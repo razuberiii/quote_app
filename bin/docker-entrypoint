@@ -2,6 +2,14 @@
 
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  # Debug: Check if POSTGRES_PASSWORD is set
+  if [ -z "$POSTGRES_PASSWORD" ]; then
+    echo "WARNING: POSTGRES_PASSWORD environment variable is not set!"
+  else
+    echo "DEBUG: POSTGRES_PASSWORD is set (${#POSTGRES_PASSWORD} chars)"
+  fi
+  echo "DEBUG: DB_HOST=${DB_HOST}, DB_USERNAME=${DB_USERNAME}, DB_NAME=${DB_NAME}"
+  
   # Retry db:prepare with exponential backoff
   retry_count=0
   max_retries=30

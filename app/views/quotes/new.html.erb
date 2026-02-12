@@ -1,0 +1,9 @@
+<% if @quote.quote_no.present? %>
+  <h1>New Revision Draft for <%= @quote.quote_no %></h1>
+<% else %>
+  <h1>New Quote</h1>
+<% end %>
+
+<%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>
+
+<%= link_to "Back to Customer", customer_path(@customer) %>

@@ -1,0 +1,355 @@
+<%= form_with model: form_model do |f| %>
+  <% if quote.errors.any? %>
+    <div class="error-messages">
+      <h2><%= pluralize(quote.errors.count, "error") %> prevented this quote from being saved:</h2>
+      <ul>
+        <% quote.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :quote_no if quote.quote_no.present? %>
+
+  <h3>Basic Information</h3>
+  <div>
+    <%= f.label :currency %>
+    <%= f.text_field :currency, placeholder: "USD" %>
+  </div>
+
+  <div>
+    <%= f.label :issued_on, "Quote date" %>
+    <%= f.date_field :issued_on %>
+  </div>
+
+  <div>
+    <%= f.label :valid_until %>
+    <%= f.date_field :valid_until %>
+  </div>
+
+  <div>
+    <%= f.label :payment_term %>
+    <%= f.text_field :payment_term, placeholder: "e.g. 30% deposit, 70% before shipment" %>
+  </div>
+
+  <div>
+    <%= f.label :status %>
+    <%= f.select :status, [ "pending", "won", "lost" ], {}, {} %>
+  </div>
+
+  <div>
+    <%= f.label :negotiated %>
+    <%= f.check_box :negotiated %>
+  </div>
+
+  <div>
+    <%= f.label :final_amount %>
+    <%= f.number_field :final_amount, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :loss_reason %>
+    <%= f.text_field :loss_reason %>
+  </div>
+
+  <div>
+    <%= f.label :notes %>
+    <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)" %>
+  </div>
+
+  <h3>Totals</h3>
+  <div>
+    <%= f.label :tax_amount, "Tax / VAT" %>
+    <%= f.number_field :tax_amount, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :shipping_amount, "Shipping / Handling" %>
+    <%= f.number_field :shipping_amount, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :discount_amount, "Discount" %>
+    <%= f.number_field :discount_amount, step: 0.01 %>
+  </div>
+
+  <h3>Terms & Conditions</h3>
+  <div>
+    <%= f.label :terms_text, "Terms" %>
+    <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc." %>
+  </div>
+
+  <div>
+    <%= f.label :legal_disclaimer %>
+    <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer" %>
+  </div>
+
+  <div>
+    <%= f.label :delivery_notes %>
+    <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes" %>
+  </div>
+
+  <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F") } }.to_json %>
+  <h3>Quote Items</h3>
+  <p style="margin-top: -8px; color: #6b7280;">
+    Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
+  </p>
+
+  <div data-products="<%= products_payload %>" id="quote-items-wrapper">
+    <table class="quote-items-table">
+      <thead>
+        <tr>
+          <th>Product Name</th>
+          <th>Description</th>
+          <th>Unit Price</th>
+          <th>Quantity</th>
+          <th>Remove</th>
+        </tr>
+      </thead>
+      <tbody id="quote-items-body">
+        <%= f.fields_for :quote_items do |item_fields| %>
+          <% item = item_fields.object %>
+          <% product_name = item.product&.name.presence || item.description.to_s %>
+          <tr class="quote-item-row">
+            <td>
+              <div class="product-search">
+                <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
+                <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
+                <div class="js-product-dropdown"></div>
+              </div>
+              <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
+            </td>
+            <td>
+              <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
+            </td>
+            <td>
+              <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
+            </td>
+            <td>
+              <%= item_fields.number_field :quantity, min: 1, placeholder: "1" %>
+            </td>
+            <td>
+              <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
+              <button type="button" class="btn btn-danger js-remove-item">Remove</button>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 10px;">
+      <button type="button" class="btn btn-secondary" id="add-quote-item">+ Add Item</button>
+    </div>
+  </div>
+
+  <div>
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<script>
+  (function() {
+    const wrapper = document.getElementById("quote-items-wrapper");
+    if (!wrapper) return;
+
+    const products = JSON.parse(wrapper.dataset.products || "[]");
+    const body = document.getElementById("quote-items-body");
+    const addBtn = document.getElementById("add-quote-item");
+
+    let rowCounter = body.querySelectorAll(".quote-item-row").length;
+
+    function findProductByName(name) {
+      const normalized = (name || "").trim().toLowerCase();
+      if (!normalized) return null;
+      return products.find((p) => (p.name || "").trim().toLowerCase() === normalized) || null;
+    }
+
+    function productMatches(productName, keyword) {
+      return (productName || "").toLowerCase().includes((keyword || "").toLowerCase());
+    }
+
+    function renderDropdown(dropdown, items) {
+      if (!dropdown) return;
+      if (!items.length) {
+        dropdown.innerHTML = '<div style="padding:6px 8px; color:#6b7280;">No matching product</div>';
+        return;
+      }
+
+        dropdown.innerHTML = items.map((p) =>
+        `<button type="button" class="js-product-option" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}</button>`
+      ).join("");
+    }
+
+    function bindRow(row) {
+      const productNameInput = row.querySelector(".js-product-name");
+      const productToggleBtn = row.querySelector(".js-product-toggle");
+      const productDropdown = row.querySelector(".js-product-dropdown");
+      const productIdInput = row.querySelector(".js-product-id");
+      const descInput = row.querySelector(".js-description");
+      const priceInput = row.querySelector(".js-unit-price");
+      const removeBtn = row.querySelector(".js-remove-item");
+      const destroyField = row.querySelector(".js-destroy-flag");
+
+      function syncProduct() {
+        const keyword = (productNameInput.value || "").trim();
+        const matched = findProductByName(keyword);
+
+        const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
+        renderDropdown(productDropdown, filtered);
+        if (productDropdown) productDropdown.style.display = "block";
+
+        if (matched) {
+          productIdInput.value = matched.id;
+          if (!priceInput.value) priceInput.value = matched.price;
+          if (!descInput.value) descInput.value = matched.name;
+        } else {
+          productIdInput.value = "";
+          if (!descInput.value && productNameInput.value.trim()) {
+            descInput.value = productNameInput.value.trim();
+          }
+        }
+      }
+
+      if (productNameInput) {
+        productNameInput.addEventListener("input", syncProduct);
+        productNameInput.addEventListener("change", syncProduct);
+        productNameInput.addEventListener("focus", syncProduct);
+      }
+
+      if (productToggleBtn && productDropdown) {
+        productToggleBtn.addEventListener("click", () => {
+          const visible = productDropdown.style.display === "block";
+          if (visible) {
+            productDropdown.style.display = "none";
+          } else {
+            renderDropdown(productDropdown, products.slice(0, 20));
+            productDropdown.style.display = "block";
+          }
+        });
+      }
+
+      if (productDropdown && productNameInput) {
+        productDropdown.addEventListener("click", (event) => {
+          const target = event.target.closest(".js-product-option");
+          if (!target) return;
+
+          productNameInput.value = target.dataset.name;
+          productIdInput.value = target.dataset.id;
+          if (!priceInput.value) priceInput.value = target.dataset.price;
+          if (!descInput.value) descInput.value = target.dataset.name;
+          productDropdown.style.display = "none";
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!row.contains(event.target)) {
+            productDropdown.style.display = "none";
+          }
+        });
+      }
+
+      if (removeBtn) {
+        removeBtn.addEventListener("click", () => {
+          if (destroyField) destroyField.value = "1";
+          row.style.display = "none";
+        });
+      }
+    }
+
+    function addRow() {
+      const index = rowCounter++;
+      const tr = document.createElement("tr");
+      tr.className = "quote-item-row";
+      tr.innerHTML = `
+        <td>
+          <div class="product-search">
+            <input type="text" class="js-product-name" placeholder="Type to search product">
+            <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
+            <div class="js-product-dropdown"></div>
+          </div>
+          <input type="hidden" name="quote[quote_items_attributes][${index}][product_id]" class="js-product-id">
+        </td>
+        <td>
+          <input type="text" name="quote[quote_items_attributes][${index}][description]" class="js-description" placeholder="Description">
+        </td>
+        <td>
+          <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price" placeholder="0.00">
+        </td>
+        <td>
+          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]">
+        </td>
+        <td>
+          <input type="hidden" name="quote[quote_items_attributes][${index}][_destroy]" value="0" class="js-destroy-flag">
+          <button type="button" class="btn btn-danger js-remove-item">Remove</button>
+        </td>
+      `;
+
+      body.appendChild(tr);
+      bindRow(tr);
+    }
+
+    body.querySelectorAll(".quote-item-row").forEach(bindRow);
+    if (addBtn) addBtn.addEventListener("click", addRow);
+  })();
+</script>
+<style>
+  .product-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .product-search .js-product-name {
+    width: 100%;
+    min-width: 180px;
+  }
+
+  .product-search .js-product-toggle {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #f8fafc;
+    color: #374151;
+    cursor: pointer;
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+
+  .product-search .js-product-toggle:hover {
+    background: #eef2f7;
+  }
+
+  .product-search .js-product-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    max-height: 200px;
+    overflow: auto;
+    z-index: 20;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  }
+
+  .product-search .js-product-option {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 8px 10px;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .product-search .js-product-option:hover {
+    background: #f3f4f6;
+  }
+</style>

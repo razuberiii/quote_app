@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Quote</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="public-quote-body">
+    <main class="public-quote-main">
+      <%= yield %>
+    </main>
+
+    <style>
+      body.public-quote-body {
+        margin: 0;
+        padding: 2rem 1rem 3rem;
+        background: linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+        color: #111827;
+      }
+
+      main.public-quote-main {
+        max-width: 920px;
+        margin: 0 auto;
+      }
+
+      @media print {
+        @page {
+          margin: 12mm;
+        }
+
+        body.public-quote-body {
+          padding: 0;
+          background: white;
+        }
+
+        main.public-quote-main {
+          box-shadow: none;
+          max-width: 100%;
+          margin: 0;
+        }
+
+        .no-print { display: none !important; }
+      }
+    </style>
+  </body>
+</html>

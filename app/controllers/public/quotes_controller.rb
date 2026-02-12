@@ -1,0 +1,16 @@
+module Public
+  class QuotesController < ApplicationController
+    skip_before_action :authenticate_user!
+    before_action :set_quote, only: [ :show ]
+    layout "public", only: [ :show ]
+
+    def show; end
+
+    private
+
+    def set_quote
+      @quote = Quote.includes({ quote_items: :product }, :customer, company: :quote_template).find(params[:id])
+      @template = @quote.company.quote_template_or_default
+    end
+  end
+end

@@ -1,0 +1,122 @@
+<article class="quote-document public-quote-document">
+  <header class="quote-doc-header">
+    <div>
+      <p class="quote-doc-kicker">Quotation</p>
+      <h1>Quote <%= @snapshot["quote_no"] %></h1>
+      <p class="quote-doc-subline">Version V<%= @snapshot["revision_number"] %></p>
+    </div>
+    <div class="quote-doc-logo-wrap">
+      <% if @template.show_logo && @share.company.logo.attached? %>
+        <%= image_tag @share.company.logo, class: "quote-doc-logo" %>
+      <% end %>
+    </div>
+  </header>
+
+  <section class="quote-meta-grid">
+    <article class="quote-meta-card">
+      <h3>Seller</h3>
+      <p><strong><%= @share.company.name %></strong></p>
+      <p><%= @share.company.address.presence || "-" %></p>
+      <p><%= @share.company.phone.presence || "-" %></p>
+      <p><%= @share.company.email.presence || "-" %></p>
+      <p><%= @share.company.website.presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Buyer</h3>
+      <p><strong><%= @snapshot["customer_name"].presence || "-" %></strong></p>
+      <p>Contact: <%= @snapshot["customer_contact_name"].presence || "-" %></p>
+      <p><%= @snapshot["customer_address"].presence || "-" %></p>
+      <p><%= @snapshot["customer_phone"].presence || "-" %></p>
+      <p><%= @snapshot["customer_email"].presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Quote Info</h3>
+      <p><strong>Date:</strong> <%= @snapshot["issued_on"].presence || "-" %></p>
+      <% if @template.show_valid_until %>
+        <p><strong>Valid Until:</strong> <%= @snapshot["valid_until"].presence || "-" %></p>
+      <% end %>
+      <% if @template.show_currency %>
+        <p><strong>Currency:</strong> <%= @snapshot["currency"] %></p>
+      <% end %>
+      <% if @template.show_payment_term && @snapshot["payment_term"].present? %>
+        <p><strong>Payment:</strong> <%= @snapshot["payment_term"] %></p>
+      <% end %>
+      <p><strong>Status:</strong> <span class="status-badge status-<%= @snapshot["status"] %>"><%= @snapshot["status"]&.capitalize %></span></p>
+    </article>
+  </section>
+
+  <table class="quote-items-table quote-doc-table">
+    <thead>
+      <tr>
+        <% if @template.show_product_images %><th>Image</th><% end %>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Line Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% (@snapshot["quote_items"] || []).each do |item| %>
+        <tr>
+          <% if @template.show_product_images %>
+            <td>
+              <% if item["product_image_path"].present? %>
+                <%= image_tag item["product_image_path"], class: "quote-item-image" %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+          <% end %>
+          <td><%= item["description"] %></td>
+          <td><%= item["quantity"] %></td>
+          <td><%= number_to_currency(item["unit_price"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+          <td><%= number_to_currency(item["amount"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% subtotal = (@snapshot["quote_items"] || []).sum { |item| item["amount"].to_d } %>
+  <% tax = @snapshot["tax_amount"].to_d %>
+  <% shipping = @snapshot["shipping_amount"].to_d %>
+  <% discount = @snapshot["discount_amount"].to_d %>
+  <% grand_total = subtotal + tax + shipping - discount %>
+  <aside class="quote-total-box">
+    <p><span>Subtotal</span><strong><%= number_to_currency(subtotal, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+    <p><span>Tax / VAT</span><strong><%= number_to_currency(tax, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+    <p><span>Shipping</span><strong><%= number_to_currency(shipping, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+    <p><span>Discount</span><strong><%= number_to_currency(discount, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(grand_total, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+  </aside>
+
+  <% if @template.show_terms_section %>
+    <section class="quote-section-block">
+      <h3>Terms & Conditions</h3>
+      <p><strong>Payment Terms:</strong> <%= @snapshot["payment_term"].presence || "-" %></p>
+      <p><strong>Terms:</strong> <%= @snapshot["terms_text"].presence || "-" %></p>
+      <p><strong>Legal Disclaimer:</strong> <%= @snapshot["legal_disclaimer"].presence || "-" %></p>
+      <p><strong>Delivery Notes:</strong> <%= @snapshot["delivery_notes"].presence || "-" %></p>
+    </section>
+  <% end %>
+
+  <% if @template.show_notes && @snapshot["notes"].present? %>
+    <section class="quote-section-block">
+      <h3>Notes</h3>
+      <div><%= simple_format(@snapshot["notes"]) %></div>
+    </section>
+  <% end %>
+
+  <% if @template.show_signature_block %>
+    <section class="quote-section-block">
+      <h3>Customer Acceptance</h3>
+      <p>__________________________</p>
+      <p>Date: ____________________</p>
+    </section>
+  <% end %>
+
+  <div class="no-print quote-public-actions">
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+</article>

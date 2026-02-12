@@ -1,0 +1,54 @@
+<h1>New Customer</h1>
+
+<%= form_with model: @customer do |f| %>
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name, placeholder: "Customer Name" %>
+  </div>
+
+  <div>
+    <%= f.label :country %>
+    <%= f.text_field :country, placeholder: "Country" %>
+  </div>
+
+  <div>
+    <%= f.label :address %>
+    <%= f.text_field :address, placeholder: "Company Address" %>
+  </div>
+
+  <div>
+    <%= f.label :contact_name %>
+    <%= f.text_field :contact_name, placeholder: "Contact Person" %>
+  </div>
+
+  <div>
+    <%= f.label :email %>
+    <%= f.email_field :email, placeholder: "Email" %>
+  </div>
+
+  <div>
+    <%= f.label :phone %>
+    <%= f.text_field :phone, placeholder: "Phone" %>
+  </div>
+
+  <div>
+    <%= f.label :status %>
+    <%= f.select :status, ['potential', 'following', 'closed', 'paused'], { prompt: 'Select Status' } %>
+  </div>
+
+  <div>
+    <%= f.label :next_follow_up_date %>
+    <%= f.date_field :next_follow_up_date %>
+  </div>
+
+  <div>
+    <%= f.label :notes %>
+    <%= f.text_area :notes, rows: 4, placeholder: "Notes" %>
+  </div>
+
+  <div>
+    <%= f.submit "Create Customer" %>
+  </div>
+<% end %>
+
+<%= link_to "Back to Customers", customers_path %>

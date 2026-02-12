@@ -1,0 +1,15 @@
+one:
+  company: one
+  show_payment_term: true
+  show_valid_until: true
+  show_notes: true
+  show_logo: true
+  show_negotiated_flag: false
+
+two:
+  company: two
+  show_payment_term: true
+  show_valid_until: true
+  show_notes: true
+  show_logo: true
+  show_negotiated_flag: false

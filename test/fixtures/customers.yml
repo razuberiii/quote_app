@@ -1,0 +1,23 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  company: one
+  name: MyString
+  country: MyString
+  contact_name: MyString
+  email: MyString
+  status: MyString
+  next_follow_up_date: 2026-02-11
+  last_follow_up_date: 2026-02-11
+  notes: MyText
+
+two:
+  company: two
+  name: MyString
+  country: MyString
+  contact_name: MyString
+  email: MyString
+  status: MyString
+  next_follow_up_date: 2026-02-11
+  last_follow_up_date: 2026-02-11
+  notes: MyText

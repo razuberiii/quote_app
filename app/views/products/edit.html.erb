@@ -1,0 +1,52 @@
+<h1>Edit Product: <%= @product.name %></h1>
+
+<%= form_with model: @product do |f| %>
+  <% if @product.errors.any? %>
+    <div id="error_explanation" class="alert alert-danger">
+      <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+      <ul>
+        <% @product.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name %>
+  </div>
+
+  <div>
+    <%= f.label :sku %>
+    <%= f.text_field :sku %>
+  </div>
+
+  <div>
+    <%= f.label :default_price %>
+    <%= f.number_field :default_price, step: 0.01 %>
+  </div>
+
+  <div>
+    <%= f.label :description %>
+    <%= f.text_area :description, rows: 4 %>
+  </div>
+
+  <div>
+    <%= f.label :image, "Product Image" %>
+    <%= f.file_field :image, accept: "image/*" %>
+  </div>
+
+  <% if @product.image.attached? %>
+    <div>
+      <p>Current image:</p>
+      <%= image_tag @product.image, style: "max-width: 220px; max-height: 160px;" %>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.submit "Update Product" %>
+  </div>
+<% end %>
+
+<%= link_to "Back to Product", @product %>

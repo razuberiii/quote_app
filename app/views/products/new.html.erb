@@ -1,0 +1,45 @@
+<h1>New Product</h1>
+
+<%= form_with model: @product do |f| %>
+  <% if @product.errors.any? %>
+    <div id="error_explanation" class="alert alert-danger">
+      <h2><%= pluralize(@product.errors.count, "error") %> prohibited this product from being saved:</h2>
+      <ul>
+        <% @product.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= f.label :name %>
+    <%= f.text_field :name, placeholder: "Product Name" %>
+  </div>
+
+  <div>
+    <%= f.label :sku %>
+    <%= f.text_field :sku, placeholder: "SKU/Product Code" %>
+  </div>
+
+  <div>
+    <%= f.label :default_price %>
+    <%= f.number_field :default_price, step: 0.01, placeholder: "Default Price" %>
+  </div>
+
+  <div>
+    <%= f.label :description %>
+    <%= f.text_area :description, rows: 4, placeholder: "Product Description" %>
+  </div>
+
+  <div>
+    <%= f.label :image, "Product Image" %>
+    <%= f.file_field :image, accept: "image/*" %>
+  </div>
+
+  <div>
+    <%= f.submit "Create Product" %>
+  </div>
+<% end %>
+
+<%= link_to "Back to Products", products_path %>

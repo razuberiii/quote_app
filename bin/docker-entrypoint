@@ -2,8 +2,23 @@
 
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
-  ./bin/rails db:prepare
-  ./bin/rails app:ensure_admin
+  # Retry db:prepare with exponential backoff
+  retry_count=0
+  max_retries=30
+  while [ $retry_count -lt $max_retries ]; do
+    if ./bin/rails db:prepare; then
+      ./bin/rails app:ensure_admin
+      break
+    else
+      retry_count=$((retry_count + 1))
+      if [ $retry_count -eq $max_retries ]; then
+        echo "Failed to prepare database after $max_retries attempts"
+        exit 1
+      fi
+      echo "Database not ready, retrying in 2 seconds... (attempt $((retry_count + 1))/$max_retries)"
+      sleep 2
+    fi
+  done
 fi
 
 exec "${@}"

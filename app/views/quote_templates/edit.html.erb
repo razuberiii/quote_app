@@ -1,0 +1,91 @@
+<h1>Quote Document Template</h1>
+
+<%= form_with model: @quote_template, url: quote_template_path, method: :patch do |f| %>
+  <h3>Seller Information</h3>
+  <div>
+    <label for="company_name">Company Name</label>
+    <%= text_field_tag "company[name]", current_user.company.name, id: "company_name" %>
+  </div>
+
+  <div>
+    <label for="company_address">Company Address</label>
+    <%= text_field_tag "company[address]", current_user.company.address, id: "company_address" %>
+  </div>
+
+  <div>
+    <label for="company_phone">Phone</label>
+    <%= text_field_tag "company[phone]", current_user.company.phone, id: "company_phone" %>
+  </div>
+
+  <div>
+    <label for="company_email">Email</label>
+    <%= text_field_tag "company[email]", current_user.company.email, id: "company_email" %>
+  </div>
+
+  <div>
+    <label for="company_website">Website</label>
+    <%= text_field_tag "company[website]", current_user.company.website, id: "company_website" %>
+  </div>
+
+  <div>
+    <label for="company_logo">Company logo</label>
+    <%= file_field_tag :company_logo, accept: "image/*" %>
+  </div>
+
+  <% if current_user.company.logo.attached? %>
+    <div>
+      <p>Current logo:</p>
+      <%= image_tag current_user.company.logo, style: "max-width: 180px; max-height: 80px;" %>
+    </div>
+  <% end %>
+
+  <h3>Display Options</h3>
+  <div>
+    <%= f.label :show_logo, "Show company logo" %>
+    <%= f.check_box :show_logo %>
+  </div>
+
+  <div>
+    <%= f.label :show_currency, "Show currency" %>
+    <%= f.check_box :show_currency %>
+  </div>
+
+  <div>
+    <%= f.label :show_valid_until, "Show valid until" %>
+    <%= f.check_box :show_valid_until %>
+  </div>
+
+  <div>
+    <%= f.label :show_payment_term, "Show payment term" %>
+    <%= f.check_box :show_payment_term %>
+  </div>
+
+  <div>
+    <%= f.label :show_product_images, "Show product images" %>
+    <%= f.check_box :show_product_images %>
+  </div>
+
+  <div>
+    <%= f.label :show_terms_section, "Show terms section" %>
+    <%= f.check_box :show_terms_section %>
+  </div>
+
+  <div>
+    <%= f.label :show_notes, "Show notes" %>
+    <%= f.check_box :show_notes %>
+  </div>
+
+  <div>
+    <%= f.label :show_negotiated_flag, "Show negotiated flag" %>
+    <%= f.check_box :show_negotiated_flag %>
+  </div>
+
+  <div>
+    <%= f.label :show_signature_block, "Show signature section" %>
+    <%= f.check_box :show_signature_block %>
+  </div>
+
+  <div>
+    <%= f.submit "Save Template" %>
+  </div>
+<% end %>

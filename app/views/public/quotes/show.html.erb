@@ -1,0 +1,117 @@
+<article class="quote-document public-quote-document">
+  <header class="quote-doc-header">
+    <div>
+      <p class="quote-doc-kicker">Quotation</p>
+      <h1>Quote <%= @quote.quote_no %></h1>
+      <p class="quote-doc-subline">Version V<%= @quote.revision_number %></p>
+    </div>
+    <div class="quote-doc-logo-wrap">
+      <% if @template.show_logo && @quote.company.logo.attached? %>
+        <%= image_tag @quote.company.logo, class: "quote-doc-logo" %>
+      <% end %>
+    </div>
+  </header>
+
+  <section class="quote-meta-grid">
+    <article class="quote-meta-card">
+      <h3>Seller</h3>
+      <p><strong><%= @quote.company.name %></strong></p>
+      <p><%= @quote.company.address.presence || "-" %></p>
+      <p><%= @quote.company.phone.presence || "-" %></p>
+      <p><%= @quote.company.email.presence || "-" %></p>
+      <p><%= @quote.company.website.presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Buyer</h3>
+      <p><strong><%= @quote.customer.name %></strong></p>
+      <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
+      <p><%= @quote.customer.address.presence || "-" %></p>
+      <p><%= @quote.customer.phone.presence || "-" %></p>
+      <p><%= @quote.customer.email.presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Quote Info</h3>
+      <p><strong>Date:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") %></p>
+      <% if @template.show_valid_until %>
+        <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
+      <% end %>
+      <% if @template.show_currency %>
+        <p><strong>Currency:</strong> <%= @quote.currency %></p>
+      <% end %>
+      <% if @template.show_payment_term && @quote.payment_term.present? %>
+        <p><strong>Payment:</strong> <%= @quote.payment_term %></p>
+      <% end %>
+      <p><strong>Status:</strong> <span class="status-badge status-<%= @quote.status %>"><%= @quote.status&.capitalize %></span></p>
+    </article>
+  </section>
+
+  <table class="quote-items-table quote-doc-table">
+    <thead>
+      <tr>
+        <% if @template.show_product_images %><th>Image</th><% end %>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Line Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @quote.quote_items.ordered.each do |item| %>
+        <tr>
+          <% if @template.show_product_images %>
+            <td>
+              <% if item.product&.image&.attached? %>
+                <%= image_tag item.product.image, class: "quote-item-image" %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+          <% end %>
+          <td><%= item.description %></td>
+          <td><%= item.quantity %></td>
+          <td><%= number_to_currency(item.unit_price, unit: (@template.show_currency ? @quote.currency : "")) %></td>
+          <td><%= number_to_currency(item.amount, unit: (@template.show_currency ? @quote.currency : "")) %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <aside class="quote-total-box">
+    <p><span>Subtotal</span><strong><%= number_to_currency(@quote.subtotal, unit: (@template.show_currency ? @quote.currency : "")) %></strong></p>
+    <p><span>Tax / VAT</span><strong><%= number_to_currency(@quote.tax_amount, unit: (@template.show_currency ? @quote.currency : "")) %></strong></p>
+    <p><span>Shipping</span><strong><%= number_to_currency(@quote.shipping_amount, unit: (@template.show_currency ? @quote.currency : "")) %></strong></p>
+    <p><span>Discount</span><strong><%= number_to_currency(@quote.discount_amount, unit: (@template.show_currency ? @quote.currency : "")) %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(@quote.grand_total, unit: (@template.show_currency ? @quote.currency : "")) %></strong></p>
+  </aside>
+
+  <% if @template.show_terms_section %>
+    <section class="quote-section-block">
+      <h3>Terms & Conditions</h3>
+      <p><strong>Payment Terms:</strong> <%= @quote.payment_term.presence || "-" %></p>
+      <p><strong>Terms:</strong> <%= @quote.terms_text.presence || "-" %></p>
+      <p><strong>Legal Disclaimer:</strong> <%= @quote.legal_disclaimer.presence || "-" %></p>
+      <p><strong>Delivery Notes:</strong> <%= @quote.delivery_notes.presence || "-" %></p>
+    </section>
+  <% end %>
+
+  <% if @template.show_notes && @quote.notes.present? %>
+    <section class="quote-section-block">
+      <h3>Notes</h3>
+      <div><%= simple_format(@quote.notes) %></div>
+    </section>
+  <% end %>
+
+  <% if @template.show_signature_block %>
+    <section class="quote-section-block">
+      <h3>Customer Acceptance</h3>
+      <p>__________________________</p>
+      <p>Date: ____________________</p>
+    </section>
+  <% end %>
+
+  <div class="no-print quote-public-actions">
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+</article>

@@ -1,0 +1,101 @@
+<h1>Customers</h1>
+
+<div class="search-section">
+  <%= form_with url: customers_path, method: :get, local: true do |f| %>
+    <div class="search-bar">
+      <%= f.text_field :query, placeholder: "Search by name, country, contact, or email...", value: @search_query %>
+      <%= f.submit "Search" %>
+      <% if @search_query.present? %>
+        <%= link_to "Clear", customers_path, class: "btn btn-secondary" %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<div class="header-actions">
+  <%= link_to "+ New Customer", new_customer_path, class: "btn btn-primary" %>
+</div>
+
+<div class="customer-list-filters">
+  <%= link_to "All Customers", customers_path(query: @search_query, list_filter: "all", sort: @sort_key, direction: @sort_direction), class: "quote-filter-pill #{'active' if @list_filter == 'all'}" %>
+  <%= link_to "High Value", customers_path(query: @search_query, list_filter: "high_value", sort: @sort_key, direction: @sort_direction), class: "quote-filter-pill #{'active' if @list_filter == 'high_value'}" %>
+  <%= link_to "At Risk", customers_path(query: @search_query, list_filter: "at_risk", sort: @sort_key, direction: @sort_direction), class: "quote-filter-pill #{'active' if @list_filter == 'at_risk'}" %>
+</div>
+
+<div class="follow-up-summary">
+  <div class="summary-card summary-today">
+    <span class="summary-label">Today</span>
+    <strong><%= @follow_up_counts[:today] %></strong>
+  </div>
+  <div class="summary-card summary-upcoming">
+    <span class="summary-label">Soon (7 days)</span>
+    <strong><%= @follow_up_counts[:upcoming] %></strong>
+  </div>
+  <div class="summary-card summary-overdue">
+    <span class="summary-label">Overdue</span>
+    <strong><%= @follow_up_counts[:overdue] %></strong>
+  </div>
+  <div class="summary-card summary-normal">
+    <span class="summary-label">No schedule</span>
+    <strong><%= @follow_up_counts[:no_schedule] %></strong>
+  </div>
+</div>
+
+<% if @search_query.present? %>
+  <p class="search-info">Found <strong><%= @customers.count %></strong> customer(s) matching "<strong><%= @search_query %></strong>"</p>
+<% end %>
+
+<table class="customers-table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Country</th>
+      <th>Contact</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th><%= customer_sort_link("Total Quote Amount", "total_quote_amount", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter) %></th>
+      <th><%= customer_sort_link("Total Won Amount", "total_won_amount", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter) %></th>
+      <th><%= customer_sort_link("Win Rate", "win_rate", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter) %></th>
+      <th>Last Follow-up</th>
+      <th><%= customer_sort_link("Next Follow-up", "next_follow_up", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter) %></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if @customers.any? %>
+      <% @customers.each do |customer| %>
+        <% metrics = @customer_metrics.fetch(customer) %>
+        <tr class="customer-row follow-up-<%= customer.follow_up_status %>">
+          <td><strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong></td>
+          <td><%= customer.country %></td>
+          <td><%= customer.contact_name %></td>
+          <td><%= customer.email %></td>
+          <td><span class="status-badge status-<%= customer.status %>"><%= customer.status&.capitalize %></span></td>
+          <td><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
+          <td><strong><%= number_to_currency(metrics[:total_won_amount]) %></strong></td>
+          <td><strong><%= metrics[:win_rate] %>%</strong></td>
+          <td><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></td>
+          <td>
+            <%= customer.next_follow_up_date&.strftime('%Y-%m-%d') || "—" %>
+            <% if customer.follow_up_overdue? %>
+              <span class="overdue-badge">OVERDUE</span>
+            <% elsif customer.follow_up_due_today? %>
+              <span class="today-badge">TODAY</span>
+            <% elsif customer.follow_up_upcoming? %>
+              <span class="upcoming-badge">SOON</span>
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    <% else %>
+      <tr>
+        <td colspan="10" class="customers-empty-row">
+          <% if @has_any_customers %>
+            No customers in this filter.
+          <% else %>
+            No customers yet. <%= link_to "Create one", new_customer_path %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,5 @@
+<h1>Edit Quote <%= @quote.quote_no %> (V<%= @quote.revision_number %>)</h1>
+
+<%= render "form", quote: @quote, form_model: @quote %>
+
+<%= link_to "Back to Quote", @quote %>

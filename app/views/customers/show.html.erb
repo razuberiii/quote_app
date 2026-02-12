@@ -1,0 +1,107 @@
+<h1><%= @customer.name %></h1>
+<%= link_to customers_path, class: "customer-back-link" do %>
+  <span aria-hidden="true">←</span>
+  <span>Back to Customers</span>
+<% end %>
+
+<div class="customer-details">
+  <p><strong>Country:</strong> <%= @customer.country %></p>
+  <p><strong>Address:</strong> <%= @customer.address.presence || "-" %></p>
+  <p><strong>Contact:</strong> <%= @customer.contact_name %></p>
+  <p><strong>Email:</strong> <%= @customer.email %></p>
+  <p><strong>Phone:</strong> <%= @customer.phone.presence || "-" %></p>
+  <p><strong>Status:</strong> <%= @customer.status&.capitalize || "N/A" %></p>
+  <p><strong>Last Follow-up:</strong> <%= @customer.last_follow_up_date&.strftime('%Y-%m-%d') || "Never" %></p>
+  <p><strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime('%Y-%m-%d') || "N/A" %>
+    <% if @customer.follow_up_overdue? %>
+      <span class="overdue-badge">OVERDUE</span>
+    <% elsif @customer.follow_up_status == 'upcoming' %>
+      <span class="upcoming-badge">DUE SOON</span>
+    <% end %>
+  </p>
+  <% if @customer.notes.present? %>
+    <p><strong>Notes:</strong> <%= @customer.notes %></p>
+  <% end %>
+</div>
+
+<div class="actions">
+  <%= button_to "Followed Today", mark_follow_up_customer_path(@customer), method: :post, class: "btn btn-primary" %>
+  <%= link_to "Edit", edit_customer_path(@customer), class: "btn btn-secondary" %>
+  <%= link_to "New Quote", new_customer_quote_path(@customer), class: "btn btn-success" %>
+  <%= button_to "Delete", customer_path(@customer), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+</div>
+
+<h3>Quotes</h3>
+
+<div class="quote-summary-grid">
+  <div class="summary-card summary-normal">
+    <span class="summary-label">Total Quotes</span>
+    <strong><%= @quote_summary[:total_count] %></strong>
+  </div>
+  <div class="summary-card summary-won">
+    <span class="summary-label">Won Amount</span>
+    <strong><%= number_to_currency(@quote_summary[:won_amount]) %></strong>
+  </div>
+  <div class="summary-card summary-lost">
+    <span class="summary-label">Lost Amount</span>
+    <strong><%= number_to_currency(@quote_summary[:lost_amount]) %></strong>
+  </div>
+  <div class="summary-card summary-upcoming">
+    <span class="summary-label">Avg Discount</span>
+    <strong><%= @quote_summary[:avg_discount_pct] %>%</strong>
+  </div>
+</div>
+
+<div class="quote-filter-bar">
+  <% [["All", "all"], ["Won", "won"], ["Lost", "lost"], ["Pending", "pending"], ["Expired", "expired"]].each do |label, value| %>
+    <%= link_to label, customer_path(@customer, quote_status: value), class: "quote-filter-pill #{'active' if @quote_status_filter == value}" %>
+  <% end %>
+</div>
+
+<% if @filtered_quote_cards.any? %>
+  <div class="quote-card-list">
+    <% @filtered_quote_cards.each do |card| %>
+      <article class="quote-card" onclick="window.location='<%= quote_path(card[:quote]) %>'">
+        <div class="quote-card-layout">
+          <div class="quote-card-main">
+            <h4><%= card[:title] %></h4>
+
+            <div class="quote-card-meta">
+              <p>
+                <strong>Total:</strong>
+                <span class="quote-total-value"><%= number_to_currency(card[:current_total]) %></span>
+              </p>
+              <p><strong>Updated:</strong> <%= card[:updated_at]&.strftime("%Y-%m-%d") || "-" %></p>
+            </div>
+
+            <% if card[:changed_from_original] %>
+              <div class="quote-card-diff">
+                <span><strong>Original:</strong> <%= number_to_currency(card[:original_total]) %></span>
+                <span class="diff-value <%= card[:diff_amount].negative? ? 'down' : 'up' %>">
+                  <%= card[:trend] == :up ? "↑" : (card[:trend] == :down ? "↓" : "→") %>
+                  <%= number_to_currency(card[:diff_amount]) %>
+                  (<%= card[:diff_pct] %>%)
+                </span>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="quote-card-side">
+            <div class="quote-card-badges">
+              <span class="revision-pill">V<%= card[:revision] %></span>
+              <span class="status-badge status-<%= card[:display_status] %>"><%= card[:display_status].capitalize %></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="quote-card-actions" onclick="event.stopPropagation();">
+          <%= link_to "View", quote_path(card[:quote]), class: "btn btn-secondary" %>
+          <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
+          <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-primary" %>
+        </div>
+      </article>
+    <% end %>
+  </div>
+<% else %>
+  <p>No quotes yet.</p>
+<% end %>

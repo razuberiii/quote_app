@@ -1,0 +1,20 @@
+<h1><%= @product.name %></h1>
+
+<% if @product.image.attached? %>
+  <p><%= image_tag @product.image, style: "max-width: 280px; max-height: 200px;" %></p>
+<% end %>
+
+<div class="product-details">
+  <p><strong>SKU:</strong> <code><%= @product.sku %></code></p>
+  <p><strong>Default Price:</strong> <%= @product.default_price %></p>
+  <% if @product.description.present? %>
+    <p><strong>Description:</strong> <%= @product.description %></p>
+  <% end %>
+</div>
+
+<div class="actions">
+  <%= link_to "Edit", edit_product_path(@product), class: "btn btn-secondary" %>
+  <%= button_to "Delete", product_path(@product), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+</div>
+
+<%= link_to "Back to Products", products_path %>

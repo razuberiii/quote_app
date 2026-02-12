@@ -60,6 +60,7 @@ env:
     # Use a DNS-safe accessory hostname (no underscore).
     DB_HOST: quote-app-db
     DB_PORT: 5432
+    DB_USERNAME: postgres
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug
@@ -107,10 +108,10 @@ accessories:
     service: quote-app-db
     image: postgres:16
     host: 127.0.0.1
-    port: "5432"
     env:
       clear:
         POSTGRES_DB: quote_app_production
+        POSTGRES_USER: postgres
       secret:
         - POSTGRES_PASSWORD
     directories:

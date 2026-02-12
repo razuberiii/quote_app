@@ -57,7 +57,7 @@ env:
 
     # Use the PostgreSQL accessory container below.
     DB_NAME: quote_app_production
-    DB_HOST: quote_app-db
+    DB_HOST: host.docker.internal
     DB_PORT: 5432
 
     # Log everything from Rails
@@ -104,7 +104,7 @@ accessories:
   db:
     image: postgres:16
     host: 127.0.0.1
-    port: "5432:5432"
+    port: "5432"
     env:
       clear:
         POSTGRES_DB: quote_app_production

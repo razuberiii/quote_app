@@ -36,34 +36,36 @@
   </section>
 
   <h3>Items</h3>
-  <table class="quote-items-table quote-doc-table">
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Description</th>
-        <th>Qty</th>
-        <th>Unit Price</th>
-        <th>Line Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @quote.quote_items.ordered.each do |item| %>
+  <div class="table-responsive">
+    <table class="quote-items-table quote-doc-table">
+      <thead>
         <tr>
-          <td>
-            <% if item.product&.image&.attached? %>
-              <%= image_tag item.product.image, class: "quote-item-image" %>
-            <% else %>
-              -
-            <% end %>
-          </td>
-          <td><%= item.description %></td>
-          <td><%= item.quantity %></td>
-          <td><%= number_to_currency(item.unit_price, unit: @quote.currency) %></td>
-          <td><%= number_to_currency(item.amount, unit: @quote.currency) %></td>
+          <th>Image</th>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% @quote.quote_items.ordered.each do |item| %>
+          <tr>
+            <td>
+              <% if item.product&.image&.attached? %>
+                <%= image_tag item.product.image, class: "quote-item-image" %>
+              <% else %>
+                -
+              <% end %>
+            </td>
+            <td><%= item.description %></td>
+            <td><%= item.quantity %></td>
+            <td><%= number_to_currency(item.unit_price, unit: @quote.currency) %></td>
+            <td><%= number_to_currency(item.amount, unit: @quote.currency) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
   <aside class="quote-total-box">
     <p><span>Subtotal</span><strong><%= number_to_currency(@quote.subtotal, unit: @quote.currency) %></strong></p>

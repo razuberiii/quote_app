@@ -7,7 +7,7 @@ image: quote_app
 # Deploy to these servers.
 servers:
   web:
-    - 15.168.18.254
+    - 127.0.0.1
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -102,7 +102,7 @@ ssh:
 accessories:
   db:
     image: postgres:16
-    host: 15.168.18.254
+    host: 127.0.0.1
     port: "127.0.0.1:5432:5432"
     env:
       clear:

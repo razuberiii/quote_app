@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  devise_for :users
+  devise_for :users, skip: [ :passwords ]
 
   # Public quote sharing
   namespace :public do

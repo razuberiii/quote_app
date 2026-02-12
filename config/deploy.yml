@@ -2,7 +2,7 @@
 service: quote_app
 
 # Name of the container image (use your-user/app-name on external registries).
-image: quote_app
+image: razuberiii/quote_app
 
 # Deploy to these servers.
 servers:
@@ -28,7 +28,7 @@ servers:
 registry:
   # Alternatives: hub.docker.com / registry.digitalocean.com / ghcr.io / ...
   server: ghcr.io
-  username: razuberiii@163.com
+  username: razuberiii
   password:
     - KAMAL_REGISTRY_PASSWORD
 

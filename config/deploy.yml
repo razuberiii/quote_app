@@ -56,6 +56,8 @@ env:
     # WEB_CONCURRENCY: 2
 
     # Use the PostgreSQL accessory container below.
+    DB_NAME: quote_app_production
+    DB_USERNAME: quote_app
     DB_HOST: quote_app-db
     DB_PORT: 5432
 
@@ -112,4 +114,4 @@ accessories:
         - POSTGRES_PASSWORD
     directories:
       # Host bind mount: database files are persisted outside the container.
-      - /var/lib/quote_app/postgres:/var/lib/postgresql/data
+      - /home/ubuntu/quote_app_data/postgres:/var/lib/postgresql/data

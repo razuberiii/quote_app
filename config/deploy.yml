@@ -105,6 +105,8 @@ accessories:
     image: postgres:16
     host: 127.0.0.1
     port: "5432:5432"
+    networks:
+      - kamal
     env:
       clear:
         POSTGRES_DB: quote_app_production

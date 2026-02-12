@@ -6,4 +6,4 @@
 
 <%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>
 
-<%= link_to "Back to Customer", customer_path(@customer) %>
+<%= link_to "Back to Customer", customer_path(@customer), class: "form-page-back-link" %>

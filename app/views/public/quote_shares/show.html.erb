@@ -47,36 +47,38 @@
     </article>
   </section>
 
-  <table class="quote-items-table quote-doc-table">
-    <thead>
-      <tr>
-        <% if @template.show_product_images %><th>Image</th><% end %>
-        <th>Description</th>
-        <th>Qty</th>
-        <th>Unit Price</th>
-        <th>Line Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% (@snapshot["quote_items"] || []).each do |item| %>
+  <div class="table-responsive">
+    <table class="quote-items-table quote-doc-table">
+      <thead>
         <tr>
-          <% if @template.show_product_images %>
-            <td>
-              <% if item["product_image_path"].present? %>
-                <%= image_tag item["product_image_path"], class: "quote-item-image" %>
-              <% else %>
-                -
-              <% end %>
-            </td>
-          <% end %>
-          <td><%= item["description"] %></td>
-          <td><%= item["quantity"] %></td>
-          <td><%= number_to_currency(item["unit_price"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
-          <td><%= number_to_currency(item["amount"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+          <% if @template.show_product_images %><th>Image</th><% end %>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
         </tr>
-      <% end %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% (@snapshot["quote_items"] || []).each do |item| %>
+          <tr>
+            <% if @template.show_product_images %>
+              <td>
+                <% if item["product_image_path"].present? %>
+                  <%= image_tag item["product_image_path"], class: "quote-item-image" %>
+                <% else %>
+                  -
+                <% end %>
+              </td>
+            <% end %>
+            <td><%= item["description"] %></td>
+            <td><%= item["quantity"] %></td>
+            <td><%= number_to_currency(item["unit_price"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+            <td><%= number_to_currency(item["amount"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
 
   <% subtotal = (@snapshot["quote_items"] || []).sum { |item| item["amount"].to_d } %>
   <% tax = @snapshot["tax_amount"].to_d %>

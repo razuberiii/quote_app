@@ -92,53 +92,55 @@
 
   <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F") } }.to_json %>
   <h3>Quote Items</h3>
-  <p style="margin-top: -8px; color: #6b7280;">
+  <p class="quote-form-hint">
     Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
   </p>
 
   <div data-products="<%= products_payload %>" id="quote-items-wrapper">
-    <table class="quote-items-table">
-      <thead>
-        <tr>
-          <th>Product Name</th>
-          <th>Description</th>
-          <th>Unit Price</th>
-          <th>Quantity</th>
-          <th>Remove</th>
-        </tr>
-      </thead>
-      <tbody id="quote-items-body">
-        <%= f.fields_for :quote_items do |item_fields| %>
-          <% item = item_fields.object %>
-          <% product_name = item.product&.name.presence || item.description.to_s %>
-          <tr class="quote-item-row">
-            <td>
-              <div class="product-search">
-                <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
-                <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
-                <div class="js-product-dropdown"></div>
-              </div>
-              <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
-            </td>
-            <td>
-              <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
-            </td>
-            <td>
-              <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
-            </td>
-            <td>
-              <%= item_fields.number_field :quantity, min: 1, placeholder: "1" %>
-            </td>
-            <td>
-              <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
-              <button type="button" class="btn btn-danger js-remove-item">Remove</button>
-            </td>
+    <div class="table-responsive">
+      <table class="quote-items-table">
+        <thead>
+          <tr>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Unit Price</th>
+            <th>Quantity</th>
+            <th>Remove</th>
           </tr>
-        <% end %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody id="quote-items-body">
+          <%= f.fields_for :quote_items do |item_fields| %>
+            <% item = item_fields.object %>
+            <% product_name = item.product&.name.presence || item.description.to_s %>
+            <tr class="quote-item-row">
+              <td>
+                <div class="product-search">
+                  <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
+                  <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
+                  <div class="js-product-dropdown"></div>
+                </div>
+                <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
+              </td>
+              <td>
+                <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
+              </td>
+              <td>
+                <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
+              </td>
+              <td>
+                <%= item_fields.number_field :quantity, min: 1, placeholder: "1" %>
+              </td>
+              <td>
+                <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
+                <button type="button" class="btn btn-danger js-remove-item">Remove</button>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
 
-    <div style="margin-top: 10px;">
+    <div class="quote-form-add-row">
       <button type="button" class="btn btn-secondary" id="add-quote-item">+ Add Item</button>
     </div>
   </div>

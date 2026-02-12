@@ -57,7 +57,8 @@ env:
 
     # Use the PostgreSQL accessory container below.
     DB_NAME: quote_app_production
-    DB_HOST: 172.17.0.1
+    # Connect to the Postgres accessory over Kamal's internal Docker network.
+    DB_HOST: quote_app-db
     DB_PORT: 5432
 
     # Log everything from Rails

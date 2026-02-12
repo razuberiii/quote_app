@@ -15,6 +15,11 @@ class QuotesController < ApplicationController
   end
 
   def create
+    unless current_user.can_create_quote?
+      used = current_user.quote_count_for_limit
+      redirect_to @customer, alert: "Free plan limit reached: #{used}/#{User::FREE_QUOTE_LIMIT} company quotes used." and return
+    end
+
     @quote = @customer.quotes.new(quote_params)
     @quote.company = current_user.company
 

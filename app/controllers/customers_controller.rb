@@ -53,6 +53,10 @@ class CustomersController < ApplicationController
   end
 
   def create
+    unless current_user.can_create_customer?
+      redirect_to customers_path, alert: "Free plan limit reached: #{current_user.customer_count_for_limit}/#{User::FREE_CUSTOMER_LIMIT} customers used." and return
+    end
+
     @customer = current_user.company.customers.new(customer_params)
 
     if @customer.save

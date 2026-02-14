@@ -16,7 +16,10 @@ WORKDIR /rails
 
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y curl fontconfig fonts-noto-cjk libjemalloc2 libvips postgresql-client && \
+    apt-get install --no-install-recommends -y ca-certificates curl fontconfig fonts-noto-cjk libjemalloc2 libvips postgresql-client && \
+    mkdir -p /usr/local/share/fonts/noto-cjk && \
+    curl -fL "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf" -o /usr/local/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf && \
+    fc-cache -f && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -26,7 +29,7 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
-    QUOTE_PDF_FONT_PATH="/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"
+    QUOTE_PDF_FONT_PATH="/usr/local/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build

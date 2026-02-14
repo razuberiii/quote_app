@@ -4,7 +4,8 @@ class QuoteExporter
     "Noto Sans" => [
       "C:/Windows/Fonts/NotoSans-Regular.ttf",
       "C:/Windows/Fonts/simhei.ttf",
-      Rails.root.join("app/assets/fonts/NotoSansSC-Regular.ttf").to_s
+      Rails.root.join("app/assets/fonts/NotoSansSC-Regular.ttf").to_s,
+      Rails.root.join("vendor/fonts/NotoSansSC-Regular.ttf").to_s
     ],
     "Inter" => [
       "C:/Windows/Fonts/Inter-Regular.ttf",
@@ -80,7 +81,7 @@ class QuoteExporter
     title = @template.resolved_document_title(@document_kind)
     pdf.character_spacing(1) do
       pdf.fill_color pdf_color
-      pdf.text title, size: 24, style: :bold
+      pdf.text pdf_text(title), size: 24, style: :bold
     end
     pdf.fill_color "000000"
 
@@ -99,14 +100,14 @@ class QuoteExporter
       @company.phone,
       @company.email,
       @company.website
-    ].compact_blank.join("\n")
+    ].compact_blank.map { |line| pdf_text(line) }.join("\n")
 
     right_lines = [
       "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}",
       "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}",
       (@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : nil),
       (@template.show_currency ? "Currency: #{@quote.currency}" : nil)
-    ].compact.join("\n")
+    ].compact.map { |line| pdf_text(line) }.join("\n")
 
     pdf.table([ [ left_lines, right_lines ] ], width: width, cell_style: { borders: [], padding: [ 2, 0, 2, 0 ] }) do |t|
       t.columns(0).width = width * 0.58
@@ -128,7 +129,7 @@ class QuoteExporter
       @company.phone,
       @company.email,
       @company.website
-    ].compact_blank.join("\n")
+    ].compact_blank.map { |line| pdf_text(line) }.join("\n")
 
     buyer_lines = [
       "BUYER",
@@ -137,7 +138,7 @@ class QuoteExporter
       @customer.address,
       @customer.phone,
       @customer.email
-    ].compact_blank.join("\n")
+    ].compact_blank.map { |line| pdf_text(line) }.join("\n")
 
     pdf.table([ [ seller_lines, buyer_lines ] ], width: width) do |t|
       t.cells.borders = []
@@ -158,7 +159,7 @@ class QuoteExporter
     @quote.quote_items.ordered.each_with_index do |item, idx|
       row = [ idx + 1 ]
       row << pdf_image_cell(item) if @template.show_images?
-      row << item.description
+      row << pdf_text(item.description)
       row << item.quantity
       row << decimal_text(item.unit_price)
       row << decimal_text(item.amount)
@@ -230,7 +231,7 @@ class QuoteExporter
 
     pdf.text "Terms & Conditions", style: :bold, size: 11
     pdf.move_down 4
-    lines.each { |line| pdf.text line, size: 10 }
+    lines.each { |line| pdf.text pdf_text(line), size: 10 }
     pdf.move_down 10
   end
 
@@ -240,7 +241,7 @@ class QuoteExporter
 
     pdf.text "Footer", style: :bold, size: 11
     pdf.move_down 3
-    pdf.text footer_note, size: 10
+    pdf.text pdf_text(footer_note), size: 10
     pdf.move_down 8
   end
 
@@ -537,7 +538,8 @@ class QuoteExporter
   end
 
   def configure_pdf_font(pdf)
-    candidates = FONT_MAP.fetch(@template.font_family, []) + FONT_MAP["Noto Sans"]
+    @pdf_font_unicode_ready = false
+    candidates = (FONT_MAP.fetch(@template.font_family, []) + FONT_MAP["Noto Sans"] + extra_pdf_font_candidates).uniq
 
     candidates.each do |path|
       next unless File.exist?(path)
@@ -550,11 +552,24 @@ class QuoteExporter
           bold_italic: path
         })
         pdf.font("quote_custom")
+        @pdf_font_unicode_ready = true
         return
       rescue StandardError
         next
       end
     end
+  end
+
+  def extra_pdf_font_candidates
+    [
+      ENV["QUOTE_PDF_FONT_PATH"],
+      "/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf",
+      "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+      "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+      "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
+      "/usr/share/fonts/truetype/arphic/ukai.ttc",
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    ].compact
   end
 
   def excel_template_config
@@ -580,7 +595,16 @@ class QuoteExporter
 
   def total_value_text(value)
     suffix = @template.show_currency ? " #{@quote.currency}" : ""
-    "#{decimal_text(value)}#{suffix}"
+    pdf_text("#{decimal_text(value)}#{suffix}")
+  end
+
+  def pdf_text(value)
+    text = value.to_s
+    return text if @pdf_font_unicode_ready
+
+    text.encode("Windows-1252", invalid: :replace, undef: :replace, replace: "?").encode("UTF-8")
+  rescue StandardError
+    text.scrub("?")
   end
 
   def decimal_text(value)

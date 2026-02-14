@@ -1,6 +1,7 @@
 class Quote < ApplicationRecord
   belongs_to :company
   belongs_to :customer
+  belongs_to :template, class_name: "QuoteTemplate", optional: true
   has_many :quote_items, dependent: :destroy
   accepts_nested_attributes_for :quote_items,
                                 allow_destroy: true,
@@ -56,6 +57,7 @@ class Quote < ApplicationRecord
     revision = self.class.new(
       company_id: company_id,
       customer_id: customer_id,
+      template_id: template_id,
       quote_no: quote_no,
       currency: currency,
       valid_until: valid_until,
@@ -120,5 +122,6 @@ class Quote < ApplicationRecord
     self.tax_amount ||= 0
     self.shipping_amount ||= 0
     self.discount_amount ||= 0
+    self.template ||= company&.quote_template_or_default
   end
 end

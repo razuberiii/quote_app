@@ -4,9 +4,10 @@ module Public
     layout "public"
 
     def show
-      @share = QuoteShare.includes(company: :quote_template).find_by!(token: params[:token])
+      @share = QuoteShare.includes(:quote, company: :quote_templates).find_by!(token: params[:token])
       @snapshot = @share.snapshot
-      @template = @share.company.quote_template_or_default
+      @template = @share.quote.template || @share.company.quote_template_or_default
+      @document_kind = @template.normalize_document_kind(params[:doc].presence || @template.default_document_kind)
     end
   end
 end

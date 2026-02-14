@@ -1,0 +1,13 @@
+one:
+  quote: one
+  description: Industrial Hydraulic Pump Model HZ-240
+  unit_price: 480.00
+  quantity: 5
+  amount: 2400.00
+
+two:
+  quote: two
+  description: Stainless Steel Valve Assembly
+  unit_price: 195.00
+  quantity: 8
+  amount: 1560.00

@@ -20,7 +20,20 @@ class ProductsController < ApplicationController
     if @product.save
       redirect_to @product, notice: "Product created successfully"
     else
-      render :new
+      flash.now[:alert] = @product.errors.full_messages.to_sentence
+      render :new, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotUnique
+    @product.errors.add(:sku, "already exists in your product list")
+    flash.now[:alert] = @product.errors.full_messages.to_sentence
+    render :new, status: :unprocessable_entity
+  rescue ActiveRecord::StatementInvalid => e
+    if e.message.to_s.downcase.include?("unique") && e.message.to_s.downcase.include?("sku")
+      @product.errors.add(:sku, "already exists in your product list")
+      flash.now[:alert] = @product.errors.full_messages.to_sentence
+      render :new, status: :unprocessable_entity
+    else
+      raise
     end
   end
 
@@ -31,7 +44,20 @@ class ProductsController < ApplicationController
     if @product.update(product_params)
       redirect_to @product, notice: "Product updated successfully"
     else
-      render :edit
+      flash.now[:alert] = @product.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_entity
+    end
+  rescue ActiveRecord::RecordNotUnique
+    @product.errors.add(:sku, "already exists in your product list")
+    flash.now[:alert] = @product.errors.full_messages.to_sentence
+    render :edit, status: :unprocessable_entity
+  rescue ActiveRecord::StatementInvalid => e
+    if e.message.to_s.downcase.include?("unique") && e.message.to_s.downcase.include?("sku")
+      @product.errors.add(:sku, "already exists in your product list")
+      flash.now[:alert] = @product.errors.full_messages.to_sentence
+      render :edit, status: :unprocessable_entity
+    else
+      raise
     end
   end
 

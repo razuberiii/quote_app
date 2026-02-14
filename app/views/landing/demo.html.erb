@@ -1,0 +1,50 @@
+<% content_for :title, "Quote App Demo | Pipeline and Quote Workspace" %>
+
+<section class="marketing-section demo-page">
+  <div class="marketing-section-head">
+    <h1>Quote App Demo Workspace</h1>
+    <p>This is a static demo view showing how a sales team tracks pipeline and quote delivery in one place.</p>
+  </div>
+
+  <div class="demo-toolbar">
+    <span class="demo-pill">Open Deals: 14</span>
+    <span class="demo-pill">Quotes This Week: 27</span>
+    <span class="demo-pill">Pending Follow-ups: 9</span>
+  </div>
+
+  <div class="demo-layout">
+    <article class="demo-card">
+      <h2>Recent Quotes</h2>
+      <table class="demo-table">
+        <thead>
+          <tr>
+            <th>Quote No.</th>
+            <th>Buyer</th>
+            <th>Status</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>QT-2026-118</td><td>Pacific Trading Group</td><td>Pending</td><td>USD 2,400.00</td></tr>
+          <tr><td>QT-2026-116</td><td>Nordic Process Systems</td><td>Revised</td><td>USD 18,750.00</td></tr>
+          <tr><td>QT-2026-115</td><td>Harbor Marine Equipment</td><td>Won</td><td>USD 9,120.00</td></tr>
+          <tr><td>QT-2026-113</td><td>Summit Fluid Controls</td><td>Pending</td><td>USD 6,840.00</td></tr>
+        </tbody>
+      </table>
+    </article>
+
+    <article class="demo-card">
+      <h2>Deal Overview</h2>
+      <ul class="demo-list">
+        <li><strong>Top Product:</strong> Hydraulic Pump HZ-240</li>
+        <li><strong>Average Quote Cycle:</strong> 3.8 days</li>
+        <li><strong>Revision Rate:</strong> 41%</li>
+        <li><strong>Export Mix:</strong> 62% PI / 38% Quotation</li>
+      </ul>
+      <div class="demo-actions">
+        <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary" %>
+        <%= link_to "See Sample Quote", sample_quote_path, class: "btn btn-secondary", target: "_blank" %>
+      </div>
+    </article>
+  </div>
+</section>

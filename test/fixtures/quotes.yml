@@ -3,33 +3,33 @@
 one:
   company: one
   customer: one
-  quote_no: MyString
+  quote_no: QT-2026-0001
   revision_number: 1
-  product_name: MyString
+  product_name: Industrial Hydraulic Pump Model HZ-240
   unit_price: 9.99
   quantity: 1
-  currency: MyString
-  valid_until: 2026-02-11
-  payment_term: MyString
-  status: MyString
+  currency: USD
+  valid_until: 2026-03-31
+  payment_term: 30% advance, 70% before shipment
+  status: pending
   negotiated: false
   final_amount: 9.99
-  loss_reason: MyString
-  notes: MyText
+  loss_reason:
+  notes: Lead time 20 working days.
 
 two:
   company: two
   customer: two
-  quote_no: MyString
+  quote_no: QT-2026-1001
   revision_number: 1
-  product_name: MyString
+  product_name: Stainless Steel Valve Assembly
   unit_price: 9.99
   quantity: 1
-  currency: MyString
-  valid_until: 2026-02-11
-  payment_term: MyString
-  status: MyString
+  currency: USD
+  valid_until: 2026-03-31
+  payment_term: Net 30
+  status: pending
   negotiated: false
   final_amount: 9.99
-  loss_reason: MyString
-  notes: MyText
+  loss_reason:
+  notes: Subject to final packing confirmation.

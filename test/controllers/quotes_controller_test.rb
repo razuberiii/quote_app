@@ -22,4 +22,9 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get export_pdf_quote_url(@quote)
     assert_response :success
   end
+
+  test "export xlsx responds successfully" do
+    get export_xlsx_quote_url(@quote)
+    assert_response :success
+  end
 end

@@ -1,0 +1,158 @@
+<div class="quote-document" style="--quote-accent: <%= @template.accent_color %>;">
+  <% active_template = @template %>
+  <header class="quote-doc-header">
+    <div>
+      <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
+      <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %> <span class="quote-doc-version">V<%= @quote.revision_number %></span></h1>
+    </div>
+    <span class="status-badge status-<%= @quote.status %>"><%= @quote.status&.capitalize %></span>
+  </header>
+
+  <section class="quote-meta-grid">
+    <article class="quote-meta-card">
+      <h3>Seller</h3>
+      <p><strong><%= @quote.company.name %></strong></p>
+      <p><%= @quote.company.address.presence || "-" %></p>
+      <p><%= @quote.company.phone.presence || "-" %></p>
+      <p><%= @quote.company.email.presence || "-" %></p>
+      <p><%= @quote.company.website.presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Buyer</h3>
+      <p><strong><%= @quote.customer.name %></strong></p>
+      <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
+      <p><%= @quote.customer.address.presence || "-" %></p>
+      <p><%= @quote.customer.phone.presence || "-" %></p>
+      <p><%= @quote.customer.email.presence || "-" %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Quote Info</h3>
+      <p><strong>Quote Date:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") %></p>
+      <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
+      <p><strong>Currency:</strong> <%= @quote.currency %></p>
+      <p><strong>Status:</strong> <%= @quote.status&.capitalize %></p>
+    </article>
+  </section>
+
+  <h3>Items</h3>
+  <div class="table-responsive">
+    <table class="quote-items-table quote-doc-table">
+      <thead>
+        <tr>
+          <% if active_template.show_images? %>
+            <th>Image</th>
+          <% end %>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @quote.quote_items.ordered.each do |item| %>
+          <tr>
+            <% if active_template.show_images? %>
+              <td>
+                <% if item.product&.image&.attached? %>
+                  <%= image_tag item.product.image, class: "quote-item-image" %>
+                <% else %>
+                  -
+                <% end %>
+              </td>
+            <% end %>
+            <td><%= item.description %></td>
+            <td><%= item.quantity %></td>
+            <td><%= number_to_currency(item.unit_price, unit: @quote.currency) %></td>
+            <td><%= number_to_currency(item.amount, unit: @quote.currency) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <aside class="quote-total-box">
+    <p><span>Subtotal</span><strong><%= number_to_currency(@quote.subtotal, unit: @quote.currency) %></strong></p>
+    <% if active_template.show_tax %>
+      <p><span>Tax / VAT</span><strong><%= number_to_currency(@quote.tax_amount, unit: @quote.currency) %></strong></p>
+    <% end %>
+    <% if active_template.show_shipping %>
+      <p><span>Shipping</span><strong><%= number_to_currency(@quote.shipping_amount, unit: @quote.currency) %></strong></p>
+    <% end %>
+    <p><span>Discount</span><strong><%= number_to_currency(@quote.discount_amount, unit: @quote.currency) %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(@quote.grand_total, unit: @quote.currency) %></strong></p>
+  </aside>
+
+  <% if active_template.show_terms_section && (@quote.payment_term.present? || @quote.terms_text.present? || @quote.legal_disclaimer.present? || @quote.delivery_notes.present?) %>
+    <section class="quote-section-block">
+      <h3>Terms & Conditions</h3>
+      <% if active_template.show_payment_term %>
+        <p><strong>Payment Terms:</strong> <%= @quote.payment_term.presence || "-" %></p>
+      <% end %>
+      <p><strong>Terms:</strong> <%= @quote.terms_text.presence || "-" %></p>
+      <p><strong>Legal Disclaimer:</strong> <%= @quote.legal_disclaimer.presence || "-" %></p>
+      <p><strong>Delivery Notes:</strong> <%= @quote.delivery_notes.presence || "-" %></p>
+    </section>
+  <% end %>
+
+  <% if active_template.show_notes && @quote.notes.present? %>
+    <section class="quote-section-block">
+      <h3>Internal Notes</h3>
+      <p><%= simple_format(@quote.notes) %></p>
+    </section>
+  <% end %>
+
+  <% footer_note = @template.resolved_footer_note(@document_kind) %>
+  <% if footer_note.present? %>
+    <section class="quote-section-block">
+      <h3>Footer Note</h3>
+      <div><%= simple_format(footer_note) %></div>
+    </section>
+  <% end %>
+</div>
+
+<div class="quote-toolbar">
+  <div class="quote-toolbar-main">
+    <div class="quote-template-picker">
+      <label for="template_select_<%= @quote.id %>">Template</label>
+      <%= select_tag :template_id,
+                     options_from_collection_for_select(@template_options, :id, :name, @template.id),
+                     id: "template_select_#{@quote.id}",
+                     class: "js-template-select",
+                     data: { update_url: update_template_quote_path(@quote), doc: @document_kind } %>
+    </div>
+
+    <%= link_to "Back to Customer", @quote.customer, class: "quote-back-link" %>
+    <%= link_to "Download PDF", export_pdf_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-primary" %>
+    <%= link_to "Edit", edit_quote_path(@quote), class: "quote-btn quote-btn-secondary" %>
+    <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
+    <% if @document_kind == "pi" %>
+      <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote"), class: "quote-btn quote-btn-secondary" %>
+    <% else %>
+      <%= link_to "Switch to PI", quote_path(@quote, doc: "pi"), class: "quote-btn quote-btn-secondary" %>
+    <% end %>
+    <%= link_to "Share Public Link", public_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary", target: "_blank" %>
+    <%= link_to "Download Excel", export_xlsx_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary" %>
+  </div>
+
+  <div class="quote-toolbar-danger">
+    <%= button_to "Delete Quote", quote_path(@quote), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this quote? This action cannot be undone." }, class: "quote-btn quote-btn-danger" %>
+  </div>
+</div>
+
+<section class="quote-history">
+  <h3>History</h3>
+  <div class="quote-history-tabs">
+    <% @quote.customer.quotes.where(quote_no: @quote.quote_no).order(revision_number: :desc).each do |q| %>
+      <% is_current = q.id == @quote.id %>
+      <% tab_class = "history-tab#{' active' if is_current}" %>
+      <% label = "V#{q.revision_number}" %>
+      <% if is_current %>
+        <span class="<%= tab_class %>"><%= label %></span>
+      <% else %>
+        <%= link_to label, quote_path(q), class: tab_class %>
+      <% end %>
+    <% end %>
+  </div>
+</section>

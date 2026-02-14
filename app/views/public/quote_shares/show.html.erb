@@ -1,9 +1,8 @@
-<article class="quote-document public-quote-document">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-font: '<%= @template.font_family %>';">
   <header class="quote-doc-header">
     <div>
-      <p class="quote-doc-kicker">Quotation</p>
-      <h1>Quote <%= @snapshot["quote_no"] %></h1>
-      <p class="quote-doc-subline">Version V<%= @snapshot["revision_number"] %></p>
+      <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
+      <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @snapshot["quote_no"] %></h1>
     </div>
     <div class="quote-doc-logo-wrap">
       <% if @template.show_logo && @share.company.logo.attached? %>
@@ -43,7 +42,6 @@
       <% if @template.show_payment_term && @snapshot["payment_term"].present? %>
         <p><strong>Payment:</strong> <%= @snapshot["payment_term"] %></p>
       <% end %>
-      <p><strong>Status:</strong> <span class="status-badge status-<%= @snapshot["status"] %>"><%= @snapshot["status"]&.capitalize %></span></p>
     </article>
   </section>
 
@@ -100,21 +98,6 @@
       <p><strong>Terms:</strong> <%= @snapshot["terms_text"].presence || "-" %></p>
       <p><strong>Legal Disclaimer:</strong> <%= @snapshot["legal_disclaimer"].presence || "-" %></p>
       <p><strong>Delivery Notes:</strong> <%= @snapshot["delivery_notes"].presence || "-" %></p>
-    </section>
-  <% end %>
-
-  <% if @template.show_notes && @snapshot["notes"].present? %>
-    <section class="quote-section-block">
-      <h3>Notes</h3>
-      <div><%= simple_format(@snapshot["notes"]) %></div>
-    </section>
-  <% end %>
-
-  <% if @template.show_signature_block %>
-    <section class="quote-section-block">
-      <h3>Customer Acceptance</h3>
-      <p>__________________________</p>
-      <p>Date: ____________________</p>
     </section>
   <% end %>
 

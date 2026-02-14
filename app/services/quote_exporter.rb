@@ -563,6 +563,7 @@ class QuoteExporter
   def extra_pdf_font_candidates
     [
       ENV["QUOTE_PDF_FONT_PATH"],
+      "/usr/local/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf",
       "/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf",
       "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
       "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",

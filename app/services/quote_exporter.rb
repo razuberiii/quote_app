@@ -302,11 +302,11 @@ class QuoteExporter
     sheet.merge_cells("E#{start_row}:F#{start_row}")
 
     detail_rows = [
-      [ @company.name, @customer.name, "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}" ],
-      [ @company.address.presence || "-", @customer.address.presence || "-", (@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : "-") ],
-      [ @company.phone.presence || "-", @customer.phone.presence || "-", (@template.show_currency ? "Currency: #{@quote.currency}" : "-") ],
-      [ @company.email.presence || "-", @customer.email.presence || "-", (@template.show_payment_term ? "Payment: #{@quote.payment_term.presence || '-'}" : "-") ],
-      [ @company.website.presence || "-", "Contact: #{@customer.contact_name.presence || '-'}", "" ]
+      [ excel_text(@company.name), excel_text(@customer.name), excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}") ],
+      [ excel_text(@company.address.presence || "-"), excel_text(@customer.address.presence || "-"), excel_text(@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : "-") ],
+      [ excel_text(@company.phone.presence || "-"), excel_text(@customer.phone.presence || "-"), excel_text(@template.show_currency ? "Currency: #{@quote.currency}" : "-") ],
+      [ excel_text(@company.email.presence || "-"), excel_text(@customer.email.presence || "-"), excel_text(@template.show_payment_term ? "Payment: #{@quote.payment_term.presence || '-'}" : "-") ],
+      [ excel_text(@company.website.presence || "-"), excel_text("Contact: #{@customer.contact_name.presence || '-'}"), "" ]
     ]
 
     detail_rows.each_with_index do |(seller_text, buyer_text, info_text), idx|
@@ -563,6 +563,7 @@ class QuoteExporter
   def extra_pdf_font_candidates
     [
       ENV["QUOTE_PDF_FONT_PATH"],
+      "/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf",
       "/usr/local/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf",
       "/usr/share/fonts/truetype/noto/NotoSansSC-Regular.ttf",
       "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
@@ -610,6 +611,14 @@ class QuoteExporter
 
   def decimal_text(value)
     format("%.2f", value.to_d)
+  end
+
+  def excel_text(value)
+    text = value.to_s
+    return text if text.blank?
+    return "'#{text}" if text.match?(/\A\+?[\d\-\s()]+\z/)
+
+    text
   end
 
   def pdf_content_width(pdf)

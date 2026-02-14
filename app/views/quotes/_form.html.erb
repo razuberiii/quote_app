@@ -14,6 +14,11 @@
 
   <h3>Basic Information</h3>
   <div>
+    <%= f.label :template_id, "Template" %>
+    <%= f.select :template_id, (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] }, { include_blank: false } %>
+  </div>
+
+  <div>
     <%= f.label :currency %>
     <%= f.text_field :currency, placeholder: "USD" %>
   </div>
@@ -30,7 +35,7 @@
 
   <div>
     <%= f.label :payment_term %>
-    <%= f.text_field :payment_term, placeholder: "e.g. 30% deposit, 70% before shipment" %>
+    <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment" %>
   </div>
 
   <div>
@@ -97,7 +102,7 @@
   </p>
 
   <div data-products="<%= products_payload %>" id="quote-items-wrapper">
-    <div class="table-responsive">
+    <div class="table-responsive quote-items-responsive">
       <table class="quote-items-table">
         <thead>
           <tr>
@@ -113,24 +118,25 @@
             <% item = item_fields.object %>
             <% product_name = item.product&.name.presence || item.description.to_s %>
             <tr class="quote-item-row">
-              <td>
+              <td class="quote-col-product">
                 <div class="product-search">
                   <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
-                  <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
+                  <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
                   <div class="js-product-dropdown"></div>
                 </div>
+                <div class="js-product-feedback product-feedback" aria-live="polite"></div>
                 <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
               </td>
-              <td>
+              <td class="quote-col-desc">
                 <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
               </td>
-              <td>
+              <td class="quote-col-price">
                 <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
               </td>
-              <td>
+              <td class="quote-col-qty">
                 <%= item_fields.number_field :quantity, min: 1, placeholder: "1" %>
               </td>
-              <td>
+              <td class="quote-col-remove">
                 <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
                 <button type="button" class="btn btn-danger js-remove-item">Remove</button>
               </td>
@@ -174,7 +180,7 @@
     function renderDropdown(dropdown, items) {
       if (!dropdown) return;
       if (!items.length) {
-        dropdown.innerHTML = '<div style="padding:6px 8px; color:#6b7280;">No matching product</div>';
+        dropdown.innerHTML = '<div class="product-option-empty">No matching product</div>';
         return;
       }
 
@@ -183,15 +189,82 @@
       ).join("");
     }
 
+    function openDropdown(row, dropdown) {
+      if (!dropdown) return;
+      body.querySelectorAll(".quote-item-row.is-dropdown-open").forEach((openRow) => {
+        if (openRow !== row) {
+          openRow.classList.remove("is-dropdown-open");
+          const openDropdownEl = openRow.querySelector(".js-product-dropdown");
+          if (openDropdownEl) openDropdownEl.classList.remove("is-open");
+        }
+      });
+
+      row.classList.add("is-dropdown-open");
+      dropdown.classList.add("is-open");
+      positionDropdown(row, dropdown);
+    }
+
+    function closeDropdown(row, dropdown) {
+      if (!dropdown) return;
+      dropdown.classList.remove("is-open");
+      dropdown.classList.remove("open-up");
+      row.classList.remove("is-dropdown-open");
+    }
+
+    function positionDropdown(row, dropdown) {
+      if (!dropdown) return;
+      const searchBox = row.querySelector(".product-search");
+      if (!searchBox) return;
+
+      dropdown.classList.remove("open-up");
+      dropdown.style.maxHeight = "";
+
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const boxRect = searchBox.getBoundingClientRect();
+      const safeGap = 10;
+      const minHeight = 140;
+      const maxHeight = 260;
+
+      const spaceBelow = viewportHeight - boxRect.bottom - safeGap;
+      const spaceAbove = boxRect.top - safeGap;
+
+      if (spaceBelow < 180 && spaceAbove > spaceBelow) {
+        dropdown.classList.add("open-up");
+        dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(maxHeight, Math.floor(spaceAbove)))}px`;
+      } else {
+        dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(maxHeight, Math.floor(spaceBelow)))}px`;
+      }
+    }
+
     function bindRow(row) {
       const productNameInput = row.querySelector(".js-product-name");
       const productToggleBtn = row.querySelector(".js-product-toggle");
       const productDropdown = row.querySelector(".js-product-dropdown");
+      const productFeedback = row.querySelector(".js-product-feedback");
       const productIdInput = row.querySelector(".js-product-id");
       const descInput = row.querySelector(".js-description");
       const priceInput = row.querySelector(".js-unit-price");
       const removeBtn = row.querySelector(".js-remove-item");
       const destroyField = row.querySelector(".js-destroy-flag");
+      let feedbackTimer = null;
+
+      function setFeedback(type, text, autoclear = false) {
+        if (!productFeedback) return;
+        if (feedbackTimer) {
+          window.clearTimeout(feedbackTimer);
+          feedbackTimer = null;
+        }
+        productFeedback.className = "js-product-feedback product-feedback";
+        if (type) productFeedback.classList.add(`product-feedback-${type}`);
+        productFeedback.textContent = text || "";
+
+        if (autoclear && text) {
+          feedbackTimer = window.setTimeout(() => {
+            productFeedback.className = "js-product-feedback product-feedback";
+            productFeedback.textContent = "";
+          }, 1200);
+        }
+      }
 
       function syncProduct() {
         const keyword = (productNameInput.value || "").trim();
@@ -199,16 +272,24 @@
 
         const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
         renderDropdown(productDropdown, filtered);
-        if (productDropdown) productDropdown.style.display = "block";
+        openDropdown(row, productDropdown);
 
         if (matched) {
           productIdInput.value = matched.id;
           if (!priceInput.value) priceInput.value = matched.price;
           if (!descInput.value) descInput.value = matched.name;
+          productNameInput.classList.add("is-matched");
+          setFeedback("", "");
         } else {
           productIdInput.value = "";
+          productNameInput.classList.remove("is-matched");
           if (!descInput.value && productNameInput.value.trim()) {
             descInput.value = productNameInput.value.trim();
+          }
+          if (keyword) {
+            setFeedback("muted", "No exact match. This will be saved as a custom item.");
+          } else {
+            setFeedback("", "");
           }
         }
       }
@@ -221,12 +302,13 @@
 
       if (productToggleBtn && productDropdown) {
         productToggleBtn.addEventListener("click", () => {
-          const visible = productDropdown.style.display === "block";
+          const visible = productDropdown.classList.contains("is-open");
           if (visible) {
-            productDropdown.style.display = "none";
+            closeDropdown(row, productDropdown);
           } else {
             renderDropdown(productDropdown, products.slice(0, 20));
-            productDropdown.style.display = "block";
+            openDropdown(row, productDropdown);
+            setFeedback("", "");
           }
         });
       }
@@ -240,14 +322,28 @@
           productIdInput.value = target.dataset.id;
           if (!priceInput.value) priceInput.value = target.dataset.price;
           if (!descInput.value) descInput.value = target.dataset.name;
-          productDropdown.style.display = "none";
+          productNameInput.classList.add("is-matched");
+          setFeedback("", "");
+          closeDropdown(row, productDropdown);
         });
 
         document.addEventListener("click", (event) => {
           if (!row.contains(event.target)) {
-            productDropdown.style.display = "none";
+            closeDropdown(row, productDropdown);
           }
         });
+
+        window.addEventListener("resize", () => {
+          if (productDropdown.classList.contains("is-open")) {
+            positionDropdown(row, productDropdown);
+          }
+        });
+
+        window.addEventListener("scroll", () => {
+          if (productDropdown.classList.contains("is-open")) {
+            positionDropdown(row, productDropdown);
+          }
+        }, true);
       }
 
       if (removeBtn) {
@@ -261,26 +357,27 @@
     function addRow() {
       const index = rowCounter++;
       const tr = document.createElement("tr");
-      tr.className = "quote-item-row";
+      tr.className = "quote-item-row is-new";
       tr.innerHTML = `
-        <td>
+        <td class="quote-col-product">
           <div class="product-search">
             <input type="text" class="js-product-name" placeholder="Type to search product">
-            <button type="button" class="js-product-toggle" aria-label="Show products">&#9662;</button>
+            <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
             <div class="js-product-dropdown"></div>
           </div>
+          <div class="js-product-feedback product-feedback" aria-live="polite"></div>
           <input type="hidden" name="quote[quote_items_attributes][${index}][product_id]" class="js-product-id">
         </td>
-        <td>
+        <td class="quote-col-desc">
           <input type="text" name="quote[quote_items_attributes][${index}][description]" class="js-description" placeholder="Description">
         </td>
-        <td>
+        <td class="quote-col-price">
           <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price" placeholder="0.00">
         </td>
-        <td>
+        <td class="quote-col-qty">
           <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]">
         </td>
-        <td>
+        <td class="quote-col-remove">
           <input type="hidden" name="quote[quote_items_attributes][${index}][_destroy]" value="0" class="js-destroy-flag">
           <button type="button" class="btn btn-danger js-remove-item">Remove</button>
         </td>
@@ -288,70 +385,10 @@
 
       body.appendChild(tr);
       bindRow(tr);
+      window.setTimeout(() => tr.classList.remove("is-new"), 420);
     }
 
     body.querySelectorAll(".quote-item-row").forEach(bindRow);
     if (addBtn) addBtn.addEventListener("click", addRow);
   })();
 </script>
-<style>
-  .product-search {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .product-search .js-product-name {
-    width: 100%;
-    min-width: 180px;
-  }
-
-  .product-search .js-product-toggle {
-    width: 34px;
-    height: 34px;
-    border: 1px solid #d1d5db;
-    border-radius: 4px;
-    background: #f8fafc;
-    color: #374151;
-    cursor: pointer;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-  }
-
-  .product-search .js-product-toggle:hover {
-    background: #eef2f7;
-  }
-
-  .product-search .js-product-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
-    right: 0;
-    background: #fff;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    max-height: 200px;
-    overflow: auto;
-    z-index: 20;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-  }
-
-  .product-search .js-product-option {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 8px 10px;
-    border: none;
-    background: #fff;
-    cursor: pointer;
-    font-size: 0.95rem;
-    margin: 0;
-  }
-
-  .product-search .js-product-option:hover {
-    background: #f3f4f6;
-  }
-</style>

@@ -19,7 +19,10 @@
 
   <div>
     <%= f.label :sku %>
-    <%= f.text_field :sku %>
+    <%= f.text_field :sku, class: ("input-error" if @product.errors[:sku].any?) %>
+    <% if @product.errors[:sku].any? %>
+      <p class="field-error-message"><%= @product.errors.full_messages_for(:sku).first %></p>
+    <% end %>
   </div>
 
   <div>

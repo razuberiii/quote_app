@@ -28,15 +28,26 @@
       <div class="navbar-container">
         <h1><%= link_to "Quote App", root_path %></h1>
         <% if user_signed_in? %>
-          <ul class="navbar-menu">
+          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <ul class="navbar-menu" id="primary-navigation">
             <li><%= link_to "Customers", customers_path %></li>
             <li><%= link_to "Products", products_path %></li>
-            <li><%= link_to "Template", edit_quote_template_path %></li>
+            <li><%= link_to "Template", quote_templates_path %></li>
             <% if current_user.admin? %>
               <li><%= link_to "Admin", admin_users_path %></li>
             <% end %>
             <li><%= link_to "Account", edit_user_registration_path %></li>
             <li><%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete } %></li>
+          </ul>
+        <% else %>
+          <ul class="navbar-menu navbar-menu-public">
+            <li><%= link_to "Home", root_path %></li>
+            <li><%= link_to "Login", new_user_session_path %></li>
+            <li><%= link_to "Start Free", new_user_registration_path, class: "navbar-cta-link" %></li>
           </ul>
         <% end %>
       </div>
@@ -51,5 +62,25 @@
       <% end %>
       <%= yield %>
     </main>
+
+    <script>
+      (() => {
+        const onLoad = () => {
+          const container = document.querySelector(".navbar-container");
+          const toggle = document.querySelector(".navbar-toggle");
+          if (container && toggle && toggle.dataset.bound !== "true") {
+            toggle.dataset.bound = "true";
+
+            toggle.addEventListener("click", () => {
+              const isOpen = container.classList.toggle("menu-open");
+              toggle.setAttribute("aria-expanded", String(isOpen));
+            });
+          }
+        };
+
+        onLoad();
+        document.addEventListener("turbo:load", onLoad);
+      })();
+    </script>
   </body>
 </html>

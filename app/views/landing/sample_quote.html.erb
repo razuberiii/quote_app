@@ -1,0 +1,82 @@
+<article class="quote-document public-quote-document public-quote-themed public-layout-classic" style="--doc-accent: #1F4E79; --doc-font: 'Noto Sans';">
+  <header class="quote-doc-header">
+    <div>
+      <p class="quote-doc-kicker"><%= @sample_quote[:document_title] %></p>
+      <h1>PI # <%= @sample_quote[:quote_no] %></h1>
+    </div>
+  </header>
+
+  <section class="quote-meta-grid">
+    <article class="quote-meta-card">
+      <h3>Seller</h3>
+      <p><strong><%= @sample_quote[:seller][:name] %></strong></p>
+      <p><%= @sample_quote[:seller][:address] %></p>
+      <p><%= @sample_quote[:seller][:phone] %></p>
+      <p><%= @sample_quote[:seller][:email] %></p>
+      <p><%= @sample_quote[:seller][:website] %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Buyer</h3>
+      <p><strong><%= @sample_quote[:buyer][:name] %></strong></p>
+      <p>Contact: <%= @sample_quote[:buyer][:contact_name] %></p>
+      <p><%= @sample_quote[:buyer][:address] %></p>
+      <p><%= @sample_quote[:buyer][:phone] %></p>
+      <p><%= @sample_quote[:buyer][:email] %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Quote Info</h3>
+      <p><strong>Date:</strong> <%= @sample_quote[:issued_on] %></p>
+      <p><strong>Valid Until:</strong> <%= @sample_quote[:valid_until] %></p>
+      <p><strong>Currency:</strong> <%= @sample_quote[:currency] %></p>
+      <p><strong>Delivery:</strong> 20 working days</p>
+    </article>
+  </section>
+
+  <div class="table-responsive">
+    <table class="quote-items-table quote-doc-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Qty</th>
+          <th>Unit Price</th>
+          <th>Line Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% subtotal = 0.to_d %>
+        <% @sample_quote[:items].each do |item| %>
+          <% line_total = item[:unit_price].to_d * item[:quantity].to_i %>
+          <% subtotal += line_total %>
+          <tr>
+            <td><%= item[:description] %></td>
+            <td><%= item[:quantity] %></td>
+            <td><%= number_to_currency(item[:unit_price], unit: "USD ") %></td>
+            <td><%= number_to_currency(line_total, unit: "USD ") %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <aside class="quote-total-box">
+    <p><span>Subtotal</span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
+    <p><span>Tax / VAT</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p><span>Shipping</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p><span>Discount</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
+  </aside>
+
+  <section class="quote-section-block">
+    <h3>Terms & Conditions</h3>
+    <p><strong>Payment Terms:</strong> <%= @sample_quote[:terms][:payment] %></p>
+    <p><strong>Validity:</strong> <%= @sample_quote[:terms][:validity] %></p>
+    <p><strong>Delivery:</strong> <%= @sample_quote[:terms][:delivery] %></p>
+    <p><strong>Notes:</strong> <%= @sample_quote[:terms][:notes] %></p>
+  </section>
+
+  <div class="no-print quote-public-actions">
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+</article>

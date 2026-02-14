@@ -1,0 +1,10 @@
+New contact request from Quote App landing page.
+
+Type: <%= @inquiry_label %>
+Name: <%= @contact_request.name %>
+Email: <%= @contact_request.email %>
+Company: <%= @contact_request.company.presence || "-" %>
+Team Size: <%= @contact_request.team_size.presence || "-" %>
+
+Message:
+<%= @contact_request.message %>

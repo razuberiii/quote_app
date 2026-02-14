@@ -1,0 +1,14 @@
+sheet_name: "Quote"
+title_merge: "A1:F1"
+company_merge: "A2:C2"
+number_merge: "D2:F2"
+column_widths:
+  - 6
+  - 16
+  - 34
+  - 8
+  - 15
+  - 17
+freeze_pane:
+  top_left_cell: "A16"
+  y_split: 15

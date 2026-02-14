@@ -1,0 +1,162 @@
+<% content_for :title, "Quote App | Professional B2B Quotes, Delivered Faster" %>
+
+<section class="marketing-hero">
+  <div class="marketing-hero-bg"></div>
+  <div class="marketing-hero-content">
+    <p class="marketing-kicker">BUILT FOR B2B SALES AND EXPORT TEAMS</p>
+    <h1>Professional B2B Quotes, Delivered Faster</h1>
+    <p class="marketing-subtitle">
+      Create polished quotations and PI documents, share public links, and export client-ready PDF/XLSX files
+      without spreadsheet chaos.
+    </p>
+    <div class="marketing-cta-row">
+      <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
+      <%= link_to "See Demo", @demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
+      <%= link_to "See a Sample Quote", @sample_quote_path, class: "marketing-sample-link", target: "_blank" %>
+    </div>
+  </div>
+</section>
+
+<section class="marketing-section">
+  <div class="marketing-section-head">
+    <h2>What You Can Do</h2>
+    <p>Core workflows for small teams and foreign trade operations.</p>
+  </div>
+  <div class="marketing-grid marketing-grid-4">
+    <article class="marketing-feature">
+      <div class="marketing-icon">Q</div>
+      <h3>Build Quotes Fast</h3>
+      <p>Turn product lists into client-ready quote drafts in minutes.</p>
+    </article>
+    <article class="marketing-feature">
+      <div class="marketing-icon">V</div>
+      <h3>Manage Revisions</h3>
+      <p>Create new versions while preserving quote history and context.</p>
+    </article>
+    <article class="marketing-feature">
+      <div class="marketing-icon">E</div>
+      <h3>Export to PDF/XLSX</h3>
+      <p>Send polished documents for procurement and finance workflows.</p>
+    </article>
+    <article class="marketing-feature">
+      <div class="marketing-icon">L</div>
+      <h3>Share Public Link</h3>
+      <p>Give buyers a clean link they can view and print from any device.</p>
+    </article>
+  </div>
+</section>
+
+<section class="marketing-section marketing-soft">
+  <div class="marketing-section-head">
+    <h2>Why Teams Pick Quote App</h2>
+    <p>A practical quoting stack without enterprise overhead.</p>
+  </div>
+  <div class="marketing-grid marketing-grid-4">
+    <article class="marketing-advantage">
+      <h3>Built for Small Teams</h3>
+      <p>Simple onboarding, clear UI, and workflows that match daily sales execution.</p>
+    </article>
+    <article class="marketing-advantage">
+      <h3>Better Follow-ups</h3>
+      <p>Customer status, quote history, and next actions in one place.</p>
+    </article>
+    <article class="marketing-advantage">
+      <h3>Professional Output</h3>
+      <p>Consistent documents for buyers, managers, and finance stakeholders.</p>
+    </article>
+    <article class="marketing-advantage">
+      <h3>Template Driven</h3>
+      <p>Reusable layouts with controlled branding and no risky custom HTML.</p>
+    </article>
+  </div>
+</section>
+
+<section class="marketing-section">
+  <div class="marketing-section-head">
+    <h2>How It Works</h2>
+  </div>
+  <div class="marketing-steps">
+    <article class="marketing-step">
+      <span>1</span>
+      <h3>Add Your Data</h3>
+      <p>Set up products and customer records.</p>
+    </article>
+    <article class="marketing-step">
+      <span>2</span>
+      <h3>Create the Quote</h3>
+      <p>Compose items, totals, and terms with reusable templates.</p>
+    </article>
+    <article class="marketing-step">
+      <span>3</span>
+      <h3>Share or Export</h3>
+      <p>Send a public link or export PDF/XLSX instantly.</p>
+    </article>
+    <article class="marketing-step">
+      <span>4</span>
+      <h3>Revise and Close</h3>
+      <p>Track revisions and keep deal communication organized.</p>
+    </article>
+  </div>
+</section>
+
+<section class="marketing-section marketing-faq">
+  <div class="marketing-section-head">
+    <h2>FAQ</h2>
+  </div>
+  <details>
+    <summary>Can we use this with a small sales team?</summary>
+    <p>Yes. Quote App is designed for lean teams that need speed, clarity, and consistent documents.</p>
+  </details>
+  <details>
+    <summary>Do buyers need an account to view a quote link?</summary>
+    <p>No. Public quote links are viewable directly in the browser and can be printed cleanly.</p>
+  </details>
+  <details>
+    <summary>Can we still export files for finance approval?</summary>
+    <p>Yes. PDF and Excel exports are included for internal review and customer delivery.</p>
+  </details>
+</section>
+
+<% contact_email = @contact_email || ContactMailer.contact_email_for_environment %>
+<section class="marketing-section marketing-contact" id="contact-us">
+  <div class="marketing-section-head">
+    <h2>Contact Us</h2>
+    <p>Tell us your team size and current quoting workflow.</p>
+  </div>
+
+  <%= form_with model: (@contact_request || ContactRequest.new), url: contact_requests_path, local: true, class: "marketing-contact-form" do |f| %>
+    <%= f.hidden_field :website, value: "", autocomplete: "off" %>
+    <div class="marketing-contact-grid">
+      <div>
+        <%= f.label :name, "Name" %>
+        <%= f.text_field :name, required: true %>
+      </div>
+      <div>
+        <%= f.label :email, "Email" %>
+        <%= f.email_field :email, required: true %>
+      </div>
+      <div>
+        <%= f.label :company, "Company" %>
+        <%= f.text_field :company, required: true %>
+      </div>
+      <div class="marketing-contact-message-wrap">
+        <%= f.label :message, "Message" %>
+        <%= f.text_area :message, rows: 5, required: true, placeholder: "Share your quote process, team setup, and rollout timeline." %>
+      </div>
+    </div>
+    <div class="marketing-contact-actions">
+      <%= f.submit "Send Message", class: "btn btn-primary" %>
+      <span>or <%= mail_to contact_email, "email us directly", subject: "Quote App Inquiry" %></span>
+    </div>
+  <% end %>
+</section>
+
+<footer class="marketing-footer">
+  <p>© <%= Time.current.year %> Quote App. All rights reserved.</p>
+  <div class="marketing-footer-links">
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms</a>
+    <a href="#">LinkedIn</a>
+    <a href="#">X</a>
+  </div>
+</footer>

@@ -1,0 +1,45 @@
+<h1>Templates</h1>
+
+<div class="actions">
+  <%= link_to "New Template", new_quote_template_path, class: "btn btn-primary" %>
+</div>
+
+<div class="template-grid">
+  <% @quote_templates.each do |template| %>
+    <article class="template-card">
+      <div class="template-card-head">
+        <div>
+          <h3><%= template.name %></h3>
+          <p class="template-sub">slug: <code><%= template.slug %></code></p>
+        </div>
+        <% if template.default_template? %>
+          <span class="template-default-pill">Default</span>
+        <% end %>
+      </div>
+
+      <p class="template-meta"><strong>Layout:</strong> <%= template.layout_type.titleize %></p>
+      <p class="template-meta"><strong>Accent:</strong> <span class="template-color-dot" style="background: <%= template.accent_color %>"></span> <%= template.accent_color %></p>
+      <p class="template-meta"><strong>Font:</strong> <%= template.font_family %></p>
+
+      <div class="template-preview template-preview-<%= template.layout_type %>" style="--template-accent: <%= template.accent_color %>; font-family: <%= template.font_family %>, sans-serif;">
+        <div class="preview-header">
+          <span><%= template.layout_type.upcase %></span>
+          <strong>PROFORMA INVOICE</strong>
+        </div>
+        <div class="preview-body">
+          <div></div>
+          <div></div>
+        </div>
+        <div class="preview-total">TOTAL</div>
+      </div>
+
+      <div class="template-actions">
+        <%= link_to "Edit", edit_quote_template_path(template), class: "btn btn-secondary" %>
+        <% unless template.default_template? %>
+          <%= button_to "Set Default", set_default_quote_template_path(template), method: :patch, class: "btn btn-info", form: { data: { turbo: false } } %>
+        <% end %>
+        <%= button_to "Delete", quote_template_path(template), method: :delete, class: "btn btn-danger", data: { turbo_confirm: "Delete this template?" } %>
+      </div>
+    </article>
+  <% end %>
+</div>

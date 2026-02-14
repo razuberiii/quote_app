@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_12_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -108,19 +108,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_090000) do
   end
 
   create_table "quote_templates", force: :cascade do |t|
+    t.string "accent_color", default: "#1F4E79", null: false
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
+    t.boolean "default_template", default: false, null: false
+    t.string "document_kind", default: "quotation", null: false
+    t.string "document_number_label", default: "", null: false
+    t.string "document_title", default: "", null: false
+    t.string "font_family", default: "Noto Sans", null: false
+    t.text "footer_note", default: "", null: false
+    t.text "footer_text", default: "", null: false
+    t.string "layout_type", default: "classic", null: false
+    t.string "name", default: "Default Template", null: false
+    t.text "pi_footer_note", default: "", null: false
+    t.string "pi_number_label", default: "", null: false
+    t.string "pi_title", default: "", null: false
+    t.text "quotation_footer_note", default: "", null: false
+    t.string "quotation_number_label", default: "", null: false
+    t.string "quotation_title", default: "", null: false
     t.boolean "show_currency", default: true, null: false
+    t.boolean "show_images", default: true, null: false
     t.boolean "show_logo", default: true, null: false
     t.boolean "show_negotiated_flag", default: false, null: false
     t.boolean "show_notes", default: true, null: false
     t.boolean "show_payment_term", default: true, null: false
     t.boolean "show_product_images", default: true, null: false
+    t.boolean "show_shipping", default: true, null: false
     t.boolean "show_signature_block", default: false, null: false
+    t.boolean "show_tax", default: true, null: false
     t.boolean "show_terms_section", default: true, null: false
     t.boolean "show_valid_until", default: true, null: false
+    t.string "slug", default: "default-template", null: false
     t.datetime "updated_at", null: false
-    t.index ["company_id"], name: "index_quote_templates_on_company_id", unique: true
+    t.index ["company_id", "slug"], name: "index_quote_templates_on_company_id_and_slug", unique: true
+    t.index ["company_id"], name: "index_quote_templates_on_company_id"
   end
 
   create_table "quotes", force: :cascade do |t|
@@ -144,12 +165,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_090000) do
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.string "status"
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
+    t.bigint "template_id"
     t.text "terms_text"
     t.decimal "unit_price", precision: 15, scale: 4
     t.datetime "updated_at", null: false
     t.date "valid_until"
     t.index ["company_id"], name: "index_quotes_on_company_id"
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
+    t.index ["template_id"], name: "index_quotes_on_template_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -178,5 +201,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_12_090000) do
   add_foreign_key "quote_templates", "companies"
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
+  add_foreign_key "quotes", "quote_templates", column: "template_id"
   add_foreign_key "users", "companies"
 end

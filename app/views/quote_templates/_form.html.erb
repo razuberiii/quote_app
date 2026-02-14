@@ -1,0 +1,118 @@
+<%= form_with model: quote_template do |f| %>
+  <% if quote_template.errors.any? %>
+    <div class="error-messages">
+      <h2><%= pluralize(quote_template.errors.count, "error") %> prevented this template from being saved:</h2>
+      <ul>
+        <% quote_template.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="template-form-grid">
+    <div>
+      <%= f.label :name %>
+      <%= f.text_field :name, required: true %>
+    </div>
+
+    <div>
+      <%= f.label :slug %>
+      <%= f.text_field :slug, placeholder: "auto-from-name" %>
+    </div>
+
+    <div>
+      <%= f.label :layout_type %>
+      <%= f.select :layout_type, QuoteTemplate.layout_types.keys.map { |it| [it.titleize, it] } %>
+    </div>
+
+    <div>
+      <%= f.label :accent_color %>
+      <%= f.color_field :accent_color %>
+    </div>
+
+    <div>
+      <%= f.label :font_family %>
+      <%= f.select :font_family, ["Inter", "Noto Sans", "Segoe UI", "Arial", "Helvetica"], {}, {} %>
+    </div>
+
+    <div>
+      <%= f.label :document_kind, "Default document view" %>
+      <%= f.select :document_kind, [["Quotation", "quotation"], ["Proforma Invoice (PI)", "proforma_invoice"]] %>
+    </div>
+  </div>
+
+  <h3>Visibility</h3>
+  <div class="template-toggle-grid">
+    <label><%= f.check_box :show_logo %> Show logo</label>
+    <label><%= f.check_box :show_images %> Show product images</label>
+    <label><%= f.check_box :show_tax %> Show tax line</label>
+    <label><%= f.check_box :show_shipping %> Show shipping line</label>
+    <label><%= f.check_box :show_currency %> Show currency</label>
+    <label><%= f.check_box :show_valid_until %> Show valid until</label>
+    <label><%= f.check_box :show_payment_term %> Show payment term</label>
+    <label><%= f.check_box :show_terms_section %> Show terms section</label>
+    <label><%= f.check_box :show_notes %> Show notes section</label>
+    <label><%= f.check_box :show_signature_block %> Show signature block</label>
+  </div>
+
+  <h3>Document Labels</h3>
+  <div class="template-form-grid">
+    <div>
+      <%= f.label :quotation_title %>
+      <%= f.text_field :quotation_title, placeholder: "QUOTATION" %>
+    </div>
+
+    <div>
+      <%= f.label :quotation_number_label %>
+      <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
+    </div>
+
+    <div>
+      <%= f.label :pi_title %>
+      <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
+    </div>
+
+    <div>
+      <%= f.label :pi_number_label %>
+      <%= f.text_field :pi_number_label, placeholder: "PI #" %>
+    </div>
+  </div>
+
+  <div>
+    <%= f.label :quotation_footer_note %>
+    <%= f.text_area :quotation_footer_note, rows: 2 %>
+  </div>
+
+  <div>
+    <%= f.label :pi_footer_note %>
+    <%= f.text_area :pi_footer_note, rows: 2 %>
+  </div>
+
+  <div>
+    <%= f.label :footer_text, "Fallback footer text" %>
+    <%= f.text_area :footer_text, rows: 3 %>
+  </div>
+
+  <div>
+    <label><%= check_box_tag :make_default, "1", quote_template.default_template? %> Set as default template</label>
+  </div>
+
+  <h3>Live Preview</h3>
+  <div class="template-preview template-preview-<%= quote_template.layout_type.presence || 'classic' %>" style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+    <div class="preview-header">
+      <span><%= (quote_template.layout_type.presence || "classic").upcase %></span>
+      <strong><%= quote_template.resolved_document_title("pi") %></strong>
+    </div>
+    <div class="preview-body">
+      <div></div>
+      <div></div>
+    </div>
+    <div class="preview-total">GRAND TOTAL</div>
+  </div>
+
+  <div class="actions">
+    <%= f.submit class: "btn btn-primary" %>
+    <%= link_to "Back", quote_templates_path, class: "btn btn-secondary" %>
+  </div>
+<% end %>

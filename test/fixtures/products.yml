@@ -1,0 +1,13 @@
+one:
+  company: one
+  name: Hydraulic Pump HZ-240
+  sku: HZ-240
+  description: Industrial hydraulic pump for continuous-duty systems.
+  default_price: 480.00
+
+two:
+  company: two
+  name: Valve Assembly SS-88
+  sku: SS-88
+  description: Stainless steel valve assembly for pressure regulation.
+  default_price: 195.00

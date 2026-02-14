@@ -85,15 +85,15 @@
               <% if @recent_quotes.any? %>
                 <% @recent_quotes.each do |entry| %>
                   <tr>
-                    <td><strong><%= link_to entry[:quote_no], quote_path(entry[:quote]) %></strong></td>
-                    <td><%= entry[:customer_name] %></td>
-                    <td><span class="status-badge status-<%= entry[:status] %>"><%= entry[:status].capitalize %></span></td>
-                    <td class="text-right"><%= number_to_currency(entry[:total]) %></td>
+                    <td data-label="Quote No."><strong><%= link_to entry[:quote_no], quote_path(entry[:quote]) %></strong></td>
+                    <td data-label="Buyer"><%= entry[:customer_name] %></td>
+                    <td data-label="Status"><span class="status-badge status-<%= entry[:status] %>"><%= entry[:status].capitalize %></span></td>
+                    <td data-label="Total" class="text-right"><%= number_to_currency(entry[:total]) %></td>
                   </tr>
                 <% end %>
               <% else %>
                 <tr>
-                  <td colspan="4" class="customers-empty-row">No quotes available yet.</td>
+                  <td data-label="Recent Quotes" colspan="4" class="customers-empty-row">No quotes available yet.</td>
                 </tr>
               <% end %>
             </tbody>

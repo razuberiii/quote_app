@@ -619,6 +619,7 @@ table a:hover {
   color: #0f172a;
   font-size: 1.1rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 .follow-up-summary {
@@ -1290,6 +1291,8 @@ li {
 .quote-item-image {
   width: 52px;
   height: 52px;
+  max-width: 100%;
+  display: block;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #dbe1e8;
@@ -2216,31 +2219,31 @@ a:hover {
     min-width: 140px;
   }
 
-  .quote-items-table input[type="text"],
-  .quote-items-table input[type="number"],
-  .quote-items-table .btn {
+  .quote-items-responsive .quote-items-table input[type="text"],
+  .quote-items-responsive .quote-items-table input[type="number"],
+  .quote-items-responsive .quote-items-table .btn {
     min-height: 40px;
   }
 
-  .quote-items-table {
+  .quote-items-responsive .quote-items-table {
     min-width: 0;
     border-spacing: 0;
     background: transparent;
   }
 
-  .quote-items-table thead {
+  .quote-items-responsive .quote-items-table thead {
     display: none;
   }
 
-  .quote-items-table,
-  .quote-items-table tbody,
-  .quote-items-table tr,
-  .quote-items-table td {
+  .quote-items-responsive .quote-items-table,
+  .quote-items-responsive .quote-items-table tbody,
+  .quote-items-responsive .quote-items-table tr,
+  .quote-items-responsive .quote-items-table td {
     display: block;
     width: 100%;
   }
 
-  .quote-items-table tr {
+  .quote-items-responsive .quote-items-table tr {
     margin-bottom: 0.65rem;
     border: 1px solid #d8e1eb;
     border-radius: 10px;
@@ -2249,18 +2252,18 @@ a:hover {
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
   }
 
-  .quote-items-table td {
+  .quote-items-responsive .quote-items-table td {
     border: none;
     border-bottom: 1px solid #e5e7eb;
     border-radius: 0;
     padding: 0.55rem 0.65rem;
   }
 
-  .quote-items-table td:last-child {
+  .quote-items-responsive .quote-items-table td:last-child {
     border-bottom: none;
   }
 
-  .quote-items-table td::before {
+  .quote-items-responsive .quote-items-table td::before {
     display: block;
     margin-bottom: 0.35rem;
     color: #64748b;
@@ -2269,33 +2272,33 @@ a:hover {
     letter-spacing: 0.01em;
   }
 
-  .quote-items-table td:nth-child(1)::before { content: "Product Name"; }
-  .quote-items-table td:nth-child(2)::before { content: "Description"; }
-  .quote-items-table td:nth-child(3)::before { content: "Unit Price"; }
-  .quote-items-table td:nth-child(4)::before { content: "Quantity"; }
-  .quote-items-table td:nth-child(5)::before { content: "Action"; }
+  .quote-items-responsive .quote-items-table td:nth-child(1)::before { content: "Product Name"; }
+  .quote-items-responsive .quote-items-table td:nth-child(2)::before { content: "Description"; }
+  .quote-items-responsive .quote-items-table td:nth-child(3)::before { content: "Unit Price"; }
+  .quote-items-responsive .quote-items-table td:nth-child(4)::before { content: "Quantity"; }
+  .quote-items-responsive .quote-items-table td:nth-child(5)::before { content: "Action"; }
 
-  .quote-col-product,
-  .quote-col-desc,
-  .quote-col-price,
-  .quote-col-qty,
-  .quote-col-remove {
+  .quote-items-responsive .quote-col-product,
+  .quote-items-responsive .quote-col-desc,
+  .quote-items-responsive .quote-col-price,
+  .quote-items-responsive .quote-col-qty,
+  .quote-items-responsive .quote-col-remove {
     width: 100%;
   }
 
-  .quote-col-remove .btn {
+  .quote-items-responsive .quote-col-remove .btn {
     width: 100%;
   }
 
-  .product-search {
+  .quote-items-responsive .product-search {
     gap: 6px;
   }
 
-  .product-search .js-product-toggle {
+  .quote-items-responsive .product-search .js-product-toggle {
     flex: 0 0 34px;
   }
 
-  .product-search .js-product-dropdown {
+  .quote-items-responsive .product-search .js-product-dropdown {
     max-height: 160px;
   }
 
@@ -3193,14 +3196,127 @@ a:hover {
   }
 
   .dashboard-kpi-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .dashboard-kpi-card {
+    padding: 0.62rem 0.68rem;
   }
 
   .dashboard-kpi-card strong {
-    font-size: 1.35rem;
+    font-size: 1.18rem;
+  }
+
+  .dashboard-kpi-head span {
+    font-size: 0.78rem;
+  }
+
+  .dashboard-kpi-trend {
+    font-size: 0.72rem;
   }
 
   .dashboard-recent-table {
-    min-width: 520px;
+    min-width: 0;
+    border: none;
+  }
+
+  .dashboard-panel .table-responsive {
+    overflow-x: visible;
+  }
+
+  .dashboard-panel .table-responsive table.dashboard-recent-table {
+    min-width: 0 !important;
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .dashboard-recent-table thead {
+    display: none;
+  }
+
+  .dashboard-recent-table,
+  .dashboard-recent-table tbody,
+  .dashboard-recent-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .dashboard-recent-table tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "quote total"
+      "buyer status";
+    gap: 0.28rem 0.55rem;
+    padding: 0.52rem 0.58rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 0.48rem;
+    background: #fff;
+  }
+
+  .dashboard-recent-table td {
+    border: none;
+    padding: 0;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-recent-table td:nth-child(1) {
+    grid-area: quote;
+    font-weight: 700;
+  }
+
+  .dashboard-recent-table td:nth-child(2) {
+    grid-area: buyer;
+    color: #334155;
+  }
+
+  .dashboard-recent-table td:nth-child(3) {
+    grid-area: status;
+    justify-self: end;
+  }
+
+  .dashboard-recent-table td:nth-child(4) {
+    grid-area: total;
+    justify-self: end;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .dashboard-recent-table tbody tr:nth-child(n + 5) {
+    display: none;
+  }
+
+  .dashboard-panel {
+    padding: 0.7rem 0.72rem;
+  }
+
+  .dashboard-overview-list li {
+    padding: 0.52rem 0.06rem;
+  }
+
+  .dashboard-overview-value {
+    font-size: 1rem;
+    margin-top: 0.24rem;
+  }
+
+  .sales-dashboard,
+  .dashboard-detail-grid,
+  .dashboard-panel {
+    overflow-x: clip;
+  }
+
+  .quote-document .quote-items-table,
+  .public-quote-document .quote-items-table {
+    min-width: 620px;
+  }
+
+  .quote-item-image {
+    width: 44px;
+    height: 44px;
   }
 }

@@ -16,12 +16,17 @@ Rails.application.routes.draw do
 
   # Public quote sharing
   namespace :public do
-    resources :quotes, only: [ :show ]
     resources :quote_shares, only: [ :show ], param: :token
   end
 
   # Product management
-  resources :products
+  resources :products do
+    member do
+      patch :set_primary_image
+      delete :remove_primary_image
+      delete :remove_gallery_image
+    end
+  end
   resources :quote_templates, except: [ :show ] do
     member do
       patch :set_default
@@ -36,6 +41,7 @@ Rails.application.routes.draw do
     resources :quotes, shallow: true do
       member do
         post :duplicate
+        post :duplicate_and_reprice
         post :share
         patch :update_template
         get "export/pdf", action: :export_pdf, as: :export_pdf

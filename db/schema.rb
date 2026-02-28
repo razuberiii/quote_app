@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_183500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -75,6 +75,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
     t.decimal "default_price", precision: 15, scale: 4, null: false
     t.text "description"
     t.string "name", null: false
+    t.string "price_currency", default: "USD", null: false
     t.string "sku", null: false
     t.datetime "updated_at", null: false
     t.index ["company_id", "sku"], name: "index_products_on_company_id_and_sku", unique: true
@@ -82,12 +83,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
   end
 
   create_table "quote_items", force: :cascade do |t|
+    t.jsonb "addon_charges", default: [], null: false
     t.decimal "amount", precision: 15, scale: 4
     t.datetime "created_at", null: false
     t.string "description", null: false
     t.integer "product_id"
     t.integer "quantity", default: 1, null: false
     t.bigint "quote_id", null: false
+    t.jsonb "specifications", default: [], null: false
     t.decimal "unit_price", precision: 15, scale: 4, null: false
     t.datetime "updated_at", null: false
     t.index ["quote_id", "created_at"], name: "index_quote_items_on_quote_id_and_created_at"
@@ -98,10 +101,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
     t.datetime "expires_at"
+    t.datetime "first_viewed_at"
+    t.datetime "last_viewed_at"
     t.bigint "quote_id", null: false
     t.jsonb "snapshot", default: {}, null: false
     t.string "token", null: false
     t.datetime "updated_at", null: false
+    t.integer "view_count", default: 0, null: false
     t.index ["company_id"], name: "index_quote_shares_on_company_id"
     t.index ["quote_id"], name: "index_quote_shares_on_quote_id"
     t.index ["token"], name: "index_quote_shares_on_token", unique: true
@@ -115,6 +121,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
     t.string "document_kind", default: "quotation", null: false
     t.string "document_number_label", default: "", null: false
     t.string "document_title", default: "", null: false
+    t.boolean "excel_show_grid_lines", default: false, null: false
     t.string "font_family", default: "Noto Sans", null: false
     t.text "footer_note", default: "", null: false
     t.text "footer_text", default: "", null: false
@@ -162,14 +169,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_14_132000) do
     t.integer "quantity"
     t.string "quote_no"
     t.integer "revision_number"
+    t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.string "status"
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "template_id"
     t.text "terms_text"
+    t.string "trade_term"
     t.decimal "unit_price", precision: 15, scale: 4
     t.datetime "updated_at", null: false
     t.date "valid_until"
+    t.datetime "viewed_at"
     t.index ["company_id"], name: "index_quotes_on_company_id"
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
     t.index ["template_id"], name: "index_quotes_on_template_id"

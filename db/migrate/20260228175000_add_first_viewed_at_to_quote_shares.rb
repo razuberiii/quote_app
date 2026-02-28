@@ -1,0 +1,5 @@
+class AddFirstViewedAtToQuoteShares < ActiveRecord::Migration[8.0]
+  def change
+    add_column :quote_shares, :first_viewed_at, :datetime
+  end
+end

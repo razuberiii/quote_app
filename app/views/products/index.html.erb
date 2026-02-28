@@ -27,7 +27,7 @@
           <th>Image</th>
           <th>Name</th>
           <th>SKU</th>
-          <th>Default Price</th>
+          <th>Reference Price (for auto-fill only)</th>
           <th>Description</th>
           <th>Actions</th>
         </tr>
@@ -36,15 +36,21 @@
         <% @products.each do |product| %>
           <tr>
             <td>
-              <% if product.image.attached? %>
-                <%= image_tag product.image, style: "width: 56px; height: 56px; object-fit: cover;" %>
+              <% if product.display_image.present? %>
+                <%= link_to product_path(product), class: "product-quick-edit-link", title: "View product" do %>
+                  <%= image_tag product.display_image, style: "width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" %>
+                <% end %>
               <% else %>
                 -
               <% end %>
             </td>
-            <td><strong><%= product.name %></strong></td>
-            <td><code><%= product.sku %></code></td>
-            <td><%= product.default_price %></td>
+            <td>
+              <strong>
+                <%= link_to product.name, product_path(product), class: "product-quick-edit-link" %>
+              </strong>
+            </td>
+            <td><span class="product-sku"><%= product.sku %></span></td>
+            <td><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
             <td><%= truncate(product.description, length: 50) %></td>
             <td>
               <%= link_to "View", product %> |

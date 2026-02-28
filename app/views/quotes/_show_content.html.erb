@@ -4,9 +4,37 @@
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
       <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %> <span class="quote-doc-version">V<%= @quote.revision_number %></span></h1>
+      <%= link_to "← Back to Customer", @quote.customer, class: "quote-back-link quote-back-link-inline" %>
     </div>
     <span class="status-badge status-<%= @quote.status %>"><%= @quote.status&.capitalize %></span>
   </header>
+  <% days_left = @quote.valid_until.present? ? (@quote.valid_until - Date.current).to_i : nil %>
+  <% total_views = @quote.quote_shares.sum(&:view_count) %>
+  <% viewed_flag = @quote.viewed_at.present? || total_views.positive? %>
+  <% urgency_text =
+      if days_left.nil?
+        "No expiry date set."
+      elsif days_left.negative?
+        "Expired #{days_left.abs} day(s) ago. Follow up now."
+      elsif days_left <= 3
+        "Expiring in #{days_left} day(s). Recommended to follow up today."
+      else
+        "Valid for #{days_left} more day(s)."
+      end %>
+  <section class="quote-signal-strip <%= 'is-urgent' if days_left.present? && days_left <= 3 %>">
+    <div class="quote-signal-item">
+      <span class="quote-signal-label">Momentum</span>
+      <strong><%= urgency_text %></strong>
+    </div>
+    <div class="quote-signal-item">
+      <span class="quote-signal-label">Engagement</span>
+      <strong><%= viewed_flag ? "Viewed (#{total_views} view#{'s' unless total_views == 1})" : "Not viewed yet" %></strong>
+    </div>
+    <div class="quote-signal-item">
+      <span class="quote-signal-label">Next Action</span>
+      <strong><%= viewed_flag ? "Discuss terms and close" : "Share public link to trigger first view" %></strong>
+    </div>
+  </section>
 
   <section class="quote-meta-grid">
     <article class="quote-meta-card">
@@ -30,9 +58,31 @@
     <article class="quote-meta-card">
       <h3>Quote Info</h3>
       <p><strong>Quote Date:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") %></p>
-      <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
+      <p>
+        <strong>Valid Until:</strong>
+        <% if @quote.valid_until.present? %>
+          <%= @quote.valid_until.strftime("%Y-%m-%d") %>
+          <% if days_left.negative? %>
+            <span class="status-badge status-expired">Expired</span>
+          <% elsif days_left <= 3 %>
+            <span class="status-badge status-paused"><%= days_left %>d left</span>
+          <% end %>
+        <% else %>
+          -
+        <% end %>
+      </p>
       <p><strong>Currency:</strong> <%= @quote.currency %></p>
+      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
       <p><strong>Status:</strong> <%= @quote.status&.capitalize %></p>
+    </article>
+
+    <article class="quote-meta-card">
+      <h3>Engagement</h3>
+      <p><strong>Sent:</strong> <%= @quote.sent_at ? @quote.sent_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
+      <p><strong>Last Shared:</strong> <span id="quote-last-shared-at"><%= @quote.quote_shares.maximum(:created_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></span></p>
+      <p><strong>First Viewed:</strong> <%= @quote.quote_shares.minimum(:first_viewed_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></p>
+      <p><strong>Last Viewed:</strong> <%= @quote.viewed_at ? @quote.viewed_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
+      <p><strong>Total Views:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
     </article>
   </section>
 
@@ -55,8 +105,8 @@
           <tr>
             <% if active_template.show_images? %>
               <td>
-                <% if item.product&.image&.attached? %>
-                  <%= image_tag item.product.image, class: "quote-item-image" %>
+                <% if item.product&.display_image.present? %>
+                  <%= image_tag item.product.display_image, class: "quote-item-image" %>
                 <% else %>
                   -
                 <% end %>
@@ -64,8 +114,18 @@
             <% end %>
             <td><%= item.description %></td>
             <td><%= item.quantity %></td>
-            <td><%= number_to_currency(item.unit_price, unit: @quote.currency) %></td>
-            <td><%= number_to_currency(item.amount, unit: @quote.currency) %></td>
+            <td><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
+            <td>
+              <%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %>
+              <% details = quote_item_details_lines(item, show_symbol: active_template.show_currency) %>
+              <% if details.any? %>
+                <div class="quote-item-details">
+                  <% details.each do |line| %>
+                    <div><%= line %></div>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
@@ -73,15 +133,15 @@
   </div>
 
   <aside class="quote-total-box">
-    <p><span>Subtotal</span><strong><%= number_to_currency(@quote.subtotal, unit: @quote.currency) %></strong></p>
+    <p><span>Subtotal</span><strong><%= quote_money(@quote.subtotal, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% if active_template.show_tax %>
-      <p><span>Tax / VAT</span><strong><%= number_to_currency(@quote.tax_amount, unit: @quote.currency) %></strong></p>
+      <p><span>Tax / VAT</span><strong><%= quote_money(@quote.tax_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
     <% if active_template.show_shipping %>
-      <p><span>Shipping</span><strong><%= number_to_currency(@quote.shipping_amount, unit: @quote.currency) %></strong></p>
+      <p><span>Shipping</span><strong><%= quote_money(@quote.shipping_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
-    <p><span>Discount</span><strong><%= number_to_currency(@quote.discount_amount, unit: @quote.currency) %></strong></p>
-    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(@quote.grand_total, unit: @quote.currency) %></strong></p>
+    <p><span>Discount</span><strong><%= quote_money(@quote.discount_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
   </aside>
 
   <% if active_template.show_terms_section && (@quote.payment_term.present? || @quote.terms_text.present? || @quote.legal_disclaimer.present? || @quote.delivery_notes.present?) %>
@@ -90,6 +150,7 @@
       <% if active_template.show_payment_term %>
         <p><strong>Payment Terms:</strong> <%= @quote.payment_term.presence || "-" %></p>
       <% end %>
+      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
       <p><strong>Terms:</strong> <%= @quote.terms_text.presence || "-" %></p>
       <p><strong>Legal Disclaimer:</strong> <%= @quote.legal_disclaimer.presence || "-" %></p>
       <p><strong>Delivery Notes:</strong> <%= @quote.delivery_notes.presence || "-" %></p>
@@ -124,15 +185,33 @@
     </div>
 
     <%= link_to "Back to Customer", @quote.customer, class: "quote-back-link" %>
-    <%= link_to "Download PDF", export_pdf_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-primary" %>
+    <%= button_to "Download PDF",
+                  export_pdf_quote_path(@quote, doc: @document_kind),
+                  method: :get,
+                  form: { data: { turbo: false } },
+                  class: "quote-btn quote-btn-secondary" %>
     <%= link_to "Edit", edit_quote_path(@quote), class: "quote-btn quote-btn-secondary" %>
     <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
+    <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
     <% if @document_kind == "pi" %>
       <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote"), class: "quote-btn quote-btn-secondary" %>
     <% else %>
       <%= link_to "Switch to PI", quote_path(@quote, doc: "pi"), class: "quote-btn quote-btn-secondary" %>
     <% end %>
-    <%= link_to "Share Public Link", public_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary", target: "_blank" %>
+    <div class="share-link-group">
+      <button type="button"
+              class="quote-btn quote-btn-primary js-share-public-link"
+              data-share-url="<%= share_quote_path(@quote, doc: @document_kind, format: :json) %>">
+        Share Public Link
+      </button>
+      <div class="share-link-panel" id="quote-share-panel" hidden>
+        <div class="share-link-panel-message" id="quote-share-message"></div>
+        <div class="share-link-panel-actions">
+          <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn">Copy Link</button>
+          <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link">Open</a>
+        </div>
+      </div>
+    </div>
     <%= link_to "Download Excel", export_xlsx_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary" %>
   </div>
 
@@ -143,16 +222,135 @@
 
 <section class="quote-history">
   <h3>History</h3>
+  <% revisions = @quote.customer.quotes.where(quote_no: @quote.quote_no).order(revision_number: :desc).to_a %>
+  <% latest_revision = revisions.first %>
+  <p class="quote-history-meta">
+    <span><strong><%= revisions.size %></strong> revision(s)</span>
+    <span>Current updated: <strong><%= @quote.updated_at&.strftime("%Y-%m-%d %H:%M") || "-" %></strong></span>
+  </p>
   <div class="quote-history-tabs">
-    <% @quote.customer.quotes.where(quote_no: @quote.quote_no).order(revision_number: :desc).each do |q| %>
+    <% revisions.each do |q| %>
       <% is_current = q.id == @quote.id %>
       <% tab_class = "history-tab#{' active' if is_current}" %>
       <% label = "V#{q.revision_number}" %>
       <% if is_current %>
-        <span class="<%= tab_class %>"><%= label %></span>
+        <span class="<%= tab_class %>">
+          <%= label %>
+          <span class="history-tab-tag">Current</span>
+          <% if latest_revision&.id == q.id %>
+            <span class="history-tab-tag history-tab-tag-latest">Latest</span>
+          <% end %>
+        </span>
       <% else %>
-        <%= link_to label, quote_path(q), class: tab_class %>
+        <%= link_to quote_path(q), class: tab_class do %>
+          <%= label %>
+          <% if latest_revision&.id == q.id %>
+            <span class="history-tab-tag history-tab-tag-latest">Latest</span>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
   </div>
 </section>
+
+<script>
+  (() => {
+    const button = document.querySelector(".js-share-public-link");
+    const panel = document.getElementById("quote-share-panel");
+    const message = document.getElementById("quote-share-message");
+    const copyButton = document.getElementById("quote-share-copy-btn");
+    const openLink = document.getElementById("quote-share-open-link");
+    const lastSharedAt = document.getElementById("quote-last-shared-at");
+    if (!button || !panel || !message || !copyButton || !openLink || button.dataset.bound === "true") return;
+    button.dataset.bound = "true";
+
+    const csrf = document.querySelector("meta[name='csrf-token']")?.content;
+    let timer = null;
+    let currentShareUrl = "";
+
+    const showPanel = (text, isError = false) => {
+      message.textContent = text;
+      panel.classList.toggle("is-error", isError);
+      panel.hidden = false;
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => { panel.hidden = true; }, 4200);
+    };
+
+    const hidePanel = () => {
+      panel.hidden = true;
+      if (timer) window.clearTimeout(timer);
+    };
+
+    const copyText = async (text) => {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      return false;
+    };
+
+    button.addEventListener("click", async () => {
+      button.disabled = true;
+      try {
+        const response = await fetch(button.dataset.shareUrl, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrf || ""
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({})
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok || !payload.url) {
+          throw new Error(payload.message || "Unable to generate public link");
+        }
+
+        const copied = await copyText(payload.url);
+        currentShareUrl = payload.url;
+        openLink.href = payload.url;
+        openLink.hidden = false;
+        if (lastSharedAt) {
+          const now = new Date();
+          const pad = (n) => String(n).padStart(2, "0");
+          const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+          lastSharedAt.textContent = stamp;
+        }
+        if (copied) {
+          showPanel("Public link ready. Copied to clipboard.");
+        } else {
+          showPanel("Public link ready. Copy manually if needed.");
+        }
+      } catch (error) {
+        currentShareUrl = "";
+        openLink.href = "#";
+        openLink.hidden = true;
+        showPanel(error.message || "Share failed", true);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    copyButton.addEventListener("click", async () => {
+      if (!currentShareUrl) return;
+      const copied = await copyText(currentShareUrl);
+      showPanel(copied ? "Link copied." : "Copy failed on browser.", !copied);
+    });
+
+    openLink.addEventListener("click", () => {
+      hidePanel();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (panel.hidden) return;
+      if (event.target.closest(".share-link-group")) return;
+      hidePanel();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") hidePanel();
+    });
+  })();
+</script>

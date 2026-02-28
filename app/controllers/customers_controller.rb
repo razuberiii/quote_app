@@ -2,6 +2,7 @@ class CustomersController < ApplicationController
   before_action :set_customer, only: %i[show edit update destroy]
 
   def index
+    Quote.expire_overdue_for_company!(current_user.company_id)
     scope = current_user.company.customers.search(params[:query]).includes(quotes: [ :quote_items, :template ])
     all_customers = scope.to_a
 
@@ -31,11 +32,12 @@ class CustomersController < ApplicationController
   end
 
   def show
+    Quote.expire_overdue_for_company!(current_user.company_id)
     quote_groups = @customer.quotes.includes(:quote_items).order(:quote_no, :revision_number).group_by(&:quote_no)
     @quote_cards = quote_groups.values.map { |revisions| build_quote_card(revisions) }
     @quote_cards.sort_by! { |card| card[:updated_at] || Time.at(0) }.reverse!
 
-    @quote_status_filter = params[:quote_status].presence_in(%w[all won lost pending expired]) || "all"
+    @quote_status_filter = params[:quote_status].presence_in(%w[all draft sent viewed negotiating won lost expired]) || "all"
     @filtered_quote_cards =
       if @quote_status_filter == "all"
         @quote_cards
@@ -47,11 +49,22 @@ class CustomersController < ApplicationController
       total_count: @quote_cards.count,
       won_count: @quote_cards.count { |card| card[:display_status] == "won" },
       lost_count: @quote_cards.count { |card| card[:display_status] == "lost" },
-      pending_count: @quote_cards.count { |card| card[:display_status] == "pending" },
+      draft_count: @quote_cards.count { |card| card[:display_status] == "draft" },
+      sent_count: @quote_cards.count { |card| card[:display_status] == "sent" },
+      viewed_count: @quote_cards.count { |card| card[:display_status] == "viewed" },
+      negotiating_count: @quote_cards.count { |card| card[:display_status] == "negotiating" },
       expired_count: @quote_cards.count { |card| card[:display_status] == "expired" },
-      won_amount: @quote_cards.select { |card| card[:display_status] == "won" }.sum { |card| card[:current_total].to_d },
-      lost_amount: @quote_cards.select { |card| card[:display_status] == "lost" }.sum { |card| card[:current_total].to_d },
+      won_amounts_by_currency: summarize_amount_by_currency(@quote_cards, "won"),
+      lost_amounts_by_currency: summarize_amount_by_currency(@quote_cards, "lost"),
       avg_discount_pct: average_discount_percentage(@quote_cards)
+    }
+
+    latest_quote = @quote_cards.max_by { |card| card[:updated_at] || Time.at(0) }
+    @customer_summary = {
+      total_quotes: @quote_cards.count,
+      latest_quote_at: latest_quote&.dig(:updated_at),
+      sales_stage: @customer.status_label,
+      last_follow_up_at: @customer.last_follow_up_date
     }
   end
 
@@ -147,6 +160,7 @@ class CustomersController < ApplicationController
       revision: latest.revision_number,
       display_status: quote_display_status(latest),
       current_total: current_total,
+      currency: latest.currency.to_s.upcase.presence || "USD",
       original_total: original_total,
       diff_amount: diff_amount,
       diff_pct: diff_pct,
@@ -157,9 +171,11 @@ class CustomersController < ApplicationController
   end
 
   def quote_display_status(quote)
-    return "expired" if quote.status == "pending" && quote.valid_until.present? && quote.valid_until < Date.current
+    raw_status = quote.status.to_s.downcase
+    raw_status = "draft" if raw_status == "pending"
+    return "expired" if Quote::OPEN_STATUSES.include?(raw_status) && quote.valid_until.present? && quote.valid_until < Date.current
 
-    quote.status.presence || "pending"
+    raw_status.presence || "draft"
   end
 
   def average_discount_percentage(cards)
@@ -333,6 +349,7 @@ class CustomersController < ApplicationController
           customer_name: quote.customer&.name || "Unknown customer",
           status: quote_display_status(quote),
           total: quote.grand_total,
+          currency: quote.currency.to_s.upcase.presence || "USD",
           updated_at: quote.updated_at
         }
       end
@@ -345,14 +362,25 @@ class CustomersController < ApplicationController
       candidate = revisions
         .select { |quote| quote.created_at&.to_date && quote.created_at.to_date <= reference_date }
         .max_by(&:revision_number)
-      candidate.present? && quote_display_status_at(candidate, reference_date) == "pending"
+      candidate.present? && %w[draft sent viewed negotiating].include?(quote_display_status_at(candidate, reference_date))
     end
   end
 
   def quote_display_status_at(quote, reference_date)
-    return "expired" if quote.status == "pending" && quote.valid_until.present? && quote.valid_until < reference_date
+    raw_status = quote.status.to_s.downcase
+    raw_status = "draft" if raw_status == "pending"
+    return "expired" if Quote::OPEN_STATUSES.include?(raw_status) && quote.valid_until.present? && quote.valid_until < reference_date
 
-    quote.status.presence || "pending"
+    raw_status.presence || "draft"
+  end
+
+  def summarize_amount_by_currency(cards, status)
+    cards
+      .select { |card| card[:display_status] == status }
+      .group_by { |card| card[:currency].presence || "USD" }
+      .transform_values { |currency_cards| currency_cards.sum { |card| card[:current_total].to_d } }
+      .sort_by { |currency, _| currency }
+      .to_h
   end
 
   def pending_follow_up_for_reference?(customer, reference_date, period)

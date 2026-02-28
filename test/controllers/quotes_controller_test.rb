@@ -27,4 +27,23 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     get export_xlsx_quote_url(@quote)
     assert_response :success
   end
+
+  test "share creates public token and redirects" do
+    assert_difference("QuoteShare.count", 1) do
+      post share_quote_url(@quote)
+    end
+
+    assert_response :redirect
+    assert_match(%r{/public/quote_shares/}, response.headers["Location"])
+  end
+
+  test "share returns json url" do
+    assert_difference("QuoteShare.count", 1) do
+      post share_quote_url(@quote, format: :json)
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_match(%r{/public/quote_shares/}, payload["url"])
+  end
 end

@@ -4,17 +4,40 @@
   <span>Back to Customers</span>
 <% end %>
 
+<section class="quote-edit-summary customer-top-summary">
+  <article class="quote-edit-summary-card">
+    <span class="summary-label">Total Quotes</span>
+    <strong><%= @customer_summary[:total_quotes] %></strong>
+  </article>
+  <article class="quote-edit-summary-card">
+    <span class="summary-label">Latest Quote</span>
+    <strong><%= @customer_summary[:latest_quote_at]&.strftime("%Y-%m-%d") || "No quote yet" %></strong>
+  </article>
+  <article class="quote-edit-summary-card">
+    <span class="summary-label">Sales Stage</span>
+    <strong><%= @customer_summary[:sales_stage] %></strong>
+    <span class="status-badge status-<%= @customer.status_css %>"><%= @customer.status_label %></span>
+  </article>
+  <article class="quote-edit-summary-card">
+    <span class="summary-label">Last Follow-up</span>
+    <strong><%= @customer_summary[:last_follow_up_at]&.strftime("%Y-%m-%d") || "Never" %></strong>
+  </article>
+</section>
+
 <div class="customer-details">
   <p><strong>Country:</strong> <%= @customer.country %></p>
   <p><strong>Address:</strong> <%= @customer.address.presence || "-" %></p>
   <p><strong>Contact:</strong> <%= @customer.contact_name %></p>
   <p><strong>Email:</strong> <%= @customer.email %></p>
   <p><strong>Phone:</strong> <%= @customer.phone.presence || "-" %></p>
-  <p><strong>Status:</strong> <%= @customer.status&.capitalize || "N/A" %></p>
+  <p><strong>Status:</strong> <span class="status-badge status-<%= @customer.status_css %>"><%= @customer.status_label %></span></p>
   <p><strong>Last Follow-up:</strong> <%= @customer.last_follow_up_date&.strftime('%Y-%m-%d') || "Never" %></p>
-  <p><strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime('%Y-%m-%d') || "N/A" %>
+  <p class="customer-next-follow-up-line follow-up-<%= @customer.follow_up_status %>">
+    <strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime('%Y-%m-%d') || "N/A" %>
     <% if @customer.follow_up_overdue? %>
       <span class="overdue-badge">OVERDUE</span>
+    <% elsif @customer.follow_up_due_today? %>
+      <span class="today-badge">TODAY</span>
     <% elsif @customer.follow_up_status == 'upcoming' %>
       <span class="upcoming-badge">DUE SOON</span>
     <% end %>
@@ -24,9 +47,28 @@
   <% end %>
 </div>
 
+<% follow_up_text =
+    if @customer.follow_up_overdue?
+      "Follow-up overdue. Contact this customer today."
+    elsif @customer.follow_up_due_today?
+      "Follow-up scheduled for today."
+    elsif @customer.follow_up_status == "upcoming"
+      "Follow-up due soon. Keep momentum."
+    else
+      "No follow-up date yet. Set the next touchpoint."
+    end %>
+<section class="customer-follow-up-callout follow-up-<%= @customer.follow_up_status %>">
+  <div>
+    <span class="summary-label">Follow-up Action</span>
+    <strong><%= follow_up_text %></strong>
+  </div>
+  <div class="customer-follow-up-callout-actions">
+    <%= button_to "Mark Followed Today", mark_follow_up_customer_path(@customer), method: :post, class: "btn btn-primary" %>
+    <%= link_to "Edit Customer", edit_customer_path(@customer), class: "btn btn-secondary" %>
+  </div>
+</section>
+
 <div class="actions">
-  <%= button_to "Followed Today", mark_follow_up_customer_path(@customer), method: :post, class: "btn btn-primary" %>
-  <%= link_to "Edit", edit_customer_path(@customer), class: "btn btn-secondary" %>
   <%= link_to "New Quote", new_customer_quote_path(@customer), class: "btn btn-success" %>
   <%= button_to "Delete", customer_path(@customer), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
 </div>
@@ -40,11 +82,33 @@
   </div>
   <div class="summary-card summary-won">
     <span class="summary-label">Won Amount</span>
-    <strong><%= number_to_currency(@quote_summary[:won_amount]) %></strong>
+    <div class="summary-currency-lines" data-currency-group>
+      <% if @quote_summary[:won_amounts_by_currency].any? %>
+        <% @quote_summary[:won_amounts_by_currency].each_with_index do |(currency, amount), idx| %>
+          <strong class="<%= 'currency-line-extra' if idx > 0 %>" <%= 'hidden' if idx > 0 %>><%= currency %>: <%= quote_money(amount, currency) %></strong>
+        <% end %>
+        <% if @quote_summary[:won_amounts_by_currency].size > 1 %>
+          <button type="button" class="currency-lines-toggle" data-currency-toggle>Show all currencies</button>
+        <% end %>
+      <% else %>
+        <strong>-</strong>
+      <% end %>
+    </div>
   </div>
   <div class="summary-card summary-lost">
     <span class="summary-label">Lost Amount</span>
-    <strong><%= number_to_currency(@quote_summary[:lost_amount]) %></strong>
+    <div class="summary-currency-lines" data-currency-group>
+      <% if @quote_summary[:lost_amounts_by_currency].any? %>
+        <% @quote_summary[:lost_amounts_by_currency].each_with_index do |(currency, amount), idx| %>
+          <strong class="<%= 'currency-line-extra' if idx > 0 %>" <%= 'hidden' if idx > 0 %>><%= currency %>: <%= quote_money(amount, currency) %></strong>
+        <% end %>
+        <% if @quote_summary[:lost_amounts_by_currency].size > 1 %>
+          <button type="button" class="currency-lines-toggle" data-currency-toggle>Show all currencies</button>
+        <% end %>
+      <% else %>
+        <strong>-</strong>
+      <% end %>
+    </div>
   </div>
   <div class="summary-card summary-upcoming">
     <span class="summary-label">Avg Discount</span>
@@ -53,7 +117,7 @@
 </div>
 
 <div class="quote-filter-bar">
-  <% [["All", "all"], ["Won", "won"], ["Lost", "lost"], ["Pending", "pending"], ["Expired", "expired"]].each do |label, value| %>
+  <% [["All", "all"], ["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]].each do |label, value| %>
     <%= link_to label, customer_path(@customer, quote_status: value), class: "quote-filter-pill #{'active' if @quote_status_filter == value}" %>
   <% end %>
 </div>
@@ -61,7 +125,24 @@
 <% if @filtered_quote_cards.any? %>
   <div class="quote-card-list">
     <% @filtered_quote_cards.each do |card| %>
+      <% quote = card[:quote] %>
+      <% quote_days_left = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
+      <% action_message =
+          if quote_days_left.present? && quote_days_left.negative?
+            "Expired: send revision or reconfirm requirements."
+          elsif quote_days_left.present? && quote_days_left <= 3
+            "Expiring soon: follow up today."
+          elsif quote.viewed_at.blank? && quote.status.in?(%w[sent viewed negotiating])
+            "Not viewed recently: resend public link."
+          else
+            nil
+          end %>
       <article class="quote-card" onclick="window.location='<%= quote_path(card[:quote]) %>'">
+        <% if action_message.present? %>
+          <div class="quote-card-action-callout <%= 'is-urgent' if quote_days_left.present? && quote_days_left <= 3 %>">
+            <strong>Next Action:</strong> <%= action_message %>
+          </div>
+        <% end %>
         <div class="quote-card-layout">
           <div class="quote-card-main">
             <h4><%= card[:title] %></h4>
@@ -69,17 +150,27 @@
             <div class="quote-card-meta">
               <p>
                 <strong>Total:</strong>
-                <span class="quote-total-value"><%= number_to_currency(card[:current_total]) %></span>
+                <span class="quote-total-value"><%= quote_money(card[:current_total], card[:currency]) %></span>
               </p>
               <p><strong>Updated:</strong> <%= card[:updated_at]&.strftime("%Y-%m-%d") || "-" %></p>
+              <% if card[:quote].valid_until.present? %>
+                <% days_left = (card[:quote].valid_until - Date.current).to_i %>
+                <% if days_left.negative? %>
+                  <p><strong>Valid Until:</strong> <span class="status-badge status-expired"><%= card[:quote].valid_until.strftime("%Y-%m-%d") %> (Expired)</span></p>
+                <% elsif days_left <= 3 %>
+                  <p><strong>Valid Until:</strong> <span class="status-badge status-paused"><%= card[:quote].valid_until.strftime("%Y-%m-%d") %> (#{days_left}d left)</span></p>
+                <% else %>
+                  <p><strong>Valid Until:</strong> <%= card[:quote].valid_until.strftime("%Y-%m-%d") %></p>
+                <% end %>
+              <% end %>
             </div>
 
             <% if card[:changed_from_original] %>
               <div class="quote-card-diff">
-                <span><strong>Original:</strong> <%= number_to_currency(card[:original_total]) %></span>
+                <span><strong>Original:</strong> <%= quote_money(card[:original_total], card[:currency]) %></span>
                 <span class="diff-value <%= card[:diff_amount].negative? ? 'down' : 'up' %>">
                   <%= card[:trend] == :up ? "↑" : (card[:trend] == :down ? "↓" : "→") %>
-                  <%= number_to_currency(card[:diff_amount]) %>
+                  <%= quote_money(card[:diff_amount], card[:currency]) %>
                   (<%= card[:diff_pct] %>%)
                 </span>
               </div>
@@ -98,6 +189,7 @@
           <%= link_to "View", quote_path(card[:quote]), class: "btn btn-secondary" %>
           <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
           <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-primary" %>
+          <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
         </div>
       </article>
     <% end %>
@@ -105,3 +197,24 @@
 <% else %>
   <p>No quotes yet.</p>
 <% end %>
+
+<script>
+  (() => {
+    const toggles = document.querySelectorAll("[data-currency-toggle]");
+    toggles.forEach((toggle) => {
+      if (toggle.dataset.bound === "true") return;
+      toggle.dataset.bound = "true";
+      toggle.addEventListener("click", () => {
+        const group = toggle.closest("[data-currency-group]");
+        if (!group) return;
+        const extras = group.querySelectorAll(".currency-line-extra");
+        const collapsed = toggle.dataset.expanded !== "true";
+        extras.forEach((line) => {
+          line.hidden = !collapsed;
+        });
+        toggle.dataset.expanded = collapsed ? "true" : "false";
+        toggle.textContent = collapsed ? "Show less" : "Show all currencies";
+      });
+    });
+  })();
+</script>

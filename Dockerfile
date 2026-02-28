@@ -14,12 +14,33 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
+ARG WKHTMLTOX_VERSION=0.12.6.1-2
+ARG WKHTMLTOX_DEB=wkhtmltox_${WKHTMLTOX_VERSION}.bookworm_amd64.deb
+ARG WKHTMLTOX_URL=https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOX_VERSION}/${WKHTMLTOX_DEB}
+
 # Install base packages
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y ca-certificates curl fontconfig fonts-ipafont-gothic fonts-noto-cjk libjemalloc2 libvips postgresql-client && \
-    mkdir -p /usr/local/share/fonts/noto-cjk && \
-    curl -fL "https://raw.githubusercontent.com/notofonts/noto-cjk/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf" -o /usr/local/share/fonts/noto-cjk/NotoSansCJKsc-Regular.otf && \
+    apt-get install --no-install-recommends -y \
+      ca-certificates \
+      curl \
+      fontconfig \
+      fonts-ipafont-gothic \
+      fonts-noto-cjk \
+      libjpeg62-turbo \
+      libpng16-16 \
+      libx11-6 \
+      libxext6 \
+      libxrender1 \
+      xfonts-75dpi \
+      xfonts-base \
+      libjemalloc2 \
+      libvips \
+      postgresql-client && \
+    curl -fL "${WKHTMLTOX_URL}" -o "/tmp/${WKHTMLTOX_DEB}" && \
+    apt-get install --no-install-recommends -y "/tmp/${WKHTMLTOX_DEB}" && \
+    rm -f "/tmp/${WKHTMLTOX_DEB}" && \
     fc-cache -f && \
+    wkhtmltopdf -V && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
@@ -29,7 +50,8 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
-    QUOTE_PDF_FONT_PATH="/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf"
+    QUOTE_PDF_FONT_PATH="/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf" \
+    WKHTMLTOPDF_PATH="/usr/bin/wkhtmltopdf"
 
 # Throw-away build stage to reduce size of final image
 FROM base AS build

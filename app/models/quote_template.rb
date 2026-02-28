@@ -28,6 +28,7 @@ class QuoteTemplate < ApplicationRecord
     show_images
     show_tax
     show_shipping
+    excel_show_grid_lines
     default_template
   ].freeze
 
@@ -114,5 +115,6 @@ class QuoteTemplate < ApplicationRecord
     self.show_images = true if show_images.nil?
     self.show_tax = true if show_tax.nil?
     self.show_shipping = true if show_shipping.nil?
+    self.excel_show_grid_lines = false if excel_show_grid_lines.nil?
   end
 end

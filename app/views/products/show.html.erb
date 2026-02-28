@@ -1,16 +1,30 @@
 <h1><%= @product.name %></h1>
 
-<% if @product.image.attached? %>
-  <p><%= image_tag @product.image, style: "max-width: 280px; max-height: 200px;" %></p>
+<% if @product.display_image.present? %>
+  <p><%= image_tag @product.display_image, class: "product-main-image" %></p>
 <% end %>
 
 <div class="product-details">
-  <p><strong>SKU:</strong> <code><%= @product.sku %></code></p>
-  <p><strong>Default Price:</strong> <%= @product.default_price %></p>
+  <p><strong>SKU:</strong> <span class="product-sku"><%= @product.sku %></span></p>
+  <p><strong>Reference Price (for auto-fill only):</strong> <%= number_with_precision(@product.default_price, precision: 2) %> <span class="product-price-currency"><%= @product.price_currency %></span></p>
+  <p><strong>Quoted In:</strong> <%= @quote_reference_count %> quote(s)</p>
+  <p><strong>Last Referenced:</strong> <%= @last_referenced_at&.strftime("%Y-%m-%d %H:%M") || "Never" %></p>
   <% if @product.description.present? %>
-    <p><strong>Description:</strong> <%= @product.description %></p>
+    <p><strong>Description:</strong></p>
+    <div class="product-description-text"><%= simple_format(@product.description) %></div>
   <% end %>
 </div>
+
+<% if @product.gallery_images.attached? %>
+  <section class="product-gallery">
+    <h3>Gallery</h3>
+    <div class="product-gallery-grid">
+      <% @product.gallery_images.each do |gallery_image| %>
+        <%= image_tag gallery_image, class: "product-gallery-thumb", alt: "Product gallery image" %>
+      <% end %>
+    </div>
+  </section>
+<% end %>
 
 <div class="actions">
   <%= link_to "Edit", edit_product_path(@product), class: "btn btn-secondary" %>

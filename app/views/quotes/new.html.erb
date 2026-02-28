@@ -1,7 +1,13 @@
 <% if @quote.quote_no.present? %>
-  <h1>New Revision Draft for <%= @quote.quote_no %></h1>
+  <h1>
+    New Revision Draft for <%= @quote.quote_no %>
+    <span class="status-badge status-<%= (@quote.status.presence || "draft") %>"><%= (@quote.status.presence || "draft").capitalize %></span>
+  </h1>
 <% else %>
-  <h1>New Quote</h1>
+  <h1>
+    New Quote
+    <span class="status-badge status-<%= (@quote.status.presence || "draft") %>"><%= (@quote.status.presence || "draft").capitalize %></span>
+  </h1>
 <% end %>
 
 <%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>

@@ -23,10 +23,15 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body>
+  <body<% if user_signed_in? %> style="--brand-primary: <%= ui_brand_color %>; --brand-on-primary: <%= ui_brand_text_color %>;"<% end %>>
     <nav class="navbar">
       <div class="navbar-container">
-        <h1><%= link_to "Quote App", root_path %></h1>
+        <div class="navbar-brand-wrap">
+          <h1><%= link_to "Quote App", root_path %></h1>
+          <% if user_signed_in? %>
+            <span class="navbar-company-context"><%= current_user.company.name %></span>
+          <% end %>
+        </div>
         <% if user_signed_in? %>
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Toggle navigation">
             <span></span>
@@ -37,11 +42,47 @@
             <li><%= link_to "Customers", customers_path %></li>
             <li><%= link_to "Products", products_path %></li>
             <li><%= link_to "Template", quote_templates_path %></li>
+            <% if current_user.can_manage_team? %>
+              <li><%= link_to "Team", team_members_path %></li>
+            <% end %>
             <% if current_user.admin? %>
               <li><%= link_to "Admin", admin_users_path %></li>
             <% end %>
-            <li><%= link_to "Account", edit_user_registration_path %></li>
-            <li><%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete } %></li>
+            <% invite_count = pending_team_invitations_count %>
+            <li class="account-menu">
+              <button class="account-menu-trigger"
+                      type="button"
+                      aria-expanded="false"
+                      aria-controls="account-dropdown">
+                <span class="account-avatar">
+                  <% if current_user.avatar.attached? %>
+                    <%= image_tag current_user.avatar, alt: "Avatar", class: "account-avatar-img" %>
+                  <% else %>
+                    <%= current_user.email.to_s.first.to_s.upcase %>
+                  <% end %>
+                </span>
+                <span>Account</span>
+                <% if invite_count.positive? %>
+                  <span class="account-notice-badge"><%= invite_count %></span>
+                <% end %>
+              </button>
+              <div class="account-dropdown" id="account-dropdown" hidden>
+                <p class="account-dropdown-group-label">Settings</p>
+                <%= link_to "Account Settings", edit_user_registration_path %>
+                <% if current_user.can_manage_templates? %>
+                  <%= link_to "Company Settings", edit_company_settings_path %>
+                <% end %>
+                <% if current_user.can_manage_team? %>
+                  <%= link_to "Team Management", team_members_path %>
+                <% end %>
+                <% if current_user.can_manage_templates? %>
+                  <%= link_to "Template Settings", quote_templates_path %>
+                <% end %>
+                <p class="account-dropdown-group-label">Workspace</p>
+                <%= link_to "My Invitations#{invite_count.positive? ? " (#{invite_count})" : ""}", team_invitations_path %>
+                <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete } %>
+              </div>
+            </li>
           </ul>
         <% else %>
           <ul class="navbar-menu navbar-menu-public">
@@ -62,21 +103,123 @@
       <% end %>
       <%= yield %>
     </main>
+    <div id="app-toast-container" class="app-toast-container" aria-live="polite" aria-atomic="true"></div>
     <footer class="global-app-footer">
       <span class="app-version-pill">v0.9 Beta</span>
     </footer>
 
     <script>
       (() => {
+        const setupToastApi = () => {
+          if (window.showAppToast) return;
+          window.showAppToast = (text, type = "info") => {
+            const container = document.getElementById("app-toast-container");
+            if (!container || !text) return;
+            const toast = document.createElement("div");
+            toast.className = `app-toast is-${type}`;
+            toast.textContent = text;
+            container.appendChild(toast);
+            window.setTimeout(() => toast.classList.add("is-visible"), 10);
+            window.setTimeout(() => {
+              toast.classList.remove("is-visible");
+              window.setTimeout(() => toast.remove(), 220);
+            }, 2400);
+          };
+        };
+
+        const setupDirtyGuards = () => {
+          if (window.__settingsDirtyGuardBound) return;
+          window.__settingsDirtyGuardBound = true;
+
+          const getFormSnapshot = (form) => {
+            const data = new FormData(form);
+            const entries = [];
+            data.forEach((value, key) => {
+              if (key === "authenticity_token" || key === "_method") return;
+              if (value instanceof File) {
+                entries.push([key, value.name || ""]);
+              } else {
+                entries.push([key, String(value)]);
+              }
+            });
+            entries.sort((a, b) => a[0].localeCompare(b[0]));
+            return JSON.stringify(entries);
+          };
+
+          const trackedForms = new Set();
+          const refreshTrackedForms = () => {
+            document.querySelectorAll("form[data-dirty-guard='true']").forEach((form) => {
+              if (trackedForms.has(form)) return;
+              form.dataset.initialSnapshot = getFormSnapshot(form);
+              form.dataset.dirty = "false";
+              form.addEventListener("input", () => {
+                form.dataset.dirty = String(form.dataset.initialSnapshot !== getFormSnapshot(form));
+              });
+              form.addEventListener("change", () => {
+                form.dataset.dirty = String(form.dataset.initialSnapshot !== getFormSnapshot(form));
+              });
+              form.addEventListener("submit", () => {
+                form.dataset.skipDirtyGuard = "true";
+              });
+              trackedForms.add(form);
+            });
+          };
+
+          const hasDirtyForm = () => Array.from(trackedForms).some((form) => {
+            if (!document.body.contains(form)) return false;
+            if (form.dataset.skipDirtyGuard === "true") return false;
+            return form.dataset.dirty === "true";
+          });
+
+          refreshTrackedForms();
+          document.addEventListener("turbo:load", refreshTrackedForms);
+
+          window.addEventListener("beforeunload", (event) => {
+            if (!hasDirtyForm()) return;
+            event.preventDefault();
+            event.returnValue = "";
+          });
+
+          document.addEventListener("turbo:before-visit", (event) => {
+            if (!hasDirtyForm()) return;
+            if (window.confirm("You have unsaved changes. Leave this page?")) return;
+            event.preventDefault();
+          });
+        };
+
         const onLoad = () => {
+          setupToastApi();
+          setupDirtyGuards();
+
           const container = document.querySelector(".navbar-container");
           const toggle = document.querySelector(".navbar-toggle");
+          const accountMenu = document.querySelector(".account-menu");
+          const accountTrigger = document.querySelector(".account-menu-trigger");
+          const accountDropdown = document.getElementById("account-dropdown");
           if (container && toggle && toggle.dataset.bound !== "true") {
             toggle.dataset.bound = "true";
 
             toggle.addEventListener("click", () => {
               const isOpen = container.classList.toggle("menu-open");
               toggle.setAttribute("aria-expanded", String(isOpen));
+            });
+          }
+
+          if (accountMenu && accountTrigger && accountDropdown && accountTrigger.dataset.bound !== "true") {
+            accountTrigger.dataset.bound = "true";
+
+            accountTrigger.addEventListener("click", () => {
+              const isOpen = accountMenu.classList.toggle("is-open");
+              accountDropdown.hidden = !isOpen;
+              accountTrigger.setAttribute("aria-expanded", String(isOpen));
+            });
+
+            document.addEventListener("click", (event) => {
+              if (!accountMenu.classList.contains("is-open")) return;
+              if (event.target.closest(".account-menu")) return;
+              accountMenu.classList.remove("is-open");
+              accountDropdown.hidden = true;
+              accountTrigger.setAttribute("aria-expanded", "false");
             });
           }
         };

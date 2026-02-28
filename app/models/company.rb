@@ -1,13 +1,20 @@
 class Company < ApplicationRecord
+  validates :name, presence: true
+  validates :brand_color, format: { with: /\A#[0-9A-Fa-f]{6}\z/ }, allow_blank: true
+  validates :default_validity_days, numericality: { greater_than: 0 }, allow_nil: true
+  validates :default_tax_rate, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+
   has_many :users, dependent: :destroy
   has_many :customers, dependent: :destroy
   has_many :quotes, dependent: :destroy
   has_many :quote_shares, dependent: :destroy
   has_many :products, dependent: :destroy
   has_many :quote_templates, dependent: :destroy
+  has_many :team_invitations, dependent: :destroy
   has_one_attached :logo
 
   after_create :ensure_quote_template!
+  before_validation :apply_default_settings
 
   def default_quote_template
     quote_templates.find_by(default_template: true)
@@ -61,9 +68,16 @@ class Company < ApplicationRecord
       qty_label: "Qty",
       unit_price_label: "Unit Price",
       line_total_label: "Line Total",
-      accent_color: "#1F4E79",
+      accent_color: brand_color.presence || "#1F4E79",
       font_family: "Noto Sans",
       footer_text: ""
     }
+  end
+
+  def apply_default_settings
+    self.default_currency = default_currency.presence || "USD"
+    self.default_validity_days = 30 if default_validity_days.blank?
+    self.default_tax_rate = 0 if default_tax_rate.blank?
+    self.brand_color = brand_color.presence || "#1F4E79"
   end
 end

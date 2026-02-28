@@ -33,6 +33,7 @@ class QuoteShare < ApplicationRecord
       else
         quote.status
       end
+
     quote.update_columns(viewed_at: now, status: next_status)
   end
 end

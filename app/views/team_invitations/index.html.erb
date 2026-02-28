@@ -1,0 +1,40 @@
+<%= render "shared/settings_header", title: "My Invitations", section: :invitations %>
+
+<section class="team-members-panel">
+  <p class="team-members-hint">Invitations are account-level notifications. Accepting one will switch your company workspace.</p>
+  <% if @invitations.any? %>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Role</th>
+            <th>Invited By</th>
+            <th>Status</th>
+            <th>Expires</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @invitations.each do |invitation| %>
+            <tr>
+              <td><%= invitation.company.name %></td>
+              <td><span class="role-badge role-badge-<%= invitation.company_role %>"><%= invitation.company_role.capitalize %></span></td>
+              <td><%= invitation.invited_by.email %></td>
+              <td><span class="status-badge status-badge-pending">Pending</span></td>
+              <td><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
+              <td>
+                <%= button_to "Accept",
+                              accept_team_invitation_path(invitation.token),
+                              method: :post,
+                              class: "btn btn-primary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="team-members-hint">No pending invitations.</p>
+  <% end %>
+</section>

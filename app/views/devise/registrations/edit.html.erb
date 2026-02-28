@@ -1,0 +1,100 @@
+<%= render "shared/settings_header", title: "Account Settings", section: :account %>
+
+<section class="team-members-panel">
+  <h2>Personal Profile</h2>
+  <p class="team-members-hint">Manage your working identity. Security verification is not required for profile-only changes.</p>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, multipart: true, data: { turbo: false, dirty_guard: true } }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div class="account-avatar-row">
+      <div class="account-avatar-preview">
+        <% if resource.avatar.attached? && resource.avatar.blob&.persisted? %>
+          <%= image_tag resource.avatar, alt: "Avatar" %>
+        <% else %>
+          <span><%= resource.email.to_s.first.to_s.upcase %></span>
+        <% end %>
+      </div>
+      <div class="account-avatar-actions">
+        <%= f.label :avatar, "Upload Avatar" %>
+        <%= f.file_field :avatar, accept: "image/*" %>
+        <% if resource.avatar.attached? %>
+          <%= button_tag "Remove Current Avatar",
+                         type: "submit",
+                         name: "user[remove_avatar]",
+                         value: "1",
+                         class: "btn btn-secondary account-remove-avatar-btn",
+                         data: { turbo: false } %>
+        <% end %>
+      </div>
+    </div>
+
+    <div>
+      <%= f.label :full_name, "Display Name" %>
+      <%= f.text_field :full_name, placeholder: "How teammates and clients see your name" %>
+    </div>
+
+    <div>
+      <%= f.label :contact_phone, "Contact Number" %>
+      <%= f.text_field :contact_phone, placeholder: "+1 ..." %>
+    </div>
+
+    <div>
+      <%= f.label :job_title, "Job Title" %>
+      <%= f.text_field :job_title, placeholder: "Sales Manager / Founder" %>
+    </div>
+
+    <div>
+      <%= f.label :time_zone, "Time Zone" %>
+      <%= f.select :time_zone,
+                   options_for_select(ActiveSupport::TimeZone.all.map(&:name), resource.time_zone.presence || Time.zone.name),
+                   {},
+                   {} %>
+    </div>
+
+    <div>
+      <%= f.label :language, "Language" %>
+      <%= f.select :language, options_for_select([["English", "en"]], resource.language.presence || "en") %>
+    </div>
+
+    <%= f.hidden_field :email, value: resource.email %>
+    <%= f.submit "Update Profile", class: "btn btn-primary" %>
+  <% end %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Security Settings</h2>
+  <p class="team-members-hint">Change email or password here. Current password is required for security updates.</p>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, data: { turbo: false, dirty_guard: true } }) do |f| %>
+    <%= render "devise/shared/error_messages", resource: resource %>
+
+    <div>
+      <%= f.label :email %>
+      <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+    </div>
+
+    <div>
+      <%= f.label :password, "New password (optional)" %>
+      <%= f.password_field :password, autocomplete: "new-password" %>
+    </div>
+
+    <div>
+      <%= f.label :password_confirmation, "Confirm new password" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+    </div>
+
+    <div>
+      <%= f.label :current_password, "Current password (required for security changes)" %>
+      <%= f.password_field :current_password, autocomplete: "current-password" %>
+    </div>
+
+    <%= f.submit "Update Security Settings", class: "btn btn-primary" %>
+  <% end %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Company Invitations</h2>
+  <p class="team-members-hint">
+    You currently have <strong><%= pending_team_invitations_count %></strong> pending company invitation(s).
+    <%= link_to "Open Invitations", team_invitations_path %>
+  </p>
+</section>

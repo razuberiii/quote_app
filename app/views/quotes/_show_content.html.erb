@@ -4,7 +4,6 @@
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
       <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %> <span class="quote-doc-version">V<%= @quote.revision_number %></span></h1>
-      <%= link_to "← Back to Customer", @quote.customer, class: "quote-back-link quote-back-link-inline" %>
     </div>
     <span class="status-badge status-<%= @quote.status %>"><%= @quote.status&.capitalize %></span>
   </header>
@@ -35,6 +34,17 @@
       <strong><%= viewed_flag ? "Discuss terms and close" : "Share public link to trigger first view" %></strong>
     </div>
   </section>
+
+  <details class="quote-engagement-details">
+    <summary>Engagement Details</summary>
+    <div class="quote-engagement-details-grid">
+      <p><strong>Sent:</strong> <%= @quote.sent_at ? @quote.sent_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
+      <p><strong>Last Shared:</strong> <span id="quote-last-shared-at"><%= @quote.quote_shares.maximum(:created_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></span></p>
+      <p><strong>First Viewed:</strong> <%= @quote.quote_shares.minimum(:first_viewed_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></p>
+      <p><strong>Last Viewed:</strong> <%= @quote.viewed_at ? @quote.viewed_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
+      <p><strong>Total Views:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
+    </div>
+  </details>
 
   <section class="quote-meta-grid">
     <article class="quote-meta-card">
@@ -76,14 +86,6 @@
       <p><strong>Status:</strong> <%= @quote.status&.capitalize %></p>
     </article>
 
-    <article class="quote-meta-card">
-      <h3>Engagement</h3>
-      <p><strong>Sent:</strong> <%= @quote.sent_at ? @quote.sent_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
-      <p><strong>Last Shared:</strong> <span id="quote-last-shared-at"><%= @quote.quote_shares.maximum(:created_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></span></p>
-      <p><strong>First Viewed:</strong> <%= @quote.quote_shares.minimum(:first_viewed_at)&.strftime("%Y-%m-%d %H:%M") || "-" %></p>
-      <p><strong>Last Viewed:</strong> <%= @quote.viewed_at ? @quote.viewed_at.strftime("%Y-%m-%d %H:%M") : "-" %></p>
-      <p><strong>Total Views:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
-    </article>
   </section>
 
   <h3>Items</h3>
@@ -95,9 +97,9 @@
             <th>Image</th>
           <% end %>
           <th>Description</th>
-          <th>Qty</th>
-          <th>Unit Price</th>
-          <th>Line Total</th>
+          <th class="quote-col-right">Qty</th>
+          <th class="quote-col-right">Unit Price</th>
+          <th class="quote-col-right">Line Total</th>
         </tr>
       </thead>
       <tbody>
@@ -113,9 +115,9 @@
               </td>
             <% end %>
             <td><%= item.description %></td>
-            <td><%= item.quantity %></td>
-            <td><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
-            <td>
+            <td class="quote-col-right"><%= item.quantity %></td>
+            <td class="quote-col-right"><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
+            <td class="quote-col-right">
               <%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %>
               <% details = quote_item_details_lines(item, show_symbol: active_template.show_currency) %>
               <% if details.any? %>
@@ -174,7 +176,7 @@
 </div>
 
 <div class="quote-toolbar">
-  <div class="quote-toolbar-main">
+  <div class="quote-toolbar-left">
     <div class="quote-template-picker">
       <label for="template_select_<%= @quote.id %>">Template</label>
       <%= select_tag :template_id,
@@ -184,40 +186,49 @@
                      data: { update_url: update_template_quote_path(@quote), doc: @document_kind } %>
     </div>
 
-    <%= link_to "Back to Customer", @quote.customer, class: "quote-back-link" %>
-    <%= button_to "Download PDF",
-                  export_pdf_quote_path(@quote),
-                  method: :get,
-                  params: { doc: @document_kind, document_kind: @document_kind },
-                  form: { data: { turbo: false } },
-                  class: "quote-btn quote-btn-secondary" %>
-    <%= link_to "Edit", edit_quote_path(@quote), class: "quote-btn quote-btn-secondary" %>
-    <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
-    <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
-    <% if @document_kind == "pi" %>
-      <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote", document_kind: "quote"), class: "quote-btn quote-btn-secondary" %>
-    <% else %>
-      <%= link_to "Switch to PI", quote_path(@quote, doc: "pi", document_kind: "pi"), class: "quote-btn quote-btn-secondary" %>
-    <% end %>
-    <div class="share-link-group">
-      <button type="button"
-              class="quote-btn quote-btn-primary js-share-public-link"
-              data-share-url="<%= share_quote_path(@quote, doc: @document_kind, format: :json) %>">
-        Share Public Link
-      </button>
-      <div class="share-link-panel" id="quote-share-panel" hidden>
-        <div class="share-link-panel-message" id="quote-share-message"></div>
-        <div class="share-link-panel-actions">
-          <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn">Copy Link</button>
-          <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link">Open</a>
-        </div>
+    <details class="quote-toolbar-export">
+      <summary class="quote-btn quote-btn-secondary">Export</summary>
+      <div class="quote-toolbar-export-menu">
+        <%= button_to "Download PDF",
+                      export_pdf_quote_path(@quote),
+                      method: :get,
+                      params: { doc: @document_kind, document_kind: @document_kind },
+                      form: { data: { turbo: false } },
+                      class: "quote-btn quote-btn-secondary" %>
+        <%= link_to "Download Excel", export_xlsx_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary" %>
       </div>
-    </div>
-    <%= link_to "Download Excel", export_xlsx_quote_path(@quote, doc: @document_kind), class: "quote-btn quote-btn-secondary" %>
+    </details>
+    <%= link_to "Back to Customer", @quote.customer, class: "quote-back-link" %>
   </div>
 
-  <div class="quote-toolbar-danger">
-    <%= button_to "Delete Quote", quote_path(@quote), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this quote? This action cannot be undone." }, class: "quote-btn quote-btn-danger" %>
+  <div class="quote-toolbar-right">
+    <div class="quote-toolbar-right-secondary">
+      <%= link_to "Edit", edit_quote_path(@quote), class: "quote-btn quote-btn-secondary" %>
+      <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
+      <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
+      <% if @document_kind == "pi" %>
+        <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote", document_kind: "quote"), class: "quote-btn quote-btn-secondary" %>
+      <% else %>
+        <%= link_to "Switch to PI", quote_path(@quote, doc: "pi", document_kind: "pi"), class: "quote-btn quote-btn-secondary" %>
+      <% end %>
+    </div>
+    <div class="quote-toolbar-right-primary">
+      <div class="share-link-group">
+        <button type="button"
+                class="quote-btn quote-btn-primary js-share-public-link"
+                data-share-url="<%= share_quote_path(@quote, doc: @document_kind, format: :json) %>">
+          Share Public Link
+        </button>
+        <div class="share-link-panel" id="quote-share-panel" hidden>
+          <div class="share-link-panel-message" id="quote-share-message"></div>
+          <div class="share-link-panel-actions">
+            <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn">Copy Link</button>
+            <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link">Open</a>
+          </div>
+        </div>
+      </div>
+      <%= button_to "Delete Quote", quote_path(@quote), method: :delete, data: { turbo_confirm: "Are you sure you want to delete this quote? This action cannot be undone." }, class: "quote-btn quote-btn-danger" %>
+    </div>
   </div>
 </div>
 
@@ -283,11 +294,31 @@
     };
 
     const copyText = async (text) => {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        return true;
+      try {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_) {
+        // Fallback to legacy copy path below.
       }
-      return false;
+
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return !!ok;
+      } catch (_) {
+        return false;
+      }
     };
 
     button.addEventListener("click", async () => {
@@ -311,7 +342,14 @@
 
         const copied = await copyText(payload.url);
         currentShareUrl = payload.url;
-        openLink.href = payload.url;
+        try {
+          const previewUrl = new URL(payload.url, window.location.origin);
+          previewUrl.searchParams.set("preview", "1");
+          openLink.href = previewUrl.toString();
+        } catch (_) {
+          const separator = payload.url.includes("?") ? "&" : "?";
+          openLink.href = `${payload.url}${separator}preview=1`;
+        }
         openLink.hidden = false;
         if (lastSharedAt) {
           const now = new Date();
@@ -321,14 +359,17 @@
         }
         if (copied) {
           showPanel("Public link ready. Copied to clipboard.");
+          window.showAppToast?.("Public link copied.", "success");
         } else {
           showPanel("Public link ready. Copy manually if needed.");
+          window.showAppToast?.("Public link ready. Copy manually if needed.", "warn");
         }
       } catch (error) {
         currentShareUrl = "";
         openLink.href = "#";
         openLink.hidden = true;
         showPanel(error.message || "Share failed", true);
+        window.showAppToast?.(error.message || "Share failed", "error");
       } finally {
         button.disabled = false;
       }
@@ -338,6 +379,7 @@
       if (!currentShareUrl) return;
       const copied = await copyText(currentShareUrl);
       showPanel(copied ? "Link copied." : "Copy failed on browser.", !copied);
+      window.showAppToast?.(copied ? "Link copied." : "Copy failed on browser.", copied ? "success" : "error");
     });
 
     openLink.addEventListener("click", () => {
@@ -352,6 +394,27 @@
 
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") hidePanel();
+    });
+  })();
+
+  (() => {
+    const exportMenus = document.querySelectorAll(".quote-toolbar-export");
+    if (!exportMenus.length) return;
+
+    const closeAll = () => {
+      exportMenus.forEach((menu) => {
+        menu.removeAttribute("open");
+      });
+    };
+
+    document.addEventListener("click", (event) => {
+      if (event.target.closest(".quote-toolbar-export")) return;
+      closeAll();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      closeAll();
     });
   })();
 </script>

@@ -35,6 +35,35 @@
   </div>
 
   <div class="sales-dashboard-content" data-dashboard-content>
+    <div class="dashboard-alert-strip">
+      <% if @risk_snapshot[:overdue].positive? %>
+        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:overdue] %></strong> overdue follow-up(s)</span>
+      <% end %>
+      <% if @risk_snapshot[:due_today].positive? %>
+        <span class="dashboard-alert-pill is-today"><strong><%= @risk_snapshot[:due_today] %></strong> due today</span>
+      <% end %>
+      <% if @risk_snapshot[:stalled_high_value].positive? %>
+        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:stalled_high_value] %></strong> high-value stalled</span>
+      <% end %>
+      <% if @risk_snapshot.values.all?(&:zero?) %>
+        <span class="dashboard-alert-pill is-good">No immediate risk signals.</span>
+      <% end %>
+    </div>
+
+    <article class="dashboard-panel dashboard-action-summary">
+      <div class="dashboard-action-summary-head">
+        <h2>Action Required (<%= @action_required_summary[:total] %>)</h2>
+        <% if @action_required_summary[:has_risk] %>
+          <span class="dashboard-alert-pill is-danger dashboard-action-summary-risk"><%= @action_required_summary[:risk_customers] %> risk customer(s)</span>
+        <% else %>
+          <span class="dashboard-alert-pill is-good dashboard-action-summary-risk">No immediate customer risk</span>
+        <% end %>
+      </div>
+      <p class="dashboard-action-summary-note">
+        Handle overdue and stalled accounts first.
+      </p>
+    </article>
+
     <div class="dashboard-kpi-row">
     <article class="dashboard-kpi-card">
       <div class="dashboard-kpi-head">
@@ -45,16 +74,18 @@
       </div>
       <strong><%= @dashboard_stats[:open_deals][:value] %></strong>
       <small class="dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
+      <span class="dashboard-kpi-health <%= @dashboard_stats[:open_deals][:health_class] %>"><%= @dashboard_stats[:open_deals][:health_label] %></span>
     </article>
     <article class="dashboard-kpi-card">
       <div class="dashboard-kpi-head">
         <span class="dashboard-kpi-icon" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none"><path d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
         </span>
-        <span>Quotes This Week</span>
+        <span>Quotes This <%= @kpi_period == "month" ? "Month" : "Week" %></span>
       </div>
       <strong><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
       <small class="dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
+      <span class="dashboard-kpi-health <%= @dashboard_stats[:quotes_this_week][:health_class] %>"><%= @dashboard_stats[:quotes_this_week][:health_label] %></span>
     </article>
     <article class="dashboard-kpi-card">
       <div class="dashboard-kpi-head">
@@ -65,12 +96,55 @@
       </div>
       <strong><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
       <small class="dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
+      <span class="dashboard-kpi-health <%= @dashboard_stats[:pending_follow_ups][:health_class] %>"><%= @dashboard_stats[:pending_follow_ups][:health_label] %></span>
     </article>
     </div>
+
+    <article class="dashboard-panel dashboard-action-center">
+      <h2>Today Focus</h2>
+      <% if @primary_action.present? %>
+        <div class="dashboard-action-list">
+            <div class="dashboard-action-item dashboard-action-item-primary is-<%= @primary_action[:priority] %>">
+              <div>
+                <span class="dashboard-action-primary-label">Top Priority</span>
+                <strong><%= @primary_action[:title] %></strong>
+                <p><%= @primary_action[:detail] %></p>
+              </div>
+              <%= link_to @primary_action[:cta_label], @primary_action[:cta_path], class: "btn btn-secondary dashboard-action-link" %>
+            </div>
+          <% if @secondary_actions.any? %>
+            <div class="dashboard-action-more" data-action-more hidden>
+              <% @secondary_actions.each do |item| %>
+                <div class="dashboard-action-item is-<%= item[:priority] %>">
+                  <div>
+                    <span class="dashboard-action-secondary-label">Secondary</span>
+                    <strong><%= item[:title] %></strong>
+                    <p><%= item[:detail] %></p>
+                  </div>
+                  <%= link_to item[:cta_label], item[:cta_path], class: "btn btn-secondary dashboard-action-link" %>
+                </div>
+              <% end %>
+            </div>
+            <button
+              type="button"
+              class="btn btn-secondary dashboard-action-toggle"
+              data-action-toggle
+              data-expanded="false"
+              data-action-count="<%= @secondary_actions.size %>"
+            >
+              Show more (<%= @secondary_actions.size %>)
+            </button>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="team-members-hint">No high-priority actions today.</p>
+      <% end %>
+    </article>
 
     <div class="dashboard-detail-grid">
       <article class="dashboard-panel">
         <h2>Recent Quotes</h2>
+        <p class="dashboard-panel-note">Showing 6 most recent, sorted by urgency.</p>
         <div class="table-responsive">
           <table class="dashboard-recent-table">
             <thead>
@@ -78,22 +152,31 @@
                 <th>Quote No.</th>
                 <th>Buyer</th>
                 <th>Status</th>
+                <th>Engagement</th>
+                <th>Next Move</th>
                 <th class="text-right">Total</th>
               </tr>
             </thead>
             <tbody>
               <% if @recent_quotes.any? %>
                 <% @recent_quotes.each do |entry| %>
+                  <% is_draft_unsent = entry[:status] == "draft" && entry[:view_signal] == "Draft unsent" %>
                   <tr>
                     <td data-label="Quote No."><strong><%= link_to entry[:quote_no], quote_path(entry[:quote]) %></strong></td>
                     <td data-label="Buyer"><%= entry[:customer_name] %></td>
-                    <td data-label="Status"><span class="status-badge status-<%= entry[:status] %>"><%= entry[:status].capitalize %></span></td>
+                    <td data-label="Status">
+                      <span class="status-badge status-<%= entry[:status] %>"><%= is_draft_unsent ? "Draft (unsent)" : entry[:status].capitalize %></span>
+                    </td>
+                    <td data-label="Engagement">
+                      <span class="dashboard-engagement-pill <%= is_draft_unsent ? "is-subtle" : "" %>"><%= is_draft_unsent ? "—" : entry[:view_signal] %></span>
+                    </td>
+                    <td data-label="Next Move"><%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %></td>
                     <td data-label="Total" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
                   </tr>
                 <% end %>
               <% else %>
                 <tr>
-                  <td data-label="Recent Quotes" colspan="4" class="customers-empty-row">No quotes available yet.</td>
+                  <td data-label="Recent Quotes" colspan="6" class="customers-empty-row">No quotes available yet.</td>
                 </tr>
               <% end %>
             </tbody>
@@ -117,6 +200,7 @@
               <small>closed deals</small>
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:average_quote_cycle_days] %> days</strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:cycle_insight] %></p>
           </li>
           <li>
             <div class="dashboard-overview-label-row">
@@ -124,6 +208,7 @@
               <small>active quotes</small>
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:revision_rate] %>%</strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:revision_insight] %></p>
           </li>
           <li>
             <div class="dashboard-overview-label-row">
@@ -131,6 +216,7 @@
               <small>quotation vs PI</small>
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:export_mix] %></strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:decision_insight] %></p>
           </li>
         </ul>
       </article>
@@ -141,6 +227,22 @@
 <script>
   (() => {
     const STORAGE_KEY = "customers_dashboard_collapsed";
+    const safeStorageGet = (key) => {
+      try {
+        return localStorage.getItem(key);
+      } catch (_) {
+        return null;
+      }
+    };
+
+    const safeStorageSet = (key, value) => {
+      try {
+        localStorage.setItem(key, value);
+      } catch (_) {
+        // Ignore storage errors (private mode / blocked storage).
+      }
+    };
+
     const bindDashboardToggle = () => {
       const toggle = document.querySelector("[data-dashboard-toggle]");
       const content = document.querySelector("[data-dashboard-content]");
@@ -155,18 +257,40 @@
         toggle.setAttribute("aria-expanded", String(!collapsed));
       };
 
-      const initialCollapsed = localStorage.getItem(STORAGE_KEY) === "true";
+      const initialCollapsed = safeStorageGet(STORAGE_KEY) === "true";
       applyState(initialCollapsed);
 
       toggle.addEventListener("click", () => {
         const collapsed = !content.hidden;
-        localStorage.setItem(STORAGE_KEY, String(collapsed));
+        safeStorageSet(STORAGE_KEY, String(collapsed));
         applyState(collapsed);
       });
     };
 
+    const bindActionToggle = () => {
+      const toggle = document.querySelector("[data-action-toggle]");
+      const extra = document.querySelector("[data-action-more]");
+      if (!toggle || !extra || toggle.dataset.bound === "true") return;
+      toggle.dataset.bound = "true";
+
+      const count = Number(toggle.dataset.actionCount || 0);
+      const applyState = (expanded) => {
+        extra.hidden = !expanded;
+        toggle.dataset.expanded = expanded ? "true" : "false";
+        toggle.textContent = expanded ? "Show less" : `Show more (${count})`;
+      };
+
+      applyState(false);
+
+      toggle.addEventListener("click", () => {
+        applyState(toggle.dataset.expanded !== "true");
+      });
+    };
+
     bindDashboardToggle();
+    bindActionToggle();
     document.addEventListener("turbo:load", bindDashboardToggle);
+    document.addEventListener("turbo:load", bindActionToggle);
   })();
 </script>
 
@@ -241,27 +365,8 @@
       <% if @customers.any? %>
         <% @customers.each do |customer| %>
           <% metrics = @customer_metrics.fetch(customer) %>
-          <% next_action_label =
-              if customer.follow_up_overdue?
-                "Follow today"
-              elsif customer.follow_up_due_today?
-                "Contact now"
-              elsif customer.follow_up_upcoming?
-                "Prepare quote"
-              else
-                "Set schedule"
-              end %>
-          <% next_action_class =
-              if customer.follow_up_overdue?
-                "is-danger"
-              elsif customer.follow_up_due_today?
-                "is-today"
-              elsif customer.follow_up_upcoming?
-                "is-upcoming"
-              else
-                "is-muted"
-              end %>
-          <tr class="customer-row follow-up-<%= customer.follow_up_status %>">
+          <% row_signal = @customer_row_signals.fetch(customer.id) %>
+          <tr class="customer-row follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>">
             <td data-label="Name"><strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong></td>
             <td data-label="Country"><%= customer.country %></td>
             <td data-label="Contact"><%= customer.contact_name %></td>
@@ -287,7 +392,7 @@
               <% end %>
             </td>
             <td data-label="Next Action">
-              <span class="next-action-pill <%= next_action_class %>"><%= next_action_label %></span>
+              <span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span>
             </td>
           </tr>
         <% end %>
@@ -310,27 +415,8 @@
   <% if @customers.any? %>
     <% @customers.each do |customer| %>
       <% metrics = @customer_metrics.fetch(customer) %>
-      <% next_action_label =
-          if customer.follow_up_overdue?
-            "Follow today"
-          elsif customer.follow_up_due_today?
-            "Contact now"
-          elsif customer.follow_up_upcoming?
-            "Prepare quote"
-          else
-            "Set schedule"
-          end %>
-      <% next_action_class =
-          if customer.follow_up_overdue?
-            "is-danger"
-          elsif customer.follow_up_due_today?
-            "is-today"
-          elsif customer.follow_up_upcoming?
-            "is-upcoming"
-          else
-            "is-muted"
-          end %>
-      <article class="customer-mobile-card follow-up-<%= customer.follow_up_status %>">
+      <% row_signal = @customer_row_signals.fetch(customer.id) %>
+      <article class="customer-mobile-card follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>">
         <div class="customer-mobile-head">
           <div class="customer-mobile-title-wrap">
             <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
@@ -368,7 +454,7 @@
           </div>
           <div class="customer-mobile-metric">
             <span>Next Action</span>
-            <strong><span class="next-action-pill <%= next_action_class %>"><%= next_action_label %></span></strong>
+            <strong><span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span></strong>
           </div>
         </div>
 

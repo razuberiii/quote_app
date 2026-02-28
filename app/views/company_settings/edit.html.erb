@@ -1,0 +1,140 @@
+<%= render "shared/settings_header", title: "Company Settings", section: :company %>
+
+<section class="team-members-panel">
+  <% if @company.errors.any? || @template.errors.any? %>
+    <div class="settings-error-summary">
+      <h3>Could not save settings</h3>
+      <ul>
+        <% @company.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+        <% @template.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <h2>Company Profile</h2>
+  <p class="team-members-hint">These settings apply to your whole company workspace.</p>
+
+  <%= form_with model: @company, url: company_settings_path, method: :patch, local: true, multipart: true, class: "settings-form-grid", data: { dirty_guard: true } do |f| %>
+    <div class="settings-section-title">1) Company Basic Information</div>
+
+    <div>
+      <%= f.label :name, "Company Name" %>
+      <%= f.text_field :name %>
+    </div>
+
+    <div>
+      <%= f.label :legal_name, "Legal Name" %>
+      <%= f.text_field :legal_name %>
+    </div>
+
+    <div>
+      <%= f.label :registration_number, "Registration Number" %>
+      <%= f.text_field :registration_number %>
+    </div>
+
+    <div class="settings-grid-span-2">
+      <%= f.label :registration_details, "Registration Details" %>
+      <%= f.text_area :registration_details, rows: 3 %>
+    </div>
+
+    <div>
+      <%= f.label :email, "Company Email" %>
+      <%= f.email_field :email %>
+    </div>
+
+    <div>
+      <%= f.label :phone, "Company Phone" %>
+      <%= f.text_field :phone %>
+    </div>
+
+    <div class="settings-grid-span-2">
+      <%= f.label :address, "Company Address" %>
+      <%= f.text_area :address, rows: 2 %>
+    </div>
+
+    <div class="settings-grid-span-2">
+      <%= f.label :website, "Website" %>
+      <%= f.text_field :website, placeholder: "example.com or https://example.com" %>
+    </div>
+
+    <div class="settings-section-title settings-grid-span-2">2) Default Business Parameters</div>
+
+    <div>
+      <%= f.label :default_currency, "Default Currency" %>
+      <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY], @company.default_currency.presence || "USD") %>
+    </div>
+
+    <div>
+      <%= f.label :default_validity_days, "Default Validity Days" %>
+      <%= f.number_field :default_validity_days, min: 1, step: 1 %>
+    </div>
+
+    <div>
+      <%= f.label :default_trade_term, "Default Trade Terms" %>
+      <%= f.text_field :default_trade_term, placeholder: "EXW / FOB / CIF" %>
+    </div>
+
+    <div>
+      <%= f.label :default_payment_term, "Default Payment Terms" %>
+      <%= f.text_field :default_payment_term, placeholder: "Net 30 / 50% deposit" %>
+    </div>
+
+    <div>
+      <%= f.label :default_tax_rate, "Default Tax Rate (%)" %>
+      <%= f.number_field :default_tax_rate, step: 0.01, min: 0 %>
+    </div>
+
+    <div>
+      <%= f.label :brand_color, "Brand Primary Color" %>
+      <%= f.color_field :brand_color, value: (@company.brand_color.presence || "#1F4E79") %>
+    </div>
+
+    <div class="settings-section-title settings-grid-span-2">3) Branding & Default Template Behavior</div>
+
+    <div class="settings-grid-span-2">
+      <div class="company-logo-row">
+        <div class="company-logo-preview">
+          <% if @company.logo.attached? %>
+            <%= image_tag @company.logo, alt: "Company Logo" %>
+          <% else %>
+            <span><%= @company.name.to_s.first.to_s.upcase %></span>
+          <% end %>
+        </div>
+        <div class="company-logo-actions">
+          <%= f.label :logo, "Upload Company Logo" %>
+          <%= f.file_field :logo, accept: "image/*" %>
+          <% if @company.logo.attached? %>
+            <%= button_tag "Remove Current Logo",
+                           type: "submit",
+                           name: "company[remove_logo]",
+                           value: "1",
+                           class: "btn btn-secondary" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <div class="settings-grid-span-2">
+      <div class="settings-checkbox-grid">
+        <%= hidden_field_tag "company[template_show_logo]", "0" %>
+        <label><%= check_box_tag "company[template_show_logo]", "1", @template.show_logo %> Show logo by default</label>
+        <%= hidden_field_tag "company[template_show_images]", "0" %>
+        <label><%= check_box_tag "company[template_show_images]", "1", @template.show_images %> Show images by default</label>
+        <%= hidden_field_tag "company[template_show_terms_section]", "0" %>
+        <label><%= check_box_tag "company[template_show_terms_section]", "1", @template.show_terms_section %> Show terms section by default</label>
+        <%= hidden_field_tag "company[template_show_notes]", "0" %>
+        <label><%= check_box_tag "company[template_show_notes]", "1", @template.show_notes %> Show notes by default</label>
+        <%= hidden_field_tag "company[template_show_payment_term]", "0" %>
+        <label><%= check_box_tag "company[template_show_payment_term]", "1", @template.show_payment_term %> Show payment terms by default</label>
+      </div>
+    </div>
+
+    <div class="settings-grid-span-2 settings-actions">
+      <%= f.submit "Save Company Settings", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</section>

@@ -1,4 +1,7 @@
-<h1>Edit Quote <%= @quote.quote_no %> (V<%= @quote.revision_number %>)</h1>
+<h1>
+  Edit Quote <%= @quote.quote_no %> (V<%= @quote.revision_number %>)
+  <span class="status-badge status-<%= (@quote.status.presence || "draft") %>"><%= (@quote.status.presence || "draft").capitalize %></span>
+</h1>
 
 <%= render "form", quote: @quote, form_model: @quote %>
 

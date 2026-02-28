@@ -88,7 +88,7 @@
                     <td data-label="Quote No."><strong><%= link_to entry[:quote_no], quote_path(entry[:quote]) %></strong></td>
                     <td data-label="Buyer"><%= entry[:customer_name] %></td>
                     <td data-label="Status"><span class="status-badge status-<%= entry[:status] %>"><%= entry[:status].capitalize %></span></td>
-                    <td data-label="Total" class="text-right"><%= number_to_currency(entry[:total]) %></td>
+                    <td data-label="Total" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
                   </tr>
                 <% end %>
               <% else %>
@@ -172,36 +172,42 @@
 
 <div class="customer-list-filters">
   <%= link_to "All Customers", customers_path(query: @search_query, list_filter: "all", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'all'}" %>
-  <%= link_to "High Value", customers_path(query: @search_query, list_filter: "high_value", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'high_value'}" %>
-  <%= link_to "At Risk", customers_path(query: @search_query, list_filter: "at_risk", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'at_risk'}" %>
+  <% next_high_value_filter = @list_filter == "high_value" ? "all" : "high_value" %>
+  <% next_at_risk_filter = @list_filter == "at_risk" ? "all" : "at_risk" %>
+  <%= link_to "High Value", customers_path(query: @search_query, list_filter: next_high_value_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'high_value'}" %>
+  <%= link_to "At Risk", customers_path(query: @search_query, list_filter: next_at_risk_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'at_risk'}" %>
   <% if @follow_up_filter != "all" %>
     <%= link_to "Clear Follow-up Filter", customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "all", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill" %>
   <% end %>
 </div>
 
 <div class="follow-up-summary">
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "today", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-today #{'active' if @follow_up_filter == 'today'}" do %>
+  <% next_today_filter = @follow_up_filter == "today" ? "all" : "today" %>
+  <% next_upcoming_filter = @follow_up_filter == "upcoming" ? "all" : "upcoming" %>
+  <% next_overdue_filter = @follow_up_filter == "overdue" ? "all" : "overdue" %>
+  <% next_no_schedule_filter = @follow_up_filter == "no_schedule" ? "all" : "no_schedule" %>
+  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_today_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-today #{'active' if @follow_up_filter == 'today'}" do %>
     <span class="summary-label-wrap">
       <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3v4m8-4v4M4 11h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
       <span class="summary-label">Today</span>
     </span>
     <strong><%= @follow_up_counts[:today] %></strong>
   <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "upcoming", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-upcoming #{'active' if @follow_up_filter == 'upcoming'}" do %>
+  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_upcoming_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-upcoming #{'active' if @follow_up_filter == 'upcoming'}" do %>
     <span class="summary-label-wrap">
       <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6m-6 18h6M8 3v3l4 3 4-3V3m-8 18v-3l4-3 4 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <span class="summary-label">Soon (7 days)</span>
     </span>
     <strong><%= @follow_up_counts[:upcoming] %></strong>
   <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "overdue", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-overdue #{'active' if @follow_up_filter == 'overdue'}" do %>
+  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_overdue_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-overdue #{'active' if @follow_up_filter == 'overdue'}" do %>
     <span class="summary-label-wrap">
       <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.8 16.6a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
       <span class="summary-label">Overdue</span>
     </span>
     <strong><%= @follow_up_counts[:overdue] %></strong>
   <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "no_schedule", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-normal #{'active' if @follow_up_filter == 'no_schedule'}" do %>
+  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_no_schedule_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-normal #{'active' if @follow_up_filter == 'no_schedule'}" do %>
     <span class="summary-label-wrap">
       <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
       <span class="summary-label">No schedule</span>
@@ -228,18 +234,39 @@
         <th><%= customer_sort_link("Win Rate", "win_rate", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
         <th>Last Follow-up</th>
         <th><%= customer_sort_link("Next Follow-up", "next_follow_up", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
+        <th>Next Action</th>
       </tr>
     </thead>
     <tbody>
       <% if @customers.any? %>
         <% @customers.each do |customer| %>
           <% metrics = @customer_metrics.fetch(customer) %>
+          <% next_action_label =
+              if customer.follow_up_overdue?
+                "Follow today"
+              elsif customer.follow_up_due_today?
+                "Contact now"
+              elsif customer.follow_up_upcoming?
+                "Prepare quote"
+              else
+                "Set schedule"
+              end %>
+          <% next_action_class =
+              if customer.follow_up_overdue?
+                "is-danger"
+              elsif customer.follow_up_due_today?
+                "is-today"
+              elsif customer.follow_up_upcoming?
+                "is-upcoming"
+              else
+                "is-muted"
+              end %>
           <tr class="customer-row follow-up-<%= customer.follow_up_status %>">
             <td data-label="Name"><strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong></td>
             <td data-label="Country"><%= customer.country %></td>
             <td data-label="Contact"><%= customer.contact_name %></td>
             <td data-label="Email"><%= customer.email %></td>
-            <td data-label="Status"><span class="status-badge status-<%= customer.status.presence || 'pending' %>"><%= customer.status&.capitalize || "Pending" %></span></td>
+            <td data-label="Status"><span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span></td>
             <td data-label="Total Quote Amount" class="text-right"><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
             <td data-label="Total Won Amount" class="text-right"><strong><%= number_to_currency(metrics[:total_won_amount]) %></strong></td>
             <td data-label="Win Rate" class="text-right">
@@ -259,11 +286,14 @@
                 <span class="upcoming-badge">SOON</span>
               <% end %>
             </td>
+            <td data-label="Next Action">
+              <span class="next-action-pill <%= next_action_class %>"><%= next_action_label %></span>
+            </td>
           </tr>
         <% end %>
       <% else %>
         <tr>
-          <td colspan="10" class="customers-empty-row">
+          <td colspan="11" class="customers-empty-row">
             <% if @has_any_customers %>
               No customers in this filter.
             <% else %>
@@ -280,11 +310,31 @@
   <% if @customers.any? %>
     <% @customers.each do |customer| %>
       <% metrics = @customer_metrics.fetch(customer) %>
+      <% next_action_label =
+          if customer.follow_up_overdue?
+            "Follow today"
+          elsif customer.follow_up_due_today?
+            "Contact now"
+          elsif customer.follow_up_upcoming?
+            "Prepare quote"
+          else
+            "Set schedule"
+          end %>
+      <% next_action_class =
+          if customer.follow_up_overdue?
+            "is-danger"
+          elsif customer.follow_up_due_today?
+            "is-today"
+          elsif customer.follow_up_upcoming?
+            "is-upcoming"
+          else
+            "is-muted"
+          end %>
       <article class="customer-mobile-card follow-up-<%= customer.follow_up_status %>">
         <div class="customer-mobile-head">
           <div class="customer-mobile-title-wrap">
             <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
-            <span class="status-badge status-<%= customer.status.presence || 'pending' %>"><%= customer.status&.capitalize || "Pending" %></span>
+            <span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span>
           </div>
           <div class="customer-mobile-next">
             <span class="customer-mobile-next-label">Next Follow-up</span>
@@ -315,6 +365,10 @@
           <div class="customer-mobile-metric">
             <span>Last Follow-up</span>
             <strong><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></strong>
+          </div>
+          <div class="customer-mobile-metric">
+            <span>Next Action</span>
+            <strong><span class="next-action-pill <%= next_action_class %>"><%= next_action_label %></span></strong>
           </div>
         </div>
 

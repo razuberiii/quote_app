@@ -106,7 +106,8 @@ class QuoteExporter
       "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}",
       "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}",
       (@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : nil),
-      (@template.show_currency ? "Currency: #{@quote.currency}" : nil)
+      (@template.show_currency ? "Currency: #{@quote.currency}" : nil),
+      "Trade Terms: #{@quote.trade_term.presence || '-'}"
     ].compact.map { |line| pdf_text(line) }.join("\n")
 
     pdf.table([ [ left_lines, right_lines ] ], width: width, cell_style: { borders: [], padding: [ 2, 0, 2, 0 ] }) do |t|
@@ -159,10 +160,10 @@ class QuoteExporter
     @quote.quote_items.ordered.each_with_index do |item, idx|
       row = [ idx + 1 ]
       row << pdf_image_cell(item) if @template.show_images?
-      row << pdf_text(item.description)
+      row << pdf_text(pdf_item_description_text(item))
       row << item.quantity
-      row << decimal_text(item.unit_price)
-      row << decimal_text(item.amount)
+      row << money_text(item.unit_price)
+      row << money_text(item.line_total)
       rows << row
     end
 
@@ -223,6 +224,7 @@ class QuoteExporter
 
     lines = []
     lines << "Payment Terms: #{@quote.payment_term.presence || '-'}" if @template.show_payment_term
+    lines << "Trade Terms: #{@quote.trade_term.presence || '-'}"
     lines << "Terms: #{@quote.terms_text.presence || '-'}"
     lines << "Legal Disclaimer: #{@quote.legal_disclaimer.presence || '-'}"
     lines << "Delivery Notes: #{@quote.delivery_notes.presence || '-'}"
@@ -306,7 +308,7 @@ class QuoteExporter
       [ excel_text(@company.address.presence || "-"), excel_text(@customer.address.presence || "-"), excel_text(@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : "-") ],
       [ excel_text(@company.phone.presence || "-"), excel_text(@customer.phone.presence || "-"), excel_text(@template.show_currency ? "Currency: #{@quote.currency}" : "-") ],
       [ excel_text(@company.email.presence || "-"), excel_text(@customer.email.presence || "-"), excel_text(@template.show_payment_term ? "Payment: #{@quote.payment_term.presence || '-'}" : "-") ],
-      [ excel_text(@company.website.presence || "-"), excel_text("Contact: #{@customer.contact_name.presence || '-'}"), "" ]
+      [ excel_text(@company.website.presence || "-"), excel_text("Contact: #{@customer.contact_name.presence || '-'}"), excel_text("Trade Terms: #{@quote.trade_term.presence || '-'}") ]
     ]
 
     detail_rows.each_with_index do |(seller_text, buyer_text, info_text), idx|
@@ -333,7 +335,7 @@ class QuoteExporter
     total_col = 5
 
     @quote.quote_items.ordered.each_with_index do |item, idx|
-      row = [ idx + 1, "", item.description, item.quantity, item.unit_price.to_f, item.amount.to_f ]
+      row = [ idx + 1, "", excel_item_description_text(item), item.quantity, item.unit_price.to_f, item.line_total.to_f ]
       row_styles = Array.new(6, styles[:cell])
       row_styles[qty_col] = styles[:number]
       row_styles[unit_col] = styles[:currency]
@@ -386,6 +388,7 @@ class QuoteExporter
       sheet.add_row [ "Terms & Conditions" ], style: styles[:section]
       sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
       sheet.add_row [ "Payment Terms", @quote.payment_term, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ] if @template.show_payment_term
+      sheet.add_row [ "Trade Terms", @quote.trade_term, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
       sheet.add_row [ "Terms", @quote.terms_text, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
       sheet.add_row [ "Legal Disclaimer", @quote.legal_disclaimer, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
       sheet.add_row [ "Delivery Notes", @quote.delivery_notes, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
@@ -408,7 +411,9 @@ class QuoteExporter
   end
 
   def apply_excel_sheet_options(sheet)
-    sheet.sheet_view.show_grid_lines = false if sheet.sheet_view.respond_to?(:show_grid_lines=)
+    if sheet.sheet_view.respond_to?(:show_grid_lines=)
+      sheet.sheet_view.show_grid_lines = !!@template.excel_show_grid_lines
+    end
   rescue StandardError
     nil
   end
@@ -478,7 +483,7 @@ class QuoteExporter
   def add_excel_item_image(sheet, item, image_col_index)
     return if image_col_index.nil?
     return unless @template.show_images?
-    return unless item.product&.image&.attached?
+    return unless product_display_attachment(item.product)
 
     image_path = excel_image_path_for(item)
     return if image_path.blank?
@@ -496,7 +501,10 @@ class QuoteExporter
   end
 
   def excel_image_path_for(item)
-    blob = item.product.image.blob
+    attachment = product_display_attachment(item.product)
+    return nil unless attachment
+
+    blob = attachment.blob
     return nil unless EXCEL_SUPPORTED_IMAGE_TYPES.include?(blob.content_type.to_s.downcase)
 
     ext = File.extname(blob.filename.to_s)
@@ -529,12 +537,20 @@ class QuoteExporter
 
   def pdf_image_cell(item)
     return "-" unless @template.show_images?
-    return "-" unless item.product&.image&.attached?
+    attachment = product_display_attachment(item.product)
+    return "-" unless attachment
 
-    path = ActiveStorage::Blob.service.path_for(item.product.image.blob.key)
+    path = ActiveStorage::Blob.service.path_for(attachment.blob.key)
     { image: path, fit: [ 38, 38 ], position: :center, vposition: :center }
   rescue StandardError
     "Image"
+  end
+
+  def product_display_attachment(product)
+    return nil unless product
+    return product.image_attachment if product.image_attachment.present?
+
+    product.gallery_images.attachments.first
   end
 
   def configure_pdf_font(pdf)
@@ -596,8 +612,37 @@ class QuoteExporter
   end
 
   def total_value_text(value)
-    suffix = @template.show_currency ? " #{@quote.currency}" : ""
-    pdf_text("#{decimal_text(value)}#{suffix}")
+    pdf_text(money_text(value))
+  end
+
+  def money_text(value)
+    amount = decimal_text(value)
+    return amount unless @template.show_currency
+
+    symbol = Quote.currency_symbol_for(@quote.currency)
+    symbol == @quote.currency.to_s.upcase ? "#{symbol} #{amount}" : "#{symbol}#{amount}"
+  end
+
+  def pdf_item_description_text(item)
+    lines = [ item.description.to_s ]
+    item.specification_pairs.each do |pair|
+      lines << "Spec: #{pair[:key]} - #{pair[:value]}"
+    end
+    item.addon_charge_entries.each do |entry|
+      lines << "Add-on: #{entry[:name]} (#{money_text(entry[:amount])})"
+    end
+    lines.join("\n")
+  end
+
+  def excel_item_description_text(item)
+    lines = [ item.description.to_s ]
+    item.specification_pairs.each do |pair|
+      lines << "Spec: #{pair[:key]} - #{pair[:value]}"
+    end
+    item.addon_charge_entries.each do |entry|
+      lines << "Add-on: #{entry[:name]} (#{entry[:amount]})"
+    end
+    lines.join("\n")
   end
 
   def pdf_text(value)

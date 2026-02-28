@@ -39,6 +39,7 @@
       <% if @template.show_currency %>
         <p><strong>Currency:</strong> <%= @snapshot["currency"] %></p>
       <% end %>
+      <p><strong>Trade Terms:</strong> <%= @snapshot["trade_term"].presence || "-" %></p>
       <% if @template.show_payment_term && @snapshot["payment_term"].present? %>
         <p><strong>Payment:</strong> <%= @snapshot["payment_term"] %></p>
       <% end %>
@@ -70,8 +71,24 @@
             <% end %>
             <td><%= item["description"] %></td>
             <td><%= item["quantity"] %></td>
-            <td><%= number_to_currency(item["unit_price"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
-            <td><%= number_to_currency(item["amount"], unit: (@template.show_currency ? @snapshot["currency"] : "")) %></td>
+            <td><%= quote_money(item["unit_price"], @snapshot["currency"], show_symbol: @template.show_currency) %></td>
+            <td>
+              <%= quote_money(item["amount"], @snapshot["currency"], show_symbol: @template.show_currency) %>
+              <% specs = Array(item["specifications"]) %>
+              <% addons = Array(item["addon_charges"]) %>
+              <% if specs.any? || addons.any? %>
+                <div class="quote-item-details">
+                  <% specs.each do |spec| %>
+                    <div>Spec: <%= spec["key"] || spec[:key] %> - <%= spec["value"] || spec[:value] %></div>
+                  <% end %>
+                  <% addons.each do |addon| %>
+                    <% addon_name = addon["name"] || addon[:name] %>
+                    <% addon_amount = addon["amount"] || addon[:amount] %>
+                    <div>Add-on: <%= addon_name %> (<%= quote_money(addon_amount, @snapshot["currency"], show_symbol: @template.show_currency) %>)</div>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
           </tr>
         <% end %>
       </tbody>
@@ -84,17 +101,18 @@
   <% discount = @snapshot["discount_amount"].to_d %>
   <% grand_total = subtotal + tax + shipping - discount %>
   <aside class="quote-total-box">
-    <p><span>Subtotal</span><strong><%= number_to_currency(subtotal, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
-    <p><span>Tax / VAT</span><strong><%= number_to_currency(tax, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
-    <p><span>Shipping</span><strong><%= number_to_currency(shipping, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
-    <p><span>Discount</span><strong><%= number_to_currency(discount, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
-    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(grand_total, unit: (@template.show_currency ? @snapshot["currency"] : "")) %></strong></p>
+    <p><span>Subtotal</span><strong><%= quote_money(subtotal, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <p><span>Tax / VAT</span><strong><%= quote_money(tax, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <p><span>Shipping</span><strong><%= quote_money(shipping, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <p><span>Discount</span><strong><%= quote_money(discount, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(grand_total, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
   </aside>
 
   <% if @template.show_terms_section %>
     <section class="quote-section-block">
       <h3>Terms & Conditions</h3>
       <p><strong>Payment Terms:</strong> <%= @snapshot["payment_term"].presence || "-" %></p>
+      <p><strong>Trade Terms:</strong> <%= @snapshot["trade_term"].presence || "-" %></p>
       <p><strong>Terms:</strong> <%= @snapshot["terms_text"].presence || "-" %></p>
       <p><strong>Legal Disclaimer:</strong> <%= @snapshot["legal_disclaimer"].presence || "-" %></p>
       <p><strong>Delivery Notes:</strong> <%= @snapshot["delivery_notes"].presence || "-" %></p>

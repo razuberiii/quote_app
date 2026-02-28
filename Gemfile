@@ -69,6 +69,7 @@ gem "devise", "~> 5.0"
 # PDF generation
 gem "prawn"
 gem "prawn-table"
+gem "wicked_pdf"
 
 # Excel export
 gem "axlsx"

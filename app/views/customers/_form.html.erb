@@ -1,0 +1,82 @@
+<%= form_with model: customer do |f| %>
+  <% status_options = Customer::SALES_STATUSES.map { |value| [value.humanize, value] } %>
+  <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
+    <% status_options.unshift(["#{customer.status.humanize} (legacy)", customer.status]) %>
+  <% end %>
+  <% if customer.errors.any? %>
+    <div class="error-messages">
+      <h2><%= pluralize(customer.errors.count, "error") %> prevented this customer from being saved:</h2>
+      <ul>
+        <% customer.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="quote-edit-shell">
+    <section class="quote-form-section">
+      <h3>Basic Information</h3>
+      <div class="quote-form-grid">
+        <div>
+          <%= f.label :name %>
+          <%= f.text_field :name, placeholder: "Customer Name" %>
+        </div>
+        <div>
+          <%= f.label :country %>
+          <%= f.text_field :country, placeholder: "Country" %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :address %>
+          <%= f.text_field :address, placeholder: "Company Address" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-form-section">
+      <h3>Contact & Follow-up</h3>
+      <div class="quote-form-grid">
+        <div>
+          <%= f.label :contact_name %>
+          <%= f.text_field :contact_name, placeholder: "Contact Person" %>
+        </div>
+        <div>
+          <%= f.label :email %>
+          <%= f.email_field :email, placeholder: "Email" %>
+        </div>
+        <div>
+          <%= f.label :phone %>
+          <%= f.text_field :phone, placeholder: "Phone" %>
+        </div>
+        <div>
+          <%= f.label :status %>
+          <%= f.select :status, status_options, { prompt: "Select Status" } %>
+        </div>
+        <div>
+          <%= f.label :next_follow_up_date %>
+          <%= f.date_field :next_follow_up_date %>
+        </div>
+        <% if customer.persisted? %>
+          <div>
+            <%= f.label :last_follow_up_date %>
+            <%= f.date_field :last_follow_up_date %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <section class="quote-form-section">
+      <h3>Notes</h3>
+      <div class="quote-form-grid">
+        <div class="quote-form-grid-span-2">
+          <%= f.label :notes %>
+          <%= f.text_area :notes, rows: 4, placeholder: "Notes" %>
+        </div>
+      </div>
+    </section>
+
+    <div class="quote-form-submit">
+      <%= f.submit submit_label, class: "btn btn-primary" %>
+    </div>
+  </div>
+<% end %>

@@ -47,6 +47,7 @@ class Company < ApplicationRecord
       show_images: true,
       show_tax: true,
       show_shipping: true,
+      excel_show_grid_lines: false,
       show_currency: true,
       show_valid_until: true,
       show_notes: true,

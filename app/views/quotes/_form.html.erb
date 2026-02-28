@@ -1,171 +1,416 @@
-<%= form_with model: form_model do |f| %>
-  <% if quote.errors.any? %>
-    <div class="error-messages">
-      <h2><%= pluralize(quote.errors.count, "error") %> prevented this quote from being saved:</h2>
-      <ul>
-        <% quote.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
+<% status_value = quote.status.to_s.presence || "draft" %>
+<% subtotal_value = quote.subtotal.to_d %>
+<% add_ons_value = quote.quote_items.reject(&:marked_for_destruction?).sum { |item| item.addon_total.to_d } %>
+<% grand_total_value = quote.grand_total.to_d %>
+<% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
+<% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
+<% was_viewed = quote.viewed_at.present? %>
+<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency } }.to_json %>
+
+<div class="quote-edit-shell" id="quote-edit-root" data-viewed="<%= was_viewed %>">
+  <section class="quote-edit-summary">
+    <article class="quote-edit-summary-card">
+      <span class="summary-label">Current Status</span>
+      <strong id="quote-summary-status-text"><%= status_value.capitalize %></strong>
+      <span id="quote-summary-status-badge" class="status-badge status-<%= status_value %>"><%= status_value.capitalize %></span>
+    </article>
+    <article class="quote-edit-summary-card">
+      <span class="summary-label">Grand Total</span>
+      <strong id="quote-summary-grand-total"><%= quote_money(grand_total_value, quote.currency) %></strong>
+    </article>
+    <article class="quote-edit-summary-card">
+      <span class="summary-label">Discount Rate</span>
+      <strong id="quote-summary-discount-rate"><%= discount_pct_value %>%</strong>
+    </article>
+    <article class="quote-edit-summary-card">
+      <span class="summary-label">Expiry</span>
+      <strong id="quote-summary-expiry">
+        <% if days_left_value.nil? %>
+          No date
+        <% elsif days_left_value.negative? %>
+          Expired
+        <% else %>
+          <%= days_left_value %> day(s) left
         <% end %>
-      </ul>
+      </strong>
+    </article>
+    <article class="quote-edit-summary-card">
+      <span class="summary-label">Viewed</span>
+      <strong id="quote-summary-viewed"><%= was_viewed ? "Yes" : "No" %></strong>
+    </article>
+  </section>
+
+  <%= form_with model: form_model do |f| %>
+    <% if quote.errors.any? %>
+      <div class="error-messages">
+        <h2><%= pluralize(quote.errors.count, "error") %> prevented this quote from being saved:</h2>
+        <ul>
+          <% quote.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <%= f.hidden_field :quote_no if quote.quote_no.present? %>
+
+    <section class="quote-form-section">
+      <h3>Basic Information</h3>
+      <div class="quote-form-grid">
+        <div>
+          <%= f.label :template_id, "Template" %>
+          <%= f.select :template_id, (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] }, { include_blank: false } %>
+        </div>
+        <div>
+          <%= f.label :currency %>
+          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD" ], {}, {} %>
+        </div>
+        <div>
+          <%= f.label :issued_on, "Quote date" %>
+          <%= f.date_field :issued_on %>
+        </div>
+        <div>
+          <%= f.label :valid_until %>
+          <%= f.date_field :valid_until %>
+        </div>
+        <div>
+          <%= f.label :status %>
+          <%= f.select :status, [["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]], {}, {} %>
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-form-section">
+      <h3>Business Terms</h3>
+      <div class="quote-form-grid">
+        <div>
+          <%= f.label :payment_term %>
+          <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment" %>
+        </div>
+        <div>
+          <%= f.label :trade_term, "Trade terms" %>
+          <%= f.text_field :trade_term, placeholder: "FOB / CIF / EXW" %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :delivery_notes %>
+          <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes" %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :terms_text, "Terms" %>
+          <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc." %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :legal_disclaimer %>
+          <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-form-section">
+      <h3>Internal Information</h3>
+      <div class="quote-form-grid">
+        <div class="quote-form-grid-span-2">
+          <%= f.label :notes %>
+          <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)" %>
+        </div>
+        <div class="quote-conditional" data-show-when-status="won">
+          <%= f.label :final_amount, "Final amount (actual deal)" %>
+          <%= f.number_field :final_amount, step: 0.01, class: "js-final-amount" %>
+        </div>
+        <div class="quote-conditional" data-show-when-status="lost">
+          <%= f.label :loss_reason %>
+          <%= f.text_field :loss_reason, class: "js-loss-reason" %>
+        </div>
+      </div>
+    </section>
+
+    <section class="quote-form-section quote-form-section-totals">
+      <div class="quote-totals-inputs">
+        <h3>Totals Inputs</h3>
+        <div class="quote-form-grid">
+          <div>
+            <%= f.label :tax_amount, "Tax / VAT" %>
+            <%= f.number_field :tax_amount, step: 0.01, class: "js-tax-input" %>
+          </div>
+          <div>
+            <%= f.label :shipping_amount, "Shipping / Handling" %>
+            <%= f.number_field :shipping_amount, step: 0.01, class: "js-shipping-input" %>
+          </div>
+          <div>
+            <%= f.label :discount_amount, "Discount" %>
+            <%= f.number_field :discount_amount, step: 0.01, class: "js-discount-input" %>
+          </div>
+        </div>
+      </div>
+
+      <aside class="quote-live-totals">
+        <h4>Totals</h4>
+        <p><span>Subtotal</span><strong id="quote-live-subtotal"><%= quote_money(subtotal_value, quote.currency) %></strong></p>
+        <p><span>Add-ons Total</span><strong id="quote-live-addons"><%= quote_money(add_ons_value, quote.currency) %></strong></p>
+        <p><span>Tax / VAT</span><strong id="quote-live-tax"><%= quote_money(quote.tax_amount.to_d, quote.currency) %></strong></p>
+        <p><span>Shipping</span><strong id="quote-live-shipping"><%= quote_money(quote.shipping_amount.to_d, quote.currency) %></strong></p>
+        <p><span>Discount</span><strong id="quote-live-discount"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
+        <p class="quote-live-grand"><span>Grand Total</span><strong id="quote-live-grand"><%= quote_money(grand_total_value, quote.currency) %></strong></p>
+      </aside>
+    </section>
+
+    <section class="quote-form-section">
+      <h3>Quote Items</h3>
+      <p class="quote-form-hint">
+        Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
+      </p>
+      <p class="quote-form-hint">
+        Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
+      </p>
+      <p class="quote-form-hint">
+        If product reference currency differs from quote currency, unit price will not be auto-filled.
+      </p>
+      <p class="quote-form-hint quote-form-hint-warning">
+        Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually.
+      </p>
+
+      <div data-products="<%= products_payload %>" id="quote-items-wrapper">
+        <div class="table-responsive quote-items-responsive">
+          <table class="quote-items-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Description</th>
+                <th>Specifications</th>
+                <th>Add-ons</th>
+                <th>Unit Price</th>
+                <th>Quantity</th>
+                <th>Remove</th>
+              </tr>
+            </thead>
+            <tbody id="quote-items-body">
+              <%= f.fields_for :quote_items do |item_fields| %>
+                <% item = item_fields.object %>
+                <% product_name = item.product&.name.presence || item.description.to_s %>
+                <tr class="quote-item-row">
+                  <td class="quote-col-product">
+                    <div class="product-search">
+                      <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
+                      <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
+                      <div class="js-product-dropdown"></div>
+                    </div>
+                    <div class="js-product-feedback product-feedback" aria-live="polite"></div>
+                    <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
+                  </td>
+                  <td class="quote-col-desc">
+                    <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
+                  </td>
+                  <td class="quote-col-specs">
+                    <%= item_fields.text_area :specifications_text, rows: 4, class: "js-specifications", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
+                  </td>
+                  <td class="quote-col-addons">
+                    <%= item_fields.text_area :addon_charges_text, rows: 4, class: "js-addon-charges", placeholder: "Packaging: 30&#10;Installation: 120" %>
+                  </td>
+                  <td class="quote-col-price">
+                    <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
+                  </td>
+                  <td class="quote-col-qty">
+                    <%= item_fields.number_field :quantity, min: 1, placeholder: "1", class: "js-quantity" %>
+                  </td>
+                  <td class="quote-col-remove">
+                    <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
+                    <button type="button" class="quote-item-remove-icon js-remove-item" aria-label="Remove item">&times;</button>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="quote-form-add-row">
+          <button type="button" class="btn btn-secondary" id="add-quote-item">+ Add Item</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="quote-form-submit">
+      <%= f.submit %>
     </div>
   <% end %>
-
-  <%= f.hidden_field :quote_no if quote.quote_no.present? %>
-
-  <h3>Basic Information</h3>
-  <div>
-    <%= f.label :template_id, "Template" %>
-    <%= f.select :template_id, (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] }, { include_blank: false } %>
-  </div>
-
-  <div>
-    <%= f.label :currency %>
-    <%= f.text_field :currency, placeholder: "USD" %>
-  </div>
-
-  <div>
-    <%= f.label :issued_on, "Quote date" %>
-    <%= f.date_field :issued_on %>
-  </div>
-
-  <div>
-    <%= f.label :valid_until %>
-    <%= f.date_field :valid_until %>
-  </div>
-
-  <div>
-    <%= f.label :payment_term %>
-    <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment" %>
-  </div>
-
-  <div>
-    <%= f.label :status %>
-    <%= f.select :status, [ "pending", "won", "lost" ], {}, {} %>
-  </div>
-
-  <div>
-    <%= f.label :negotiated %>
-    <%= f.check_box :negotiated %>
-  </div>
-
-  <div>
-    <%= f.label :final_amount %>
-    <%= f.number_field :final_amount, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :loss_reason %>
-    <%= f.text_field :loss_reason %>
-  </div>
-
-  <div>
-    <%= f.label :notes %>
-    <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)" %>
-  </div>
-
-  <h3>Totals</h3>
-  <div>
-    <%= f.label :tax_amount, "Tax / VAT" %>
-    <%= f.number_field :tax_amount, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :shipping_amount, "Shipping / Handling" %>
-    <%= f.number_field :shipping_amount, step: 0.01 %>
-  </div>
-
-  <div>
-    <%= f.label :discount_amount, "Discount" %>
-    <%= f.number_field :discount_amount, step: 0.01 %>
-  </div>
-
-  <h3>Terms & Conditions</h3>
-  <div>
-    <%= f.label :terms_text, "Terms" %>
-    <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc." %>
-  </div>
-
-  <div>
-    <%= f.label :legal_disclaimer %>
-    <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer" %>
-  </div>
-
-  <div>
-    <%= f.label :delivery_notes %>
-    <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes" %>
-  </div>
-
-  <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F") } }.to_json %>
-  <h3>Quote Items</h3>
-  <p class="quote-form-hint">
-    Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
-  </p>
-
-  <div data-products="<%= products_payload %>" id="quote-items-wrapper">
-    <div class="table-responsive quote-items-responsive">
-      <table class="quote-items-table">
-        <thead>
-          <tr>
-            <th>Product Name</th>
-            <th>Description</th>
-            <th>Unit Price</th>
-            <th>Quantity</th>
-            <th>Remove</th>
-          </tr>
-        </thead>
-        <tbody id="quote-items-body">
-          <%= f.fields_for :quote_items do |item_fields| %>
-            <% item = item_fields.object %>
-            <% product_name = item.product&.name.presence || item.description.to_s %>
-            <tr class="quote-item-row">
-              <td class="quote-col-product">
-                <div class="product-search">
-                  <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
-                  <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
-                  <div class="js-product-dropdown"></div>
-                </div>
-                <div class="js-product-feedback product-feedback" aria-live="polite"></div>
-                <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
-              </td>
-              <td class="quote-col-desc">
-                <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
-              </td>
-              <td class="quote-col-price">
-                <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
-              </td>
-              <td class="quote-col-qty">
-                <%= item_fields.number_field :quantity, min: 1, placeholder: "1" %>
-              </td>
-              <td class="quote-col-remove">
-                <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
-                <button type="button" class="btn btn-danger js-remove-item">Remove</button>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="quote-form-add-row">
-      <button type="button" class="btn btn-secondary" id="add-quote-item">+ Add Item</button>
-    </div>
-  </div>
-
-  <div>
-    <%= f.submit %>
-  </div>
-<% end %>
+</div>
 
 <script>
   (function() {
+    const root = document.getElementById("quote-edit-root");
     const wrapper = document.getElementById("quote-items-wrapper");
-    if (!wrapper) return;
+    if (!wrapper || !root) return;
 
     const products = JSON.parse(wrapper.dataset.products || "[]");
     const body = document.getElementById("quote-items-body");
     const addBtn = document.getElementById("add-quote-item");
+    const statusInput = document.querySelector("[name='quote[status]']");
+    const currencyInput = document.querySelector("[name='quote[currency]']");
+    const validUntilInput = document.querySelector("[name='quote[valid_until]']");
+    const finalAmountInput = document.querySelector(".js-final-amount");
+    const lossReasonInput = document.querySelector(".js-loss-reason");
+    const taxInput = document.querySelector(".js-tax-input");
+    const shippingInput = document.querySelector(".js-shipping-input");
+    const discountInput = document.querySelector(".js-discount-input");
+
+    const statusText = document.getElementById("quote-summary-status-text");
+    const statusBadge = document.getElementById("quote-summary-status-badge");
+    const summaryGrand = document.getElementById("quote-summary-grand-total");
+    const summaryDiscount = document.getElementById("quote-summary-discount-rate");
+    const summaryExpiry = document.getElementById("quote-summary-expiry");
+
+    const liveSubtotal = document.getElementById("quote-live-subtotal");
+    const liveAddons = document.getElementById("quote-live-addons");
+    const liveTax = document.getElementById("quote-live-tax");
+    const liveShipping = document.getElementById("quote-live-shipping");
+    const liveDiscount = document.getElementById("quote-live-discount");
+    const liveGrand = document.getElementById("quote-live-grand");
+
+    const statusLabels = {
+      draft: "Draft",
+      sent: "Sent",
+      viewed: "Viewed",
+      negotiating: "Negotiating",
+      won: "Won",
+      lost: "Lost",
+      expired: "Expired"
+    };
+
+    const currencySymbols = {
+      USD: "$",
+      EUR: "€",
+      GBP: "£",
+      CNY: "¥",
+      JPY: "¥",
+      AUD: "A$",
+      CAD: "C$",
+      SGD: "S$",
+      HKD: "HK$"
+    };
 
     let rowCounter = body.querySelectorAll(".quote-item-row").length;
+
+    function parseNumber(value) {
+      const number = parseFloat(value || "0");
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function parseInteger(value) {
+      const number = parseInt(value || "0", 10);
+      return Number.isFinite(number) ? number : 0;
+    }
+
+    function parseAddonTotal(text) {
+      return String(text || "").split(/\r?\n/).reduce((sum, line) => {
+        const parts = line.split(/[:=]/, 2);
+        if (parts.length < 2) return sum;
+        const amount = parseNumber(parts[1]);
+        return amount >= 0 ? sum + amount : sum;
+      }, 0);
+    }
+
+    function currentCurrency() {
+      return (currencyInput?.value || "USD").toUpperCase();
+    }
+
+    function formatMoney(amount, currencyCode) {
+      const value = parseNumber(amount).toFixed(2);
+      const code = (currencyCode || "USD").toUpperCase();
+      const symbol = currencySymbols[code] || code;
+      if (symbol === code) return `${code} ${value}`;
+      return `${symbol}${value}`;
+    }
+
+    function calculateTotals() {
+      let baseSubtotal = 0;
+      let addonTotal = 0;
+
+      body.querySelectorAll(".quote-item-row").forEach((row) => {
+        const destroyField = row.querySelector(".js-destroy-flag");
+        if (destroyField && destroyField.value === "1") return;
+        if (row.style.display === "none") return;
+
+        const unitPrice = parseNumber(row.querySelector(".js-unit-price")?.value);
+        const qty = Math.max(parseInteger(row.querySelector(".js-quantity")?.value), 0);
+        const lineBase = unitPrice * qty;
+        const lineAddon = parseAddonTotal(row.querySelector(".js-addon-charges")?.value);
+        baseSubtotal += lineBase;
+        addonTotal += lineAddon;
+      });
+
+      const subtotal = baseSubtotal + addonTotal;
+      const tax = parseNumber(taxInput?.value);
+      const shipping = parseNumber(shippingInput?.value);
+      const discount = parseNumber(discountInput?.value);
+      const grandTotal = subtotal + tax + shipping - discount;
+      const discountRate = subtotal > 0 ? ((discount / subtotal) * 100) : 0;
+
+      return { subtotal, addonTotal, tax, shipping, discount, grandTotal, discountRate };
+    }
+
+    function updateTotalsUI() {
+      const totals = calculateTotals();
+      const code = currentCurrency();
+      liveSubtotal.textContent = formatMoney(totals.subtotal, code);
+      liveAddons.textContent = formatMoney(totals.addonTotal, code);
+      liveTax.textContent = formatMoney(totals.tax, code);
+      liveShipping.textContent = formatMoney(totals.shipping, code);
+      liveDiscount.textContent = formatMoney(totals.discount, code);
+      liveGrand.textContent = formatMoney(totals.grandTotal, code);
+      summaryGrand.textContent = formatMoney(totals.grandTotal, code);
+      summaryDiscount.textContent = `${totals.discountRate.toFixed(2)}%`;
+      return totals;
+    }
+
+    function updateExpirySummary() {
+      if (!validUntilInput || !summaryExpiry) return;
+      const value = validUntilInput.value;
+      if (!value) {
+        summaryExpiry.textContent = "No date";
+        return;
+      }
+
+      const target = new Date(`${value}T00:00:00`);
+      if (Number.isNaN(target.getTime())) {
+        summaryExpiry.textContent = "Invalid date";
+        return;
+      }
+
+      const today = new Date();
+      const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      const diffMs = target.getTime() - startOfToday.getTime();
+      const daysLeft = Math.floor(diffMs / 86400000);
+
+      if (daysLeft < 0) {
+        summaryExpiry.textContent = "Expired";
+      } else {
+        summaryExpiry.textContent = `${daysLeft} day(s) left`;
+      }
+    }
+
+    function applyStatusUI() {
+      if (!statusInput) return;
+      const status = (statusInput.value || "draft").toLowerCase();
+      const label = statusLabels[status] || status;
+      if (statusText) statusText.textContent = label;
+      if (statusBadge) {
+        statusBadge.className = `status-badge status-${status}`;
+        statusBadge.textContent = label;
+      }
+
+      document.querySelectorAll("[data-show-when-status]").forEach((element) => {
+        const expected = (element.dataset.showWhenStatus || "").toLowerCase();
+        const visible = expected === status;
+        element.style.display = visible ? "" : "none";
+      });
+
+      if (finalAmountInput) finalAmountInput.required = status === "won";
+      if (lossReasonInput) lossReasonInput.required = status === "lost";
+
+      if (status === "won" && finalAmountInput && !String(finalAmountInput.value || "").trim()) {
+        const totals = calculateTotals();
+        finalAmountInput.value = totals.grandTotal.toFixed(2);
+      }
+    }
 
     function findProductByName(name) {
       const normalized = (name || "").trim().toLowerCase();
@@ -184,7 +429,7 @@
         return;
       }
 
-        dropdown.innerHTML = items.map((p) =>
+      dropdown.innerHTML = items.map((p) =>
         `<button type="button" class="js-product-option" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}</button>`
       ).join("");
     }
@@ -246,7 +491,16 @@
       const priceInput = row.querySelector(".js-unit-price");
       const removeBtn = row.querySelector(".js-remove-item");
       const destroyField = row.querySelector(".js-destroy-flag");
+      const qtyInput = row.querySelector(".js-quantity");
+      const addonInput = row.querySelector(".js-addon-charges");
+      const specsInput = row.querySelector(".js-specifications");
       let feedbackTimer = null;
+
+      function autoGrow(textarea) {
+        if (!textarea) return;
+        textarea.style.height = "auto";
+        textarea.style.height = `${Math.max(textarea.scrollHeight, 96)}px`;
+      }
 
       function setFeedback(type, text, autoclear = false) {
         if (!productFeedback) return;
@@ -269,17 +523,26 @@
       function syncProduct() {
         const keyword = (productNameInput.value || "").trim();
         const matched = findProductByName(keyword);
-
         const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
         renderDropdown(productDropdown, filtered);
         openDropdown(row, productDropdown);
 
         if (matched) {
           productIdInput.value = matched.id;
-          if (!priceInput.value) priceInput.value = matched.price;
+          const quoteCurrency = currentCurrency();
+          const productCurrency = (matched.currency || "").trim().toUpperCase();
+          const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
+
+          if (!priceInput.value && !isCurrencyMismatch) {
+            priceInput.value = matched.price;
+          }
           if (!descInput.value) descInput.value = matched.name;
           productNameInput.classList.add("is-matched");
-          setFeedback("", "");
+          if (isCurrencyMismatch) {
+            setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
+          } else {
+            setFeedback("", "");
+          }
         } else {
           productIdInput.value = "";
           productNameInput.classList.remove("is-matched");
@@ -292,12 +555,30 @@
             setFeedback("", "");
           }
         }
+        updateTotalsUI();
       }
 
       if (productNameInput) {
         productNameInput.addEventListener("input", syncProduct);
         productNameInput.addEventListener("change", syncProduct);
         productNameInput.addEventListener("focus", syncProduct);
+      }
+
+      if (priceInput) {
+        priceInput.addEventListener("input", updateTotalsUI);
+      }
+      if (qtyInput) {
+        qtyInput.addEventListener("input", updateTotalsUI);
+      }
+      if (addonInput) {
+        addonInput.addEventListener("input", updateTotalsUI);
+        addonInput.addEventListener("input", () => autoGrow(addonInput));
+        autoGrow(addonInput);
+      }
+
+      if (specsInput) {
+        specsInput.addEventListener("input", () => autoGrow(specsInput));
+        autoGrow(specsInput);
       }
 
       if (productToggleBtn && productDropdown) {
@@ -320,11 +601,22 @@
 
           productNameInput.value = target.dataset.name;
           productIdInput.value = target.dataset.id;
-          if (!priceInput.value) priceInput.value = target.dataset.price;
+          const quoteCurrency = currentCurrency();
+          const selected = products.find((p) => String(p.id) === String(target.dataset.id));
+          const productCurrency = (selected?.currency || "").trim().toUpperCase();
+          const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
+
+          if (!priceInput.value && !isCurrencyMismatch) priceInput.value = target.dataset.price;
           if (!descInput.value) descInput.value = target.dataset.name;
           productNameInput.classList.add("is-matched");
-          setFeedback("", "");
+
+          if (isCurrencyMismatch) {
+            setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
+          } else {
+            setFeedback("", "");
+          }
           closeDropdown(row, productDropdown);
+          updateTotalsUI();
         });
 
         document.addEventListener("click", (event) => {
@@ -350,6 +642,8 @@
         removeBtn.addEventListener("click", () => {
           if (destroyField) destroyField.value = "1";
           row.style.display = "none";
+          updateTotalsUI();
+          applyStatusUI();
         });
       }
     }
@@ -371,24 +665,52 @@
         <td class="quote-col-desc">
           <input type="text" name="quote[quote_items_attributes][${index}][description]" class="js-description" placeholder="Description">
         </td>
+        <td class="quote-col-specs">
+          <textarea rows="4" class="js-specifications" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
+        </td>
+        <td class="quote-col-addons">
+          <textarea rows="4" class="js-addon-charges" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
+        </td>
         <td class="quote-col-price">
           <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price" placeholder="0.00">
         </td>
         <td class="quote-col-qty">
-          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]">
+          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]" class="js-quantity">
         </td>
         <td class="quote-col-remove">
           <input type="hidden" name="quote[quote_items_attributes][${index}][_destroy]" value="0" class="js-destroy-flag">
-          <button type="button" class="btn btn-danger js-remove-item">Remove</button>
+          <button type="button" class="quote-item-remove-icon js-remove-item" aria-label="Remove item">&times;</button>
         </td>
       `;
 
       body.appendChild(tr);
       bindRow(tr);
+      updateTotalsUI();
       window.setTimeout(() => tr.classList.remove("is-new"), 420);
     }
 
     body.querySelectorAll(".quote-item-row").forEach(bindRow);
     if (addBtn) addBtn.addEventListener("click", addRow);
+
+    [taxInput, shippingInput, discountInput, currencyInput].forEach((input) => {
+      if (!input) return;
+      input.addEventListener("input", updateTotalsUI);
+      input.addEventListener("change", updateTotalsUI);
+    });
+
+    if (statusInput) {
+      statusInput.addEventListener("change", () => {
+        applyStatusUI();
+        updateTotalsUI();
+      });
+    }
+
+    if (validUntilInput) {
+      validUntilInput.addEventListener("change", updateExpirySummary);
+    }
+
+    updateTotalsUI();
+    updateExpirySummary();
+    applyStatusUI();
   })();
 </script>

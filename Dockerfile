@@ -14,9 +14,7 @@ FROM docker.io/library/ruby:$RUBY_VERSION-slim AS base
 # Rails app lives here
 WORKDIR /rails
 
-ARG WKHTMLTOX_VERSION=0.12.6.1-2
-ARG WKHTMLTOX_DEB=wkhtmltox_${WKHTMLTOX_VERSION}.bookworm_amd64.deb
-ARG WKHTMLTOX_URL=https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOX_VERSION}/${WKHTMLTOX_DEB}
+ARG WKHTMLTOX_VERSION=0.12.6.1-3
 
 # Install base packages
 RUN apt-get update -qq && \
@@ -36,9 +34,18 @@ RUN apt-get update -qq && \
       libjemalloc2 \
       libvips \
       postgresql-client && \
-    curl -fL "${WKHTMLTOX_URL}" -o "/tmp/${WKHTMLTOX_DEB}" && \
-    apt-get install --no-install-recommends -y "/tmp/${WKHTMLTOX_DEB}" && \
-    rm -f "/tmp/${WKHTMLTOX_DEB}" && \
+    arch="$(dpkg --print-architecture)" && \
+    case "$arch" in \
+      amd64) wkhtml_arch="amd64" ;; \
+      arm64) wkhtml_arch="arm64" ;; \
+      *) echo "Unsupported architecture for wkhtmltox package: $arch" && exit 1 ;; \
+    esac && \
+    wkhtml_deb="wkhtmltox_${WKHTMLTOX_VERSION}.bookworm_${wkhtml_arch}.deb" && \
+    wkhtml_url="https://github.com/wkhtmltopdf/packaging/releases/download/${WKHTMLTOX_VERSION}/${wkhtml_deb}" && \
+    echo "Downloading ${wkhtml_url}" && \
+    curl -fL "${wkhtml_url}" -o "/tmp/${wkhtml_deb}" && \
+    apt-get install --no-install-recommends -y "/tmp/${wkhtml_deb}" && \
+    rm -f "/tmp/${wkhtml_deb}" && \
     fc-cache -f && \
     wkhtmltopdf -V && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so && \

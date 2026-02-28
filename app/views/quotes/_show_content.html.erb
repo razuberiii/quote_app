@@ -186,17 +186,18 @@
 
     <%= link_to "Back to Customer", @quote.customer, class: "quote-back-link" %>
     <%= button_to "Download PDF",
-                  export_pdf_quote_path(@quote, doc: @document_kind),
+                  export_pdf_quote_path(@quote),
                   method: :get,
+                  params: { doc: @document_kind, document_kind: @document_kind },
                   form: { data: { turbo: false } },
                   class: "quote-btn quote-btn-secondary" %>
     <%= link_to "Edit", edit_quote_path(@quote), class: "quote-btn quote-btn-secondary" %>
     <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
     <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "quote-btn quote-btn-secondary" %>
     <% if @document_kind == "pi" %>
-      <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote"), class: "quote-btn quote-btn-secondary" %>
+      <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote", document_kind: "quote"), class: "quote-btn quote-btn-secondary" %>
     <% else %>
-      <%= link_to "Switch to PI", quote_path(@quote, doc: "pi"), class: "quote-btn quote-btn-secondary" %>
+      <%= link_to "Switch to PI", quote_path(@quote, doc: "pi", document_kind: "pi"), class: "quote-btn quote-btn-secondary" %>
     <% end %>
     <div class="share-link-group">
       <button type="button"

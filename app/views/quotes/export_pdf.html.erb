@@ -1,67 +1,96 @@
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-font: '<%= @template.font_family %>'; --quote-accent: <%= @template.accent_color %>;">
-  <header class="quote-doc-header">
-    <div>
-      <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
-      <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %></h1>
+<% doc_accent = @template.accent_color.presence || "#1F4E79" %>
+<% raw_document_kind = @document_kind || params[:document_kind] || params[:doc] || params[:kind] %>
+<% document_kind = @template.normalize_document_kind(raw_document_kind || @template.default_document_kind) %>
+<style>
+  /* Dynamic accent color for PDF rendering */
+  .pdf-render .quote-doc-kicker {
+    color: <%= doc_accent %> !important;
+  }
+  .pdf-render .quote-total-grand {
+    background-color: transparent !important;
+    color: #222 !important;
+  }
+  .pdf-render .quote-total-grand span,
+  .pdf-render .quote-total-grand strong {
+    color: #222 !important;
+  }
+</style>
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %>">
+  <% title_text = @template.resolved_document_title(document_kind).to_s.upcase %>
+  <% number_label = @template.resolved_document_number_label(document_kind) %>
+  <% logo_uri = quote_logo_data_uri if @template.show_logo %>
+  <% company_header_lines = [@quote.company.address, @quote.company.phone, @quote.company.email, @quote.company.website].compact_blank %>
+  <% if logo_uri.present? %>
+    <div class="pdf-logo-band pdf-logo-<%= @template.logo_position %>">
+      <img src="<%= logo_uri %>" class="quote-doc-logo" alt="Company logo">
     </div>
-    <div class="quote-doc-logo-wrap">
-      <% if (logo_data_uri = quote_logo_data_uri).present? %>
-        <img src="<%= logo_data_uri %>" class="quote-doc-logo" alt="Company logo">
-      <% end %>
-    </div>
+  <% end %>
+
+  <header class="quote-doc-header pdf-doc-header">
+    <table class="pdf-head-table">
+      <tr>
+        <td class="pdf-head-left">
+          <h1><%= @quote.company.name.to_s.upcase %></h1>
+          <div class="pdf-doc-company-lines">
+            <% company_header_lines.each do |line| %>
+              <p><%= line %></p>
+            <% end %>
+          </div>
+        </td>
+        <td class="pdf-head-right">
+          <p class="quote-doc-kicker"><%= title_text %></p>
+          <p class="pdf-doc-number"><strong><%= number_label %></strong> <%= @quote.quote_no %></p>
+          <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></p>
+          <% if @template.show_valid_until %>
+            <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
+          <% end %>
+          <% if @template.show_currency %>
+            <p><strong>Currency:</strong> <%= @quote.currency %></p>
+          <% end %>
+          <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
+        </td>
+      </tr>
+    </table>
   </header>
 
   <section class="quote-meta-grid">
-    <article class="quote-meta-card">
+    <div class="quote-meta-card pdf-party-col">
       <h3>Seller</h3>
-      <p><strong><%= @quote.company.name %></strong></p>
+      <p class="pdf-party-name"><strong><%= @quote.company.name %></strong></p>
       <p><%= @quote.company.address.presence || "-" %></p>
       <p><%= @quote.company.phone.presence || "-" %></p>
       <p><%= @quote.company.email.presence || "-" %></p>
       <p><%= @quote.company.website.presence || "-" %></p>
-    </article>
-
-    <article class="quote-meta-card">
+    </div>
+    <div class="quote-meta-card pdf-party-col">
       <h3>Buyer</h3>
-      <p><strong><%= @quote.customer.name %></strong></p>
+      <p class="pdf-party-name"><strong><%= @quote.customer.name %></strong></p>
       <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
       <p><%= @quote.customer.address.presence || "-" %></p>
       <p><%= @quote.customer.phone.presence || "-" %></p>
       <p><%= @quote.customer.email.presence || "-" %></p>
-    </article>
-
-    <article class="quote-meta-card">
-      <h3>Quote Info</h3>
-      <p><strong>Date:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></p>
-      <% if @template.show_valid_until %>
-        <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
-      <% end %>
-      <% if @template.show_currency %>
-        <p><strong>Currency:</strong> <%= @quote.currency %></p>
-      <% end %>
-      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
-      <% if @template.show_payment_term && @quote.payment_term.present? %>
-        <p><strong>Payment:</strong> <%= @quote.payment_term %></p>
-      <% end %>
-    </article>
+    </div>
+    <div class="pdf-clear"></div>
   </section>
 
   <div class="table-responsive">
-    <table class="quote-items-table quote-doc-table">
+    <table class="quote-items-table quote-doc-table <%= @template.show_images? ? 'has-images' : 'no-images' %>">
       <thead>
         <tr>
-          <% if @template.show_images? %><th>Image</th><% end %>
-          <th>Description</th>
-          <th>Qty</th>
-          <th>Unit Price</th>
-          <th>Line Total</th>
+          <th class="is-left">No.</th>
+          <% if @template.show_images? %><th class="is-left">Image</th><% end %>
+          <th class="is-left"><%= @template.resolved_table_label("description") %></th>
+          <th class="is-right"><%= @template.resolved_table_label("qty") %></th>
+          <th class="is-money"><%= @template.resolved_table_label("unit_price") %></th>
+          <th class="is-money"><%= @template.resolved_table_label("line_total") %></th>
         </tr>
       </thead>
       <tbody>
-        <% @quote.quote_items.ordered.each do |item| %>
+        <% @quote.quote_items.ordered.each_with_index do |item, idx| %>
           <tr>
+            <td class="is-left"><%= idx + 1 %></td>
             <% if @template.show_images? %>
-              <td>
+              <td class="is-left">
                 <% if (item_data_uri = quote_item_image_data_uri(item)).present? %>
                   <img src="<%= item_data_uri %>" class="quote-item-image" alt="Product image">
                 <% else %>
@@ -69,12 +98,12 @@
                 <% end %>
               </td>
             <% end %>
-            <td><%= item.description %></td>
-            <td><%= item.quantity %></td>
-            <td><%= quote_money(item.unit_price, @quote.currency, show_symbol: @template.show_currency) %></td>
-            <td>
-              <%= quote_money(item.line_total, @quote.currency, show_symbol: @template.show_currency) %>
-              <% details = quote_item_details_lines(item, show_symbol: @template.show_currency) %>
+            <td class="is-left"><%= item.description %></td>
+            <td class="is-right"><%= item.quantity %></td>
+            <td class="is-money"><%= template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+            <td class="is-money">
+              <%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %>
+              <% details = quote_item_details_lines(item, show_symbol: @template.show_currency, template: @template) %>
               <% if details.any? %>
                 <div class="quote-item-details">
                   <% details.each do |line| %>
@@ -89,16 +118,21 @@
     </table>
   </div>
 
-  <aside class="quote-total-box">
-    <p><span>Subtotal</span><strong><%= quote_money(@quote.subtotal, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+  <% currency_code = @quote.currency.to_s.upcase.presence || "USD" %>
+  <% grand_amount_text = template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %>
+  <aside class="quote-total-box pdf-total-box">
+    <p><span>Subtotal</span><strong><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
     <% if @template.show_tax %>
-      <p><span>Tax / VAT</span><strong><%= quote_money(@quote.tax_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+      <p><span>Tax / VAT</span><strong><%= template_money(@quote.tax_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
     <% end %>
     <% if @template.show_shipping %>
-      <p><span>Shipping</span><strong><%= quote_money(@quote.shipping_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+      <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
     <% end %>
-    <p><span>Discount</span><strong><%= quote_money(@quote.discount_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
-    <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+    <p><span>Discount</span><strong><%= template_money(@quote.discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+    <p class="quote-total-grand">
+      <span>Grand Total</span>
+      <strong><%= grand_amount_text %></strong>
+    </p>
   </aside>
 
   <% if @template.show_terms_section %>

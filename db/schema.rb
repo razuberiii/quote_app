@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_28_183500) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_194000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -115,9 +115,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_183500) do
 
   create_table "quote_templates", force: :cascade do |t|
     t.string "accent_color", default: "#1F4E79", null: false
+    t.integer "amount_decimals", default: 2, null: false
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
+    t.string "currency_display_mode", default: "symbol_prefix", null: false
     t.boolean "default_template", default: false, null: false
+    t.string "description_label", default: "Description", null: false
     t.string "document_kind", default: "quotation", null: false
     t.string "document_number_label", default: "", null: false
     t.string "document_title", default: "", null: false
@@ -125,11 +128,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_183500) do
     t.string "font_family", default: "Noto Sans", null: false
     t.text "footer_note", default: "", null: false
     t.text "footer_text", default: "", null: false
+    t.string "layout_density", default: "standard", null: false
     t.string "layout_type", default: "classic", null: false
+    t.string "line_total_label", default: "Line Total", null: false
+    t.string "logo_position", default: "right", null: false
     t.string "name", default: "Default Template", null: false
     t.text "pi_footer_note", default: "", null: false
     t.string "pi_number_label", default: "", null: false
     t.string "pi_title", default: "", null: false
+    t.string "qty_label", default: "Qty", null: false
     t.text "quotation_footer_note", default: "", null: false
     t.string "quotation_number_label", default: "", null: false
     t.string "quotation_title", default: "", null: false
@@ -146,6 +153,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_183500) do
     t.boolean "show_terms_section", default: true, null: false
     t.boolean "show_valid_until", default: true, null: false
     t.string "slug", default: "default-template", null: false
+    t.string "thousand_separator", default: "comma", null: false
+    t.string "unit_price_label", default: "Unit Price", null: false
     t.datetime "updated_at", null: false
     t.index ["company_id", "slug"], name: "index_quote_templates_on_company_id_and_slug", unique: true
     t.index ["company_id"], name: "index_quote_templates_on_company_id"

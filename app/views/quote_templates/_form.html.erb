@@ -27,6 +27,11 @@
     </div>
 
     <div>
+      <%= f.label :layout_density, "Layout density" %>
+      <%= f.select :layout_density, [["Compact", "compact"], ["Standard", "standard"], ["Spacious", "spacious"]] %>
+    </div>
+
+    <div>
       <%= f.label :accent_color %>
       <%= f.color_field :accent_color %>
     </div>
@@ -56,9 +61,53 @@
     <label><%= f.check_box :show_signature_block %> Show signature block</label>
   </div>
 
+  <h3>Logo Position</h3>
+  <div class="template-form-grid">
+    <div>
+      <%= f.label :logo_position, "Logo position" %>
+      <%= f.select :logo_position, [["Right Top", "right"], ["Left Top", "left"], ["Center", "center"]] %>
+    </div>
+  </div>
+
   <h3>Excel Export</h3>
   <div class="template-toggle-grid">
     <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
+  </div>
+
+  <h3>Amount Format</h3>
+  <div class="template-form-grid">
+    <div>
+      <%= f.label :amount_decimals, "Decimal places" %>
+      <%= f.select :amount_decimals, [["0", 0], ["2", 2]] %>
+    </div>
+    <div>
+      <%= f.label :thousand_separator %>
+      <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]] %>
+    </div>
+    <div>
+      <%= f.label :currency_display_mode, "Currency display" %>
+      <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]] %>
+    </div>
+  </div>
+
+  <h3>Table Labels</h3>
+  <div class="template-form-grid">
+    <div>
+      <%= f.label :description_label, "Description label" %>
+      <%= f.text_field :description_label %>
+    </div>
+    <div>
+      <%= f.label :qty_label, "Qty label" %>
+      <%= f.text_field :qty_label %>
+    </div>
+    <div>
+      <%= f.label :unit_price_label, "Unit price label" %>
+      <%= f.text_field :unit_price_label %>
+    </div>
+    <div>
+      <%= f.label :line_total_label, "Line total label" %>
+      <%= f.text_field :line_total_label %>
+    </div>
   </div>
 
   <h3>Document Labels</h3>

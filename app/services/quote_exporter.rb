@@ -258,75 +258,92 @@ class QuoteExporter
 
   def render_excel_header(sheet, styles, config)
     title = @template.resolved_document_title(@document_kind)
-    sheet.add_row [ title, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title]), height: 30
+    sheet.add_row [ title, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title]), height: 20
     sheet.merge_cells(config.fetch("title_merge", "A1:F1"))
 
-    sheet.add_row [ @company.name, nil, nil, "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}", nil, nil ],
-                  style: [ styles[:meta], styles[:meta], styles[:meta], styles[:meta_right], styles[:meta_right], styles[:meta_right] ],
-                  height: 22
-    sheet.merge_cells("A2:C2")
-    sheet.merge_cells(config.fetch("number_merge", "D2:F2"))
+    left_lines = [
+      excel_text(@company.name.to_s),
+      excel_text(@company.address.presence || "-"),
+      excel_text(@company.phone.presence || "-"),
+      excel_text(@company.email.presence || "-"),
+      excel_text(@company.website.presence || "-")
+    ]
+    right_lines = [
+      excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
+      excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}"),
+      (@template.show_valid_until ? excel_text("Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}") : nil),
+      (@template.show_currency ? excel_text("Currency: #{@quote.currency}") : nil),
+      excel_text("Trade Terms: #{@quote.trade_term.presence || '-'}")
+    ].compact
 
-    sheet.add_row [ document_date_label, @quote.issued_on&.strftime("%Y-%m-%d") || "-", nil, nil, nil, nil ],
-                  style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ],
-                  height: 20
-    sheet.merge_cells("B3:C3")
-    sheet.merge_cells("D3:F3")
-    if @template.show_valid_until
-      sheet.add_row [ "Valid Until", @quote.valid_until&.strftime("%Y-%m-%d") || "-", nil, nil, nil, nil ],
-                    style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ],
-                    height: 20
-      sheet.merge_cells("B4:C4")
-      sheet.merge_cells("D4:F4")
-    end
-    if @template.show_currency
-      row_index = sheet.rows.size + 1
-      sheet.add_row [ "Currency", @quote.currency, nil, nil, nil, nil ],
-                    style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ],
-                    height: 20
-      sheet.merge_cells("B#{row_index}:C#{row_index}")
-      sheet.merge_cells("D#{row_index}:F#{row_index}")
+    [ left_lines.length, right_lines.length ].max.times do |idx|
+      left_text = left_lines[idx].to_s
+      right_text = right_lines[idx].to_s
+      sheet.add_row [ left_text, nil, nil, right_text, nil, nil ],
+                    style: [
+                      (idx.zero? ? styles[:header_company_name] : styles[:header_company_meta]),
+                      (idx.zero? ? styles[:header_company_name] : styles[:header_company_meta]),
+                      (idx.zero? ? styles[:header_company_name] : styles[:header_company_meta]),
+                      styles[:header_quote_meta],
+                      styles[:header_quote_meta],
+                      styles[:header_quote_meta]
+                    ],
+                    height: 16
+      row_no = sheet.rows.size
+      sheet.merge_cells("A#{row_no}:C#{row_no}")
+      sheet.merge_cells("D#{row_no}:F#{row_no}")
     end
 
     divider_row = sheet.rows.size + 1
-    sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title_underline]), height: 8
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title_underline]), height: 3
     sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-    sheet.add_row []
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 2
   end
 
   def render_excel_parties(sheet, styles)
-    start_row = sheet.rows.size + 1
-    sheet.add_row [ "Seller", nil, "Buyer", nil, "Quote Info", nil ],
-                  style: [ styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block] ],
-                  height: 22
-    sheet.merge_cells("A#{start_row}:B#{start_row}")
-    sheet.merge_cells("C#{start_row}:D#{start_row}")
-    sheet.merge_cells("E#{start_row}:F#{start_row}")
+    divider_row = sheet.rows.size + 1
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:section_divider]), height: 4
+    sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 3
 
-    detail_rows = [
-      [ excel_text(@company.name), excel_text(@customer.name), excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}") ],
-      [ excel_text(@company.address.presence || "-"), excel_text(@customer.address.presence || "-"), excel_text(@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : "-") ],
-      [ excel_text(@company.phone.presence || "-"), excel_text(@customer.phone.presence || "-"), excel_text(@template.show_currency ? "Currency: #{@quote.currency}" : "-") ],
-      [ excel_text(@company.email.presence || "-"), excel_text(@customer.email.presence || "-"), excel_text(@template.show_payment_term ? "Payment: #{@quote.payment_term.presence || '-'}" : "-") ],
-      [ excel_text(@company.website.presence || "-"), excel_text("Contact: #{@customer.contact_name.presence || '-'}"), excel_text("Trade Terms: #{@quote.trade_term.presence || '-'}") ]
+    start_row = sheet.rows.size + 1
+    sheet.add_row [ "Seller", nil, nil, "Buyer", nil, nil ],
+                  style: [ styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block] ],
+                  height: 20
+    sheet.merge_cells("A#{start_row}:C#{start_row}")
+    sheet.merge_cells("D#{start_row}:F#{start_row}")
+
+    seller_lines = [
+      excel_text(@company.name),
+      excel_text(@company.address.presence || "-"),
+      excel_text(@company.phone.presence || "-"),
+      excel_text(@company.email.presence || "-"),
+      excel_text(@company.website.presence || "-")
+    ]
+    buyer_lines = [
+      excel_text(@customer.name),
+      excel_text("Contact: #{@customer.contact_name.presence || '-'}"),
+      excel_text(@customer.address.presence || "-"),
+      excel_text(@customer.phone.presence || "-"),
+      excel_text(@customer.email.presence || "-")
     ]
 
-    detail_rows.each_with_index do |(seller_text, buyer_text, info_text), idx|
+    [ seller_lines.length, buyer_lines.length ].max.times do |idx|
       row_no = start_row + idx + 1
-      sheet.add_row [ seller_text, nil, buyer_text, nil, info_text, nil ],
+      sheet.add_row [ seller_lines[idx].to_s, nil, nil, buyer_lines[idx].to_s, nil, nil ],
                     style: [ styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell] ],
-                    height: 20
-      sheet.merge_cells("A#{row_no}:B#{row_no}")
-      sheet.merge_cells("C#{row_no}:D#{row_no}")
-      sheet.merge_cells("E#{row_no}:F#{row_no}")
+                    height: 17
+      sheet.merge_cells("A#{row_no}:C#{row_no}")
+      sheet.merge_cells("D#{row_no}:F#{row_no}")
     end
 
-    sheet.add_row []
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 5
   end
 
   def render_excel_items(sheet, styles)
     headers = [ "No.", "Image", "Description", "Qty", "Unit Price", "Line Total" ]
-    sheet.add_row headers, style: Array.new(6, styles[:header]), height: 24
+    header_styles = [ styles[:header_left], styles[:header_left], styles[:header_left], styles[:header_right], styles[:header_right], styles[:header_right] ]
+    sheet.add_row headers, style: header_styles, height: 21
     header_row_index = sheet.rows.size - 1
 
     image_col_index = 1
@@ -336,18 +353,23 @@ class QuoteExporter
 
     @quote.quote_items.ordered.each_with_index do |item, idx|
       row = [ idx + 1, "", excel_item_description_text(item), item.quantity, item.unit_price.to_f, item.line_total.to_f ]
-      row_styles = Array.new(6, styles[:cell])
-      row_styles[qty_col] = styles[:number]
-      row_styles[unit_col] = styles[:currency]
-      row_styles[total_col] = styles[:currency]
+      alternate = idx.odd?
+      row_styles = [
+        (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
+        (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
+        (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
+        (alternate ? styles[:number_alt] : styles[:number]),
+        (alternate ? styles[:currency_alt] : styles[:currency]),
+        (alternate ? styles[:currency_alt] : styles[:currency])
+      ]
 
-      sheet.add_row row, style: row_styles, height: 24
+      sheet.add_row row, style: row_styles, height: 20
       row_index = sheet.rows.size - 1
       @excel_row_index_map[item.id] = row_index
       add_excel_item_image(sheet, item, image_col_index) if @template.show_images?
     end
 
-    sheet.add_row []
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 5
 
     {
       header_row_index: header_row_index,
@@ -373,7 +395,7 @@ class QuoteExporter
 
     row = summary_row_data("Grand Total", @quote.grand_total.to_f, ctx[:width], ctx[:label_col], ctx[:value_col])
     style = summary_row_styles(ctx[:width], ctx[:label_col], ctx[:value_col], styles[:grand_total_label], styles[:grand_total])
-    sheet.add_row row, style: style, height: 30
+    sheet.add_row row, style: style, height: 22
 
     totals_end = sheet.rows.size
     (totals_start..totals_end).each do |row_no|
@@ -384,29 +406,31 @@ class QuoteExporter
 
   def render_excel_sections(sheet, styles)
     if @template.show_terms_section
-      sheet.add_row []
+      divider_row = sheet.rows.size + 1
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
       sheet.add_row [ "Terms & Conditions" ], style: styles[:section]
       sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
-      sheet.add_row [ "Payment Terms", @quote.payment_term, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ] if @template.show_payment_term
-      sheet.add_row [ "Trade Terms", @quote.trade_term, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
-      sheet.add_row [ "Terms", @quote.terms_text, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
-      sheet.add_row [ "Legal Disclaimer", @quote.legal_disclaimer, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
-      sheet.add_row [ "Delivery Notes", @quote.delivery_notes, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
+
+      if @template.show_payment_term
+        add_excel_terms_row(sheet, styles, "Payment Terms", @quote.payment_term)
+      end
+      add_excel_terms_row(sheet, styles, "Trade Terms", @quote.trade_term)
+      add_excel_terms_row(sheet, styles, "Terms", @quote.terms_text)
+      add_excel_terms_row(sheet, styles, "Legal Disclaimer", @quote.legal_disclaimer)
+      add_excel_terms_row(sheet, styles, "Delivery Notes", @quote.delivery_notes)
     end
 
     if @template.show_notes && @quote.notes.present?
       sheet.add_row []
-      row = sheet.rows.size + 1
-      sheet.add_row [ "Notes", @quote.notes, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
-      sheet.merge_cells("B#{row}:F#{row}")
+      add_excel_terms_row(sheet, styles, "Notes", @quote.notes)
     end
 
     footer_note = @template.resolved_footer_note(@document_kind)
     if footer_note.present?
       sheet.add_row []
-      row = sheet.rows.size + 1
-      sheet.add_row [ "Footer", footer_note, nil, nil, nil, nil ], style: [ styles[:meta_label], styles[:meta], styles[:meta], styles[:meta], styles[:meta], styles[:meta] ]
-      sheet.merge_cells("B#{row}:F#{row}")
+      add_excel_terms_row(sheet, styles, "Footer", footer_note)
     end
   end
 
@@ -419,7 +443,10 @@ class QuoteExporter
   end
 
   def apply_excel_post_layout(sheet, ctx, config)
-    widths = config["column_widths"] || [ 6, 12, 34, 10, 14, 16 ]
+    widths = (config["column_widths"] || [ 6, 12, 34, 10, 14, 16 ]).map(&:to_f)
+    widths[0] = [ widths[0], 8.5 ].max
+    widths[2] = [ widths[2], 32 ].max
+    widths[3] = [ widths[3], 9 ].max
     sheet.column_widths(*widths)
 
     freeze = config["freeze_pane"]
@@ -436,28 +463,47 @@ class QuoteExporter
     styles = workbook.styles
     font = @template.font_family
     accent = excel_color
-    dark_header = darken_color(accent, 0.18)
-    border = "CBD5E1"
+    dark_header = accent
+    grid = "E5E7EB"
+    emphasis = "6B7280"
+    zebra = "F8FAFC"
 
     {
-      title: styles.add_style(sz: 20, b: true, fg_color: accent, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      title: styles.add_style(sz: 15, b: true, fg_color: accent, alignment: { horizontal: :left, vertical: :center }, font_name: font),
       title_underline: styles.add_style(border: { style: :thin, color: accent, edges: [ :bottom ] }, font_name: font),
-      section: styles.add_style(sz: 12, b: true, fg_color: accent, font_name: font),
-      section_block: styles.add_style(sz: 11, b: true, fg_color: accent, bg_color: "F8FAFC", border: { style: :thin, color: border, edges: [ :bottom ] }, alignment: { horizontal: :left, vertical: :center }, font_name: font),
-      block_cell: styles.add_style(alignment: { vertical: :top, wrap_text: true }, font_name: font),
-      meta_label: styles.add_style(b: true, fg_color: "334155", font_name: font),
-      meta: styles.add_style(font_name: font),
-      meta_right: styles.add_style(alignment: { horizontal: :right }, font_name: font),
-      header: styles.add_style(b: true, bg_color: dark_header, fg_color: "FFFFFF", border: { style: :thin, color: border, edges: [ :bottom ] }, alignment: { horizontal: :center, vertical: :center }, font_name: font),
-      cell: styles.add_style(border: { style: :thin, color: border, edges: [ :bottom ] }, alignment: { vertical: :center }, font_name: font),
-      number: styles.add_style(border: { style: :thin, color: border, edges: [ :bottom ] }, format_code: "0", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      currency: styles.add_style(border: { style: :thin, color: border, edges: [ :bottom ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      totals_separator: styles.add_style(border: { style: :thin, color: border, edges: [ :top ] }, font_name: font),
-      total_label: styles.add_style(b: true, alignment: { horizontal: :right, vertical: :center }, bg_color: "F8FAFC", font_name: font),
-      total_value: styles.add_style(b: true, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      grand_total_label: styles.add_style(b: true, sz: 12, bg_color: accent, fg_color: "FFFFFF", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      grand_total: styles.add_style(b: true, sz: 14, bg_color: accent, fg_color: "FFFFFF", format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font)
+      section_divider: styles.add_style(border: { style: :thin, color: grid, edges: [ :top ] }, font_name: font),
+      header_company_name: styles.add_style(sz: 12, b: true, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      header_company_meta: styles.add_style(sz: 11, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      header_quote_meta: styles.add_style(sz: 11, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      section: styles.add_style(sz: 12, b: true, fg_color: accent, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      section_block: styles.add_style(sz: 11, b: true, fg_color: "334155", alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      block_cell: styles.add_style(sz: 11, alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font),
+      meta_label: styles.add_style(sz: 11, b: true, fg_color: "334155", alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font),
+      terms_value: styles.add_style(sz: 11, alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font),
+      header_left: styles.add_style(sz: 11, b: true, bg_color: dark_header, fg_color: "FFFFFF", border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      header_right: styles.add_style(sz: 11, b: true, bg_color: dark_header, fg_color: "FFFFFF", border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      cell_left: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :center, wrap_text: true }, font_name: font),
+      cell_left_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :center, wrap_text: true }, font_name: font),
+      number: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "0", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      number_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "0", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      currency: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      currency_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      totals_separator: styles.add_style(border: { style: :medium, color: emphasis, edges: [ :top ] }, font_name: font),
+      total_label: styles.add_style(sz: 11, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      total_value: styles.add_style(sz: 11, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      grand_total_label: styles.add_style(b: true, sz: 12, bg_color: accent, fg_color: "FFFFFF", border: { style: :medium, color: emphasis, edges: [ :top ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      grand_total: styles.add_style(b: true, sz: 13, bg_color: accent, fg_color: "FFFFFF", border: { style: :medium, color: emphasis, edges: [ :top ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      terms_divider: styles.add_style(border: { style: :thin, color: grid, edges: [ :top ] }, font_name: font)
     }
+  end
+
+  def add_excel_terms_row(sheet, styles, label, value)
+    row = sheet.rows.size + 1
+    sheet.add_row [ label, nil, value, nil, nil, nil ],
+                  style: [ styles[:meta_label], styles[:meta_label], styles[:terms_value], styles[:terms_value], styles[:terms_value], styles[:terms_value] ],
+                  height: 17
+    sheet.merge_cells("A#{row}:B#{row}")
+    sheet.merge_cells("C#{row}:F#{row}")
   end
 
   def add_excel_total_row(sheet, label, value, ctx, styles)

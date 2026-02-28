@@ -278,7 +278,19 @@ class QuotesController < ApplicationController
   end
 
   def resolved_document_kind
-    @template.normalize_document_kind(params[:doc].presence || default_document_kind)
+    requested_kind = params[:document_kind].presence || params[:doc].presence || params[:kind].presence
+    requested_kind ||= document_kind_from_referer
+    @template.normalize_document_kind(requested_kind || default_document_kind)
+  end
+
+  def document_kind_from_referer
+    return nil if request.referer.blank?
+
+    uri = URI.parse(request.referer)
+    referer_params = Rack::Utils.parse_nested_query(uri.query.to_s)
+    referer_params["document_kind"].presence || referer_params["doc"].presence || referer_params["kind"].presence
+  rescue URI::InvalidURIError
+    nil
   end
 
   def default_document_kind

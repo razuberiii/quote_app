@@ -14,6 +14,11 @@ class QuoteTemplate < ApplicationRecord
   validates :font_family, presence: true
 
   validates :document_kind, inclusion: { in: %w[quotation proforma_invoice] }
+  validates :layout_density, inclusion: { in: %w[compact standard spacious] }, allow_blank: true
+  validates :thousand_separator, inclusion: { in: %w[comma space none] }, allow_blank: true
+  validates :currency_display_mode, inclusion: { in: %w[symbol_prefix code_prefix code_suffix] }, allow_blank: true
+  validates :logo_position, inclusion: { in: %w[left right center] }, allow_blank: true
+  validates :amount_decimals, inclusion: { in: [ 0, 2 ] }, allow_nil: true
 
   BOOLEAN_FIELDS = %i[
     show_payment_term
@@ -42,6 +47,16 @@ class QuoteTemplate < ApplicationRecord
 
   scope :ordered, -> { order(default_template: :desc, created_at: :asc) }
 
+  def resolved_table_label(kind)
+    case kind.to_s
+    when "description" then description_label.presence || "Description"
+    when "qty" then qty_label.presence || "Qty"
+    when "unit_price" then unit_price_label.presence || "Unit Price"
+    when "line_total" then line_total_label.presence || "Line Total"
+    else kind.to_s.titleize
+    end
+  end
+
   def show_images?
     show_images.nil? ? show_product_images : show_images
   end
@@ -52,7 +67,7 @@ class QuoteTemplate < ApplicationRecord
 
   def resolved_document_title(kind = default_document_kind)
     if kind == "pi"
-      pi_title.presence || document_title.presence || "PROFORMA INVOICE"
+      pi_title.presence || "PROFORMA INVOICE"
     else
       quotation_title.presence || document_title.presence || "QUOTATION"
     end
@@ -60,7 +75,7 @@ class QuoteTemplate < ApplicationRecord
 
   def resolved_document_number_label(kind = default_document_kind)
     if kind == "pi"
-      pi_number_label.presence || document_number_label.presence || "PI #"
+      pi_number_label.presence || "PI #"
     else
       quotation_number_label.presence || document_number_label.presence || "Quote #"
     end
@@ -116,5 +131,14 @@ class QuoteTemplate < ApplicationRecord
     self.show_tax = true if show_tax.nil?
     self.show_shipping = true if show_shipping.nil?
     self.excel_show_grid_lines = false if excel_show_grid_lines.nil?
+    self.layout_density = "standard" if layout_density.blank?
+    self.amount_decimals = 2 if amount_decimals.nil?
+    self.thousand_separator = "comma" if thousand_separator.blank?
+    self.currency_display_mode = "symbol_prefix" if currency_display_mode.blank?
+    self.logo_position = "right" if logo_position.blank?
+    self.description_label = "Description" if description_label.blank?
+    self.qty_label = "Qty" if qty_label.blank?
+    self.unit_price_label = "Unit Price" if unit_price_label.blank?
+    self.line_total_label = "Line Total" if line_total_label.blank?
   end
 end

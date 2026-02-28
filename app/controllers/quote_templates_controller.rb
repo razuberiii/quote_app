@@ -1,4 +1,5 @@
 class QuoteTemplatesController < ApplicationController
+  before_action :require_company_template_manager!
   before_action :set_quote_template, only: %i[edit update destroy set_default]
 
   def index

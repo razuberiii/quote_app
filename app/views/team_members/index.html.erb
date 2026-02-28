@@ -1,0 +1,135 @@
+<%= render "shared/settings_header", title: "Team Management", section: :team %>
+
+<section class="team-members-panel">
+  <h2>Company Team Overview</h2>
+  <div class="team-overview-grid">
+    <div class="team-overview-item">
+      <span>Total Members</span>
+      <strong><%= @members.size %></strong>
+    </div>
+    <div class="team-overview-item">
+      <span>Pending Invitations</span>
+      <strong><%= @pending_invitations.size %></strong>
+    </div>
+    <div class="team-overview-item">
+      <span>Your Permission</span>
+      <strong><%= current_user.company_role.capitalize %></strong>
+    </div>
+  </div>
+</section>
+
+<section class="team-members-panel">
+  <h2>Invite Member</h2>
+  <p class="team-members-hint">Member must have an account first. Invitation will appear in their account.</p>
+  <%= form_with model: @new_invitation, url: team_invitations_path, local: true do |f| %>
+    <div>
+      <%= f.label :email, "Email" %>
+      <%= f.email_field :email, required: true %>
+    </div>
+    <div>
+      <%= f.label :company_role, "Company Role" %>
+      <%= f.select :company_role, [["Member", "member"], ["Admin", "admin"]] %>
+    </div>
+    <%= f.submit "Create Invitation", class: "btn btn-primary" %>
+  <% end %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Pending Invitations</h2>
+  <% if @pending_invitations.any? %>
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Expires</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @pending_invitations.each do |invitation| %>
+            <tr>
+              <td><%= invitation.email %></td>
+              <td><span class="role-badge role-badge-<%= invitation.company_role %>"><%= invitation.company_role.capitalize %></span></td>
+              <td><span class="status-badge status-badge-pending">Pending</span></td>
+              <td><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
+              <td>
+                <%= button_to "Revoke",
+                              team_invitation_path(invitation.token),
+                              method: :delete,
+                              data: { turbo_confirm: "Revoke invitation for #{invitation.email}?" },
+                              class: "btn btn-danger" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="team-members-hint">No pending invitations.</p>
+  <% end %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Current Team</h2>
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>Avatar</th>
+          <th>Email</th>
+          <th>Company Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @members.each do |member| %>
+          <tr>
+            <td>
+              <div class="team-avatar-cell">
+                <%= link_to team_member_path(member), class: "team-avatar-link", title: "View profile" do %>
+                  <% if member.avatar.attached? %>
+                    <%= image_tag member.avatar, alt: "Avatar", class: "team-avatar-thumb" %>
+                  <% else %>
+                    <span class="team-avatar-thumb team-avatar-fallback"><%= member.email.to_s.first.to_s.upcase %></span>
+                  <% end %>
+                <% end %>
+              </div>
+            </td>
+            <td><%= link_to member.email, team_member_path(member), class: "team-member-email-link" %></td>
+            <td><span class="role-badge role-badge-<%= member.company_role %>"><%= member.company_role.capitalize %></span></td>
+            <td><span class="status-badge status-badge-active">Active</span></td>
+            <td>
+              <% if member.company_owner? %>
+                <div class="team-actions">
+                  <span class="team-action-note">Owner (protected)</span>
+                </div>
+              <% elsif member == current_user %>
+                <div class="team-actions">
+                  <span class="team-action-note">You (self-role locked)</span>
+                </div>
+              <% else %>
+                <div class="team-actions">
+                  <%= form_with model: member, url: team_member_path(member), method: :patch, local: true, class: "inline-form" do |f| %>
+                    <%= f.select :company_role, [["Member", "member"], ["Admin", "admin"]], {}, {} %>
+                    <%= f.submit "Update", class: "btn btn-secondary" %>
+                  <% end %>
+                  <% unless member == current_user %>
+                    <%= button_to "Remove from Team",
+                                  team_member_path(member),
+                                  method: :delete,
+                                  data: { turbo_confirm: "Remove #{member.email} from #{current_user.company.name}? Their account will be kept." },
+                                  class: "btn btn-danger" %>
+                  <% end %>
+                </div>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</section>

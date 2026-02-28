@@ -52,10 +52,12 @@
             <td><span class="product-sku"><%= product.sku %></span></td>
             <td><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
             <td><%= truncate(product.description, length: 50) %></td>
-            <td>
-              <%= link_to "View", product %> |
-              <%= link_to "Edit", edit_product_path(product) %> |
-              <%= link_to "Delete", product_path(product), method: :delete, data: { turbo_confirm: "Are you sure?" } %>
+            <td class="product-row-actions">
+              <div class="product-actions-inline">
+                <%= link_to "View", product, class: "product-action-link product-action-view" %>
+                <%= link_to "Edit", edit_product_path(product), class: "product-action-link product-action-edit" %>
+                <%= link_to "Delete", product_path(product), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "product-action-link product-action-delete" %>
+              </div>
             </td>
           </tr>
         <% end %>

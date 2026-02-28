@@ -1,0 +1,21 @@
+<%= render "shared/settings_header", title: "Team Member Profile", section: :team %>
+
+<section class="team-members-panel">
+  <div class="member-profile-head">
+    <div class="member-profile-avatar">
+      <% if @member.avatar.attached? %>
+        <%= image_tag @member.avatar, alt: "Avatar" %>
+      <% else %>
+        <span><%= @member.email.to_s.first.to_s.upcase %></span>
+      <% end %>
+    </div>
+    <div class="member-profile-meta">
+      <h2><%= @member.email %></h2>
+      <p><strong>Company Role:</strong> <span class="role-badge role-badge-<%= @member.company_role %>"><%= @member.company_role.capitalize %></span></p>
+      <p><strong>Company:</strong> <%= @member.company.name %></p>
+      <p><strong>Joined:</strong> <%= @member.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+    </div>
+  </div>
+</section>
+
+<%= link_to "Back to Team", team_members_path, class: "btn btn-secondary" %>

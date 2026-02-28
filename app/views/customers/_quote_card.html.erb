@@ -1,0 +1,64 @@
+<% quote = card[:quote] %>
+<% signal = card[:push_signal] %>
+<article class="quote-card" onclick="window.location='<%= quote_path(card[:quote]) %>'">
+  <div class="quote-card-action-callout <%= "is-urgent" if signal[:state] == "risk" %>">
+    <strong>Next Action:</strong> <%= signal[:summary] %> - <%= signal[:detail] %>
+  </div>
+
+  <div class="quote-card-layout">
+    <div class="quote-card-main">
+      <h4><%= card[:title] %></h4>
+      <div class="quote-card-meta">
+        <p>
+          <strong>Total:</strong>
+          <span class="quote-total-value"><%= quote_money(card[:current_total], card[:currency]) %></span>
+        </p>
+        <p><strong>Updated:</strong> <%= card[:updated_at]&.strftime("%Y-%m-%d") || "-" %></p>
+        <% if quote.valid_until.present? %>
+          <% days_left = (quote.valid_until - Date.current).to_i %>
+          <% if days_left.negative? %>
+            <p><strong>Valid Until:</strong> <span class="status-badge status-expired"><%= quote.valid_until.strftime("%Y-%m-%d") %> (Expired)</span></p>
+          <% elsif days_left <= 3 %>
+            <p><strong>Valid Until:</strong> <span class="status-badge status-paused"><%= quote.valid_until.strftime("%Y-%m-%d") %> (#{days_left}d left)</span></p>
+          <% else %>
+            <p><strong>Valid Until:</strong> <%= quote.valid_until.strftime("%Y-%m-%d") %></p>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% if card[:changed_from_original] %>
+        <div class="quote-card-diff">
+          <span><strong>Original:</strong> <%= quote_money(card[:original_total], card[:currency]) %></span>
+          <span class="diff-value <%= card[:diff_amount].negative? ? "down" : "up" %>">
+            <%= card[:trend] == :up ? "↑" : (card[:trend] == :down ? "↓" : "→") %>
+            <%= quote_money(card[:diff_amount], card[:currency]) %>
+            (<%= card[:diff_pct] %>%)
+          </span>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="quote-card-side">
+      <div class="quote-card-badges">
+        <span class="revision-pill">V<%= card[:revision] %></span>
+        <span class="status-badge status-<%= card[:display_status] %>"><%= card[:display_status].capitalize %></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quote-card-actions" onclick="event.stopPropagation();">
+    <% if signal[:method] == :post %>
+      <%= button_to signal[:label],
+                    signal[:path],
+                    method: :post,
+                    form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" },
+                    class: "btn btn-primary quote-action-primary" %>
+    <% else %>
+      <%= link_to signal[:label], signal[:path], class: "btn btn-primary quote-action-primary" %>
+    <% end %>
+    <%= link_to "View", quote_path(card[:quote]), class: "btn btn-secondary" %>
+    <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
+    <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+    <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+  </div>
+</article>

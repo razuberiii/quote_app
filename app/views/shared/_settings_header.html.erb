@@ -1,0 +1,28 @@
+<section class="settings-header-card">
+  <div class="settings-header-top">
+    <h1><%= title %></h1>
+    <div class="settings-company-pill">
+      <span class="settings-company-label">Company</span>
+      <strong><%= current_user.company.name %></strong>
+    </div>
+  </div>
+
+  <p class="settings-header-meta">
+    Signed in as <strong><%= current_user.email %></strong>
+    · Company role: <span class="role-badge role-badge-<%= current_user.company_role %>"><%= current_user.company_role.capitalize %></span>
+  </p>
+
+  <nav class="settings-nav" aria-label="Settings navigation">
+    <%= link_to "Account", edit_user_registration_path, class: "settings-nav-link #{'is-active' if section == :account}" %>
+    <% if current_user.can_manage_templates? %>
+      <%= link_to "Company", edit_company_settings_path, class: "settings-nav-link #{'is-active' if section == :company}" %>
+    <% end %>
+    <%= link_to "Invitations", team_invitations_path, class: "settings-nav-link #{'is-active' if section == :invitations}" %>
+    <% if current_user.can_manage_team? %>
+      <%= link_to "Team", team_members_path, class: "settings-nav-link #{'is-active' if section == :team}" %>
+    <% end %>
+    <% if current_user.can_manage_templates? %>
+      <%= link_to "Template", quote_templates_path, class: "settings-nav-link" %>
+    <% end %>
+  </nav>
+</section>

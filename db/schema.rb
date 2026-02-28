@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_28_194000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_28_201001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -44,10 +44,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_194000) do
 
   create_table "companies", force: :cascade do |t|
     t.string "address"
+    t.string "brand_color", default: "#1F4E79"
     t.datetime "created_at", null: false
+    t.string "default_currency", default: "USD"
+    t.string "default_payment_term"
+    t.decimal "default_tax_rate", precision: 6, scale: 2, default: "0.0", null: false
+    t.string "default_trade_term"
+    t.integer "default_validity_days", default: 30, null: false
     t.string "email"
+    t.string "legal_name"
     t.string "name"
     t.string "phone"
+    t.text "registration_details"
+    t.string "registration_number"
     t.datetime "updated_at", null: false
     t.string "website"
   end
@@ -194,17 +203,40 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_194000) do
     t.index ["template_id"], name: "index_quotes_on_template_id"
   end
 
+  create_table "team_invitations", force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.bigint "company_id", null: false
+    t.integer "company_role", default: 1, null: false
+    t.datetime "created_at", null: false
+    t.string "email", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "invited_by_id", null: false
+    t.string "token", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "email", "accepted_at"], name: "index_team_invites_on_company_email_status"
+    t.index ["company_id"], name: "index_team_invitations_on_company_id"
+    t.index ["invited_by_id"], name: "index_team_invitations_on_invited_by_id"
+    t.index ["token"], name: "index_team_invitations_on_token", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.bigint "company_id"
+    t.integer "company_role", default: 2, null: false
+    t.string "contact_phone"
     t.datetime "created_at", null: false
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
+    t.string "full_name"
+    t.string "job_title"
+    t.string "language"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "role", default: 0, null: false
+    t.string "time_zone"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_users_on_company_id"
+    t.index ["company_role"], name: "index_users_on_company_role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
@@ -221,5 +253,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_28_194000) do
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
   add_foreign_key "quotes", "quote_templates", column: "template_id"
+  add_foreign_key "team_invitations", "companies"
+  add_foreign_key "team_invitations", "users", column: "invited_by_id"
   add_foreign_key "users", "companies"
 end

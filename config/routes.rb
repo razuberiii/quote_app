@@ -1,7 +1,7 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  devise_for :users, skip: [ :passwords ]
+  devise_for :users, skip: [ :passwords ], controllers: { registrations: "users/registrations" }
 
   authenticated :user do
     root "customers#index", as: :authenticated_root
@@ -32,10 +32,18 @@ Rails.application.routes.draw do
       patch :set_default
     end
   end
+  resources :team_members, only: [ :index, :show, :update, :destroy ]
+  resources :team_invitations, only: [ :index, :create, :destroy ], param: :token do
+    member do
+      post :accept
+    end
+  end
+  resource :company_settings, only: [ :edit, :update ]
 
   resources :customers do
     member do
       post :mark_follow_up
+      post :schedule_follow_up
     end
 
     resources :quotes, shallow: true do

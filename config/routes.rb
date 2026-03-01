@@ -25,6 +25,8 @@ Rails.application.routes.draw do
   end
   get "demo", to: "landing#demo"
   get "sample-quote", to: "landing#sample_quote"
+  get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
+  get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
   resources :contact_requests, only: [ :create ]
 
   # Public quote sharing

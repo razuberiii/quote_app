@@ -190,26 +190,37 @@
       const loadingDiv = document.getElementById('turnstile-loading');
       const containerDiv = document.getElementById('turnstile-container');
       const successDiv = document.getElementById('turnstile-success');
+      
+      // Make sure all elements exist
+      if (!contactForm || !submitBtn || !modal || !turnstileResponse) {
+        console.warn('Contact form elements not found');
+        return;
+      }
+
       let verificationComplete = false;
-      let modalOpen = false;
+      let isSubmitting = false;
 
       submitBtn.addEventListener('click', function(e) {
         e.preventDefault();
         
-        if (!modal) {
-          contactForm.submit();
+        // Prevent double-submission
+        if (isSubmitting) {
           return;
         }
-
-        // If verification already complete, submit form
+        
+        // If verification already complete and we have a fresh token, submit
         if (verificationComplete && turnstileResponse.value) {
+          isSubmitting = true;
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending...';
           contactForm.submit();
           return;
         }
 
-        // Show modal (reset states first)
+        // Reset and show modal
+        verificationComplete = false;
+        turnstileResponse.value = ''; // Clear any old token
         modal.style.display = 'flex';
-        modalOpen = true;
         loadingDiv.style.display = 'block';
         containerDiv.style.display = 'none';
         successDiv.style.display = 'none';
@@ -248,10 +259,14 @@
             containerDiv.style.display = 'none';
             successDiv.style.display = 'block';
             
+            // Disable button during submission
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            
             // Auto-submit after 1 second
             setTimeout(() => {
+              isSubmitting = true;
               modal.style.display = 'none';
-              modalOpen = false;
               contactForm.submit();
             }, 1000);
           }
@@ -260,14 +275,21 @@
       }
 
       // Close modal on background click
-      if (modal) {
-        modal.addEventListener('click', function(e) {
-          if (e.target === modal && !verificationComplete) {
-            modal.style.display = 'none';
-            modalOpen = false;
-          }
-        });
-      }
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal && !verificationComplete) {
+          modal.style.display = 'none';
+          turnstileResponse.value = ''; // Clear incomplete verification
+        }
+      });
+
+      // Restore button state on form reset
+      contactForm.addEventListener('reset', function() {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Message';
+        turnstileResponse.value = '';
+        verificationComplete = false;
+        isSubmitting = false;
+      });
     });
   </script>
 </section>

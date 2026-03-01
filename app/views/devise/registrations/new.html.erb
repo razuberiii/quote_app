@@ -2,6 +2,15 @@
   <div class="auth-card">
     <h1>Sign up</h1>
 
+    <% if @validation_error.present? %>
+      <div class="error-messages">
+        <h2>Verification Error</h2>
+        <ul>
+          <li><%= @validation_error %></li>
+        </ul>
+      </div>
+    <% end %>
+
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
       <% if resource.errors.any? %>
         <div class="error-messages">
@@ -31,6 +40,14 @@
         <%= f.label :password_confirmation %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
       </div>
+
+      <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
+        <!-- Cloudflare Turnstile -->
+        <div style="margin: 20px 0;">
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAACkKXqa756rWhUr7" data-theme="light"></div>
+          <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
+        </div>
+      <% end %>
 
       <div>
         <%= f.submit "Create account", class: "btn btn-primary" %>

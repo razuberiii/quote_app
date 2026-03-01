@@ -1,0 +1,18 @@
+<h2>Verify your email address</h2>
+
+<p>Hello <%= @user.full_name.presence || @user.email %>,</p>
+
+<p>Thank you for registering. Please verify your email address by clicking the link below:</p>
+
+<p>
+  <%= link_to "Verify Email", @verification_link, style: "display: inline-block; padding: 10px 20px; background-color: #1F4E79; color: white; text-decoration: none; border-radius: 4px;" %>
+</p>
+
+<p>Or copy and paste this link in your browser:</p>
+<p><%= @verification_link %></p>
+
+<p><strong>Note:</strong> This link will expire in 15 minutes.</p>
+
+<p>If you didn't create this account, you can ignore this email.</p>
+
+<p>Best regards,<br/>Rubusoo Team</p>

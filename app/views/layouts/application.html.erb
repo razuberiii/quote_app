@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Quote App" %></title>
+    <title><%= content_for(:title) || "Rubusoo" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Quote App">
+    <meta name="application-name" content="Rubusoo">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -21,13 +21,41 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+      window.addEventListener('load', function() {
+        // Render all Turnstile widgets on the page
+        if (typeof turnstile !== 'undefined') {
+          const turnstileWidgets = document.querySelectorAll('.cf-turnstile');
+          turnstileWidgets.forEach((widget, index) => {
+            // Check if already rendered
+            if (!widget.dataset.rendered) {
+              turnstile.render(widget, {
+                sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+                theme: 'light',
+                callback: function(token) {
+                  // Find the closest hidden input for this widget's response
+                  const hiddenInput = widget.closest('form')?.querySelector('input[name*="cf_turnstile_response"]');
+                  if (hiddenInput) {
+                    hiddenInput.value = token;
+                  }
+                }
+              });
+              widget.dataset.rendered = 'true';
+            }
+          });
+        }
+      });
+    </script>
   </head>
 
   <body<% if user_signed_in? %> style="--brand-primary: <%= ui_brand_color %>; --brand-on-primary: <%= ui_brand_text_color %>;"<% end %>>
     <nav class="navbar">
       <div class="navbar-container">
         <div class="navbar-brand-wrap">
-          <h1><%= link_to "Quote App", root_path %></h1>
+          <h1><%= link_to "Rubusoo", root_path %></h1>
           <% if user_signed_in? %>
             <span class="navbar-company-context"><%= current_user.company.name %></span>
           <% end %>

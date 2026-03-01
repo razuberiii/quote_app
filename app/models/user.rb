@@ -51,6 +51,10 @@ class User < ApplicationRecord
     company.users.where(role: [ User.roles[:vip], User.roles[:admin] ]).exists?
   end
 
+  def email_verified?
+    email_verified_at.present?
+  end
+
   def move_to_personal_company!
     transaction do
       personal_company = Company.create!(name: "#{email}'s Company")

@@ -56,9 +56,8 @@
   </div>
 </div>
 
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  function initializePendingEmailVerification() {
     const resendBtn = document.getElementById('resend-btn');
     const messageDiv = document.getElementById('resend-message');
     const messageText = document.getElementById('resend-message-text');
@@ -66,6 +65,15 @@
     const loadingDiv = document.getElementById('resend-turnstile-loading');
     const containerDiv = document.getElementById('resend-turnstile-container');
     const successDiv = document.getElementById('resend-turnstile-success');
+
+    if (!resendBtn || !messageDiv || !messageText || !modal || !loadingDiv || !containerDiv || !successDiv) {
+      return;
+    }
+
+    if (resendBtn.dataset.bound === 'true') {
+      return;
+    }
+    resendBtn.dataset.bound = 'true';
     
     let verificationComplete = false;
     let isSubmitting = false;
@@ -199,5 +207,8 @@
         modal.style.display = 'none';
       }
     });
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', initializePendingEmailVerification);
+  document.addEventListener('turbo:load', initializePendingEmailVerification);
 </script>

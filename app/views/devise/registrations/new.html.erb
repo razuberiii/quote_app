@@ -11,7 +11,7 @@
       </div>
     <% end %>
 
-    <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "signup-form" }) do |f| %>
       <% if resource.errors.any? %>
         <div class="error-messages">
           <h2><%= pluralize(resource.errors.count, "error") %> prevented sign up:</h2>
@@ -42,15 +42,11 @@
       </div>
 
       <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-        <!-- Cloudflare Turnstile -->
-        <div style="margin: 20px 0;">
-          <div class="cf-turnstile"></div>
-          <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
-        </div>
+        <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
       <% end %>
 
       <div>
-        <%= f.submit "Create account", class: "btn btn-primary" %>
+        <%= f.submit "Create account", class: "btn btn-primary", id: "signup-submit-btn" %>
       </div>
     <% end %>
 
@@ -58,4 +54,128 @@
       <%= link_to "Log in", new_session_path(resource_name) %>
     </div>
   </div>
+
+  <!-- Verification Modal -->
+  <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
+    <div id="signup-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 40px; border-radius: 12px; max-width: 420px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
+        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+        
+        <div id="signup-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+          <p>Loading verification...</p>
+        </div>
+        
+        <div id="signup-turnstile-container" style="display: none; text-align: center;">
+          <div class="cf-turnstile"></div>
+        </div>
+        
+        <div id="signup-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
+          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const signupForm = document.getElementById('signup-form');
+      const submitBtn = document.getElementById('signup-submit-btn');
+      const modal = document.getElementById('signup-verification-modal');
+      const turnstileResponse = document.getElementById('cf_turnstile_response');
+      const loadingDiv = document.getElementById('signup-turnstile-loading');
+      const containerDiv = document.getElementById('signup-turnstile-container');
+      const successDiv = document.getElementById('signup-turnstile-success');
+      
+      if (!signupForm) {
+        return; // Form not found, skip
+      }
+
+      let verificationComplete = false;
+      let modalOpen = false;
+      let showModalOnSubmit = <%= @show_turnstile_modal ? 'true' : 'false' %>;
+
+      // If there was a validation error, show modal immediately
+      if (showModalOnSubmit && modal) {
+        setTimeout(() => {
+          modal.style.display = 'flex';
+          modalOpen = true;
+          renderTurnstile();
+        }, 200);
+      }
+
+      submitBtn.addEventListener('click', function(e) {
+        if (!modal) {
+          return;
+        }
+
+        e.preventDefault();
+
+        // If verification already complete, submit
+        if (verificationComplete && turnstileResponse.value) {
+          signupForm.submit();
+          return;
+        }
+
+        // If not yet shown, show modal
+        if (!modalOpen) {
+          modal.style.display = 'flex';
+          modalOpen = true;
+          
+          // Reset form states
+          loadingDiv.style.display = 'block';
+          containerDiv.style.display = 'none';
+          successDiv.style.display = 'none';
+          verificationComplete = false;
+          
+          setTimeout(renderTurnstile, 300);
+        }
+      });
+
+      function renderTurnstile() {
+        if (typeof turnstile === 'undefined') {
+          setTimeout(renderTurnstile, 200);
+          return;
+        }
+
+        loadingDiv.style.display = 'none';
+        containerDiv.style.display = 'block';
+
+        const widget = containerDiv.querySelector('.cf-turnstile');
+        
+        if (widget.dataset.rendered === 'true') {
+          widget.innerHTML = '';
+          widget.removeAttribute('data-rendered');
+        }
+
+        turnstile.render(widget, {
+          sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+          theme: 'light',
+          callback: function(token) {
+            turnstileResponse.value = token;
+            verificationComplete = true;
+            
+            containerDiv.style.display = 'none';
+            successDiv.style.display = 'block';
+            
+            setTimeout(() => {
+              modal.style.display = 'none';
+              modalOpen = false;
+              signupForm.submit();
+            }, 1000);
+          }
+        });
+        widget.dataset.rendered = 'true';
+      }
+
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal && !verificationComplete) {
+            modal.style.display = 'none';
+            modalOpen = false;
+          }
+        });
+      }
+    });
+  </script>
 </section>

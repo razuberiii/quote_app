@@ -182,7 +182,7 @@
   <% end %>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initializeContactForm() {
       const contactForm = document.getElementById('contact-form');
       const submitBtn = document.getElementById('contact-submit-btn');
       const modal = document.getElementById('verification-modal');
@@ -197,6 +197,8 @@
         return;
       }
 
+      // Clear any old token and state
+      turnstileResponse.value = '';
       let verificationComplete = false;
       let isSubmitting = false;
 
@@ -290,7 +292,12 @@
         verificationComplete = false;
         isSubmitting = false;
       });
-    });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializeContactForm);
+    // Re-initialize on Turbo navigation
+    document.addEventListener('turbo:load', initializeContactForm);
   </script>
 </section>
 

@@ -33,24 +33,112 @@
   </div>
 </div>
 
+<!-- Turnstile Verification Modal for Resend -->
+<div id="resend-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+    <h3 style="margin: 0 0 10px 0; color: #333;">Security Verification</h3>
+    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">Please complete the verification to resend the email</p>
+    
+    <div id="resend-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+      <p>Loading verification...</p>
+    </div>
+    
+    <div id="resend-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
+      <div class="cf-turnstile"></div>
+    </div>
+    
+    <div id="resend-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
+      <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Sending...</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const resendBtn = document.getElementById('resend-btn');
     const messageDiv = document.getElementById('resend-message');
     const messageText = document.getElementById('resend-message-text');
+    const modal = document.getElementById('resend-verification-modal');
+    const loadingDiv = document.getElementById('resend-turnstile-loading');
+    const containerDiv = document.getElementById('resend-turnstile-container');
+    const successDiv = document.getElementById('resend-turnstile-success');
+    
+    let verificationComplete = false;
+    let isSubmitting = false;
     let resendCountdown = null;
 
     resendBtn.addEventListener('click', function() {
+      // Prevent multiple submissions
+      if (isSubmitting) {
+        return;
+      }
+
+      // If verification already complete, submit
+      if (verificationComplete) {
+        submitResend();
+        return;
+      }
+
+      // Show modal and start Turnstile
+      verificationComplete = false;
+      modal.style.display = 'flex';
+      loadingDiv.style.display = 'block';
+      containerDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      
+      setTimeout(renderTurnstile, 300);
+    });
+
+    function renderTurnstile() {
+      if (typeof turnstile === 'undefined') {
+        setTimeout(renderTurnstile, 200);
+        return;
+      }
+
+      loadingDiv.style.display = 'none';
+      containerDiv.style.display = 'block';
+
+      const widget = containerDiv.querySelector('.cf-turnstile');
+      
+      if (widget.dataset.rendered === 'true') {
+        widget.innerHTML = '';
+        widget.removeAttribute('data-rendered');
+      }
+
+      turnstile.render(widget, {
+        sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+        theme: 'light',
+        callback: function(token) {
+          verificationComplete = true;
+          
+          containerDiv.style.display = 'none';
+          successDiv.style.display = 'block';
+          
+          setTimeout(() => {
+            submitResend(token);
+          }, 1000);
+        }
+      });
+      widget.dataset.rendered = 'true';
+    }
+
+    function submitResend(token) {
+      isSubmitting = true;
       resendBtn.disabled = true;
       resendBtn.textContent = 'Sending...';
       messageDiv.style.display = 'none';
+      modal.style.display = 'none';
+
+      const data = token ? { cf_turnstile_response: token } : {};
 
       fetch('<%= email_verifications_resend_path %>', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
-        }
+        },
+        body: JSON.stringify(data)
       })
       .then(response => response.json())
       .then(data => {
@@ -59,14 +147,15 @@
           messageText.textContent = '✓ ' + data.message;
           messageDiv.style.display = 'block';
           
-          // Start cooldown timer
           startResendCooldown(60);
+          verificationComplete = false;
         } else {
           messageDiv.className = 'alert alert-danger';
           messageText.textContent = '✗ ' + (data.error || 'Failed to send email');
           messageDiv.style.display = 'block';
           resendBtn.disabled = false;
           resendBtn.textContent = 'Resend Verification Email';
+          isSubmitting = false;
         }
       })
       .catch(error => {
@@ -76,8 +165,9 @@
         messageDiv.style.display = 'block';
         resendBtn.disabled = false;
         resendBtn.textContent = 'Resend Verification Email';
+        isSubmitting = false;
       });
-    });
+    }
 
     function startResendCooldown(seconds) {
       resendBtn.disabled = true;
@@ -91,8 +181,16 @@
           clearInterval(resendCountdown);
           resendBtn.disabled = false;
           resendBtn.textContent = 'Resend Verification Email';
+          isSubmitting = false;
         }
       }, 1000);
     }
+
+    // Close modal on background click
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal && !verificationComplete) {
+        modal.style.display = 'none';
+      }
+    });
   });
 </script>

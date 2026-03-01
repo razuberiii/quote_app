@@ -119,19 +119,57 @@
   </div>
 </section>
 
-<section class="marketing-section marketing-soft">
+<section class="marketing-section marketing-explainer" id="what-is-quotation-software">
   <div class="marketing-section-head">
     <h2>What Is Foreign Trade Quotation Software?</h2>
+    <p class="marketing-section-intro">A practical explanation for export-focused sales operations.</p>
   </div>
-  <p>
-    Foreign trade quotation software is the operational layer between lead management and final purchase confirmation for international sales teams. In many exporting companies, quotes still begin in spreadsheets and are then passed through chat tools, email threads, and file attachments. That approach works at very small volume, but it breaks down quickly when B2B export teams handle multiple markets, currencies, and buyer revisions at the same time. A modern system should provide structured export quotation management so every quote has a clear owner, status, and version history.
+  <p class="marketing-explainer-summary">
+    Foreign trade quotation software helps B2B export teams control revisions, improve buyer visibility, and run faster quote follow-ups without heavy ERP overhead.
   </p>
-  <p>
-    Excel remains useful for analysis, but it is weak as a live quoting workflow. Files get duplicated, formulas are overwritten, and teams lose confidence in which number is final. ERP systems solve data consistency at enterprise scale, but many small and mid-size exporters find ERP quotation modules too heavy, too expensive, and too slow to adapt to frontline selling. Teams need speed in customer communication without sacrificing control. That gap is where quotation CRM software becomes practical: it connects sales activity, quote documents, and buyer follow-up in one lightweight process.
-  </p>
-  <p>
-    Rubusoo is built for that exact gap. It gives teams revision control, public quote links for buyers, and consistent export outputs without forcing a full ERP rollout. Sales can update pricing or terms, and buyers always see the newest approved version instead of stale attachments. Managers can see quote progress, pending follow-ups, and conversion signals in a single workflow. In short, Rubusoo delivers foreign trade quotation software that supports day-to-day execution, not just reporting, so export teams can move faster with fewer errors and clearer buyer communication.
-  </p>
+  <ul class="marketing-explainer-keypoints">
+    <li>Replaces fragmented spreadsheets and attachments with one structured quote workflow.</li>
+    <li>Supports quote revision control and buyer-facing live links in daily sales execution.</li>
+    <li>Keeps export quotation management practical with professional PDF/Excel output.</li>
+  </ul>
+
+  <details class="marketing-explainer-details">
+    <summary>Read full explanation</summary>
+
+    <h3>Why Export Teams Need It</h3>
+    <p>
+      Foreign trade quotation software is the execution layer between lead discussions and final buyer confirmation in international sales.
+    </p>
+    <p>
+      For B2B export teams, quoting is not just document creation. It is revision management, buyer communication, and follow-up control inside one commercial workflow.
+    </p>
+
+    <h3>Why Spreadsheet Quoting Breaks at Scale</h3>
+    <p>
+      Many teams start with spreadsheets, email threads, and attachment chains. That can work early, but volume quickly creates version confusion.
+    </p>
+    <ul>
+      <li>No single source of truth when quotes move across teammates.</li>
+      <li>Revision history gets fragmented across files and messages.</li>
+      <li>Buyers compare old attachments instead of the latest offer.</li>
+    </ul>
+
+    <h3>What a Practical Quotation CRM Should Do</h3>
+    <p>
+      Excel remains useful for analysis, but it is weak for live export quotation management. ERP can provide deep governance, yet many exporters find it too heavy for frontline quoting speed.
+    </p>
+    <p>
+      Teams need a balanced quotation CRM workflow: fast for daily negotiation, structured for reliable internal execution.
+    </p>
+    <ul>
+      <li>Track revisions clearly and keep every version visible.</li>
+      <li>Share one buyer-facing live quote link to prevent confusion.</li>
+      <li>Export professional PDF/Excel files without extra manual work.</li>
+    </ul>
+    <p>
+      Rubusoo is built for that exact gap. It gives B2B export teams clearer buyer communication, fewer avoidable errors, and stronger follow-up discipline across the quote lifecycle.
+    </p>
+  </details>
 </section>
 
 <section class="marketing-section marketing-faq">
@@ -154,16 +192,6 @@
     <summary>What happens when we need to change pricing?</summary>
     <p>Revisions are instant. Every version stays in history. Buyers always see the latest. No confusion.</p>
   </details>
-</section>
-
-<section class="marketing-section">
-  <div class="marketing-section-head">
-    <h2>Related Resources:</h2>
-  </div>
-  <div class="marketing-footer-links">
-    <%= link_to "Foreign Trade Quotation Software", foreign_trade_quotation_software_path %>
-    <%= link_to "Quotation CRM for Export Teams", quotation_crm_for_export_teams_path %>
-  </div>
 </section>
 
 <% contact_email = @contact_email || ContactMailer.contact_email_for_environment %>
@@ -351,6 +379,16 @@
     // Re-initialize on Turbo navigation
     document.addEventListener('turbo:load', initializeContactForm);
   </script>
+</section>
+
+<section class="marketing-section marketing-related-inline">
+  <div class="marketing-section-head">
+    <h2>Related Resources</h2>
+  </div>
+  <div class="marketing-footer-links">
+    <%= link_to "Foreign Trade Quotation Software", foreign_trade_quotation_software_path %>
+    <%= link_to "Quotation CRM for Export Teams", quotation_crm_for_export_teams_path %>
+  </div>
 </section>
 
 <footer class="marketing-footer">

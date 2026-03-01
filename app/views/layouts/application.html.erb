@@ -25,7 +25,12 @@
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "base", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "layout", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "legacy", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "marketing", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "seo", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
     <!-- Cloudflare Turnstile -->
@@ -96,8 +101,8 @@
         <% else %>
           <ul class="navbar-menu navbar-menu-public">
             <li><%= link_to "Home", root_path %></li>
-            <li><%= link_to "Login", new_user_session_path %></li>
             <li><%= link_to "Start Free", new_user_registration_path, class: "navbar-cta-link" %></li>
+            <li><%= link_to "Login", new_user_session_path %></li>
           </ul>
         <% end %>
       </div>
@@ -196,9 +201,41 @@
           });
         };
 
+        const setupRevealAnimations = () => {
+          const targets = document.querySelectorAll(
+            ".marketing-hero, .marketing-section, .seo-page-shell .marketing-soft, .seo-page-toc"
+          );
+          if (targets.length === 0) return;
+
+          targets.forEach((element) => {
+            if (element.dataset.revealReady === "true") return;
+            element.dataset.revealReady = "true";
+            element.classList.add("reveal-on-scroll");
+          });
+
+          if (!("IntersectionObserver" in window)) {
+            targets.forEach((element) => element.classList.add("is-visible"));
+            return;
+          }
+
+          const observer = new IntersectionObserver((entries, activeObserver) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              activeObserver.unobserve(entry.target);
+            });
+          }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+
+          targets.forEach((element) => {
+            if (element.classList.contains("is-visible")) return;
+            observer.observe(element);
+          });
+        };
+
         const onLoad = () => {
           setupToastApi();
           setupDirtyGuards();
+          setupRevealAnimations();
 
           const container = document.querySelector(".navbar-container");
           const toggle = document.querySelector(".navbar-toggle");

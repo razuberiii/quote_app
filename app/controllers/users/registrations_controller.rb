@@ -9,7 +9,7 @@ module Users
 
       # Call verify_turnstile before creating the user
       # (verify_turnstile will render :new if validation fails)
-      
+
       resource.save
       if resource.persisted?
         # Email verification email will be sent via after_action
@@ -23,12 +23,7 @@ module Users
       end
     end
 
-      else
-        super
-      end
-    end
-
-    private
+    protected
 
     def verify_turnstile
       # Skip Turnstile verification if disabled (useful for local development)

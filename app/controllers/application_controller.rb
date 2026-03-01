@@ -15,6 +15,10 @@ class ApplicationController < ActionController::Base
     return if should_skip_email_verification_check?
     return if current_user.blank?
     return if current_user.email_verified?
+    
+    # Allow existing users (created before email verification feature) to use the system
+    # These are users who have no verification token/timestamp, meaning they signed up before this feature
+    return if current_user.email_verification_token.blank? && current_user.email_verification_token_sent_at.blank?
 
     redirect_to pending_email_verification_path, alert: "Please verify your email address to continue. Check your email for a verification link."
   end
@@ -26,6 +30,8 @@ class ApplicationController < ActionController::Base
     return true if controller_name == "email_verifications"
     # Skip for users signout
     return true if controller_name == "devise_sessions" && action_name == "destroy"
+    # Skip for email changes
+    return true if controller_name == "email_changes"
     false
   end
 

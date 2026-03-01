@@ -3,7 +3,7 @@ class EmailChangeMailer < ApplicationMailer
     @user = params[:user]
     @new_email = params[:new_email]
     @token = params[:token]
-    
+
     # Build confirmation URL using Rails configuration
     @confirmation_url = Rails.application.routes.url_helpers.email_change_url(
       token: @token,

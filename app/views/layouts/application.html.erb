@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= seo_title %></title>
+    <title><%= content_for?(:title) ? yield(:title) : "Rubusoo" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="<%= seo_description %>">
-    <meta name="robots" content="<%= seo_robots %>">
-    <% if seo_canonical_url.present? %>
-      <link rel="canonical" href="<%= seo_canonical_url %>">
+    <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : seo_description %>">
+    <meta name="robots" content="<%= content_for?(:meta_robots) ? yield(:meta_robots) : "index,follow" %>">
+    <% canonical_url = content_for?(:canonical_url) ? yield(:canonical_url) : "#{request.base_url}#{request.path}" %>
+    <% if canonical_url.present? %>
+      <link rel="canonical" href="<%= canonical_url %>">
     <% end %>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Rubusoo">

@@ -1,4 +1,4 @@
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-font: '<%= @template.font_family %>';">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>';">
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>

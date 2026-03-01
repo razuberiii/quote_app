@@ -4149,12 +4149,29 @@ a:hover {
   background-color: var(--doc-accent, #1f4e79);
 }
 
+.public-quote-themed .quote-doc-table thead th {
+  color: var(--doc-on-accent, #ffffff);
+}
+
 .public-quote-themed .quote-total-grand {
   background: var(--doc-accent, #1f4e79);
-  color: #fff;
+  color: var(--doc-on-accent, #ffffff);
   border-radius: 8px;
   padding: 0.4rem 0.6rem;
   border-top: none;
+}
+
+.public-quote-themed .quote-total-grand span,
+.public-quote-themed .quote-total-grand strong {
+  color: var(--doc-on-accent, #ffffff);
+}
+
+.public-quote-themed .quote-total-box p:not(.quote-total-grand) span {
+  color: #556b84;
+}
+
+.public-quote-themed .quote-total-box p:not(.quote-total-grand) strong {
+  color: #4a6380;
 }
 
 .public-quote-themed .quote-section-block h3 {

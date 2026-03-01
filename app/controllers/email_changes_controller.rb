@@ -50,4 +50,3 @@ class EmailChangesController < ApplicationController
     end
   end
 end
-

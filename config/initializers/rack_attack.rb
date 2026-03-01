@@ -33,6 +33,20 @@ class Rack::Attack
     end
   end
 
+  # Throttle email verification resend by IP (POST /email_verifications/resend)
+  throttle("email verification resend by ip", limit: 10, period: 60) do |req|
+    if req.path == "/email_verifications/resend" && req.request_method == "POST"
+      req.ip
+    end
+  end
+
+  # Throttle email change requests by IP (POST /email-change/request)
+  throttle("email change request by ip", limit: 10, period: 60) do |req|
+    if req.path == "/email-change/request" && req.request_method == "POST"
+      req.ip
+    end
+  end
+
   # Throttle all other mutating requests by IP (100 per minute)
   # Catches POST, PUT, PATCH, DELETE on paths not matched above
   throttle("requests by ip", limit: 100, period: 60) do |req|

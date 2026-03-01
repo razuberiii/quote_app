@@ -141,10 +141,31 @@
   </div>
 </div>
 
+<!-- Email Change Verification Modal -->
+<div id="email-change-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+    <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
+    <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+
+    <div id="email-change-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+      <p>Loading verification...</p>
+    </div>
+
+    <div id="email-change-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
+      <div class="cf-turnstile"></div>
+    </div>
+
+    <div id="email-change-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
+      <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Sending...</p>
+    </div>
+  </div>
+</div>
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const changeEmailBtn = document.getElementById('change-email-btn');
     const emailChangeModal = document.getElementById('email-change-modal');
+    const verificationModal = document.getElementById('email-change-verification-modal');
     const emailChangeForm = document.getElementById('email-change-form');
     const cancelBtn = document.getElementById('email-change-cancel-btn');
     const submitBtn = document.getElementById('email-change-submit-btn');
@@ -152,11 +173,25 @@
     const successDiv = document.getElementById('email-change-success');
     const newEmailInput = document.getElementById('new-email-input');
     const currentPasswordInput = document.getElementById('current-password-input');
+    const loadingDiv = document.getElementById('email-change-turnstile-loading');
+    const containerDiv = document.getElementById('email-change-turnstile-container');
+    const turnstileSuccessDiv = document.getElementById('email-change-turnstile-success');
+    const skipTurnstile = <%= ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" ? "true" : "false" %>;
+
+    if (!changeEmailBtn || !emailChangeModal || !verificationModal || !emailChangeForm) {
+      return;
+    }
+
+    let verificationComplete = false;
+    let isSubmitting = false;
+    let turnstileToken = '';
 
     changeEmailBtn.addEventListener('click', function() {
       emailChangeModal.style.display = 'flex';
       newEmailInput.value = '';
       currentPasswordInput.value = '';
+      verificationComplete = false;
+      turnstileToken = '';
       errorDiv.style.display = 'none';
       successDiv.style.display = 'none';
     });
@@ -174,13 +209,77 @@
     emailChangeForm.addEventListener('submit', function(e) {
       e.preventDefault();
 
+      if (isSubmitting) {
+        return;
+      }
+
       const newEmail = newEmailInput.value.trim();
       const currentPassword = currentPasswordInput.value;
 
       errorDiv.style.display = 'none';
       successDiv.style.display = 'none';
+
+      if (skipTurnstile) {
+        submitEmailChange(newEmail, currentPassword, null);
+        return;
+      }
+
+      verificationComplete = false;
+      turnstileToken = '';
+      verificationModal.style.display = 'flex';
+      loadingDiv.style.display = 'block';
+      containerDiv.style.display = 'none';
+      turnstileSuccessDiv.style.display = 'none';
+
+      setTimeout(renderTurnstile, 300);
+    });
+
+    function renderTurnstile() {
+      if (typeof turnstile === 'undefined') {
+        setTimeout(renderTurnstile, 200);
+        return;
+      }
+
+      loadingDiv.style.display = 'none';
+      containerDiv.style.display = 'block';
+
+      const widget = containerDiv.querySelector('.cf-turnstile');
+      if (widget.dataset.rendered === 'true') {
+        widget.innerHTML = '';
+        widget.removeAttribute('data-rendered');
+      }
+
+      turnstile.render(widget, {
+        sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+        theme: 'light',
+        callback: function(token) {
+          verificationComplete = true;
+          turnstileToken = token;
+          containerDiv.style.display = 'none';
+          turnstileSuccessDiv.style.display = 'block';
+
+          setTimeout(function() {
+            verificationModal.style.display = 'none';
+            submitEmailChange(newEmailInput.value.trim(), currentPasswordInput.value, token);
+          }, 800);
+        }
+      });
+      widget.dataset.rendered = 'true';
+    }
+
+    function submitEmailChange(newEmail, currentPassword, token) {
+      isSubmitting = true;
       submitBtn.disabled = true;
       submitBtn.textContent = 'Sending...';
+
+      const payload = {
+        new_email: newEmail,
+        current_password: currentPassword
+      };
+
+      if (token) {
+        payload.cf_turnstile_response = token;
+      }
 
       fetch('<%= request_email_change_path %>', {
         method: 'POST',
@@ -188,10 +287,7 @@
           'Content-Type': 'application/json',
           'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({
-          new_email: newEmail,
-          current_password: currentPassword
-        })
+        body: JSON.stringify(payload)
       })
       .then(response => response.json())
       .then(data => {
@@ -199,7 +295,7 @@
           successDiv.textContent = data.message;
           successDiv.style.display = 'block';
           emailChangeForm.reset();
-          
+
           setTimeout(() => {
             emailChangeModal.style.display = 'none';
           }, 3000);
@@ -216,7 +312,16 @@
       .finally(() => {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Send Verification Email';
+        isSubmitting = false;
+        verificationComplete = false;
+        turnstileToken = '';
       });
+    }
+
+    verificationModal.addEventListener('click', function(e) {
+      if (e.target === verificationModal && !verificationComplete) {
+        verificationModal.style.display = 'none';
+      }
     });
   });
 </script>

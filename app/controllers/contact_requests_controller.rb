@@ -2,22 +2,19 @@ class ContactRequestsController < ApplicationController
   skip_before_action :authenticate_user!
 
   def create
-    # Skip Turnstile verification if disabled (useful for local development)
-    unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true"
-      # Verify Turnstile first
-      turnstile_token = params.dig(:contact_request, :cf_turnstile_response)
-
-      unless turnstile_token.present?
+    turnstile_token = params.dig(:contact_request, :cf_turnstile_response)
+    unless verify_turnstile_for_html!(
+      token: turnstile_token,
+      on_missing: -> {
         flash.now[:alert] = "Bot verification is required. Please complete the CAPTCHA."
-        return render "landing/index", status: :unprocessable_entity
-      end
-
-      service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
-
-      unless service.verify
+        render "landing/index", status: :unprocessable_entity
+      },
+      on_failed: -> {
         flash.now[:alert] = "Bot verification failed. Please try again."
-        return render "landing/index", status: :unprocessable_entity
-      end
+        render "landing/index", status: :unprocessable_entity
+      }
+    )
+      return
     end
 
     @contact_request = ContactRequest.new(contact_request_params)

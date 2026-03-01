@@ -5,8 +5,9 @@ module Users
 
       # Check if email is verified
       if resource.email_verified_at.blank?
+        EmailVerificationService.new(resource).send_verification_email(request.host_with_port, request.scheme.to_sym)
         sign_out(resource)
-        redirect_to pending_email_verification_path, alert: "Please verify your email before logging in. A verification link has been sent to your email."
+        redirect_to pending_email_verification_path(email: resource.email), alert: "Please verify your email before logging in."
         return
       end
 

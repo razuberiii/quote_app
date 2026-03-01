@@ -201,20 +201,21 @@
           return;
         }
 
-        // If verification already complete, submit
+        // If verification already complete, submit form
         if (verificationComplete && turnstileResponse.value) {
           contactForm.submit();
           return;
         }
 
-        // Show modal
-        if (!modalOpen) {
-          modal.style.display = 'flex';
-          modalOpen = true;
-          
-          // Wait for Turnstile API to load, then render
-          setTimeout(renderTurnstile, 300);
-        }
+        // Show modal (reset states first)
+        modal.style.display = 'flex';
+        modalOpen = true;
+        loadingDiv.style.display = 'block';
+        containerDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+        
+        // Wait for Turnstile API to load, then render
+        setTimeout(renderTurnstile, 300);
       });
 
       function renderTurnstile() {

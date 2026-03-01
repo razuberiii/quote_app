@@ -27,6 +27,7 @@ module Users
 
       unless turnstile_token.present?
         @validation_error = "Bot verification is required. Please complete the CAPTCHA."
+        build_resource
         render :new, status: :unprocessable_entity
         return
       end
@@ -35,8 +36,8 @@ module Users
 
       unless service.verify
         @validation_error = "Bot verification failed. Please try again."
+        build_resource
         render :new, status: :unprocessable_entity
-        nil
       end
     end
 

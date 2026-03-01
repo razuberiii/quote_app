@@ -128,7 +128,7 @@
     <p style="margin-top: 12px; font-size: 0.95em; color: #666;">Built for teams who need clear revision control and buyer visibility.</p>
   </div>
 
-  <%= form_with model: (@contact_request || ContactRequest.new), url: contact_requests_path, local: true, class: "marketing-contact-form" do |f| %>
+  <%= form_with model: (@contact_request || ContactRequest.new), url: contact_requests_path, local: true, class: "marketing-contact-form", id: "contact-form" do |f| %>
     <%= f.hidden_field :website, value: "", autocomplete: "off" %>
     <div class="marketing-contact-grid">
       <div>
@@ -150,18 +150,71 @@
     </div>
     
     <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-      <!-- Cloudflare Turnstile -->
-      <div style="margin: 20px 0; display: flex; justify-content: center;">
+      <!-- Cloudflare Turnstile - Hidden by default -->
+      <div id="contact-turnstile-container" style="margin: 20px 0; display: none; text-align: center; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">Please verify you're human:</p>
         <div class="cf-turnstile"></div>
         <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response_contact" %>
       </div>
     <% end %>
 
     <div class="marketing-contact-actions">
-      <%= f.submit "Send Message", class: "btn btn-primary" %>
+      <%= f.submit "Send Message", class: "btn btn-primary", id: "contact-submit-btn" %>
       <span>or <%= mail_to contact_email, "email us directly", subject: "Rubusoo Inquiry" %></span>
     </div>
   <% end %>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const contactForm = document.getElementById('contact-form');
+      const turnstileContainer = document.getElementById('contact-turnstile-container');
+      const submitBtn = document.getElementById('contact-submit-btn');
+      const turnstileResponse = document.getElementById('cf_turnstile_response_contact');
+      let turnstileShown = false;
+
+      if (contactForm && turnstileContainer && submitBtn) {
+        submitBtn.addEventListener('click', function(e) {
+          // If Turnstile not shown yet, show it and prevent submit
+          if (!turnstileShown) {
+            e.preventDefault();
+            turnstileContainer.style.display = 'block';
+            turnstileShown = true;
+            
+            // Scroll to verification
+            turnstileContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // Re-render Turnstile if not already rendered
+            setTimeout(() => {
+              const widget = turnstileContainer.querySelector('.cf-turnstile');
+              if (widget && !widget.dataset.rendered) {
+                if (typeof turnstile !== 'undefined') {
+                  turnstile.render(widget, {
+                    sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+                    theme: 'light',
+                    callback: function(token) {
+                      turnstileResponse.value = token;
+                    }
+                  });
+                  widget.dataset.rendered = 'true';
+                }
+              }
+            }, 100);
+            return false;
+          }
+          
+          // If Turnstile shown but not completed, prevent submit
+          if (!turnstileResponse.value) {
+            e.preventDefault();
+            alert('Please complete the verification.');
+            return false;
+          }
+          
+          // Allow form submission
+          return true;
+        });
+      }
+    });
+  </script>
 </section>
 
 <footer class="marketing-footer">

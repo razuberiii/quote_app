@@ -54,23 +54,8 @@ module Users
     def send_verification_email
       return unless resource.persisted?
 
-      token = SecureRandom.hex(32)
-      resource.update(
-        email_verification_token: token,
-        email_verification_token_sent_at: Time.current
-      )
-
-      # Create the verification URL with host and protocol
-      verification_url = email_verification_url(
-        token: token,
-        protocol: request.scheme,
-        host: request.host_with_port
-      )
-
-      EmailVerificationMailer.with(
-        user: resource,
-        verification_link: verification_url
-      ).verification_email.deliver_later
+      service = EmailVerificationService.new(resource)
+      service.send_verification_email(request.host_with_port, request.scheme.to_sym)
     end
 
     def successful_new_user_registration?

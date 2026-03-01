@@ -7,10 +7,92 @@
         <hr/>
         <p>Please check your email for a verification link. The link will expire in 15 minutes.</p>
         <p class="mb-0">
-          If you don't see the verification email, please check your spam folder or 
-          <%= link_to "sign up", new_user_registration_path %> again to receive a new verification link.
+          If you don't see the verification email, please check your spam folder.
         </p>
+      </div>
+
+      <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
+        <h5 style="margin-top: 0;">Didn't receive the email?</h5>
+        <p style="margin: 10px 0 20px 0; font-size: 0.95em; color: #666;">
+          We can send a new verification link to your email address. You can request a new one every 60 seconds.
+        </p>
+        
+        <button id="resend-btn" class="btn btn-primary" type="button">
+          Resend Verification Email
+        </button>
+        
+        <div id="resend-message" style="display: none; margin-top: 15px; padding: 12px; border-radius: 4px;" role="alert">
+          <span id="resend-message-text"></span>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center; color: #999; font-size: 0.9em;">
+        <%= link_to "Sign up again", new_user_registration_path %> to use a different email address
       </div>
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const resendBtn = document.getElementById('resend-btn');
+    const messageDiv = document.getElementById('resend-message');
+    const messageText = document.getElementById('resend-message-text');
+    let resendCountdown = null;
+
+    resendBtn.addEventListener('click', function() {
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending...';
+      messageDiv.style.display = 'none';
+
+      fetch('<%= email_verifications_resend_path %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          messageDiv.className = 'alert alert-success';
+          messageText.textContent = '✓ ' + data.message;
+          messageDiv.style.display = 'block';
+          
+          // Start cooldown timer
+          startResendCooldown(60);
+        } else {
+          messageDiv.className = 'alert alert-danger';
+          messageText.textContent = '✗ ' + (data.error || 'Failed to send email');
+          messageDiv.style.display = 'block';
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Verification Email';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        messageDiv.className = 'alert alert-danger';
+        messageText.textContent = '✗ An error occurred. Please try again.';
+        messageDiv.style.display = 'block';
+        resendBtn.disabled = false;
+        resendBtn.textContent = 'Resend Verification Email';
+      });
+    });
+
+    function startResendCooldown(seconds) {
+      resendBtn.disabled = true;
+      let remaining = seconds;
+
+      resendCountdown = setInterval(() => {
+        remaining--;
+        resendBtn.textContent = `Resend (${remaining}s)`;
+        
+        if (remaining <= 0) {
+          clearInterval(resendCountdown);
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend Verification Email';
+        }
+      }, 1000);
+    }
+  });
+</script>

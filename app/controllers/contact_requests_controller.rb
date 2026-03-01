@@ -6,14 +6,14 @@ class ContactRequestsController < ApplicationController
     unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true"
       # Verify Turnstile first
       turnstile_token = params.dig(:contact_request, :cf_turnstile_response)
-      
+
       unless turnstile_token.present?
         flash.now[:alert] = "Bot verification is required. Please complete the CAPTCHA."
         return render "landing/index", status: :unprocessable_entity
       end
 
       service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
-      
+
       unless service.verify
         flash.now[:alert] = "Bot verification failed. Please try again."
         return render "landing/index", status: :unprocessable_entity

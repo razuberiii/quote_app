@@ -64,13 +64,26 @@
 <section class="team-members-panel">
   <h2>Security Settings</h2>
   <p class="team-members-hint">Change email or password here. Current password is required for security updates.</p>
+
+  <!-- Email Display & Change -->
+  <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
+    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Email Address</label>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <span style="padding: 8px 12px; background: #f5f5f5; border-radius: 4px; color: #666; flex: 1;">
+        <%= resource.email %>
+      </span>
+      <button type="button" class="btn btn-secondary" id="change-email-btn" style="white-space: nowrap;">
+        Change Email
+      </button>
+    </div>
+    <p style="margin-top: 8px; font-size: 0.9em; color: #999;">
+      You'll need to verify the new email address before it becomes active.
+    </p>
+  </div>
+
+  <!-- Password Change Form -->
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, data: { turbo: false, dirty_guard: true } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
-
-    <div>
-      <%= f.label :email %>
-      <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-    </div>
 
     <div>
       <%= f.label :password, "New password (optional)" %>
@@ -98,3 +111,112 @@
     <%= link_to "Open Invitations", team_invitations_path %>
   </p>
 </section>
+<!-- Email Change Modal -->
+<div id="email-change-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+    <h3 style="margin: 0 0 10px 0; color: #333;">Change Email Address</h3>
+    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">We'll send a verification link to your new email address. You must click it to complete the change.</p>
+
+    <form id="email-change-form">
+      <div style="margin-bottom: 15px;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;">New Email Address</label>
+        <input type="email" id="new-email-input" required placeholder="your-new-email@example.com" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;">Current Password</label>
+        <input type="password" id="current-password-input" required placeholder="Enter your password to confirm" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+        <p style="margin: 6px 0 0 0; font-size: 0.85em; color: #999;">For security, we need to verify your password.</p>
+      </div>
+
+      <div id="email-change-error" style="display: none; margin-bottom: 15px; padding: 12px; background: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c33; font-size: 14px;"></div>
+
+      <div id="email-change-success" style="display: none; margin-bottom: 15px; padding: 12px; background: #efe; border: 1px solid #cfc; border-radius: 4px; color: #3c3; font-size: 14px;"></div>
+
+      <div style="display: flex; gap: 10px;">
+        <button type="submit" class="btn btn-primary" id="email-change-submit-btn" style="flex: 1;">Send Verification Email</button>
+        <button type="button" class="btn btn-secondary" id="email-change-cancel-btn" style="flex: 1;">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const changeEmailBtn = document.getElementById('change-email-btn');
+    const emailChangeModal = document.getElementById('email-change-modal');
+    const emailChangeForm = document.getElementById('email-change-form');
+    const cancelBtn = document.getElementById('email-change-cancel-btn');
+    const submitBtn = document.getElementById('email-change-submit-btn');
+    const errorDiv = document.getElementById('email-change-error');
+    const successDiv = document.getElementById('email-change-success');
+    const newEmailInput = document.getElementById('new-email-input');
+    const currentPasswordInput = document.getElementById('current-password-input');
+
+    changeEmailBtn.addEventListener('click', function() {
+      emailChangeModal.style.display = 'flex';
+      newEmailInput.value = '';
+      currentPasswordInput.value = '';
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+    });
+
+    cancelBtn.addEventListener('click', function() {
+      emailChangeModal.style.display = 'none';
+    });
+
+    emailChangeModal.addEventListener('click', function(e) {
+      if (e.target === emailChangeModal) {
+        emailChangeModal.style.display = 'none';
+      }
+    });
+
+    emailChangeForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const newEmail = newEmailInput.value.trim();
+      const currentPassword = currentPasswordInput.value;
+
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      fetch('<%= request_email_change_path %>', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+          new_email: newEmail,
+          current_password: currentPassword
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          successDiv.textContent = data.message;
+          successDiv.style.display = 'block';
+          emailChangeForm.reset();
+          
+          setTimeout(() => {
+            emailChangeModal.style.display = 'none';
+          }, 3000);
+        } else {
+          errorDiv.textContent = data.error || 'An error occurred';
+          errorDiv.style.display = 'block';
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        errorDiv.textContent = 'Failed to send verification email. Please try again.';
+        errorDiv.style.display = 'block';
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send Verification Email';
+      });
+    });
+  });
+</script>

@@ -26,6 +26,7 @@ module Users
       turnstile_token = params.dig(:user, :cf_turnstile_response)
 
       unless turnstile_token.present?
+        @show_turnstile_modal = true
         @validation_error = "Bot verification is required. Please complete the CAPTCHA."
         build_resource
         render :new, status: :unprocessable_entity
@@ -35,6 +36,7 @@ module Users
       service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
 
       unless service.verify
+        @show_turnstile_modal = true
         @validation_error = "Bot verification failed. Please try again."
         build_resource
         render :new, status: :unprocessable_entity

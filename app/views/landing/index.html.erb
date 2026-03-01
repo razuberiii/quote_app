@@ -150,12 +150,7 @@
     </div>
     
     <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-      <!-- Cloudflare Turnstile - Hidden by default -->
-      <div id="contact-turnstile-container" style="margin: 20px 0; display: none; text-align: center; padding: 20px; background: #f5f5f5; border-radius: 8px;">
-        <p style="margin: 0 0 15px 0; color: #666; font-size: 14px;">Please verify you're human:</p>
-        <div class="cf-turnstile"></div>
-        <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response_contact" %>
-      </div>
+      <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response_contact" %>
     <% end %>
 
     <div class="marketing-contact-actions">
@@ -164,53 +159,112 @@
     </div>
   <% end %>
 
+  <!-- Verification Modal -->
+  <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
+    <div id="verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+      <div style="background: white; padding: 40px; border-radius: 12px; max-width: 420px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
+        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
+        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+        
+        <div id="turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+          <p>Loading verification...</p>
+        </div>
+        
+        <div id="turnstile-container" style="display: none; text-align: center;">
+          <div class="cf-turnstile"></div>
+        </div>
+        
+        <div id="turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
+          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const contactForm = document.getElementById('contact-form');
-      const turnstileContainer = document.getElementById('contact-turnstile-container');
       const submitBtn = document.getElementById('contact-submit-btn');
+      const modal = document.getElementById('verification-modal');
       const turnstileResponse = document.getElementById('cf_turnstile_response_contact');
-      let turnstileShown = false;
+      const loadingDiv = document.getElementById('turnstile-loading');
+      const containerDiv = document.getElementById('turnstile-container');
+      const successDiv = document.getElementById('turnstile-success');
+      let verificationComplete = false;
+      let modalOpen = false;
 
-      if (contactForm && turnstileContainer && submitBtn) {
-        submitBtn.addEventListener('click', function(e) {
-          // If Turnstile not shown yet, show it and prevent submit
-          if (!turnstileShown) {
-            e.preventDefault();
-            turnstileContainer.style.display = 'block';
-            turnstileShown = true;
+      submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        if (!modal) {
+          contactForm.submit();
+          return;
+        }
+
+        // If verification already complete, submit
+        if (verificationComplete && turnstileResponse.value) {
+          contactForm.submit();
+          return;
+        }
+
+        // Show modal
+        if (!modalOpen) {
+          modal.style.display = 'flex';
+          modalOpen = true;
+          
+          // Wait for Turnstile API to load, then render
+          setTimeout(renderTurnstile, 300);
+        }
+      });
+
+      function renderTurnstile() {
+        if (typeof turnstile === 'undefined') {
+          // API not loaded yet, retry
+          setTimeout(renderTurnstile, 200);
+          return;
+        }
+
+        // Hide loading, show container
+        loadingDiv.style.display = 'none';
+        containerDiv.style.display = 'block';
+
+        const widget = containerDiv.querySelector('.cf-turnstile');
+        
+        // Clear any previous render
+        if (widget.dataset.rendered === 'true') {
+          widget.innerHTML = '';
+          widget.removeAttribute('data-rendered');
+        }
+
+        turnstile.render(widget, {
+          sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+          theme: 'light',
+          callback: function(token) {
+            turnstileResponse.value = token;
+            verificationComplete = true;
             
-            // Scroll to verification
-            turnstileContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Show success message
+            containerDiv.style.display = 'none';
+            successDiv.style.display = 'block';
             
-            // Re-render Turnstile if not already rendered
+            // Auto-submit after 1 second
             setTimeout(() => {
-              const widget = turnstileContainer.querySelector('.cf-turnstile');
-              if (widget && !widget.dataset.rendered) {
-                if (typeof turnstile !== 'undefined') {
-                  turnstile.render(widget, {
-                    sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
-                    theme: 'light',
-                    callback: function(token) {
-                      turnstileResponse.value = token;
-                    }
-                  });
-                  widget.dataset.rendered = 'true';
-                }
-              }
-            }, 100);
-            return false;
+              modal.style.display = 'none';
+              modalOpen = false;
+              contactForm.submit();
+            }, 1000);
           }
-          
-          // If Turnstile shown but not completed, prevent submit
-          if (!turnstileResponse.value) {
-            e.preventDefault();
-            alert('Please complete the verification.');
-            return false;
+        });
+        widget.dataset.rendered = 'true';
+      }
+
+      // Close modal on background click
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal && !verificationComplete) {
+            modal.style.display = 'none';
+            modalOpen = false;
           }
-          
-          // Allow form submission
-          return true;
         });
       }
     });

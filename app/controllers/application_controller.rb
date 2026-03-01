@@ -1,5 +1,6 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user!
+  before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
   helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color
 
@@ -7,6 +8,26 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   private
+
+  def ensure_email_verified!
+    # Redirect to pending verification page if user is logged in but email not verified
+    # Skip this check for certain controllers/actions
+    return if should_skip_email_verification_check?
+    return if current_user.blank?
+    return if current_user.email_verified?
+
+    redirect_to pending_email_verification_path, alert: "Please verify your email address to continue. Check your email for a verification link."
+  end
+
+  def should_skip_email_verification_check?
+    # Skip for Devise controllers (login, signup recovery etc)
+    return true if devise_controller?
+    # Skip for email verifications controller
+    return true if controller_name == "email_verifications"
+    # Skip for users signout
+    return true if controller_name == "devise_sessions" && action_name == "destroy"
+    false
+  end
 
   def require_admin!
     redirect_to root_path, alert: "Not authorized." unless current_user&.admin?

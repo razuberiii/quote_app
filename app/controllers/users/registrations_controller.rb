@@ -4,12 +4,25 @@ module Users
     before_action :verify_turnstile, only: :create
     after_action :send_verification_email, only: :create, if: :successful_new_user_registration?
 
-    protected
+    def create
+      build_resource(sign_up_params)
 
-    # Allow profile-only updates without asking for current password.
-    def update_resource(resource, params)
-      if profile_only_update?(resource, params)
-        resource.update_without_password(params.except(:current_password, :password, :password_confirmation))
+      # Call verify_turnstile before creating the user
+      # (verify_turnstile will render :new if validation fails)
+      
+      resource.save
+      if resource.persisted?
+        # Email verification email will be sent via after_action
+        # Redirect to pending verification page instead of auto-logging in
+        yield resource if block_given?
+        respond_with resource, location: pending_email_verification_path
+      else
+        clean_up_passwords resource
+        set_minimum_password_length
+        respond_with resource
+      end
+    end
+
       else
         super
       end

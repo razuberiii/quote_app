@@ -87,62 +87,48 @@
       const containerDiv = document.getElementById('signup-turnstile-container');
       const successDiv = document.getElementById('signup-turnstile-success');
       
-      if (!signupForm) {
-        return; // Form not found, skip
+      if (!signupForm || !modal) {
+        return; // Form or modal not found, skip
       }
 
       let verificationComplete = false;
       let modalOpen = false;
-      let showModalOnSubmit = <%= @show_turnstile_modal ? 'true' : 'false' %>;
-
-      // If there was a validation error, show modal immediately
-      if (showModalOnSubmit && modal) {
-        setTimeout(() => {
-          modal.style.display = 'flex';
-          modalOpen = true;
-          renderTurnstile();
-        }, 200);
-      }
 
       submitBtn.addEventListener('click', function(e) {
-        if (!modal) {
-          return;
-        }
-
         e.preventDefault();
 
-        // If verification already complete, submit
+        // If verification already complete, submit form
         if (verificationComplete && turnstileResponse.value) {
           signupForm.submit();
           return;
         }
 
-        // If not yet shown, show modal
-        if (!modalOpen) {
-          modal.style.display = 'flex';
-          modalOpen = true;
-          
-          // Reset form states
-          loadingDiv.style.display = 'block';
-          containerDiv.style.display = 'none';
-          successDiv.style.display = 'none';
-          verificationComplete = false;
-          
-          setTimeout(renderTurnstile, 300);
-        }
+        // Show modal (reset states first)
+        modal.style.display = 'flex';
+        modalOpen = true;
+        loadingDiv.style.display = 'block';
+        containerDiv.style.display = 'none';
+        successDiv.style.display = 'none';
+        verificationComplete = false;
+        
+        // Wait for Turnstile API to load, then render
+        setTimeout(renderTurnstile, 300);
       });
 
       function renderTurnstile() {
         if (typeof turnstile === 'undefined') {
+          // API not loaded yet, retry
           setTimeout(renderTurnstile, 200);
           return;
         }
 
+        // Hide loading, show container
         loadingDiv.style.display = 'none';
         containerDiv.style.display = 'block';
 
         const widget = containerDiv.querySelector('.cf-turnstile');
         
+        // Clear any previous render
         if (widget.dataset.rendered === 'true') {
           widget.innerHTML = '';
           widget.removeAttribute('data-rendered');
@@ -155,9 +141,11 @@
             turnstileResponse.value = token;
             verificationComplete = true;
             
+            // Show success message
             containerDiv.style.display = 'none';
             successDiv.style.display = 'block';
             
+            // Auto-submit after 1 second
             setTimeout(() => {
               modal.style.display = 'none';
               modalOpen = false;
@@ -168,14 +156,13 @@
         widget.dataset.rendered = 'true';
       }
 
-      if (modal) {
-        modal.addEventListener('click', function(e) {
-          if (e.target === modal && !verificationComplete) {
-            modal.style.display = 'none';
-            modalOpen = false;
-          }
-        });
-      }
+      // Close modal on background click
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal && !verificationComplete) {
+          modal.style.display = 'none';
+          modalOpen = false;
+        }
+      });
     });
   </script>
 </section>

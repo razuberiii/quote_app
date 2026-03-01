@@ -76,7 +76,7 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initializeSignupForm() {
       const signupForm = document.getElementById('signup-form');
       const submitBtn = document.getElementById('signup-submit-btn');
       const modal = document.getElementById('signup-verification-modal');
@@ -91,6 +91,8 @@
         return;
       }
 
+      // Clear any old token and state
+      turnstileResponse.value = '';
       let verificationComplete = false;
       let isSubmitting = false;
 
@@ -184,6 +186,11 @@
         verificationComplete = false;
         isSubmitting = false;
       });
-    });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializeSignupForm);
+    // Re-initialize on Turbo navigation
+    document.addEventListener('turbo:load', initializeSignupForm);
   </script>
 </section>

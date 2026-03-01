@@ -27,6 +27,9 @@
       </div>
 
       <div style="margin-top: 20px; text-align: center; color: #999; font-size: 0.9em;">
+        <% if @pending_email.present? %>
+          <div style="margin-bottom: 8px;">Current email: <strong><%= @pending_email %></strong></div>
+        <% end %>
         <%= link_to "Sign up again", new_user_registration_path %> to use a different email address
       </div>
     </div>
@@ -67,6 +70,7 @@
     let verificationComplete = false;
     let isSubmitting = false;
     let resendCountdown = null;
+    const pendingEmail = '<%= j(@pending_email.to_s) %>';
 
     resendBtn.addEventListener('click', function() {
       // Prevent multiple submissions
@@ -131,6 +135,9 @@
       modal.style.display = 'none';
 
       const data = token ? { cf_turnstile_response: token } : {};
+      if (pendingEmail) {
+        data.email = pendingEmail;
+      }
 
       fetch('<%= resend_email_verifications_path %>', {
         method: 'POST',

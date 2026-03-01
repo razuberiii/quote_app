@@ -18,13 +18,13 @@ class EmailVerificationService
     end
 
     # Mark email as verified and clear token
-    user.update(
+    updated = user.update(
       email_verified_at: Time.current,
       email_verification_token: nil,
       email_verification_token_sent_at: nil
     )
 
-    true
+    updated
   end
 
   def self.can_resend?(user)
@@ -55,6 +55,8 @@ class EmailVerificationService
     end
 
     token = generate_token
+    return false if token.blank?
+
     verification_url = Rails.application.routes.url_helpers.email_verification_url(
       token: token,
       host: host || Rails.application.config.action_mailer.default_url_options[:host],
@@ -69,11 +71,11 @@ class EmailVerificationService
 
   def generate_token
     token = SecureRandom.hex(32)
-    @user.update(
+    updated = @user.update(
       email_verification_token: token,
       email_verification_token_sent_at: Time.current
     )
-    token
+    updated ? token : nil
   end
 
   def send_email(verification_url)

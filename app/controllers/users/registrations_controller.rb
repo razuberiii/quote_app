@@ -1,5 +1,7 @@
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    include TurnstileVerifiable
+
     before_action :purge_avatar_if_requested, only: :update
     before_action :verify_turnstile, only: :create
     after_action :send_verification_email, only: :create, if: :successful_new_user_registration?
@@ -15,7 +17,7 @@ module Users
         # Email verification email will be sent via after_action
         # Redirect to pending verification page instead of auto-logging in
         yield resource if block_given?
-        respond_with resource, location: pending_email_verification_path
+        respond_with resource, location: pending_email_verification_path(email: resource.email)
       else
         clean_up_passwords resource
         set_minimum_password_length
@@ -26,28 +28,23 @@ module Users
     protected
 
     def verify_turnstile
-      # Skip Turnstile verification if disabled (useful for local development)
-      if ENV["SKIP_TURNSTILE_VERIFICATION"] == "true"
-        return
-      end
-
       turnstile_token = params.dig(:user, :cf_turnstile_response)
-
-      unless turnstile_token.present?
-        @show_turnstile_modal = true
-        @validation_error = "Bot verification is required. Please complete the CAPTCHA."
-        build_resource
-        render :new, status: :unprocessable_entity
+      unless verify_turnstile_for_html!(
+        token: turnstile_token,
+        on_missing: -> {
+          @show_turnstile_modal = true
+          @validation_error = "Bot verification is required. Please complete the CAPTCHA."
+          build_resource
+          render :new, status: :unprocessable_entity
+        },
+        on_failed: -> {
+          @show_turnstile_modal = true
+          @validation_error = "Bot verification failed. Please try again."
+          build_resource
+          render :new, status: :unprocessable_entity
+        }
+      )
         return
-      end
-
-      service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
-
-      unless service.verify
-        @show_turnstile_modal = true
-        @validation_error = "Bot verification failed. Please try again."
-        build_resource
-        render :new, status: :unprocessable_entity
       end
     end
 

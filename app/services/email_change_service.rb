@@ -30,7 +30,9 @@ class EmailChangeService
     end
 
     # Mark email as changed and clear token
-    user.update(
+    return false if user.pending_email.blank?
+
+    updated = user.update(
       email: user.pending_email,
       email_verified_at: Time.current,
       email_change_token: nil,
@@ -38,10 +40,10 @@ class EmailChangeService
       pending_email: nil
     )
 
-    true
+    updated
   end
 
-  def self.generate_and_send(user, new_email)
+  def self.generate_and_send(user, new_email, host: nil, protocol: nil)
     return false if user.blank? || new_email.blank?
 
     # Check if email is already in use
@@ -50,23 +52,26 @@ class EmailChangeService
     end
 
     token = SecureRandom.hex(32)
-    user.update(
+    updated = user.update(
       pending_email: new_email,
       email_change_token: token,
       email_change_sent_at: Time.current
     )
+    return false unless updated
 
-    send_email(user, new_email, token)
+    send_email(user, new_email, token, host: host, protocol: protocol)
     true
   end
 
   private
 
-  def self.send_email(user, new_email, token)
+  def self.send_email(user, new_email, token, host: nil, protocol: nil)
     EmailChangeMailer.with(
       user: user,
       new_email: new_email,
-      token: token
+      token: token,
+      host: host,
+      protocol: protocol
     ).confirmation_email.deliver_later
   end
 end

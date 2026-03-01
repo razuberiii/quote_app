@@ -71,6 +71,8 @@ env:
     DB_HOST: quote-app-db
     DB_PORT: 5432
     DB_USERNAME: postgres
+    APP_HOST: www.rubusoo.com
+    RAILS_PROTOCOL: https
 
     # Log everything from Rails
     # RAILS_LOG_LEVEL: debug

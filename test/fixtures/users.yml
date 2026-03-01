@@ -2,8 +2,12 @@ one:
   email: user_one@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   company: one
+  company_role: owner
+  email_verified_at: <%= 1.day.ago %>
 
 two:
   email: user_two@example.com
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   company: two
+  company_role: owner
+  email_verified_at: <%= 1.day.ago %>

@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::Base
+  include TurnstileVerifiable
+
   before_action :authenticate_user!
   before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
@@ -22,7 +24,7 @@ class ApplicationController < ActionController::Base
     # These are users who have no verification token/timestamp, meaning they signed up before this feature
     return if current_user.email_verification_token.blank? && current_user.email_verification_token_sent_at.blank?
 
-    redirect_to pending_email_verification_path, alert: "Please verify your email address to continue. Check your email for a verification link."
+    redirect_to pending_email_verification_path(email: current_user.email), alert: "Please verify your email address to continue. Check your email for a verification link."
   end
 
   def should_skip_email_verification_check?

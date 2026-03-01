@@ -5,6 +5,10 @@ class EmailChangesController < ApplicationController
   def request_change
     @user = current_user
 
+    unless verify_turnstile!
+      return
+    end
+
     # Validate password
     unless @user.valid_password?(params[:current_password])
       return render json: { error: "Invalid password" }, status: :unauthorized
@@ -27,7 +31,12 @@ class EmailChangesController < ApplicationController
     end
 
     # Generate and send confirmation email
-    if EmailChangeService.generate_and_send(@user, new_email)
+    if EmailChangeService.generate_and_send(
+      @user,
+      new_email,
+      host: request.host_with_port,
+      protocol: request.scheme.to_sym
+    )
       render json: {
         success: true,
         message: "Verification email sent to #{new_email}. Please check your email to confirm the change."
@@ -48,5 +57,15 @@ class EmailChangesController < ApplicationController
     else
       render :invalid, status: :unprocessable_entity
     end
+  end
+
+  private
+
+  def verify_turnstile!
+    verify_turnstile_for_json!(
+      token: params[:cf_turnstile_response],
+      missing_message: "Bot verification is required",
+      failed_message: "Bot verification failed. Please try again."
+    )
   end
 end

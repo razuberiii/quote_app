@@ -18,6 +18,10 @@ class ContactRequestsController < ApplicationController
         flash.now[:alert] = "Bot verification failed. Please try again."
         return render "landing/index", status: :unprocessable_entity
       end
+    end
+
+    @contact_request = ContactRequest.new(contact_request_params)
+
     if @contact_request.valid?
       ContactMailer.with(contact_request: @contact_request).inquiry_email.deliver_now
       redirect_to root_path(anchor: "contact-us"), notice: "Thanks. We received your message and will reply by email."

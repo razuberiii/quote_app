@@ -24,6 +24,9 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
+  # Disable source maps in production to avoid 404 errors on .map files
+  config.assets.js_compressor = Terser.new(mangle: true, compress: { drop_console: true })
+
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   # config.assume_ssl = true
 

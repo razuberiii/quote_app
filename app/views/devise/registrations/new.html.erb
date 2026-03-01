@@ -44,7 +44,7 @@
       <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
         <!-- Cloudflare Turnstile -->
         <div style="margin: 20px 0;">
-          <div class="cf-turnstile" data-sitekey="0x4AAAAAACkKXqa756rWhUr7" data-theme="light"></div>
+          <div class="cf-turnstile"></div>
           <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
         </div>
       <% end %>

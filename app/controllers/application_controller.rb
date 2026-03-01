@@ -10,12 +10,14 @@ class ApplicationController < ActionController::Base
   private
 
   def ensure_email_verified!
-    # Redirect to pending verification page if user is logged in but email not verified
+    # Skip in development environment
+    return if Rails.env.development?
+
     # Skip this check for certain controllers/actions
     return if should_skip_email_verification_check?
     return if current_user.blank?
     return if current_user.email_verified?
-    
+
     # Allow existing users (created before email verification feature) to use the system
     # These are users who have no verification token/timestamp, meaning they signed up before this feature
     return if current_user.email_verification_token.blank? && current_user.email_verification_token_sent_at.blank?

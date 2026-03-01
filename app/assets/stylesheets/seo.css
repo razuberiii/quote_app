@@ -1,0 +1,203 @@
+.seo-page-shell {
+  max-width: 1120px;
+  margin: 14px auto 0;
+  padding: 0 24px 44px;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.seo-page-shell .marketing-section {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 34px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.seo-page-shell .marketing-soft {
+  background: #f8fbff;
+  border: 1px solid #e9eff8;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+  padding: 24px 22px;
+}
+
+.seo-page-toc {
+  padding: 16px 18px 14px;
+  border: 1px solid #e4ecf8;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.seo-page-toc ul {
+  list-style: none;
+  padding-left: 0;
+  margin-top: 0.52rem;
+}
+
+.seo-page-toc li {
+  margin: 0.38rem 0;
+}
+
+.seo-page-toc a {
+  color: #123f8a;
+  text-decoration: none;
+  font-weight: 650;
+  border-bottom: 1px solid transparent;
+  transition:
+    color 180ms ease-out,
+    border-color 180ms ease-out;
+}
+
+.seo-page-toc a:hover {
+  color: #0f2f66;
+  border-color: #9bb5de;
+  text-decoration: none;
+}
+
+.seo-page-shell .marketing-section-head h2 {
+  font-size: clamp(1.34rem, 2vw, 1.62rem);
+  margin-bottom: 0.58rem;
+  letter-spacing: -0.01em;
+  color: #0f2748;
+}
+
+.seo-page-shell .marketing-section-head h1 {
+  font-size: clamp(2.02rem, 3.4vw, 2.86rem);
+  line-height: 1.13;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.72rem;
+  color: #0b1f3d;
+}
+
+.seo-page-shell p,
+.seo-page-shell li {
+  line-height: 1.74;
+  color: #3f5169;
+  font-size: 1.02rem;
+}
+
+.seo-page-shell p,
+.seo-page-shell ul,
+.seo-page-shell ol,
+.seo-page-shell .marketing-section-head p {
+  max-width: 740px;
+}
+
+.seo-page-shell .marketing-section-head p {
+  margin-top: 0.56rem;
+}
+
+.seo-page-shell p + p {
+  margin-top: 0.48rem;
+}
+
+.seo-page-shell ul,
+.seo-page-shell ol {
+  margin-top: 0.8rem;
+  padding-left: 1.15rem;
+}
+
+.seo-page-shell li + li {
+  margin-top: 0.42rem;
+}
+
+.seo-page-shell .table-responsive {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border: 1px solid #e4ecf8;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+}
+
+.seo-page-shell .demo-table {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.seo-page-shell .demo-table thead {
+  background: linear-gradient(90deg, #10284f, #183869);
+  color: #fff;
+}
+
+.seo-page-shell .demo-table tbody tr:hover {
+  background: #f5f9ff;
+  transition: background-color 180ms ease-out;
+}
+
+.seo-page-shell .demo-table th:last-child,
+.seo-page-shell .demo-table td:last-child {
+  background: #eef4ff;
+  font-weight: 600;
+}
+
+.seo-page-shell .seo-cta-block {
+  background: #0f274c;
+  border: 1px solid #223f66;
+  border-radius: 16px;
+  margin-top: 42px;
+  margin-bottom: 30px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+  color: #f8fbff;
+  padding: 34px 22px;
+}
+
+.seo-page-shell .seo-cta-block .marketing-section-head h2,
+.seo-page-shell .seo-cta-block .marketing-section-head p {
+  color: #f8fbff;
+  text-align: center;
+}
+
+.seo-page-shell .seo-cta-block .marketing-section-head p {
+  max-width: 640px;
+  margin: 0.72rem auto 0;
+  color: #dbe8ff;
+}
+
+.seo-page-shell .seo-cta-block .marketing-cta-row {
+  justify-content: center;
+}
+
+.seo-page-shell .marketing-section:not(.seo-page-toc):not(.seo-cta-block) + .marketing-section:not(.seo-page-toc):not(.seo-cta-block) {
+  border-top: 1px solid #e9eef6;
+  padding-top: 32px;
+}
+
+.seo-page-shell .marketing-section .seo-summary {
+  font-weight: 700;
+  color: #203b5b;
+  margin-bottom: 0.12rem;
+}
+
+.seo-page-shell .seo-cta-block .marketing-cta-primary {
+  box-shadow: 0 10px 22px rgba(7, 15, 30, 0.3);
+}
+
+.seo-page-shell .seo-cta-block .marketing-cta-primary:hover {
+  filter: brightness(1.08);
+}
+
+@media (max-width: 768px) {
+  .seo-page-shell {
+    padding: 0 12px 24px;
+  }
+
+  .seo-page-shell .marketing-section {
+    padding: 24px 0;
+  }
+
+  .seo-page-shell .marketing-soft {
+    padding: 16px 14px;
+  }
+
+  .seo-page-shell .seo-cta-block {
+    padding: 26px 16px;
+  }
+}

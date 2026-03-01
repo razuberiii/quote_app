@@ -7,6 +7,10 @@ Rails.application.routes.draw do
   resources :email_verifications, only: :show, param: :token
   get "pending-email-verification", to: "email_verifications#pending", as: :pending_email_verification
 
+  # Email change
+  post "email-change/request", to: "email_changes#request_change", as: :request_email_change
+  get "email-change/confirm/:token", to: "email_changes#confirm", as: :email_change
+
   authenticated :user do
     root "customers#index", as: :authenticated_root
   end

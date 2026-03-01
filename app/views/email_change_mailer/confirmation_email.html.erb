@@ -1,0 +1,25 @@
+<h2>Confirm Your New Email Address</h2>
+<p>Hi <%= @user.full_name.presence || @user.email %>,</p>
+
+<p>You've requested to change your Rubusoo account email to <strong><%= @new_email %></strong>.</p>
+
+<p>Click the button below to confirm this email change:</p>
+
+<div style="text-align: center; margin: 30px 0;">
+  <%= link_to "Confirm Email Change", @confirmation_url, style: "display: inline-block; padding: 10px 20px; background-color: #1F4E79; color: white; text-decoration: none; border-radius: 4px;" %>
+</div>
+
+<p>Or copy and paste this link in your browser:</p>
+<p><code><%= @confirmation_url %></code></p>
+
+<p style="color: #666; font-size: 0.9em;">
+  <strong>This link expires in 15 minutes.</strong><br>
+  If you didn't request this change, you can ignore this email. Your current email will remain unchanged.
+</p>
+
+<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+
+<p style="color: #999; font-size: 0.85em;">
+  © <%= Time.current.year %> Rubusoo. All rights reserved.<br>
+  Built for B2B sales and export teams.
+</p>

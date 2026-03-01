@@ -26,27 +26,42 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
     <script>
       window.addEventListener('load', function() {
-        // Render all Turnstile widgets on the page
-        if (typeof turnstile !== 'undefined') {
-          const turnstileWidgets = document.querySelectorAll('.cf-turnstile');
-          turnstileWidgets.forEach((widget, index) => {
-            // Check if already rendered
-            if (!widget.dataset.rendered) {
-              turnstile.render(widget, {
-                sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
-                theme: 'light',
-                callback: function(token) {
-                  // Find the closest hidden input for this widget's response
-                  const hiddenInput = widget.closest('form')?.querySelector('input[name*="cf_turnstile_response"]');
-                  if (hiddenInput) {
-                    hiddenInput.value = token;
+        // Wait for Turnstile API to load and render all widgets
+        let attempts = 0;
+        const maxAttempts = 30; // 3 seconds max (100ms * 30)
+        
+        const renderWidgets = () => {
+          if (typeof turnstile !== 'undefined') {
+            const turnstileWidgets = document.querySelectorAll('.cf-turnstile');
+            let allRendered = true;
+            
+            turnstileWidgets.forEach((widget) => {
+              // Check if already rendered
+              if (!widget.dataset.rendered) {
+                turnstile.render(widget, {
+                  sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
+                  theme: 'light',
+                  callback: function(token) {
+                    // Find the closest hidden input for this widget's response
+                    const hiddenInput = widget.closest('form')?.querySelector('input[name*="cf_turnstile_response"]');
+                    if (hiddenInput) {
+                      hiddenInput.value = token;
+                    }
                   }
-                }
-              });
-              widget.dataset.rendered = 'true';
+                });
+                widget.dataset.rendered = 'true';
+              }
+            });
+          } else {
+            // Turnstile not loaded yet, retry
+            if (attempts < maxAttempts) {
+              attempts++;
+              setTimeout(renderWidgets, 100);
             }
-          });
-        }
+          }
+        };
+        
+        renderWidgets();
       });
     </script>
   </head>

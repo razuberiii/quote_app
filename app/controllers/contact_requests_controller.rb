@@ -24,7 +24,7 @@ class ContactRequestsController < ApplicationController
 
     if @contact_request.valid?
       ContactMailer.with(contact_request: @contact_request).inquiry_email.deliver_now
-      redirect_to root_path(anchor: "contact-us"), notice: "Thanks. We received your message and will reply by email."
+      redirect_to root_path, notice: "Thanks! We received your message and will reply by email."
     else
       flash.now[:alert] = @contact_request.errors.full_messages.to_sentence
       render "landing/index", status: :unprocessable_entity

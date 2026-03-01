@@ -56,26 +56,24 @@
   </div>
 
   <!-- Verification Modal -->
-  <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-    <div id="signup-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-      <div style="background: white; padding: 40px; border-radius: 12px; max-width: 420px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">
-        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
-        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
-        
-        <div id="signup-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-          <p>Loading verification...</p>
-        </div>
-        
-        <div id="signup-turnstile-container" style="display: none; text-align: center;">
-          <div class="cf-turnstile"></div>
-        </div>
-        
-        <div id="signup-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
-        </div>
+  <div id="signup-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
+    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+      <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
+      <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+      
+      <div id="signup-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+        <p>Loading verification...</p>
+      </div>
+      
+      <div id="signup-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
+        <div class="cf-turnstile"></div>
+      </div>
+      
+      <div id="signup-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
+        <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
       </div>
     </div>
-  <% end %>
+  </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {

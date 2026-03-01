@@ -13,7 +13,7 @@ class ContactMailer < ApplicationMailer
 
     mail(
       to: self.class.contact_email_for_environment,
-      subject: "[Quote App] #{@inquiry_label} inquiry from #{@contact_request.name}",
+      subject: "[Rubusoo] #{@inquiry_label} inquiry from #{@contact_request.name}",
       reply_to: @contact_request.email
     )
   end

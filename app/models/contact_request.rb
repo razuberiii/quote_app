@@ -11,6 +11,7 @@ class ContactRequest
   attribute :inquiry_type, :string, default: "general"
   attribute :message, :string
   attribute :website, :string
+  attribute :cf_turnstile_response, :string
 
   validates :name, presence: true
   validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }

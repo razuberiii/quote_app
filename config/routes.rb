@@ -1,7 +1,11 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
-  devise_for :users, skip: [ :passwords ], controllers: { registrations: "users/registrations" }
+  devise_for :users, skip: [ :passwords ], controllers: { registrations: "users/registrations", sessions: "users/sessions" }
+
+  # Email verification
+  resources :email_verifications, only: :show, param: :token
+  get "pending-email-verification", to: "email_verifications#pending", as: :pending_email_verification
 
   authenticated :user do
     root "customers#index", as: :authenticated_root

@@ -1,6 +1,8 @@
 module Users
   class RegistrationsController < Devise::RegistrationsController
     before_action :purge_avatar_if_requested, only: :update
+    before_action :verify_turnstile, only: :create
+    after_action :send_verification_email, only: :create, if: :successful_new_user_registration?
 
     protected
 
@@ -14,6 +16,56 @@ module Users
     end
 
     private
+
+    def verify_turnstile
+      # Skip Turnstile verification if disabled (useful for local development)
+      if ENV["SKIP_TURNSTILE_VERIFICATION"] == "true"
+        return
+      end
+
+      turnstile_token = params.dig(:user, :cf_turnstile_response)
+
+      unless turnstile_token.present?
+        @validation_error = "Bot verification is required. Please complete the CAPTCHA."
+        render :new, status: :unprocessable_entity
+        return
+      end
+
+      service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
+
+      unless service.verify
+        @validation_error = "Bot verification failed. Please try again."
+        render :new, status: :unprocessable_entity
+        nil
+      end
+    end
+
+    def send_verification_email
+      return unless resource.persisted?
+
+      token = SecureRandom.hex(32)
+      resource.update(
+        email_verification_token: token,
+        email_verification_token_sent_at: Time.current
+      )
+
+      # Create the verification URL with host and protocol
+      verification_url = email_verification_url(
+        token: token,
+        protocol: request.protocol.chop,
+        host: request.host_with_port
+      )
+
+      EmailVerificationMailer.with(
+        user: resource,
+        verification_link: verification_url
+      ).verification_email.deliver_later
+    end
+
+    def successful_new_user_registration?
+      # This is called after the user is created
+      true
+    end
 
     def purge_avatar_if_requested
       return unless raw_account_update_params[:remove_avatar].to_s == "1"

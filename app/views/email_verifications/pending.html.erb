@@ -11,6 +11,20 @@
         </p>
       </div>
 
+      <% if @auto_send_state == "sent" %>
+        <div class="alert alert-success" role="status">
+          We sent a fresh verification email automatically when you tried to log in.
+        </div>
+      <% elsif @auto_send_state == "cooldown" %>
+        <div class="alert alert-warning" role="status">
+          A verification email was sent recently. You can request another one in <strong><%= @auto_send_cooldown %>s</strong>.
+        </div>
+      <% elsif @auto_send_state == "failed" %>
+        <div class="alert alert-warning" role="status">
+          Automatic resend did not complete. Please use the button below to send a new verification email.
+        </div>
+      <% end %>
+
       <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
         <h5 style="margin-top: 0;">Didn't receive the email?</h5>
         <p style="margin: 10px 0 20px 0; font-size: 0.95em; color: #666;">

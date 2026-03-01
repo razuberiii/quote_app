@@ -16,6 +16,8 @@ class EmailVerificationsController < ApplicationController
   def pending
     # Show page for users who need to verify their email before logging in
     @pending_email = current_user&.email.presence || params[:email].to_s.strip.downcase.presence
+    @auto_send_state = params[:auto_send].to_s
+    @auto_send_cooldown = params[:cooldown].to_i
   end
 
   def resend

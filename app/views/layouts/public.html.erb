@@ -1,8 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Quote</title>
+    <title><%= seo_title("Rubusoo Public Quote") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="<%= seo_description %>">
+    <meta name="robots" content="<%= seo_robots %>">
+    <% if seo_canonical_url.present? %>
+      <link rel="canonical" href="<%= seo_canonical_url %>">
+    <% end %>
+    <link rel="icon" href="<%= favicon_href %>" type="image/png">
+    <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
+    <link rel="apple-touch-icon" href="<%= favicon_href %>">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 

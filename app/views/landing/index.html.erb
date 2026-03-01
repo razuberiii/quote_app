@@ -1,4 +1,25 @@
 <% content_for :title, "Rubusoo | Manage Quote Versions. Share with Buyers." %>
+<% content_for :meta_description, "Rubusoo helps B2B sales and export teams manage quote revisions, share live quote links, and export buyer-ready PDF/Excel documents." %>
+<% content_for :canonical_url, root_url %>
+<% content_for :head do %>
+  <script type="application/ld+json">
+    <%= raw({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Rubusoo",
+      "url": root_url,
+      "logo": "#{request.base_url}/icon.png"
+    }.to_json) %>
+  </script>
+  <script type="application/ld+json">
+    <%= raw({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Rubusoo",
+      "url": root_url
+    }.to_json) %>
+  </script>
+<% end %>
 
 <section class="marketing-hero">
   <div class="marketing-hero-bg"></div>

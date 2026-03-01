@@ -1,1 +1,14 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+User-agent: *
+Disallow: /admin
+Disallow: /users
+Disallow: /customers
+Disallow: /products
+Disallow: /quotes
+Disallow: /quote_templates
+Disallow: /team_members
+Disallow: /team_invitations
+Disallow: /company_settings
+Disallow: /pending-email-verification
+Allow: /
+
+Sitemap: https://www.rubusoo.com/sitemap.xml

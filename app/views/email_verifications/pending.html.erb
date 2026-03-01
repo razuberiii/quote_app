@@ -132,7 +132,7 @@
 
       const data = token ? { cf_turnstile_response: token } : {};
 
-      fetch('<%= email_verifications_resend_path %>', {
+      fetch('<%= resend_email_verifications_path %>', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

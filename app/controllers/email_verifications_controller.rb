@@ -23,6 +23,21 @@ class EmailVerificationsController < ApplicationController
       return render json: { error: "Please log in" }, status: :unauthorized
     end
 
+    # Verify Turnstile if not disabled
+    unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true"
+      turnstile_token = params[:cf_turnstile_response]
+
+      unless turnstile_token.present?
+        return render json: { error: "Bot verification is required" }, status: :unprocessable_entity
+      end
+
+      service = TurnstileVerificationService.new(turnstile_token, request.remote_ip)
+
+      unless service.verify
+        return render json: { error: "Bot verification failed. Please try again." }, status: :unprocessable_entity
+      end
+    end
+
     # Check if user can resend (cooldown check)
     if !EmailVerificationService.can_resend?(current_user)
       seconds_left = EmailVerificationService.seconds_until_resend_allowed(current_user)

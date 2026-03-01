@@ -39,7 +39,7 @@ class EmailVerificationService
     return 0 if user.email_verification_token_sent_at.blank?
 
     seconds_elapsed = (Time.current - user.email_verification_token_sent_at).to_i
-    [RESEND_COOLDOWN_SECONDS - seconds_elapsed, 0].max
+    [ RESEND_COOLDOWN_SECONDS - seconds_elapsed, 0 ].max
   end
 
   def initialize(user)

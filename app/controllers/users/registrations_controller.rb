@@ -55,7 +55,7 @@ module Users
       # Create the verification URL with host and protocol
       verification_url = email_verification_url(
         token: token,
-        protocol: request.protocol.chop,
+        protocol: request.scheme,
         host: request.host_with_port
       )
 

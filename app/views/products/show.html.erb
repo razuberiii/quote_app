@@ -1,34 +1,133 @@
-<h1><%= @product.name %></h1>
+<header class="product-show-header">
+  <div>
+    <h1><%= @product.name %></h1>
+    <p class="product-show-meta">
+      SKU <span class="product-sku"><%= @product.sku %></span>
+      <% if @product.product_category.present? %>
+        <span class="product-meta-divider">•</span>
+        <%= @product.product_category %>
+      <% end %>
+      <% if @product.unit.present? %>
+        <span class="product-meta-divider">•</span>
+        Unit: <%= @product.unit %>
+      <% end %>
+    </p>
+  </div>
+
+  <div class="product-show-header-actions">
+    <%= link_to "Edit", edit_product_path(@product), class: "btn btn-secondary" %>
+    <%= button_to "Delete", product_path(@product), method: :delete, data: { turbo_confirm: "Delete this product?" }, class: "btn btn-danger" %>
+  </div>
+</header>
 
 <% if @product.display_image.present? %>
-  <p><%= image_tag @product.display_image, class: "product-main-image" %></p>
-<% end %>
-
-<div class="product-details">
-  <p><strong>SKU:</strong> <span class="product-sku"><%= @product.sku %></span></p>
-  <p><strong>Reference Price (for auto-fill only):</strong> <%= number_with_precision(@product.default_price, precision: 2) %> <span class="product-price-currency"><%= @product.price_currency %></span></p>
-  <p><strong>Quoted In:</strong> <%= @quote_reference_count %> quote(s)</p>
-  <p><strong>Last Referenced:</strong> <%= @last_referenced_at&.strftime("%Y-%m-%d %H:%M") || "Never" %></p>
-  <% if @product.description.present? %>
-    <p><strong>Description:</strong></p>
-    <div class="product-description-text"><%= simple_format(@product.description) %></div>
-  <% end %>
-</div>
-
-<% if @product.gallery_images.attached? %>
-  <section class="product-gallery">
-    <h3>Gallery</h3>
-    <div class="product-gallery-grid">
-      <% @product.gallery_images.each do |gallery_image| %>
-        <%= image_tag gallery_image, class: "product-gallery-thumb", alt: "Product gallery image" %>
-      <% end %>
+  <section class="product-show-hero">
+    <div class="product-show-hero-frame">
+      <button
+        type="button"
+        class="product-show-main-image-trigger"
+        data-product-lightbox-trigger
+        data-full-src="<%= url_for(@product.display_image) %>"
+        data-alt="<%= @product.name %> main image">
+        <%= image_tag @product.display_image, class: "product-main-image product-main-image-hero product-show-main-image", alt: "Main product image" %>
+      </button>
     </div>
   </section>
 <% end %>
 
-<div class="actions">
-  <%= link_to "Edit", edit_product_path(@product), class: "btn btn-secondary" %>
-  <%= button_to "Delete", product_path(@product), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
+<section class="product-show-content">
+  <div class="product-show-grid">
+    <article class="product-show-block product-show-pricing">
+      <h3>Pricing & Business</h3>
+      <div class="product-show-pricing-list">
+        <div class="product-show-pricing-rows">
+          <p class="product-price-highlight">
+            <span class="product-show-label">Reference Price</span>
+            <span class="product-show-value">
+              <strong><%= number_with_precision(@product.default_price, precision: 2) %></strong>
+              <span class="product-price-currency"><%= @product.price_currency %></span>
+            </span>
+          </p>
+          <p class="product-cost-secondary">
+            <span class="product-show-label">Cost Price</span>
+            <span class="product-show-value">
+              <span><%= @product.cost_price.present? ? number_with_precision(@product.cost_price, precision: 2) : "-" %></span>
+              <span class="quote-form-hint">Internal only</span>
+            </span>
+          </p>
+          <div class="product-show-kv">
+            <p><strong>MOQ</strong><span><%= @product.moq.presence || "-" %></span></p>
+            <p><strong>Lead Time</strong><span><%= @product.lead_time.presence || "-" %></span></p>
+            <p><strong>Category</strong><span><%= @product.product_category.presence || "-" %></span></p>
+            <p><strong>Unit</strong><span><%= @product.unit.presence || "-" %></span></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="product-show-badges">
+        <span class="next-action-pill is-muted">Quoted <%= @quote_reference_count %></span>
+        <% if @last_referenced_at.present? %>
+          <span class="next-action-pill is-upcoming">Last Used <%= @last_referenced_at.strftime("%Y-%m-%d %H:%M") %></span>
+        <% else %>
+          <span class="next-action-pill is-muted">Last Used Never</span>
+        <% end %>
+      </div>
+    </article>
+
+    <article class="product-show-block">
+      <h3>Specifications & Description</h3>
+      <% if @product.default_specification.present? %>
+        <p class="product-show-subtitle"><strong>Default Specification</strong></p>
+        <% spec_lines = @product.default_specification.to_s.lines.map(&:strip).reject(&:blank?) %>
+        <ul class="product-show-spec-list">
+          <% spec_lines.each do |line| %>
+            <% key, value = line.split(":", 2).map(&:strip) %>
+            <li>
+              <% if value.present? %>
+                <span class="product-show-spec-key"><%= key %>:</span>
+                <span class="product-show-spec-value"><%= value %></span>
+              <% else %>
+                <span class="product-show-spec-value"><%= line %></span>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <% if @product.description.present? %>
+        <p class="product-show-subtitle"><strong>Description</strong></p>
+        <div class="product-description-text"><%= simple_format(@product.description) %></div>
+      <% end %>
+      <% if @product.default_specification.blank? && @product.description.blank? %>
+        <p class="quote-form-hint">No description content added yet.</p>
+      <% end %>
+    </article>
+  </div>
+
+  <% if @product.gallery_images.attached? %>
+    <div class="product-gallery">
+      <h3>Gallery</h3>
+      <div class="product-show-gallery-grid">
+        <% @product.gallery_images.each do |gallery_image| %>
+          <button
+            type="button"
+            class="product-show-gallery-trigger"
+            data-product-lightbox-trigger
+            data-full-src="<%= url_for(gallery_image) %>"
+            data-alt="<%= @product.name %> gallery image">
+            <%= image_tag gallery_image, class: "product-show-gallery-thumb", alt: "Product gallery image" %>
+          </button>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</section>
+
+<div class="product-lightbox" data-product-lightbox hidden>
+  <div class="product-lightbox-backdrop" data-product-lightbox-close></div>
+  <div class="product-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button type="button" class="product-lightbox-close" aria-label="Close image preview" data-product-lightbox-close>×</button>
+    <img src="" alt="" class="product-lightbox-image" data-product-lightbox-image>
+  </div>
 </div>
 
-<%= link_to "Back to Products", products_path %>
+<%= link_to "Back to Products", products_path, class: "form-page-back-link" %>

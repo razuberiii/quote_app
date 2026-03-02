@@ -159,6 +159,11 @@
         margin-bottom: 0.02in !important;
       }
 
+      .pdf-render .pdf-doc-number.is-doc-number strong {
+        font-size: 13.5px !important;
+        font-weight: 800 !important;
+      }
+
       .pdf-render .pdf-logo-band {
         margin-bottom: 0.08in !important;
       }
@@ -267,6 +272,33 @@
         color: #222 !important;
       }
 
+      .pdf-render .quote-item-desc {
+        display: block !important;
+      }
+
+      .pdf-render .quote-item-desc-main {
+        font-weight: 600 !important;
+        color: #222 !important;
+      }
+
+      .pdf-render .quote-item-desc-meta {
+        margin-top: 0.02in !important;
+      }
+
+      .pdf-render .quote-item-desc-sub {
+        display: block !important;
+        font-size: 9.6px !important;
+        color: #6b7280 !important;
+        line-height: 1.28 !important;
+      }
+
+      .pdf-render .quote-item-desc-sub.is-addon {
+        margin-top: 0.01in !important;
+        padding-left: 0.08in !important;
+        border-left: 1px solid #d9dee6 !important;
+        color: #7b8794 !important;
+      }
+
       .pdf-render .quote-doc-table th.is-money,
       .pdf-render .quote-doc-table td.is-money {
         text-align: right !important;
@@ -297,6 +329,8 @@
         border: none !important;
         border-radius: 0 !important;
         padding: 0 !important;
+        page-break-before: avoid !important;
+        break-before: avoid-page !important;
       }
 
       .pdf-render .quote-total-box p {
@@ -330,6 +364,8 @@
         margin-top: 0.04in !important;
         border-top: 2px solid #cfcfcf !important;
         padding: 0.052in 0.07in !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
       }
 
       .pdf-render .quote-total-grand span {
@@ -343,6 +379,23 @@
         color: inherit !important;
         font-size: 25px !important;
         font-weight: 900 !important;
+      }
+
+      .pdf-render .quote-engagement-note {
+        margin: 0.06in 0 0 0 !important;
+        padding-top: 0.04in !important;
+        border-top: 1px solid #d4d4d4 !important;
+        color: #5b6472 !important;
+        font-size: 10px !important;
+        line-height: 1.35 !important;
+      }
+
+      .pdf-render .quote-public-footnote {
+        clear: both !important;
+        margin: 0.12in 0 0 0 !important;
+        text-align: right !important;
+        color: #9aa3af !important;
+        font-size: 9px !important;
       }
 
       .pdf-render .quote-section-block {

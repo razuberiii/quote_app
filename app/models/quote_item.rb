@@ -61,6 +61,7 @@ class QuoteItem < ApplicationRecord
 
     self.description = product.name if description.blank?
     self.unit_price = product.default_price if unit_price.blank?
+    apply_default_specification_from_product
   end
 
   def calculate_amount
@@ -111,6 +112,16 @@ class QuoteItem < ApplicationRecord
 
       { key: key, value: val }
     end
+  end
+
+  def apply_default_specification_from_product
+    return if specification_pairs.present?
+    return if product.default_specification.blank?
+
+    parsed_default_specification = parse_specifications_text(product.default_specification)
+    return if parsed_default_specification.blank?
+
+    self[:specifications] = parsed_default_specification
   end
 
   def parse_addon_charges_text(value)

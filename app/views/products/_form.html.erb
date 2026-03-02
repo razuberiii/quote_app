@@ -1,0 +1,412 @@
+<% form_key = product.new_record? ? "new" : "edit" %>
+
+<%= form_with model: product do |f| %>
+  <div class="product-edit-layout">
+    <aside class="product-edit-media">
+      <section class="quote-form-section">
+        <h3>Product Media</h3>
+
+        <div class="product-main-image-panel">
+          <p class="product-media-label">Main image</p>
+          <% if product.display_image.present? %>
+            <div class="product-main-image-frame">
+              <%= image_tag product.display_image, class: "product-main-image product-main-image-large product-edit-main-image", alt: "Main product image" %>
+            </div>
+          <% else %>
+            <p class="quote-form-hint">No image yet. Upload images to build gallery.</p>
+          <% end %>
+        </div>
+
+        <div class="product-upload-panel">
+          <%= f.label :gallery_images, product.new_record? ? "Upload Images" : "Add More Images" %>
+          <%= f.file_field :gallery_images, accept: "image/*", multiple: true, id: "product_gallery_images_#{form_key}", data: { has_display: product.display_image.present? } %>
+          <%= hidden_field_tag "product[primary_uploaded_image_index]", "", id: "product_primary_uploaded_image_index_#{form_key}" %>
+          <div id="product_gallery_preview_<%= form_key %>" class="product-upload-preview" hidden></div>
+        </div>
+
+        <% if product.gallery_images.attached? %>
+          <div class="product-gallery-editor">
+            <div class="product-gallery-toolbar">
+              <p class="product-media-label">Gallery</p>
+              <div class="product-gallery-toolbar-actions">
+                <button type="button" class="product-ghost-btn" id="product_gallery_select_all_<%= form_key %>">Select all</button>
+                <button type="button" class="product-ghost-btn is-danger" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled>Delete selected</button>
+              </div>
+            </div>
+            <p class="quote-form-hint" id="product_gallery_selected_count_<%= form_key %>">0 selected</p>
+            <div class="product-gallery-grid">
+              <% product.gallery_images.attachments.each do |attachment| %>
+                <% is_main = product.image.attached? && product.image.blob_id == attachment.blob_id %>
+                <article class="product-gallery-item">
+                  <div class="product-gallery-media">
+                    <label class="product-gallery-select-toggle" title="Select image">
+                      <input type="checkbox" class="product-gallery-select-input" value="<%= attachment.id %>">
+                      <span class="product-gallery-select-indicator"></span>
+                    </label>
+
+                    <% if is_main %>
+                      <div class="product-gallery-thumb-wrap is-current">
+                        <%= image_tag attachment, class: "product-gallery-thumb", alt: "Gallery image" %>
+                      </div>
+                    <% else %>
+                      <%= link_to set_primary_image_product_path(product, attachment_id: attachment.id), data: { turbo_method: :patch }, class: "product-gallery-thumb-wrap", title: "Set as main image" do %>
+                        <%= image_tag attachment, class: "product-gallery-thumb", alt: "Gallery image" %>
+                      <% end %>
+                    <% end %>
+
+                    <%= link_to remove_gallery_image_product_path(product, attachment_id: attachment.id),
+                                data: { turbo_method: :delete, turbo_confirm: "Delete this image?" },
+                                class: "product-gallery-delete-icon",
+                                title: "Delete image",
+                                aria: { label: "Delete image" } do %>
+                      ×
+                    <% end %>
+
+                    <% if is_main %>
+                      <span class="product-gallery-main-badge">Main</span>
+                    <% end %>
+                  </div>
+                </article>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </section>
+    </aside>
+
+    <div class="product-edit-content">
+      <section class="quote-form-section">
+        <h3>Basic Info</h3>
+        <div class="quote-form-grid">
+          <div>
+            <%= f.label :name %>
+            <%= f.text_field :name, placeholder: "Product Name" %>
+          </div>
+          <div>
+            <%= f.label :sku %>
+            <%= f.text_field :sku, placeholder: "SKU/Product Code", class: ("input-error" if product.errors[:sku].any?) %>
+            <% if product.errors[:sku].any? %>
+              <p class="field-error-message"><%= product.errors.full_messages_for(:sku).first %></p>
+            <% end %>
+          </div>
+          <div>
+            <%= f.label :product_category, "Category" %>
+            <%= f.text_field :product_category, placeholder: "Pump / Fittings / Spare Parts" %>
+          </div>
+          <div>
+            <%= f.label :unit, "Unit" %>
+            <%= f.text_field :unit, placeholder: "pcs / set / kg / carton", list: "product_unit_options_#{form_key}" %>
+            <datalist id="product_unit_options_<%= form_key %>">
+              <option value="pcs"></option>
+              <option value="set"></option>
+              <option value="kg"></option>
+              <option value="carton"></option>
+              <option value="box"></option>
+              <option value="meter"></option>
+            </datalist>
+          </div>
+        </div>
+      </section>
+
+      <section class="quote-form-section">
+        <h3>Pricing & Business</h3>
+        <div class="quote-form-grid">
+          <div>
+            <%= f.label :default_price, "Reference Price" %>
+            <%= f.number_field :default_price, step: 0.01, min: 0, placeholder: "0.00" %>
+          </div>
+          <div>
+            <%= f.label :price_currency, "Reference Price Currency" %>
+            <%= f.select :price_currency, Product::PRICE_CURRENCIES, {}, {} %>
+          </div>
+          <div>
+            <%= f.label :cost_price, "Cost Price (internal only)" %>
+            <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: "0.00" %>
+            <p class="quote-form-hint">Internal only. Not shown in quotation output.</p>
+          </div>
+          <div>
+            <%= f.label :moq, "MOQ" %>
+            <%= f.number_field :moq, min: 0, step: 1, placeholder: "0" %>
+          </div>
+          <div>
+            <%= f.label :lead_time, "Lead Time" %>
+            <%= f.text_field :lead_time, placeholder: "e.g. 15-20 days" %>
+          </div>
+        </div>
+      </section>
+
+      <section class="quote-form-section">
+        <h3>Description</h3>
+        <div class="quote-form-grid">
+          <div class="quote-form-grid-span-2">
+            <%= f.label :default_specification, "Default Specification" %>
+            <%= f.text_area :default_specification, rows: 4, class: ("input-error" if product.errors[:default_specification].any?), placeholder: "Power: 5kW&#10;Voltage: 220V&#10;Material: SS304" %>
+            <p class="quote-form-hint">Auto-fills quote item specifications when matched. One pair per line: key: value</p>
+            <% if product.errors[:default_specification].any? %>
+              <p class="field-error-message js-default-spec-error"><%= product.errors.full_messages_for(:default_specification).first %></p>
+            <% else %>
+              <p class="field-error-message js-default-spec-error" hidden></p>
+            <% end %>
+          </div>
+          <div class="quote-form-grid-span-2">
+            <%= f.label :description %>
+            <%= f.text_area :description, rows: 5, placeholder: "Product Description" %>
+          </div>
+        </div>
+      </section>
+
+      <div class="quote-form-submit">
+        <%= f.submit submit_label, class: "btn btn-primary" %>
+      </div>
+      <%= link_to back_label, back_path, class: "form-page-back-link" %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  (() => {
+    const selectAllBtn = document.getElementById("product_gallery_select_all_<%= form_key %>");
+    const deleteSelectedBtn = document.getElementById("product_gallery_delete_selected_<%= form_key %>");
+    const selectedCountEl = document.getElementById("product_gallery_selected_count_<%= form_key %>");
+    const checkboxes = Array.from(document.querySelectorAll(".product-gallery-select-input"));
+
+    if (selectAllBtn && deleteSelectedBtn && selectedCountEl && checkboxes.length) {
+      const csrf = document.querySelector("meta[name='csrf-token']")?.content || "";
+
+      const updateSelectionUi = () => {
+        const selected = checkboxes.filter((input) => input.checked);
+        checkboxes.forEach((input) => {
+          input.closest(".product-gallery-item")?.classList.toggle("is-selected", input.checked);
+        });
+        selectedCountEl.textContent = `${selected.length} selected`;
+        deleteSelectedBtn.disabled = selected.length === 0;
+      };
+
+      checkboxes.forEach((input) => {
+        input.addEventListener("change", updateSelectionUi);
+      });
+
+      selectAllBtn.addEventListener("click", () => {
+        const allSelected = checkboxes.every((input) => input.checked);
+        checkboxes.forEach((input) => { input.checked = !allSelected; });
+        updateSelectionUi();
+      });
+
+      deleteSelectedBtn.addEventListener("click", () => {
+        const selected = checkboxes.filter((input) => input.checked).map((input) => input.value);
+        if (!selected.length) return;
+        if (!window.confirm(`Delete ${selected.length} selected image(s)?`)) return;
+
+        const form = document.createElement("form");
+        form.method = "post";
+        form.action = deleteSelectedBtn.dataset.deleteUrl;
+        form.style.display = "none";
+
+        const method = document.createElement("input");
+        method.type = "hidden";
+        method.name = "_method";
+        method.value = "delete";
+        form.appendChild(method);
+
+        if (csrf) {
+          const tokenInput = document.createElement("input");
+          tokenInput.type = "hidden";
+          tokenInput.name = "authenticity_token";
+          tokenInput.value = csrf;
+          form.appendChild(tokenInput);
+        }
+
+        selected.forEach((id) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = "attachment_ids[]";
+          input.value = id;
+          form.appendChild(input);
+        });
+
+        document.body.appendChild(form);
+        form.submit();
+      });
+
+      updateSelectionUi();
+    }
+  })();
+
+  (() => {
+    const input = document.getElementById("product_gallery_images_<%= form_key %>");
+    const preview = document.getElementById("product_gallery_preview_<%= form_key %>");
+    const hidden = document.getElementById("product_primary_uploaded_image_index_<%= form_key %>");
+    if (!input || !preview || !hidden || input.dataset.previewBound === "true") return;
+    input.dataset.previewBound = "true";
+    hidden.value = "";
+    const hasDisplayImage = input.dataset.hasDisplay === "true";
+
+    let stagedFiles = [];
+
+    const syncInputFiles = () => {
+      const dt = new DataTransfer();
+      stagedFiles.forEach((file) => dt.items.add(file));
+      input.files = dt.files;
+    };
+
+    const markSelected = (index) => {
+      hidden.value = String(index);
+      preview.querySelectorAll(".product-upload-preview-item").forEach((el) => {
+        el.classList.toggle("is-selected", Number(el.dataset.index) === index);
+      });
+    };
+
+    const selectedIndex = () => {
+      if (hidden.value === "") return null;
+      const parsed = Number.parseInt(hidden.value, 10);
+      return Number.isInteger(parsed) ? parsed : null;
+    };
+
+    const renderPreview = () => {
+      preview.innerHTML = "";
+      if (!stagedFiles.length) {
+        hidden.value = "";
+        preview.hidden = true;
+        return;
+      }
+
+      stagedFiles.forEach((file, index) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "product-upload-preview-item";
+        item.dataset.index = String(index);
+        item.title = "Set as main image";
+
+        const img = document.createElement("img");
+        img.className = "product-upload-preview-thumb";
+        img.alt = file.name;
+        img.src = URL.createObjectURL(file);
+        img.onload = () => URL.revokeObjectURL(img.src);
+
+        const label = document.createElement("span");
+        label.className = "product-upload-preview-label";
+        label.textContent = "Set as main";
+
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "product-upload-preview-remove";
+        remove.textContent = "×";
+        remove.title = "Remove file";
+        remove.addEventListener("click", (event) => {
+          event.stopPropagation();
+          const current = selectedIndex();
+          if (current !== null) {
+            if (current === index) {
+              hidden.value = "";
+            } else if (current > index) {
+              hidden.value = String(current - 1);
+            }
+          }
+          stagedFiles = stagedFiles.filter((_, i) => i !== index);
+          syncInputFiles();
+          renderPreview();
+        });
+
+        item.appendChild(img);
+        item.appendChild(label);
+        item.appendChild(remove);
+        item.addEventListener("click", () => {
+          const current = selectedIndex();
+          if (current === index) {
+            hidden.value = "";
+            preview.querySelectorAll(".product-upload-preview-item").forEach((el) => el.classList.remove("is-selected"));
+          } else {
+            markSelected(index);
+          }
+        });
+        preview.appendChild(item);
+      });
+
+      const selected = selectedIndex();
+      if (selected !== null && selected >= 0 && selected < stagedFiles.length) {
+        markSelected(selected);
+      } else if (!hasDisplayImage) {
+        markSelected(0);
+      }
+      preview.hidden = false;
+    };
+
+    input.addEventListener("change", () => {
+      const newlyPicked = Array.from(input.files || []).filter((file) => file.type.startsWith("image/"));
+      if (!newlyPicked.length) return;
+
+      const signature = (file) => `${file.name}__${file.size}__${file.lastModified}`;
+      const existingSignatures = new Set(stagedFiles.map(signature));
+      newlyPicked.forEach((file) => {
+        const key = signature(file);
+        if (!existingSignatures.has(key)) {
+          stagedFiles.push(file);
+          existingSignatures.add(key);
+        }
+      });
+
+      syncInputFiles();
+      renderPreview();
+      input.value = "";
+    });
+  })();
+
+  (() => {
+    const specInput = document.querySelector("textarea[name='product[default_specification]']");
+    if (!specInput || specInput.dataset.validationBound === "true") return;
+    specInput.dataset.validationBound = "true";
+
+    const form = specInput.closest("form");
+    const container = specInput.closest(".quote-form-grid-span-2");
+    let errorEl = container?.querySelector(".js-default-spec-error");
+
+    if (!errorEl && container) {
+      errorEl = document.createElement("p");
+      errorEl.className = "field-error-message js-default-spec-error";
+      errorEl.hidden = true;
+      container.appendChild(errorEl);
+    }
+
+    const validate = () => {
+      const lines = String(specInput.value || "").split(/\r?\n/);
+      const invalidLines = [];
+
+      lines.forEach((line, idx) => {
+        const text = line.trim();
+        if (!text) return;
+        const parts = text.split(/[:=]/, 2).map((part) => part.trim());
+        if (parts.length < 2 || !parts[0] || !parts[1]) {
+          invalidLines.push(idx + 1);
+        }
+      });
+
+      if (!errorEl) return invalidLines.length === 0;
+
+      if (invalidLines.length > 0) {
+        const label = invalidLines.length === 1 ? "line" : "lines";
+        errorEl.textContent = `Invalid format on ${label} ${invalidLines.join(", ")}. Use key: value (e.g. Power: 5kW).`;
+        errorEl.hidden = false;
+        specInput.classList.add("input-error");
+        specInput.setAttribute("aria-invalid", "true");
+        return false;
+      }
+
+      errorEl.hidden = true;
+      errorEl.textContent = "";
+      specInput.classList.remove("input-error");
+      specInput.removeAttribute("aria-invalid");
+      return true;
+    };
+
+    specInput.addEventListener("input", validate);
+    specInput.addEventListener("blur", validate);
+
+    if (form) {
+      form.addEventListener("submit", (event) => {
+        if (validate()) return;
+        event.preventDefault();
+        specInput.focus();
+      });
+    }
+  })();
+</script>

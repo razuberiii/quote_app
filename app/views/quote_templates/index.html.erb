@@ -1,36 +1,48 @@
 <h1>Templates</h1>
 
-<div class="actions">
+<p class="template-page-subtitle">Build reusable brand presets for quotations and PI documents.</p>
+
+<div class="actions template-index-actions">
   <%= link_to "New Template", new_quote_template_path, class: "btn btn-primary" %>
 </div>
 
 <div class="template-grid">
   <% @quote_templates.each do |template| %>
-    <article class="template-card">
+    <article class="template-card template-preset-card">
       <div class="template-card-head">
         <div>
           <h3><%= template.name %></h3>
           <p class="template-sub">slug: <code><%= template.slug %></code></p>
         </div>
         <% if template.default_template? %>
-          <span class="template-default-pill">Default</span>
+          <span class="template-default-pill">Default Preset</span>
         <% end %>
       </div>
 
-      <p class="template-meta"><strong>Layout:</strong> <%= template.layout_type.titleize %></p>
-      <p class="template-meta"><strong>Accent:</strong> <span class="template-color-dot" style="background: <%= template.accent_color %>"></span> <%= template.accent_color %></p>
-      <p class="template-meta"><strong>Font:</strong> <%= template.font_family %></p>
+      <div class="template-meta-compact">
+        <p class="template-meta"><%= template.layout_type.titleize %> · <%= (template.layout_density.presence || "standard").titleize %></p>
+        <p class="template-meta"><%= template.font_family.presence || "Noto Sans" %></p>
+        <p class="template-meta">Accent <span class="template-color-dot" style="background: <%= template.accent_color %>"></span><%= template.accent_color %></p>
+      </div>
+      <div class="template-usage-row">
+        <span class="next-action-pill is-muted">Used in <%= @template_usage_counts[template.id].to_i %> quote(s)</span>
+      </div>
 
-      <div class="template-preview template-preview-<%= template.layout_type %>" style="--template-accent: <%= template.accent_color %>; font-family: <%= template.font_family %>, sans-serif;">
-        <div class="preview-header">
-          <span><%= template.layout_type.upcase %></span>
-          <strong>PROFORMA INVOICE</strong>
+      <div class="template-preview template-preview-card template-preview-<%= template.layout_type %>" style="--template-accent: <%= template.accent_color.presence || '#1F4E79' %>; font-family: <%= template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+        <div class="preview-header preview-header-<%= template.logo_position.presence || 'right' %>">
+          <span><%= template.layout_type.upcase %> • <%= (template.layout_density.presence || "standard").upcase %></span>
+          <strong><%= template.resolved_document_title("quote") %></strong>
         </div>
-        <div class="preview-body">
+        <div class="preview-body preview-body-rich">
           <div></div>
           <div></div>
         </div>
-        <div class="preview-total">TOTAL</div>
+        <div class="preview-table">
+          <span><%= template.resolved_table_label("description") %></span>
+          <span><%= template.resolved_table_label("qty") %></span>
+          <span><%= template.resolved_table_label("line_total") %></span>
+        </div>
+        <div class="preview-total">Grand Total</div>
       </div>
 
       <div class="template-actions">

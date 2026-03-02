@@ -4,6 +4,7 @@ class QuoteTemplatesController < ApplicationController
 
   def index
     @quote_templates = current_user.company.quote_templates.ordered
+    @template_usage_counts = current_user.company.quotes.where(template_id: @quote_templates.select(:id)).group(:template_id).count
   end
 
   def new
@@ -72,9 +73,13 @@ class QuoteTemplatesController < ApplicationController
       :show_images,
       :show_tax,
       :show_shipping,
+      :show_closing_message,
+      :show_saas_branding,
       :excel_show_grid_lines,
+      :closing_message,
       :show_currency,
       :show_valid_until,
+      :show_customer_owner,
       :show_payment_term,
       :show_terms_section,
       :show_notes,
@@ -107,9 +112,13 @@ class QuoteTemplatesController < ApplicationController
       show_images: true,
       show_tax: true,
       show_shipping: true,
+      show_closing_message: true,
+      show_saas_branding: false,
       excel_show_grid_lines: false,
+      closing_message: QuoteTemplate::DEFAULT_CLOSING_MESSAGE,
       show_currency: true,
       show_valid_until: true,
+      show_customer_owner: true,
       show_payment_term: true,
       show_terms_section: true,
       show_notes: true

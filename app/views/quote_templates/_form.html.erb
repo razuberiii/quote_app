@@ -1,4 +1,5 @@
-<%= form_with model: quote_template do |f| %>
+<% advanced_collapsible = local_assigns.fetch(:advanced_collapsible, false) %>
+<%= form_with model: quote_template, html: { class: "template-editor-form", data: { template_editor_form: true } } do |f| %>
   <% if quote_template.errors.any? %>
     <div class="error-messages">
       <h2><%= pluralize(quote_template.errors.count, "error") %> prevented this template from being saved:</h2>
@@ -10,163 +11,371 @@
     </div>
   <% end %>
 
-  <div class="template-form-grid">
+  <section class="template-identity-row">
     <div>
-      <%= f.label :name %>
-      <%= f.text_field :name, required: true %>
+      <%= f.label :name, "Preset name" %>
+      <%= f.text_field :name, required: true, placeholder: "Modern B2B Quotation" %>
     </div>
-
     <div>
-      <%= f.label :slug %>
+      <%= f.label :slug, "Preset slug" %>
       <%= f.text_field :slug, placeholder: "auto-from-name" %>
     </div>
-
-    <div>
-      <%= f.label :layout_type %>
-      <%= f.select :layout_type, QuoteTemplate.layout_types.keys.map { |it| [it.titleize, it] } %>
-    </div>
-
-    <div>
-      <%= f.label :layout_density, "Layout density" %>
-      <%= f.select :layout_density, [["Compact", "compact"], ["Standard", "standard"], ["Spacious", "spacious"]] %>
-    </div>
-
-    <div>
-      <%= f.label :accent_color %>
-      <%= f.color_field :accent_color %>
-    </div>
-
-    <div>
-      <%= f.label :font_family %>
-      <%= f.select :font_family, ["Inter", "Noto Sans", "Segoe UI", "Arial", "Helvetica"], {}, {} %>
-    </div>
-
     <div>
       <%= f.label :document_kind, "Default document view" %>
       <%= f.select :document_kind, [["Quotation", "quotation"], ["Proforma Invoice (PI)", "proforma_invoice"]] %>
     </div>
+  </section>
+
+  <div class="template-editor-layout">
+    <div class="template-editor-sections">
+      <section class="template-editor-section template-editor-section-visual">
+        <header>
+          <h3>Visual Style</h3>
+          <p>Control the visual signature of your quotation documents.</p>
+        </header>
+        <div class="template-form-grid">
+          <div>
+            <%= f.label :layout_type, "Layout type" %>
+            <%= f.select :layout_type, QuoteTemplate.layout_types.keys.map { |it| [it.titleize, it] }, {}, data: { template_preview_target: "layout" } %>
+          </div>
+          <div>
+            <%= f.label :layout_density, "Layout density" %>
+            <%= f.select :layout_density, [["Compact", "compact"], ["Standard", "standard"], ["Spacious", "spacious"]], {}, data: { template_preview_target: "density" } %>
+          </div>
+          <div>
+            <%= f.label :accent_color, "Accent color" %>
+            <%= f.color_field :accent_color, data: { template_preview_target: "accent" } %>
+          </div>
+          <div>
+            <%= f.label :font_family, "Font family" %>
+            <%= f.select :font_family, ["Inter", "Noto Sans", "Segoe UI", "Arial", "Helvetica"], {}, data: { template_preview_target: "font" } %>
+          </div>
+          <div>
+            <%= f.label :logo_position, "Logo position" %>
+            <%= f.select :logo_position, [["Right Top", "right"], ["Left Top", "left"], ["Center", "center"]], {}, data: { template_preview_target: "logo-position" } %>
+          </div>
+        </div>
+      </section>
+
+      <section class="template-editor-section">
+        <header>
+          <h3>Document Structure</h3>
+          <p>Decide which blocks should appear by default on quote output.</p>
+        </header>
+        <div class="template-toggle-grid">
+          <label><%= f.check_box :show_logo, data: { template_preview_toggle: "logo" } %> Show logo</label>
+          <label><%= f.check_box :show_tax, data: { template_preview_toggle: "tax" } %> Show tax line</label>
+          <label><%= f.check_box :show_shipping, data: { template_preview_toggle: "shipping" } %> Show shipping line</label>
+          <label><%= f.check_box :show_payment_term, data: { template_preview_toggle: "payment" } %> Show payment term</label>
+          <label><%= f.check_box :show_customer_owner %> Show sales owner</label>
+          <label><%= f.check_box :show_notes, data: { template_preview_toggle: "notes" } %> Show notes section</label>
+          <label><%= f.check_box :show_signature_block, data: { template_preview_toggle: "signature" } %> Show signature block</label>
+          <label><%= f.check_box :show_images %> Show product images</label>
+          <label><%= f.check_box :show_valid_until %> Show valid until</label>
+          <label><%= f.check_box :show_terms_section %> Show terms section</label>
+          <label><%= f.check_box :show_currency, data: { template_preview_toggle: "currency" } %> Show currency symbol/code</label>
+          <label><%= f.check_box :show_closing_message %> Show closing message</label>
+          <label><%= f.check_box :show_saas_branding %> Show Rubusoo footer (white-label off by default)</label>
+          <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
+        </div>
+      </section>
+
+      <section class="template-editor-section template-editor-section-compact">
+        <header>
+          <h3>Number & Format</h3>
+          <p>Set money readability standards for all exported quote documents.</p>
+        </header>
+        <div class="template-form-grid">
+          <div>
+            <%= f.label :amount_decimals, "Decimal places" %>
+            <%= f.select :amount_decimals, [["0", 0], ["2", 2]], {}, data: { template_preview_target: "amount-decimals" } %>
+          </div>
+          <div>
+            <%= f.label :thousand_separator, "Thousand separator" %>
+            <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]], {}, data: { template_preview_target: "thousand-separator" } %>
+          </div>
+          <div>
+            <%= f.label :currency_display_mode, "Currency display" %>
+            <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]], {}, data: { template_preview_target: "currency-display-mode" } %>
+          </div>
+        </div>
+      </section>
+
+      <% if advanced_collapsible %>
+        <details class="template-editor-section template-editor-section-advanced" open>
+          <summary class="template-editor-summary">
+            <strong>Labels & Text</strong>
+            <span>Advanced settings</span>
+          </summary>
+          <div class="template-editor-section-body">
+            <div class="template-form-grid">
+              <div>
+                <%= f.label :description_label, "Description label" %>
+                <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
+              </div>
+              <div>
+                <%= f.label :qty_label, "Qty label" %>
+                <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
+              </div>
+              <div>
+                <%= f.label :unit_price_label, "Unit price label" %>
+                <%= f.text_field :unit_price_label %>
+              </div>
+              <div>
+                <%= f.label :line_total_label, "Line total label" %>
+                <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
+              </div>
+              <div>
+                <%= f.label :quotation_title, "Quotation title" %>
+                <%= f.text_field :quotation_title, placeholder: "QUOTATION", data: { template_preview_target: "title-quote" } %>
+              </div>
+              <div>
+                <%= f.label :quotation_number_label, "Quotation number label" %>
+                <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
+              </div>
+              <div>
+                <%= f.label :pi_title, "PI title" %>
+                <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
+              </div>
+              <div>
+                <%= f.label :pi_number_label, "PI number label" %>
+                <%= f.text_field :pi_number_label, placeholder: "PI #" %>
+              </div>
+              <div class="template-span-2">
+                <%= f.label :quotation_footer_note, "Quotation footer note" %>
+                <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
+              </div>
+              <div class="template-span-2">
+                <%= f.label :pi_footer_note, "PI footer note" %>
+                <%= f.text_area :pi_footer_note, rows: 2 %>
+              </div>
+              <div class="template-span-2">
+                <%= f.label :footer_text, "Fallback footer text" %>
+                <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
+              </div>
+              <div class="template-span-2">
+                <%= f.label :closing_message, "Closing message under Grand Total" %>
+                <%= f.text_area :closing_message, rows: 2, placeholder: QuoteTemplate::DEFAULT_CLOSING_MESSAGE %>
+                <p class="template-sub">Optional. Leave empty to hide message completely even if toggle is on.</p>
+              </div>
+            </div>
+          </div>
+        </details>
+      <% else %>
+        <section class="template-editor-section template-editor-section-advanced">
+          <header>
+            <h3>Labels & Text</h3>
+            <p>Advanced text settings for table labels, document titles, and footer notes.</p>
+          </header>
+          <div class="template-form-grid">
+            <div>
+              <%= f.label :description_label, "Description label" %>
+              <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
+            </div>
+            <div>
+              <%= f.label :qty_label, "Qty label" %>
+              <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
+            </div>
+            <div>
+              <%= f.label :unit_price_label, "Unit price label" %>
+              <%= f.text_field :unit_price_label %>
+            </div>
+            <div>
+              <%= f.label :line_total_label, "Line total label" %>
+              <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
+            </div>
+            <div>
+              <%= f.label :quotation_title, "Quotation title" %>
+              <%= f.text_field :quotation_title, placeholder: "QUOTATION", data: { template_preview_target: "title-quote" } %>
+            </div>
+            <div>
+              <%= f.label :quotation_number_label, "Quotation number label" %>
+              <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
+            </div>
+            <div>
+              <%= f.label :pi_title, "PI title" %>
+              <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
+            </div>
+            <div>
+              <%= f.label :pi_number_label, "PI number label" %>
+              <%= f.text_field :pi_number_label, placeholder: "PI #" %>
+            </div>
+            <div class="template-span-2">
+              <%= f.label :quotation_footer_note, "Quotation footer note" %>
+              <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
+            </div>
+            <div class="template-span-2">
+              <%= f.label :pi_footer_note, "PI footer note" %>
+              <%= f.text_area :pi_footer_note, rows: 2 %>
+            </div>
+            <div class="template-span-2">
+              <%= f.label :footer_text, "Fallback footer text" %>
+              <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
+            </div>
+            <div class="template-span-2">
+              <%= f.label :closing_message, "Closing message under Grand Total" %>
+              <%= f.text_area :closing_message, rows: 2, placeholder: QuoteTemplate::DEFAULT_CLOSING_MESSAGE %>
+              <p class="template-sub">Optional. Leave empty to hide message completely even if toggle is on.</p>
+            </div>
+          </div>
+        </section>
+      <% end %>
+    </div>
+
+    <aside class="template-live-pane">
+      <div class="template-live-pane-header">
+        <h3>Live Preview</h3>
+        <p>Real-time rendering with quote-like content.</p>
+      </div>
+      <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %>" data-template-preview style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+        <div class="preview-header preview-header-<%= quote_template.logo_position.presence || 'right' %>" data-template-preview-logo-position>
+          <span data-template-preview-logo data-visible="<%= quote_template.show_logo? %>">LOGO</span>
+          <strong data-template-preview-title><%= quote_template.quotation_title.presence || quote_template.resolved_document_title("quote") %></strong>
+        </div>
+        <div class="preview-body preview-body-rich preview-density-<%= quote_template.layout_density.presence || 'standard' %>" data-template-preview-density>
+          <div></div>
+          <div></div>
+        </div>
+        <div class="preview-table preview-table-rich">
+          <div class="preview-table-head">
+            <span data-template-preview-label-description><%= quote_template.description_label.presence || "Description" %></span>
+            <span data-template-preview-label-qty><%= quote_template.qty_label.presence || "Qty" %></span>
+            <span data-template-preview-label-line-total><%= quote_template.line_total_label.presence || "Line Total" %></span>
+          </div>
+          <div class="preview-table-row"><span>Pump body SS304</span><span>2</span><span data-template-preview-amount data-raw-amount="1800"></span></div>
+          <div class="preview-table-row"><span>Motor 5.5kW</span><span>1</span><span data-template-preview-amount data-raw-amount="620"></span></div>
+          <div class="preview-table-row"><span>Installation kit</span><span>3</span><span data-template-preview-amount data-raw-amount="390"></span></div>
+        </div>
+        <div class="preview-summary">
+          <p><span>Subtotal</span><strong data-template-preview-amount data-raw-amount="2810"></strong></p>
+          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span>Tax / VAT</span><strong data-template-preview-amount data-raw-amount="281"></strong></p>
+          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span>Shipping</span><strong data-template-preview-amount data-raw-amount="120"></strong></p>
+          <p class="preview-total"><span>Grand Total</span><strong data-template-preview-amount data-raw-amount="3211"></strong></p>
+        </div>
+        <div class="preview-meta">
+          <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong>Payment Term:</strong> TT 30% deposit, 70% before shipment</p>
+          <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong>Notes:</strong> Price valid for 30 days.</p>
+          <p data-template-preview-signature data-visible="<%= quote_template.show_signature_block? %>">Authorized Signature ____________________</p>
+        </div>
+        <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || "Thank you for your business." %></p>
+      </div>
+    </aside>
   </div>
 
-  <h3>Visibility</h3>
-  <div class="template-toggle-grid">
-    <label><%= f.check_box :show_logo %> Show logo</label>
-    <label><%= f.check_box :show_images %> Show product images</label>
-    <label><%= f.check_box :show_tax %> Show tax line</label>
-    <label><%= f.check_box :show_shipping %> Show shipping line</label>
-    <label><%= f.check_box :show_currency %> Show currency</label>
-    <label><%= f.check_box :show_valid_until %> Show valid until</label>
-    <label><%= f.check_box :show_payment_term %> Show payment term</label>
-    <label><%= f.check_box :show_terms_section %> Show terms section</label>
-    <label><%= f.check_box :show_notes %> Show notes section</label>
-    <label><%= f.check_box :show_signature_block %> Show signature block</label>
-  </div>
-
-  <h3>Logo Position</h3>
-  <div class="template-form-grid">
-    <div>
-      <%= f.label :logo_position, "Logo position" %>
-      <%= f.select :logo_position, [["Right Top", "right"], ["Left Top", "left"], ["Center", "center"]] %>
+  <div class="template-form-footer">
+    <label class="template-default-check"><%= check_box_tag :make_default, "1", quote_template.default_template? %> Set as default template</label>
+    <div class="actions">
+      <%= f.submit class: "btn btn-primary" %>
+      <%= link_to "Back", quote_templates_path, class: "btn btn-secondary" %>
     </div>
-  </div>
-
-  <h3>Excel Export</h3>
-  <div class="template-toggle-grid">
-    <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
-  </div>
-
-  <h3>Amount Format</h3>
-  <div class="template-form-grid">
-    <div>
-      <%= f.label :amount_decimals, "Decimal places" %>
-      <%= f.select :amount_decimals, [["0", 0], ["2", 2]] %>
-    </div>
-    <div>
-      <%= f.label :thousand_separator %>
-      <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]] %>
-    </div>
-    <div>
-      <%= f.label :currency_display_mode, "Currency display" %>
-      <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]] %>
-    </div>
-  </div>
-
-  <h3>Table Labels</h3>
-  <div class="template-form-grid">
-    <div>
-      <%= f.label :description_label, "Description label" %>
-      <%= f.text_field :description_label %>
-    </div>
-    <div>
-      <%= f.label :qty_label, "Qty label" %>
-      <%= f.text_field :qty_label %>
-    </div>
-    <div>
-      <%= f.label :unit_price_label, "Unit price label" %>
-      <%= f.text_field :unit_price_label %>
-    </div>
-    <div>
-      <%= f.label :line_total_label, "Line total label" %>
-      <%= f.text_field :line_total_label %>
-    </div>
-  </div>
-
-  <h3>Document Labels</h3>
-  <div class="template-form-grid">
-    <div>
-      <%= f.label :quotation_title %>
-      <%= f.text_field :quotation_title, placeholder: "QUOTATION" %>
-    </div>
-
-    <div>
-      <%= f.label :quotation_number_label %>
-      <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
-    </div>
-
-    <div>
-      <%= f.label :pi_title %>
-      <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
-    </div>
-
-    <div>
-      <%= f.label :pi_number_label %>
-      <%= f.text_field :pi_number_label, placeholder: "PI #" %>
-    </div>
-  </div>
-
-  <div>
-    <%= f.label :quotation_footer_note %>
-    <%= f.text_area :quotation_footer_note, rows: 2 %>
-  </div>
-
-  <div>
-    <%= f.label :pi_footer_note %>
-    <%= f.text_area :pi_footer_note, rows: 2 %>
-  </div>
-
-  <div>
-    <%= f.label :footer_text, "Fallback footer text" %>
-    <%= f.text_area :footer_text, rows: 3 %>
-  </div>
-
-  <div>
-    <label><%= check_box_tag :make_default, "1", quote_template.default_template? %> Set as default template</label>
-  </div>
-
-  <h3>Live Preview</h3>
-  <div class="template-preview template-preview-<%= quote_template.layout_type.presence || 'classic' %>" style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
-    <div class="preview-header">
-      <span><%= (quote_template.layout_type.presence || "classic").upcase %></span>
-      <strong><%= quote_template.resolved_document_title("pi") %></strong>
-    </div>
-    <div class="preview-body">
-      <div></div>
-      <div></div>
-    </div>
-    <div class="preview-total">GRAND TOTAL</div>
-  </div>
-
-  <div class="actions">
-    <%= f.submit class: "btn btn-primary" %>
-    <%= link_to "Back", quote_templates_path, class: "btn btn-secondary" %>
   </div>
 <% end %>
+
+<script>
+  (() => {
+    const form = document.querySelector("[data-template-editor-form]");
+    if (!form || form.dataset.previewBound === "true") return;
+    form.dataset.previewBound = "true";
+
+    const preview = form.querySelector("[data-template-preview]");
+    if (!preview) return;
+
+    const qs = (selector) => form.querySelector(selector);
+    const qsp = (selector) => preview.querySelector(selector);
+
+    const showNode = (selector, visible) => {
+      const node = qsp(selector);
+      if (!node) return;
+      node.hidden = !visible;
+    };
+
+    const formatNumber = (value, decimals, separator) => {
+      const fixed = Number(value || 0).toFixed(decimals);
+      const [intPart, decPart] = fixed.split(".");
+      let grouped = intPart;
+
+      if (separator === "comma") grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+      if (separator === "space") grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+      if (decimals === 0) return grouped;
+      return `${grouped}.${decPart}`;
+    };
+
+    const formatMoney = (value, options) => {
+      const amount = formatNumber(value, options.decimals, options.separator);
+      if (!options.showCurrency) return amount;
+
+      if (options.mode === "code_prefix") return `USD ${amount}`;
+      if (options.mode === "code_suffix") return `${amount} USD`;
+      return `$${amount}`;
+    };
+
+    const updatePreview = () => {
+      const accent = qs("[data-template-preview-target='accent']")?.value || "#1F4E79";
+      const font = qs("[data-template-preview-target='font']")?.value || "Noto Sans";
+      const layout = qs("[data-template-preview-target='layout']")?.value || "classic";
+      const density = qs("[data-template-preview-target='density']")?.value || "standard";
+      const logoPosition = qs("[data-template-preview-target='logo-position']")?.value || "right";
+      const titleQuote = qs("[data-template-preview-target='title-quote']")?.value?.trim() || "QUOTATION";
+      const labelDesc = qs("[data-template-preview-target='label-description']")?.value?.trim() || "Description";
+      const labelQty = qs("[data-template-preview-target='label-qty']")?.value?.trim() || "Qty";
+      const labelLineTotal = qs("[data-template-preview-target='label-line-total']")?.value?.trim() || "Line Total";
+      const footerQuote = qs("[data-template-preview-target='footer-quote']")?.value?.trim();
+      const footerFallback = qs("[data-template-preview-target='footer-fallback']")?.value?.trim();
+      const decimals = Number.parseInt(qs("[data-template-preview-target='amount-decimals']")?.value || "2", 10);
+      const separator = qs("[data-template-preview-target='thousand-separator']")?.value || "comma";
+      const currencyMode = qs("[data-template-preview-target='currency-display-mode']")?.value || "symbol_prefix";
+      const showCurrency = !!qs("[data-template-preview-toggle='currency']")?.checked;
+
+      preview.classList.remove("template-preview-classic", "template-preview-modern", "template-preview-industry");
+      preview.classList.add(`template-preview-${layout}`);
+      preview.style.setProperty("--template-accent", accent);
+      preview.style.fontFamily = `${font}, sans-serif`;
+
+      const densityNode = qsp("[data-template-preview-density]");
+      if (densityNode) {
+        densityNode.classList.remove("preview-density-compact", "preview-density-standard", "preview-density-spacious");
+        densityNode.classList.add(`preview-density-${density}`);
+      }
+
+      const header = qsp("[data-template-preview-logo-position]");
+      if (header) {
+        header.classList.remove("preview-header-left", "preview-header-right", "preview-header-center");
+        header.classList.add(`preview-header-${logoPosition}`);
+      }
+
+      const titleNode = qsp("[data-template-preview-title]");
+      if (titleNode) titleNode.textContent = titleQuote;
+      const descNode = qsp("[data-template-preview-label-description]");
+      if (descNode) descNode.textContent = labelDesc;
+      const qtyNode = qsp("[data-template-preview-label-qty]");
+      if (qtyNode) qtyNode.textContent = labelQty;
+      const lineTotalNode = qsp("[data-template-preview-label-line-total]");
+      if (lineTotalNode) lineTotalNode.textContent = labelLineTotal;
+
+      const footerNode = qsp("[data-template-preview-footer]");
+      if (footerNode) footerNode.textContent = footerQuote || footerFallback || "Thank you for your business.";
+
+      preview.querySelectorAll("[data-template-preview-amount]").forEach((node) => {
+        const raw = Number.parseFloat(node.dataset.rawAmount || "0");
+        node.textContent = formatMoney(raw, {
+          decimals: Number.isNaN(decimals) ? 2 : decimals,
+          separator,
+          mode: currencyMode,
+          showCurrency
+        });
+      });
+
+      showNode("[data-template-preview-logo]", !!qs("[data-template-preview-toggle='logo']")?.checked);
+      showNode("[data-template-preview-tax]", !!qs("[data-template-preview-toggle='tax']")?.checked);
+      showNode("[data-template-preview-shipping]", !!qs("[data-template-preview-toggle='shipping']")?.checked);
+      showNode("[data-template-preview-payment]", !!qs("[data-template-preview-toggle='payment']")?.checked);
+      showNode("[data-template-preview-notes]", !!qs("[data-template-preview-toggle='notes']")?.checked);
+      showNode("[data-template-preview-signature]", !!qs("[data-template-preview-toggle='signature']")?.checked);
+    };
+
+    form.addEventListener("input", updatePreview);
+    form.addEventListener("change", updatePreview);
+    updatePreview();
+  })();
+</script>

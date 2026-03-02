@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_080445) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,31 +61,64 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_080445) do
     t.string "website"
   end
 
+  create_table "customer_taggings", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "customer_id", null: false
+    t.bigint "customer_tag_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["customer_id", "customer_tag_id"], name: "index_customer_taggings_on_customer_id_and_customer_tag_id", unique: true
+    t.index ["customer_id"], name: "index_customer_taggings_on_customer_id"
+    t.index ["customer_tag_id"], name: "index_customer_taggings_on_customer_tag_id"
+  end
+
+  create_table "customer_tags", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "name"], name: "index_customer_tags_on_company_id_and_name", unique: true
+    t.index ["company_id"], name: "index_customer_tags_on_company_id"
+  end
+
   create_table "customers", force: :cascade do |t|
     t.string "address"
     t.bigint "company_id", null: false
     t.string "contact_name"
     t.string "country"
     t.datetime "created_at", null: false
+    t.string "customer_level", default: "normal", null: false
+    t.string "customer_source"
     t.string "email"
+    t.decimal "estimated_annual_volume", precision: 15, scale: 2
+    t.bigint "internal_owner_id"
     t.date "last_follow_up_date"
+    t.string "main_product_interest"
     t.string "name"
     t.date "next_follow_up_date"
     t.text "notes"
+    t.string "payment_terms"
     t.string "phone"
     t.string "status"
+    t.string "timezone"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_customers_on_company_id"
+    t.index ["internal_owner_id"], name: "index_customers_on_internal_owner_id"
   end
 
   create_table "products", force: :cascade do |t|
     t.bigint "company_id", null: false
+    t.decimal "cost_price", precision: 15, scale: 4
     t.datetime "created_at", null: false
     t.decimal "default_price", precision: 15, scale: 4, null: false
+    t.text "default_specification"
     t.text "description"
+    t.string "lead_time"
+    t.integer "moq"
     t.string "name", null: false
     t.string "price_currency", default: "USD", null: false
+    t.string "product_category"
     t.string "sku", null: false
+    t.string "unit"
     t.datetime "updated_at", null: false
     t.index ["company_id", "sku"], name: "index_products_on_company_id_and_sku", unique: true
     t.index ["company_id"], name: "index_products_on_company_id"
@@ -125,6 +158,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_080445) do
   create_table "quote_templates", force: :cascade do |t|
     t.string "accent_color", default: "#1F4E79", null: false
     t.integer "amount_decimals", default: 2, null: false
+    t.text "closing_message", default: "If you have questions, reply directly to this quote. Ready to proceed? Let us know.", null: false
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
     t.string "currency_display_mode", default: "symbol_prefix", null: false
@@ -149,13 +183,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_080445) do
     t.text "quotation_footer_note", default: "", null: false
     t.string "quotation_number_label", default: "", null: false
     t.string "quotation_title", default: "", null: false
+    t.boolean "show_closing_message", default: true, null: false
     t.boolean "show_currency", default: true, null: false
+    t.boolean "show_customer_owner", default: true, null: false
     t.boolean "show_images", default: true, null: false
     t.boolean "show_logo", default: true, null: false
     t.boolean "show_negotiated_flag", default: false, null: false
     t.boolean "show_notes", default: true, null: false
     t.boolean "show_payment_term", default: true, null: false
     t.boolean "show_product_images", default: true, null: false
+    t.boolean "show_saas_branding", default: false, null: false
     t.boolean "show_shipping", default: true, null: false
     t.boolean "show_signature_block", default: false, null: false
     t.boolean "show_tax", default: true, null: false
@@ -252,7 +289,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_080445) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "customer_taggings", "customer_tags"
+  add_foreign_key "customer_taggings", "customers"
+  add_foreign_key "customer_tags", "companies"
   add_foreign_key "customers", "companies"
+  add_foreign_key "customers", "users", column: "internal_owner_id"
   add_foreign_key "products", "companies"
   add_foreign_key "quote_items", "quotes"
   add_foreign_key "quote_shares", "companies"

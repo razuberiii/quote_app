@@ -20,6 +20,14 @@
   <% number_label = @template.resolved_document_number_label(document_kind) %>
   <% logo_uri = quote_logo_data_uri if @template.show_logo %>
   <% company_header_lines = [@quote.company.address, @quote.company.phone, @quote.company.email, @quote.company.website].compact_blank %>
+  <% terms_lines = [] %>
+  <% if @template.show_terms_section %>
+    <% terms_lines << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
+    <% terms_lines << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present? %>
+    <% terms_lines << [ "Terms", @quote.terms_text ] if @quote.terms_text.present? %>
+    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present? %>
+    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present? %>
+  <% end %>
   <% if logo_uri.present? %>
     <div class="pdf-logo-band pdf-logo-<%= @template.logo_position %>">
       <img src="<%= logo_uri %>" class="quote-doc-logo" alt="Company logo">
@@ -39,15 +47,17 @@
         </td>
         <td class="pdf-head-right">
           <p class="quote-doc-kicker"><%= title_text %></p>
-          <p class="pdf-doc-number"><strong><%= number_label %></strong> <%= @quote.quote_no %></p>
+          <p class="pdf-doc-number is-doc-number"><strong><%= number_label %></strong> <%= @quote.quote_no %></p>
           <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></p>
-          <% if @template.show_valid_until %>
-            <p><strong>Valid Until:</strong> <%= @quote.valid_until&.strftime("%Y-%m-%d") || "-" %></p>
+          <% if @template.show_valid_until && @quote.valid_until.present? %>
+            <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %></p>
           <% end %>
           <% if @template.show_currency %>
             <p><strong>Currency:</strong> <%= @quote.currency %></p>
           <% end %>
-          <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
+          <% if @quote.trade_term.present? %>
+            <p><strong>Trade Terms:</strong> <%= @quote.trade_term %></p>
+          <% end %>
         </td>
       </tr>
     </table>
@@ -57,6 +67,9 @@
     <div class="quote-meta-card pdf-party-col">
       <h3>Seller</h3>
       <p class="pdf-party-name"><strong><%= @quote.company.name %></strong></p>
+      <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
+        <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
+      <% end %>
       <p><%= @quote.company.address.presence || "-" %></p>
       <p><%= @quote.company.phone.presence || "-" %></p>
       <p><%= @quote.company.email.presence || "-" %></p>
@@ -75,6 +88,14 @@
 
   <div class="table-responsive">
     <table class="quote-items-table quote-doc-table <%= @template.show_images? ? 'has-images' : 'no-images' %>">
+      <colgroup>
+        <col style="width: 8%;">
+        <% if @template.show_images? %><col style="width: 12%;"><% end %>
+        <col>
+        <col style="width: 12%;">
+        <col style="width: 16%;">
+        <col style="width: 18%;">
+      </colgroup>
       <thead>
         <tr>
           <th class="is-left">No.</th>
@@ -98,20 +119,26 @@
                 <% end %>
               </td>
             <% end %>
-            <td class="is-left"><%= item.description %></td>
+            <td class="is-left">
+              <div class="quote-item-desc">
+                <div class="quote-item-desc-main"><%= item.description %></div>
+                <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
+                  <div class="quote-item-desc-meta">
+                    <% item.specification_pairs.each do |pair| %>
+                      <div class="quote-item-desc-sub">Spec: <%= pair[:key] %> - <%= pair[:value] %></div>
+                    <% end %>
+                    <% item.addon_charge_entries.each do |entry| %>
+                      <div class="quote-item-desc-sub is-addon">
+                        Add-on: <%= entry[:name] %> (<%= template_money(entry[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </td>
             <td class="is-right"><%= item.quantity %></td>
             <td class="is-money"><%= template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
-            <td class="is-money">
-              <%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %>
-              <% details = quote_item_details_lines(item, show_symbol: @template.show_currency, template: @template) %>
-              <% if details.any? %>
-                <div class="quote-item-details">
-                  <% details.each do |line| %>
-                    <div><%= line %></div>
-                  <% end %>
-                </div>
-              <% end %>
-            </td>
+            <td class="is-money"><%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -133,18 +160,17 @@
       <span>Grand Total</span>
       <strong><%= grand_amount_text %></strong>
     </p>
+    <% if (closing_message = @template.resolved_closing_message).present? %>
+      <p class="quote-engagement-note"><%= closing_message %></p>
+    <% end %>
   </aside>
 
-  <% if @template.show_terms_section %>
+  <% if terms_lines.any? %>
     <section class="quote-section-block">
       <h3>Terms & Conditions</h3>
-      <% if @template.show_payment_term %>
-        <p><strong>Payment Terms:</strong> <%= @quote.payment_term.presence || "-" %></p>
+      <% terms_lines.each do |label, value| %>
+        <p><strong><%= label %>:</strong> <%= value %></p>
       <% end %>
-      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
-      <p><strong>Terms:</strong> <%= @quote.terms_text.presence || "-" %></p>
-      <p><strong>Legal Disclaimer:</strong> <%= @quote.legal_disclaimer.presence || "-" %></p>
-      <p><strong>Delivery Notes:</strong> <%= @quote.delivery_notes.presence || "-" %></p>
     </section>
   <% end %>
 
@@ -153,5 +179,8 @@
       <h3>Notes</h3>
       <%= simple_format(@quote.notes) %>
     </section>
+  <% end %>
+  <% if @template.show_saas_branding %>
+    <p class="quote-public-footnote"><%= @template.saas_branding_footer_text %></p>
   <% end %>
 </article>

@@ -11,6 +11,7 @@ class Company < ApplicationRecord
   has_many :products, dependent: :destroy
   has_many :quote_templates, dependent: :destroy
   has_many :team_invitations, dependent: :destroy
+  has_many :customer_tags, dependent: :destroy
   has_one_attached :logo
 
   after_create :ensure_quote_template!
@@ -55,11 +56,15 @@ class Company < ApplicationRecord
       show_images: true,
       show_tax: true,
       show_shipping: true,
+      show_closing_message: true,
+      show_saas_branding: false,
       excel_show_grid_lines: false,
+      closing_message: QuoteTemplate::DEFAULT_CLOSING_MESSAGE,
       show_currency: true,
       show_valid_until: true,
       show_notes: true,
       show_terms_section: true,
+      show_customer_owner: true,
       amount_decimals: 2,
       thousand_separator: "comma",
       currency_display_mode: "symbol_prefix",

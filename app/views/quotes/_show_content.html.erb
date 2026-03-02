@@ -50,6 +50,9 @@
     <article class="quote-meta-card">
       <h3>Seller</h3>
       <p><strong><%= @quote.company.name %></strong></p>
+      <% if active_template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
+        <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
+      <% end %>
       <p><%= @quote.company.address.presence || "-" %></p>
       <p><%= @quote.company.phone.presence || "-" %></p>
       <p><%= @quote.company.email.presence || "-" %></p>
@@ -67,23 +70,28 @@
 
     <article class="quote-meta-card">
       <h3>Quote Info</h3>
-      <p><strong>Quote Date:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") %></p>
-      <p>
-        <strong>Valid Until:</strong>
+      <div class="quote-info-list">
+        <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @quote.quote_no %></strong></p>
+        <p class="quote-info-row"><span><%= @document_kind == "pi" ? "PI Date" : "Quote Date" %></span><strong><%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></strong></p>
         <% if @quote.valid_until.present? %>
-          <%= @quote.valid_until.strftime("%Y-%m-%d") %>
-          <% if days_left.negative? %>
-            <span class="status-badge status-expired">Expired</span>
-          <% elsif days_left <= 3 %>
-            <span class="status-badge status-paused"><%= days_left %>d left</span>
-          <% end %>
-        <% else %>
-          -
+          <p class="quote-info-row is-valid-until">
+            <span>Valid Until</span>
+            <strong>
+              <%= @quote.valid_until.strftime("%Y-%m-%d") %>
+              <% if days_left.negative? %>
+                <span class="status-badge status-expired">Expired</span>
+              <% elsif days_left <= 3 %>
+                <span class="status-badge status-paused"><%= days_left %>d left</span>
+              <% end %>
+            </strong>
+          </p>
         <% end %>
-      </p>
-      <p><strong>Currency:</strong> <%= @quote.currency %></p>
-      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
-      <p><strong>Status:</strong> <%= @quote.status&.capitalize %></p>
+        <p class="quote-info-row"><span>Currency</span><strong><%= @quote.currency %></strong></p>
+        <% if @quote.trade_term.present? %>
+          <p class="quote-info-row"><span>Trade Terms</span><strong><%= @quote.trade_term %></strong></p>
+        <% end %>
+        <p class="quote-info-row"><span>Status</span><strong><%= @quote.status&.capitalize %></strong></p>
+      </div>
     </article>
 
   </section>
@@ -91,6 +99,15 @@
   <h3>Items</h3>
   <div class="table-responsive">
     <table class="quote-items-table quote-doc-table">
+      <colgroup>
+        <% if active_template.show_images? %>
+          <col class="quote-col-image">
+        <% end %>
+        <col class="quote-col-description">
+        <col class="quote-col-qty">
+        <col class="quote-col-money">
+        <col class="quote-col-money">
+      </colgroup>
       <thead>
         <tr>
           <% if active_template.show_images? %>
@@ -98,8 +115,8 @@
           <% end %>
           <th>Description</th>
           <th class="quote-col-right">Qty</th>
-          <th class="quote-col-right">Unit Price</th>
-          <th class="quote-col-right">Line Total</th>
+          <th class="quote-col-right quote-col-money">Unit Price</th>
+          <th class="quote-col-right quote-col-money">Line Total</th>
         </tr>
       </thead>
       <tbody>
@@ -114,20 +131,26 @@
                 <% end %>
               </td>
             <% end %>
-            <td><%= item.description %></td>
-            <td class="quote-col-right"><%= item.quantity %></td>
-            <td class="quote-col-right"><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
-            <td class="quote-col-right">
-              <%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %>
-              <% details = quote_item_details_lines(item, show_symbol: active_template.show_currency) %>
-              <% if details.any? %>
-                <div class="quote-item-details">
-                  <% details.each do |line| %>
-                    <div><%= line %></div>
-                  <% end %>
-                </div>
-              <% end %>
+            <td>
+              <div class="quote-item-desc">
+                <div class="quote-item-desc-main"><%= item.description %></div>
+                <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
+                  <div class="quote-item-desc-meta">
+                    <% item.specification_pairs.each do |pair| %>
+                      <div class="quote-item-desc-sub">Spec: <%= pair[:key] %> - <%= pair[:value] %></div>
+                    <% end %>
+                    <% item.addon_charge_entries.each do |entry| %>
+                      <div class="quote-item-desc-sub is-addon">
+                        Add-on: <%= entry[:name] %> (<%= quote_money(entry[:amount], @quote.currency, show_symbol: active_template.show_currency) %>)
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
             </td>
+            <td class="quote-col-right"><%= item.quantity %></td>
+            <td class="quote-col-right quote-col-money"><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
+            <td class="quote-col-right quote-col-money"><%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -144,18 +167,25 @@
     <% end %>
     <p><span>Discount</span><strong><%= quote_money(@quote.discount_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+    <% if (closing_message = active_template.resolved_closing_message).present? %>
+      <p class="quote-engagement-note"><%= closing_message %></p>
+    <% end %>
   </aside>
 
-  <% if active_template.show_terms_section && (@quote.payment_term.present? || @quote.terms_text.present? || @quote.legal_disclaimer.present? || @quote.delivery_notes.present?) %>
+  <% terms_lines = [] %>
+  <% if active_template.show_terms_section %>
+    <% terms_lines << [ "Payment Terms", @quote.payment_term ] if active_template.show_payment_term && @quote.payment_term.present? %>
+    <% terms_lines << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present? %>
+    <% terms_lines << [ "Terms", @quote.terms_text ] if @quote.terms_text.present? %>
+    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present? %>
+    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present? %>
+  <% end %>
+  <% if terms_lines.any? %>
     <section class="quote-section-block">
       <h3>Terms & Conditions</h3>
-      <% if active_template.show_payment_term %>
-        <p><strong>Payment Terms:</strong> <%= @quote.payment_term.presence || "-" %></p>
+      <% terms_lines.each do |label, value| %>
+        <p><strong><%= label %>:</strong> <%= value %></p>
       <% end %>
-      <p><strong>Trade Terms:</strong> <%= @quote.trade_term.presence || "-" %></p>
-      <p><strong>Terms:</strong> <%= @quote.terms_text.presence || "-" %></p>
-      <p><strong>Legal Disclaimer:</strong> <%= @quote.legal_disclaimer.presence || "-" %></p>
-      <p><strong>Delivery Notes:</strong> <%= @quote.delivery_notes.presence || "-" %></p>
     </section>
   <% end %>
 
@@ -172,6 +202,9 @@
       <h3>Footer Note</h3>
       <div><%= simple_format(footer_note) %></div>
     </section>
+  <% end %>
+  <% if active_template.show_saas_branding %>
+    <p class="quote-public-footnote"><%= active_template.saas_branding_footer_text %></p>
   <% end %>
 </div>
 

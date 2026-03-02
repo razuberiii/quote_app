@@ -5,7 +5,7 @@
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% was_viewed = quote.viewed_at.present? %>
-<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency } }.to_json %>
+<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specification: p.default_specification.to_s } }.to_json %>
 
 <div class="quote-edit-shell" id="quote-edit-root" data-viewed="<%= was_viewed %>">
   <section class="quote-edit-summary">
@@ -14,7 +14,7 @@
       <strong id="quote-summary-status-text"><%= status_value.capitalize %></strong>
       <span id="quote-summary-status-badge" class="status-badge status-<%= status_value %>"><%= status_value.capitalize %></span>
     </article>
-    <article class="quote-edit-summary-card">
+    <article class="quote-edit-summary-card quote-edit-summary-card-grand">
       <span class="summary-label">Grand Total</span>
       <strong id="quote-summary-grand-total"><%= quote_money(grand_total_value, quote.currency) %></strong>
     </article>
@@ -127,18 +127,25 @@
     <section class="quote-form-section quote-form-section-totals">
       <div class="quote-totals-inputs">
         <h3>Totals Inputs</h3>
+        <p class="quote-form-hint quote-money-context">Settlement currency: <strong class="js-currency-code"><%= quote.currency %></strong></p>
         <div class="quote-form-grid">
           <div>
             <%= f.label :tax_amount, "Tax / VAT" %>
-            <%= f.number_field :tax_amount, step: 0.01, class: "js-tax-input" %>
+            <div class="quote-money-input">
+              <%= f.number_field :tax_amount, step: 0.01, class: "js-tax-input" %>
+            </div>
           </div>
           <div>
             <%= f.label :shipping_amount, "Shipping / Handling" %>
-            <%= f.number_field :shipping_amount, step: 0.01, class: "js-shipping-input" %>
+            <div class="quote-money-input">
+              <%= f.number_field :shipping_amount, step: 0.01, class: "js-shipping-input" %>
+            </div>
           </div>
           <div>
             <%= f.label :discount_amount, "Discount" %>
-            <%= f.number_field :discount_amount, step: 0.01, class: "js-discount-input" %>
+            <div class="quote-money-input">
+              <%= f.number_field :discount_amount, step: 0.01, class: "js-discount-input" %>
+            </div>
           </div>
         </div>
       </div>
@@ -162,10 +169,9 @@
       <p class="quote-form-hint">
         Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
       </p>
-      <p class="quote-form-hint">
-        If product reference currency differs from quote currency, unit price will not be auto-filled.
-      </p>
-      <p class="quote-form-hint quote-form-hint-warning">
+      <p class="quote-form-hint">If product reference currency differs from quote currency, unit price will not be auto-filled.</p>
+      <p class="quote-form-hint">Specifications and add-ons use structured rows. No manual <code>key: value</code> typing required.</p>
+      <p class="quote-form-hint quote-form-hint-warning" id="quote-currency-mismatch-warning" hidden>
         Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually.
       </p>
 
@@ -191,7 +197,6 @@
                   <td class="quote-col-product">
                     <div class="product-search">
                       <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
-                      <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
                       <div class="js-product-dropdown"></div>
                     </div>
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -201,10 +206,52 @@
                     <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
                   </td>
                   <td class="quote-col-specs">
-                    <%= item_fields.text_area :specifications_text, rows: 4, class: "js-specifications", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
+                    <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
+                    <div class="quote-kv-summary js-spec-summary"></div>
+                    <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
+                    <div class="quote-kv-editor js-spec-editor" data-kind="spec">
+                      <div class="quote-kv-editor-head">
+                        <strong>Specifications</strong>
+                        <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                      </div>
+                      <div class="quote-kv-rows js-kv-rows">
+                        <% spec_rows = item.specification_pairs.presence || [ { key: "", value: "" } ] %>
+                        <% spec_rows.each do |pair| %>
+                          <div class="quote-kv-row">
+                            <input type="text" class="js-kv-key" value="<%= pair[:key] %>" placeholder="e.g. Power">
+                            <input type="text" class="js-kv-value" value="<%= pair[:value] %>" placeholder="e.g. 5kW">
+                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove specification">&times;</button>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="quote-kv-actions">
+                        <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
+                      </div>
+                    </div>
                   </td>
                   <td class="quote-col-addons">
-                    <%= item_fields.text_area :addon_charges_text, rows: 4, class: "js-addon-charges", placeholder: "Packaging: 30&#10;Installation: 120" %>
+                    <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120" %>
+                    <div class="quote-kv-summary js-addon-summary"></div>
+                    <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
+                    <div class="quote-kv-editor js-addon-editor" data-kind="addon">
+                      <div class="quote-kv-editor-head">
+                        <strong>Add-ons</strong>
+                        <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                      </div>
+                      <div class="quote-kv-rows js-kv-rows">
+                        <% addon_rows = item.addon_charge_entries.presence || [ { name: "", amount: "" } ] %>
+                        <% addon_rows.each do |entry| %>
+                          <div class="quote-kv-row quote-kv-row-addon">
+                            <input type="text" class="js-addon-name" value="<%= entry[:name] %>" placeholder="e.g. Packaging">
+                            <input type="number" step="0.01" min="0" class="js-addon-amount" value="<%= entry[:amount] %>" placeholder="0.00">
+                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove add-on">&times;</button>
+                          </div>
+                        <% end %>
+                      </div>
+                      <div class="quote-kv-actions">
+                        <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
+                      </div>
+                    </div>
                   </td>
                   <td class="quote-col-price">
                     <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
@@ -264,6 +311,7 @@
     const liveShipping = document.getElementById("quote-live-shipping");
     const liveDiscount = document.getElementById("quote-live-discount");
     const liveGrand = document.getElementById("quote-live-grand");
+    const mismatchWarning = document.getElementById("quote-currency-mismatch-warning");
 
     const statusLabels = {
       draft: "Draft",
@@ -312,12 +360,66 @@
       return (currencyInput?.value || "USD").toUpperCase();
     }
 
+    function refreshCurrencyCodeTags() {
+      const code = currentCurrency();
+      document.querySelectorAll(".js-currency-code").forEach((el) => {
+        el.textContent = code;
+      });
+    }
+
     function formatMoney(amount, currencyCode) {
       const value = parseNumber(amount).toFixed(2);
       const code = (currencyCode || "USD").toUpperCase();
       const symbol = currencySymbols[code] || code;
       if (symbol === code) return `${code} ${value}`;
       return `${symbol}${value}`;
+    }
+
+    function decodeRichText(text) {
+      const el = document.createElement("textarea");
+      el.innerHTML = String(text || "");
+      return el.value;
+    }
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function normalizeSpecificationText(text) {
+      return decodeRichText(text)
+        .replace(/&#10;|&#x0a;|&#13;|&#x0d;/gi, "\n")
+        .replace(/\r\n?/g, "\n")
+        .trim();
+    }
+
+    function refreshCurrencyMismatchWarning() {
+      if (!mismatchWarning) return;
+      const quoteCurrency = currentCurrency();
+      let hasMismatch = false;
+
+      body.querySelectorAll(".quote-item-row").forEach((row) => {
+        if (hasMismatch) return;
+        const destroyField = row.querySelector(".js-destroy-flag");
+        if (destroyField && destroyField.value === "1") return;
+        if (row.style.display === "none") return;
+
+        const productId = row.querySelector(".js-product-id")?.value;
+        if (!productId) return;
+        const selected = products.find((p) => String(p.id) === String(productId));
+        if (!selected) return;
+
+        const productCurrency = (selected.currency || "").trim().toUpperCase();
+        if (quoteCurrency && productCurrency && quoteCurrency !== productCurrency) {
+          hasMismatch = true;
+        }
+      });
+
+      mismatchWarning.hidden = !hasMismatch;
     }
 
     function calculateTotals() {
@@ -350,6 +452,7 @@
     function updateTotalsUI() {
       const totals = calculateTotals();
       const code = currentCurrency();
+      refreshCurrencyCodeTags();
       liveSubtotal.textContent = formatMoney(totals.subtotal, code);
       liveAddons.textContent = formatMoney(totals.addonTotal, code);
       liveTax.textContent = formatMoney(totals.tax, code);
@@ -358,7 +461,32 @@
       liveGrand.textContent = formatMoney(totals.grandTotal, code);
       summaryGrand.textContent = formatMoney(totals.grandTotal, code);
       summaryDiscount.textContent = `${totals.discountRate.toFixed(2)}%`;
+      refreshCurrencyMismatchWarning();
       return totals;
+    }
+
+    function createSpecRow(key = "", value = "") {
+      const safeKey = escapeHtml(key);
+      const safeValue = escapeHtml(value);
+      return `
+        <div class="quote-kv-row">
+          <input type="text" class="js-kv-key" value="${safeKey}" placeholder="e.g. Power">
+          <input type="text" class="js-kv-value" value="${safeValue}" placeholder="e.g. 5kW">
+          <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove specification">&times;</button>
+        </div>
+      `;
+    }
+
+    function createAddonRow(name = "", amount = "") {
+      const safeName = escapeHtml(name);
+      const safeAmount = escapeHtml(amount);
+      return `
+        <div class="quote-kv-row quote-kv-row-addon">
+          <input type="text" class="js-addon-name" value="${safeName}" placeholder="e.g. Packaging">
+          <input type="number" step="0.01" min="0" class="js-addon-amount" value="${safeAmount}" placeholder="0.00">
+          <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove add-on">&times;</button>
+        </div>
+      `;
     }
 
     function updateExpirySummary() {
@@ -430,7 +558,7 @@
       }
 
       dropdown.innerHTML = items.map((p) =>
-        `<button type="button" class="js-product-option" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}</button>`
+        `<button type="button" class="js-product-option" role="option" aria-selected="false" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}</button>`
       ).join("");
     }
 
@@ -445,6 +573,7 @@
       });
 
       row.classList.add("is-dropdown-open");
+      dropdown.setAttribute("role", "listbox");
       dropdown.classList.add("is-open");
       positionDropdown(row, dropdown);
     }
@@ -454,6 +583,7 @@
       dropdown.classList.remove("is-open");
       dropdown.classList.remove("open-up");
       row.classList.remove("is-dropdown-open");
+      dropdown.querySelectorAll(".js-product-option.is-active").forEach((el) => el.classList.remove("is-active"));
     }
 
     function positionDropdown(row, dropdown) {
@@ -481,10 +611,9 @@
       }
     }
 
-    function bindRow(row) {
-      const productNameInput = row.querySelector(".js-product-name");
-      const productToggleBtn = row.querySelector(".js-product-toggle");
-      const productDropdown = row.querySelector(".js-product-dropdown");
+      function bindRow(row) {
+        const productNameInput = row.querySelector(".js-product-name");
+        const productDropdown = row.querySelector(".js-product-dropdown");
       const productFeedback = row.querySelector(".js-product-feedback");
       const productIdInput = row.querySelector(".js-product-id");
       const descInput = row.querySelector(".js-description");
@@ -494,12 +623,46 @@
       const qtyInput = row.querySelector(".js-quantity");
       const addonInput = row.querySelector(".js-addon-charges");
       const specsInput = row.querySelector(".js-specifications");
+      const specsEditor = row.querySelector(".js-spec-editor");
+      const addonEditor = row.querySelector(".js-addon-editor");
+      const specSummary = row.querySelector(".js-spec-summary");
+      const addonSummary = row.querySelector(".js-addon-summary");
+      const openSpecBtn = row.querySelector(".js-open-spec-editor");
+      const openAddonBtn = row.querySelector(".js-open-addon-editor");
       let feedbackTimer = null;
+      let activeOptionIndex = -1;
 
-      function autoGrow(textarea) {
-        if (!textarea) return;
-        textarea.style.height = "auto";
-        textarea.style.height = `${Math.max(textarea.scrollHeight, 96)}px`;
+      function closeEditor(editor) {
+        if (!editor) return;
+        editor.classList.remove("is-open");
+      }
+
+      function openEditor(editor) {
+        if (!editor) return;
+        document.querySelectorAll(".quote-kv-editor.is-open").forEach((el) => {
+          if (el !== editor) el.classList.remove("is-open");
+        });
+        editor.classList.add("is-open");
+      }
+
+      function renderSpecSummary() {
+        if (!specSummary) return;
+        const lines = String(specsInput?.value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        if (!lines.length) {
+          specSummary.innerHTML = '<span class="quote-kv-summary-empty">No specs</span>';
+          return;
+        }
+        specSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
+      }
+
+      function renderAddonSummary() {
+        if (!addonSummary) return;
+        const lines = String(addonInput?.value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        if (!lines.length) {
+          addonSummary.innerHTML = '<span class="quote-kv-summary-empty">No add-ons</span>';
+          return;
+        }
+        addonSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
       }
 
       function setFeedback(type, text, autoclear = false) {
@@ -520,29 +683,82 @@
         }
       }
 
+      function optionButtons() {
+        return Array.from(productDropdown?.querySelectorAll(".js-product-option") || []);
+      }
+
+      function setActiveOption(index) {
+        const options = optionButtons();
+        if (!options.length) {
+          activeOptionIndex = -1;
+          return;
+        }
+
+        if (index < 0) index = options.length - 1;
+        if (index >= options.length) index = 0;
+        activeOptionIndex = index;
+
+        options.forEach((option, idx) => {
+          option.classList.toggle("is-active", idx === activeOptionIndex);
+          option.setAttribute("aria-selected", idx === activeOptionIndex ? "true" : "false");
+          option.classList.remove("is-hovered");
+        });
+
+        const active = options[activeOptionIndex];
+        if (active) {
+          active.scrollIntoView({ block: "nearest" });
+        }
+      }
+
+      function clearSpecEditor() {
+        if (!specsEditor || !specsInput) return;
+        const rowsWrap = specsEditor.querySelector(".js-kv-rows");
+        if (!rowsWrap) return;
+        rowsWrap.innerHTML = createSpecRow();
+        syncSpecsText();
+      }
+
+      function applyProductSelection(selected) {
+        if (!selected) return;
+        const previousProductId = String(productIdInput.value || "");
+        productIdInput.value = selected.id;
+        const quoteCurrency = currentCurrency();
+        const productCurrency = (selected.currency || "").trim().toUpperCase();
+        const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
+
+        if (!priceInput.value && !isCurrencyMismatch) {
+          priceInput.value = selected.price;
+        }
+        if (!descInput.value) descInput.value = selected.name;
+
+        const normalizedDefaultSpec = normalizeSpecificationText(selected.default_specification || "");
+        if (specsInput) {
+          if (normalizedDefaultSpec) {
+            specsInput.value = normalizedDefaultSpec;
+            setSpecEditorFromText(specsInput.value);
+          } else if (previousProductId !== String(selected.id)) {
+            clearSpecEditor();
+          }
+        }
+
+        productNameInput.classList.add("is-matched");
+        if (isCurrencyMismatch) {
+          setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
+        } else {
+          setFeedback("", "");
+        }
+      }
+
       function syncProduct() {
         const keyword = (productNameInput.value || "").trim();
         const matched = findProductByName(keyword);
         const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
         renderDropdown(productDropdown, filtered);
         openDropdown(row, productDropdown);
+        setActiveOption(0);
 
         if (matched) {
-          productIdInput.value = matched.id;
-          const quoteCurrency = currentCurrency();
-          const productCurrency = (matched.currency || "").trim().toUpperCase();
-          const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
-
-          if (!priceInput.value && !isCurrencyMismatch) {
-            priceInput.value = matched.price;
-          }
-          if (!descInput.value) descInput.value = matched.name;
-          productNameInput.classList.add("is-matched");
-          if (isCurrencyMismatch) {
-            setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
-          } else {
-            setFeedback("", "");
-          }
+          applyProductSelection(matched);
         } else {
           productIdInput.value = "";
           productNameInput.classList.remove("is-matched");
@@ -562,6 +778,49 @@
         productNameInput.addEventListener("input", syncProduct);
         productNameInput.addEventListener("change", syncProduct);
         productNameInput.addEventListener("focus", syncProduct);
+        productNameInput.addEventListener("keydown", (event) => {
+          const options = optionButtons();
+          const dropdownOpen = productDropdown?.classList.contains("is-open");
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            if (!dropdownOpen) {
+              renderDropdown(productDropdown, products.slice(0, 12));
+              openDropdown(row, productDropdown);
+            }
+            setActiveOption(activeOptionIndex + 1);
+            return;
+          }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!dropdownOpen) {
+              renderDropdown(productDropdown, products.slice(0, 12));
+              openDropdown(row, productDropdown);
+            }
+            setActiveOption(activeOptionIndex - 1);
+            return;
+          }
+
+          if (event.key === "Enter" && dropdownOpen && options.length) {
+            event.preventDefault();
+            const target = options[activeOptionIndex] || options[0];
+            if (!target) return;
+            const selected = products.find((p) => String(p.id) === String(target.dataset.id));
+            if (!selected) return;
+
+            productNameInput.value = selected.name;
+            applyProductSelection(selected);
+            closeDropdown(row, productDropdown);
+            updateTotalsUI();
+            return;
+          }
+
+          if (event.key === "Escape" && dropdownOpen) {
+            event.preventDefault();
+            closeDropdown(row, productDropdown);
+          }
+        });
       }
 
       if (priceInput) {
@@ -570,58 +829,208 @@
       if (qtyInput) {
         qtyInput.addEventListener("input", updateTotalsUI);
       }
+      function syncSpecsText() {
+        if (!specsInput || !specsEditor) return;
+        const lines = [];
+        specsEditor.querySelectorAll(".quote-kv-row").forEach((kvRow) => {
+          const key = (kvRow.querySelector(".js-kv-key")?.value || "").trim();
+          const value = (kvRow.querySelector(".js-kv-value")?.value || "").trim();
+          if (!key && !value) return;
+          if (key && value) lines.push(`${key}: ${value}`);
+        });
+        specsInput.value = lines.join("\n");
+        renderSpecSummary();
+      }
+
+      function setSpecEditorFromText(text) {
+        if (!specsEditor) return;
+        const rowsWrap = specsEditor.querySelector(".js-kv-rows");
+        if (!rowsWrap) return;
+
+        const parsedRows = String(text || "")
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            const parts = line.split(/[:=]/, 2);
+            return {
+              key: (parts[0] || "").trim(),
+              value: (parts[1] || "").trim()
+            };
+          })
+          .filter((pair) => pair.key && pair.value);
+
+        if (!parsedRows.length) return;
+        rowsWrap.innerHTML = parsedRows.map((pair) => createSpecRow(pair.key, pair.value)).join("");
+        syncSpecsText();
+      }
+
+      function syncAddonText() {
+        if (!addonInput || !addonEditor) return;
+        const lines = [];
+        addonEditor.querySelectorAll(".quote-kv-row-addon").forEach((kvRow) => {
+          const name = (kvRow.querySelector(".js-addon-name")?.value || "").trim();
+          const amount = parseNumber(kvRow.querySelector(".js-addon-amount")?.value);
+          if (!name) return;
+          if (amount < 0) return;
+          lines.push(`${name}: ${amount.toFixed(2)}`);
+        });
+        addonInput.value = lines.join("\n");
+        renderAddonSummary();
+      }
+
+      function ensureEditorRow(editor, kind) {
+        if (!editor) return;
+        const rows = editor.querySelectorAll(".quote-kv-row");
+        if (rows.length) return;
+        const rowsWrap = editor.querySelector(".js-kv-rows");
+        if (!rowsWrap) return;
+        rowsWrap.insertAdjacentHTML("beforeend", kind === "addon" ? createAddonRow() : createSpecRow());
+        refreshCurrencyCodeTags();
+      }
+
+      if (specsEditor) {
+        specsEditor.addEventListener("click", (event) => {
+          const addBtn = event.target.closest(".js-kv-add");
+          const removeBtn = event.target.closest(".js-kv-remove");
+          const rowsWrap = specsEditor.querySelector(".js-kv-rows");
+          if (!rowsWrap) return;
+
+          if (addBtn) {
+            rowsWrap.insertAdjacentHTML("beforeend", createSpecRow());
+            rowsWrap.scrollTop = rowsWrap.scrollHeight;
+            syncSpecsText();
+            return;
+          }
+
+          if (removeBtn) {
+            const targetRow = removeBtn.closest(".quote-kv-row");
+            if (targetRow) targetRow.remove();
+            ensureEditorRow(specsEditor, "spec");
+            syncSpecsText();
+          }
+        });
+
+        specsEditor.addEventListener("input", () => {
+          syncSpecsText();
+        });
+      }
+
+      if (addonEditor) {
+        addonEditor.addEventListener("click", (event) => {
+          const addBtn = event.target.closest(".js-kv-add");
+          const removeBtn = event.target.closest(".js-kv-remove");
+          const rowsWrap = addonEditor.querySelector(".js-kv-rows");
+          if (!rowsWrap) return;
+
+          if (addBtn) {
+            rowsWrap.insertAdjacentHTML("beforeend", createAddonRow());
+            rowsWrap.scrollTop = rowsWrap.scrollHeight;
+            refreshCurrencyCodeTags();
+            syncAddonText();
+            updateTotalsUI();
+            return;
+          }
+
+          if (removeBtn) {
+            const targetRow = removeBtn.closest(".quote-kv-row");
+            if (targetRow) targetRow.remove();
+            ensureEditorRow(addonEditor, "addon");
+            refreshCurrencyCodeTags();
+            syncAddonText();
+            updateTotalsUI();
+          }
+        });
+
+        addonEditor.addEventListener("input", () => {
+          syncAddonText();
+          updateTotalsUI();
+        });
+      }
+
       if (addonInput) {
-        addonInput.addEventListener("input", updateTotalsUI);
-        addonInput.addEventListener("input", () => autoGrow(addonInput));
-        autoGrow(addonInput);
+        syncAddonText();
       }
 
       if (specsInput) {
-        specsInput.addEventListener("input", () => autoGrow(specsInput));
-        autoGrow(specsInput);
+        syncSpecsText();
       }
 
-      if (productToggleBtn && productDropdown) {
-        productToggleBtn.addEventListener("click", () => {
-          const visible = productDropdown.classList.contains("is-open");
-          if (visible) {
-            closeDropdown(row, productDropdown);
-          } else {
-            renderDropdown(productDropdown, products.slice(0, 20));
-            openDropdown(row, productDropdown);
-            setFeedback("", "");
-          }
+      row.querySelectorAll(".js-kv-close").forEach((btn) => {
+        btn.addEventListener("click", (event) => {
+          closeEditor(event.target.closest(".quote-kv-editor"));
+        });
+      });
+
+      if (openSpecBtn) {
+        openSpecBtn.addEventListener("click", () => {
+          openEditor(specsEditor);
+        });
+      }
+
+      if (openAddonBtn) {
+        openAddonBtn.addEventListener("click", () => {
+          openEditor(addonEditor);
         });
       }
 
       if (productDropdown && productNameInput) {
+        productDropdown.addEventListener("mousedown", (event) => {
+          if (event.target.closest(".js-product-option")) {
+            event.preventDefault();
+            productNameInput.focus();
+          }
+        });
+
+        productDropdown.addEventListener("keydown", (event) => {
+          const options = optionButtons();
+          const dropdownOpen = productDropdown.classList.contains("is-open");
+          if (!dropdownOpen || !options.length) return;
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            setActiveOption(activeOptionIndex + 1);
+            return;
+          }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            setActiveOption(activeOptionIndex - 1);
+            return;
+          }
+
+          if (event.key === "Enter") {
+            event.preventDefault();
+            const target = options[activeOptionIndex] || options[0];
+            if (!target) return;
+            target.click();
+            return;
+          }
+
+          if (event.key === "Escape") {
+            event.preventDefault();
+            closeDropdown(row, productDropdown);
+            productNameInput.focus();
+          }
+        });
+
         productDropdown.addEventListener("click", (event) => {
           const target = event.target.closest(".js-product-option");
           if (!target) return;
 
           productNameInput.value = target.dataset.name;
-          productIdInput.value = target.dataset.id;
-          const quoteCurrency = currentCurrency();
           const selected = products.find((p) => String(p.id) === String(target.dataset.id));
-          const productCurrency = (selected?.currency || "").trim().toUpperCase();
-          const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
-
-          if (!priceInput.value && !isCurrencyMismatch) priceInput.value = target.dataset.price;
-          if (!descInput.value) descInput.value = target.dataset.name;
-          productNameInput.classList.add("is-matched");
-
-          if (isCurrencyMismatch) {
-            setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
-          } else {
-            setFeedback("", "");
-          }
+          applyProductSelection(selected);
           closeDropdown(row, productDropdown);
+          productNameInput.focus();
           updateTotalsUI();
         });
 
         document.addEventListener("click", (event) => {
           if (!row.contains(event.target)) {
             closeDropdown(row, productDropdown);
+            closeEditor(specsEditor);
+            closeEditor(addonEditor);
           }
         });
 
@@ -656,7 +1065,6 @@
         <td class="quote-col-product">
           <div class="product-search">
             <input type="text" class="js-product-name" placeholder="Type to search product">
-            <button type="button" class="js-product-toggle" aria-label="Show products"><span aria-hidden="true">▾</span></button>
             <div class="js-product-dropdown"></div>
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -666,10 +1074,38 @@
           <input type="text" name="quote[quote_items_attributes][${index}][description]" class="js-description" placeholder="Description">
         </td>
         <td class="quote-col-specs">
-          <textarea rows="4" class="js-specifications" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
+          <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
+          <div class="quote-kv-summary js-spec-summary"></div>
+          <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
+          <div class="quote-kv-editor js-spec-editor" data-kind="spec">
+            <div class="quote-kv-editor-head">
+              <strong>Specifications</strong>
+              <button type="button" class="quote-kv-close js-kv-close">Close</button>
+            </div>
+            <div class="quote-kv-rows js-kv-rows">
+              ${createSpecRow()}
+            </div>
+            <div class="quote-kv-actions">
+              <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
+            </div>
+          </div>
         </td>
         <td class="quote-col-addons">
-          <textarea rows="4" class="js-addon-charges" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
+          <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
+          <div class="quote-kv-summary js-addon-summary"></div>
+          <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
+          <div class="quote-kv-editor js-addon-editor" data-kind="addon">
+            <div class="quote-kv-editor-head">
+              <strong>Add-ons</strong>
+              <button type="button" class="quote-kv-close js-kv-close">Close</button>
+            </div>
+            <div class="quote-kv-rows js-kv-rows">
+              ${createAddonRow()}
+            </div>
+            <div class="quote-kv-actions">
+              <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
+            </div>
+          </div>
         </td>
         <td class="quote-col-price">
           <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price" placeholder="0.00">

@@ -1,9 +1,10 @@
 class CustomersController < ApplicationController
   before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up]
+  before_action :set_customer_form_collections, only: %i[new create edit update]
 
   def index
     Quote.expire_overdue_for_company!(current_user.company_id)
-    scope = current_user.company.customers.search(params[:query]).includes(quotes: [ :quote_items, :template ])
+    scope = current_user.company.customers.search(params[:query]).includes(:customer_tags, quotes: [ :quote_items, :template ])
     all_customers = scope.to_a
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
@@ -124,6 +125,7 @@ class CustomersController < ApplicationController
 
   def new
     @customer = current_user.company.customers.new
+    @customer.internal_owner ||= current_user if Customer.internal_owner_enabled?
   end
 
   def create
@@ -131,12 +133,15 @@ class CustomersController < ApplicationController
       redirect_to customers_path, alert: "Free plan limit reached: #{current_user.customer_count_for_limit}/#{User::FREE_CUSTOMER_LIMIT} customers used." and return
     end
 
-    @customer = current_user.company.customers.new(customer_params)
+    @customer = current_user.company.customers.new
+    @customer.assign_attributes(customer_params)
+    apply_custom_tags(@customer)
+    @customer.internal_owner ||= current_user if Customer.internal_owner_enabled?
 
     if @customer.save
       redirect_to @customer
     else
-      render :new
+      render :new, status: :unprocessable_entity
     end
   end
 
@@ -144,10 +149,14 @@ class CustomersController < ApplicationController
   end
 
   def update
-    if @customer.update(customer_params)
+    @customer.assign_attributes(customer_params)
+    apply_custom_tags(@customer)
+
+    if @customer.save
+      @customer.avatar.purge_later if remove_avatar_requested?
       redirect_to @customer
     else
-      render :edit
+      render :edit, status: :unprocessable_entity
     end
   end
 
@@ -184,7 +193,7 @@ class CustomersController < ApplicationController
   end
 
   def customer_params
-    params.require(:customer).permit(
+    permitted_keys = [
       :name,
       :country,
       :address,
@@ -192,10 +201,52 @@ class CustomersController < ApplicationController
       :email,
       :phone,
       :status,
+      :customer_level,
+      :customer_source,
+      :payment_terms,
+      :main_product_interest,
+      :estimated_annual_volume,
+      :timezone,
       :next_follow_up_date,
       :last_follow_up_date,
-      :notes
-    )
+      :notes,
+      :avatar
+    ]
+    permitted_keys << :internal_owner_id if Customer.internal_owner_enabled?
+    permitted = params.require(:customer).permit(*permitted_keys, customer_tag_ids: [])
+    permitted[:customer_tag_ids] = Array(permitted[:customer_tag_ids]).reject(&:blank?)
+    permitted
+  end
+
+  def set_customer_form_collections
+    @owner_users =
+      if Customer.internal_owner_enabled?
+        current_user.company.users.order(Arel.sql("COALESCE(NULLIF(full_name, ''), email) ASC"))
+      else
+        []
+      end
+    CustomerTag.ensure_presets_for(current_user.company)
+    @available_tags = current_user.company.customer_tags.ordered
+  end
+
+  def apply_custom_tags(customer)
+    custom_names = Array(params.dig(:customer, :new_tag_names)).map { |name| name.to_s.split(",") }.flatten
+    custom_names.concat(customer_custom_tags_input.to_s.split(","))
+    custom_names = custom_names.map { |name| name.strip.gsub(/\s+/, " ") }.reject(&:blank?).uniq
+    return if custom_names.empty?
+
+    tag_ids = custom_names.map do |name|
+      current_user.company.customer_tags.find_or_create_by!(name: name).id
+    end
+    customer.customer_tag_ids = (customer.customer_tag_ids + tag_ids).uniq
+  end
+
+  def customer_custom_tags_input
+    params.dig(:customer, :custom_tags_input)
+  end
+
+  def remove_avatar_requested?
+    params.dig(:customer, :remove_avatar).to_s == "1" && params.dig(:customer, :avatar).blank?
   end
 
   def build_quote_card(revisions)

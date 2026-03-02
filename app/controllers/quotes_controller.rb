@@ -180,6 +180,10 @@ class QuotesController < ApplicationController
     snapshot["customer_address"] = @quote.customer.address
     snapshot["customer_phone"] = @quote.customer.phone
     snapshot["customer_email"] = @quote.customer.email
+    if Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-"
+      snapshot["sales_owner_name"] = @quote.customer.internal_owner_display_name
+      snapshot["customer_owner_name"] = @quote.customer.internal_owner_display_name
+    end
     snapshot["trade_term"] = @quote.trade_term
     snapshot["quote_items"] = @quote.quote_items.map { |item| build_quote_item_snapshot(item) }
 

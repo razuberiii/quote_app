@@ -15,6 +15,10 @@
     <article class="quote-meta-card">
       <h3>Seller</h3>
       <p><strong><%= @share.company.name %></strong></p>
+      <% sales_owner = @snapshot["sales_owner_name"].presence || @snapshot["customer_owner_name"].presence %>
+      <% if @template.show_customer_owner && sales_owner.present? %>
+        <p>Sales Owner: <%= sales_owner %></p>
+      <% end %>
       <p><%= @share.company.address.presence || "-" %></p>
       <p><%= @share.company.phone.presence || "-" %></p>
       <p><%= @share.company.email.presence || "-" %></p>
@@ -32,29 +36,41 @@
 
     <article class="quote-meta-card">
       <h3>Quote Info</h3>
-      <p><strong>Date:</strong> <%= @snapshot["issued_on"].presence || "-" %></p>
-      <% if @template.show_valid_until %>
-        <p><strong>Valid Until:</strong> <%= @snapshot["valid_until"].presence || "-" %></p>
+      <div class="quote-info-list">
+      <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @snapshot["quote_no"].presence || "-" %></strong></p>
+      <p class="quote-info-row"><span>Date</span><strong><%= @snapshot["issued_on"].presence || "-" %></strong></p>
+      <% if @template.show_valid_until && @snapshot["valid_until"].present? %>
+        <p class="quote-info-row is-valid-until"><span>Valid Until</span><strong><%= @snapshot["valid_until"] %></strong></p>
       <% end %>
       <% if @template.show_currency %>
-        <p><strong>Currency:</strong> <%= @snapshot["currency"] %></p>
+        <p class="quote-info-row"><span>Currency</span><strong><%= @snapshot["currency"] %></strong></p>
       <% end %>
-      <p><strong>Trade Terms:</strong> <%= @snapshot["trade_term"].presence || "-" %></p>
+      <% if @snapshot["trade_term"].present? %>
+        <p class="quote-info-row"><span>Trade Terms</span><strong><%= @snapshot["trade_term"] %></strong></p>
+      <% end %>
       <% if @template.show_payment_term && @snapshot["payment_term"].present? %>
-        <p><strong>Payment:</strong> <%= @snapshot["payment_term"] %></p>
+        <p class="quote-info-row"><span>Payment</span><strong><%= @snapshot["payment_term"] %></strong></p>
       <% end %>
+      </div>
     </article>
   </section>
 
   <div class="table-responsive">
     <table class="quote-items-table quote-doc-table">
+      <colgroup>
+        <% if @template.show_product_images %><col class="quote-col-image"><% end %>
+        <col class="quote-col-description">
+        <col class="quote-col-qty">
+        <col class="quote-col-money">
+        <col class="quote-col-money">
+      </colgroup>
       <thead>
         <tr>
           <% if @template.show_product_images %><th>Image</th><% end %>
           <th>Description</th>
-          <th>Qty</th>
-          <th>Unit Price</th>
-          <th>Line Total</th>
+          <th class="quote-col-right">Qty</th>
+          <th class="quote-col-right quote-col-money">Unit Price</th>
+          <th class="quote-col-right quote-col-money">Line Total</th>
         </tr>
       </thead>
       <tbody>
@@ -69,26 +85,30 @@
                 <% end %>
               </td>
             <% end %>
-            <td><%= item["description"] %></td>
-            <td><%= item["quantity"] %></td>
-            <td><%= quote_money(item["unit_price"], @snapshot["currency"], show_symbol: @template.show_currency) %></td>
             <td>
-              <%= quote_money(item["amount"], @snapshot["currency"], show_symbol: @template.show_currency) %>
-              <% specs = Array(item["specifications"]) %>
-              <% addons = Array(item["addon_charges"]) %>
-              <% if specs.any? || addons.any? %>
-                <div class="quote-item-details">
-                  <% specs.each do |spec| %>
-                    <div>Spec: <%= spec["key"] || spec[:key] %> - <%= spec["value"] || spec[:value] %></div>
-                  <% end %>
-                  <% addons.each do |addon| %>
-                    <% addon_name = addon["name"] || addon[:name] %>
-                    <% addon_amount = addon["amount"] || addon[:amount] %>
-                    <div>Add-on: <%= addon_name %> (<%= quote_money(addon_amount, @snapshot["currency"], show_symbol: @template.show_currency) %>)</div>
-                  <% end %>
-                </div>
-              <% end %>
+              <div class="quote-item-desc">
+                <div class="quote-item-desc-main"><%= item["description"] %></div>
+                <% specs = Array(item["specifications"]) %>
+                <% addons = Array(item["addon_charges"]) %>
+                <% if specs.any? || addons.any? %>
+                  <div class="quote-item-desc-meta">
+                    <% specs.each do |spec| %>
+                      <div class="quote-item-desc-sub">Spec: <%= spec["key"] || spec[:key] %> - <%= spec["value"] || spec[:value] %></div>
+                    <% end %>
+                    <% addons.each do |addon| %>
+                      <% addon_name = addon["name"] || addon[:name] %>
+                      <% addon_amount = addon["amount"] || addon[:amount] %>
+                      <div class="quote-item-desc-sub is-addon">
+                        Add-on: <%= addon_name %> (<%= quote_money(addon_amount, @snapshot["currency"], show_symbol: @template.show_currency) %>)
+                      </div>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
             </td>
+            <td class="quote-col-right"><%= item["quantity"] %></td>
+            <td class="quote-col-right quote-col-money"><%= quote_money(item["unit_price"], @snapshot["currency"], show_symbol: @template.show_currency) %></td>
+            <td class="quote-col-right quote-col-money"><%= quote_money(item["amount"], @snapshot["currency"], show_symbol: @template.show_currency) %></td>
           </tr>
         <% end %>
       </tbody>
@@ -102,24 +122,40 @@
   <% grand_total = subtotal + tax + shipping - discount %>
   <aside class="quote-total-box">
     <p><span>Subtotal</span><strong><%= quote_money(subtotal, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
-    <p><span>Tax / VAT</span><strong><%= quote_money(tax, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
-    <p><span>Shipping</span><strong><%= quote_money(shipping, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% if @template.show_tax %>
+      <p><span>Tax / VAT</span><strong><%= quote_money(tax, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
+    <% if @template.show_shipping %>
+      <p><span>Shipping</span><strong><%= quote_money(shipping, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
     <p><span>Discount</span><strong><%= quote_money(discount, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
     <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(grand_total, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% if (closing_message = @template.resolved_closing_message).present? %>
+      <p class="quote-engagement-note"><%= closing_message %></p>
+    <% end %>
   </aside>
 
+  <% terms_lines = [] %>
   <% if @template.show_terms_section %>
+    <% terms_lines << [ "Payment Terms", @snapshot["payment_term"] ] if @template.show_payment_term && @snapshot["payment_term"].present? %>
+    <% terms_lines << [ "Trade Terms", @snapshot["trade_term"] ] if @snapshot["trade_term"].present? %>
+    <% terms_lines << [ "Terms", @snapshot["terms_text"] ] if @snapshot["terms_text"].present? %>
+    <% terms_lines << [ "Legal Disclaimer", @snapshot["legal_disclaimer"] ] if @snapshot["legal_disclaimer"].present? %>
+    <% terms_lines << [ "Delivery Notes", @snapshot["delivery_notes"] ] if @snapshot["delivery_notes"].present? %>
+  <% end %>
+  <% if terms_lines.any? %>
     <section class="quote-section-block">
       <h3>Terms & Conditions</h3>
-      <p><strong>Payment Terms:</strong> <%= @snapshot["payment_term"].presence || "-" %></p>
-      <p><strong>Trade Terms:</strong> <%= @snapshot["trade_term"].presence || "-" %></p>
-      <p><strong>Terms:</strong> <%= @snapshot["terms_text"].presence || "-" %></p>
-      <p><strong>Legal Disclaimer:</strong> <%= @snapshot["legal_disclaimer"].presence || "-" %></p>
-      <p><strong>Delivery Notes:</strong> <%= @snapshot["delivery_notes"].presence || "-" %></p>
+      <% terms_lines.each do |label, value| %>
+        <p><strong><%= label %>:</strong> <%= value %></p>
+      <% end %>
     </section>
   <% end %>
 
   <div class="no-print quote-public-actions">
     <button type="button" onclick="window.print()">Print</button>
   </div>
+  <% if @template.show_saas_branding %>
+    <p class="quote-public-footnote"><%= @template.saas_branding_footer_text %></p>
+  <% end %>
 </article>

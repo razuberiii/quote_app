@@ -4,6 +4,25 @@
   <span>Back to Customers</span>
 <% end %>
 
+<section class="customer-profile-card">
+  <div class="customer-profile-card-head">
+    <div class="customer-profile-identity">
+      <span class="customer-list-avatar customer-profile-avatar" aria-hidden="true">
+        <% if @customer.avatar.attached? && @customer.avatar.blob&.persisted? %>
+          <%= image_tag @customer.avatar, alt: "#{@customer.name} avatar" %>
+        <% else %>
+          <span><%= @customer.avatar_initial %></span>
+        <% end %>
+      </span>
+      <div>
+        <strong><%= @customer.name %></strong>
+        <p><%= @customer.email.presence || "No email" %></p>
+      </div>
+    </div>
+    <%= link_to "Edit Customer", edit_customer_path(@customer), class: "btn btn-primary customer-edit-cta" %>
+  </div>
+</section>
+
 <section class="quote-edit-summary customer-top-summary">
   <article class="quote-edit-summary-card">
     <span class="summary-label">Total Quotes</span>
@@ -25,28 +44,41 @@
   </article>
 </section>
 
-<div class="customer-details">
-  <p><strong>Country:</strong> <%= @customer.country %></p>
-  <p><strong>Address:</strong> <%= @customer.address.presence || "-" %></p>
-  <p><strong>Contact:</strong> <%= @customer.contact_name %></p>
-  <p><strong>Email:</strong> <%= @customer.email %></p>
-  <p><strong>Phone:</strong> <%= @customer.phone.presence || "-" %></p>
-  <p><strong>Status:</strong> <span class="status-badge status-<%= @customer.status_css %>"><%= @customer.status_label %></span></p>
-  <p><strong>Latest Customer Signal:</strong> <%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || "No customer behavior yet" %></p>
-  <p class="customer-next-follow-up-line follow-up-<%= @customer.follow_up_status %>">
-    <strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime("%Y-%m-%d") || "N/A" %>
-    <% if @customer.follow_up_overdue? %>
-      <span class="overdue-badge">OVERDUE</span>
-    <% elsif @customer.follow_up_due_today? %>
-      <span class="today-badge">TODAY</span>
-    <% elsif @customer.follow_up_status == "upcoming" %>
-      <span class="upcoming-badge">DUE SOON</span>
+<details class="customer-details-collapsible">
+  <summary>Customer Profile Details</summary>
+  <div class="customer-details">
+    <p><strong>Country:</strong> <%= @customer.country %></p>
+    <p><strong>Level:</strong> <%= @customer.customer_level.to_s.humanize %></p>
+    <p><strong>Source:</strong> <%= @customer.customer_source.to_s.humanize.presence || "-" %></p>
+    <p><strong>Address:</strong> <%= @customer.address.presence || "-" %></p>
+    <p><strong>Contact:</strong> <%= @customer.contact_name %></p>
+    <p><strong>Email:</strong> <%= @customer.email %></p>
+    <p><strong>Phone:</strong> <%= @customer.phone.presence || "-" %></p>
+    <p><strong>Payment Terms:</strong> <%= @customer.payment_terms.to_s.upcase.gsub("_", "/").presence || "-" %></p>
+    <p><strong>Main Product Interest:</strong> <%= @customer.main_product_interest.presence || "-" %></p>
+    <p><strong>Internal Owner:</strong> <%= @customer.internal_owner_display_name %></p>
+    <p><strong>Estimated Annual Volume:</strong> <%= @customer.estimated_annual_volume.present? ? number_with_precision(@customer.estimated_annual_volume, precision: 2, delimiter: ",") : "-" %></p>
+    <p><strong>Timezone:</strong> <%= @customer.timezone.presence || "-" %></p>
+    <p><strong>Status:</strong> <span class="status-badge status-<%= @customer.status_css %>"><%= @customer.status_label %></span></p>
+    <% if @customer.customer_tags.any? %>
+      <p><strong>Tags:</strong> <%= @customer.customer_tags.order(:name).pluck(:name).join(", ") %></p>
     <% end %>
-  </p>
-  <% if @customer.notes.present? %>
-    <p><strong>Notes:</strong> <%= @customer.notes %></p>
-  <% end %>
-</div>
+    <p><strong>Latest Customer Signal:</strong> <%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || "No customer behavior yet" %></p>
+    <p class="customer-next-follow-up-line follow-up-<%= @customer.follow_up_status %>">
+      <strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime("%Y-%m-%d") || "N/A" %>
+      <% if @customer.follow_up_overdue? %>
+        <span class="overdue-badge">OVERDUE</span>
+      <% elsif @customer.follow_up_due_today? %>
+        <span class="today-badge">TODAY</span>
+      <% elsif @customer.follow_up_status == "upcoming" %>
+        <span class="upcoming-badge">DUE SOON</span>
+      <% end %>
+    </p>
+    <% if @customer.notes.present? %>
+      <p><strong>Notes:</strong> <%= @customer.notes %></p>
+    <% end %>
+  </div>
+</details>
 
 <section class="customer-follow-up-callout follow-up-<%= @customer.follow_up_status %>">
   <div>
@@ -66,7 +98,8 @@
   </div>
 </section>
 
-<div class="actions">
+<h3 class="customer-actions-title">Quote Actions</h3>
+<div class="actions customer-quote-actions">
   <%= link_to "New Quote", new_customer_quote_path(@customer), class: "btn btn-success" %>
   <%= button_to "Delete", customer_path(@customer), method: :delete, data: { turbo_confirm: "Are you sure?" }, class: "btn btn-danger" %>
 </div>

@@ -1,8 +1,21 @@
-<%= form_with model: customer do |f| %>
+<%= form_with model: customer, html: { class: "customer-profile-form", multipart: true } do |f| %>
   <% status_options = Customer::SALES_STATUSES.map { |value| [value.humanize, value] } %>
   <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
     <% status_options.unshift(["#{customer.status.humanize} (legacy)", customer.status]) %>
   <% end %>
+
+  <% level_options = Customer::CUSTOMER_LEVELS.map { |value| [value.humanize, value] } %>
+  <% source_options = Customer::CUSTOMER_SOURCES.map { |value| [value.humanize, value] } %>
+  <% payment_options = Customer::PAYMENT_TERMS_OPTIONS.map { |value| [value.upcase.gsub("_", "/"), value] } %>
+  <% owner_users = (@owner_users || []) %>
+  <% selected_owner = owner_users.find { |user| user.id == customer.internal_owner_id } if Customer.internal_owner_enabled? %>
+  <% timezone_options = ActiveSupport::TimeZone.all.map { |zone| [zone.to_s, zone.name] } %>
+
+  <% selected_tag_ids = customer.customer_tag_ids.map(&:to_i) %>
+  <% initial_custom_tags = Array(params.dig(:customer, :new_tag_names)).reject(&:blank?) %>
+  <% initial_custom_tags += params.dig(:customer, :custom_tags_input).to_s.split(",") %>
+  <% initial_custom_tags = initial_custom_tags.map { |tag| tag.to_s.strip }.reject(&:blank?).uniq %>
+
   <% if customer.errors.any? %>
     <div class="error-messages">
       <h2><%= pluralize(customer.errors.count, "error") %> prevented this customer from being saved:</h2>
@@ -14,30 +27,67 @@
     </div>
   <% end %>
 
-  <div class="quote-edit-shell">
-    <section class="quote-form-section">
-      <h3>Basic Information</h3>
-      <div class="quote-form-grid">
-        <div>
-          <%= f.label :name %>
-          <%= f.text_field :name, placeholder: "Customer Name" %>
+  <div class="customer-profile-shell">
+    <section class="customer-profile-section customer-profile-identity">
+      <div class="customer-profile-section-head">
+        <h3>Section A - Identity Block</h3>
+      </div>
+      <div class="customer-identity-grid">
+        <div class="customer-avatar-panel">
+          <div class="customer-avatar-preview">
+            <% has_avatar = customer.avatar.attached? && customer.avatar.blob&.persisted? %>
+            <% if has_avatar %>
+              <%= image_tag customer.avatar, alt: "#{customer.name} avatar", id: "customer_avatar_preview_img" %>
+            <% else %>
+              <%= tag.img id: "customer_avatar_preview_img", alt: "#{customer.name} avatar", hidden: true %>
+            <% end %>
+            <span id="customer_avatar_preview_fallback" <%= "hidden" if has_avatar %>><%= customer.avatar_initial %></span>
+          </div>
+          <div class="customer-avatar-fields">
+            <%= f.label :avatar, "Avatar" %>
+            <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#customer_avatar_preview_img", live_preview_fallback: "#customer_avatar_preview_fallback" } %>
+            <% if customer.avatar.attached? %>
+              <label class="customer-avatar-remove"><%= check_box_tag "customer[remove_avatar]", "1", false %> Remove current avatar</label>
+            <% end %>
+            <p class="customer-field-hint">If no image is uploaded, the first letter of customer name is used.</p>
+          </div>
         </div>
-        <div>
-          <%= f.label :country %>
-          <%= f.text_field :country, placeholder: "Country" %>
-        </div>
-        <div class="quote-form-grid-span-2">
-          <%= f.label :address %>
-          <%= f.text_field :address, placeholder: "Company Address" %>
+
+        <div class="customer-identity-fields">
+          <div class="customer-profile-grid customer-profile-grid-2">
+            <div class="customer-name-field">
+              <%= f.label :name, "Customer Name" %>
+              <%= f.text_field :name, placeholder: "Customer Name", required: true, class: "customer-name-input" %>
+            </div>
+            <div>
+              <%= f.label :country %>
+              <%= f.text_field :country, placeholder: "Country" %>
+            </div>
+            <div>
+              <%= f.label :status %>
+              <div class="customer-status-select-wrap">
+                <%= f.select :status, status_options, { prompt: "Select Status" } %>
+                <% if customer.status.present? %>
+                  <span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span>
+                <% end %>
+              </div>
+            </div>
+            <div>
+              <%= f.label :customer_level, "Customer Level" %>
+              <%= f.select :customer_level, level_options, { include_blank: false } %>
+            </div>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="quote-form-section">
-      <h3>Contact & Follow-up</h3>
-      <div class="quote-form-grid">
+    <section class="customer-profile-section">
+      <div class="customer-profile-section-head">
+        <h3>Section B - Business & Contact</h3>
+      </div>
+      <div class="customer-profile-grid customer-profile-grid-2">
         <div>
-          <%= f.label :contact_name %>
+          <%= f.label :contact_name, "Contact Person" %>
           <%= f.text_field :contact_name, placeholder: "Contact Person" %>
         </div>
         <div>
@@ -49,34 +99,224 @@
           <%= f.text_field :phone, placeholder: "Phone" %>
         </div>
         <div>
-          <%= f.label :status %>
-          <%= f.select :status, status_options, { prompt: "Select Status" } %>
+          <%= f.label :payment_terms, "Payment Terms" %>
+          <%= f.select :payment_terms, payment_options, { prompt: "Select payment terms" } %>
         </div>
         <div>
-          <%= f.label :next_follow_up_date %>
-          <%= f.date_field :next_follow_up_date %>
+          <%= f.label :customer_source, "Source" %>
+          <%= f.select :customer_source, source_options, { prompt: "Select source" } %>
         </div>
-        <% if customer.persisted? %>
+        <div>
+          <%= f.label :main_product_interest, "Main Product Interest" %>
+          <%= f.text_field :main_product_interest, placeholder: "Main product / category" %>
+        </div>
+        <% if Customer.internal_owner_enabled? %>
           <div>
-            <%= f.label :last_follow_up_date %>
-            <%= f.date_field :last_follow_up_date %>
+            <label for="customer_internal_owner_id">Internal Owner</label>
+            <div class="owner-picker" data-owner-picker>
+              <%= hidden_field_tag "customer[internal_owner_id]", customer.internal_owner_id, id: "customer_internal_owner_id" %>
+              <button type="button" class="owner-picker-trigger" data-owner-trigger>
+                <span class="owner-picker-avatar">
+                  <% selected_owner_avatar_url = selected_owner&.avatar&.attached? && selected_owner.avatar.blob&.persisted? ? url_for(selected_owner.avatar) : nil %>
+                  <img src="<%= selected_owner_avatar_url %>" alt="Owner avatar" data-owner-selected-avatar <%= "hidden" if selected_owner_avatar_url.blank? %>>
+                  <span data-owner-selected-initial <%= "hidden" if selected_owner_avatar_url.present? %>><%= (selected_owner&.full_name.presence || selected_owner&.email || "?").to_s.first.to_s.upcase %></span>
+                </span>
+                <span class="owner-picker-meta">
+                  <strong data-owner-selected-name><%= selected_owner&.full_name.presence || selected_owner&.email || "Select internal owner" %></strong>
+                  <small data-owner-selected-email><%= selected_owner&.email || "Choose from your team members" %></small>
+                </span>
+              </button>
+              <div class="owner-picker-menu" data-owner-menu hidden>
+                <% owner_users.each do |user| %>
+                  <button
+                    type="button"
+                    class="owner-picker-option"
+                    data-owner-option
+                    data-owner-id="<%= user.id %>"
+                    data-owner-name="<%= user.full_name.presence || user.email %>"
+                    data-owner-email="<%= user.email %>"
+                    data-owner-avatar-src="<%= user.avatar.attached? && user.avatar.blob&.persisted? ? url_for(user.avatar) : "" %>"
+                  >
+                    <span class="owner-picker-avatar">
+                      <% if user.avatar.attached? && user.avatar.blob&.persisted? %>
+                        <%= image_tag user.avatar, alt: "Owner avatar" %>
+                      <% else %>
+                        <span><%= (user.full_name.presence || user.email).to_s.first.to_s.upcase %></span>
+                      <% end %>
+                    </span>
+                    <span class="owner-picker-meta">
+                      <strong><%= user.full_name.presence || user.email %></strong>
+                      <small><%= user.email %></small>
+                    </span>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+            <p class="customer-field-hint">Owner can be shown on quote by template switch (default: ON).</p>
           </div>
         <% end %>
+        <div>
+          <%= f.label :next_follow_up_date, "Follow-up Date" %>
+          <%= f.date_field :next_follow_up_date %>
+        </div>
       </div>
     </section>
 
-    <section class="quote-form-section">
-      <h3>Notes</h3>
-      <div class="quote-form-grid">
-        <div class="quote-form-grid-span-2">
+    <section class="customer-profile-section">
+      <div class="customer-profile-section-head">
+        <h3>Section C - Additional Info</h3>
+      </div>
+      <div class="customer-profile-grid customer-profile-grid-2">
+        <div class="customer-grid-span-2">
+          <%= f.label :address %>
+          <%= f.text_area :address, rows: 2, placeholder: "Address" %>
+        </div>
+        <div>
+          <%= f.label :estimated_annual_volume, "Estimated Annual Volume" %>
+          <%= f.number_field :estimated_annual_volume, step: 0.01, min: 0, placeholder: "0.00" %>
+        </div>
+        <div>
+          <%= f.label :timezone %>
+          <%= f.select :timezone, timezone_options, { prompt: "Select timezone" } %>
+        </div>
+
+        <div class="customer-grid-span-2">
+          <label>Tags</label>
+          <div class="customer-tag-cloud">
+            <% (@available_tags || []).each do |tag| %>
+              <label class="customer-tag-chip">
+                <%= check_box_tag "customer[customer_tag_ids][]", tag.id, selected_tag_ids.include?(tag.id), id: "customer_tag_#{tag.id}" %>
+                <span><%= tag.name %></span>
+              </label>
+            <% end %>
+          </div>
+          <div class="customer-tag-custom" data-customer-tag-builder>
+            <input type="text" placeholder="Add custom tag and press Enter" data-custom-tag-input>
+            <button type="button" class="btn btn-secondary" data-add-custom-tag>Add</button>
+            <div class="customer-tag-custom-list" data-custom-tag-list>
+              <% initial_custom_tags.each do |tag_name| %>
+                <span class="customer-tag-chip customer-tag-chip-custom"><%= tag_name %></span>
+                <%= hidden_field_tag "customer[new_tag_names][]", tag_name %>
+              <% end %>
+            </div>
+            <p class="customer-field-hint">Preset tags are reusable company-wide. Custom tags will be saved for reuse.</p>
+          </div>
+        </div>
+
+        <div class="customer-grid-span-2">
           <%= f.label :notes %>
           <%= f.text_area :notes, rows: 4, placeholder: "Notes" %>
         </div>
       </div>
     </section>
 
-    <div class="quote-form-submit">
+    <div class="customer-form-submit">
       <%= f.submit submit_label, class: "btn btn-primary" %>
     </div>
   </div>
 <% end %>
+
+<script>
+  (() => {
+    const bindCustomTagBuilder = () => {
+      document.querySelectorAll("[data-customer-tag-builder]").forEach((builder) => {
+        if (builder.dataset.bound === "true") return;
+        builder.dataset.bound = "true";
+
+        const input = builder.querySelector("[data-custom-tag-input]");
+        const addBtn = builder.querySelector("[data-add-custom-tag]");
+        const list = builder.querySelector("[data-custom-tag-list]");
+        if (!input || !addBtn || !list) return;
+
+        const existing = () =>
+          Array.from(list.querySelectorAll("input[name='customer[new_tag_names][]']"))
+            .map((node) => node.value.toLowerCase().trim());
+
+        const appendTag = (rawValue) => {
+          const value = rawValue.trim();
+          if (!value) return;
+          if (existing().includes(value.toLowerCase())) {
+            input.value = "";
+            return;
+          }
+
+          const chip = document.createElement("span");
+          chip.className = "customer-tag-chip customer-tag-chip-custom";
+          chip.textContent = value;
+
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "customer[new_tag_names][]";
+          hidden.value = value;
+
+          list.appendChild(chip);
+          list.appendChild(hidden);
+          input.value = "";
+        };
+
+        addBtn.addEventListener("click", () => appendTag(input.value));
+        input.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          appendTag(input.value);
+        });
+      });
+    };
+
+    const bindOwnerPicker = () => {
+      document.querySelectorAll("[data-owner-picker]").forEach((picker) => {
+        if (picker.dataset.boundOwner === "true") return;
+        picker.dataset.boundOwner = "true";
+
+        const trigger = picker.querySelector("[data-owner-trigger]");
+        const menu = picker.querySelector("[data-owner-menu]");
+        const hidden = picker.querySelector("#customer_internal_owner_id");
+        const selectedName = picker.querySelector("[data-owner-selected-name]");
+        const selectedEmail = picker.querySelector("[data-owner-selected-email]");
+        const selectedInitial = picker.querySelector("[data-owner-selected-initial]");
+        const selectedAvatar = picker.querySelector("[data-owner-selected-avatar]");
+        if (!trigger || !menu || !hidden || !selectedName || !selectedEmail) return;
+
+        const closeMenu = () => { menu.hidden = true; };
+        const openMenu = () => { menu.hidden = false; };
+
+        trigger.addEventListener("click", () => {
+          menu.hidden ? openMenu() : closeMenu();
+        });
+
+        picker.querySelectorAll("[data-owner-option]").forEach((option) => {
+          option.addEventListener("click", () => {
+            hidden.value = option.dataset.ownerId || "";
+            selectedName.textContent = option.dataset.ownerName || "Select internal owner";
+            selectedEmail.textContent = option.dataset.ownerEmail || "Choose from your team members";
+            if (selectedInitial) {
+              selectedInitial.textContent = (option.dataset.ownerName || "?").trim().charAt(0).toUpperCase();
+            }
+            if (selectedAvatar && selectedInitial) {
+              const avatarSrc = option.dataset.ownerAvatarSrc || "";
+              if (avatarSrc) {
+                selectedAvatar.src = avatarSrc;
+                selectedAvatar.hidden = false;
+                selectedInitial.hidden = true;
+              } else {
+                selectedAvatar.src = "";
+                selectedAvatar.hidden = true;
+                selectedInitial.hidden = false;
+              }
+            }
+            closeMenu();
+          });
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!picker.contains(event.target)) closeMenu();
+        });
+      });
+    };
+
+    bindCustomTagBuilder();
+    bindOwnerPicker();
+    document.addEventListener("turbo:load", bindCustomTagBuilder);
+    document.addEventListener("turbo:load", bindOwnerPicker);
+  })();
+</script>

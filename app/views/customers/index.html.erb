@@ -366,8 +366,32 @@
         <% @customers.each do |customer| %>
           <% metrics = @customer_metrics.fetch(customer) %>
           <% row_signal = @customer_row_signals.fetch(customer.id) %>
-          <tr class="customer-row follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>">
-            <td data-label="Name"><strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong></td>
+          <% tag_names = customer.customer_tags.map(&:name).sort %>
+          <% visible_tags = tag_names.first(2) %>
+          <% hidden_tags_count = [tag_names.size - visible_tags.size, 0].max %>
+          <tr
+            class="customer-row follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>"
+            data-clickable-href="<%= customer_path(customer) %>"
+            tabindex="0"
+            aria-label="Open customer <%= customer.name %>"
+          >
+            <td data-label="Name">
+              <div class="customer-list-name-cell">
+                <span class="customer-list-avatar" aria-hidden="true">
+                  <% if customer.avatar.attached? && customer.avatar.blob&.persisted? %>
+                    <%= image_tag customer.avatar, alt: "#{customer.name} avatar" %>
+                  <% else %>
+                    <span><%= customer.avatar_initial %></span>
+                  <% end %>
+                </span>
+                <div class="customer-list-name-meta">
+                  <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
+                  <% if tag_names.any? %>
+                    <span class="customer-list-tags">(<%= visible_tags.join(", ") %><%= ", +#{hidden_tags_count}" if hidden_tags_count.positive? %>)</span>
+                  <% end %>
+                </div>
+              </div>
+            </td>
             <td data-label="Country"><%= customer.country %></td>
             <td data-label="Contact"><%= customer.contact_name %></td>
             <td data-label="Email"><%= customer.email %></td>
@@ -416,10 +440,32 @@
     <% @customers.each do |customer| %>
       <% metrics = @customer_metrics.fetch(customer) %>
       <% row_signal = @customer_row_signals.fetch(customer.id) %>
-      <article class="customer-mobile-card follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>">
+      <% tag_names = customer.customer_tags.map(&:name).sort %>
+      <% visible_tags = tag_names.first(2) %>
+      <% hidden_tags_count = [tag_names.size - visible_tags.size, 0].max %>
+      <article
+        class="customer-mobile-card follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>"
+        data-clickable-href="<%= customer_path(customer) %>"
+        tabindex="0"
+        aria-label="Open customer <%= customer.name %>"
+      >
         <div class="customer-mobile-head">
           <div class="customer-mobile-title-wrap">
-            <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
+            <div class="customer-list-name-cell customer-list-name-cell-mobile">
+              <span class="customer-list-avatar" aria-hidden="true">
+                <% if customer.avatar.attached? && customer.avatar.blob&.persisted? %>
+                  <%= image_tag customer.avatar, alt: "#{customer.name} avatar" %>
+                <% else %>
+                  <span><%= customer.avatar_initial %></span>
+                <% end %>
+              </span>
+              <div class="customer-list-name-meta">
+                <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
+                <% if tag_names.any? %>
+                  <span class="customer-list-tags">(<%= visible_tags.join(", ") %><%= ", +#{hidden_tags_count}" if hidden_tags_count.positive? %>)</span>
+                <% end %>
+              </div>
+            </div>
             <span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span>
           </div>
           <div class="customer-mobile-next">

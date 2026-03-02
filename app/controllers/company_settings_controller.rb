@@ -50,7 +50,8 @@ class CompanySettingsController < ApplicationController
       :template_show_images,
       :template_show_terms_section,
       :template_show_notes,
-      :template_show_payment_term
+      :template_show_payment_term,
+      :template_show_customer_owner
     )
   end
 
@@ -61,7 +62,8 @@ class CompanySettingsController < ApplicationController
       :template_show_images,
       :template_show_terms_section,
       :template_show_notes,
-      :template_show_payment_term
+      :template_show_payment_term,
+      :template_show_customer_owner
     )
   end
 
@@ -75,6 +77,7 @@ class CompanySettingsController < ApplicationController
     attrs[:show_terms_section] = ActiveModel::Type::Boolean.new.cast(company_settings_params[:template_show_terms_section]) if company_settings_params.key?(:template_show_terms_section)
     attrs[:show_notes] = ActiveModel::Type::Boolean.new.cast(company_settings_params[:template_show_notes]) if company_settings_params.key?(:template_show_notes)
     attrs[:show_payment_term] = ActiveModel::Type::Boolean.new.cast(company_settings_params[:template_show_payment_term]) if company_settings_params.key?(:template_show_payment_term)
+    attrs[:show_customer_owner] = ActiveModel::Type::Boolean.new.cast(company_settings_params[:template_show_customer_owner]) if company_settings_params.key?(:template_show_customer_owner)
     attrs
   end
 

@@ -105,9 +105,9 @@ class QuoteExporter
     right_lines = [
       "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}",
       "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}",
-      (@template.show_valid_until ? "Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}" : nil),
+      (@template.show_valid_until && @quote.valid_until.present? ? "Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}" : nil),
       (@template.show_currency ? "Currency: #{@quote.currency}" : nil),
-      "Trade Terms: #{@quote.trade_term.presence || '-'}"
+      (@quote.trade_term.present? ? "Trade Terms: #{@quote.trade_term}" : nil)
     ].compact.map { |line| pdf_text(line) }.join("\n")
 
     pdf.table([ [ left_lines, right_lines ] ], width: width, cell_style: { borders: [], padding: [ 2, 0, 2, 0 ] }) do |t|
@@ -122,10 +122,12 @@ class QuoteExporter
   def render_pdf_parties(pdf)
     width = pdf_content_width(pdf)
     accent = pdf_color
+    sales_owner_line = sales_owner_display_name.present? ? "Sales Owner: #{sales_owner_display_name}" : nil
 
     seller_lines = [
       "SELLER",
       @company.name,
+      sales_owner_line,
       @company.address,
       @company.phone,
       @company.email,
@@ -223,11 +225,11 @@ class QuoteExporter
     return unless @template.show_terms_section
 
     lines = []
-    lines << "Payment Terms: #{@quote.payment_term.presence || '-'}" if @template.show_payment_term
-    lines << "Trade Terms: #{@quote.trade_term.presence || '-'}"
-    lines << "Terms: #{@quote.terms_text.presence || '-'}"
-    lines << "Legal Disclaimer: #{@quote.legal_disclaimer.presence || '-'}"
-    lines << "Delivery Notes: #{@quote.delivery_notes.presence || '-'}"
+    lines << "Payment Terms: #{@quote.payment_term}" if @template.show_payment_term && @quote.payment_term.present?
+    lines << "Trade Terms: #{@quote.trade_term}" if @quote.trade_term.present?
+    lines << "Terms: #{@quote.terms_text}" if @quote.terms_text.present?
+    lines << "Legal Disclaimer: #{@quote.legal_disclaimer}" if @quote.legal_disclaimer.present?
+    lines << "Delivery Notes: #{@quote.delivery_notes}" if @quote.delivery_notes.present?
     lines << "Notes: #{@quote.notes}" if @template.show_notes && @quote.notes.present?
     return if lines.empty?
 
@@ -271,9 +273,9 @@ class QuoteExporter
     right_lines = [
       excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
       excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}"),
-      (@template.show_valid_until ? excel_text("Valid Until: #{@quote.valid_until&.strftime('%Y-%m-%d') || '-'}") : nil),
+      (@template.show_valid_until && @quote.valid_until.present? ? excel_text("Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
       (@template.show_currency ? excel_text("Currency: #{@quote.currency}") : nil),
-      excel_text("Trade Terms: #{@quote.trade_term.presence || '-'}")
+      (@quote.trade_term.present? ? excel_text("Trade Terms: #{@quote.trade_term}") : nil)
     ].compact
 
     [ left_lines.length, right_lines.length ].max.times do |idx|
@@ -315,11 +317,12 @@ class QuoteExporter
 
     seller_lines = [
       excel_text(@company.name),
+      sales_owner_display_name.present? ? excel_text("Sales Owner: #{sales_owner_display_name}") : nil,
       excel_text(@company.address.presence || "-"),
       excel_text(@company.phone.presence || "-"),
       excel_text(@company.email.presence || "-"),
       excel_text(@company.website.presence || "-")
-    ]
+    ].compact
     buyer_lines = [
       excel_text(@customer.name),
       excel_text("Contact: #{@customer.contact_name.presence || '-'}"),
@@ -352,18 +355,19 @@ class QuoteExporter
     total_col = 5
 
     @quote.quote_items.ordered.each_with_index do |item, idx|
-      row = [ idx + 1, "", excel_item_description_text(item), item.quantity, item.unit_price.to_f, item.line_total.to_f ]
+      description_text = excel_item_description_text(item)
+      row = [ idx + 1, "", description_text, item.quantity, item.unit_price.to_f, item.line_total.to_f ]
       alternate = idx.odd?
       row_styles = [
         (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
         (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
-        (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
+        (alternate ? styles[:cell_desc_alt] : styles[:cell_desc]),
         (alternate ? styles[:number_alt] : styles[:number]),
         (alternate ? styles[:currency_alt] : styles[:currency]),
         (alternate ? styles[:currency_alt] : styles[:currency])
       ]
 
-      sheet.add_row row, style: row_styles, height: 20
+      sheet.add_row row, style: row_styles, height: excel_item_row_height(description_text)
       row_index = sheet.rows.size - 1
       @excel_row_index_map[item.id] = row_index
       add_excel_item_image(sheet, item, image_col_index) if @template.show_images?
@@ -406,20 +410,25 @@ class QuoteExporter
 
   def render_excel_sections(sheet, styles)
     if @template.show_terms_section
-      divider_row = sheet.rows.size + 1
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-      sheet.add_row [ "Terms & Conditions" ], style: styles[:section]
-      sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
+      terms_rows = []
+      terms_rows << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
+      terms_rows << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present?
+      terms_rows << [ "Terms", @quote.terms_text ] if @quote.terms_text.present?
+      terms_rows << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present?
+      terms_rows << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present?
 
-      if @template.show_payment_term
-        add_excel_terms_row(sheet, styles, "Payment Terms", @quote.payment_term)
+      if terms_rows.any?
+        divider_row = sheet.rows.size + 1
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+        sheet.add_row [ "Terms & Conditions" ], style: styles[:section]
+        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
+
+        terms_rows.each do |label, value|
+          add_excel_terms_row(sheet, styles, label, value)
+        end
       end
-      add_excel_terms_row(sheet, styles, "Trade Terms", @quote.trade_term)
-      add_excel_terms_row(sheet, styles, "Terms", @quote.terms_text)
-      add_excel_terms_row(sheet, styles, "Legal Disclaimer", @quote.legal_disclaimer)
-      add_excel_terms_row(sheet, styles, "Delivery Notes", @quote.delivery_notes)
     end
 
     if @template.show_notes && @quote.notes.present?
@@ -443,10 +452,12 @@ class QuoteExporter
   end
 
   def apply_excel_post_layout(sheet, ctx, config)
-    widths = (config["column_widths"] || [ 6, 12, 34, 10, 14, 16 ]).map(&:to_f)
+    widths = (config["column_widths"] || [ 6, 14, 42, 8, 14, 16 ]).map(&:to_f)
     widths[0] = [ widths[0], 8.5 ].max
-    widths[2] = [ widths[2], 32 ].max
+    widths[2] = [ widths[2], 42 ].max
     widths[3] = [ widths[3], 9 ].max
+    widths[4] = [ widths[4], 14 ].max
+    widths[5] = [ widths[5], 16 ].max
     sheet.column_widths(*widths)
 
     freeze = config["freeze_pane"]
@@ -467,6 +478,9 @@ class QuoteExporter
     grid = "E5E7EB"
     emphasis = "6B7280"
     zebra = "F8FAFC"
+    grand_total_fill = "EAF2FF"
+    grand_total_text = "1E3A5F"
+    currency_format_code = excel_currency_format_code
 
     {
       title: styles.add_style(sz: 15, b: true, fg_color: accent, alignment: { horizontal: :left, vertical: :center }, font_name: font),
@@ -484,17 +498,59 @@ class QuoteExporter
       header_right: styles.add_style(sz: 11, b: true, bg_color: dark_header, fg_color: "FFFFFF", border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
       cell_left: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :center, wrap_text: true }, font_name: font),
       cell_left_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :center, wrap_text: true }, font_name: font),
+      cell_desc: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font),
+      cell_desc_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font),
       number: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "0", alignment: { horizontal: :right, vertical: :center }, font_name: font),
       number_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "0", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      currency: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      currency_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      currency: styles.add_style(sz: 11, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      currency_alt: styles.add_style(sz: 11, bg_color: zebra, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
       totals_separator: styles.add_style(border: { style: :medium, color: emphasis, edges: [ :top ] }, font_name: font),
       total_label: styles.add_style(sz: 11, alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      total_value: styles.add_style(sz: 11, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      grand_total_label: styles.add_style(b: true, sz: 12, bg_color: accent, fg_color: "FFFFFF", border: { style: :medium, color: emphasis, edges: [ :top ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      grand_total: styles.add_style(b: true, sz: 13, bg_color: accent, fg_color: "FFFFFF", border: { style: :medium, color: emphasis, edges: [ :top ] }, format_code: "#,##0.00", alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      total_value: styles.add_style(sz: 11, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      grand_total_label: styles.add_style(b: true, sz: 12, bg_color: grand_total_fill, fg_color: grand_total_text, border: { style: :medium, color: emphasis, edges: [ :top ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
+      grand_total: styles.add_style(b: true, sz: 13, bg_color: grand_total_fill, fg_color: grand_total_text, border: { style: :medium, color: emphasis, edges: [ :top ] }, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
       terms_divider: styles.add_style(border: { style: :thin, color: grid, edges: [ :top ] }, font_name: font)
     }
+  end
+
+  def excel_number_format_code
+    decimals = @template&.amount_decimals.to_i
+    decimals = 2 unless [ 0, 2 ].include?(decimals)
+    decimal_suffix = decimals.zero? ? "" : ".#{'0' * decimals}"
+
+    integer_part =
+      case @template&.thousand_separator
+      when "none" then "0"
+      when "space" then "# ##0"
+      else "#,##0"
+      end
+
+    "#{integer_part}#{decimal_suffix}"
+  end
+
+  def excel_currency_format_code
+    base = excel_number_format_code
+    return base unless @template.show_currency
+
+    code = @quote.currency.to_s.upcase.presence || "USD"
+    symbol = Quote.currency_symbol_for(code)
+    mode = @template&.currency_display_mode.presence || "symbol_prefix"
+
+    case mode
+    when "code_prefix"
+      "#{excel_format_literal(code)} #{base}"
+    when "code_suffix"
+      "#{base} #{excel_format_literal(code)}"
+    else
+      literal = (symbol == code ? code : symbol)
+      "#{excel_format_literal(literal)}#{base}"
+    end
+  end
+
+  # Excel custom number format must avoid raw double quotes inside XML attributes.
+  # Use escaped literals (\U\S\D) instead of quoted strings ("USD") to keep styles.xml valid.
+  def excel_format_literal(text)
+    text.to_s.each_char.map { |char| "\\#{char}" }.join
   end
 
   def add_excel_terms_row(sheet, styles, label, value)
@@ -535,7 +591,8 @@ class QuoteExporter
     return if image_path.blank?
 
     row_index = @excel_row_index_map[item.id] || sheet.rows.size - 1
-    sheet.rows[row_index].height = 40
+    current_height = sheet.rows[row_index].height.to_f
+    sheet.rows[row_index].height = [ current_height, 40 ].max
 
     sheet.add_image(image_src: image_path) do |image|
       image.start_at(image_col_index, row_index)
@@ -644,9 +701,15 @@ class QuoteExporter
   rescue StandardError
     {
       "sheet_name" => xlsx_sheet_name,
-      "column_widths" => [ 6, 14, 36, 8, 14, 16 ],
+      "column_widths" => [ 6, 14, 42, 8, 14, 16 ],
       "title_merge" => "A1:F1"
     }
+  end
+
+  def excel_item_row_height(description_text)
+    line_count = description_text.to_s.split(/\r?\n/).count
+    visible_lines = [ line_count, 1 ].max
+    [[18 + (visible_lines * 12), 20].max, 150].min
   end
 
   def xlsx_sheet_name
@@ -686,7 +749,7 @@ class QuoteExporter
       lines << "Spec: #{pair[:key]} - #{pair[:value]}"
     end
     item.addon_charge_entries.each do |entry|
-      lines << "Add-on: #{entry[:name]} (#{entry[:amount]})"
+      lines << "  Add-on: #{entry[:name]} (#{money_text(entry[:amount])})"
     end
     lines.join("\n")
   end
@@ -729,6 +792,16 @@ class QuoteExporter
     return "1F4E79" unless hex.match?(/\A(?:\h{3}|\h{6})\z/)
 
     hex.length == 3 ? hex.chars.map { |c| c * 2 }.join.upcase : hex.upcase
+  end
+
+  def sales_owner_display_name
+    return nil unless @template.show_customer_owner
+    return nil unless @customer.respond_to?(:internal_owner_display_name)
+
+    value = @customer.internal_owner_display_name.to_s
+    return nil if value.blank? || value == "-"
+
+    value
   end
 
   def darken_color(hex, amount)

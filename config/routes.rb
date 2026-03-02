@@ -40,6 +40,7 @@ Rails.application.routes.draw do
       patch :set_primary_image
       delete :remove_primary_image
       delete :remove_gallery_image
+      delete :bulk_remove_gallery_images
     end
   end
   resources :quote_templates, except: [ :show ] do

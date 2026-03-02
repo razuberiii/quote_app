@@ -98,15 +98,17 @@
     <div class="settings-grid-span-2">
       <div class="company-logo-row">
         <div class="company-logo-preview">
-          <% if @company.logo.attached? %>
-            <%= image_tag @company.logo, alt: "Company Logo" %>
+          <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>
+          <% if has_logo %>
+            <%= image_tag @company.logo, alt: "Company Logo", id: "company_logo_preview_img" %>
           <% else %>
-            <span><%= @company.name.to_s.first.to_s.upcase %></span>
+            <%= tag.img id: "company_logo_preview_img", alt: "Company Logo", hidden: true %>
           <% end %>
+          <span id="company_logo_preview_fallback" <%= "hidden" if has_logo %>><%= @company.name.to_s.first.to_s.upcase %></span>
         </div>
         <div class="company-logo-actions">
           <%= f.label :logo, "Upload Company Logo" %>
-          <%= f.file_field :logo, accept: "image/*" %>
+          <%= f.file_field :logo, accept: "image/*", data: { live_preview_target: "#company_logo_preview_img", live_preview_fallback: "#company_logo_preview_fallback" } %>
           <% if @company.logo.attached? %>
             <%= button_tag "Remove Current Logo",
                            type: "submit",
@@ -130,6 +132,8 @@
         <label><%= check_box_tag "company[template_show_notes]", "1", @template.show_notes %> Show notes by default</label>
         <%= hidden_field_tag "company[template_show_payment_term]", "0" %>
         <label><%= check_box_tag "company[template_show_payment_term]", "1", @template.show_payment_term %> Show payment terms by default</label>
+        <%= hidden_field_tag "company[template_show_customer_owner]", "0" %>
+        <label><%= check_box_tag "company[template_show_customer_owner]", "1", @template.show_customer_owner %> Show sales owner by default</label>
       </div>
     </div>
 

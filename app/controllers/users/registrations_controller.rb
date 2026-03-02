@@ -83,5 +83,14 @@ module Users
         params[:current_password].blank? &&
         params[:email].to_s.casecmp(resource.email.to_s).zero?
     end
+
+    def update_resource(resource, params)
+      if profile_only_update?(resource, params)
+        profile_params = params.except(:current_password, :password, :password_confirmation)
+        resource.update_without_password(profile_params)
+      else
+        resource.update_with_password(params)
+      end
+    end
   end
 end

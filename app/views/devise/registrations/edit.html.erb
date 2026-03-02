@@ -8,15 +8,17 @@
 
     <div class="account-avatar-row">
       <div class="account-avatar-preview">
-        <% if resource.avatar.attached? && resource.avatar.blob&.persisted? %>
-          <%= image_tag resource.avatar, alt: "Avatar" %>
+        <% has_avatar = resource.avatar.attached? && resource.avatar.blob&.persisted? %>
+        <% if has_avatar %>
+          <%= image_tag resource.avatar, alt: "Avatar", id: "user_avatar_preview_img" %>
         <% else %>
-          <span><%= resource.email.to_s.first.to_s.upcase %></span>
+          <%= tag.img id: "user_avatar_preview_img", alt: "Avatar", hidden: true %>
         <% end %>
+        <span id="user_avatar_preview_fallback" <%= "hidden" if has_avatar %>><%= resource.email.to_s.first.to_s.upcase %></span>
       </div>
       <div class="account-avatar-actions">
         <%= f.label :avatar, "Upload Avatar" %>
-        <%= f.file_field :avatar, accept: "image/*" %>
+        <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#user_avatar_preview_img", live_preview_fallback: "#user_avatar_preview_fallback" } %>
         <% if resource.avatar.attached? %>
           <%= button_tag "Remove Current Avatar",
                          type: "submit",

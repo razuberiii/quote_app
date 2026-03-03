@@ -68,12 +68,12 @@ class Product < ApplicationRecord
       .map(&:strip)
       .reject(&:blank?)
       .find do |line|
-        key, value = line.split(/[:=]/, 2).map { |part| part.to_s.strip }
+        key, value = line.split(/[:=：]/, 2).map { |part| part.to_s.strip }
         key.blank? || value.blank?
       end
 
     return if invalid_line.blank?
 
-    errors.add(:default_specification, "must use one pair per line in key: value format, e.g. Power: 5kW")
+    errors.add(:default_specification, "must use one pair per line with key/value separated by :, =, or ： (e.g. Power: 5kW)")
   end
 end

@@ -73,6 +73,10 @@
           <%= f.label :valid_until %>
           <%= f.date_field :valid_until %>
         </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :custom_title, "Custom Quotation Title (optional)" %>
+          <%= f.text_field :custom_title, placeholder: "Project Falcon - Q2 Equipment Package" %>
+        </div>
         <div>
           <%= f.label :status %>
           <%= f.select :status, [["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]], {}, {} %>
@@ -181,7 +185,6 @@
             <thead>
               <tr>
                 <th>Product Name</th>
-                <th>Description</th>
                 <th>Specifications</th>
                 <th>Add-ons</th>
                 <th>Unit Price</th>
@@ -202,9 +205,7 @@
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
                     <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
                   </td>
-                  <td class="quote-col-desc">
-                    <%= item_fields.text_field :description, class: "js-description", placeholder: "Description" %>
-                  </td>
+                  <%= item_fields.hidden_field :description, class: "js-description" %>
                   <td class="quote-col-specs">
                     <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
                     <div class="quote-kv-summary js-spec-summary"></div>
@@ -213,6 +214,13 @@
                       <div class="quote-kv-editor-head">
                         <strong>Specifications</strong>
                         <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                      </div>
+                      <div class="quote-kv-bulk">
+                        <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Power: 5kW&#10;Voltage: 220V"></textarea>
+                        <div class="quote-kv-bulk-actions">
+                          <button type="button" class="quote-kv-parse js-spec-bulk-apply">Apply text</button>
+                          <span class="quote-kv-bulk-check js-spec-bulk-check" aria-live="polite"></span>
+                        </div>
                       </div>
                       <div class="quote-kv-rows js-kv-rows">
                         <% spec_rows = item.specification_pairs.presence || [ { key: "", value: "" } ] %>
@@ -226,6 +234,7 @@
                       </div>
                       <div class="quote-kv-actions">
                         <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
+                        <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
                       </div>
                     </div>
                   </td>
@@ -237,6 +246,13 @@
                       <div class="quote-kv-editor-head">
                         <strong>Add-ons</strong>
                         <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                      </div>
+                      <div class="quote-kv-bulk">
+                        <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Packaging: 30&#10;Installation = 120"></textarea>
+                        <div class="quote-kv-bulk-actions">
+                          <button type="button" class="quote-kv-parse js-addon-bulk-apply">Apply text</button>
+                          <span class="quote-kv-bulk-check js-addon-bulk-check" aria-live="polite"></span>
+                        </div>
                       </div>
                       <div class="quote-kv-rows js-kv-rows">
                         <% addon_rows = item.addon_charge_entries.presence || [ { name: "", amount: "" } ] %>
@@ -250,6 +266,7 @@
                       </div>
                       <div class="quote-kv-actions">
                         <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
+                        <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
                       </div>
                     </div>
                   </td>
@@ -349,7 +366,7 @@
 
     function parseAddonTotal(text) {
       return String(text || "").split(/\r?\n/).reduce((sum, line) => {
-        const parts = line.split(/[:=]/, 2);
+        const parts = line.split(/[:=：]/, 2);
         if (parts.length < 2) return sum;
         const amount = parseNumber(parts[1]);
         return amount >= 0 ? sum + amount : sum;
@@ -487,6 +504,56 @@
           <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove add-on">&times;</button>
         </div>
       `;
+    }
+
+    function parseSpecPairsFromText(text) {
+      const rows = [];
+      const invalidLines = [];
+      String(text || "").split(/\r?\n/).forEach((rawLine, index) => {
+        const line = rawLine.trim();
+        if (!line) return;
+        const separatorIndex = line.search(/[:=：]/);
+        if (separatorIndex <= 0 || separatorIndex >= line.length - 1) {
+          invalidLines.push(index + 1);
+          return;
+        }
+
+        const key = line.slice(0, separatorIndex).trim();
+        const value = line.slice(separatorIndex + 1).trim();
+        if (!key || !value) {
+          invalidLines.push(index + 1);
+          return;
+        }
+        rows.push({ key, value });
+      });
+
+      return { rows, invalidLines };
+    }
+
+    function parseAddonRowsFromText(text) {
+      const rows = [];
+      const invalidLines = [];
+      String(text || "").split(/\r?\n/).forEach((rawLine, index) => {
+        const line = rawLine.trim();
+        if (!line) return;
+        const separatorIndex = line.search(/[:=：]/);
+        if (separatorIndex <= 0 || separatorIndex >= line.length - 1) {
+          invalidLines.push(index + 1);
+          return;
+        }
+
+        const name = line.slice(0, separatorIndex).trim();
+        const amountRaw = line.slice(separatorIndex + 1).trim();
+        const amountText = amountRaw.replace(/,/g, "").replace(/[^\d.+-]/g, "");
+        const amount = parseFloat(amountText);
+        if (!name || !Number.isFinite(amount) || amount < 0) {
+          invalidLines.push(index + 1);
+          return;
+        }
+        rows.push({ name, amount: amount.toFixed(2) });
+      });
+
+      return { rows, invalidLines };
     }
 
     function updateExpirySummary() {
@@ -629,6 +696,10 @@
       const addonSummary = row.querySelector(".js-addon-summary");
       const openSpecBtn = row.querySelector(".js-open-spec-editor");
       const openAddonBtn = row.querySelector(".js-open-addon-editor");
+      const specBulkInput = row.querySelector(".js-spec-bulk-input");
+      const specBulkCheck = row.querySelector(".js-spec-bulk-check");
+      const addonBulkInput = row.querySelector(".js-addon-bulk-input");
+      const addonBulkCheck = row.querySelector(".js-addon-bulk-check");
       let feedbackTimer = null;
       let activeOptionIndex = -1;
 
@@ -852,7 +923,7 @@
           .map((line) => line.trim())
           .filter(Boolean)
           .map((line) => {
-            const parts = line.split(/[:=]/, 2);
+            const parts = line.split(/[:=：]/, 2);
             return {
               key: (parts[0] || "").trim(),
               value: (parts[1] || "").trim()
@@ -863,6 +934,52 @@
         if (!parsedRows.length) return;
         rowsWrap.innerHTML = parsedRows.map((pair) => createSpecRow(pair.key, pair.value)).join("");
         syncSpecsText();
+      }
+
+      function renderSpecBulkCheck() {
+        if (!specBulkCheck || !specBulkInput) return;
+        const text = String(specBulkInput.value || "").trim();
+        if (!text) {
+          specBulkCheck.textContent = "";
+          specBulkCheck.classList.remove("is-error");
+          specBulkCheck.classList.remove("is-ok");
+          return;
+        }
+
+        const result = parseSpecPairsFromText(text);
+        if (result.invalidLines.length) {
+          specBulkCheck.textContent = `Invalid format at line ${result.invalidLines.join(", ")}. Use key: value`;
+          specBulkCheck.classList.add("is-error");
+          specBulkCheck.classList.remove("is-ok");
+          return;
+        }
+
+        specBulkCheck.textContent = `${result.rows.length} row(s) ready`;
+        specBulkCheck.classList.remove("is-error");
+        specBulkCheck.classList.add("is-ok");
+      }
+
+      function renderAddonBulkCheck() {
+        if (!addonBulkCheck || !addonBulkInput) return;
+        const text = String(addonBulkInput.value || "").trim();
+        if (!text) {
+          addonBulkCheck.textContent = "";
+          addonBulkCheck.classList.remove("is-error");
+          addonBulkCheck.classList.remove("is-ok");
+          return;
+        }
+
+        const result = parseAddonRowsFromText(text);
+        if (result.invalidLines.length) {
+          addonBulkCheck.textContent = `Invalid format at line ${result.invalidLines.join(", ")}. Use name: amount`;
+          addonBulkCheck.classList.add("is-error");
+          addonBulkCheck.classList.remove("is-ok");
+          return;
+        }
+
+        addonBulkCheck.textContent = `${result.rows.length} row(s) ready`;
+        addonBulkCheck.classList.remove("is-error");
+        addonBulkCheck.classList.add("is-ok");
       }
 
       function syncAddonText() {
@@ -890,11 +1007,37 @@
       }
 
       if (specsEditor) {
+        if (specBulkInput) {
+          specBulkInput.addEventListener("input", renderSpecBulkCheck);
+        }
+
         specsEditor.addEventListener("click", (event) => {
           const addBtn = event.target.closest(".js-kv-add");
           const removeBtn = event.target.closest(".js-kv-remove");
+          const clearAllBtn = event.target.closest(".js-kv-clear-all");
+          const bulkApplyBtn = event.target.closest(".js-spec-bulk-apply");
           const rowsWrap = specsEditor.querySelector(".js-kv-rows");
           if (!rowsWrap) return;
+
+          if (bulkApplyBtn) {
+            if (!specBulkInput) return;
+            const result = parseSpecPairsFromText(specBulkInput.value);
+            renderSpecBulkCheck();
+            if (result.invalidLines.length || !result.rows.length) return;
+            rowsWrap.innerHTML = result.rows.map((pair) => createSpecRow(pair.key, pair.value)).join("");
+            syncSpecsText();
+            return;
+          }
+
+          if (clearAllBtn) {
+            rowsWrap.innerHTML = createSpecRow();
+            if (specBulkInput) {
+              specBulkInput.value = "";
+              renderSpecBulkCheck();
+            }
+            syncSpecsText();
+            return;
+          }
 
           if (addBtn) {
             rowsWrap.insertAdjacentHTML("beforeend", createSpecRow());
@@ -914,14 +1057,50 @@
         specsEditor.addEventListener("input", () => {
           syncSpecsText();
         });
+
+        specsEditor.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          closeEditor(specsEditor);
+        });
       }
 
       if (addonEditor) {
+        if (addonBulkInput) {
+          addonBulkInput.addEventListener("input", renderAddonBulkCheck);
+        }
+
         addonEditor.addEventListener("click", (event) => {
           const addBtn = event.target.closest(".js-kv-add");
           const removeBtn = event.target.closest(".js-kv-remove");
+          const clearAllBtn = event.target.closest(".js-kv-clear-all");
+          const bulkApplyBtn = event.target.closest(".js-addon-bulk-apply");
           const rowsWrap = addonEditor.querySelector(".js-kv-rows");
           if (!rowsWrap) return;
+
+          if (bulkApplyBtn) {
+            if (!addonBulkInput) return;
+            const result = parseAddonRowsFromText(addonBulkInput.value);
+            renderAddonBulkCheck();
+            if (result.invalidLines.length || !result.rows.length) return;
+            rowsWrap.innerHTML = result.rows.map((entry) => createAddonRow(entry.name, entry.amount)).join("");
+            refreshCurrencyCodeTags();
+            syncAddonText();
+            updateTotalsUI();
+            return;
+          }
+
+          if (clearAllBtn) {
+            rowsWrap.innerHTML = createAddonRow();
+            if (addonBulkInput) {
+              addonBulkInput.value = "";
+              renderAddonBulkCheck();
+            }
+            refreshCurrencyCodeTags();
+            syncAddonText();
+            updateTotalsUI();
+            return;
+          }
 
           if (addBtn) {
             rowsWrap.insertAdjacentHTML("beforeend", createAddonRow());
@@ -946,6 +1125,12 @@
           syncAddonText();
           updateTotalsUI();
         });
+
+        addonEditor.addEventListener("keydown", (event) => {
+          if (event.key !== "Escape") return;
+          event.preventDefault();
+          closeEditor(addonEditor);
+        });
       }
 
       if (addonInput) {
@@ -964,12 +1149,20 @@
 
       if (openSpecBtn) {
         openSpecBtn.addEventListener("click", () => {
+          if (specBulkInput) {
+            specBulkInput.value = specsInput?.value || "";
+            renderSpecBulkCheck();
+          }
           openEditor(specsEditor);
         });
       }
 
       if (openAddonBtn) {
         openAddonBtn.addEventListener("click", () => {
+          if (addonBulkInput) {
+            addonBulkInput.value = addonInput?.value || "";
+            renderAddonBulkCheck();
+          }
           openEditor(addonEditor);
         });
       }
@@ -1027,7 +1220,9 @@
         });
 
         document.addEventListener("click", (event) => {
-          if (!row.contains(event.target)) {
+          const clickPath = typeof event.composedPath === "function" ? event.composedPath() : [];
+          const clickedInsideRow = clickPath.includes(row) || row.contains(event.target);
+          if (!clickedInsideRow) {
             closeDropdown(row, productDropdown);
             closeEditor(specsEditor);
             closeEditor(addonEditor);
@@ -1069,9 +1264,7 @@
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
           <input type="hidden" name="quote[quote_items_attributes][${index}][product_id]" class="js-product-id">
-        </td>
-        <td class="quote-col-desc">
-          <input type="text" name="quote[quote_items_attributes][${index}][description]" class="js-description" placeholder="Description">
+          <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description">
         </td>
         <td class="quote-col-specs">
           <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
@@ -1082,11 +1275,19 @@
               <strong>Specifications</strong>
               <button type="button" class="quote-kv-close js-kv-close">Close</button>
             </div>
+            <div class="quote-kv-bulk">
+              <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Power: 5kW&#10;Voltage: 220V"></textarea>
+              <div class="quote-kv-bulk-actions">
+                <button type="button" class="quote-kv-parse js-spec-bulk-apply">Apply text</button>
+                <span class="quote-kv-bulk-check js-spec-bulk-check" aria-live="polite"></span>
+              </div>
+            </div>
             <div class="quote-kv-rows js-kv-rows">
               ${createSpecRow()}
             </div>
             <div class="quote-kv-actions">
               <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
+              <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
             </div>
           </div>
         </td>
@@ -1099,11 +1300,19 @@
               <strong>Add-ons</strong>
               <button type="button" class="quote-kv-close js-kv-close">Close</button>
             </div>
+            <div class="quote-kv-bulk">
+              <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Packaging: 30&#10;Installation = 120"></textarea>
+              <div class="quote-kv-bulk-actions">
+                <button type="button" class="quote-kv-parse js-addon-bulk-apply">Apply text</button>
+                <span class="quote-kv-bulk-check js-addon-bulk-check" aria-live="polite"></span>
+              </div>
+            </div>
             <div class="quote-kv-rows js-kv-rows">
               ${createAddonRow()}
             </div>
             <div class="quote-kv-actions">
               <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
+              <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
             </div>
           </div>
         </td>

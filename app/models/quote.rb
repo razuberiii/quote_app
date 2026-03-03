@@ -57,11 +57,74 @@ class Quote < ApplicationRecord
   }
 
   def title
-    quote_items.ordered.first&.description.presence || "Quotation #{quote_no}"
+    custom_title.presence || quote_items.ordered.first&.description.presence || "Quotation #{quote_no}"
   end
 
   def display_amount
     negotiated? && final_amount.present? ? final_amount : grand_total
+  end
+
+  def latest_revision_for_quote_no?
+    self.class
+      .where(company_id: company_id, quote_no: quote_no)
+      .maximum(:revision_number).to_i == revision_number.to_i
+  end
+
+  def workflow_state
+    normalized = status.to_s.downcase
+    return "accepted" if accepted_at.present? || normalized == "won"
+    return "lost" if normalized == "lost"
+    return "expired" if normalized == "expired"
+    return "negotiating" if normalized == "negotiating" || changes_requested_at.present?
+    return "draft" if normalized.blank? || normalized == "draft" || normalized == "pending"
+    return "sent" if normalized == "sent"
+    return "viewed" if normalized == "viewed"
+
+    normalized
+  end
+
+  def can_edit_revision?
+    draft? && latest_revision_for_quote_no?
+  end
+
+  def can_create_new_revision?
+    %w[sent viewed negotiating].include?(workflow_state) && latest_revision_for_quote_no?
+  end
+
+  def can_reopen?
+    return false unless latest_revision_for_quote_no?
+
+    %w[accepted lost expired].include?(workflow_state) || changes_requested_at.present?
+  end
+
+  def can_delete_revision?
+    draft? && latest_revision_for_quote_no?
+  end
+
+  def can_copy_and_reprice?
+    %w[sent viewed negotiating accepted lost expired].include?(workflow_state) && latest_revision_for_quote_no?
+  end
+
+  def can_share_publicly?
+    %w[draft sent viewed negotiating].include?(workflow_state) &&
+      latest_revision_for_quote_no? &&
+      changes_requested_at.blank?
+  end
+
+  def can_switch_document?
+    workflow_state == "accepted" && latest_revision_for_quote_no?
+  end
+
+  def draft?
+    workflow_state == "draft"
+  end
+
+  def resolved_spec_label
+    spec_label.presence || template&.spec_label.presence || "Spec"
+  end
+
+  def resolved_addon_label
+    addon_label.presence || template&.addon_label.presence || "Add-on"
   end
 
   def subtotal
@@ -89,13 +152,20 @@ class Quote < ApplicationRecord
       negotiated: negotiated,
       final_amount: final_amount,
       loss_reason: loss_reason,
+      custom_title: custom_title,
+      spec_label: spec_label,
+      addon_label: addon_label,
       notes: notes,
       tax_amount: tax_amount,
       shipping_amount: shipping_amount,
       discount_amount: discount_amount,
       terms_text: terms_text,
       legal_disclaimer: legal_disclaimer,
-      delivery_notes: delivery_notes
+      delivery_notes: delivery_notes,
+      accepted_at: nil,
+      changes_requested_at: nil,
+      changes_request_message: nil,
+      reopened_at: nil
     }
     revision_attrs[:trade_term] = trade_term if self.class.column_names.include?("trade_term")
     revision = self.class.new(revision_attrs)
@@ -158,6 +228,8 @@ class Quote < ApplicationRecord
     self.shipping_amount ||= 0
     self.discount_amount ||= 0
     self.template ||= company&.quote_template_or_default
+    self.spec_label = template&.spec_label.presence || "Spec" if spec_label.blank?
+    self.addon_label = template&.addon_label.presence || "Add-on" if addon_label.blank?
   end
 
   def normalize_status
@@ -214,4 +286,5 @@ class Quote < ApplicationRecord
     normalized = code.to_s.upcase
     CURRENCY_SYMBOLS.fetch(normalized, normalized.presence || "USD")
   end
+
 end

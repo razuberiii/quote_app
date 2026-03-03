@@ -2,7 +2,7 @@ class QuotesController < ApplicationController
   require "base64"
 
   before_action :set_customer, only: %i[new create]
-  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share update_template]
+  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share update_template reopen]
   before_action :set_template, only: %i[show export_pdf export_xlsx share update_template]
   before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
   before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
@@ -42,10 +42,17 @@ class QuotesController < ApplicationController
   end
 
   def edit
+    unless @quote.can_edit_revision?
+      redirect_to quote_path(@quote), alert: "This revision is read-only in the current state." and return
+    end
     ensure_quote_item_row
   end
 
   def update
+    unless @quote.can_edit_revision?
+      redirect_to quote_path(@quote), alert: "This revision is read-only in the current state." and return
+    end
+
     @quote.template ||= current_user.company.quote_template_or_default
 
     if @quote.update(quote_params)
@@ -57,6 +64,10 @@ class QuotesController < ApplicationController
   end
 
   def update_template
+    unless @quote.can_edit_revision?
+      redirect_to quote_path(@quote), alert: "Template cannot be changed in the current state." and return
+    end
+
     requested_template_id = params[:template_id].presence
     template = current_user.company.quote_templates.find_by(id: requested_template_id)
     template ||= current_user.company.quote_template_or_default
@@ -149,6 +160,10 @@ class QuotesController < ApplicationController
   end
 
   def duplicate
+    unless @quote.can_create_new_revision?
+      redirect_to quote_path(@quote), alert: "New revision is not available for the current quote state." and return
+    end
+
     @customer = @quote.customer
     @quote = @quote.build_revision
     ensure_quote_item_row
@@ -160,6 +175,10 @@ class QuotesController < ApplicationController
   end
 
   def duplicate_and_reprice
+    unless @quote.can_copy_and_reprice?
+      redirect_to quote_path(@quote), alert: "Copy & Reprice is not available for the current quote state." and return
+    end
+
     revision = @quote.build_revision
     revision.status = "draft" if revision.status.blank? || revision.status == "expired"
     revision.save!
@@ -173,6 +192,10 @@ class QuotesController < ApplicationController
   end
 
   def share
+    unless @quote.can_share_publicly?
+      redirect_to quote_path(@quote), alert: "Sharing is disabled for the current quote state." and return
+    end
+
     token = QuoteShare.generate_token
     snapshot = @quote.as_json
     snapshot["customer_name"] = @quote.customer.name
@@ -185,6 +208,11 @@ class QuotesController < ApplicationController
       snapshot["customer_owner_name"] = @quote.customer.internal_owner_display_name
     end
     snapshot["trade_term"] = @quote.trade_term
+    snapshot["spec_label"] = @quote.resolved_spec_label
+    snapshot["addon_label"] = @quote.resolved_addon_label
+    snapshot["custom_title"] = @quote.custom_title
+    snapshot["accepted_at"] = @quote.accepted_at
+    snapshot["changes_requested_at"] = @quote.changes_requested_at
     snapshot["quote_items"] = @quote.quote_items.map { |item| build_quote_item_snapshot(item) }
 
     current_user.company.quote_shares.create!(quote: @quote, token: token, snapshot: snapshot)
@@ -212,6 +240,28 @@ class QuotesController < ApplicationController
     end
   end
 
+  def reopen
+    unless @quote.can_reopen?
+      redirect_to quote_path(@quote), alert: "Reopen is not available for the current quote state." and return
+    end
+
+    next_status = if @quote.viewed_at.present? || @quote.quote_shares.sum(:view_count).positive?
+      "viewed"
+    else
+      "sent"
+    end
+
+    @quote.update_columns(
+      status: next_status,
+      accepted_at: nil,
+      changes_requested_at: nil,
+      changes_request_message: nil,
+      reopened_at: Time.current,
+      updated_at: Time.current
+    )
+    redirect_to quote_path(@quote), notice: "Quotation reopened at #{@quote.reopened_at&.strftime('%Y-%m-%d %H:%M')}."
+  end
+
   private
 
   def set_customer
@@ -231,6 +281,7 @@ class QuotesController < ApplicationController
       :valid_until,
       :payment_term,
       :trade_term,
+      :custom_title,
       :status,
       :negotiated,
       :final_amount,

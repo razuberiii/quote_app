@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -150,6 +150,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
     t.string "token", null: false
     t.datetime "updated_at", null: false
     t.integer "view_count", default: 0, null: false
+    t.jsonb "view_events", default: [], null: false
     t.index ["company_id"], name: "index_quote_shares_on_company_id"
     t.index ["quote_id"], name: "index_quote_shares_on_quote_id"
     t.index ["token"], name: "index_quote_shares_on_token", unique: true
@@ -157,6 +158,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
 
   create_table "quote_templates", force: :cascade do |t|
     t.string "accent_color", default: "#1F4E79", null: false
+    t.string "addon_label", default: "Add-on", null: false
     t.integer "amount_decimals", default: 2, null: false
     t.text "closing_message", default: "If you have questions, reply directly to this quote. Ready to proceed? Let us know.", null: false
     t.bigint "company_id", null: false
@@ -199,6 +201,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
     t.boolean "show_terms_section", default: true, null: false
     t.boolean "show_valid_until", default: true, null: false
     t.string "slug", default: "default-template", null: false
+    t.string "spec_label", default: "Spec", null: false
     t.string "thousand_separator", default: "comma", null: false
     t.string "unit_price_label", default: "Unit Price", null: false
     t.datetime "updated_at", null: false
@@ -207,9 +210,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
   end
 
   create_table "quotes", force: :cascade do |t|
+    t.datetime "accepted_at"
+    t.string "addon_label"
+    t.text "changes_request_message"
+    t.datetime "changes_requested_at"
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
     t.string "currency"
+    t.string "custom_title"
     t.bigint "customer_id", null: false
     t.text "delivery_notes"
     t.decimal "discount_amount", precision: 15, scale: 4, default: "0.0", null: false
@@ -223,9 +231,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
     t.string "product_name"
     t.integer "quantity"
     t.string "quote_no"
+    t.datetime "reopened_at"
     t.integer "revision_number"
     t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
+    t.string "spec_label"
     t.string "status"
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "template_id"
@@ -235,6 +245,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_02_230001) do
     t.datetime "updated_at", null: false
     t.date "valid_until"
     t.datetime "viewed_at"
+    t.index ["accepted_at"], name: "index_quotes_on_accepted_at"
+    t.index ["changes_requested_at"], name: "index_quotes_on_changes_requested_at"
     t.index ["company_id"], name: "index_quotes_on_company_id"
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
     t.index ["template_id"], name: "index_quotes_on_template_id"

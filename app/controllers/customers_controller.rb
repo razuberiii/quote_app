@@ -28,6 +28,7 @@ class CustomersController < ApplicationController
     }
 
     @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period)
+    @decision_snapshot = build_decision_snapshot(all_customers, @kpi_period)
     @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics)
     @action_center = build_action_center(all_customers, @customer_metrics)
     @primary_action = @action_center.first
@@ -35,7 +36,8 @@ class CustomersController < ApplicationController
     @action_required_summary = {
       total: @action_center.count { |item| %w[urgent watch].include?(item[:priority]) },
       risk_customers: @risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value],
-      has_risk: (@risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value]).positive?
+      decision_alerts: @decision_snapshot[:negotiating_stale_count],
+      has_risk: (@risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value]).positive? || @decision_snapshot[:negotiating_stale_count].positive?
     }
     @deal_overview = build_deal_overview(all_customers)
     @recent_quotes = build_recent_quotes(all_customers)
@@ -293,6 +295,8 @@ class CustomersController < ApplicationController
   def quote_display_status(quote)
     raw_status = quote.status.to_s.downcase
     raw_status = "draft" if raw_status == "pending"
+    return "won" if quote.accepted_at.present?
+    raw_status = "negotiating" if raw_status == "negotiating" || quote.changes_requested_at.present?
     return "expired" if Quote::OPEN_STATUSES.include?(raw_status) && quote.valid_until.present? && quote.valid_until < Date.current
 
     raw_status.presence || "draft"
@@ -463,7 +467,9 @@ class CustomersController < ApplicationController
 
     {
       top_product: top_item_name || "Not enough data yet",
+      top_product_sample_size: latest_quotes.count,
       average_quote_cycle_days: closed_cycle_days.empty? ? 0 : (closed_cycle_days.sum.to_f / closed_cycle_days.size).round(1),
+      closed_cycle_sample_size: closed_cycle_days.size,
       revision_rate: revision_rate,
       export_mix: total_mix.zero? ? "Quotation 0% / PI 0%" : "Quotation #{((quotation_count.to_f / total_mix) * 100).round}% / PI #{((pi_count.to_f / total_mix) * 100).round}%",
       cycle_insight: cycle_state,
@@ -486,6 +492,7 @@ class CustomersController < ApplicationController
         {
           quote: quote,
           quote_no: quote.quote_no,
+          display_name: quote.custom_title.presence || quote.quote_items.ordered.first&.product&.name.presence || quote.quote_items.ordered.first&.description.presence,
           customer_name: quote.customer&.name || "Unknown customer",
           status: status,
           view_signal: view_signal,
@@ -511,6 +518,10 @@ class CustomersController < ApplicationController
   def quote_display_status_at(quote, reference_date)
     raw_status = quote.status.to_s.downcase
     raw_status = "draft" if raw_status == "pending"
+    return "won" if quote.accepted_at.present? && quote.accepted_at.to_date <= reference_date
+    if quote.changes_requested_at.present? && quote.changes_requested_at.to_date <= reference_date
+      raw_status = "negotiating"
+    end
     return "expired" if Quote::OPEN_STATUSES.include?(raw_status) && quote.valid_until.present? && quote.valid_until < reference_date
 
     raw_status.presence || "draft"
@@ -659,8 +670,73 @@ class CustomersController < ApplicationController
       }
     end
 
+    latest_quotes = latest_quotes_from_collection(customers.flat_map(&:quotes))
+    stale_cutoff = 7.days.ago
+    latest_quotes
+      .select { |quote| quote_display_status(quote) == "negotiating" && quote.updated_at.present? && quote.updated_at <= stale_cutoff }
+      .first(4)
+      .each do |quote|
+        stale_days = (Date.current - quote.updated_at.to_date).to_i
+        items << {
+          priority: "urgent",
+          title: "Quote #{quote.quote_no}: negotiating stalled",
+          detail: "No update for #{stale_days} day(s). Push next revision or close decision.",
+          cta_label: "Open Quote",
+          cta_path: quote_path(quote)
+        }
+      end
+
     order = { "urgent" => 0, "watch" => 1, "normal" => 2 }
     items.uniq { |item| item[:title] }.sort_by { |item| [ order.fetch(item[:priority], 9), item[:title] ] }.first(9)
+  end
+
+  def build_decision_snapshot(customers, period)
+    latest_quotes = latest_quotes_from_collection(customers.flat_map(&:quotes))
+    period_start = period == "month" ? Date.current.beginning_of_month : Date.current.beginning_of_week
+
+    accepted_count = latest_quotes.count do |quote|
+      quote.accepted_at.present? && quote.accepted_at.to_date >= period_start
+    end
+
+    revision_requested_count = latest_quotes.count do |quote|
+      quote.changes_requested_at.present? && quote.changes_requested_at.to_date >= period_start
+    end
+
+    reopened_count = latest_quotes.count do |quote|
+      quote.reopened_at.present? && quote.reopened_at.to_date >= period_start
+    end
+
+    negotiating_stale_count = latest_quotes.count do |quote|
+      quote_display_status(quote) == "negotiating" && quote.updated_at.present? && quote.updated_at <= 7.days.ago
+    end
+
+    public_actionable_count = latest_quotes.count do |quote|
+      %w[sent viewed negotiating].include?(quote_display_status(quote)) &&
+        quote.accepted_at.blank? &&
+        quote.changes_requested_at.blank?
+    end
+
+    reason_counts = Hash.new(0)
+    latest_quotes.each do |quote|
+      message = quote.changes_request_message.to_s
+      next if message.blank?
+
+      match = message.match(/Reasons:\s*([^|]+)/i)
+      if match
+        match[1].split(";").map(&:strip).reject(&:blank?).each { |reason| reason_counts[reason] += 1 }
+      elsif quote.changes_requested_at.present?
+        reason_counts["Custom request"] += 1
+      end
+    end
+
+    {
+      accepted_count: accepted_count,
+      revision_requested_count: revision_requested_count,
+      reopened_count: reopened_count,
+      negotiating_stale_count: negotiating_stale_count,
+      public_actionable_count: public_actionable_count,
+      top_revision_reasons: reason_counts.sort_by { |(_, count)| -count }.first(2)
+    }
   end
 
   def high_value_customer?(customer, metrics)
@@ -1113,14 +1189,60 @@ class CustomersController < ApplicationController
         }
       end
 
-      if %w[won lost expired].include?(card[:display_status])
-        tone = card[:display_status] == "won" ? "good" : "urgent"
+      if quote.changes_requested_at.present?
+        events << {
+          at: quote.changes_requested_at,
+          tone: "today",
+          category: "high_signal",
+          title: "Quote #{quote.quote_no} revision requested",
+          detail: quote.changes_request_message.present? ? "Client request: #{quote.changes_request_message}" : "Customer requested updates to this revision."
+        }
+      end
+
+      if quote.accepted_at.present?
+        events << {
+          at: quote.accepted_at,
+          tone: "good",
+          category: "high_signal",
+          title: "Quote #{quote.quote_no} accepted",
+          detail: "Customer accepted this quotation revision via public link."
+        }
+      end
+
+      if quote.reopened_at.present?
+        events << {
+          at: quote.reopened_at,
+          tone: "normal",
+          category: "system_activity",
+          title: "Quote #{quote.quote_no} reopened",
+          detail: "Reopened internally to continue commercial discussion."
+        }
+      end
+
+      if card[:display_status] == "won" && quote.accepted_at.blank?
+        events << {
+          at: quote.updated_at,
+          tone: "good",
+          category: "high_signal",
+          title: "Quote #{quote.quote_no} won",
+          detail: "Quotation marked as Won internally."
+        }
+      end
+
+      if %w[lost expired].include?(card[:display_status])
+        tone = card[:display_status] == "lost" ? "urgent" : "normal"
+        status_detail =
+          if card[:display_status] == "lost" && quote.loss_reason.present?
+            "Marked Lost. Reason: #{quote.loss_reason}"
+          else
+            "Final status changed to #{card[:display_status].capitalize}."
+          end
         events << {
           at: quote.updated_at,
           tone: tone,
-          category: %w[won lost].include?(card[:display_status]) ? "high_signal" : "system_activity",
+          category: card[:display_status] == "lost" ? "high_signal" : "system_activity",
           title: "Quote #{quote.quote_no} #{card[:display_status]}",
-          detail: "Final status changed to #{card[:display_status].capitalize}."
+          detail: status_detail
         }
       end
 
@@ -1143,6 +1265,18 @@ class CustomersController < ApplicationController
             category: "high_signal",
             title: "Public link first viewed",
             detail: "Quote #{quote.quote_no} viewed via public link."
+          }
+        end
+
+        latest_view = shares.filter_map(&:last_viewed_at).max
+        total_views = shares.sum { |share| share.view_count.to_i }
+        if latest_view.present? && total_views.positive?
+          events << {
+            at: latest_view,
+            tone: "normal",
+            category: "system_activity",
+            title: "Public link activity",
+            detail: "Quote #{quote.quote_no} viewed #{total_views} time#{'s' unless total_views == 1}."
           }
         end
       end

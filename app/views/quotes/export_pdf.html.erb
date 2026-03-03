@@ -1,6 +1,8 @@
 <% doc_accent = @template.accent_color.presence || "#1F4E79" %>
 <% raw_document_kind = @document_kind || params[:document_kind] || params[:doc] || params[:kind] %>
 <% document_kind = @template.normalize_document_kind(raw_document_kind || @template.default_document_kind) %>
+<% spec_label = @quote.resolved_spec_label %>
+<% addon_label = @quote.resolved_addon_label %>
 <style>
   /* Dynamic accent color for PDF rendering */
   .pdf-render .quote-doc-kicker {
@@ -48,6 +50,9 @@
         <td class="pdf-head-right">
           <p class="quote-doc-kicker"><%= title_text %></p>
           <p class="pdf-doc-number is-doc-number"><strong><%= number_label %></strong> <%= @quote.quote_no %></p>
+          <% if @quote.custom_title.present? %>
+            <p><strong>Title:</strong> <%= @quote.custom_title %></p>
+          <% end %>
           <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></p>
           <% if @template.show_valid_until && @quote.valid_until.present? %>
             <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %></p>
@@ -121,15 +126,23 @@
             <% end %>
             <td class="is-left">
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.description %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || "Item" %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
-                    <% item.specification_pairs.each do |pair| %>
-                      <div class="quote-item-desc-sub">Spec: <%= pair[:key] %> - <%= pair[:value] %></div>
+                    <% if item.specification_pairs.any? %>
+                      <div class="quote-item-desc-group">
+                        <div class="quote-item-desc-group-label"><%= spec_label %>:</div>
+                        <% item.specification_pairs.each do |pair| %>
+                          <div class="quote-item-desc-sub"><span class="quote-item-desc-bullet">&bull;</span><%= pair[:key] %> - <%= pair[:value] %></div>
+                        <% end %>
+                      </div>
                     <% end %>
-                    <% item.addon_charge_entries.each do |entry| %>
-                      <div class="quote-item-desc-sub is-addon">
-                        Add-on: <%= entry[:name] %> (<%= template_money(entry[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)
+                    <% if item.addon_charge_entries.any? %>
+                      <div class="quote-item-desc-group is-addon">
+                        <div class="quote-item-desc-group-label"><%= addon_label %>:</div>
+                        <% item.addon_charge_entries.each do |entry| %>
+                          <div class="quote-item-desc-sub is-addon"><span class="quote-item-desc-bullet">&bull;</span><%= entry[:name] %> (<%= template_money(entry[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)</div>
+                        <% end %>
                       </div>
                     <% end %>
                   </div>

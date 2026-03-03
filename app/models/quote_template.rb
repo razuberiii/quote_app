@@ -14,6 +14,8 @@ class QuoteTemplate < ApplicationRecord
               message: "must be a valid HEX color like #1F4E79"
             }
   validates :font_family, presence: true
+  validates :spec_label, presence: true
+  validates :addon_label, presence: true
 
   validates :document_kind, inclusion: { in: %w[quotation proforma_invoice] }
   validates :layout_density, inclusion: { in: %w[compact standard spacious] }, allow_blank: true
@@ -158,5 +160,7 @@ class QuoteTemplate < ApplicationRecord
     self.qty_label = "Qty" if qty_label.blank?
     self.unit_price_label = "Unit Price" if unit_price_label.blank?
     self.line_total_label = "Line Total" if line_total_label.blank?
+    self.spec_label = "Spec" if spec_label.blank?
+    self.addon_label = "Add-on" if addon_label.blank?
   end
 end

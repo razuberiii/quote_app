@@ -22,7 +22,7 @@
     </div>
     <div>
       <%= f.label :document_kind, "Default document view" %>
-      <%= f.select :document_kind, [["Quotation", "quotation"], ["Proforma Invoice (PI)", "proforma_invoice"]] %>
+      <%= f.select :document_kind, [["Quotation", "quotation"], ["Proforma Invoice (PI)", "proforma_invoice"]], {}, data: { template_preview_target: "document-kind" } %>
     </div>
   </section>
 
@@ -67,15 +67,15 @@
           <label><%= f.check_box :show_tax, data: { template_preview_toggle: "tax" } %> Show tax line</label>
           <label><%= f.check_box :show_shipping, data: { template_preview_toggle: "shipping" } %> Show shipping line</label>
           <label><%= f.check_box :show_payment_term, data: { template_preview_toggle: "payment" } %> Show payment term</label>
-          <label><%= f.check_box :show_customer_owner %> Show sales owner</label>
+          <label><%= f.check_box :show_customer_owner, data: { template_preview_toggle: "customer-owner" } %> Show sales owner</label>
           <label><%= f.check_box :show_notes, data: { template_preview_toggle: "notes" } %> Show notes section</label>
           <label><%= f.check_box :show_signature_block, data: { template_preview_toggle: "signature" } %> Show signature block</label>
-          <label><%= f.check_box :show_images %> Show product images</label>
-          <label><%= f.check_box :show_valid_until %> Show valid until</label>
-          <label><%= f.check_box :show_terms_section %> Show terms section</label>
+          <label><%= f.check_box :show_images, data: { template_preview_toggle: "images" } %> Show product images</label>
+          <label><%= f.check_box :show_valid_until, data: { template_preview_toggle: "valid-until" } %> Show valid until</label>
+          <label><%= f.check_box :show_terms_section, data: { template_preview_toggle: "terms" } %> Show terms section</label>
           <label><%= f.check_box :show_currency, data: { template_preview_toggle: "currency" } %> Show currency symbol/code</label>
-          <label><%= f.check_box :show_closing_message %> Show closing message</label>
-          <label><%= f.check_box :show_saas_branding %> Show Rubusoo footer (white-label off by default)</label>
+          <label><%= f.check_box :show_closing_message, data: { template_preview_toggle: "closing" } %> Show closing message</label>
+          <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> Show Rubusoo footer (white-label off by default)</label>
           <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
         </div>
       </section>
@@ -114,12 +114,20 @@
                 <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
               </div>
               <div>
+                <%= f.label :spec_label, "Spec label" %>
+                <%= f.text_field :spec_label, placeholder: "Spec", data: { template_preview_target: "label-spec" } %>
+              </div>
+              <div>
+                <%= f.label :addon_label, "Add-on label" %>
+                <%= f.text_field :addon_label, placeholder: "Add-on", data: { template_preview_target: "label-addon" } %>
+              </div>
+              <div>
                 <%= f.label :qty_label, "Qty label" %>
                 <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
               </div>
               <div>
                 <%= f.label :unit_price_label, "Unit price label" %>
-                <%= f.text_field :unit_price_label %>
+                <%= f.text_field :unit_price_label, data: { template_preview_target: "label-unit-price" } %>
               </div>
               <div>
                 <%= f.label :line_total_label, "Line total label" %>
@@ -131,7 +139,7 @@
               </div>
               <div>
                 <%= f.label :quotation_number_label, "Quotation number label" %>
-                <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
+                <%= f.text_field :quotation_number_label, placeholder: "Quote #", data: { template_preview_target: "number-label-quote" } %>
               </div>
               <div>
                 <%= f.label :pi_title, "PI title" %>
@@ -139,7 +147,7 @@
               </div>
               <div>
                 <%= f.label :pi_number_label, "PI number label" %>
-                <%= f.text_field :pi_number_label, placeholder: "PI #" %>
+                <%= f.text_field :pi_number_label, placeholder: "PI #", data: { template_preview_target: "number-label-pi" } %>
               </div>
               <div class="template-span-2">
                 <%= f.label :quotation_footer_note, "Quotation footer note" %>
@@ -173,12 +181,20 @@
               <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
             </div>
             <div>
+              <%= f.label :spec_label, "Spec label" %>
+              <%= f.text_field :spec_label, placeholder: "Spec", data: { template_preview_target: "label-spec" } %>
+            </div>
+            <div>
+              <%= f.label :addon_label, "Add-on label" %>
+              <%= f.text_field :addon_label, placeholder: "Add-on", data: { template_preview_target: "label-addon" } %>
+            </div>
+            <div>
               <%= f.label :qty_label, "Qty label" %>
               <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
             </div>
             <div>
               <%= f.label :unit_price_label, "Unit price label" %>
-              <%= f.text_field :unit_price_label %>
+              <%= f.text_field :unit_price_label, data: { template_preview_target: "label-unit-price" } %>
             </div>
             <div>
               <%= f.label :line_total_label, "Line total label" %>
@@ -190,7 +206,7 @@
             </div>
             <div>
               <%= f.label :quotation_number_label, "Quotation number label" %>
-              <%= f.text_field :quotation_number_label, placeholder: "Quote #" %>
+              <%= f.text_field :quotation_number_label, placeholder: "Quote #", data: { template_preview_target: "number-label-quote" } %>
             </div>
             <div>
               <%= f.label :pi_title, "PI title" %>
@@ -198,7 +214,7 @@
             </div>
             <div>
               <%= f.label :pi_number_label, "PI number label" %>
-              <%= f.text_field :pi_number_label, placeholder: "PI #" %>
+              <%= f.text_field :pi_number_label, placeholder: "PI #", data: { template_preview_target: "number-label-pi" } %>
             </div>
             <div class="template-span-2">
               <%= f.label :quotation_footer_note, "Quotation footer note" %>
@@ -226,8 +242,24 @@
       <div class="template-live-pane-header">
         <h3>Live Preview</h3>
         <p>Real-time rendering with quote-like content.</p>
+        <div class="template-live-pane-tools">
+          <span class="template-preview-status is-saved" data-template-preview-status>Saved</span>
+          <div class="template-preview-scenario">
+            <label for="template_preview_scenario">Scenario</label>
+            <select id="template_preview_scenario" data-template-preview-scenario>
+              <option value="standard">Standard</option>
+              <option value="long_text">Long Content</option>
+              <option value="spec_heavy">Spec Heavy</option>
+            </select>
+          </div>
+          <div class="template-preview-viewport-switch" data-template-preview-viewports>
+            <button type="button" class="is-active" data-template-preview-viewport-btn="desktop" aria-pressed="true">Desktop</button>
+            <button type="button" data-template-preview-viewport-btn="tablet" aria-pressed="false">Tablet</button>
+            <button type="button" data-template-preview-viewport-btn="mobile" aria-pressed="false">Mobile</button>
+          </div>
+        </div>
       </div>
-      <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %>" data-template-preview style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+      <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %> template-preview-viewport-desktop" data-template-preview style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
         <div class="preview-header preview-header-<%= quote_template.logo_position.presence || 'right' %>" data-template-preview-logo-position>
           <span data-template-preview-logo data-visible="<%= quote_template.show_logo? %>">LOGO</span>
           <strong data-template-preview-title><%= quote_template.quotation_title.presence || quote_template.resolved_document_title("quote") %></strong>
@@ -236,29 +268,53 @@
           <div></div>
           <div></div>
         </div>
+        <div class="preview-doc-meta">
+          <p><span data-template-preview-number-label><%= quote_template.quotation_number_label.presence || "Quote #" %></span><strong>QT-2026-0001</strong></p>
+          <p data-template-preview-valid-until data-visible="<%= quote_template.show_valid_until? %>"><span>Valid Until</span><strong>2026-04-02</strong></p>
+          <p data-template-preview-customer-owner data-visible="<%= quote_template.show_customer_owner? %>"><span>Sales Owner</span><strong>Amy Chen</strong></p>
+        </div>
         <div class="preview-table preview-table-rich">
           <div class="preview-table-head">
             <span data-template-preview-label-description><%= quote_template.description_label.presence || "Description" %></span>
             <span data-template-preview-label-qty><%= quote_template.qty_label.presence || "Qty" %></span>
+            <span data-template-preview-label-unit-price><%= quote_template.unit_price_label.presence || "Unit Price" %></span>
             <span data-template-preview-label-line-total><%= quote_template.line_total_label.presence || "Line Total" %></span>
           </div>
-          <div class="preview-table-row"><span>Pump body SS304</span><span>2</span><span data-template-preview-amount data-raw-amount="1800"></span></div>
-          <div class="preview-table-row"><span>Motor 5.5kW</span><span>1</span><span data-template-preview-amount data-raw-amount="620"></span></div>
-          <div class="preview-table-row"><span>Installation kit</span><span>3</span><span data-template-preview-amount data-raw-amount="390"></span></div>
+          <div class="preview-table-row">
+            <span>
+              <span data-template-preview-item-desc-1>Pump body SS304</span>
+              <small class="preview-item-extra"><span data-template-preview-spec-label><%= quote_template.spec_label.presence || "Spec" %></span>: <span data-template-preview-item-spec-1>316L / IP55</span></small>
+              <small class="preview-item-extra is-addon"><span data-template-preview-addon-label><%= quote_template.addon_label.presence || "Add-on" %></span>: <span data-template-preview-item-addon-1>Wooden Case (+$35)</span></small>
+            </span>
+            <span data-template-preview-item-qty-1>2</span>
+            <span data-template-preview-amount data-template-preview-item-unit-1 data-raw-amount="900"></span>
+            <span data-template-preview-amount data-template-preview-item-line-1 data-raw-amount="1800"></span>
+          </div>
+          <div class="preview-table-row"><span data-template-preview-item-desc-2>Motor 5.5kW</span><span data-template-preview-item-qty-2>1</span><span data-template-preview-amount data-template-preview-item-unit-2 data-raw-amount="620"></span><span data-template-preview-amount data-template-preview-item-line-2 data-raw-amount="620"></span></div>
+          <div class="preview-table-row"><span data-template-preview-item-desc-3>Installation kit</span><span data-template-preview-item-qty-3>3</span><span data-template-preview-amount data-template-preview-item-unit-3 data-raw-amount="130"></span><span data-template-preview-amount data-template-preview-item-line-3 data-raw-amount="390"></span></div>
         </div>
         <div class="preview-summary">
-          <p><span>Subtotal</span><strong data-template-preview-amount data-raw-amount="2810"></strong></p>
-          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span>Tax / VAT</span><strong data-template-preview-amount data-raw-amount="281"></strong></p>
-          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span>Shipping</span><strong data-template-preview-amount data-raw-amount="120"></strong></p>
-          <p class="preview-total"><span>Grand Total</span><strong data-template-preview-amount data-raw-amount="3211"></strong></p>
+          <p><span>Subtotal</span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
+          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span>Tax / VAT</span><strong data-template-preview-amount data-template-preview-tax-amount data-raw-amount="281"></strong></p>
+          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span>Shipping</span><strong data-template-preview-amount data-template-preview-shipping-amount data-raw-amount="120"></strong></p>
+          <p class="preview-total"><span>Grand Total</span><strong data-template-preview-amount data-template-preview-grand-total data-raw-amount="3211"></strong></p>
+          <p class="preview-closing" data-template-preview-closing data-visible="<%= quote_template.show_closing_message? %>"><%= quote_template.resolved_closing_message.presence || QuoteTemplate::DEFAULT_CLOSING_MESSAGE %></p>
         </div>
         <div class="preview-meta">
           <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong>Payment Term:</strong> TT 30% deposit, 70% before shipment</p>
           <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong>Notes:</strong> Price valid for 30 days.</p>
           <p data-template-preview-signature data-visible="<%= quote_template.show_signature_block? %>">Authorized Signature ____________________</p>
         </div>
+        <div class="preview-terms" data-template-preview-terms data-visible="<%= quote_template.show_terms_section? %>">
+          <strong>Terms:</strong> FOB Shanghai | Lead time 20 days.
+        </div>
+        <div class="preview-image-strip" data-template-preview-images data-visible="<%= quote_template.show_images? %>">
+          <span></span><span></span><span></span>
+        </div>
         <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || "Thank you for your business." %></p>
+        <p class="preview-saas-footnote" data-template-preview-saas-branding data-visible="<%= quote_template.show_saas_branding? %>"><%= quote_template.saas_branding_footer_text %></p>
       </div>
+      <p class="template-preview-contrast-note" data-template-preview-contrast hidden></p>
     </aside>
   </div>
 
@@ -282,11 +338,42 @@
 
     const qs = (selector) => form.querySelector(selector);
     const qsp = (selector) => preview.querySelector(selector);
+    const statusNode = form.querySelector("[data-template-preview-status]");
+    const contrastNode = form.querySelector("[data-template-preview-contrast]");
+    const scenarioNode = form.querySelector("[data-template-preview-scenario]");
+    const viewportButtons = Array.from(form.querySelectorAll("[data-template-preview-viewport-btn]"));
+    const viewportClasses = [
+      "template-preview-viewport-desktop",
+      "template-preview-viewport-tablet",
+      "template-preview-viewport-mobile"
+    ];
+    const initialSignature = (() => {
+      const parts = [];
+      form.querySelectorAll("input[name], select[name], textarea[name]").forEach((field) => {
+        if (field.disabled) return;
+        const type = field.type ? field.type.toLowerCase() : "";
+        if (type === "file") return;
+        if (type === "hidden" && /authenticity_token|utf8|_method/.test(field.name)) return;
+        if (type === "checkbox" || type === "radio") {
+          parts.push(`${field.name}:${field.checked ? "1" : "0"}`);
+          return;
+        }
+        parts.push(`${field.name}:${field.value}`);
+      });
+      return parts.sort().join("|");
+    })();
 
     const showNode = (selector, visible) => {
       const node = qsp(selector);
       if (!node) return;
+      const changed = node.hidden === visible;
       node.hidden = !visible;
+      if (changed) {
+        node.classList.remove("is-preview-flash");
+        window.requestAnimationFrame(() => {
+          node.classList.add("is-preview-flash");
+        });
+      }
     };
 
     const formatNumber = (value, decimals, separator) => {
@@ -310,6 +397,177 @@
       return `$${amount}`;
     };
 
+    const hexToRgb = (hex) => {
+      const raw = String(hex || "").trim().replace("#", "");
+      if (!/^[0-9a-fA-F]{3}([0-9a-fA-F]{3})?$/.test(raw)) return null;
+      const normalized = raw.length === 3 ? raw.split("").map((ch) => ch + ch).join("") : raw;
+      return {
+        r: Number.parseInt(normalized.slice(0, 2), 16),
+        g: Number.parseInt(normalized.slice(2, 4), 16),
+        b: Number.parseInt(normalized.slice(4, 6), 16)
+      };
+    };
+
+    const relativeLuminance = (rgb) => {
+      const linear = [rgb.r, rgb.g, rgb.b].map((value) => {
+        const channel = value / 255;
+        return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    };
+
+    const contrastRatio = (hexA, hexB) => {
+      const rgbA = hexToRgb(hexA);
+      const rgbB = hexToRgb(hexB);
+      if (!rgbA || !rgbB) return null;
+      const lumA = relativeLuminance(rgbA);
+      const lumB = relativeLuminance(rgbB);
+      const lighter = Math.max(lumA, lumB);
+      const darker = Math.min(lumA, lumB);
+      return (lighter + 0.05) / (darker + 0.05);
+    };
+
+    const currentSignature = () => {
+      const parts = [];
+      form.querySelectorAll("input[name], select[name], textarea[name]").forEach((field) => {
+        if (field.disabled) return;
+        const type = field.type ? field.type.toLowerCase() : "";
+        if (type === "file") return;
+        if (type === "hidden" && /authenticity_token|utf8|_method/.test(field.name)) return;
+        if (type === "checkbox" || type === "radio") {
+          parts.push(`${field.name}:${field.checked ? "1" : "0"}`);
+          return;
+        }
+        parts.push(`${field.name}:${field.value}`);
+      });
+      return parts.sort().join("|");
+    };
+
+    const updateSaveStatus = () => {
+      if (!statusNode) return;
+      const dirty = currentSignature() !== initialSignature;
+      statusNode.textContent = dirty ? "Unsaved changes" : "Saved";
+      statusNode.classList.toggle("is-dirty", dirty);
+      statusNode.classList.toggle("is-saved", !dirty);
+    };
+
+    const updateContrastWarning = (accent) => {
+      if (!contrastNode) return;
+      const whiteContrast = contrastRatio(accent, "#ffffff");
+      const textContrast = contrastRatio(accent, "#0f172a");
+      const warnings = [];
+      if (whiteContrast && whiteContrast < 4.5) warnings.push("white text on accent");
+      if (textContrast && textContrast < 3.0) warnings.push("accent text on white background");
+
+      if (warnings.length === 0) {
+        contrastNode.hidden = true;
+        contrastNode.textContent = "";
+        return;
+      }
+
+      contrastNode.hidden = false;
+      contrastNode.textContent = `Contrast check: low readability risk for ${warnings.join(" and ")}.`;
+    };
+
+    const applyViewport = (viewport) => {
+      if (!viewport) return;
+      preview.classList.remove(...viewportClasses);
+      preview.classList.add(`template-preview-viewport-${viewport}`);
+      viewportButtons.forEach((button) => {
+        const active = button.dataset.templatePreviewViewportBtn === viewport;
+        button.classList.toggle("is-active", active);
+        button.setAttribute("aria-pressed", active ? "true" : "false");
+      });
+    };
+
+    const applyScenario = (scenario) => {
+      const scenarios = {
+        standard: {
+          desc1: "Pump body SS304",
+          spec1: "316L / IP55",
+          addon1: "Wooden Case (+$35)",
+          qty1: "2",
+          unit1: 900,
+          line1: 1800,
+          desc2: "Motor 5.5kW",
+          qty2: "1",
+          unit2: 620,
+          line2: 620,
+          desc3: "Installation kit",
+          qty3: "3",
+          unit3: 130,
+          line3: 390
+        },
+        long_text: {
+          desc1: "High-pressure stainless steel pump body with anti-corrosion treatment and reinforced flange",
+          spec1: "316L / IP55 / 380V 50Hz",
+          addon1: "Export packaging, reinforced frame, moisture-proof wrapping (+$120)",
+          qty1: "2",
+          unit1: 980,
+          line1: 1960,
+          desc2: "Motor with inverter-ready control set and thermal protection",
+          qty2: "1",
+          unit2: 760,
+          line2: 760,
+          desc3: "Installation + commissioning support package",
+          qty3: "1",
+          unit3: 480,
+          line3: 480
+        },
+        spec_heavy: {
+          desc1: "Pump body SS304",
+          spec1: "Flow 25m3/h | Head 58m | Seal: Sic/Sic",
+          addon1: "Spare seal set (+$55), base plate (+$40), wiring loom (+$22)",
+          qty1: "1",
+          unit1: 1320,
+          line1: 1320,
+          desc2: "Motor 7.5kW",
+          qty2: "2",
+          unit2: 690,
+          line2: 1380,
+          desc3: "Commissioning kit",
+          qty3: "2",
+          unit3: 210,
+          line3: 420
+        }
+      };
+      const data = scenarios[scenario] || scenarios.standard;
+      const setText = (selector, value) => {
+        const node = qsp(selector);
+        if (!node) return;
+        node.textContent = value;
+      };
+      const setAmount = (selector, value) => {
+        const node = qsp(selector);
+        if (!node) return;
+        node.dataset.rawAmount = String(value);
+      };
+
+      setText("[data-template-preview-item-desc-1]", data.desc1);
+      setText("[data-template-preview-item-spec-1]", data.spec1);
+      setText("[data-template-preview-item-addon-1]", data.addon1);
+      setText("[data-template-preview-item-qty-1]", data.qty1);
+      setAmount("[data-template-preview-item-unit-1]", data.unit1);
+      setAmount("[data-template-preview-item-line-1]", data.line1);
+      setText("[data-template-preview-item-desc-2]", data.desc2);
+      setText("[data-template-preview-item-qty-2]", data.qty2);
+      setAmount("[data-template-preview-item-unit-2]", data.unit2);
+      setAmount("[data-template-preview-item-line-2]", data.line2);
+      setText("[data-template-preview-item-desc-3]", data.desc3);
+      setText("[data-template-preview-item-qty-3]", data.qty3);
+      setAmount("[data-template-preview-item-unit-3]", data.unit3);
+      setAmount("[data-template-preview-item-line-3]", data.line3);
+
+      const subtotal = (data.line1 || 0) + (data.line2 || 0) + (data.line3 || 0);
+      const tax = 281;
+      const shipping = 120;
+      const grandTotal = subtotal + tax + shipping;
+      setAmount("[data-template-preview-subtotal]", subtotal);
+      setAmount("[data-template-preview-tax-amount]", tax);
+      setAmount("[data-template-preview-shipping-amount]", shipping);
+      setAmount("[data-template-preview-grand-total]", grandTotal);
+    };
+
     const updatePreview = () => {
       const accent = qs("[data-template-preview-target='accent']")?.value || "#1F4E79";
       const font = qs("[data-template-preview-target='font']")?.value || "Noto Sans";
@@ -317,10 +575,17 @@
       const density = qs("[data-template-preview-target='density']")?.value || "standard";
       const logoPosition = qs("[data-template-preview-target='logo-position']")?.value || "right";
       const titleQuote = qs("[data-template-preview-target='title-quote']")?.value?.trim() || "QUOTATION";
+      const documentKind = qs("[data-template-preview-target='document-kind']")?.value || "quotation";
       const labelDesc = qs("[data-template-preview-target='label-description']")?.value?.trim() || "Description";
       const labelQty = qs("[data-template-preview-target='label-qty']")?.value?.trim() || "Qty";
+      const labelUnitPrice = qs("[data-template-preview-target='label-unit-price']")?.value?.trim() || "Unit Price";
       const labelLineTotal = qs("[data-template-preview-target='label-line-total']")?.value?.trim() || "Line Total";
+      const labelSpec = qs("[data-template-preview-target='label-spec']")?.value?.trim() || "Spec";
+      const labelAddon = qs("[data-template-preview-target='label-addon']")?.value?.trim() || "Add-on";
+      const numberLabelQuote = qs("[data-template-preview-target='number-label-quote']")?.value?.trim() || "Quote #";
+      const numberLabelPi = qs("[data-template-preview-target='number-label-pi']")?.value?.trim() || "PI #";
       const footerQuote = qs("[data-template-preview-target='footer-quote']")?.value?.trim();
+      const closingMessage = qs("[name='quote_template[closing_message]']")?.value?.trim();
       const footerFallback = qs("[data-template-preview-target='footer-fallback']")?.value?.trim();
       const decimals = Number.parseInt(qs("[data-template-preview-target='amount-decimals']")?.value || "2", 10);
       const separator = qs("[data-template-preview-target='thousand-separator']")?.value || "comma";
@@ -345,16 +610,36 @@
       }
 
       const titleNode = qsp("[data-template-preview-title]");
-      if (titleNode) titleNode.textContent = titleQuote;
+      if (titleNode) {
+        if (documentKind === "proforma_invoice") {
+          const piTitle = qs("[name='quote_template[pi_title]']")?.value?.trim() || "PROFORMA INVOICE";
+          titleNode.textContent = piTitle;
+        } else {
+          titleNode.textContent = titleQuote;
+        }
+      }
       const descNode = qsp("[data-template-preview-label-description]");
       if (descNode) descNode.textContent = labelDesc;
       const qtyNode = qsp("[data-template-preview-label-qty]");
       if (qtyNode) qtyNode.textContent = labelQty;
+      const unitPriceNode = qsp("[data-template-preview-label-unit-price]");
+      if (unitPriceNode) unitPriceNode.textContent = labelUnitPrice;
       const lineTotalNode = qsp("[data-template-preview-label-line-total]");
       if (lineTotalNode) lineTotalNode.textContent = labelLineTotal;
+      const specNode = qsp("[data-template-preview-spec-label]");
+      if (specNode) specNode.textContent = labelSpec;
+      const addonNode = qsp("[data-template-preview-addon-label]");
+      if (addonNode) addonNode.textContent = labelAddon;
+      const numberLabelNode = qsp("[data-template-preview-number-label]");
+      if (numberLabelNode) numberLabelNode.textContent = documentKind === "proforma_invoice" ? numberLabelPi : numberLabelQuote;
 
       const footerNode = qsp("[data-template-preview-footer]");
-      if (footerNode) footerNode.textContent = footerQuote || footerFallback || "Thank you for your business.";
+      if (footerNode) {
+        const piFooter = qs("[name='quote_template[pi_footer_note]']")?.value?.trim();
+        footerNode.textContent = documentKind === "proforma_invoice" ? (piFooter || footerFallback || "Thank you for your business.") : (footerQuote || footerFallback || "Thank you for your business.");
+      }
+      const closingNode = qsp("[data-template-preview-closing]");
+      if (closingNode) closingNode.textContent = closingMessage || "<No closing message>";
 
       preview.querySelectorAll("[data-template-preview-amount]").forEach((node) => {
         const raw = Number.parseFloat(node.dataset.rawAmount || "0");
@@ -372,10 +657,40 @@
       showNode("[data-template-preview-payment]", !!qs("[data-template-preview-toggle='payment']")?.checked);
       showNode("[data-template-preview-notes]", !!qs("[data-template-preview-toggle='notes']")?.checked);
       showNode("[data-template-preview-signature]", !!qs("[data-template-preview-toggle='signature']")?.checked);
+      showNode("[data-template-preview-customer-owner]", !!qs("[data-template-preview-toggle='customer-owner']")?.checked);
+      showNode("[data-template-preview-valid-until]", !!qs("[data-template-preview-toggle='valid-until']")?.checked);
+      showNode("[data-template-preview-terms]", !!qs("[data-template-preview-toggle='terms']")?.checked);
+      showNode("[data-template-preview-images]", !!qs("[data-template-preview-toggle='images']")?.checked);
+      showNode("[data-template-preview-closing]", !!qs("[data-template-preview-toggle='closing']")?.checked);
+      showNode("[data-template-preview-saas-branding]", !!qs("[data-template-preview-toggle='saas-branding']")?.checked);
+      updateContrastWarning(accent);
+      updateSaveStatus();
     };
 
     form.addEventListener("input", updatePreview);
     form.addEventListener("change", updatePreview);
+    form.addEventListener("submit", () => {
+      if (!statusNode) return;
+      statusNode.textContent = "Saving...";
+      statusNode.classList.remove("is-dirty", "is-saved");
+      statusNode.classList.add("is-saving");
+    });
+
+    viewportButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        applyViewport(button.dataset.templatePreviewViewportBtn);
+      });
+    });
+
+    if (scenarioNode) {
+      scenarioNode.addEventListener("change", () => {
+        applyScenario(scenarioNode.value);
+        updatePreview();
+      });
+    }
+
+    applyViewport("desktop");
+    applyScenario(scenarioNode?.value || "standard");
     updatePreview();
   })();
 </script>

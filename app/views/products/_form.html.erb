@@ -141,7 +141,7 @@
           <div class="quote-form-grid-span-2">
             <%= f.label :default_specification, "Default Specification" %>
             <%= f.text_area :default_specification, rows: 4, class: ("input-error" if product.errors[:default_specification].any?), placeholder: "Power: 5kW&#10;Voltage: 220V&#10;Material: SS304" %>
-            <p class="quote-form-hint">Auto-fills quote item specifications when matched. One pair per line: key: value</p>
+            <p class="quote-form-hint">Auto-fills quote item specifications when matched. One pair per line, using :, =, or ： as separator</p>
             <% if product.errors[:default_specification].any? %>
               <p class="field-error-message js-default-spec-error"><%= product.errors.full_messages_for(:default_specification).first %></p>
             <% else %>
@@ -373,7 +373,7 @@
       lines.forEach((line, idx) => {
         const text = line.trim();
         if (!text) return;
-        const parts = text.split(/[:=]/, 2).map((part) => part.trim());
+        const parts = text.split(/[:=：]/, 2).map((part) => part.trim());
         if (parts.length < 2 || !parts[0] || !parts[1]) {
           invalidLines.push(idx + 1);
         }
@@ -383,7 +383,7 @@
 
       if (invalidLines.length > 0) {
         const label = invalidLines.length === 1 ? "line" : "lines";
-        errorEl.textContent = `Invalid format on ${label} ${invalidLines.join(", ")}. Use key: value (e.g. Power: 5kW).`;
+        errorEl.textContent = `Invalid format on ${label} ${invalidLines.join(", ")}. Use key: value, key = value, or key：value (e.g. Power: 5kW).`;
         errorEl.hidden = false;
         specInput.classList.add("input-error");
         specInput.setAttribute("aria-invalid", "true");

@@ -11,16 +11,21 @@ class QuoteShare < ApplicationRecord
     SecureRandom.hex(12)
   end
 
-  def track_view!
+  def track_view!(country: nil)
     now = Time.current
-    first_view = first_viewed_at.blank?
-    update_sql = if first_view
-      [ "view_count = view_count + 1, first_viewed_at = ?, last_viewed_at = ?", now, now ]
-    else
-      [ "view_count = view_count + 1, last_viewed_at = ?", now ]
+    first_view = false
+    with_lock do
+      first_view = first_viewed_at.blank?
+      self.view_count = view_count.to_i + 1
+      self.first_viewed_at ||= now
+      self.last_viewed_at = now
+
+      event = { "at" => now.utc.strftime("%Y-%m-%dT%H:%M:%SZ") }
+      event["country"] = country if country.present?
+      self.view_events = Array(view_events).last(199) + [ event ]
+      save!(validate: false)
     end
 
-    self.class.where(id: id).update_all(update_sql)
     return unless quote.present?
 
     current_status = quote.status.to_s
@@ -34,6 +39,6 @@ class QuoteShare < ApplicationRecord
         quote.status
       end
 
-    quote.update_columns(viewed_at: now, status: next_status)
+    quote.update_columns(viewed_at: now, status: next_status, updated_at: Time.current)
   end
 end

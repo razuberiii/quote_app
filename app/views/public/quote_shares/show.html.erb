@@ -1,8 +1,36 @@
 <article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>';">
+  <% spec_label = @snapshot["spec_label"].presence || @template.spec_label.presence || "Spec" %>
+  <% addon_label = @snapshot["addon_label"].presence || @template.addon_label.presence || "Add-on" %>
+  <% custom_title = @snapshot["custom_title"].presence %>
+  <% quote = @share.quote %>
+  <% decision_state =
+      if quote.accepted_at.present?
+        "accepted"
+      elsif quote.changes_requested_at.present?
+        "changes_requested"
+      elsif quote.latest_revision_for_quote_no? && %w[sent viewed negotiating].include?(quote.status.to_s)
+        "active"
+      else
+        "inactive"
+      end %>
+  <% revision_reason_options = [
+       "Price needs adjustment",
+       "Specification needs update",
+       "Add-on items need change",
+       "Payment terms need revision",
+       "Lead time / delivery needs revision",
+       "Need internal approval first"
+     ] %>
+  <div class="no-print quote-public-utility">
+    <button type="button" class="quote-utility-btn" onclick="window.print()">Print</button>
+  </div>
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
       <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @snapshot["quote_no"] %></h1>
+      <% if custom_title.present? %>
+        <p class="quote-doc-subtitle"><%= custom_title %></p>
+      <% end %>
     </div>
     <div class="quote-doc-logo-wrap">
       <% if @template.show_logo && @share.company.logo.attached? %>
@@ -38,6 +66,9 @@
       <h3>Quote Info</h3>
       <div class="quote-info-list">
       <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @snapshot["quote_no"].presence || "-" %></strong></p>
+      <% if custom_title.present? %>
+        <p class="quote-info-row"><span>Title</span><strong><%= custom_title %></strong></p>
+      <% end %>
       <p class="quote-info-row"><span>Date</span><strong><%= @snapshot["issued_on"].presence || "-" %></strong></p>
       <% if @template.show_valid_until && @snapshot["valid_until"].present? %>
         <p class="quote-info-row is-valid-until"><span>Valid Until</span><strong><%= @snapshot["valid_until"] %></strong></p>
@@ -67,7 +98,7 @@
       <thead>
         <tr>
           <% if @template.show_product_images %><th>Image</th><% end %>
-          <th>Description</th>
+          <th>Item Details</th>
           <th class="quote-col-right">Qty</th>
           <th class="quote-col-right quote-col-money">Unit Price</th>
           <th class="quote-col-right quote-col-money">Line Total</th>
@@ -87,19 +118,27 @@
             <% end %>
             <td>
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item["description"] %></div>
+                <div class="quote-item-desc-main"><%= item["product_name"].presence || "Item" %></div>
                 <% specs = Array(item["specifications"]) %>
                 <% addons = Array(item["addon_charges"]) %>
                 <% if specs.any? || addons.any? %>
                   <div class="quote-item-desc-meta">
-                    <% specs.each do |spec| %>
-                      <div class="quote-item-desc-sub">Spec: <%= spec["key"] || spec[:key] %> - <%= spec["value"] || spec[:value] %></div>
+                    <% if specs.any? %>
+                      <div class="quote-item-desc-group">
+                        <div class="quote-item-desc-group-label"><%= spec_label %>:</div>
+                        <% specs.each do |spec| %>
+                          <div class="quote-item-desc-sub"><span class="quote-item-desc-bullet">&bull;</span><%= spec["key"] || spec[:key] %> - <%= spec["value"] || spec[:value] %></div>
+                        <% end %>
+                      </div>
                     <% end %>
-                    <% addons.each do |addon| %>
-                      <% addon_name = addon["name"] || addon[:name] %>
-                      <% addon_amount = addon["amount"] || addon[:amount] %>
-                      <div class="quote-item-desc-sub is-addon">
-                        Add-on: <%= addon_name %> (<%= quote_money(addon_amount, @snapshot["currency"], show_symbol: @template.show_currency) %>)
+                    <% if addons.any? %>
+                      <div class="quote-item-desc-group is-addon">
+                        <div class="quote-item-desc-group-label"><%= addon_label %>:</div>
+                        <% addons.each do |addon| %>
+                          <% addon_name = addon["name"] || addon[:name] %>
+                          <% addon_amount = addon["amount"] || addon[:amount] %>
+                          <div class="quote-item-desc-sub is-addon"><span class="quote-item-desc-bullet">&bull;</span><%= addon_name %> (<%= quote_money(addon_amount, @snapshot["currency"], show_symbol: @template.show_currency) %>)</div>
+                        <% end %>
                       </div>
                     <% end %>
                   </div>
@@ -152,10 +191,97 @@
     </section>
   <% end %>
 
-  <div class="no-print quote-public-actions">
-    <button type="button" onclick="window.print()">Print</button>
-  </div>
+  <section class="no-print quote-decision-section">
+    <h3>Ready to proceed?</h3>
+    <% if @status_message.present? %>
+      <p class="quote-decision-note"><%= @status_message %></p>
+    <% end %>
+    <% if decision_state == "accepted" %>
+      <p class="quote-decision-status is-accepted">Quotation Accepted on <%= quote.accepted_at&.strftime("%Y-%m-%d %H:%M") %></p>
+    <% elsif decision_state == "changes_requested" %>
+      <p class="quote-decision-status is-revision">Revision Requested on <%= quote.changes_requested_at&.strftime("%Y-%m-%d %H:%M") %></p>
+      <% if quote.changes_request_message.present? %>
+        <p class="quote-decision-note">Message: <%= quote.changes_request_message %></p>
+      <% end %>
+    <% elsif decision_state == "active" %>
+      <div class="quote-public-actions">
+        <%= form_with url: accept_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept", onsubmit: "return window.confirm('Confirm acceptance of this quotation?');" } do %>
+          <button type="submit">Accept Quotation</button>
+        <% end %>
+        <button type="button" class="quote-decision-request-toggle js-open-revision-request">Request Revision</button>
+      </div>
+      <div class="quote-revision-modal js-revision-modal" hidden>
+        <div class="quote-revision-modal-backdrop js-close-revision-request"></div>
+        <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="revision-request-title">
+          <div class="quote-revision-modal-head">
+            <h4 id="revision-request-title">Request Revision</h4>
+            <button type="button" class="quote-revision-modal-close js-close-revision-request" aria-label="Close">x</button>
+          </div>
+          <%= form_with url: request_revision_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-revision-form js-revision-request-form" } do |f| %>
+            <p class="quote-revision-modal-hint">Select one or more reasons, then add optional details.</p>
+            <div class="quote-revision-reason-grid">
+              <% revision_reason_options.each_with_index do |reason, idx| %>
+                <% input_id = "revision_reason_#{idx}" %>
+                <label class="quote-revision-reason-option" for="<%= input_id %>">
+                  <%= check_box_tag "revision_reasons[]", reason, false, id: input_id %>
+                  <span><%= reason %></span>
+                </label>
+              <% end %>
+            </div>
+            <div class="quote-revision-custom">
+              <%= f.label :client_message, "Custom details (optional)" %>
+              <%= f.text_area :client_message, rows: 3, placeholder: "Describe specific changes if needed" %>
+            </div>
+            <div class="quote-public-revision-form-actions">
+              <button type="submit">Confirm Revision Request</button>
+              <button type="button" class="quote-decision-cancel js-close-revision-request">Cancel</button>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% else %>
+      <p class="quote-decision-status">This revision is not currently open for public decision.</p>
+    <% end %>
+  </section>
   <% if @template.show_saas_branding %>
     <p class="quote-public-footnote"><%= @template.saas_branding_footer_text %></p>
   <% end %>
 </article>
+
+<script>
+  (() => {
+    const openBtn = document.querySelector(".js-open-revision-request");
+    const modal = document.querySelector(".js-revision-modal");
+    const closeButtons = Array.from(document.querySelectorAll(".js-close-revision-request"));
+    const form = document.querySelector(".js-revision-request-form");
+    if (!openBtn || !modal || !form || openBtn.dataset.bound === "true") return;
+    openBtn.dataset.bound = "true";
+
+    const closeModal = () => {
+      modal.classList.remove("is-open");
+      window.setTimeout(() => {
+        modal.hidden = true;
+        openBtn.focus();
+      }, 180);
+    };
+
+    openBtn.addEventListener("click", () => {
+      modal.hidden = false;
+      window.requestAnimationFrame(() => {
+        modal.classList.add("is-open");
+      });
+      const input = form.querySelector("textarea");
+      if (input) input.focus();
+    });
+
+    closeButtons.forEach((button) => {
+      button.addEventListener("click", closeModal);
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !modal.hidden) {
+        closeModal();
+      }
+    });
+  })();
+</script>

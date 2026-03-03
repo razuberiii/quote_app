@@ -107,7 +107,7 @@ class QuoteItem < ApplicationRecord
       content = line.to_s.strip
       next if content.blank?
 
-      key, val = content.split(/[:=]/, 2).map { |part| part.to_s.strip }
+      key, val = content.split(/[:=：]/, 2).map { |part| part.to_s.strip }
       next if key.blank? || val.blank?
 
       { key: key, value: val }
@@ -129,7 +129,7 @@ class QuoteItem < ApplicationRecord
       content = line.to_s.strip
       next if content.blank?
 
-      name, amount_text = content.split(/[:=]/, 2).map { |part| part.to_s.strip }
+      name, amount_text = content.split(/[:=：]/, 2).map { |part| part.to_s.strip }
       next if name.blank? || amount_text.blank?
 
       amount = BigDecimal(amount_text)

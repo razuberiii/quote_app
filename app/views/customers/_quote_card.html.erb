@@ -57,8 +57,17 @@
       <%= link_to signal[:label], signal[:path], class: "btn btn-primary quote-action-primary" %>
     <% end %>
     <%= link_to "View", quote_path(card[:quote]), class: "btn btn-secondary" %>
-    <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
-    <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
-    <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+    <% if quote.can_edit_revision? %>
+      <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
+    <% end %>
+    <% if quote.can_create_new_revision? %>
+      <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+    <% end %>
+    <% if quote.can_reopen? %>
+      <%= button_to "Reopen", reopen_quote_path(card[:quote]), method: :post, form: { data: { turbo_confirm: "Reopen this quotation lifecycle and restore active flow?" }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+    <% end %>
+    <% if quote.can_copy_and_reprice? %>
+      <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+    <% end %>
   </div>
 </article>

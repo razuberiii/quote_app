@@ -31,7 +31,12 @@ Rails.application.routes.draw do
 
   # Public quote sharing
   namespace :public do
-    resources :quote_shares, only: [ :show ], param: :token
+    resources :quote_shares, only: [ :show ], param: :token do
+      member do
+        post :accept
+        post :request_revision
+      end
+    end
   end
 
   # Product management
@@ -66,6 +71,7 @@ Rails.application.routes.draw do
       member do
         post :duplicate
         post :duplicate_and_reprice
+        post :reopen
         post :share
         patch :update_template
         get "export/pdf", action: :export_pdf, as: :export_pdf

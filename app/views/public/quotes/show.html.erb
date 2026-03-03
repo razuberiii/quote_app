@@ -1,8 +1,13 @@
 <article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>';">
+  <% spec_label = @quote.resolved_spec_label %>
+  <% addon_label = @quote.resolved_addon_label %>
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
       <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %></h1>
+      <% if @quote.custom_title.present? %>
+        <p class="quote-doc-subtitle"><%= @quote.custom_title %></p>
+      <% end %>
     </div>
     <div class="quote-doc-logo-wrap">
       <% if @template.show_logo && @quote.company.logo.attached? %>
@@ -36,7 +41,10 @@
     <article class="quote-meta-card">
       <h3>Quote Info</h3>
       <div class="quote-info-list">
-        <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @quote.quote_no %></strong></p>
+      <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @quote.quote_no %></strong></p>
+      <% if @quote.custom_title.present? %>
+        <p class="quote-info-row"><span>Title</span><strong><%= @quote.custom_title %></strong></p>
+      <% end %>
         <p class="quote-info-row"><span>Date</span><strong><%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></strong></p>
         <% if @template.show_valid_until && @quote.valid_until.present? %>
           <p class="quote-info-row is-valid-until"><span>Valid Until</span><strong><%= @quote.valid_until.strftime("%Y-%m-%d") %></strong></p>
@@ -66,7 +74,7 @@
       <thead>
         <tr>
           <% if @template.show_product_images %><th>Image</th><% end %>
-          <th>Description</th>
+          <th>Item Details</th>
           <th class="quote-col-right">Qty</th>
           <th class="quote-col-right quote-col-money">Unit Price</th>
           <th class="quote-col-right quote-col-money">Line Total</th>
@@ -86,15 +94,23 @@
             <% end %>
             <td>
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.description %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || "Item" %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
-                    <% item.specification_pairs.each do |pair| %>
-                      <div class="quote-item-desc-sub">Spec: <%= pair[:key] %> - <%= pair[:value] %></div>
+                    <% if item.specification_pairs.any? %>
+                      <div class="quote-item-desc-group">
+                        <div class="quote-item-desc-group-label"><%= spec_label %>:</div>
+                        <% item.specification_pairs.each do |pair| %>
+                          <div class="quote-item-desc-sub"><span class="quote-item-desc-bullet">&bull;</span><%= pair[:key] %> - <%= pair[:value] %></div>
+                        <% end %>
+                      </div>
                     <% end %>
-                    <% item.addon_charge_entries.each do |entry| %>
-                      <div class="quote-item-desc-sub is-addon">
-                        Add-on: <%= entry[:name] %> (<%= quote_money(entry[:amount], @quote.currency, show_symbol: @template.show_currency) %>)
+                    <% if item.addon_charge_entries.any? %>
+                      <div class="quote-item-desc-group is-addon">
+                        <div class="quote-item-desc-group-label"><%= addon_label %>:</div>
+                        <% item.addon_charge_entries.each do |entry| %>
+                          <div class="quote-item-desc-sub is-addon"><span class="quote-item-desc-bullet">&bull;</span><%= entry[:name] %> (<%= quote_money(entry[:amount], @quote.currency, show_symbol: @template.show_currency) %>)</div>
+                        <% end %>
                       </div>
                     <% end %>
                   </div>

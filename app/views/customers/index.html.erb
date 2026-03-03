@@ -45,7 +45,16 @@
       <% if @risk_snapshot[:stalled_high_value].positive? %>
         <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:stalled_high_value] %></strong> high-value stalled</span>
       <% end %>
-      <% if @risk_snapshot.values.all?(&:zero?) %>
+      <% if @decision_snapshot[:accepted_count].positive? %>
+        <span class="dashboard-alert-pill is-good"><strong><%= @decision_snapshot[:accepted_count] %></strong> accepted</span>
+      <% end %>
+      <% if @decision_snapshot[:revision_requested_count].positive? %>
+        <span class="dashboard-alert-pill is-watch"><strong><%= @decision_snapshot[:revision_requested_count] %></strong> revision request(s)</span>
+      <% end %>
+      <% if @decision_snapshot[:negotiating_stale_count].positive? %>
+        <span class="dashboard-alert-pill is-danger"><strong><%= @decision_snapshot[:negotiating_stale_count] %></strong> negotiating 7d+</span>
+      <% end %>
+      <% if @risk_snapshot.values.all?(&:zero?) && @decision_snapshot[:negotiating_stale_count].zero? %>
         <span class="dashboard-alert-pill is-good">No immediate risk signals.</span>
       <% end %>
     </div>
@@ -54,14 +63,62 @@
       <div class="dashboard-action-summary-head">
         <h2>Action Required (<%= @action_required_summary[:total] %>)</h2>
         <% if @action_required_summary[:has_risk] %>
-          <span class="dashboard-alert-pill is-danger dashboard-action-summary-risk"><%= @action_required_summary[:risk_customers] %> risk customer(s)</span>
+          <% risk_text_parts = [] %>
+          <% risk_text_parts << "#{@action_required_summary[:risk_customers]} risk customer(s)" if @action_required_summary[:risk_customers].positive? %>
+          <% risk_text_parts << "#{@action_required_summary[:decision_alerts]} stalled negotiation(s)" if @action_required_summary[:decision_alerts].positive? %>
+          <span class="dashboard-alert-pill is-danger dashboard-action-summary-risk"><%= risk_text_parts.join(" • ") %></span>
         <% else %>
-          <span class="dashboard-alert-pill is-good dashboard-action-summary-risk">No immediate customer risk</span>
+          <span class="dashboard-alert-pill is-good dashboard-action-summary-risk">No immediate customer or decision risk</span>
         <% end %>
       </div>
       <p class="dashboard-action-summary-note">
         Handle overdue and stalled accounts first.
       </p>
+    </article>
+
+    <article class="dashboard-panel dashboard-decision-snapshot">
+      <div class="dashboard-action-summary-head">
+        <h2>Decision Snapshot</h2>
+        <span class="dashboard-decision-period"><%= @kpi_period == "month" ? "This month" : "This week" %></span>
+      </div>
+      <div class="dashboard-decision-flow">
+        <div class="dashboard-decision-column">
+          <h3>Outcome Signals</h3>
+          <div class="dashboard-decision-metrics">
+            <p class="dashboard-decision-metric">
+              <span>Accepted</span>
+              <strong><%= @decision_snapshot[:accepted_count] %></strong>
+            </p>
+            <p class="dashboard-decision-metric">
+              <span>Revision Requested</span>
+              <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
+            </p>
+          </div>
+        </div>
+        <div class="dashboard-decision-column">
+          <h3>Pressure Signals</h3>
+          <div class="dashboard-decision-metrics">
+            <p class="dashboard-decision-metric">
+              <span>Reopened</span>
+              <strong><%= @decision_snapshot[:reopened_count] %></strong>
+            </p>
+            <p class="dashboard-decision-metric">
+              <span>Negotiating 7d+</span>
+              <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
+            </p>
+          </div>
+        </div>
+        <div class="dashboard-decision-column dashboard-decision-column-attention">
+          <h3>Attention Signal</h3>
+          <div class="dashboard-decision-waiting">
+            <p>
+              <span>Public Actionable</span>
+              <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
+            </p>
+            <small>Awaiting client decision</small>
+          </div>
+        </div>
+      </div>
     </article>
 
     <div class="dashboard-kpi-row">
@@ -149,7 +206,7 @@
           <table class="dashboard-recent-table">
             <thead>
               <tr>
-                <th>Quote No.</th>
+                <th>Quote</th>
                 <th>Buyer</th>
                 <th>Status</th>
                 <th>Engagement</th>
@@ -162,7 +219,12 @@
                 <% @recent_quotes.each do |entry| %>
                   <% is_draft_unsent = entry[:status] == "draft" && entry[:view_signal] == "Draft unsent" %>
                   <tr>
-                    <td data-label="Quote No."><strong><%= link_to entry[:quote_no], quote_path(entry[:quote]) %></strong></td>
+                    <td data-label="Quote">
+                      <strong><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
+                      <% if entry[:display_name].present? %>
+                        <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
+                      <% end %>
+                    </td>
                     <td data-label="Buyer"><%= entry[:customer_name] %></td>
                     <td data-label="Status">
                       <span class="status-badge status-<%= entry[:status] %>"><%= is_draft_unsent ? "Draft (unsent)" : entry[:status].capitalize %></span>
@@ -190,14 +252,14 @@
           <li>
             <div class="dashboard-overview-label-row">
               <span>Top Product</span>
-              <small>last 30 days</small>
+              <small>last 30 days • <%= @deal_overview[:top_product_sample_size] %> quotes</small>
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:top_product] %></strong>
           </li>
           <li>
             <div class="dashboard-overview-label-row">
               <span>Average Quote Cycle</span>
-              <small>closed deals</small>
+              <small><%= @deal_overview[:closed_cycle_sample_size] %> closed deals</small>
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:average_quote_cycle_days] %> days</strong>
             <p class="dashboard-overview-insight"><%= @deal_overview[:cycle_insight] %></p>

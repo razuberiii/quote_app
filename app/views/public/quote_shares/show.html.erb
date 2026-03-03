@@ -193,6 +193,16 @@
 
   <section class="no-print quote-decision-section">
     <h3>Ready to proceed?</h3>
+    <% if @has_newer_revision %>
+      <p class="quote-decision-status is-revision">
+        A newer revision is available.
+        <% if @latest_share_url.present? %>
+          <%= link_to "Open latest revision", @latest_share_url, class: "quote-back-link-inline" %>
+        <% else %>
+          Please ask your sales contact for the latest public link.
+        <% end %>
+      </p>
+    <% end %>
     <% if @status_message.present? %>
       <p class="quote-decision-note"><%= @status_message %></p>
     <% end %>

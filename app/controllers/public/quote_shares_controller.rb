@@ -10,6 +10,7 @@ module Public
       @share.track_view!(country: request_country) unless internal_preview_request?
       @snapshot = @share.snapshot
       @status_message = params[:status_message].presence
+      set_newer_revision_context
     end
 
     def accept
@@ -82,6 +83,19 @@ module Public
       return false unless quote.latest_revision_for_quote_no?
 
       %w[sent viewed negotiating].include?(quote.status.to_s)
+    end
+
+    def set_newer_revision_context
+      quote = @share.quote
+      latest_quote = quote.company.quotes.where(quote_no: quote.quote_no).order(revision_number: :desc).first
+      return if latest_quote.blank? || latest_quote.id == quote.id
+
+      @has_newer_revision = true
+      latest_share = latest_quote.quote_shares.active.order(created_at: :desc).first
+      latest_share ||= latest_quote.quote_shares.order(created_at: :desc).first
+      return if latest_share.blank?
+
+      @latest_share_url = public_quote_share_path(latest_share.token, doc: @document_kind)
     end
   end
 end

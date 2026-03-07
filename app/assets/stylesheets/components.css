@@ -3382,10 +3382,37 @@ input[type="submit"].btn:hover {
   color: #475569;
   font-size: 0.86rem;
   line-height: 1.45;
+}.quote-decision-more {
+  margin-top: 0.9rem;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 0.85rem;
+}.quote-decision-more summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 0.85rem;
+  border: 1px solid #d7e1ee;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #29486c;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 700;
+  list-style: none;
+}.quote-decision-more summary::-webkit-details-marker {
+  display: none;
+}.quote-decision-more[open] summary {
+  background: #f8fbff;
+  border-color: #c7d5e6;
+}.quote-decision-more .quote-decision-list {
+  margin-top: 0.85rem;
+}.quote-decision-list.is-secondary::before {
+  top: 0;
 }.quote-decision-item.is-accepted .quote-decision-dot {
   border-color: #16a34a;
 }.quote-decision-item.is-viewed .quote-decision-dot,
-.quote-decision-item.is-shared .quote-decision-dot {
+.quote-decision-item.is-shared .quote-decision-dot,
+.quote-decision-item.is-reshared .quote-decision-dot {
   border-color: #2563eb;
 }.quote-decision-item.is-revision .quote-decision-dot,
 .quote-decision-item.is-reopened .quote-decision-dot {

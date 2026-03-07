@@ -16,8 +16,11 @@
     <% end %>
   </div>
 
+  <% visible_events = @quote_decision_timeline.first(4) %>
+  <% hidden_events = @quote_decision_timeline.drop(4) %>
+
   <div class="quote-decision-list">
-    <% @quote_decision_timeline.each do |event| %>
+    <% visible_events.each do |event| %>
       <article class="quote-decision-item is-<%= event[:kind] %>">
         <div class="quote-decision-dot" aria-hidden="true"></div>
         <div class="quote-decision-content">
@@ -30,4 +33,24 @@
       </article>
     <% end %>
   </div>
+
+  <% if hidden_events.any? %>
+    <details class="quote-decision-more">
+      <summary>Show older events (<%= hidden_events.size %>)</summary>
+      <div class="quote-decision-list is-secondary">
+        <% hidden_events.each do |event| %>
+          <article class="quote-decision-item is-<%= event[:kind] %>">
+            <div class="quote-decision-dot" aria-hidden="true"></div>
+            <div class="quote-decision-content">
+              <div class="quote-decision-topline">
+                <strong><%= event[:label] %></strong>
+                <span><%= format_in_user_time(event[:at], current_user) %></span>
+              </div>
+              <p><%= event[:detail] %></p>
+            </div>
+          </article>
+        <% end %>
+      </div>
+    </details>
+  <% end %>
 </section>

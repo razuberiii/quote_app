@@ -43,6 +43,16 @@ class QuotesController < ApplicationController
     set_revision_compare_context
     set_decision_review_context
     set_decision_timeline_context
+
+    respond_to do |format|
+      format.turbo_stream do
+        render turbo_stream: turbo_stream.update(
+          "quote-page-content",
+          partial: "quotes/show_content"
+        )
+      end
+      format.html
+    end
   end
 
   def edit
@@ -86,7 +96,7 @@ class QuotesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream do
-        render turbo_stream: turbo_stream.replace(
+        render turbo_stream: turbo_stream.update(
           "quote-page-content",
           partial: "quotes/show_content"
         )
@@ -488,6 +498,7 @@ class QuotesController < ApplicationController
 
   def set_decision_timeline_context
     first_share_at = @quote.quote_shares.minimum(:created_at)
+    latest_share_at = @quote.quote_shares.maximum(:created_at)
     first_view_at = @quote.quote_shares.minimum(:first_viewed_at) || @quote.viewed_at
     total_views = @quote.quote_shares.sum(&:view_count)
     last_view_at = @quote.quote_shares.maximum(:last_viewed_at) || @quote.viewed_at
@@ -506,7 +517,7 @@ class QuotesController < ApplicationController
       {
         label: "Share Status",
         value: first_share_at.present? ? "#{@quote.quote_shares.size} link#{'s' unless @quote.quote_shares.size == 1}" : "Not shared",
-        detail: first_share_at.present? ? "First shared #{format_in_user_time(first_share_at, current_user)}." : "Generate a public link to start engagement."
+        detail: latest_share_at.present? ? "Last shared #{format_in_user_time(latest_share_at, current_user)}." : "Generate a public link to start engagement."
       },
       {
         label: "Pressure",
@@ -517,13 +528,13 @@ class QuotesController < ApplicationController
 
     @quote_decision_timeline = [
       timeline_item(:created, @quote.issued_on&.to_time || @quote.created_at, "Created", "Quote version prepared."),
-      timeline_item(:shared, first_share_at, "Shared", "Public quote link generated and ready to send."),
+      timeline_item(share_event_kind(latest_share_at), latest_share_at, share_event_label(latest_share_at), share_event_detail(latest_share_at)),
       timeline_item(:viewed, first_view_at, "Viewed", "Buyer opened the quote for the first time."),
       timeline_item(:revision, @quote.changes_requested_at, "Revision Requested", revision_request_detail),
       timeline_item(:reopened, @quote.reopened_at, "Reopened", "Quote moved back to draft for editing."),
       timeline_item(:accepted, @quote.accepted_at, "Accepted", "Buyer confirmed the quote."),
       timeline_item(:expired, expired_event_time, "Expired", "Validity window ended without closure.")
-    ].compact.sort_by { |item| item[:at] }
+    ].compact.sort_by { |item| item[:at] }.reverse
   end
 
   def set_decision_review_context
@@ -561,7 +572,7 @@ class QuotesController < ApplicationController
     return "Accepted" if @quote.accepted_at.present?
     return "Revision Requested" if @quote.changes_requested_at.present?
     return "Expired" if expired_event_time.present?
-    return "Reopened" if @quote.reopened_at.present?
+    return "Reopened" if reopened_pending?
 
     @quote.workflow_state.to_s.humanize
   end
@@ -570,7 +581,7 @@ class QuotesController < ApplicationController
     return "Buyer accepted this revision." if @quote.accepted_at.present?
     return revision_request_detail if @quote.changes_requested_at.present?
     return "Validity window closed without a decision." if expired_event_time.present?
-    return "Quote is back in draft for rework." if @quote.reopened_at.present?
+    return "Quote is back in draft for rework." if reopened_pending?
 
     "Waiting for buyer movement on this revision."
   end
@@ -589,17 +600,49 @@ class QuotesController < ApplicationController
 
   def pressure_value
     return "Expired" if expired_event_time.present?
-    return "#{@quote.expires_in_days}d left" if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+    return "Needs reshare" if reopened_pending?
     return "Needs revision" if @quote.changes_requested_at.present?
+    return "#{@quote.expires_in_days}d left" if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
 
     "Stable"
   end
 
   def pressure_detail
     return "Follow up with a new revision or close the thread." if expired_event_time.present?
+    return "Generate a fresh public link for the reopened revision." if reopened_pending?
     return "Buyer requested changes on this revision." if @quote.changes_requested_at.present?
     return "Act before validity runs out." if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
 
     "No immediate expiry or revision pressure."
+  end
+
+  def reopened_pending?
+    return false if @quote.reopened_at.blank?
+
+    latest_share_at = @quote.quote_shares.maximum(:created_at)
+    latest_share_at.blank? || latest_share_at < @quote.reopened_at
+  end
+
+  def share_event_kind(latest_share_at)
+    return :shared if latest_share_at.blank? || @quote.reopened_at.blank?
+    return :reshared if latest_share_at > @quote.reopened_at
+
+    :shared
+  end
+
+  def share_event_label(latest_share_at)
+    return "Reshared" if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
+
+    "Shared"
+  end
+
+  def share_event_detail(latest_share_at)
+    return "Fresh public quote link generated after reopening." if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
+
+    "Public quote link generated and ready to send."
+  end
+
+  def format_in_user_time(value, user = current_user, format: "%Y-%m-%d %H:%M")
+    helpers.format_in_user_time(value, user, format: format)
   end
 end

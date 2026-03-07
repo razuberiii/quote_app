@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -42,6 +42,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "addon_presets", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "entries", default: [], null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "name"], name: "index_addon_presets_on_company_id_and_name", unique: true
+    t.index ["company_id"], name: "index_addon_presets_on_company_id"
+  end
+
   create_table "companies", force: :cascade do |t|
     t.string "address"
     t.string "brand_color", default: "#1F4E79"
@@ -57,16 +67,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.string "phone"
     t.text "registration_details"
     t.string "registration_number"
+    t.text "reminder_email_body"
+    t.string "reminder_email_cta_label"
+    t.string "reminder_email_subject"
     t.datetime "updated_at", null: false
     t.string "website"
+  end
+
+  create_table "company_documents", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "document_type", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "document_type"], name: "index_company_documents_on_company_id_and_document_type"
+    t.index ["company_id"], name: "index_company_documents_on_company_id"
   end
 
   create_table "customer_taggings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "customer_id", null: false
     t.bigint "customer_tag_id", null: false
+    t.integer "position", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["customer_id", "customer_tag_id"], name: "index_customer_taggings_on_customer_id_and_customer_tag_id", unique: true
+    t.index ["customer_id", "position"], name: "index_customer_taggings_on_customer_id_and_position"
     t.index ["customer_id"], name: "index_customer_taggings_on_customer_id"
     t.index ["customer_tag_id"], name: "index_customer_taggings_on_customer_tag_id"
   end
@@ -105,33 +130,67 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.index ["internal_owner_id"], name: "index_customers_on_internal_owner_id"
   end
 
+  create_table "product_addon_presets", force: :cascade do |t|
+    t.bigint "addon_preset_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "product_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["addon_preset_id"], name: "index_product_addon_presets_on_addon_preset_id"
+    t.index ["product_id", "addon_preset_id"], name: "index_product_addon_presets_on_product_id_and_addon_preset_id", unique: true
+    t.index ["product_id"], name: "index_product_addon_presets_on_product_id"
+  end
+
+  create_table "product_spec_presets", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "product_id", null: false
+    t.bigint "spec_preset_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id", "spec_preset_id"], name: "index_product_spec_presets_on_product_id_and_spec_preset_id", unique: true
+    t.index ["product_id"], name: "index_product_spec_presets_on_product_id"
+    t.index ["spec_preset_id"], name: "index_product_spec_presets_on_spec_preset_id"
+  end
+
   create_table "products", force: :cascade do |t|
     t.bigint "company_id", null: false
     t.decimal "cost_price", precision: 15, scale: 4
     t.datetime "created_at", null: false
+    t.bigint "default_addon_preset_id"
+    t.jsonb "default_addons", default: [], null: false
     t.decimal "default_price", precision: 15, scale: 4, null: false
+    t.bigint "default_spec_preset_id"
     t.text "default_specification"
+    t.jsonb "default_specs", default: [], null: false
     t.text "description"
+    t.datetime "last_quoted_at"
     t.string "lead_time"
     t.integer "moq"
     t.string "name", null: false
     t.string "price_currency", default: "USD", null: false
     t.string "product_category"
+    t.integer "quoted_count", default: 0, null: false
     t.string "sku", null: false
     t.string "unit"
     t.datetime "updated_at", null: false
+    t.integer "won_count", default: 0, null: false
     t.index ["company_id", "sku"], name: "index_products_on_company_id_and_sku", unique: true
     t.index ["company_id"], name: "index_products_on_company_id"
+    t.index ["default_addon_preset_id"], name: "index_products_on_default_addon_preset_id"
+    t.index ["default_spec_preset_id"], name: "index_products_on_default_spec_preset_id"
+    t.index ["last_quoted_at"], name: "index_products_on_last_quoted_at"
+    t.index ["quoted_count"], name: "index_products_on_quoted_count"
+    t.index ["won_count"], name: "index_products_on_won_count"
   end
 
   create_table "quote_items", force: :cascade do |t|
     t.jsonb "addon_charges", default: [], null: false
+    t.jsonb "addon_snapshot", default: [], null: false
     t.decimal "amount", precision: 15, scale: 4
     t.datetime "created_at", null: false
     t.string "description", null: false
     t.integer "product_id"
     t.integer "quantity", default: 1, null: false
     t.bigint "quote_id", null: false
+    t.jsonb "spec_snapshot", default: [], null: false
     t.jsonb "specifications", default: [], null: false
     t.decimal "unit_price", precision: 15, scale: 4, null: false
     t.datetime "updated_at", null: false
@@ -200,11 +259,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.boolean "show_tax", default: true, null: false
     t.boolean "show_terms_section", default: true, null: false
     t.boolean "show_valid_until", default: true, null: false
+    t.boolean "show_watermark", default: false, null: false
+    t.string "signature_name"
     t.string "slug", default: "default-template", null: false
     t.string "spec_label", default: "Spec", null: false
     t.string "thousand_separator", default: "comma", null: false
     t.string "unit_price_label", default: "Unit Price", null: false
     t.datetime "updated_at", null: false
+    t.integer "watermark_opacity", default: 12, null: false
+    t.string "watermark_text", default: "", null: false
     t.index ["company_id", "slug"], name: "index_quote_templates_on_company_id_and_slug", unique: true
     t.index ["company_id"], name: "index_quote_templates_on_company_id"
   end
@@ -212,6 +275,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
   create_table "quotes", force: :cascade do |t|
     t.datetime "accepted_at"
     t.string "addon_label"
+    t.datetime "archived_at"
     t.text "changes_request_message"
     t.datetime "changes_requested_at"
     t.bigint "company_id", null: false
@@ -219,6 +283,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.string "currency"
     t.string "custom_title"
     t.bigint "customer_id", null: false
+    t.datetime "deleted_at"
     t.text "delivery_notes"
     t.decimal "discount_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.decimal "final_amount", precision: 15, scale: 4
@@ -231,11 +296,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.string "product_name"
     t.integer "quantity"
     t.string "quote_no"
+    t.integer "reminder_count", default: 0, null: false
+    t.datetime "reminder_sent_at"
     t.datetime "reopened_at"
+    t.string "request_reason"
     t.integer "revision_number"
     t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.string "spec_label"
+    t.string "stalled_reason"
     t.string "status"
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "template_id"
@@ -245,11 +314,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
     t.datetime "updated_at", null: false
     t.date "valid_until"
     t.datetime "viewed_at"
+    t.string "win_reason"
     t.index ["accepted_at"], name: "index_quotes_on_accepted_at"
     t.index ["changes_requested_at"], name: "index_quotes_on_changes_requested_at"
+    t.index ["company_id", "quote_no", "archived_at"], name: "index_quotes_on_company_quote_archived_at"
     t.index ["company_id"], name: "index_quotes_on_company_id"
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
+    t.index ["deleted_at"], name: "index_quotes_on_deleted_at"
+    t.index ["reminder_sent_at"], name: "index_quotes_on_reminder_sent_at"
+    t.index ["request_reason"], name: "index_quotes_on_request_reason"
     t.index ["template_id"], name: "index_quotes_on_template_id"
+  end
+
+  create_table "spec_presets", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "entries", default: [], null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "name"], name: "index_spec_presets_on_company_id_and_name", unique: true
+    t.index ["company_id"], name: "index_spec_presets_on_company_id"
   end
 
   create_table "team_invitations", force: :cascade do |t|
@@ -301,12 +385,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "addon_presets", "companies"
+  add_foreign_key "company_documents", "companies"
   add_foreign_key "customer_taggings", "customer_tags"
   add_foreign_key "customer_taggings", "customers"
   add_foreign_key "customer_tags", "companies"
   add_foreign_key "customers", "companies"
   add_foreign_key "customers", "users", column: "internal_owner_id"
+  add_foreign_key "product_addon_presets", "addon_presets"
+  add_foreign_key "product_addon_presets", "products"
+  add_foreign_key "product_spec_presets", "products"
+  add_foreign_key "product_spec_presets", "spec_presets"
+  add_foreign_key "products", "addon_presets", column: "default_addon_preset_id"
   add_foreign_key "products", "companies"
+  add_foreign_key "products", "spec_presets", column: "default_spec_preset_id"
   add_foreign_key "quote_items", "quotes"
   add_foreign_key "quote_shares", "companies"
   add_foreign_key "quote_shares", "quotes"
@@ -314,6 +406,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_03_030000) do
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
   add_foreign_key "quotes", "quote_templates", column: "template_id"
+  add_foreign_key "spec_presets", "companies"
   add_foreign_key "team_invitations", "companies"
   add_foreign_key "team_invitations", "users", column: "invited_by_id"
   add_foreign_key "users", "companies"

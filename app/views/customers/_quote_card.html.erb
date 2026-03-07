@@ -2,12 +2,30 @@
 <% signal = card[:push_signal] %>
 <article class="quote-card" onclick="window.location='<%= quote_path(card[:quote]) %>'">
   <div class="quote-card-action-callout <%= "is-urgent" if signal[:state] == "risk" %>">
-    <strong>Next Action:</strong> <%= signal[:summary] %> - <%= signal[:detail] %>
+    <span class="quote-card-callout-label">Next Action</span>
+    <div>
+      <strong><%= signal[:summary] %></strong>
+      <span><%= signal[:detail] %></span>
+    </div>
   </div>
 
   <div class="quote-card-layout">
     <div class="quote-card-main">
-      <h4><%= card[:title] %></h4>
+      <div class="quote-card-heading">
+        <h4><%= card[:title] %></h4>
+      </div>
+      <div class="quote-card-signal-row">
+        <span class="quote-card-signal-pill is-<%= signal[:state] %>"><%= signal[:summary] %></span>
+        <% if quote.win_reason.present? && card[:display_status] == "won" %>
+          <span class="quote-card-signal-detail">Win reason: <%= quote.win_reason.humanize %></span>
+        <% elsif quote.loss_reason.present? && card[:display_status] == "lost" %>
+          <span class="quote-card-signal-detail">Loss reason: <%= quote.loss_reason.humanize %></span>
+        <% elsif quote.stalled_reason.present? && %w[sent viewed negotiating expired].include?(card[:display_status]) %>
+          <span class="quote-card-signal-detail">Pressure: <%= quote.stalled_reason.humanize %></span>
+        <% elsif quote.valid_until.present? && card[:display_status] == "expired" %>
+          <span class="quote-card-signal-detail">Expired on <%= quote.valid_until.strftime("%Y-%m-%d") %></span>
+        <% end %>
+      </div>
       <div class="quote-card-meta">
         <p>
           <strong>Total:</strong>
@@ -17,9 +35,9 @@
         <% if quote.valid_until.present? %>
           <% days_left = (quote.valid_until - Date.current).to_i %>
           <% if days_left.negative? %>
-            <p><strong>Valid Until:</strong> <span class="status-badge status-expired"><%= quote.valid_until.strftime("%Y-%m-%d") %> (Expired)</span></p>
+            <p><strong>Valid Until:</strong> <%= quote_status_badge("expired", label: "#{quote.valid_until.strftime("%Y-%m-%d")} (Expired)") %></p>
           <% elsif days_left <= 3 %>
-            <p><strong>Valid Until:</strong> <span class="status-badge status-paused"><%= quote.valid_until.strftime("%Y-%m-%d") %> (#{days_left}d left)</span></p>
+            <p><strong>Valid Until:</strong> <%= status_badge("#{quote.valid_until.strftime("%Y-%m-%d")} (#{days_left}d left)", :amber) %></p>
           <% else %>
             <p><strong>Valid Until:</strong> <%= quote.valid_until.strftime("%Y-%m-%d") %></p>
           <% end %>
@@ -41,7 +59,7 @@
     <div class="quote-card-side">
       <div class="quote-card-badges">
         <span class="revision-pill">V<%= card[:revision] %></span>
-        <span class="status-badge status-<%= card[:display_status] %>"><%= card[:display_status].capitalize %></span>
+        <%= quote_status_badge(card[:display_status]) %>
       </div>
     </div>
   </div>
@@ -52,22 +70,33 @@
                     signal[:path],
                     method: :post,
                     form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" },
-                    class: "btn btn-primary quote-action-primary" %>
+                    class: ui_button_classes(:primary, "quote-action-primary") %>
     <% else %>
-      <%= link_to signal[:label], signal[:path], class: "btn btn-primary quote-action-primary" %>
+      <%= link_to signal[:label], signal[:path], class: ui_button_classes(:primary, "quote-action-primary") %>
     <% end %>
-    <%= link_to "View", quote_path(card[:quote]), class: "btn btn-secondary" %>
     <% if quote.can_edit_revision? %>
-      <%= link_to "Edit", edit_quote_path(card[:quote]), class: "btn btn-secondary" %>
+      <%= link_to "Edit", edit_quote_path(card[:quote]), class: ui_button_classes(:secondary, "quote-card-secondary-action") %>
     <% end %>
     <% if quote.can_create_new_revision? %>
-      <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+      <%= button_to "New Revision", duplicate_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: ui_button_classes(:secondary, "quote-card-secondary-action") %>
     <% end %>
     <% if quote.can_reopen? %>
-      <%= button_to "Reopen", reopen_quote_path(card[:quote]), method: :post, form: { data: { turbo_confirm: "Reopen this quotation lifecycle and restore active flow?" }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+      <%= button_to "Reopen Quote",
+                    reopen_quote_path(card[:quote]),
+                    method: :post,
+                    form: { data: { turbo_confirm: "Reopening this quote will allow editing again and mark the public version as outdated. Customers will not be able to accept it until a new version is shared." }, onsubmit: "event.stopPropagation();" },
+                    class: ui_button_classes(:secondary, "quote-card-secondary-action") %>
     <% end %>
     <% if quote.can_copy_and_reprice? %>
-      <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: "btn btn-secondary" %>
+      <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(card[:quote]), method: :post, form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" }, class: ui_button_classes(:secondary, "quote-card-secondary-action") %>
+    <% end %>
+    <% if quote.can_delete_quote_family? %>
+      <%= button_to "Delete Quote",
+                    quote_path(card[:quote]),
+                    method: :delete,
+                    form: { data: { turbo_confirm: "Delete the entire quote thread #{quote.quote_no} including all revisions and expire any public links? This cannot be undone." },
+                            onsubmit: "event.stopPropagation(); if (!confirm('Final warning: this will expire public links and remove the full quote thread.')) return false; if (prompt('Type DELETE to confirm quote thread removal') !== 'DELETE') return false;" },
+                    class: ui_button_classes(:danger, "quote-card-secondary-action") %>
     <% end %>
   </div>
 </article>

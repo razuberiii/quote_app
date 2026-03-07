@@ -1,4 +1,5 @@
 class QuoteExporter
+  require "stringio"
   EXCEL_SUPPORTED_IMAGE_TYPES = %w[image/png image/jpeg image/jpg image/gif image/bmp].freeze
   FONT_MAP = {
     "Noto Sans" => [
@@ -32,12 +33,14 @@ class QuoteExporter
 
     pdf = Prawn::Document.new(page_size: "A4", margin: [ 56, 42, 56, 42 ])
     configure_pdf_font(pdf)
+    render_pdf_watermark(pdf)
 
     render_pdf_header(pdf)
     render_pdf_parties(pdf)
     render_pdf_items(pdf)
     render_pdf_totals(pdf)
     render_pdf_terms(pdf)
+    render_pdf_company_credentials(pdf)
     render_pdf_footer(pdf)
     render_pdf_signature(pdf)
 
@@ -74,6 +77,51 @@ class QuoteExporter
   end
 
   private
+
+  def render_pdf_watermark(pdf)
+    return unless @template.show_watermark
+
+    image_io = template_watermark_image_io
+    watermark_text = pdf_watermark_text
+    return if image_io.blank? && watermark_text.blank?
+
+    alpha = watermark_alpha
+    pdf.repeat(:all, dynamic: true) do
+      pdf.canvas do
+        if image_io.present?
+          image_io.rewind if image_io.respond_to?(:rewind)
+          width = pdf.bounds.width * 0.48
+          height = pdf.bounds.height * 0.38
+          x = (pdf.bounds.width - width) / 2.0
+          y = (pdf.bounds.height + height) / 2.0
+          pdf.transparent(alpha) do
+            pdf.image(image_io, at: [ x, y ], fit: [ width, height ])
+          end
+        elsif watermark_text.present?
+          pdf.transparent(alpha) do
+            pdf.fill_color "0F172A"
+            center_x = pdf.bounds.width / 2.0
+            center_y = pdf.bounds.height / 2.0
+            pdf.rotate(-18, origin: [ center_x, center_y ]) do
+              pdf.text_box(
+                pdf_text(watermark_text),
+                at: [ 0, center_y + 36 ],
+                width: pdf.bounds.width,
+                height: 84,
+                align: :center,
+                valign: :center,
+                size: 46,
+                style: :bold
+              )
+            end
+            pdf.fill_color "000000"
+          end
+        end
+      end
+    end
+  rescue StandardError
+    nil
+  end
 
   def render_pdf_header(pdf)
     width = pdf_content_width(pdf)
@@ -185,11 +233,34 @@ class QuoteExporter
       t.columns(qty_col).align = :right
       t.columns(unit_col).align = :right
       t.columns(total_col).align = :right
+      t.columns(qty_col).valign = :top
+      t.columns(unit_col).valign = :top
+      t.columns(total_col).valign = :top
 
       if @template.show_images?
         image_col = pdf_item_headers.index("Image")
-        t.columns(image_col).width = 60
+        no_col = 0
+        desc_col = pdf_item_headers.index("Description")
+
+        t.columns(no_col).width = 26
+        t.columns(image_col).width = 54
+        t.columns(qty_col).width = 42
+        t.columns(unit_col).width = 74
+        t.columns(total_col).width = 84
+        t.columns(desc_col).width = width - (26 + 54 + 42 + 74 + 84)
+      else
+        no_col = 0
+        desc_col = pdf_item_headers.index("Description")
+
+        t.columns(no_col).width = 26
+        t.columns(qty_col).width = 42
+        t.columns(unit_col).width = 74
+        t.columns(total_col).width = 84
+        t.columns(desc_col).width = width - (26 + 42 + 74 + 84)
       end
+
+      t.rows(1..-1).columns(unit_col).style(size: 11, font_style: :normal)
+      t.rows(1..-1).columns(total_col).style(size: 11, font_style: :normal)
     end
 
     pdf.move_down 14
@@ -203,20 +274,27 @@ class QuoteExporter
     totals_rows << [ "Discount", total_value_text(@quote.discount_amount) ]
     totals_rows << [ "Grand Total", total_value_text(@quote.grand_total) ]
 
-    width = [ pdf_content_width(pdf) * 0.5, 300 ].min
+    width = [ pdf_content_width(pdf) * 0.43, 260 ].min
 
     pdf.table(totals_rows, width: width, position: :right) do |t|
       t.cells.borders = []
-      t.cells.padding = [ 8, 10, 8, 10 ]
-      t.cells.background_color = "F8F9FA"
+      t.cells.padding = [ 6, 6, 6, 6 ]
+      t.cells.background_color = "FFFFFF"
+      t.cells.text_color = "475569"
       t.columns(1).align = :right
       t.columns(1).font_style = :bold
+      t.columns(1).size = 11
 
-      t.row(-1).background_color = pdf_color
-      t.row(-1).text_color = "FFFFFF"
+      t.row(-1).background_color = "FFFFFF"
+      t.row(-1).borders = [ :top ]
+      t.row(-1).border_top_width = 1
+      t.row(-1).border_top_color = "CBD5E1"
+      t.row(-1).text_color = "1F3650"
       t.row(-1).font_style = :bold
-      t.row(-1).size = 18
+      t.row(-1).size = 15
     end
+
+    pdf.fill_color "000000"
 
     pdf.move_down 12
   end
@@ -239,6 +317,18 @@ class QuoteExporter
     pdf.move_down 10
   end
 
+  def render_pdf_company_credentials(pdf)
+    documents = @company.company_documents.ordered
+    return if documents.empty?
+
+    pdf.text "Company Credentials", style: :bold, size: 11
+    pdf.move_down 4
+    documents.each do |document|
+      pdf.text pdf_text("#{document.title} (#{document.document_type_label})"), size: 10
+    end
+    pdf.move_down 10
+  end
+
   def render_pdf_footer(pdf)
     footer_note = @template.resolved_footer_note(@document_kind)
     return if footer_note.blank?
@@ -250,12 +340,18 @@ class QuoteExporter
   end
 
   def render_pdf_signature(pdf)
-    return unless @template.show_signature_block
+    signature_image_io = template_signature_image_io
+    signature_name = @template.signature_name.to_s.strip
+    return unless @template.show_signature_block && (signature_image_io.present? || signature_name.present?)
 
     pdf.move_down 8
-    pdf.text "Customer acceptance:"
-    pdf.text "________________________"
-    pdf.text "Date: _________________"
+    pdf.text "Signature:"
+    if signature_image_io
+      pdf.move_down 2
+      pdf.image(signature_image_io, fit: [ 180, 60 ], position: :left)
+      pdf.move_down 4
+    end
+    pdf.text "Authorized by: #{pdf_text(signature_name)}" if signature_name.present?
   end
 
   def render_excel_header(sheet, styles, config)
@@ -367,7 +463,7 @@ class QuoteExporter
         (alternate ? styles[:currency_alt] : styles[:currency])
       ]
 
-      sheet.add_row row, style: row_styles, height: excel_item_row_height(description_text)
+      sheet.add_row row, style: row_styles, height: excel_item_row_height(description_text, @template.show_images?)
       row_index = sheet.rows.size - 1
       @excel_row_index_map[item.id] = row_index
       add_excel_item_image(sheet, item, image_col_index) if @template.show_images?
@@ -453,11 +549,12 @@ class QuoteExporter
 
   def apply_excel_post_layout(sheet, ctx, config)
     widths = (config["column_widths"] || [ 6, 14, 42, 8, 14, 16 ]).map(&:to_f)
-    widths[0] = [ widths[0], 8.5 ].max
-    widths[2] = [ widths[2], 42 ].max
-    widths[3] = [ widths[3], 9 ].max
-    widths[4] = [ widths[4], 14 ].max
-    widths[5] = [ widths[5], 16 ].max
+    widths[0] = [ widths[0], 6 ].max
+    widths[1] = [ widths[1], 8 ].max
+    widths[2] = [ widths[2], 64 ].max
+    widths[3] = [ widths[3], 8 ].max
+    widths[4] = [ widths[4], 15 ].max
+    widths[5] = [ widths[5], 17 ].max
     sheet.column_widths(*widths)
 
     freeze = config["freeze_pane"]
@@ -706,10 +803,12 @@ class QuoteExporter
     }
   end
 
-  def excel_item_row_height(description_text)
+  def excel_item_row_height(description_text, with_images)
     line_count = description_text.to_s.split(/\r?\n/).count
     visible_lines = [ line_count, 1 ].max
-    [[18 + (visible_lines * 12), 20].max, 150].min
+    base_height = 24 + (visible_lines * 18)
+    base_height = [ base_height, 64 ].max if with_images
+    [[base_height, 32].max, 260].min
   end
 
   def xlsx_sheet_name
@@ -744,7 +843,11 @@ class QuoteExporter
   end
 
   def excel_item_description_text(item)
-    lines = [ item.description.to_s ]
+    title = item.product&.name.presence || item.description.to_s.presence || "Item"
+    lines = [ title ]
+    if item.description.present? && item.description.to_s != title
+      lines << item.description.to_s
+    end
     item.specification_pairs.each do |pair|
       lines << "Spec: #{pair[:key]} - #{pair[:value]}"
     end
@@ -802,6 +905,44 @@ class QuoteExporter
     return nil if value.blank? || value == "-"
 
     value
+  end
+
+  def template_signature_image_io
+    return nil unless @template.respond_to?(:signature_image) && @template.signature_image.attached?
+
+    decoded = @template.signature_image.blob.download
+    return nil if decoded.blank?
+
+    io = StringIO.new(decoded)
+    io.set_encoding(Encoding::BINARY) if io.respond_to?(:set_encoding)
+    io
+  rescue StandardError
+    nil
+  end
+
+  def template_watermark_image_io
+    return nil unless @template.respond_to?(:watermark_image) && @template.watermark_image.attached?
+
+    decoded = @template.watermark_image.blob.download
+    return nil if decoded.blank?
+
+    io = StringIO.new(decoded)
+    io.set_encoding(Encoding::BINARY) if io.respond_to?(:set_encoding)
+    io
+  rescue StandardError
+    nil
+  end
+
+  def pdf_watermark_text
+    return nil if @template.respond_to?(:watermark_image) && @template.watermark_image.attached?
+
+    @template.watermark_text.to_s.strip.presence || @company.name.to_s.strip.presence || "CONFIDENTIAL"
+  end
+
+  def watermark_alpha
+    percent = @template.respond_to?(:watermark_opacity) ? @template.watermark_opacity.to_i : 12
+    percent = 12 if percent <= 0
+    [ [ percent, 3 ].max, 40 ].min / 100.0
   end
 
   def darken_color(hex, amount)

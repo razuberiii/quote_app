@@ -1,0 +1,16 @@
+<%= form_with model: spec_preset, class: "settings-form-grid" do |f| %>
+  <div>
+    <%= f.label :name, "Preset Name" %>
+    <%= f.text_field :name, placeholder: "Motor 220V / Export Standard" %>
+  </div>
+
+  <div class="settings-grid-span-2">
+    <%= f.label :entries_text, "Specifications Text" %>
+    <%= f.text_area :entries_text, value: spec_preset.entries_text, rows: 8, placeholder: "Voltage: 220V&#10;Frequency: 50Hz&#10;Material: SS304" %>
+    <p class="team-members-hint">One line per item. Use <code>name: value</code>, <code>name=value</code>, or Chinese colon.</p>
+  </div>
+
+  <div class="settings-grid-span-2 settings-actions">
+    <%= f.submit(spec_preset.persisted? ? "Update Spec Preset" : "Create Spec Preset", class: "btn btn-primary") %>
+  </div>
+<% end %>

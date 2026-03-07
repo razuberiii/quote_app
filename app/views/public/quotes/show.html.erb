@@ -1,6 +1,20 @@
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>';">
+<% watermark_text = template_watermark_text(@template, @quote.company.name) %>
+<% watermark_image_url = template_watermark_image_url(@template) %>
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+  <% if watermark_image_url.present? %>
+    <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
+  <% end %>
   <% spec_label = @quote.resolved_spec_label %>
   <% addon_label = @quote.resolved_addon_label %>
+  <% quote_reopened = @quote.status.to_s == "draft" && @quote.reopened_at.present? %>
+  <% signature_image_url = template_signature_image_url(@template) %>
+  <% signature_name = template_signature_name(@template) %>
+  <% show_signature_section = @template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
+  <% if quote_reopened %>
+    <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      This quote is currently being updated by the seller. Please contact your sales representative for the latest version.
+    </div>
+  <% end %>
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
@@ -31,11 +45,11 @@
 
     <article class="quote-meta-card">
       <h3>Buyer</h3>
-      <p><strong><%= @quote.customer.name %></strong></p>
-      <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
-      <p><%= @quote.customer.address.presence || "-" %></p>
-      <p><%= @quote.customer.phone.presence || "-" %></p>
-      <p><%= @quote.customer.email.presence || "-" %></p>
+      <p><strong>Company:</strong> <%= @quote.customer.name.presence || "-" %></p>
+      <p><strong>Primary Contact:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
+      <p><strong>Email:</strong> <%= @quote.customer.email.presence || "-" %></p>
+      <p><strong>Phone:</strong> <%= @quote.customer.phone.presence || "-" %></p>
+      <p><strong>Address:</strong> <%= @quote.customer.address.presence || "-" %></p>
     </article>
 
     <article class="quote-meta-card">
@@ -126,6 +140,9 @@
     </table>
   </div>
 
+  <% discount_amount = @quote.discount_amount.to_d %>
+  <% has_discount = discount_amount.positive? %>
+  <% original_total = @quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d %>
   <aside class="quote-total-box">
     <p><span>Subtotal</span><strong><%= quote_money(@quote.subtotal, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
     <% if @template.show_tax %>
@@ -134,8 +151,14 @@
     <% if @template.show_shipping %>
       <p><span>Shipping</span><strong><%= quote_money(@quote.shipping_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
     <% end %>
-    <p><span>Discount</span><strong><%= quote_money(@quote.discount_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+    <% if has_discount %>
+      <p class="quote-total-discount"><span>Discount</span><strong>-<%= quote_money(discount_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+      <p class="quote-total-reduction"><span>Original Total</span><strong><%= quote_money(original_total, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
     <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+    <% if has_discount %>
+      <p class="quote-total-saved"><span>You Save</span><strong><%= quote_money(discount_amount, @quote.currency, show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
     <% if (closing_message = @template.resolved_closing_message).present? %>
       <p class="quote-engagement-note"><%= closing_message %></p>
     <% end %>
@@ -154,6 +177,31 @@
       <h3>Terms & Conditions</h3>
       <% terms_lines.each do |label, value| %>
         <p><strong><%= label %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% company_documents = @quote.company.company_documents.includes(file_attachment: :blob).ordered %>
+  <% if company_documents.any? %>
+    <section class="quote-section-block">
+      <h3>Company Credentials</h3>
+      <% company_documents.each do |document| %>
+        <p>
+          <strong><%= document.title %></strong>
+          <% if document.file.attached? %>
+            <%= link_to "Download", rails_blob_path(document.file, disposition: "attachment") %>
+          <% end %>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if show_signature_section %>
+    <section class="quote-section-block quote-signature-block">
+      <h3>Signature</h3>
+      <% if signature_image_url.present? %>
+        <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+      <% end %>
+      <% if signature_name.present? %>
+        <p><strong>Authorized by:</strong> <%= signature_name %></p>
       <% end %>
     </section>
   <% end %>

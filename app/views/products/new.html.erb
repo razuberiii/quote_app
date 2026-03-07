@@ -1,7 +1,14 @@
-<h1>New Product</h1>
+<section class="app-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1>New Product</h1>
+      <p>Add a catalog item with pricing, media, and reusable preset bindings.</p>
+    </div>
+  </header>
 
-<%= render "form",
-           product: @product,
-           submit_label: "Create Product",
-           back_path: products_path,
-           back_label: "Back to Products" %>
+  <%= render "form",
+             product: @product,
+             submit_label: "Create Product",
+             back_path: products_path,
+             back_label: "Back to Products" %>
+</section>

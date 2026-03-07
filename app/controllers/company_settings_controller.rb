@@ -4,10 +4,14 @@ class CompanySettingsController < ApplicationController
 
   def edit
     @template = @company.quote_template_or_default
+    @company_document = CompanyDocument.new(company: @company)
+    @company_documents = @company.company_documents.includes(file_attachment: :blob).ordered
   end
 
   def update
     @template = @company.quote_template_or_default
+    @company_document = CompanyDocument.new(company: @company)
+    @company_documents = @company.company_documents.includes(file_attachment: :blob).ordered
     remove_logo_requested = company_settings_params[:remove_logo].to_s == "1"
 
     Company.transaction do
@@ -44,6 +48,9 @@ class CompanySettingsController < ApplicationController
       :default_tax_rate,
       :default_validity_days,
       :brand_color,
+      :reminder_email_subject,
+      :reminder_email_body,
+      :reminder_email_cta_label,
       :logo,
       :remove_logo,
       :template_show_logo,

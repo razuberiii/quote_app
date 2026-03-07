@@ -1,5 +1,6 @@
 class ProductsController < ApplicationController
   before_action :set_product, only: [ :show, :edit, :update, :destroy, :set_primary_image, :remove_primary_image, :remove_gallery_image, :bulk_remove_gallery_images ]
+  before_action :set_configurator_presets, only: [ :new, :create, :edit, :update ]
 
   def index
     @products = current_user.company.products.order(:name)
@@ -10,6 +11,7 @@ class ProductsController < ApplicationController
       .joins(:quote)
       .where(product_id: @products.select(:id))
       .where(quotes: { company_id: current_user.company_id })
+      .where(quotes: { archived_at: nil, deleted_at: nil })
 
     @product_quote_stats = reference_scope
       .group(:product_id)
@@ -23,7 +25,9 @@ class ProductsController < ApplicationController
   end
 
   def show
-    reference_scope = @product.quote_items.joins(:quote).where(quotes: { company_id: current_user.company_id })
+    reference_scope = @product.quote_items
+      .joins(:quote)
+      .where(quotes: { company_id: current_user.company_id, archived_at: nil, deleted_at: nil })
     @quote_reference_count = reference_scope.distinct.count("quotes.quote_no")
     @last_referenced_at = reference_scope.maximum("quotes.updated_at")
   end
@@ -136,13 +140,23 @@ class ProductsController < ApplicationController
       :product_category,
       :unit,
       :description,
-      :default_specification,
       :default_price,
       :price_currency,
       :cost_price,
       :moq,
-      :lead_time
+      :lead_time,
+      :default_spec_preset_id,
+      :default_addon_preset_id,
+      spec_preset_ids: [],
+      addon_preset_ids: [],
+      default_specs: [ :name, :value ],
+      default_addons: [ :name, :price ]
     )
+  end
+
+  def set_configurator_presets
+    @spec_presets = current_user.company.spec_presets.ordered
+    @addon_presets = current_user.company.addon_presets.ordered
   end
 
   def attach_uploaded_gallery_images(product)

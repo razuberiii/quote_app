@@ -1,0 +1,10 @@
+<%= @reminder ? "Quotation Reminder" : "Quotation Ready" %>
+
+Hello <%= @customer.contact_name.presence || @customer.name.presence || "there" %>,
+
+<%= @email_body %>
+
+<%= @email_cta_label %>:
+<%= @public_url %>
+
+If you have any questions, reply directly to this email.

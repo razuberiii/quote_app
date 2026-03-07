@@ -4,7 +4,7 @@ class QuoteTemplatesController < ApplicationController
 
   def index
     @quote_templates = current_user.company.quote_templates.ordered
-    @template_usage_counts = current_user.company.quotes.where(template_id: @quote_templates.select(:id)).group(:template_id).count
+    @template_usage_counts = current_user.company.quotes.not_archived.where(template_id: @quote_templates.select(:id)).group(:template_id).count
   end
 
   def new
@@ -13,6 +13,8 @@ class QuoteTemplatesController < ApplicationController
 
   def create
     @quote_template = current_user.company.quote_templates.new(quote_template_params)
+    purge_watermark_image!(@quote_template) if remove_watermark_image_requested?
+    purge_signature_image!(@quote_template) if remove_signature_image_requested?
 
     if @quote_template.save
       if params[:make_default] == "1" || current_user.company.quote_templates.count == 1
@@ -27,6 +29,9 @@ class QuoteTemplatesController < ApplicationController
   def edit; end
 
   def update
+    purge_watermark_image!(@quote_template) if remove_watermark_image_requested?
+    purge_signature_image!(@quote_template) if remove_signature_image_requested?
+
     if @quote_template.update(quote_template_params)
       apply_default_template!(@quote_template) if params[:make_default] == "1"
       redirect_to quote_templates_path, notice: "Template updated"
@@ -86,6 +91,12 @@ class QuoteTemplatesController < ApplicationController
       :show_terms_section,
       :show_notes,
       :show_signature_block,
+      :signature_name,
+      :signature_image,
+      :show_watermark,
+      :watermark_text,
+      :watermark_opacity,
+      :watermark_image,
       :document_kind,
       :quotation_title,
       :quotation_number_label,
@@ -94,6 +105,26 @@ class QuoteTemplatesController < ApplicationController
       :pi_number_label,
       :pi_footer_note
     )
+  end
+
+  def remove_watermark_image_requested?
+    params.dig(:quote_template, :remove_watermark_image).to_s == "1"
+  end
+
+  def purge_watermark_image!(template)
+    return unless template.watermark_image.attached?
+
+    template.watermark_image.purge
+  end
+
+  def remove_signature_image_requested?
+    params.dig(:quote_template, :remove_signature_image).to_s == "1"
+  end
+
+  def purge_signature_image!(template)
+    return unless template.signature_image.attached?
+
+    template.signature_image.purge
   end
 
   def default_template_values
@@ -125,7 +156,10 @@ class QuoteTemplatesController < ApplicationController
       show_customer_owner: true,
       show_payment_term: true,
       show_terms_section: true,
-      show_notes: true
+      show_notes: true,
+      show_watermark: false,
+      watermark_text: "",
+      watermark_opacity: 12
     }
   end
 

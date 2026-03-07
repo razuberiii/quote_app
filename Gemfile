@@ -75,3 +75,5 @@ gem "wicked_pdf"
 # Excel export
 gem "axlsx"
 gem "axlsx_rails"
+
+gem "tailwindcss-rails", "~> 4.4"

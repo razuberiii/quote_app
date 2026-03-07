@@ -11,7 +11,7 @@ class QuoteShare < ApplicationRecord
     SecureRandom.hex(12)
   end
 
-  def track_view!(country: nil)
+  def track_view!(country: nil, ip: nil, user_agent: nil)
     now = Time.current
     first_view = false
     with_lock do
@@ -22,6 +22,8 @@ class QuoteShare < ApplicationRecord
 
       event = { "at" => now.utc.strftime("%Y-%m-%dT%H:%M:%SZ") }
       event["country"] = country if country.present?
+      event["ip"] = ip if ip.present?
+      event["ua"] = user_agent if user_agent.present?
       self.view_events = Array(view_events).last(199) + [ event ]
       save!(validate: false)
     end
@@ -31,7 +33,9 @@ class QuoteShare < ApplicationRecord
     current_status = quote.status.to_s
     current_status = "draft" if current_status == "pending"
     next_status =
-      if Quote::OPEN_STATUSES.include?(current_status) && quote.valid_until.present? && quote.valid_until < Date.current
+      if quote.status.to_s == "draft"
+        quote.status
+      elsif Quote::OPEN_STATUSES.include?(current_status) && quote.valid_until.present? && quote.valid_until < Date.current
         "expired"
       elsif first_view && Quote::AUTO_VIEW_STATUSES.include?(quote.status.to_s)
         "viewed"

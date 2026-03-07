@@ -1,413 +1,99 @@
-<h1>Customers</h1>
-
-<div class="search-section">
-  <%= form_with url: customers_path, method: :get, local: true do |f| %>
-    <%= f.hidden_field :kpi_period, value: @kpi_period %>
-    <div class="search-bar">
-      <%= f.text_field :query, placeholder: "Search by name, country, contact, or email...", value: @search_query %>
-      <%= f.submit "Search" %>
-      <% if @search_query.present? %>
-        <%= link_to "Clear", customers_path(kpi_period: @kpi_period), class: "btn btn-secondary" %>
+<section class="app-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1>Customers</h1>
+      <p>Manage account health, follow-up pressure, and commercial progress in one dense customer queue.</p>
+    </div>
+    <div class="app-page-header-actions">
+      <%= render "components/ui/button", href: new_customer_path, variant: :primary, class: "page-primary-cta" do %>
+        + New Customer
       <% end %>
     </div>
-  <% end %>
-</div>
+  </header>
 
-<div class="header-actions">
-  <%= link_to "+ New Customer", new_customer_path, class: "btn btn-primary" %>
-</div>
-
-<section class="sales-dashboard">
-  <div class="sales-dashboard-toolbar">
-    <div class="kpi-period-toggle" role="tablist" aria-label="KPI period">
-      <%= link_to "Weekly", customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: "week"), class: "quote-filter-pill #{'active' if @kpi_period == 'week'}" %>
-      <%= link_to "Monthly", customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: "month"), class: "quote-filter-pill #{'active' if @kpi_period == 'month'}" %>
-    </div>
-    <button type="button" class="btn btn-secondary sales-dashboard-toggle" data-dashboard-toggle aria-expanded="true">
-      Hide Dashboard
-    </button>
-  </div>
-
-  <div class="sales-dashboard-summary" data-dashboard-summary hidden>
-    <span>Open Deals: <strong><%= @dashboard_stats[:open_deals][:value] %></strong></span>
-    <span>Quotes This <%= @kpi_period == "month" ? "Month" : "Week" %>: <strong><%= @dashboard_stats[:quotes_this_week][:value] %></strong></span>
-    <span>Pending Follow-ups: <strong><%= @dashboard_stats[:pending_follow_ups][:value] %></strong></span>
-  </div>
-
-  <div class="sales-dashboard-content" data-dashboard-content>
-    <div class="dashboard-alert-strip">
-      <% if @risk_snapshot[:overdue].positive? %>
-        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:overdue] %></strong> overdue follow-up(s)</span>
-      <% end %>
-      <% if @risk_snapshot[:due_today].positive? %>
-        <span class="dashboard-alert-pill is-today"><strong><%= @risk_snapshot[:due_today] %></strong> due today</span>
-      <% end %>
-      <% if @risk_snapshot[:stalled_high_value].positive? %>
-        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:stalled_high_value] %></strong> high-value stalled</span>
-      <% end %>
-      <% if @decision_snapshot[:accepted_count].positive? %>
-        <span class="dashboard-alert-pill is-good"><strong><%= @decision_snapshot[:accepted_count] %></strong> accepted</span>
-      <% end %>
-      <% if @decision_snapshot[:revision_requested_count].positive? %>
-        <span class="dashboard-alert-pill is-watch"><strong><%= @decision_snapshot[:revision_requested_count] %></strong> revision request(s)</span>
-      <% end %>
-      <% if @decision_snapshot[:negotiating_stale_count].positive? %>
-        <span class="dashboard-alert-pill is-danger"><strong><%= @decision_snapshot[:negotiating_stale_count] %></strong> negotiating 7d+</span>
-      <% end %>
-      <% if @risk_snapshot.values.all?(&:zero?) && @decision_snapshot[:negotiating_stale_count].zero? %>
-        <span class="dashboard-alert-pill is-good">No immediate risk signals.</span>
-      <% end %>
-    </div>
-
-    <article class="dashboard-panel dashboard-action-summary">
-      <div class="dashboard-action-summary-head">
-        <h2>Action Required (<%= @action_required_summary[:total] %>)</h2>
-        <% if @action_required_summary[:has_risk] %>
-          <% risk_text_parts = [] %>
-          <% risk_text_parts << "#{@action_required_summary[:risk_customers]} risk customer(s)" if @action_required_summary[:risk_customers].positive? %>
-          <% risk_text_parts << "#{@action_required_summary[:decision_alerts]} stalled negotiation(s)" if @action_required_summary[:decision_alerts].positive? %>
-          <span class="dashboard-alert-pill is-danger dashboard-action-summary-risk"><%= risk_text_parts.join(" • ") %></span>
-        <% else %>
-          <span class="dashboard-alert-pill is-good dashboard-action-summary-risk">No immediate customer or decision risk</span>
-        <% end %>
-      </div>
-      <p class="dashboard-action-summary-note">
-        Handle overdue and stalled accounts first.
-      </p>
-    </article>
-
-    <article class="dashboard-panel dashboard-decision-snapshot">
-      <div class="dashboard-action-summary-head">
-        <h2>Decision Snapshot</h2>
-        <span class="dashboard-decision-period"><%= @kpi_period == "month" ? "This month" : "This week" %></span>
-      </div>
-      <div class="dashboard-decision-flow">
-        <div class="dashboard-decision-column">
-          <h3>Outcome Signals</h3>
-          <div class="dashboard-decision-metrics">
-            <p class="dashboard-decision-metric">
-              <span>Accepted</span>
-              <strong><%= @decision_snapshot[:accepted_count] %></strong>
-            </p>
-            <p class="dashboard-decision-metric">
-              <span>Revision Requested</span>
-              <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
-            </p>
+  <div class="app-section-stack">
+    <section class="app-toolbar-surface">
+      <%= form_with url: customers_path, method: :get, local: true do |f| %>
+        <%= f.hidden_field :kpi_period, value: @kpi_period %>
+        <div class="app-search-row">
+          <div class="app-search-field app-search-field-wide">
+            <span class="app-search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="app-search-icon-svg" viewBox="0 0 24 24" fill="none">
+                <path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </span>
+            <%= f.text_field :query,
+                             placeholder: "Search customers...",
+                             value: @search_query,
+                             class: "#{ui_input_classes} app-search-input" %>
           </div>
-        </div>
-        <div class="dashboard-decision-column">
-          <h3>Pressure Signals</h3>
-          <div class="dashboard-decision-metrics">
-            <p class="dashboard-decision-metric">
-              <span>Reopened</span>
-              <strong><%= @decision_snapshot[:reopened_count] %></strong>
-            </p>
-            <p class="dashboard-decision-metric">
-              <span>Negotiating 7d+</span>
-              <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
-            </p>
-          </div>
-        </div>
-        <div class="dashboard-decision-column dashboard-decision-column-attention">
-          <h3>Attention Signal</h3>
-          <div class="dashboard-decision-waiting">
-            <p>
-              <span>Public Actionable</span>
-              <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
-            </p>
-            <small>Awaiting client decision</small>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <div class="dashboard-kpi-row">
-    <article class="dashboard-kpi-card">
-      <div class="dashboard-kpi-head">
-        <span class="dashboard-kpi-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M7 8h10M7 12h6m-6 4h8M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </span>
-        <span>Open Deals</span>
-      </div>
-      <strong><%= @dashboard_stats[:open_deals][:value] %></strong>
-      <small class="dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
-      <span class="dashboard-kpi-health <%= @dashboard_stats[:open_deals][:health_class] %>"><%= @dashboard_stats[:open_deals][:health_label] %></span>
-    </article>
-    <article class="dashboard-kpi-card">
-      <div class="dashboard-kpi-head">
-        <span class="dashboard-kpi-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </span>
-        <span>Quotes This <%= @kpi_period == "month" ? "Month" : "Week" %></span>
-      </div>
-      <strong><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
-      <small class="dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
-      <span class="dashboard-kpi-health <%= @dashboard_stats[:quotes_this_week][:health_class] %>"><%= @dashboard_stats[:quotes_this_week][:health_label] %></span>
-    </article>
-    <article class="dashboard-kpi-card">
-      <div class="dashboard-kpi-head">
-        <span class="dashboard-kpi-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2m5-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-        </span>
-        <span>Pending Follow-ups</span>
-      </div>
-      <strong><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
-      <small class="dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
-      <span class="dashboard-kpi-health <%= @dashboard_stats[:pending_follow_ups][:health_class] %>"><%= @dashboard_stats[:pending_follow_ups][:health_label] %></span>
-    </article>
-    </div>
-
-    <article class="dashboard-panel dashboard-action-center">
-      <h2>Today Focus</h2>
-      <% if @primary_action.present? %>
-        <div class="dashboard-action-list">
-            <div class="dashboard-action-item dashboard-action-item-primary is-<%= @primary_action[:priority] %>">
-              <div>
-                <span class="dashboard-action-primary-label">Top Priority</span>
-                <strong><%= @primary_action[:title] %></strong>
-                <p><%= @primary_action[:detail] %></p>
-              </div>
-              <%= link_to @primary_action[:cta_label], @primary_action[:cta_path], class: "btn btn-secondary dashboard-action-link" %>
-            </div>
-          <% if @secondary_actions.any? %>
-            <div class="dashboard-action-more" data-action-more hidden>
-              <% @secondary_actions.each do |item| %>
-                <div class="dashboard-action-item is-<%= item[:priority] %>">
-                  <div>
-                    <span class="dashboard-action-secondary-label">Secondary</span>
-                    <strong><%= item[:title] %></strong>
-                    <p><%= item[:detail] %></p>
-                  </div>
-                  <%= link_to item[:cta_label], item[:cta_path], class: "btn btn-secondary dashboard-action-link" %>
-                </div>
-              <% end %>
-            </div>
-            <button
-              type="button"
-              class="btn btn-secondary dashboard-action-toggle"
-              data-action-toggle
-              data-expanded="false"
-              data-action-count="<%= @secondary_actions.size %>"
-            >
-              Show more (<%= @secondary_actions.size %>)
-            </button>
+          <% if @search_query.present? %>
+            <%= link_to "Clear", customers_path(kpi_period: @kpi_period), class: "app-search-clear" %>
           <% end %>
         </div>
-      <% else %>
-        <p class="team-members-hint">No high-priority actions today.</p>
       <% end %>
-    </article>
+      <div class="app-filter-stack">
+      <div class="app-filter-row">
+    <%= link_to "All Customers", customers_path(query: @search_query, list_filter: "all", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'all' ? 'is-active' : ''}" %>
+    <% next_high_value_filter = @list_filter == "high_value" ? "all" : "high_value" %>
+    <% next_at_risk_filter = @list_filter == "at_risk" ? "all" : "at_risk" %>
+    <%= link_to "High Value", customers_path(query: @search_query, list_filter: next_high_value_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'high_value' ? 'is-active' : ''}" %>
+    <%= link_to "At Risk", customers_path(query: @search_query, list_filter: next_at_risk_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'at_risk' ? 'is-active' : ''}" %>
+    <% if @follow_up_filter != "all" %>
+      <%= link_to "Clear Follow-up Filter", customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "all", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill" %>
+    <% end %>
+      </div>
 
-    <div class="dashboard-detail-grid">
-      <article class="dashboard-panel">
-        <h2>Recent Quotes</h2>
-        <p class="dashboard-panel-note">Showing 6 most recent, sorted by urgency.</p>
-        <div class="table-responsive">
-          <table class="dashboard-recent-table">
-            <thead>
-              <tr>
-                <th>Quote</th>
-                <th>Buyer</th>
-                <th>Status</th>
-                <th>Engagement</th>
-                <th>Next Move</th>
-                <th class="text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if @recent_quotes.any? %>
-                <% @recent_quotes.each do |entry| %>
-                  <% is_draft_unsent = entry[:status] == "draft" && entry[:view_signal] == "Draft unsent" %>
-                  <tr>
-                    <td data-label="Quote">
-                      <strong><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
-                      <% if entry[:display_name].present? %>
-                        <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
-                      <% end %>
-                    </td>
-                    <td data-label="Buyer"><%= entry[:customer_name] %></td>
-                    <td data-label="Status">
-                      <span class="status-badge status-<%= entry[:status] %>"><%= is_draft_unsent ? "Draft (unsent)" : entry[:status].capitalize %></span>
-                    </td>
-                    <td data-label="Engagement">
-                      <span class="dashboard-engagement-pill <%= is_draft_unsent ? "is-subtle" : "" %>"><%= is_draft_unsent ? "—" : entry[:view_signal] %></span>
-                    </td>
-                    <td data-label="Next Move"><%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %></td>
-                    <td data-label="Total" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
-                  </tr>
-                <% end %>
-              <% else %>
-                <tr>
-                  <td data-label="Recent Quotes" colspan="6" class="customers-empty-row">No quotes available yet.</td>
-                </tr>
-              <% end %>
-            </tbody>
-          </table>
+      <div class="follow-up-summary">
+    <% next_today_filter = @follow_up_filter == "today" ? "all" : "today" %>
+    <% next_upcoming_filter = @follow_up_filter == "upcoming" ? "all" : "upcoming" %>
+    <% next_overdue_filter = @follow_up_filter == "overdue" ? "all" : "overdue" %>
+    <% next_no_schedule_filter = @follow_up_filter == "no_schedule" ? "all" : "no_schedule" %>
+    <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_today_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-today #{'active' if @follow_up_filter == 'today'}" do %>
+      <span class="summary-label-wrap">
+        <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3v4m8-4v4M4 11h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="summary-label">Today</span>
+      </span>
+      <strong><%= @follow_up_counts[:today] %></strong>
+    <% end %>
+    <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_upcoming_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-upcoming #{'active' if @follow_up_filter == 'upcoming'}" do %>
+      <span class="summary-label-wrap">
+        <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6m-6 18h6M8 3v3l4 3 4-3V3m-8 18v-3l4-3 4 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="summary-label">Soon (7 days)</span>
+      </span>
+      <strong><%= @follow_up_counts[:upcoming] %></strong>
+    <% end %>
+    <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_overdue_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-overdue #{'active' if @follow_up_filter == 'overdue'}" do %>
+      <span class="summary-label-wrap">
+        <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.8 16.6a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="summary-label">Overdue</span>
+      </span>
+      <strong><%= @follow_up_counts[:overdue] %></strong>
+    <% end %>
+    <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_no_schedule_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-normal #{'active' if @follow_up_filter == 'no_schedule'}" do %>
+      <span class="summary-label-wrap">
+        <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+        <span class="summary-label">No schedule</span>
+      </span>
+      <strong><%= @follow_up_counts[:no_schedule] %></strong>
+    <% end %>
+      </div>
+    </section>
+
+    <section class="app-listing-shell">
+      <div class="app-section-heading">
+        <div>
+          <h2>Accounts</h2>
+          <p class="app-section-caption">Sorted commercial accounts with follow-up pressure, value, and next action in one view.</p>
         </div>
-      </article>
+      </div>
 
-      <article class="dashboard-panel">
-        <h2>Deal Overview</h2>
-        <ul class="dashboard-overview-list">
-          <li>
-            <div class="dashboard-overview-label-row">
-              <span>Top Product</span>
-              <small>last 30 days • <%= @deal_overview[:top_product_sample_size] %> quotes</small>
-            </div>
-            <strong class="dashboard-overview-value"><%= @deal_overview[:top_product] %></strong>
-          </li>
-          <li>
-            <div class="dashboard-overview-label-row">
-              <span>Average Quote Cycle</span>
-              <small><%= @deal_overview[:closed_cycle_sample_size] %> closed deals</small>
-            </div>
-            <strong class="dashboard-overview-value"><%= @deal_overview[:average_quote_cycle_days] %> days</strong>
-            <p class="dashboard-overview-insight"><%= @deal_overview[:cycle_insight] %></p>
-          </li>
-          <li>
-            <div class="dashboard-overview-label-row">
-              <span>Revision Rate</span>
-              <small>active quotes</small>
-            </div>
-            <strong class="dashboard-overview-value"><%= @deal_overview[:revision_rate] %>%</strong>
-            <p class="dashboard-overview-insight"><%= @deal_overview[:revision_insight] %></p>
-          </li>
-          <li>
-            <div class="dashboard-overview-label-row">
-              <span>Document Mix</span>
-              <small>quotation vs PI</small>
-            </div>
-            <strong class="dashboard-overview-value"><%= @deal_overview[:export_mix] %></strong>
-            <p class="dashboard-overview-insight"><%= @deal_overview[:decision_insight] %></p>
-          </li>
-        </ul>
-      </article>
-    </div>
-  </div>
-</section>
+      <% if @search_query.present? %>
+        <p class="search-info">Found <strong><%= @customers.count %></strong> customer(s) matching "<strong><%= @search_query %></strong>"</p>
+      <% end %>
 
-<script>
-  (() => {
-    const STORAGE_KEY = "customers_dashboard_collapsed";
-    const safeStorageGet = (key) => {
-      try {
-        return localStorage.getItem(key);
-      } catch (_) {
-        return null;
-      }
-    };
-
-    const safeStorageSet = (key, value) => {
-      try {
-        localStorage.setItem(key, value);
-      } catch (_) {
-        // Ignore storage errors (private mode / blocked storage).
-      }
-    };
-
-    const bindDashboardToggle = () => {
-      const toggle = document.querySelector("[data-dashboard-toggle]");
-      const content = document.querySelector("[data-dashboard-content]");
-      const summary = document.querySelector("[data-dashboard-summary]");
-      if (!toggle || !content || !summary || toggle.dataset.bound === "true") return;
-      toggle.dataset.bound = "true";
-
-      const applyState = (collapsed) => {
-        content.hidden = collapsed;
-        summary.hidden = !collapsed;
-        toggle.textContent = collapsed ? "Show Dashboard" : "Hide Dashboard";
-        toggle.setAttribute("aria-expanded", String(!collapsed));
-      };
-
-      const initialCollapsed = safeStorageGet(STORAGE_KEY) === "true";
-      applyState(initialCollapsed);
-
-      toggle.addEventListener("click", () => {
-        const collapsed = !content.hidden;
-        safeStorageSet(STORAGE_KEY, String(collapsed));
-        applyState(collapsed);
-      });
-    };
-
-    const bindActionToggle = () => {
-      const toggle = document.querySelector("[data-action-toggle]");
-      const extra = document.querySelector("[data-action-more]");
-      if (!toggle || !extra || toggle.dataset.bound === "true") return;
-      toggle.dataset.bound = "true";
-
-      const count = Number(toggle.dataset.actionCount || 0);
-      const applyState = (expanded) => {
-        extra.hidden = !expanded;
-        toggle.dataset.expanded = expanded ? "true" : "false";
-        toggle.textContent = expanded ? "Show less" : `Show more (${count})`;
-      };
-
-      applyState(false);
-
-      toggle.addEventListener("click", () => {
-        applyState(toggle.dataset.expanded !== "true");
-      });
-    };
-
-    bindDashboardToggle();
-    bindActionToggle();
-    document.addEventListener("turbo:load", bindDashboardToggle);
-    document.addEventListener("turbo:load", bindActionToggle);
-  })();
-</script>
-
-<div class="customer-list-filters">
-  <%= link_to "All Customers", customers_path(query: @search_query, list_filter: "all", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'all'}" %>
-  <% next_high_value_filter = @list_filter == "high_value" ? "all" : "high_value" %>
-  <% next_at_risk_filter = @list_filter == "at_risk" ? "all" : "at_risk" %>
-  <%= link_to "High Value", customers_path(query: @search_query, list_filter: next_high_value_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'high_value'}" %>
-  <%= link_to "At Risk", customers_path(query: @search_query, list_filter: next_at_risk_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill #{'active' if @list_filter == 'at_risk'}" %>
-  <% if @follow_up_filter != "all" %>
-    <%= link_to "Clear Follow-up Filter", customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "all", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "quote-filter-pill" %>
-  <% end %>
-</div>
-
-<div class="follow-up-summary">
-  <% next_today_filter = @follow_up_filter == "today" ? "all" : "today" %>
-  <% next_upcoming_filter = @follow_up_filter == "upcoming" ? "all" : "upcoming" %>
-  <% next_overdue_filter = @follow_up_filter == "overdue" ? "all" : "overdue" %>
-  <% next_no_schedule_filter = @follow_up_filter == "no_schedule" ? "all" : "no_schedule" %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_today_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-today #{'active' if @follow_up_filter == 'today'}" do %>
-    <span class="summary-label-wrap">
-      <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 3v4m8-4v4M4 11h16M5 5h14a1 1 0 0 1 1 1v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-      <span class="summary-label">Today</span>
-    </span>
-    <strong><%= @follow_up_counts[:today] %></strong>
-  <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_upcoming_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-upcoming #{'active' if @follow_up_filter == 'upcoming'}" do %>
-    <span class="summary-label-wrap">
-      <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M9 3h6m-6 18h6M8 3v3l4 3 4-3V3m-8 18v-3l4-3 4 3v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-      <span class="summary-label">Soon (7 days)</span>
-    </span>
-    <strong><%= @follow_up_counts[:upcoming] %></strong>
-  <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_overdue_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-overdue #{'active' if @follow_up_filter == 'overdue'}" do %>
-    <span class="summary-label-wrap">
-      <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 9v4m0 4h.01M10.3 3.9 2.8 16.6a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-      <span class="summary-label">Overdue</span>
-    </span>
-    <strong><%= @follow_up_counts[:overdue] %></strong>
-  <% end %>
-  <%= link_to customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: next_no_schedule_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "summary-card summary-normal #{'active' if @follow_up_filter == 'no_schedule'}" do %>
-    <span class="summary-label-wrap">
-      <span class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M8 7h8M8 12h8M8 17h5M5 4h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
-      <span class="summary-label">No schedule</span>
-    </span>
-    <strong><%= @follow_up_counts[:no_schedule] %></strong>
-  <% end %>
-</div>
-
-<% if @search_query.present? %>
-  <p class="search-info">Found <strong><%= @customers.count %></strong> customer(s) matching "<strong><%= @search_query %></strong>"</p>
-<% end %>
-
-<div class="table-responsive customers-table-desktop">
-  <table class="customers-table">
+      <div class="table-responsive customers-table-desktop">
+        <%= render "components/ui/table", class: "customers-table saas-table app-table-surface", table_class: "customers-table saas-table app-data-table" do %>
     <thead>
       <tr>
         <th>Name</th>
@@ -428,7 +114,7 @@
         <% @customers.each do |customer| %>
           <% metrics = @customer_metrics.fetch(customer) %>
           <% row_signal = @customer_row_signals.fetch(customer.id) %>
-          <% tag_names = customer.customer_tags.map(&:name).sort %>
+          <% tag_names = customer.ordered_tag_names %>
           <% visible_tags = tag_names.first(2) %>
           <% hidden_tags_count = [tag_names.size - visible_tags.size, 0].max %>
           <tr
@@ -449,7 +135,14 @@
                 <div class="customer-list-name-meta">
                   <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
                   <% if tag_names.any? %>
-                    <span class="customer-list-tags">(<%= visible_tags.join(", ") %><%= ", +#{hidden_tags_count}" if hidden_tags_count.positive? %>)</span>
+                    <span class="customer-list-tag-row">
+                      <% visible_tags.each do |tag| %>
+                        <span class="customer-list-tag-chip"><%= tag %></span>
+                      <% end %>
+                      <% if hidden_tags_count.positive? %>
+                        <span class="customer-list-tag-chip is-more">+<%= hidden_tags_count %></span>
+                      <% end %>
+                    </span>
                   <% end %>
                 </div>
               </div>
@@ -457,17 +150,17 @@
             <td data-label="Country"><%= customer.country %></td>
             <td data-label="Contact"><%= customer.contact_name %></td>
             <td data-label="Email"><%= customer.email %></td>
-            <td data-label="Status"><span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span></td>
-            <td data-label="Total Quote Amount" class="text-right"><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
-            <td data-label="Total Won Amount" class="text-right"><strong><%= number_to_currency(metrics[:total_won_amount]) %></strong></td>
+            <td data-label="Status"><%= customer_status_badge(customer) %></td>
+            <td data-label="Total Quote Amount" class="text-right customer-money-cell"><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
+            <td data-label="Total Won Amount" class="text-right customer-money-cell"><strong><%= number_to_currency(metrics[:total_won_amount]) %></strong></td>
             <td data-label="Win Rate" class="text-right">
               <strong><%= metrics[:win_rate] %>%</strong>
               <div class="mini-progress" role="img" aria-label="Win rate progress">
                 <div class="mini-progress-fill" style="width: <%= [metrics[:win_rate].to_f.round, 100].min %>%"></div>
               </div>
             </td>
-            <td data-label="Last Follow-up"><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></td>
-            <td data-label="Next Follow-up">
+            <td data-label="Last Follow-up" class="customer-date-cell"><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></td>
+            <td data-label="Next Follow-up" class="customer-date-cell">
               <%= customer.next_follow_up_date&.strftime('%Y-%m-%d') || "—" %>
               <% if customer.follow_up_overdue? %>
                 <span class="overdue-badge">OVERDUE</span>
@@ -478,7 +171,10 @@
               <% end %>
             </td>
             <td data-label="Next Action">
-              <span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span>
+              <div class="customer-list-next-action">
+                <span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span>
+                <small><%= row_signal[:reason] %></small>
+              </div>
             </td>
           </tr>
         <% end %>
@@ -486,23 +182,33 @@
         <tr>
           <td colspan="11" class="customers-empty-row">
             <% if @has_any_customers %>
-              No customers in this filter.
+              <%= ui_empty_state(
+                    title: "No customers in this view",
+                    body: "Try a different filter or search term to surface the accounts you need.",
+                    icon: :customers
+                  ) %>
             <% else %>
-              No customers yet. <%= link_to "Create one", new_customer_path %>
+              <%= ui_empty_state(
+                    title: "No customers yet",
+                    body: "Create your first customer to start tracking follow-ups, quotes, and account momentum.",
+                    action_label: "Create Customer",
+                    action_path: new_customer_path,
+                    icon: :customers
+                  ) %>
             <% end %>
           </td>
         </tr>
       <% end %>
     </tbody>
-  </table>
-</div>
+        <% end %>
+      </div>
 
-<div class="customers-mobile-list">
+      <div class="customers-mobile-list">
   <% if @customers.any? %>
     <% @customers.each do |customer| %>
       <% metrics = @customer_metrics.fetch(customer) %>
       <% row_signal = @customer_row_signals.fetch(customer.id) %>
-      <% tag_names = customer.customer_tags.map(&:name).sort %>
+      <% tag_names = customer.ordered_tag_names %>
       <% visible_tags = tag_names.first(2) %>
       <% hidden_tags_count = [tag_names.size - visible_tags.size, 0].max %>
       <article
@@ -524,11 +230,18 @@
               <div class="customer-list-name-meta">
                 <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
                 <% if tag_names.any? %>
-                  <span class="customer-list-tags">(<%= visible_tags.join(", ") %><%= ", +#{hidden_tags_count}" if hidden_tags_count.positive? %>)</span>
+                  <span class="customer-list-tag-row">
+                    <% visible_tags.each do |tag| %>
+                      <span class="customer-list-tag-chip"><%= tag %></span>
+                    <% end %>
+                    <% if hidden_tags_count.positive? %>
+                      <span class="customer-list-tag-chip is-more">+<%= hidden_tags_count %></span>
+                    <% end %>
+                  </span>
                 <% end %>
               </div>
             </div>
-            <span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span>
+            <%= customer_status_badge(customer) %>
           </div>
           <div class="customer-mobile-next">
             <span class="customer-mobile-next-label">Next Follow-up</span>
@@ -546,11 +259,11 @@
         <div class="customer-mobile-metrics">
           <div class="customer-mobile-metric">
             <span>Total Quote</span>
-            <strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong>
+            <strong class="customer-money-cell"><%= number_to_currency(metrics[:total_quote_amount]) %></strong>
           </div>
           <div class="customer-mobile-metric">
             <span>Total Won</span>
-            <strong><%= number_to_currency(metrics[:total_won_amount]) %></strong>
+            <strong class="customer-money-cell"><%= number_to_currency(metrics[:total_won_amount]) %></strong>
           </div>
           <div class="customer-mobile-metric">
             <span>Win Rate</span>
@@ -563,6 +276,7 @@
           <div class="customer-mobile-metric">
             <span>Next Action</span>
             <strong><span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span></strong>
+            <small class="customer-mobile-signal-reason"><%= row_signal[:reason] %></small>
           </div>
         </div>
 
@@ -588,10 +302,23 @@
   <% else %>
     <div class="customers-empty-row">
       <% if @has_any_customers %>
-        No customers in this filter.
+        <%= ui_empty_state(
+              title: "No customers in this view",
+              body: "Try a different filter or search term to surface the accounts you need.",
+              icon: :customers
+            ) %>
       <% else %>
-        No customers yet. <%= link_to "Create one", new_customer_path %>
+        <%= ui_empty_state(
+              title: "No customers yet",
+              body: "Create your first customer to start tracking follow-ups, quotes, and account momentum.",
+              action_label: "Create Customer",
+              action_path: new_customer_path,
+              icon: :customers
+            ) %>
       <% end %>
     </div>
   <% end %>
-</div>
+      </div>
+    </section>
+  </div>
+</section>

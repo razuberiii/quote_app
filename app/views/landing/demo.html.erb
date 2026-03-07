@@ -4,8 +4,16 @@
 
 <section class="marketing-section demo-page">
   <div class="marketing-section-head">
-    <h1>Rubusoo Demo Workspace</h1>
-    <p>See how a sales team moves from quote creation to follow-up to close in one focused workspace.</p>
+    <p class="marketing-kicker">DEMO WORKSPACE</p>
+    <h1>See the quote workflow in product form</h1>
+    <p>Not a slideshow. A simplified view of the kind of queue, signals, and quote context Rubusoo is built to organize.</p>
+    <p class="demo-note">All names and numbers on this page are fictional examples for product presentation.</p>
+  </div>
+
+  <div class="marketing-proof-strip">
+    <span>Quote queue visibility</span>
+    <span>Revision-aware workflow</span>
+    <span>Buyer-ready output</span>
   </div>
 
   <div class="demo-toolbar">
@@ -16,7 +24,13 @@
 
   <div class="demo-layout">
     <article class="demo-card">
-      <h2>Recent Quotes</h2>
+      <div class="demo-card-head">
+        <div>
+          <span class="demo-card-kicker">Queue</span>
+          <h2>Recent Quotes</h2>
+        </div>
+        <span class="demo-card-meta">Sorted by urgency</span>
+      </div>
       <table class="demo-table">
         <thead>
           <tr>
@@ -27,16 +41,22 @@
           </tr>
         </thead>
         <tbody>
-          <tr><td>QT-2026-118</td><td>Pacific Trading Group</td><td>Pending</td><td>USD 2,400.00</td></tr>
-          <tr><td>QT-2026-116</td><td>Nordic Process Systems</td><td>Revised</td><td>USD 18,750.00</td></tr>
-          <tr><td>QT-2026-115</td><td>Harbor Marine Equipment</td><td>Won</td><td>USD 9,120.00</td></tr>
-          <tr><td>QT-2026-113</td><td>Summit Fluid Controls</td><td>Pending</td><td>USD 6,840.00</td></tr>
+          <tr><td>QX-2026-118</td><td>Northforge Supply</td><td>Pending</td><td>USD 2,400.00</td></tr>
+          <tr><td>QX-2026-116</td><td>Red Mesa Imports</td><td>Revised</td><td>USD 18,750.00</td></tr>
+          <tr><td>QX-2026-115</td><td>Polar Gate Systems</td><td>Won</td><td>USD 9,120.00</td></tr>
+          <tr><td>QX-2026-113</td><td>Blue Current Motion</td><td>Pending</td><td>USD 6,840.00</td></tr>
         </tbody>
       </table>
     </article>
 
-    <article class="demo-card">
-      <h2>Deal Overview</h2>
+    <article class="demo-card demo-card-dark">
+      <div class="demo-card-head">
+        <div>
+          <span class="demo-card-kicker">Signals</span>
+          <h2>Deal Overview</h2>
+        </div>
+        <span class="demo-card-meta">One account workspace</span>
+      </div>
       <ul class="demo-list">
         <li><strong>Top Product:</strong> Hydraulic Pump HZ-240</li>
         <li><strong>Average Quote Cycle:</strong> 3.8 days</li>
@@ -44,8 +64,8 @@
         <li><strong>Export Mix:</strong> 62% PI / 38% Quotation</li>
       </ul>
       <div class="demo-actions">
-        <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary" %>
-        <%= link_to "Open Sample Quote", sample_quote_path, class: "btn btn-secondary", target: "_blank" %>
+        <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
+        <%= link_to "Open Sample Quote", sample_quote_path, class: "btn btn-secondary marketing-cta-secondary", target: "_blank" %>
       </div>
     </article>
   </div>

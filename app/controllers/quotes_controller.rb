@@ -2,15 +2,15 @@ class QuotesController < ApplicationController
   require "base64"
 
   before_action :set_customer, only: %i[new create]
-  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share update_template reopen]
-  before_action :set_template, only: %i[show export_pdf export_xlsx share update_template]
+  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive]
+  before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template]
   before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
   before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
-  helper_method :quote_item_image_data_uri, :quote_logo_data_uri
+  helper_method :quote_item_image_data_uri, :quote_logo_data_uri, :quote_watermark_data_uri
 
   def index
     @customer = current_user.company.customers.find(params[:customer_id])
-    @quotes = @customer.quotes.latest_versions
+    @quotes = @customer.quotes.not_archived.latest_versions
     redirect_to @customer
   end
 
@@ -39,6 +39,10 @@ class QuotesController < ApplicationController
 
   def show
     @document_kind = resolved_document_kind
+    set_superseded_context
+    set_revision_compare_context
+    set_decision_review_context
+    set_decision_timeline_context
   end
 
   def edit
@@ -95,8 +99,33 @@ class QuotesController < ApplicationController
   end
 
   def destroy
-    @quote.destroy
-    redirect_to @quote.customer
+    unless @quote.can_delete_quote_family?
+      redirect_to quote_path(@quote), alert: "Only the latest active revision can delete the whole quote thread." and return
+    end
+
+    deletion_time = Time.current
+    family_scope = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no)
+    affected_product_ids = family_scope.joins(:quote_items).where.not(quote_items: { product_id: nil }).distinct.pluck("quote_items.product_id")
+    family_scope.update_all(status: "expired", deleted_at: deletion_time, updated_at: deletion_time)
+    current_user.company.quote_shares.where(quote_id: family_scope.select(:id)).update_all(expires_at: deletion_time, updated_at: deletion_time)
+    ProductIntelligenceRefresher.refresh_products(affected_product_ids)
+
+    redirect_to @quote.customer, notice: "Quote thread #{@quote.quote_no} deleted. Public links now show as expired."
+  end
+
+  def archive
+    unless Quote.column_names.include?("archived_at")
+      redirect_to quote_path(@quote), alert: "Archive feature is not ready. Please run database migrations on the server." and return
+    end
+
+    unless @quote.can_archive_revision?
+      redirect_to quote_path(@quote), alert: "Only non-latest revisions can be archived." and return
+    end
+
+    @quote.update!(archived_at: Time.current)
+    latest = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no).order(revision_number: :desc).first
+    redirect_target = latest || @quote.customer
+    redirect_to redirect_target, notice: "Revision V#{@quote.revision_number} archived from history."
   end
 
   def export_pdf
@@ -114,7 +143,7 @@ class QuotesController < ApplicationController
     pdf_binary = nil
     pdf_client = wicked_pdf_client
 
-    if pdf_client && wkhtmltopdf_available?
+    if use_wicked_pdf_renderer?(pdf_client)
       html = render_to_string(
         template: "quotes/export_pdf",
         formats: [ :html ],
@@ -196,34 +225,15 @@ class QuotesController < ApplicationController
       redirect_to quote_path(@quote), alert: "Sharing is disabled for the current quote state." and return
     end
 
-    token = QuoteShare.generate_token
-    snapshot = @quote.as_json
-    snapshot["customer_name"] = @quote.customer.name
-    snapshot["customer_contact_name"] = @quote.customer.contact_name
-    snapshot["customer_address"] = @quote.customer.address
-    snapshot["customer_phone"] = @quote.customer.phone
-    snapshot["customer_email"] = @quote.customer.email
-    if Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-"
-      snapshot["sales_owner_name"] = @quote.customer.internal_owner_display_name
-      snapshot["customer_owner_name"] = @quote.customer.internal_owner_display_name
-    end
-    snapshot["trade_term"] = @quote.trade_term
-    snapshot["spec_label"] = @quote.resolved_spec_label
-    snapshot["addon_label"] = @quote.resolved_addon_label
-    snapshot["custom_title"] = @quote.custom_title
-    snapshot["accepted_at"] = @quote.accepted_at
-    snapshot["changes_requested_at"] = @quote.changes_requested_at
-    snapshot["quote_items"] = @quote.quote_items.map { |item| build_quote_item_snapshot(item) }
-
-    current_user.company.quote_shares.create!(quote: @quote, token: token, snapshot: snapshot)
-    quote_status = @quote.status.to_s
-    next_status = Quote::AUTO_VIEW_STATUSES.include?(quote_status) || quote_status.blank? ? "sent" : quote_status
-    @quote.update_columns(sent_at: @quote.sent_at || Time.current, status: next_status)
-
-    share_url = public_quote_share_url(token, doc: resolved_document_kind)
+    publish_result = QuoteSharePublisher.new(
+      @quote,
+      document_kind: resolved_document_kind,
+      url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
+    ).call
+    share_url = publish_result.url
 
     respond_to do |format|
-      format.json { render json: { url: share_url, token: token } }
+      format.json { render json: { url: share_url, token: publish_result.share.token } }
       format.html { redirect_to share_url }
     end
   rescue ActiveRecord::RecordInvalid => e
@@ -240,26 +250,44 @@ class QuotesController < ApplicationController
     end
   end
 
+  def send_reminder
+    unless @quote.can_send_reminder?
+      redirect_to quote_path(@quote), alert: "Reminder is not available for this quote." and return
+    end
+
+    unless verify_turnstile_for_html!(
+      token: params[:cf_turnstile_response],
+      on_missing: -> { redirect_to quote_path(@quote), alert: "Please complete verification before sending a reminder." },
+      on_failed: -> { redirect_to quote_path(@quote), alert: "Verification failed. Please try again." }
+    )
+      return
+    end
+
+    QuoteReminderSender.new(
+      @quote,
+      document_kind: resolved_document_kind,
+      url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
+    ).call
+    redirect_to quote_path(@quote), notice: "Reminder email sent. Next reminder will be available in 12 hours unless the quote gets viewed first."
+  rescue StandardError => e
+    Rails.logger.error("Quote reminder failed: #{e.class} #{e.message}")
+    redirect_to quote_path(@quote), alert: "Unable to send reminder right now."
+  end
+
   def reopen
     unless @quote.can_reopen?
       redirect_to quote_path(@quote), alert: "Reopen is not available for the current quote state." and return
     end
 
-    next_status = if @quote.viewed_at.present? || @quote.quote_shares.sum(:view_count).positive?
-      "viewed"
-    else
-      "sent"
-    end
-
     @quote.update_columns(
-      status: next_status,
+      status: "draft",
       accepted_at: nil,
       changes_requested_at: nil,
       changes_request_message: nil,
       reopened_at: Time.current,
       updated_at: Time.current
     )
-    redirect_to quote_path(@quote), notice: "Quotation reopened at #{@quote.reopened_at&.strftime('%Y-%m-%d %H:%M')}."
+    redirect_to quote_path(@quote), notice: "Quote reopened for editing."
   end
 
   private
@@ -270,7 +298,7 @@ class QuotesController < ApplicationController
 
   def set_quote
     Quote.expire_overdue_for_company!(current_user.company_id)
-    @quote = current_user.company.quotes.includes({ quote_items: :product }, :customer, :template, :quote_shares).find(params[:id])
+    @quote = current_user.company.quotes.not_archived.includes({ quote_items: :product }, :customer, :template, :quote_shares).find(params[:id])
   end
 
   def quote_params
@@ -285,7 +313,9 @@ class QuotesController < ApplicationController
       :status,
       :negotiated,
       :final_amount,
+      :win_reason,
       :loss_reason,
+      :stalled_reason,
       :notes,
       :tax_amount,
       :shipping_amount,
@@ -352,18 +382,6 @@ class QuotesController < ApplicationController
     @template.document_kind == "proforma_invoice" ? "pi" : "quote"
   end
 
-  def build_quote_item_snapshot(item)
-    snapshot = item.as_json
-    snapshot["product_name"] = item.product&.name
-    snapshot["specifications"] = item.specification_pairs
-    snapshot["addon_charges"] = item.addon_charge_entries
-    product_image = item.product&.display_image
-    snapshot["product_image_path"] = if product_image.present?
-      Rails.application.routes.url_helpers.rails_blob_path(product_image, only_path: true)
-    end
-    snapshot
-  end
-
   def quote_item_image_data_uri(item)
     product_image = item.product&.display_image
     return nil if product_image.blank?
@@ -387,11 +405,31 @@ class QuotesController < ApplicationController
     nil
   end
 
+  def quote_watermark_data_uri
+    return nil unless @template.show_watermark
+    return nil unless @template.respond_to?(:watermark_image) && @template.watermark_image.attached?
+
+    blob = @template.watermark_image.blob
+    payload = blob.download
+    encoded = Base64.strict_encode64(payload)
+    "data:#{blob.content_type};base64,#{encoded}"
+  rescue StandardError
+    nil
+  end
+
   def wkhtmltopdf_available?
     exe_path = configured_wkhtmltopdf_path.to_s
     return false if exe_path.blank?
 
     File.exist?(exe_path)
+  end
+
+  def use_wicked_pdf_renderer?(pdf_client)
+    return false unless pdf_client
+    return false unless wkhtmltopdf_available?
+    return false if windows_platform?
+
+    true
   end
 
   def wicked_pdf_client
@@ -410,5 +448,158 @@ class QuotesController < ApplicationController
     return nil unless defined?(::WickedPdf) && ::WickedPdf.respond_to?(:config)
 
     ::WickedPdf.config[:exe_path]
+  end
+
+  def windows_platform?
+    RbConfig::CONFIG["host_os"].to_s.match?(/mswin|mingw|cygwin/i)
+  end
+
+  def set_superseded_context
+    latest = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no).order(revision_number: :desc).first
+    return if latest.blank? || latest.id == @quote.id
+
+    @has_newer_revision = true
+    @latest_revision_quote = latest
+  end
+
+  def set_revision_compare_context
+    @quote_revisions = current_user.company.quotes
+      .not_archived
+      .where(quote_no: @quote.quote_no)
+      .includes(:quote_items)
+      .order(revision_number: :desc)
+      .to_a
+
+    @previous_revision_quote = @quote_revisions
+      .select { |revision| revision.revision_number.to_i < @quote.revision_number.to_i }
+      .max_by { |revision| revision.revision_number.to_i }
+
+    return if @previous_revision_quote.blank?
+
+    @revision_diff = QuoteRevisionDiffService.new(
+      new_quote: @quote,
+      old_quote: @previous_revision_quote
+    ).call
+    @change_summary = QuoteChangeSummaryService.new(
+      diff: @revision_diff,
+      currency: @quote.currency
+    ).call
+  end
+
+  def set_decision_timeline_context
+    first_share_at = @quote.quote_shares.minimum(:created_at)
+    first_view_at = @quote.quote_shares.minimum(:first_viewed_at) || @quote.viewed_at
+    total_views = @quote.quote_shares.sum(&:view_count)
+    last_view_at = @quote.quote_shares.maximum(:last_viewed_at) || @quote.viewed_at
+
+    @quote_decision_recap = [
+      {
+        label: "Outcome",
+        value: decision_outcome_value,
+        detail: decision_outcome_detail
+      },
+      {
+        label: "Buyer Signal",
+        value: first_view_at.present? ? "Viewed" : "No view yet",
+        detail: buyer_signal_detail(first_view_at, last_view_at, total_views)
+      },
+      {
+        label: "Share Status",
+        value: first_share_at.present? ? "#{@quote.quote_shares.size} link#{'s' unless @quote.quote_shares.size == 1}" : "Not shared",
+        detail: first_share_at.present? ? "First shared #{format_in_user_time(first_share_at, current_user)}." : "Generate a public link to start engagement."
+      },
+      {
+        label: "Pressure",
+        value: pressure_value,
+        detail: pressure_detail
+      }
+    ]
+
+    @quote_decision_timeline = [
+      timeline_item(:created, @quote.issued_on&.to_time || @quote.created_at, "Created", "Quote version prepared."),
+      timeline_item(:shared, first_share_at, "Shared", "Public quote link generated and ready to send."),
+      timeline_item(:viewed, first_view_at, "Viewed", "Buyer opened the quote for the first time."),
+      timeline_item(:revision, @quote.changes_requested_at, "Revision Requested", revision_request_detail),
+      timeline_item(:reopened, @quote.reopened_at, "Reopened", "Quote moved back to draft for editing."),
+      timeline_item(:accepted, @quote.accepted_at, "Accepted", "Buyer confirmed the quote."),
+      timeline_item(:expired, expired_event_time, "Expired", "Validity window ended without closure.")
+    ].compact.sort_by { |item| item[:at] }
+  end
+
+  def set_decision_review_context
+    @quote_decision_review = QuoteDecisionReviewService.new(
+      quote: @quote,
+      revision_diff: @revision_diff
+    ).call
+  end
+
+  def timeline_item(kind, at, label, detail)
+    return nil if at.blank?
+
+    {
+      kind: kind,
+      at: at,
+      label: label,
+      detail: detail
+    }
+  end
+
+  def revision_request_detail
+    detail_parts = []
+    detail_parts << @quote.request_reason.to_s.humanize if @quote.request_reason.present?
+    detail_parts << @quote.changes_request_message if @quote.changes_request_message.present?
+    detail_parts.presence&.join(" • ") || "Buyer asked for an update."
+  end
+
+  def expired_event_time
+    return nil unless @quote.valid_until.present? && @quote.valid_until < Date.current
+
+    @quote.valid_until.to_time.end_of_day
+  end
+
+  def decision_outcome_value
+    return "Accepted" if @quote.accepted_at.present?
+    return "Revision Requested" if @quote.changes_requested_at.present?
+    return "Expired" if expired_event_time.present?
+    return "Reopened" if @quote.reopened_at.present?
+
+    @quote.workflow_state.to_s.humanize
+  end
+
+  def decision_outcome_detail
+    return "Buyer accepted this revision." if @quote.accepted_at.present?
+    return revision_request_detail if @quote.changes_requested_at.present?
+    return "Validity window closed without a decision." if expired_event_time.present?
+    return "Quote is back in draft for rework." if @quote.reopened_at.present?
+
+    "Waiting for buyer movement on this revision."
+  end
+
+  def buyer_signal_detail(first_view_at, last_view_at, total_views)
+    return "No buyer view recorded yet." if first_view_at.blank?
+
+    detail = "First seen #{format_in_user_time(first_view_at, current_user)}."
+    if total_views.to_i > 1 && last_view_at.present?
+      detail += " Last activity #{format_in_user_time(last_view_at, current_user)} (#{total_views} views)."
+    elsif total_views.to_i == 1
+      detail += " Single recorded view."
+    end
+    detail
+  end
+
+  def pressure_value
+    return "Expired" if expired_event_time.present?
+    return "#{@quote.expires_in_days}d left" if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+    return "Needs revision" if @quote.changes_requested_at.present?
+
+    "Stable"
+  end
+
+  def pressure_detail
+    return "Follow up with a new revision or close the thread." if expired_event_time.present?
+    return "Buyer requested changes on this revision." if @quote.changes_requested_at.present?
+    return "Act before validity runs out." if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+
+    "No immediate expiry or revision pressure."
   end
 end

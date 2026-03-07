@@ -1,4 +1,8 @@
 class Company < ApplicationRecord
+  DEFAULT_REMINDER_EMAIL_SUBJECT = "Reminder: %{quote_no} from %{company_name}".freeze
+  DEFAULT_REMINDER_EMAIL_BODY = "This is a reminder that your quotation %{quote_no} from %{company_name} is still awaiting review.".freeze
+  DEFAULT_REMINDER_EMAIL_CTA_LABEL = "Open quotation".freeze
+
   validates :name, presence: true
   validates :brand_color, format: { with: /\A#[0-9A-Fa-f]{6}\z/ }, allow_blank: true
   validates :default_validity_days, numericality: { greater_than: 0 }, allow_nil: true
@@ -9,7 +13,10 @@ class Company < ApplicationRecord
   has_many :quotes, dependent: :destroy
   has_many :quote_shares, dependent: :destroy
   has_many :products, dependent: :destroy
+  has_many :spec_presets, dependent: :destroy
+  has_many :addon_presets, dependent: :destroy
   has_many :quote_templates, dependent: :destroy
+  has_many :company_documents, dependent: :destroy
   has_many :team_invitations, dependent: :destroy
   has_many :customer_tags, dependent: :destroy
   has_one_attached :logo
@@ -27,6 +34,18 @@ class Company < ApplicationRecord
 
   def quote_template_or_default
     default_quote_template || quote_templates.order(:created_at).first || build_default_template
+  end
+
+  def reminder_email_subject_for(quote:, customer:)
+    interpolate_reminder_content(reminder_email_subject, DEFAULT_REMINDER_EMAIL_SUBJECT, quote:, customer:)
+  end
+
+  def reminder_email_body_for(quote:, customer:)
+    interpolate_reminder_content(reminder_email_body, DEFAULT_REMINDER_EMAIL_BODY, quote:, customer:)
+  end
+
+  def reminder_email_cta_label_resolved
+    reminder_email_cta_label.to_s.strip.presence || DEFAULT_REMINDER_EMAIL_CTA_LABEL
   end
 
   def ensure_default_template!
@@ -84,5 +103,20 @@ class Company < ApplicationRecord
     self.default_validity_days = 30 if default_validity_days.blank?
     self.default_tax_rate = 0 if default_tax_rate.blank?
     self.brand_color = brand_color.presence || "#1F4E79"
+  end
+
+  def interpolate_reminder_content(raw_value, fallback, quote:, customer:)
+    template = raw_value.to_s.strip.presence || fallback
+    template % {
+      quote_no: quote.quote_no,
+      company_name: name.to_s,
+      customer_name: customer.contact_name.presence || customer.name.presence || "there"
+    }
+  rescue KeyError
+    fallback % {
+      quote_no: quote.quote_no,
+      company_name: name.to_s,
+      customer_name: customer.contact_name.presence || customer.name.presence || "there"
+    }
   end
 end

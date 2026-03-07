@@ -1,0 +1,16 @@
+<% 
+  variant = (local_assigns[:variant] || :primary).to_sym
+  tag_name = (local_assigns[:tag] || (local_assigns[:href].present? ? :a : :button)).to_sym
+  classes = ui_button_classes(variant, local_assigns[:class])
+  attrs = (local_assigns[:attrs] || {}).deep_symbolize_keys
+%>
+
+<% if tag_name == :a %>
+  <%= link_to local_assigns[:href], class: classes, **attrs do %>
+    <%= yield %>
+  <% end %>
+<% else %>
+  <%= button_tag type: (local_assigns[:type] || "button"), class: classes, **attrs do %>
+    <%= yield %>
+  <% end %>
+<% end %>

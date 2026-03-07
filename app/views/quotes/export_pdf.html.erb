@@ -3,6 +3,12 @@
 <% document_kind = @template.normalize_document_kind(raw_document_kind || @template.default_document_kind) %>
 <% spec_label = @quote.resolved_spec_label %>
 <% addon_label = @quote.resolved_addon_label %>
+<% watermark_text = template_watermark_text(@template, @quote.company.name) %>
+<% watermark_image_url = quote_watermark_data_uri || template_watermark_image_url(@template) %>
+<% pdf_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.5, 0.08].min %>
+<% signature_image_url = template_signature_image_url(@template) %>
+<% signature_name = template_signature_name(@template) %>
+<% show_signature_section = @template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
 <style>
   /* Dynamic accent color for PDF rendering */
   .pdf-render .quote-doc-kicker {
@@ -17,7 +23,10 @@
     color: #222 !important;
   }
 </style>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %>">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>;">
+  <% if watermark_image_url.present? %>
+    <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
+  <% end %>
   <% title_text = @template.resolved_document_title(document_kind).to_s.upcase %>
   <% number_label = @template.resolved_document_number_label(document_kind) %>
   <% logo_uri = quote_logo_data_uri if @template.show_logo %>
@@ -94,12 +103,12 @@
   <div class="table-responsive">
     <table class="quote-items-table quote-doc-table <%= @template.show_images? ? 'has-images' : 'no-images' %>">
       <colgroup>
-        <col style="width: 8%;">
-        <% if @template.show_images? %><col style="width: 12%;"><% end %>
+        <col style="width: 6.5%;">
+        <% if @template.show_images? %><col style="width: 10%;"><% end %>
         <col>
-        <col style="width: 12%;">
-        <col style="width: 16%;">
-        <col style="width: 18%;">
+        <col style="width: 9%;">
+        <col style="width: 15%;">
+        <col style="width: 17%;">
       </colgroup>
       <thead>
         <tr>
@@ -159,6 +168,9 @@
   </div>
 
   <% currency_code = @quote.currency.to_s.upcase.presence || "USD" %>
+  <% discount_amount = @quote.discount_amount.to_d %>
+  <% has_discount = discount_amount.positive? %>
+  <% original_total = @quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d %>
   <% grand_amount_text = template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %>
   <aside class="quote-total-box pdf-total-box">
     <p><span>Subtotal</span><strong><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
@@ -168,11 +180,17 @@
     <% if @template.show_shipping %>
       <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
     <% end %>
-    <p><span>Discount</span><strong><%= template_money(@quote.discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+    <% if has_discount %>
+      <p class="quote-total-discount"><span>Discount</span><strong>-<%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+    <% end %>
     <p class="quote-total-grand">
       <span>Grand Total</span>
       <strong><%= grand_amount_text %></strong>
     </p>
+    <% if has_discount %>
+      <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+    <% end %>
     <% if (closing_message = @template.resolved_closing_message).present? %>
       <p class="quote-engagement-note"><%= closing_message %></p>
     <% end %>
@@ -191,6 +209,26 @@
     <section class="quote-section-block">
       <h3>Notes</h3>
       <%= simple_format(@quote.notes) %>
+    </section>
+  <% end %>
+  <% company_documents = @quote.company.company_documents.ordered %>
+  <% if company_documents.any? %>
+    <section class="quote-section-block">
+      <h3>Company Credentials</h3>
+      <% company_documents.each do |document| %>
+        <p><strong><%= document.title %></strong> - <%= document.document_type_label %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if show_signature_section %>
+    <section class="quote-section-block quote-signature-block">
+      <h3>Signature</h3>
+      <% if signature_image_url.present? %>
+        <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+      <% end %>
+      <% if signature_name.present? %>
+        <p><strong>Authorized by:</strong> <%= signature_name %></p>
+      <% end %>
     </section>
   <% end %>
   <% if @template.show_saas_branding %>

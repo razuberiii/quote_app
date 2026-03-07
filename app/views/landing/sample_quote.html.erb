@@ -2,6 +2,18 @@
 <% content_for :meta_description, "View a sample public quote from Rubusoo, including buyer/seller details, line items, and payment terms." %>
 <% content_for :canonical_url, sample_quote_url %>
 
+<section class="marketing-section marketing-sample-intro no-print">
+  <div class="marketing-section-head">
+    <p class="marketing-kicker">PUBLIC QUOTE EXAMPLE</p>
+    <h2>Sample buyer-facing quote</h2>
+    <p>This page shows the kind of browser-ready quote experience Rubusoo can publish. It is a static sample, not a live negotiation record.</p>
+  </div>
+  <div class="marketing-cta-row">
+    <%= link_to "View Demo Workspace", demo_path, class: "btn btn-primary marketing-cta-primary" %>
+    <%= link_to "Start for Free", new_user_registration_path, class: "btn btn-secondary marketing-cta-secondary" %>
+  </div>
+</section>
+
 <article class="quote-document public-quote-document public-quote-themed public-layout-classic" style="--doc-accent: #1F4E79; --doc-on-accent: <%= contrast_text_color('#1F4E79') %>; --doc-font: 'Noto Sans';">
   <header class="quote-doc-header">
     <div>

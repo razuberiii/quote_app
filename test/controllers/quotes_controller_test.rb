@@ -46,4 +46,27 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     payload = JSON.parse(response.body)
     assert_match(%r{/public/quote_shares/}, payload["url"])
   end
+
+  test "send reminder delivers email and updates counters" do
+    @quote.customer.update!(email: "buyer@example.com")
+    @quote.company.update!(
+      reminder_email_subject: "Follow up: %{quote_no}",
+      reminder_email_body: "Hello %{customer_name}, please review %{quote_no} from %{company_name}.",
+      reminder_email_cta_label: "Review quote"
+    )
+    @quote.update!(status: "sent", sent_at: 3.days.ago, viewed_at: nil)
+
+    assert_emails 1 do
+      post send_reminder_quote_url(@quote)
+    end
+
+    assert_redirected_to quote_url(@quote)
+    @quote.reload
+    email = ActionMailer::Base.deliveries.last
+    assert_equal "Follow up: #{@quote.quote_no}", email.subject
+    assert_includes email.body.encoded, "Hello #{@quote.customer.name}, please review #{@quote.quote_no} from #{@quote.company.name}."
+    assert_includes email.body.encoded, "Review quote"
+    assert_equal 1, @quote.reminder_count
+    assert @quote.reminder_sent_at.present?
+  end
 end

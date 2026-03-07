@@ -1,0 +1,16 @@
+<%= form_with model: addon_preset, class: "settings-form-grid" do |f| %>
+  <div>
+    <%= f.label :name, "Preset Name" %>
+    <%= f.text_field :name, placeholder: "Export Package / Premium Service" %>
+  </div>
+
+  <div class="settings-grid-span-2">
+    <%= f.label :entries_text, "Add-ons Text" %>
+    <%= f.text_area :entries_text, value: addon_preset.entries_text, rows: 8, placeholder: "Extended Warranty: 50&#10;Installation Kit: 120" %>
+    <p class="team-members-hint">One line per item. Use <code>name: price</code> format.</p>
+  </div>
+
+  <div class="settings-grid-span-2 settings-actions">
+    <%= f.submit(addon_preset.persisted? ? "Update Add-on Preset" : "Create Add-on Preset", class: "btn btn-primary") %>
+  </div>
+<% end %>

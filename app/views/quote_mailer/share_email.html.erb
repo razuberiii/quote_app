@@ -1,0 +1,7 @@
+<h2><%= @reminder ? "Quotation Reminder" : "Quotation Ready" %></h2>
+<p>Hello <%= @customer.contact_name.presence || @customer.name.presence || "there" %>,</p>
+<p><%= @email_body %></p>
+<p>
+  <%= link_to @email_cta_label, @public_url, style: "display:inline-block;padding:10px 20px;background-color:#1F4E79;color:#ffffff;text-decoration:none;border-radius:4px;" %>
+</p>
+<p>If you have any questions, reply directly to this email.</p>

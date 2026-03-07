@@ -10,7 +10,7 @@ class Customer < ApplicationRecord
     belongs_to :internal_owner, class_name: "User", optional: true
   end
   has_many :quotes, dependent: :destroy
-  has_many :customer_taggings, dependent: :destroy
+  has_many :customer_taggings, -> { ordered }, dependent: :destroy
   has_many :customer_tags, through: :customer_taggings
   has_one_attached :avatar
 
@@ -74,6 +74,14 @@ class Customer < ApplicationRecord
 
   def avatar_initial
     name.to_s.strip.first&.upcase || "?"
+  end
+
+  def ordered_tag_names
+    customer_taggings.includes(:customer_tag).map { |tagging| tagging.customer_tag.name }
+  end
+
+  def ordered_customer_tags
+    customer_taggings.includes(:customer_tag).map(&:customer_tag)
   end
 
   def internal_owner_display_name

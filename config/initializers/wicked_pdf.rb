@@ -11,12 +11,12 @@ WickedPdf.configure do |config|
   candidate_paths << configured_path if configured_path
   candidate_paths.concat(default_candidates)
 
-  # Resolve from PATH (Linux/macOS + Windows).
-  resolved_from_which = `which wkhtmltopdf 2>/dev/null`.to_s.strip
-  candidate_paths << resolved_from_which if resolved_from_which.present?
+  ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).each do |path|
+    next if path.blank?
 
-  resolved_from_where = `where wkhtmltopdf 2>NUL`.to_s.lines.map(&:strip).reject(&:blank?)
-  candidate_paths.concat(resolved_from_where) if resolved_from_where.any?
+    candidate_paths << File.join(path, "wkhtmltopdf")
+    candidate_paths << File.join(path, "wkhtmltopdf.exe")
+  end
 
   detected_path = candidate_paths.uniq.find do |path|
     File.exist?(path) && (Gem.win_platform? || File.executable?(path))

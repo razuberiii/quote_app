@@ -40,13 +40,16 @@ class CustomersController < ApplicationController
       has_risk: (@risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value]).positive? || @decision_snapshot[:negotiating_stale_count].positive?
     }
     @deal_overview = build_deal_overview(all_customers)
+    @dashboard_health_snapshot = build_dashboard_health_snapshot(all_customers)
     @recent_quotes = build_recent_quotes(all_customers)
     @customer_row_signals = build_customer_row_signals(@customers, @customer_metrics)
   end
 
   def show
     Quote.expire_overdue_for_company!(current_user.company_id)
-    quote_groups = @customer.quotes.includes(:quote_items, :quote_shares).order(:quote_no, :revision_number).group_by(&:quote_no)
+    all_customer_quotes = @customer.quotes.includes(:quote_items, :quote_shares).order(:quote_no, :revision_number).to_a
+    customer_quotes = active_quotes_collection(all_customer_quotes)
+    quote_groups = customer_quotes.group_by(&:quote_no)
     @quote_cards = quote_groups.values.map { |revisions| build_quote_card(revisions) }
     @quote_cards.sort_by! { |card| card[:updated_at] || Time.at(0) }.reverse!
 
@@ -112,7 +115,7 @@ class CustomersController < ApplicationController
     @follow_up_tasks = build_follow_up_tasks(@customer, @quote_cards)
     @visible_follow_up_tasks = @follow_up_tasks.first(2)
     @hidden_follow_up_tasks = @follow_up_tasks.drop(2)
-    @timeline_events = build_customer_timeline(@customer, @quote_cards)
+    @timeline_events = build_customer_timeline(@customer, @quote_cards, all_customer_quotes)
     @high_signal_timeline_events = @timeline_events.select { |event| event[:category] == "high_signal" }
     @system_timeline_events = @timeline_events.select { |event| event[:category] == "system_activity" }
     @visible_high_signal_timeline_events = @high_signal_timeline_events.first(7)
@@ -123,6 +126,7 @@ class CustomersController < ApplicationController
     @days_until_follow_up = @customer.next_follow_up_date.present? ? (@customer.next_follow_up_date - Date.current).to_i : nil
     @follow_up_text = follow_up_text_for(@customer)
     @follow_up_primary_action = follow_up_primary_action_for(@customer)
+    @customer_operating_signals = build_customer_operating_signals(@customer, @quote_cards, @latest_customer_signal_at)
   end
 
   def new
@@ -136,11 +140,12 @@ class CustomersController < ApplicationController
     end
 
     @customer = current_user.company.customers.new
-    @customer.assign_attributes(customer_params)
-    apply_custom_tags(@customer)
+    @customer.assign_attributes(customer_params.except(:customer_tag_ids, :tag_priority_names))
     @customer.internal_owner ||= current_user if Customer.internal_owner_enabled?
+    resolved_tag_ids = resolve_customer_tag_ids
 
     if @customer.save
+      sync_customer_tags(@customer, resolved_tag_ids)
       redirect_to @customer
     else
       render :new, status: :unprocessable_entity
@@ -151,10 +156,11 @@ class CustomersController < ApplicationController
   end
 
   def update
-    @customer.assign_attributes(customer_params)
-    apply_custom_tags(@customer)
+    @customer.assign_attributes(customer_params.except(:customer_tag_ids, :tag_priority_names))
+    resolved_tag_ids = resolve_customer_tag_ids
 
     if @customer.save
+      sync_customer_tags(@customer, resolved_tag_ids)
       @customer.avatar.purge_later if remove_avatar_requested?
       redirect_to @customer
     else
@@ -215,8 +221,9 @@ class CustomersController < ApplicationController
       :avatar
     ]
     permitted_keys << :internal_owner_id if Customer.internal_owner_enabled?
-    permitted = params.require(:customer).permit(*permitted_keys, customer_tag_ids: [])
+    permitted = params.require(:customer).permit(*permitted_keys, customer_tag_ids: [], tag_priority_names: [])
     permitted[:customer_tag_ids] = Array(permitted[:customer_tag_ids]).reject(&:blank?)
+    permitted[:tag_priority_names] = Array(permitted[:tag_priority_names]).reject(&:blank?)
     permitted
   end
 
@@ -231,20 +238,42 @@ class CustomersController < ApplicationController
     @available_tags = current_user.company.customer_tags.ordered
   end
 
-  def apply_custom_tags(customer)
+  def resolve_customer_tag_ids
+    selected_tag_ids = Array(params.dig(:customer, :customer_tag_ids)).reject(&:blank?).map(&:to_i)
+    ordered_names = Array(params.dig(:customer, :tag_priority_names)).map { |name| normalize_tag_name(name) }.reject(&:blank?)
     custom_names = Array(params.dig(:customer, :new_tag_names)).map { |name| name.to_s.split(",") }.flatten
     custom_names.concat(customer_custom_tags_input.to_s.split(","))
-    custom_names = custom_names.map { |name| name.strip.gsub(/\s+/, " ") }.reject(&:blank?).uniq
-    return if custom_names.empty?
+    ordered_names.concat(custom_names.map { |name| normalize_tag_name(name) })
+    ordered_names.uniq!
 
-    tag_ids = custom_names.map do |name|
+    selected_tags = current_user.company.customer_tags.where(id: selected_tag_ids).to_a
+    selected_tags.each do |tag|
+      ordered_names << tag.name unless ordered_names.include?(tag.name)
+    end
+
+    return [] if ordered_names.empty?
+
+    ordered_names.map do |name|
       current_user.company.customer_tags.find_or_create_by!(name: name).id
     end
-    customer.customer_tag_ids = (customer.customer_tag_ids + tag_ids).uniq
+  end
+
+  def sync_customer_tags(customer, ordered_tag_ids)
+    customer.customer_taggings.where.not(customer_tag_id: ordered_tag_ids).delete_all
+
+    ordered_tag_ids.each_with_index do |tag_id, index|
+      tagging = customer.customer_taggings.find_or_initialize_by(customer_tag_id: tag_id)
+      tagging.position = index + 1
+      tagging.save! if tagging.new_record? || tagging.changed?
+    end
   end
 
   def customer_custom_tags_input
     params.dig(:customer, :custom_tags_input)
+  end
+
+  def normalize_tag_name(name)
+    name.to_s.strip.gsub(/\s+/, " ")
   end
 
   def remove_avatar_requested?
@@ -318,10 +347,10 @@ class CustomersController < ApplicationController
 
   def build_customer_metrics(customers)
     customers.index_with do |customer|
-      quotes = customer.quotes
+      quotes = latest_quotes_from_collection(active_quotes_collection(customer.quotes))
       total_quote_amount = quotes.sum { |quote| quote.grand_total.to_d }
-      won_quotes = quotes.select { |quote| quote.status == "won" }
-      total_won_amount = won_quotes.sum { |quote| quote.grand_total.to_d }
+      won_quotes = quotes.select { |quote| quote_display_status(quote) == "won" }
+      total_won_amount = won_quotes.sum { |quote| quote.display_amount.to_d }
       quote_count = quotes.count
       won_count = won_quotes.count
       win_rate = quote_count.positive? ? ((won_count.to_d / quote_count) * 100).round(2) : 0
@@ -391,8 +420,19 @@ class CustomersController < ApplicationController
     quotes.group_by(&:quote_no).values.map { |revisions| revisions.max_by(&:revision_number) }
   end
 
+  def active_quotes_collection(quotes)
+    Array(quotes).reject do |quote|
+      (quote.respond_to?(:archived?) && quote.archived?) ||
+        (quote.respond_to?(:deleted?) && quote.deleted?)
+    end
+  end
+
+  def active_quotes_from_customers(customers)
+    customers.flat_map { |customer| active_quotes_collection(customer.quotes) }
+  end
+
   def build_dashboard_stats(customers, follow_up_counts, period)
-    all_quotes = customers.flat_map(&:quotes)
+    all_quotes = active_quotes_from_customers(customers)
     today = Date.current
     reference_date = period == "month" ? today.prev_month : today - 7.days
 
@@ -421,7 +461,7 @@ class CustomersController < ApplicationController
   end
 
   def build_deal_overview(customers)
-    all_quotes = customers.flat_map(&:quotes)
+    all_quotes = active_quotes_from_customers(customers)
     quote_groups = all_quotes.group_by(&:quote_no)
     latest_quotes = latest_quotes_from_collection(all_quotes)
 
@@ -479,11 +519,55 @@ class CustomersController < ApplicationController
     }
   end
 
+  def build_dashboard_health_snapshot(customers)
+    latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(customers))
+    active_quotes = latest_quotes.select { |quote| %w[draft sent viewed negotiating expired].include?(quote_display_status(quote)) }
+    viewed_quotes = active_quotes.select do |quote|
+      quote.viewed_at.present? || quote.quote_shares.sum(&:view_count).positive?
+    end
+    recent_motion_quotes = active_quotes.select do |quote|
+      [
+        quote.updated_at,
+        quote.sent_at,
+        quote.viewed_at,
+        quote.accepted_at,
+        quote.changes_requested_at,
+        quote.reopened_at
+      ].compact.any? { |at| at.to_date >= Date.current - 7.days }
+    end
+    risk_customers = customers.count do |customer|
+      customer.follow_up_overdue? ||
+        customer.follow_up_due_today? ||
+        (customer.next_follow_up_date.blank? && active_quotes_collection(customer.quotes).any?)
+    end
+
+    [
+      {
+        label: "Operational Risk",
+        value: "#{risk_customers} account#{'s' unless risk_customers == 1}",
+        tone: risk_customers.positive? ? :danger : :good,
+        detail: risk_customers.positive? ? "Follow-up pressure needs attention." : "No urgent account risk."
+      },
+      {
+        label: "Momentum",
+        value: "#{recent_motion_quotes.count}/#{active_quotes.count.nonzero? || 0}",
+        tone: recent_motion_quotes.any? ? :good : :neutral,
+        detail: active_quotes.any? ? "Active quotes touched in the last 7 days." : "No active quotes yet."
+      },
+      {
+        label: "Observed Engagement",
+        value: "#{viewed_quotes.count}/#{active_quotes.count.nonzero? || 0}",
+        tone: viewed_quotes.any? ? :watch : :neutral,
+        detail: active_quotes.any? ? "Quotes with actual buyer view evidence." : "No viewable quote evidence yet."
+      }
+    ]
+  end
+
   def build_recent_quotes(customers)
-    latest_quotes = latest_quotes_from_collection(customers.flat_map(&:quotes))
+    latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(customers))
 
     latest_quotes
-      .sort_by { |quote| [ recent_quote_priority(quote), -(quote.updated_at || Time.zone.at(0)).to_i ] }
+      .sort_by { |quote| [ -(quote.updated_at || Time.zone.at(0)).to_i, recent_quote_priority(quote) ] }
       .first(6)
       .map do |quote|
         status = quote_display_status(quote)
@@ -670,16 +754,17 @@ class CustomersController < ApplicationController
       }
     end
 
-    latest_quotes = latest_quotes_from_collection(customers.flat_map(&:quotes))
+    latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(customers))
     stale_cutoff = 7.days.ago
     latest_quotes
       .select { |quote| quote_display_status(quote) == "negotiating" && quote.updated_at.present? && quote.updated_at <= stale_cutoff }
       .first(4)
       .each do |quote|
         stale_days = (Date.current - quote.updated_at.to_date).to_i
+        quote_name = quote_display_name(quote)
         items << {
           priority: "urgent",
-          title: "Quote #{quote.quote_no}: negotiating stalled",
+          title: "#{quote_name}: negotiating stalled",
           detail: "No update for #{stale_days} day(s). Push next revision or close decision.",
           cta_label: "Open Quote",
           cta_path: quote_path(quote)
@@ -691,7 +776,7 @@ class CustomersController < ApplicationController
   end
 
   def build_decision_snapshot(customers, period)
-    latest_quotes = latest_quotes_from_collection(customers.flat_map(&:quotes))
+    latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(customers))
     period_start = period == "month" ? Date.current.beginning_of_month : Date.current.beginning_of_week
 
     accepted_count = latest_quotes.count do |quote|
@@ -746,7 +831,7 @@ class CustomersController < ApplicationController
   end
 
   def stalled_customer?(customer)
-    latest_quote = customer.quotes.max_by(&:updated_at)
+    latest_quote = active_quotes_collection(customer.quotes).max_by(&:updated_at)
     latest_quote.present? && latest_quote.updated_at.to_date <= Date.current - 14.days
   end
 
@@ -804,13 +889,13 @@ class CustomersController < ApplicationController
   def recent_quote_signals(quote, status)
     if status == "draft"
       [
-        "Draft unsent",
+        "Draft, not shared",
         { label: "Send Now", path: edit_quote_path(quote), style: "is-watch" }
       ]
     elsif status == "sent" && quote.viewed_at.blank? && quote.sent_at.present? && quote.sent_at <= 3.days.ago
       [
         "Sent, no view 3d+",
-        { label: "Send Reminder", path: quote_path(quote), style: "is-attention" }
+        { label: "Check Quote", path: quote_path(quote), style: "is-attention" }
       ]
     elsif status == "sent" && quote.viewed_at.blank?
       [
@@ -819,8 +904,23 @@ class CustomersController < ApplicationController
       ]
     elsif %w[viewed negotiating].include?(status)
       [
-        "Viewed",
+        status == "negotiating" ? "Viewed, in negotiation" : "Viewed",
         { label: "Follow Up Today", path: quote_path(quote), style: "is-primary" }
+      ]
+    elsif status == "won"
+      [
+        "Decision recorded",
+        { label: "Review", path: quote_path(quote), style: "is-neutral" }
+      ]
+    elsif status == "lost"
+      [
+        "Closed lost",
+        { label: "Review", path: quote_path(quote), style: "is-neutral" }
+      ]
+    elsif status == "expired"
+      [
+        "Expired",
+        { label: "Create revision", path: quote_path(quote), style: "is-watch" }
       ]
     else
       [
@@ -848,8 +948,8 @@ class CustomersController < ApplicationController
           priority: 0,
           state: "risk",
           summary: "Sent 7d+ with no view",
-          detail: "Send a reminder or share again.",
-          label: "Send Reminder",
+          detail: "Review the quote before deciding whether to send a reminder.",
+          label: "Check Quote",
           path: quote_path(quote),
           method: :get
         }
@@ -984,6 +1084,101 @@ class CustomersController < ApplicationController
     end
   end
 
+  def build_customer_operating_signals(customer, quote_cards, latest_signal_at)
+    latest_card = quote_cards.max_by { |card| card[:updated_at] || Time.zone.at(0) }
+    latest_quote = latest_card&.dig(:quote)
+    latest_status = latest_card&.dig(:display_status)
+    total_views = quote_cards.sum { |card| card[:quote].quote_shares.sum(&:view_count) }
+
+    risk_signal =
+      if customer.follow_up_overdue?
+        {
+          label: "Operational Risk",
+          value: "High",
+          tone: :danger,
+          detail: "Follow-up is overdue and needs action now."
+        }
+      elsif customer.follow_up_due_today?
+        {
+          label: "Operational Risk",
+          value: "Watch",
+          tone: :watch,
+          detail: "Follow-up is due today."
+        }
+      elsif customer.next_follow_up_date.blank? && quote_cards.any?
+        {
+          label: "Operational Risk",
+          value: "Unscheduled",
+          tone: :watch,
+          detail: "Active account but no next follow-up date is set."
+        }
+      else
+        {
+          label: "Operational Risk",
+          value: "Controlled",
+          tone: :good,
+          detail: "Follow-up timing is currently under control."
+        }
+      end
+
+    momentum_signal =
+      if latest_quote.blank?
+        {
+          label: "Momentum",
+          value: "No quotes",
+          tone: :neutral,
+          detail: "There is no quote activity to evaluate yet."
+        }
+      elsif [latest_quote.updated_at, latest_signal_at].compact.any? { |at| at.to_date >= Date.current - 7.days }
+        {
+          label: "Momentum",
+          value: "Moving",
+          tone: :good,
+          detail: "Quote or buyer activity happened in the last 7 days."
+        }
+      elsif [latest_quote.updated_at, latest_signal_at].compact.any? { |at| at.to_date >= Date.current - 21.days }
+        {
+          label: "Momentum",
+          value: "Cooling",
+          tone: :watch,
+          detail: "There is some activity, but pace is slowing down."
+        }
+      else
+        {
+          label: "Momentum",
+          value: "Stalled",
+          tone: :danger,
+          detail: "No meaningful quote or buyer movement in 21+ days."
+        }
+      end
+
+    engagement_signal =
+      if total_views.positive? || latest_signal_at.present?
+        {
+          label: "Observed Engagement",
+          value: total_views.positive? ? "Observed" : "Indirect",
+          tone: total_views.positive? ? :good : :watch,
+          detail: total_views.positive? ? "#{total_views} buyer view#{'s' unless total_views == 1} recorded on shared quotes." : "Timeline has customer signals, but not direct quote views."
+        }
+      elsif %w[sent viewed negotiating].include?(latest_status)
+        {
+          label: "Observed Engagement",
+          value: "Low visibility",
+          tone: :neutral,
+          detail: "Quote is live, but there is no buyer-view evidence yet."
+        }
+      else
+        {
+          label: "Observed Engagement",
+          value: "N/A",
+          tone: :neutral,
+          detail: "No live quote signal is available for this account."
+        }
+      end
+
+    [ risk_signal, momentum_signal, engagement_signal ]
+  end
+
   def follow_up_text_for(customer)
     if customer.follow_up_overdue?
       "Follow-up overdue. Action required now."
@@ -1078,6 +1273,7 @@ class CustomersController < ApplicationController
     quote_cards.each do |card|
       quote = card[:quote]
       status = card[:display_status]
+      quote_name = quote_display_name(quote)
       next unless %w[sent viewed negotiating draft].include?(status)
 
       if quote.valid_until.present?
@@ -1085,7 +1281,7 @@ class CustomersController < ApplicationController
         if days_left.negative?
           tasks << {
             priority: "urgent",
-            title: "Quote #{quote.quote_no} expired",
+            title: "#{quote_name} expired",
             detail: "Expired on #{quote.valid_until.strftime('%Y-%m-%d')}. Consider sending a revision.",
             cta_label: "Open Quote",
             cta_path: quote_path(quote)
@@ -1094,7 +1290,7 @@ class CustomersController < ApplicationController
         elsif days_left <= 3
           tasks << {
             priority: "today",
-            title: "Quote #{quote.quote_no} expiring soon",
+            title: "#{quote_name} expiring soon",
             detail: "Expires in #{days_left} day(s). Follow up before expiry.",
             cta_label: "Open Quote",
             cta_path: quote_path(quote)
@@ -1105,7 +1301,7 @@ class CustomersController < ApplicationController
       if quote.sent_at.present? && quote.viewed_at.blank?
         tasks << {
           priority: "upcoming",
-          title: "Quote #{quote.quote_no} not viewed yet",
+          title: "#{quote_name} not viewed yet",
           detail: "Sent at #{quote.sent_at.strftime('%Y-%m-%d %H:%M')}. Consider a reminder.",
           cta_label: "Open Quote",
           cta_path: quote_path(quote)
@@ -1117,8 +1313,9 @@ class CustomersController < ApplicationController
     tasks.sort_by { |task| [ priority_order.fetch(task[:priority], 4), task[:title] ] }.first(8)
   end
 
-  def build_customer_timeline(customer, quote_cards)
+  def build_customer_timeline(customer, quote_cards, all_quotes = [])
     events = []
+    status_lookup = quote_cards.index_by { |card| card[:quote].id }
 
     events << {
       at: customer.created_at,
@@ -1149,13 +1346,15 @@ class CustomersController < ApplicationController
       }
     end
 
-    quote_cards.each do |card|
-      quote = card[:quote]
+    Array(all_quotes).each do |quote|
+      card = status_lookup[quote.id]
+      display_status = timeline_quote_status(quote, card)
+      quote_name = quote_display_name(quote)
       events << {
         at: quote.created_at,
         tone: "normal",
         category: "system_activity",
-        title: "Quote #{quote.quote_no} created",
+        title: "#{quote_name} created",
         detail: "Revision V#{quote.revision_number}."
       }
 
@@ -1164,8 +1363,8 @@ class CustomersController < ApplicationController
           at: quote.updated_at,
           tone: "normal",
           category: "system_activity",
-          title: "Quote #{quote.quote_no} updated",
-          detail: "Latest status: #{card[:display_status].capitalize}."
+          title: "#{quote_name} updated",
+          detail: "Latest status: #{display_status.capitalize}."
         }
       end
 
@@ -1174,7 +1373,7 @@ class CustomersController < ApplicationController
           at: quote.sent_at,
           tone: "today",
           category: "system_activity",
-          title: "Quote #{quote.quote_no} sent",
+          title: "#{quote_name} sent",
           detail: "Sent to customer."
         }
       end
@@ -1184,8 +1383,8 @@ class CustomersController < ApplicationController
           at: quote.viewed_at,
           tone: "good",
           category: "high_signal",
-          title: "Quote #{quote.quote_no} viewed",
-          detail: "Customer opened the quote."
+          title: "#{quote_name} viewed",
+          detail: "Opened by customer."
         }
       end
 
@@ -1194,7 +1393,7 @@ class CustomersController < ApplicationController
           at: quote.changes_requested_at,
           tone: "today",
           category: "high_signal",
-          title: "Quote #{quote.quote_no} revision requested",
+          title: "#{quote_name} revision requested",
           detail: quote.changes_request_message.present? ? "Client request: #{quote.changes_request_message}" : "Customer requested updates to this revision."
         }
       end
@@ -1204,8 +1403,8 @@ class CustomersController < ApplicationController
           at: quote.accepted_at,
           tone: "good",
           category: "high_signal",
-          title: "Quote #{quote.quote_no} accepted",
-          detail: "Customer accepted this quotation revision via public link."
+          title: "#{quote_name} accepted",
+          detail: "Accepted via public link."
         }
       end
 
@@ -1214,35 +1413,57 @@ class CustomersController < ApplicationController
           at: quote.reopened_at,
           tone: "normal",
           category: "system_activity",
-          title: "Quote #{quote.quote_no} reopened",
-          detail: "Reopened internally to continue commercial discussion."
+          title: "#{quote_name} reopened",
+          detail: "Reopened for editing."
         }
       end
 
-      if card[:display_status] == "won" && quote.accepted_at.blank?
+      if display_status == "won" && quote.accepted_at.blank?
         events << {
           at: quote.updated_at,
           tone: "good",
           category: "high_signal",
-          title: "Quote #{quote.quote_no} won",
-          detail: "Quotation marked as Won internally."
+          title: "#{quote_name} won",
+          detail: "Marked as Won internally."
         }
       end
 
-      if %w[lost expired].include?(card[:display_status])
-        tone = card[:display_status] == "lost" ? "urgent" : "normal"
+      if %w[lost expired].include?(display_status)
+        tone = display_status == "lost" ? "urgent" : "normal"
         status_detail =
-          if card[:display_status] == "lost" && quote.loss_reason.present?
-            "Marked Lost. Reason: #{quote.loss_reason}"
+          if display_status == "lost" && quote.loss_reason.present?
+            "Marked Lost. Reason: #{quote.loss_reason.humanize}"
+          elsif display_status == "expired" && quote.stalled_reason.present?
+            "Expired. Pressure reason: #{quote.stalled_reason.humanize}"
           else
-            "Final status changed to #{card[:display_status].capitalize}."
+            "Final status changed to #{display_status.capitalize}."
           end
         events << {
           at: quote.updated_at,
           tone: tone,
-          category: card[:display_status] == "lost" ? "high_signal" : "system_activity",
-          title: "Quote #{quote.quote_no} #{card[:display_status]}",
+          category: display_status == "lost" ? "high_signal" : "system_activity",
+          title: "#{quote_name} #{display_status}",
           detail: status_detail
+        }
+      end
+
+      if display_status == "won" && quote.win_reason.present?
+        events << {
+          at: quote.updated_at,
+          tone: "good",
+          category: "high_signal",
+          title: "#{quote_name} win reason captured",
+          detail: quote.win_reason.humanize
+        }
+      end
+
+      if quote.reminder_sent_at.present?
+        events << {
+          at: quote.reminder_sent_at,
+          tone: "normal",
+          category: "system_activity",
+          title: "#{quote_name} reminder sent",
+          detail: "Reminder email sent after no buyer view."
         }
       end
 
@@ -1254,7 +1475,7 @@ class CustomersController < ApplicationController
           tone: "normal",
           category: "system_activity",
           title: shares.size > 1 ? "Public links shared (#{shares.size})" : "Public link shared",
-          detail: "Quote #{quote.quote_no} public link generated."
+          detail: "Public link generated for this quote."
         }
 
         first_view = shares.filter_map(&:first_viewed_at).min
@@ -1264,7 +1485,7 @@ class CustomersController < ApplicationController
             tone: "good",
             category: "high_signal",
             title: "Public link first viewed",
-            detail: "Quote #{quote.quote_no} viewed via public link."
+            detail: "Viewed via public link."
           }
         end
 
@@ -1276,13 +1497,48 @@ class CustomersController < ApplicationController
             tone: "normal",
             category: "system_activity",
             title: "Public link activity",
-            detail: "Quote #{quote.quote_no} viewed #{total_views} time#{'s' unless total_views == 1}."
+            detail: "Viewed #{total_views} time#{'s' unless total_views == 1} via public link."
           }
         end
+      end
+
+      if quote.archived?
+        events << {
+          at: quote.archived_at,
+          tone: "normal",
+          category: "system_activity",
+          title: "#{quote_name} archived",
+          detail: "Revision V#{quote.revision_number} archived from visible history."
+        }
+      end
+
+      if quote.deleted?
+        events << {
+          at: quote.deleted_at,
+          tone: "normal",
+          category: "system_activity",
+          title: "#{quote_name} deleted",
+          detail: "Quote thread deleted and public links expired."
+        }
       end
     end
 
     deduped = events.uniq { |event| [ event[:title], event[:detail], event[:at]&.to_i ] }
     deduped.sort_by { |event| event[:at] || Time.zone.at(0) }.reverse
+  end
+
+  def timeline_quote_status(quote, card = nil)
+    return card[:display_status] if card.present?
+    return "deleted" if quote.deleted?
+    return "archived" if quote.archived?
+
+    quote_display_status(quote)
+  end
+
+  def quote_display_name(quote)
+    quote.custom_title.presence ||
+      quote.quote_items.ordered.first&.product&.name.presence ||
+      quote.quote_items.ordered.first&.description.presence ||
+      quote.quote_no
   end
 end

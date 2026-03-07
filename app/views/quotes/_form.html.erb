@@ -5,14 +5,15 @@
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% was_viewed = quote.viewed_at.present? %>
-<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specification: p.default_specification.to_s } }.to_json %>
+<% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
+<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specs: p.effective_default_specs, default_addons: p.effective_default_addons, spec_presets: p.available_spec_preset_payloads, addon_presets: p.available_addon_preset_payloads, default_spec_preset_id: p.default_spec_preset_id, default_addon_preset_id: p.default_addon_preset_id } }.to_json %>
 
-<div class="quote-edit-shell" id="quote-edit-root" data-viewed="<%= was_viewed %>">
-  <section class="quote-edit-summary">
+<div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-viewed="<%= was_viewed %>" data-has-errors="<%= quote.errors.any? %>">
+  <section class="quote-edit-summary app-stat-grid quote-edit-summary--workspace">
     <article class="quote-edit-summary-card">
       <span class="summary-label">Current Status</span>
       <strong id="quote-summary-status-text"><%= status_value.capitalize %></strong>
-      <span id="quote-summary-status-badge" class="status-badge status-<%= status_value %>"><%= status_value.capitalize %></span>
+      <span id="quote-summary-status-badge"><%= quote_status_badge(status_value) %></span>
     </article>
     <article class="quote-edit-summary-card quote-edit-summary-card-grand">
       <span class="summary-label">Grand Total</span>
@@ -54,104 +55,137 @@
 
     <%= f.hidden_field :quote_no if quote.quote_no.present? %>
 
-    <section class="quote-form-section">
-      <h3>Basic Information</h3>
+    <section class="quote-form-section quote-form-panel">
+      <div class="app-form-section-head">
+        <h3>Basic Information</h3>
+        <p class="app-form-section-note">Set document identity, template, currency, and validity before building line items.</p>
+      </div>
       <div class="quote-form-grid">
         <div>
           <%= f.label :template_id, "Template" %>
-          <%= f.select :template_id, (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] }, { include_blank: false } %>
+          <%= f.select :template_id,
+                       (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] },
+                       { include_blank: false },
+                       { class: ui_input_classes, data: { searchable_select: true, search_placeholder: "Search template" } } %>
         </div>
         <div>
           <%= f.label :currency %>
-          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD" ], {}, {} %>
+          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD" ], {}, { class: ui_input_classes } %>
         </div>
         <div>
           <%= f.label :issued_on, "Quote date" %>
-          <%= f.date_field :issued_on %>
+          <%= f.date_field :issued_on, class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :valid_until %>
-          <%= f.date_field :valid_until %>
+          <%= f.date_field :valid_until, class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :custom_title, "Custom Quotation Title (optional)" %>
-          <%= f.text_field :custom_title, placeholder: "Project Falcon - Q2 Equipment Package" %>
+          <%= f.text_field :custom_title, placeholder: "Project Falcon - Q2 Equipment Package", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :status %>
-          <%= f.select :status, [["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]], {}, {} %>
+          <%= f.select :status, [["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]], {}, { class: ui_input_classes } %>
         </div>
       </div>
     </section>
 
-    <section class="quote-form-section">
-      <h3>Business Terms</h3>
+    <section class="quote-form-section quote-form-panel">
+      <div class="app-form-section-head">
+        <h3>Business Terms</h3>
+        <p class="app-form-section-note">Capture the commercial terms buyers actually review alongside pricing.</p>
+      </div>
       <div class="quote-form-grid">
         <div>
           <%= f.label :payment_term %>
-          <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment" %>
+          <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :trade_term, "Trade terms" %>
-          <%= f.text_field :trade_term, placeholder: "FOB / CIF / EXW" %>
+          <%= f.text_field :trade_term, placeholder: "FOB / CIF / EXW", class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :delivery_notes %>
-          <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes" %>
+          <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes", class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :terms_text, "Terms" %>
-          <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc." %>
+          <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc.", class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :legal_disclaimer %>
-          <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer" %>
+          <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer", class: ui_input_classes %>
         </div>
       </div>
     </section>
 
-    <section class="quote-form-section">
-      <h3>Internal Information</h3>
+    <section class="quote-form-section quote-form-panel">
+      <div class="app-form-section-head">
+        <h3>Internal Information</h3>
+        <p class="app-form-section-note">Keep internal notes and post-decision data separate from the buyer-facing quote.</p>
+      </div>
       <div class="quote-form-grid">
         <div class="quote-form-grid-span-2">
           <%= f.label :notes %>
-          <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)" %>
+          <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)", class: ui_input_classes %>
         </div>
         <div class="quote-conditional" data-show-when-status="won">
           <%= f.label :final_amount, "Final amount (actual deal)" %>
-          <%= f.number_field :final_amount, step: 0.01, class: "js-final-amount" %>
+          <%= f.number_field :final_amount, step: 0.01, class: ui_input_classes("js-final-amount") %>
+        </div>
+        <div class="quote-conditional" data-show-when-status="won">
+          <%= f.label :win_reason %>
+          <%= f.select :win_reason,
+                       Quote.reason_options_for(:win).map { |reason| [reason.humanize, reason] },
+                       { include_blank: "Select win reason" },
+                       { class: ui_input_classes("js-win-reason") } %>
         </div>
         <div class="quote-conditional" data-show-when-status="lost">
           <%= f.label :loss_reason %>
-          <%= f.text_field :loss_reason, class: "js-loss-reason" %>
+          <%= f.select :loss_reason,
+                       Quote.reason_options_for(:loss).map { |reason| [reason.humanize, reason] },
+                       { include_blank: "Select loss reason" },
+                       { class: ui_input_classes("js-loss-reason") } %>
+        </div>
+        <div class="quote-conditional quote-form-grid-span-2" data-show-when-status="sent,viewed,negotiating,expired">
+          <%= f.label :stalled_reason, "Stalled / pressure reason" %>
+          <%= f.select :stalled_reason,
+                       Quote.reason_options_for(:stalled).map { |reason| [reason.humanize, reason] },
+                       { include_blank: "Select stalled reason" },
+                       { class: ui_input_classes("js-stalled-reason") } %>
         </div>
       </div>
     </section>
 
-    <section class="quote-form-section quote-form-section-totals">
+    <section class="quote-form-section quote-form-section-totals quote-form-panel">
       <div class="quote-totals-inputs">
-        <h3>Totals Inputs</h3>
-        <p class="quote-form-hint quote-money-context">Settlement currency: <strong class="js-currency-code"><%= quote.currency %></strong></p>
+        <div class="app-form-section-head">
+          <h3>Totals Inputs</h3>
+          <p class="app-form-section-note quote-money-context">Settlement currency: <strong class="js-currency-code"><%= quote.currency %></strong></p>
+        </div>
         <div class="quote-form-grid">
           <div>
             <%= f.label :tax_amount, "Tax / VAT" %>
             <div class="quote-money-input">
-              <%= f.number_field :tax_amount, step: 0.01, class: "js-tax-input" %>
+              <%= f.number_field :tax_amount, step: 0.01, class: ui_input_classes("js-tax-input") %>
             </div>
           </div>
           <div>
             <%= f.label :shipping_amount, "Shipping / Handling" %>
             <div class="quote-money-input">
-              <%= f.number_field :shipping_amount, step: 0.01, class: "js-shipping-input" %>
+              <%= f.number_field :shipping_amount, step: 0.01, class: ui_input_classes("js-shipping-input") %>
             </div>
           </div>
-          <div>
+          <div class="quote-discount-row js-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>>
             <%= f.label :discount_amount, "Discount" %>
             <div class="quote-money-input">
-              <%= f.number_field :discount_amount, step: 0.01, class: "js-discount-input" %>
+              <%= f.number_field :discount_amount, step: 0.01, class: ui_input_classes("js-discount-input") %>
             </div>
+            <button type="button" class="quote-inline-link js-remove-discount">Remove discount</button>
           </div>
         </div>
+        <button type="button" class="quote-inline-link js-add-discount" <%= "hidden" if quote.discount_amount.to_d.positive? %>>+ Add Discount</button>
       </div>
 
       <aside class="quote-live-totals">
@@ -160,13 +194,18 @@
         <p><span>Add-ons Total</span><strong id="quote-live-addons"><%= quote_money(add_ons_value, quote.currency) %></strong></p>
         <p><span>Tax / VAT</span><strong id="quote-live-tax"><%= quote_money(quote.tax_amount.to_d, quote.currency) %></strong></p>
         <p><span>Shipping</span><strong id="quote-live-shipping"><%= quote_money(quote.shipping_amount.to_d, quote.currency) %></strong></p>
-        <p><span>Discount</span><strong id="quote-live-discount"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
+        <p class="quote-live-reduction js-live-original-total" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>Original Total</span><strong id="quote-live-original-total"><%= quote_money((subtotal_value + quote.tax_amount.to_d + quote.shipping_amount.to_d), quote.currency) %></strong></p>
+        <p class="quote-live-discount js-live-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>Discount</span><strong id="quote-live-discount"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
         <p class="quote-live-grand"><span>Grand Total</span><strong id="quote-live-grand"><%= quote_money(grand_total_value, quote.currency) %></strong></p>
+        <p class="quote-live-saved js-live-saved-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>You Save</span><strong id="quote-live-saved"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
       </aside>
     </section>
 
-    <section class="quote-form-section">
-      <h3>Quote Items</h3>
+    <section class="quote-form-section quote-form-panel">
+      <div class="app-form-section-head">
+        <h3>Quote Items</h3>
+        <p class="app-form-section-note">Search products, switch presets, and edit specs or add-ons without losing quote context.</p>
+      </div>
       <p class="quote-form-hint">
         Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
       </p>
@@ -174,14 +213,24 @@
         Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
       </p>
       <p class="quote-form-hint">If product reference currency differs from quote currency, unit price will not be auto-filled.</p>
-      <p class="quote-form-hint">Specifications and add-ons use structured rows. No manual <code>key: value</code> typing required.</p>
+      <p class="quote-form-hint">Specifications and add-ons can load from product presets, switch to another preset, or be pasted as text line by line.</p>
       <p class="quote-form-hint quote-form-hint-warning" id="quote-currency-mismatch-warning" hidden>
         Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually.
       </p>
+      <% if monetary_error_messages.any? %>
+        <div class="quote-form-inline-error" role="alert">
+          <strong>Pricing needs attention before this quote can be saved.</strong>
+          <ul>
+            <% monetary_error_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
       <div data-products="<%= products_payload %>" id="quote-items-wrapper">
         <div class="table-responsive quote-items-responsive">
-          <table class="quote-items-table">
+          <table class="quote-items-table app-data-table">
             <thead>
               <tr>
                 <th>Product Name</th>
@@ -207,6 +256,13 @@
                   </td>
                   <%= item_fields.hidden_field :description, class: "js-description" %>
                   <td class="quote-col-specs">
+                    <% spec_payloads = item.product&.available_spec_preset_payloads || [] %>
+                    <select class="js-spec-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_spec_preset_id %>">
+                      <option value="">Custom specs</option>
+                      <% spec_payloads.each do |preset| %>
+                        <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_spec_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
+                      <% end %>
+                    </select>
                     <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
                     <div class="quote-kv-summary js-spec-summary"></div>
                     <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
@@ -239,6 +295,13 @@
                     </div>
                   </td>
                   <td class="quote-col-addons">
+                    <% addon_payloads = item.product&.available_addon_preset_payloads || [] %>
+                    <select class="js-addon-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_addon_preset_id %>">
+                      <option value="">Custom add-ons</option>
+                      <% addon_payloads.each do |preset| %>
+                        <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_addon_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
+                      <% end %>
+                    </select>
                     <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120" %>
                     <div class="quote-kv-summary js-addon-summary"></div>
                     <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
@@ -271,10 +334,10 @@
                     </div>
                   </td>
                   <td class="quote-col-price">
-                    <%= item_fields.number_field :unit_price, step: 0.01, class: "js-unit-price", placeholder: "0.00" %>
+                    <%= item_fields.number_field :unit_price, step: 0.01, class: ui_input_classes("js-unit-price"), placeholder: "0.00" %>
                   </td>
                   <td class="quote-col-qty">
-                    <%= item_fields.number_field :quantity, min: 1, placeholder: "1", class: "js-quantity" %>
+                    <%= item_fields.number_field :quantity, min: 1, placeholder: "1", class: ui_input_classes("js-quantity") %>
                   </td>
                   <td class="quote-col-remove">
                     <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
@@ -287,13 +350,13 @@
         </div>
 
         <div class="quote-form-add-row">
-          <button type="button" class="btn btn-secondary" id="add-quote-item">+ Add Item</button>
+          <button type="button" class="<%= ui_button_classes(:secondary) %>" id="add-quote-item">+ Add Item</button>
         </div>
       </div>
     </section>
 
     <div class="quote-form-submit">
-      <%= f.submit %>
+      <%= f.submit nil, class: ui_button_classes(:primary) %>
     </div>
   <% end %>
 </div>
@@ -311,10 +374,15 @@
     const currencyInput = document.querySelector("[name='quote[currency]']");
     const validUntilInput = document.querySelector("[name='quote[valid_until]']");
     const finalAmountInput = document.querySelector(".js-final-amount");
+    const winReasonInput = document.querySelector(".js-win-reason");
     const lossReasonInput = document.querySelector(".js-loss-reason");
+    const stalledReasonInput = document.querySelector(".js-stalled-reason");
     const taxInput = document.querySelector(".js-tax-input");
     const shippingInput = document.querySelector(".js-shipping-input");
     const discountInput = document.querySelector(".js-discount-input");
+    const discountRow = document.querySelector(".js-discount-row");
+    const addDiscountBtn = document.querySelector(".js-add-discount");
+    const removeDiscountBtn = document.querySelector(".js-remove-discount");
 
     const statusText = document.getElementById("quote-summary-status-text");
     const statusBadge = document.getElementById("quote-summary-status-badge");
@@ -327,7 +395,12 @@
     const liveTax = document.getElementById("quote-live-tax");
     const liveShipping = document.getElementById("quote-live-shipping");
     const liveDiscount = document.getElementById("quote-live-discount");
+    const liveOriginalTotal = document.getElementById("quote-live-original-total");
     const liveGrand = document.getElementById("quote-live-grand");
+    const liveSaved = document.getElementById("quote-live-saved");
+    const liveDiscountRow = document.querySelector(".js-live-discount-row");
+    const liveOriginalRow = document.querySelector(".js-live-original-total");
+    const liveSavedRow = document.querySelector(".js-live-saved-row");
     const mismatchWarning = document.getElementById("quote-currency-mismatch-warning");
 
     const statusLabels = {
@@ -338,6 +411,15 @@
       won: "Won",
       lost: "Lost",
       expired: "Expired"
+    };
+    const statusBadgeClasses = {
+      draft: "app-status-badge app-status-badge--blue",
+      sent: "app-status-badge app-status-badge--blue",
+      viewed: "app-status-badge app-status-badge--indigo",
+      negotiating: "app-status-badge app-status-badge--amber",
+      won: "app-status-badge app-status-badge--green",
+      lost: "app-status-badge app-status-badge--red",
+      expired: "app-status-badge app-status-badge--red"
     };
 
     const currencySymbols = {
@@ -353,6 +435,7 @@
     };
 
     let rowCounter = body.querySelectorAll(".quote-item-row").length;
+    let discountEnabled = !!(discountRow && !discountRow.hidden);
 
     function parseNumber(value) {
       const number = parseFloat(value || "0");
@@ -460,10 +543,18 @@
       const tax = parseNumber(taxInput?.value);
       const shipping = parseNumber(shippingInput?.value);
       const discount = parseNumber(discountInput?.value);
+      const originalTotal = subtotal + tax + shipping;
       const grandTotal = subtotal + tax + shipping - discount;
       const discountRate = subtotal > 0 ? ((discount / subtotal) * 100) : 0;
 
-      return { subtotal, addonTotal, tax, shipping, discount, grandTotal, discountRate };
+      return { subtotal, addonTotal, tax, shipping, discount, originalTotal, grandTotal, discountRate };
+    }
+
+    function toggleDiscountVisibility(enabled) {
+      discountEnabled = !!enabled;
+      if (discountRow) discountRow.hidden = !enabled;
+      if (addDiscountBtn) addDiscountBtn.hidden = enabled;
+      if (!enabled && discountInput) discountInput.value = "0";
     }
 
     function updateTotalsUI() {
@@ -474,10 +565,18 @@
       liveAddons.textContent = formatMoney(totals.addonTotal, code);
       liveTax.textContent = formatMoney(totals.tax, code);
       liveShipping.textContent = formatMoney(totals.shipping, code);
-      liveDiscount.textContent = formatMoney(totals.discount, code);
+      if (liveDiscount) liveDiscount.textContent = formatMoney(totals.discount, code);
+      if (liveOriginalTotal) liveOriginalTotal.textContent = formatMoney(totals.originalTotal, code);
       liveGrand.textContent = formatMoney(totals.grandTotal, code);
+      if (liveSaved) liveSaved.textContent = formatMoney(totals.discount, code);
       summaryGrand.textContent = formatMoney(totals.grandTotal, code);
       summaryDiscount.textContent = `${totals.discountRate.toFixed(2)}%`;
+      const hasDiscount = totals.discount > 0;
+      if (hasDiscount) discountEnabled = true;
+      if (liveDiscountRow) liveDiscountRow.hidden = !hasDiscount;
+      if (liveOriginalRow) liveOriginalRow.hidden = !hasDiscount;
+      if (liveSavedRow) liveSavedRow.hidden = !hasDiscount;
+      toggleDiscountVisibility(hasDiscount || discountEnabled);
       refreshCurrencyMismatchWarning();
       return totals;
     }
@@ -504,6 +603,24 @@
           <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove add-on">&times;</button>
         </div>
       `;
+    }
+
+    function specsToText(specs) {
+      return Array(specs).map((entry) => {
+        const name = entry?.name || entry?.["name"];
+        const value = entry?.value || entry?.["value"];
+        if (!name || !value) return null;
+        return `${name}: ${value}`;
+      }).filter(Boolean).join("\n");
+    }
+
+    function addonsToText(addons) {
+      return Array(addons).map((entry) => {
+        const name = entry?.name || entry?.["name"];
+        const price = entry?.price || entry?.["price"] || entry?.amount || entry?.["amount"];
+        if (!name || price === undefined || price === null || price === "") return null;
+        return `${name}: ${price}`;
+      }).filter(Boolean).join("\n");
     }
 
     function parseSpecPairsFromText(text) {
@@ -588,18 +705,24 @@
       const label = statusLabels[status] || status;
       if (statusText) statusText.textContent = label;
       if (statusBadge) {
-        statusBadge.className = `status-badge status-${status}`;
-        statusBadge.textContent = label;
+        const badgeClasses = statusBadgeClasses[status] || "app-status-badge app-status-badge--slate";
+        statusBadge.innerHTML = `<span class="${badgeClasses}">${label}</span>`;
       }
 
       document.querySelectorAll("[data-show-when-status]").forEach((element) => {
-        const expected = (element.dataset.showWhenStatus || "").toLowerCase();
-        const visible = expected === status;
+        const expected = (element.dataset.showWhenStatus || "")
+          .toLowerCase()
+          .split(",")
+          .map((value) => value.trim())
+          .filter(Boolean);
+        const visible = expected.includes(status);
         element.style.display = visible ? "" : "none";
       });
 
       if (finalAmountInput) finalAmountInput.required = status === "won";
+      if (winReasonInput) winReasonInput.required = status === "won";
       if (lossReasonInput) lossReasonInput.required = status === "lost";
+      if (stalledReasonInput) stalledReasonInput.required = false;
 
       if (status === "won" && finalAmountInput && !String(finalAmountInput.value || "").trim()) {
         const totals = calculateTotals();
@@ -690,6 +813,8 @@
       const qtyInput = row.querySelector(".js-quantity");
       const addonInput = row.querySelector(".js-addon-charges");
       const specsInput = row.querySelector(".js-specifications");
+      const specPresetSelect = row.querySelector(".js-spec-preset-select");
+      const addonPresetSelect = row.querySelector(".js-addon-preset-select");
       const specsEditor = row.querySelector(".js-spec-editor");
       const addonEditor = row.querySelector(".js-addon-editor");
       const specSummary = row.querySelector(".js-spec-summary");
@@ -789,6 +914,71 @@
         syncSpecsText();
       }
 
+      function clearAddonEditor() {
+        if (!addonEditor || !addonInput) return;
+        const rowsWrap = addonEditor.querySelector(".js-kv-rows");
+        if (!rowsWrap) return;
+        rowsWrap.innerHTML = createAddonRow();
+        syncAddonText();
+        updateTotalsUI();
+      }
+
+      function fillSelect(select, presets, defaultId, customLabel) {
+        if (!select) return;
+        const selectedBefore = select.value;
+        const options = [`<option value="">${customLabel}</option>`].concat(
+          (presets || []).map((preset) => `<option value="${escapeHtml(String(preset.id))}">${escapeHtml(preset.name)}</option>`)
+        );
+        select.innerHTML = options.join("");
+        select.dataset.defaultId = defaultId ? String(defaultId) : "";
+
+        const fallbackPresetId = defaultId ? String(defaultId) : ((presets || [])[0] ? String(presets[0].id) : "");
+        const nextValue = selectedBefore && (presets || []).some((preset) => String(preset.id) === String(selectedBefore)) ? selectedBefore : fallbackPresetId;
+        select.value = nextValue;
+      }
+
+      function specPresetById(selected, presetId) {
+        return (selected?.spec_presets || []).find((preset) => String(preset.id) === String(presetId));
+      }
+
+      function addonPresetById(selected, presetId) {
+        return (selected?.addon_presets || []).find((preset) => String(preset.id) === String(presetId));
+      }
+
+      function applySpecPreset(selected, presetId, previousProductId) {
+        const preset = specPresetById(selected, presetId);
+        if (specsInput) {
+          if (preset?.entries?.length) {
+            specsInput.value = normalizeSpecificationText(specsToText(preset.entries));
+            setSpecEditorFromText(specsInput.value);
+          } else if (previousProductId !== String(selected.id)) {
+            clearSpecEditor();
+          }
+        }
+      }
+
+      function applyAddonPreset(selected, presetId, previousProductId) {
+        const preset = addonPresetById(selected, presetId);
+        if (addonInput) {
+          if (preset?.entries?.length) {
+            addonInput.value = addonsToText(preset.entries);
+            if (addonBulkInput) {
+              addonBulkInput.value = addonInput.value;
+              renderAddonBulkCheck();
+            }
+            const parsedAddons = parseAddonRowsFromText(addonInput.value);
+            const rowsWrap = addonEditor?.querySelector(".js-kv-rows");
+            if (rowsWrap && parsedAddons.rows.length) {
+              rowsWrap.innerHTML = parsedAddons.rows.map((entry) => createAddonRow(entry.name, entry.amount)).join("");
+              refreshCurrencyCodeTags();
+              syncAddonText();
+            }
+          } else if (previousProductId !== String(selected.id)) {
+            clearAddonEditor();
+          }
+        }
+      }
+
       function applyProductSelection(selected) {
         if (!selected) return;
         const previousProductId = String(productIdInput.value || "");
@@ -802,15 +992,10 @@
         }
         if (!descInput.value) descInput.value = selected.name;
 
-        const normalizedDefaultSpec = normalizeSpecificationText(selected.default_specification || "");
-        if (specsInput) {
-          if (normalizedDefaultSpec) {
-            specsInput.value = normalizedDefaultSpec;
-            setSpecEditorFromText(specsInput.value);
-          } else if (previousProductId !== String(selected.id)) {
-            clearSpecEditor();
-          }
-        }
+        fillSelect(specPresetSelect, selected.spec_presets || [], selected.default_spec_preset_id, "Custom specs");
+        fillSelect(addonPresetSelect, selected.addon_presets || [], selected.default_addon_preset_id, "Custom add-ons");
+        applySpecPreset(selected, specPresetSelect?.value || selected.default_spec_preset_id || selected.spec_presets?.[0]?.id || "", previousProductId);
+        applyAddonPreset(selected, addonPresetSelect?.value || selected.default_addon_preset_id || selected.addon_presets?.[0]?.id || "", previousProductId);
 
         productNameInput.classList.add("is-matched");
         if (isCurrencyMismatch) {
@@ -899,6 +1084,21 @@
       }
       if (qtyInput) {
         qtyInput.addEventListener("input", updateTotalsUI);
+      }
+      if (specPresetSelect) {
+        specPresetSelect.addEventListener("change", () => {
+          const selectedProduct = products.find((p) => String(p.id) === String(productIdInput.value));
+          if (!selectedProduct) return;
+          applySpecPreset(selectedProduct, specPresetSelect.value, String(selectedProduct.id));
+        });
+      }
+      if (addonPresetSelect) {
+        addonPresetSelect.addEventListener("change", () => {
+          const selectedProduct = products.find((p) => String(p.id) === String(productIdInput.value));
+          if (!selectedProduct) return;
+          applyAddonPreset(selectedProduct, addonPresetSelect.value, String(selectedProduct.id));
+          updateTotalsUI();
+        });
       }
       function syncSpecsText() {
         if (!specsInput || !specsEditor) return;
@@ -1267,6 +1467,9 @@
           <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description">
         </td>
         <td class="quote-col-specs">
+          <select class="js-spec-preset-select quote-inline-select" data-default-id="">
+            <option value="">Custom specs</option>
+          </select>
           <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
           <div class="quote-kv-summary js-spec-summary"></div>
           <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
@@ -1292,6 +1495,9 @@
           </div>
         </td>
         <td class="quote-col-addons">
+          <select class="js-addon-preset-select quote-inline-select" data-default-id="">
+            <option value="">Custom add-ons</option>
+          </select>
           <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
           <div class="quote-kv-summary js-addon-summary"></div>
           <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
@@ -1343,6 +1549,22 @@
       input.addEventListener("change", updateTotalsUI);
     });
 
+    if (addDiscountBtn) {
+      addDiscountBtn.addEventListener("click", () => {
+        toggleDiscountVisibility(true);
+        if (discountInput && parseNumber(discountInput.value) <= 0) discountInput.value = "0.00";
+        if (discountInput) discountInput.focus();
+        updateTotalsUI();
+      });
+    }
+
+    if (removeDiscountBtn) {
+      removeDiscountBtn.addEventListener("click", () => {
+        toggleDiscountVisibility(false);
+        updateTotalsUI();
+      });
+    }
+
     if (statusInput) {
       statusInput.addEventListener("change", () => {
         applyStatusUI();
@@ -1357,5 +1579,14 @@
     updateTotalsUI();
     updateExpirySummary();
     applyStatusUI();
+
+    if (root.dataset.hasErrors === "true") {
+      const errorTarget = document.querySelector(".quote-form-inline-error, .error-messages");
+      if (errorTarget) {
+        setTimeout(() => {
+          errorTarget.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 120);
+      }
+    }
   })();
 </script>

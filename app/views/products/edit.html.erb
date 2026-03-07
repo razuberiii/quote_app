@@ -1,7 +1,14 @@
-<h1>Edit Product: <%= @product.name %></h1>
+<section class="app-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1>Edit Product</h1>
+      <p>Update pricing, media, description, and default preset bindings for <strong><%= @product.name %></strong>.</p>
+    </div>
+  </header>
 
-<%= render "form",
-           product: @product,
-           submit_label: "Update Product",
-           back_path: @product,
-           back_label: "Back to Product" %>
+  <%= render "form",
+             product: @product,
+             submit_label: "Update Product",
+             back_path: @product,
+             back_label: "Back to Product" %>
+</section>

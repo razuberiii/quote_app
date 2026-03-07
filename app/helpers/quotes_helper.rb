@@ -1,10 +1,10 @@
 module QuotesHelper
   def quote_money(amount, currency, show_code: false, show_symbol: true)
     code = currency.to_s.upcase.presence || "USD"
-    return number_with_precision(amount.to_d, precision: 2) unless show_symbol
+    return number_with_precision(amount.to_d, precision: 2, delimiter: ",") unless show_symbol
 
     symbol = Quote.currency_symbol_for(code)
-    formatted = number_with_precision(amount.to_d, precision: 2)
+    formatted = number_with_precision(amount.to_d, precision: 2, delimiter: ",")
     base = symbol == code ? "#{code} #{formatted}" : "#{symbol}#{formatted}"
     show_code && symbol != code ? "#{base} #{code}" : base
   end

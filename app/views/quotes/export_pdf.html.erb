@@ -191,10 +191,10 @@
     <% if has_discount %>
       <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
     <% end %>
-    <% if (closing_message = @template.resolved_closing_message).present? %>
-      <p class="quote-engagement-note"><%= closing_message %></p>
-    <% end %>
   </aside>
+  <% if (closing_message = @template.resolved_closing_message).present? %>
+    <p class="quote-engagement-note pdf-engagement-note"><%= closing_message %></p>
+  <% end %>
 
   <% if terms_lines.any? %>
     <section class="quote-section-block">

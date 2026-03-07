@@ -22,7 +22,7 @@ class QuoteDecisionReviewService
         label: "Move to fulfillment",
         detail: "Buyer has already accepted this revision. Shift from selling to delivery handoff."
       }
-    elsif @quote.reopened_at.present?
+    elsif reopened_pending?
       {
         tone: "watch",
         label: "Update and reshare",
@@ -126,7 +126,7 @@ class QuoteDecisionReviewService
     notes << "First viewed on #{format_date(first_view_at)}." if first_view_at.present?
     notes << "Shared #{share_count} time#{'s' unless share_count == 1}." if share_count.positive?
     notes << "Valid until #{@quote.valid_until.strftime('%Y-%m-%d')}." if @quote.valid_until.present?
-    notes << "Revision reopened on #{format_date(@quote.reopened_at)}." if @quote.reopened_at.present?
+    notes << "Revision reopened on #{format_date(@quote.reopened_at)}." if reopened_pending?
     notes.first(4)
   end
 
@@ -146,8 +146,18 @@ class QuoteDecisionReviewService
     @share_count ||= @quote.quote_shares.size
   end
 
+  def latest_share_at
+    @latest_share_at ||= @quote.quote_shares.maximum(:created_at)
+  end
+
   def expiring_soon?
     @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+  end
+
+  def reopened_pending?
+    return false if @quote.reopened_at.blank?
+
+    latest_share_at.blank? || latest_share_at < @quote.reopened_at
   end
 
   def format_date(value)

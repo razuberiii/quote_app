@@ -1,5 +1,5 @@
 <section class="app-page-shell">
-  <div id="quote-page-content">
+  <div id="quote-page-content" data-refresh-url="<%= quote_path(@quote, request.query_parameters.merge(format: :turbo_stream)) %>">
     <%= render "show_content" %>
   </div>
 
@@ -28,6 +28,8 @@
         window.setTimeout(() => { el.hidden = true; }, 220);
       }, 1600);
     };
+
+    window.refreshQuoteState = async (force = false) => {};
 
     document.addEventListener("change", async (event) => {
       const select = event.target.closest(".js-template-select");
@@ -201,5 +203,52 @@
         closeReminderModal(event.target);
       }
     });
+  })();
+
+  (() => {
+    if (window.__quoteLiveRefreshBound) return;
+    window.__quoteLiveRefreshBound = true;
+
+    const container = document.getElementById("quote-page-content");
+    if (!container) return;
+
+    let inFlight = false;
+    let lastRefreshAt = 0;
+
+    const refreshQuoteState = async (force = false) => {
+      if (inFlight) return;
+      if (!force && document.hidden) return;
+
+      const now = Date.now();
+      if (!force && now - lastRefreshAt < 12000) return;
+
+      const refreshUrl = container.dataset.refreshUrl;
+      if (!refreshUrl) return;
+
+      inFlight = true;
+      try {
+        const response = await fetch(refreshUrl, {
+          headers: { "Accept": "text/vnd.turbo-stream.html" },
+          credentials: "same-origin"
+        });
+        if (!response.ok) throw new Error("refresh failed");
+
+        const streamHtml = await response.text();
+        if (streamHtml.trim()) Turbo.renderStreamMessage(streamHtml);
+        lastRefreshAt = Date.now();
+      } catch (_) {
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    window.refreshQuoteState = refreshQuoteState;
+
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) refreshQuoteState(true);
+    });
+
+    window.addEventListener("focus", () => refreshQuoteState(true));
+    window.setInterval(() => refreshQuoteState(false), 15000);
   })();
 </script>

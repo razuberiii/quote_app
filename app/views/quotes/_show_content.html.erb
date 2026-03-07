@@ -610,6 +610,7 @@
           showPanel("Public link ready. Copy manually if needed.");
           window.showAppToast?.("Public link ready. Copy manually if needed.", "warn");
         }
+        window.setTimeout(() => window.refreshQuoteState?.(true), 120);
       } catch (error) {
         currentShareUrl = "";
         openLink.href = "#";

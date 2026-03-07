@@ -2,7 +2,13 @@
 
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
-<div class="quote-document quote-document-shell<%= " quote-watermarked" if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+<% workflow_state = @quote.workflow_state %>
+<% current_latest_revision = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
+<div class="quote-document quote-document-shell<%= " quote-watermarked" if watermark_text.present? %>"
+     data-watermark="<%= watermark_text %>"
+     data-has-newer-revision="<%= @has_newer_revision ? "true" : "false" %>"
+     data-current-latest="<%= current_latest_revision ? "true" : "false" %>"
+     style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
   <% end %>
@@ -35,10 +41,23 @@
       This quote was reopened for editing. Public decision actions are now disabled until you share an updated version.
     </p>
   <% end %>
-  <% days_left = @quote.valid_until.present? ? (@quote.valid_until - Date.current).to_i : nil %>
-  <% total_views = @quote.quote_shares.sum(&:view_count) %>
-  <% viewed_flag = @quote.viewed_at.present? || total_views.positive? %>
-  <% urgency_text =
+<% days_left = @quote.valid_until.present? ? (@quote.valid_until - Date.current).to_i : nil %>
+<% total_views = @quote.quote_shares.sum(&:view_count) %>
+<% viewed_flag = @quote.viewed_at.present? || total_views.positive? %>
+<% next_action_text =
+    case workflow_state
+    when "lost"
+      "Create a new revision if buyer interest returns"
+    when "accepted"
+      "Move to fulfillment and handoff"
+    when "draft"
+      "Finish edits and reshare the latest revision"
+    when "expired"
+      "Follow up with a new revision or close the thread"
+    else
+      viewed_flag ? "Discuss terms and close" : "Share public link to trigger first view"
+    end %>
+<% urgency_text =
       if days_left.nil?
         "No expiry date set."
       elsif days_left.negative?
@@ -59,7 +78,7 @@
     </div>
     <div class="quote-signal-item">
       <span class="quote-signal-label">Next Action</span>
-      <strong><%= viewed_flag ? "Discuss terms and close" : "Share public link to trigger first view" %></strong>
+      <strong><%= next_action_text %></strong>
     </div>
   </section>
 
@@ -165,13 +184,13 @@
         <% end %>
         <p class="quote-info-row"><span>Status</span><strong><%= @quote.status&.capitalize %></strong></p>
         <% if @quote.win_reason.present? %>
-          <p class="quote-info-row"><span>Win Reason</span><strong><%= @quote.win_reason.humanize %></strong></p>
+          <p class="quote-info-row"><span>Win Reason</span><strong><%= @quote.display_win_reason %></strong></p>
         <% end %>
         <% if @quote.loss_reason.present? %>
-          <p class="quote-info-row"><span>Loss Reason</span><strong><%= @quote.loss_reason.humanize %></strong></p>
+          <p class="quote-info-row"><span>Loss Reason</span><strong><%= @quote.display_loss_reason %></strong></p>
         <% end %>
         <% if @quote.stalled_reason.present? %>
-          <p class="quote-info-row"><span>Stalled Reason</span><strong><%= @quote.stalled_reason.humanize %></strong></p>
+          <p class="quote-info-row"><span>Stalled Reason</span><strong><%= @quote.display_stalled_reason %></strong></p>
         <% end %>
         <% if @quote.accepted_at.present? %>
           <p class="quote-info-row"><span>Accepted At</span><strong><%= @quote.accepted_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
@@ -523,20 +542,36 @@
     button.dataset.bound = "true";
 
     const csrf = document.querySelector("meta[name='csrf-token']")?.content;
-    let timer = null;
+    const sharePanelState = window.__quoteSharePanelState || {
+      visible: false,
+      message: "",
+      isError: false,
+      currentShareUrl: "",
+      openHref: "#",
+      openHidden: true
+    };
+    window.__quoteSharePanelState = sharePanelState;
     let currentShareUrl = "";
+
+    const syncPanelState = () => {
+      sharePanelState.visible = !panel.hidden;
+      sharePanelState.message = message.textContent || "";
+      sharePanelState.isError = panel.classList.contains("is-error");
+      sharePanelState.currentShareUrl = currentShareUrl;
+      sharePanelState.openHref = openLink.getAttribute("href") || "#";
+      sharePanelState.openHidden = openLink.hidden;
+    };
 
     const showPanel = (text, isError = false) => {
       message.textContent = text;
       panel.classList.toggle("is-error", isError);
       panel.hidden = false;
-      if (timer) window.clearTimeout(timer);
-      timer = window.setTimeout(() => { panel.hidden = true; }, 4200);
+      syncPanelState();
     };
 
     const hidePanel = () => {
       panel.hidden = true;
-      if (timer) window.clearTimeout(timer);
+      syncPanelState();
     };
 
     const copyText = async (text) => {
@@ -597,6 +632,7 @@
           openLink.href = `${payload.url}${separator}preview=1`;
         }
         openLink.hidden = false;
+        syncPanelState();
         if (lastSharedAt) {
           const now = new Date();
           const pad = (n) => String(n).padStart(2, "0");
@@ -615,6 +651,7 @@
         currentShareUrl = "";
         openLink.href = "#";
         openLink.hidden = true;
+        syncPanelState();
         showPanel(error.message || "Share failed", true);
         window.showAppToast?.(error.message || "Share failed", "error");
       } finally {
@@ -642,6 +679,15 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape") hidePanel();
     });
+
+    currentShareUrl = sharePanelState.currentShareUrl || "";
+    openLink.href = sharePanelState.openHref || "#";
+    openLink.hidden = sharePanelState.openHidden !== false;
+    if (sharePanelState.visible) {
+      showPanel(sharePanelState.message || "Public link ready.", !!sharePanelState.isError);
+    } else {
+      hidePanel();
+    }
   })();
 
   (() => {

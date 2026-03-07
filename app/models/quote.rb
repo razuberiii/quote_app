@@ -64,6 +64,7 @@ class Quote < ApplicationRecord
   before_validation :normalize_status
   before_validation :apply_auto_expired_status
   before_validation :set_final_amount_from_grand_total_for_won
+  before_validation :sync_status_transition_timestamps
   before_validation :set_defaults
   after_commit :refresh_related_product_stats, if: :saved_change_to_status?
 
@@ -76,6 +77,7 @@ class Quote < ApplicationRecord
   validate :final_amount_required_for_won
   validate :loss_reason_required_for_lost
   validate :win_reason_required_for_won
+  validate :custom_reason_details_required_for_other
   validate :reason_values_are_allowed
   validate :monetary_values_fit_storage_precision
   validate :grand_total_fits_storage_precision
@@ -106,6 +108,27 @@ class Quote < ApplicationRecord
     negotiated? && final_amount.present? ? final_amount : grand_total
   end
 
+  def display_win_reason
+    return if win_reason.blank?
+    return win_reason_detail if win_reason == "other" && win_reason_detail.present?
+
+    win_reason.humanize
+  end
+
+  def display_loss_reason
+    return if loss_reason.blank?
+    return loss_reason_detail if loss_reason == "other" && loss_reason_detail.present?
+
+    loss_reason.humanize
+  end
+
+  def display_stalled_reason
+    return if stalled_reason.blank?
+    return stalled_reason_detail if stalled_reason == "other" && stalled_reason_detail.present?
+
+    stalled_reason.humanize
+  end
+
   def latest_revision_for_quote_no?
     relation = self.class.where(company_id: company_id, quote_no: quote_no)
     relation = relation.where(archived_at: nil) if self.class.column_names.include?("archived_at")
@@ -131,14 +154,14 @@ class Quote < ApplicationRecord
   end
 
   def can_create_new_revision?
-    !archived? && %w[sent viewed negotiating].include?(workflow_state) && latest_revision_for_quote_no?
+    !archived? && %w[sent viewed negotiating lost].include?(workflow_state) && latest_revision_for_quote_no?
   end
 
   def can_reopen?
     return false if archived?
     return false unless latest_revision_for_quote_no?
 
-    %w[sent viewed negotiating].include?(workflow_state)
+    %w[sent viewed negotiating accepted].include?(workflow_state) || status.to_s == "won"
   end
 
   def can_delete_revision?
@@ -246,8 +269,11 @@ class Quote < ApplicationRecord
       negotiated: negotiated,
       final_amount: final_amount,
       win_reason: win_reason,
+      win_reason_detail: win_reason_detail,
       loss_reason: loss_reason,
+      loss_reason_detail: loss_reason_detail,
       stalled_reason: stalled_reason,
+      stalled_reason_detail: stalled_reason_detail,
       custom_title: custom_title,
       spec_label: spec_label,
       addon_label: addon_label,
@@ -259,6 +285,8 @@ class Quote < ApplicationRecord
       legal_disclaimer: legal_disclaimer,
       delivery_notes: delivery_notes,
       accepted_at: nil,
+      won_at: nil,
+      lost_at: nil,
       changes_requested_at: nil,
       changes_request_message: nil,
       request_reason: request_reason,
@@ -357,6 +385,20 @@ class Quote < ApplicationRecord
     self.final_amount = grand_total
   end
 
+  def sync_status_transition_timestamps
+    return unless will_save_change_to_status?
+
+    normalized_status = normalize_status_value(status)
+
+    if normalized_status == "won" && self.class.column_names.include?("won_at")
+      self.won_at = Time.current
+    end
+
+    if normalized_status == "lost" && self.class.column_names.include?("lost_at")
+      self.lost_at = Time.current
+    end
+  end
+
   def final_amount_required_for_won
     return unless normalize_status_value(status) == "won"
     return if final_amount.present?
@@ -376,6 +418,20 @@ class Quote < ApplicationRecord
     return if win_reason.present?
 
     errors.add(:win_reason, "is required when quote status is Won")
+  end
+
+  def custom_reason_details_required_for_other
+    if normalize_status_value(status) == "won" && win_reason == "other" && win_reason_detail.blank?
+      errors.add(:win_reason_detail, "is required when Win reason is Other")
+    end
+
+    if normalize_status_value(status) == "lost" && loss_reason == "other" && loss_reason_detail.blank?
+      errors.add(:loss_reason_detail, "is required when Loss reason is Other")
+    end
+
+    if OPEN_STATUSES.include?(normalize_status_value(status)) && stalled_reason == "other" && stalled_reason_detail.blank?
+      errors.add(:stalled_reason_detail, "is required when Stalled reason is Other")
+    end
   end
 
   def monetary_values_fit_storage_precision

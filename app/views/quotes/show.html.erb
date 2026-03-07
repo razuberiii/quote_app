@@ -1,5 +1,8 @@
 <section class="app-page-shell">
-  <div id="quote-page-content" data-refresh-url="<%= quote_path(@quote, request.query_parameters.merge(format: :turbo_stream)) %>">
+  <% live_refresh_enabled = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
+  <div id="quote-page-content"
+       data-refresh-url="<%= quote_path(@quote, request.query_parameters.merge(format: :turbo_stream)) %>"
+       data-live-refresh="<%= live_refresh_enabled %>">
     <%= render "show_content" %>
   </div>
 
@@ -211,11 +214,36 @@
 
     const container = document.getElementById("quote-page-content");
     if (!container) return;
+    if (container.dataset.liveRefresh !== "true") return;
 
     let inFlight = false;
     let lastRefreshAt = 0;
+    let intervalId = null;
+
+    const stopLiveRefresh = () => {
+      container.dataset.liveRefresh = "false";
+      if (intervalId) {
+        window.clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    const syncRefreshEligibility = () => {
+      const doc = container.querySelector(".quote-document");
+      if (doc?.dataset.currentLatest !== "true") {
+        stopLiveRefresh();
+        return false;
+      }
+      if (doc?.dataset.hasNewerRevision === "true") {
+        stopLiveRefresh();
+        return false;
+      }
+
+      return container.dataset.liveRefresh === "true";
+    };
 
     const refreshQuoteState = async (force = false) => {
+      if (!syncRefreshEligibility()) return;
       if (inFlight) return;
       if (!force && document.hidden) return;
 
@@ -234,7 +262,10 @@
         if (!response.ok) throw new Error("refresh failed");
 
         const streamHtml = await response.text();
-        if (streamHtml.trim()) Turbo.renderStreamMessage(streamHtml);
+        if (streamHtml.trim()) {
+          Turbo.renderStreamMessage(streamHtml);
+          syncRefreshEligibility();
+        }
         lastRefreshAt = Date.now();
       } catch (_) {
       } finally {
@@ -249,6 +280,6 @@
     });
 
     window.addEventListener("focus", () => refreshQuoteState(true));
-    window.setInterval(() => refreshQuoteState(false), 15000);
+    intervalId = window.setInterval(() => refreshQuoteState(false), 15000);
   })();
 </script>

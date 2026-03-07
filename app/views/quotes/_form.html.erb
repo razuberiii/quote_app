@@ -5,6 +5,7 @@
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% was_viewed = quote.viewed_at.present? %>
+<% submit_loading_label = quote.persisted? ? "Updating..." : "Creating..." %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
 <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specs: p.effective_default_specs, default_addons: p.effective_default_addons, spec_presets: p.available_spec_preset_payloads, addon_presets: p.available_addon_preset_payloads, default_spec_preset_id: p.default_spec_preset_id, default_addon_preset_id: p.default_addon_preset_id } }.to_json %>
 
@@ -41,7 +42,7 @@
     </article>
   </section>
 
-  <%= form_with model: form_model do |f| %>
+  <%= form_with model: form_model, html: { id: "quote-form", novalidate: true } do |f| %>
     <% if quote.errors.any? %>
       <div class="error-messages">
         <h2><%= pluralize(quote.errors.count, "error") %> prevented this quote from being saved:</h2>
@@ -52,6 +53,11 @@
         </ul>
       </div>
     <% end %>
+
+    <div class="quote-form-inline-error js-quote-client-error" role="alert" hidden>
+      <strong>Please complete the required fields before saving.</strong>
+      <ul class="js-quote-client-error-list"></ul>
+    </div>
 
     <%= f.hidden_field :quote_no if quote.quote_no.present? %>
 
@@ -141,6 +147,12 @@
                        { include_blank: "Select win reason" },
                        { class: ui_input_classes("js-win-reason") } %>
         </div>
+        <div class="quote-conditional quote-conditional-detail" data-show-when-status="won" data-reason-detail-for="win">
+          <%= f.label :win_reason_detail, "Win reason details" %>
+          <%= f.text_field :win_reason_detail,
+                           placeholder: "Describe the specific win reason",
+                           class: ui_input_classes("js-win-reason-detail") %>
+        </div>
         <div class="quote-conditional" data-show-when-status="lost">
           <%= f.label :loss_reason %>
           <%= f.select :loss_reason,
@@ -148,12 +160,24 @@
                        { include_blank: "Select loss reason" },
                        { class: ui_input_classes("js-loss-reason") } %>
         </div>
+        <div class="quote-conditional quote-conditional-detail" data-show-when-status="lost" data-reason-detail-for="loss">
+          <%= f.label :loss_reason_detail, "Loss reason details" %>
+          <%= f.text_field :loss_reason_detail,
+                           placeholder: "Describe the specific loss reason",
+                           class: ui_input_classes("js-loss-reason-detail") %>
+        </div>
         <div class="quote-conditional quote-form-grid-span-2" data-show-when-status="sent,viewed,negotiating,expired">
           <%= f.label :stalled_reason, "Stalled / pressure reason" %>
           <%= f.select :stalled_reason,
                        Quote.reason_options_for(:stalled).map { |reason| [reason.humanize, reason] },
                        { include_blank: "Select stalled reason" },
                        { class: ui_input_classes("js-stalled-reason") } %>
+        </div>
+        <div class="quote-conditional quote-conditional-detail quote-form-grid-span-2" data-show-when-status="sent,viewed,negotiating,expired" data-reason-detail-for="stalled">
+          <%= f.label :stalled_reason_detail, "Pressure reason details" %>
+          <%= f.text_field :stalled_reason_detail,
+                           placeholder: "Describe the specific blocker or pressure",
+                           class: ui_input_classes("js-stalled-reason-detail") %>
         </div>
       </div>
     </section>
@@ -356,7 +380,7 @@
     </section>
 
     <div class="quote-form-submit">
-      <%= f.submit nil, class: ui_button_classes(:primary) %>
+      <%= f.submit nil, class: ui_button_classes(:primary), data: { default_label: (quote.persisted? ? "Update Quote" : "Create Quote") } %>
     </div>
   <% end %>
 </div>
@@ -365,6 +389,7 @@
   (function() {
     const root = document.getElementById("quote-edit-root");
     const wrapper = document.getElementById("quote-items-wrapper");
+    const form = document.getElementById("quote-form");
     if (!wrapper || !root) return;
 
     const products = JSON.parse(wrapper.dataset.products || "[]");
@@ -375,8 +400,11 @@
     const validUntilInput = document.querySelector("[name='quote[valid_until]']");
     const finalAmountInput = document.querySelector(".js-final-amount");
     const winReasonInput = document.querySelector(".js-win-reason");
+    const winReasonDetailInput = document.querySelector(".js-win-reason-detail");
     const lossReasonInput = document.querySelector(".js-loss-reason");
+    const lossReasonDetailInput = document.querySelector(".js-loss-reason-detail");
     const stalledReasonInput = document.querySelector(".js-stalled-reason");
+    const stalledReasonDetailInput = document.querySelector(".js-stalled-reason-detail");
     const taxInput = document.querySelector(".js-tax-input");
     const shippingInput = document.querySelector(".js-shipping-input");
     const discountInput = document.querySelector(".js-discount-input");
@@ -402,6 +430,9 @@
     const liveOriginalRow = document.querySelector(".js-live-original-total");
     const liveSavedRow = document.querySelector(".js-live-saved-row");
     const mismatchWarning = document.getElementById("quote-currency-mismatch-warning");
+    const submitButton = form?.querySelector("input[type='submit'], button[type='submit']");
+    const clientErrorBox = form?.querySelector(".js-quote-client-error");
+    const clientErrorList = form?.querySelector(".js-quote-client-error-list");
 
     const statusLabels = {
       draft: "Draft",
@@ -581,6 +612,77 @@
       return totals;
     }
 
+    function fieldLabel(field) {
+      if (!field || !form) return "This field";
+      const id = field.id;
+      if (id) {
+        const label = form.querySelector(`label[for='${CSS.escape(id)}']`);
+        if (label) return label.textContent.replace(/\s+/g, " ").trim();
+      }
+
+      const section = field.closest("td, div");
+      const fallbackLabel = section?.querySelector("label");
+      return fallbackLabel?.textContent?.replace(/\s+/g, " ").trim() || field.getAttribute("aria-label") || field.name || "This field";
+    }
+
+    function clientValidationMessage(field) {
+      if (!field) return "is invalid";
+      if (field.validity.valueMissing) return "is required.";
+      if (field.validity.typeMismatch) return "has an invalid format.";
+      if (field.validity.patternMismatch) return "has an invalid format.";
+      if (field.validity.rangeUnderflow) return `must be at least ${field.min}.`;
+      if (field.validity.rangeOverflow) return `must be no more than ${field.max}.`;
+      if (field.validity.stepMismatch) return "has an invalid value.";
+      if (field.validity.badInput) return "has an invalid value.";
+      return "is invalid.";
+    }
+
+    function fieldLabelElement(field) {
+      if (!field || !form || !field.id) return null;
+      return form.querySelector(`label[for='${CSS.escape(field.id)}']`);
+    }
+
+    function clearFieldHighlights() {
+      if (!form) return;
+      form.querySelectorAll(".quote-field-invalid").forEach((field) => field.classList.remove("quote-field-invalid"));
+      form.querySelectorAll(".quote-field-label-invalid").forEach((label) => label.classList.remove("quote-field-label-invalid"));
+    }
+
+    function highlightInvalidFields(fields) {
+      clearFieldHighlights();
+      fields.forEach((field) => {
+        if (!field) return;
+        field.classList.add("quote-field-invalid");
+        fieldLabelElement(field)?.classList.add("quote-field-label-invalid");
+      });
+    }
+
+    function clearClientErrors() {
+      clearFieldHighlights();
+      if (!clientErrorBox || !clientErrorList) return;
+      clientErrorBox.hidden = true;
+      clientErrorList.innerHTML = "";
+    }
+
+    function showClientErrors(fields) {
+      if (!clientErrorBox || !clientErrorList) return;
+
+      const uniqueMessages = [];
+      fields.forEach((field) => {
+        if (!field) return;
+        const label = fieldLabel(field);
+        const message = clientValidationMessage(field);
+        const text = `${label}: ${message}`;
+        if (!uniqueMessages.includes(text)) uniqueMessages.push(text);
+      });
+
+      clientErrorList.innerHTML = uniqueMessages.map((text) => `<li>${escapeHtml(text)}</li>`).join("");
+      clientErrorBox.hidden = uniqueMessages.length === 0;
+      if (!clientErrorBox.hidden) {
+        clientErrorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
     function createSpecRow(key = "", value = "") {
       const safeKey = escapeHtml(key);
       const safeValue = escapeHtml(value);
@@ -716,13 +818,35 @@
           .map((value) => value.trim())
           .filter(Boolean);
         const visible = expected.includes(status);
-        element.style.display = visible ? "" : "none";
+        element.style.display = visible ? "block" : "none";
+        element.querySelectorAll("input, select, textarea").forEach((field) => {
+          field.disabled = !visible;
+        });
       });
 
-      if (finalAmountInput) finalAmountInput.required = status === "won";
-      if (winReasonInput) winReasonInput.required = status === "won";
-      if (lossReasonInput) lossReasonInput.required = status === "lost";
+      if (finalAmountInput) finalAmountInput.required = status === "won" && !finalAmountInput.disabled;
+      if (winReasonInput) winReasonInput.required = status === "won" && !winReasonInput.disabled;
+      if (lossReasonInput) lossReasonInput.required = status === "lost" && !lossReasonInput.disabled;
       if (stalledReasonInput) stalledReasonInput.required = false;
+
+      document.querySelectorAll("[data-reason-detail-for]").forEach((element) => {
+        const kind = element.dataset.reasonDetailFor;
+        const sourceInput =
+          kind === "win" ? winReasonInput :
+          kind === "loss" ? lossReasonInput :
+          stalledReasonInput;
+        const detailInput =
+          kind === "win" ? winReasonDetailInput :
+          kind === "loss" ? lossReasonDetailInput :
+          stalledReasonDetailInput;
+
+        const shouldShow = !sourceInput?.disabled && sourceInput?.value === "other";
+        element.style.display = shouldShow ? "block" : "none";
+        if (detailInput) {
+          detailInput.disabled = !shouldShow;
+          detailInput.required = shouldShow;
+        }
+      });
 
       if (status === "won" && finalAmountInput && !String(finalAmountInput.value || "").trim()) {
         const totals = calculateTotals();
@@ -1572,6 +1696,11 @@
       });
     }
 
+    [winReasonInput, lossReasonInput, stalledReasonInput].forEach((input) => {
+      if (!input) return;
+      input.addEventListener("change", applyStatusUI);
+    });
+
     if (validUntilInput) {
       validUntilInput.addEventListener("change", updateExpirySummary);
     }
@@ -1579,6 +1708,43 @@
     updateTotalsUI();
     updateExpirySummary();
     applyStatusUI();
+
+    if (form && submitButton) {
+      form.querySelectorAll("input, select, textarea").forEach((field) => {
+        field.addEventListener("input", clearClientErrors);
+        field.addEventListener("change", clearClientErrors);
+      });
+
+      form.addEventListener("submit", (event) => {
+        const invalidFields = Array.from(form.querySelectorAll(":invalid")).filter((field) => !field.disabled && field.offsetParent !== null);
+        if (invalidFields.length > 0) {
+          event.preventDefault();
+          highlightInvalidFields(invalidFields);
+          showClientErrors(invalidFields);
+          window.showAppToast?.("Please complete the required fields.", "error");
+          const firstInvalid = invalidFields[0];
+          if (firstInvalid && typeof firstInvalid.focus === "function") {
+            firstInvalid.focus({ preventScroll: true });
+          }
+          return;
+        }
+
+        if (submitButton.dataset.submitting === "true") {
+          event.preventDefault();
+          return;
+        }
+
+        submitButton.dataset.submitting = "true";
+        submitButton.disabled = true;
+        if (submitButton.tagName === "INPUT") {
+          submitButton.dataset.originalValue = submitButton.value;
+          submitButton.value = "<%= j submit_loading_label %>";
+        } else {
+          submitButton.dataset.originalValue = submitButton.textContent;
+          submitButton.textContent = "<%= j submit_loading_label %>";
+        }
+      });
+    }
 
     if (root.dataset.hasErrors === "true") {
       const errorTarget = document.querySelector(".quote-form-inline-error, .error-messages");

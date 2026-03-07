@@ -22,6 +22,18 @@ class QuoteDecisionReviewService
         label: "Move to fulfillment",
         detail: "Buyer has already accepted this revision. Shift from selling to delivery handoff."
       }
+    elsif @quote.status.to_s == "won"
+      {
+        tone: "good",
+        label: "Move to handoff",
+        detail: "This revision is marked won internally. Coordinate delivery, paperwork, or onboarding."
+      }
+    elsif @quote.workflow_state == "lost"
+      {
+        tone: "watch",
+        label: "Re-open only if interest returns",
+        detail: "This revision was marked lost. Create a new revision if the buyer re-engages."
+      }
     elsif reopened_pending?
       {
         tone: "watch",
@@ -66,6 +78,11 @@ class QuoteDecisionReviewService
       {
         value: "Committed",
         detail: "Accepted via quote workflow."
+      }
+    elsif @quote.status.to_s == "won"
+      {
+        value: "Won",
+        detail: "Marked won internally."
       }
     elsif @quote.changes_requested_at.present?
       {
@@ -122,6 +139,8 @@ class QuoteDecisionReviewService
   def review_notes
     notes = []
     notes << "Accepted on #{format_date(@quote.accepted_at)}." if @quote.accepted_at.present?
+    notes << "Marked won on #{format_date(@quote.won_at)}." if @quote.respond_to?(:won_at) && @quote.won_at.present?
+    notes << "Marked lost on #{format_date(@quote.lost_at)}." if @quote.respond_to?(:lost_at) && @quote.workflow_state == "lost" && @quote.lost_at.present?
     notes << "Revision requested on #{format_date(@quote.changes_requested_at)}." if @quote.changes_requested_at.present?
     notes << "First viewed on #{format_date(first_view_at)}." if first_view_at.present?
     notes << "Shared #{share_count} time#{'s' unless share_count == 1}." if share_count.positive?
@@ -156,6 +175,7 @@ class QuoteDecisionReviewService
 
   def reopened_pending?
     return false if @quote.reopened_at.blank?
+    return false unless @quote.workflow_state == "draft"
 
     latest_share_at.blank? || latest_share_at < @quote.reopened_at
   end

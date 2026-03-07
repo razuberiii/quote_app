@@ -10,9 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_022500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "action_items", force: :cascade do |t|
+    t.string "action_type", null: false
+    t.datetime "created_at", null: false
+    t.bigint "reference_id", null: false
+    t.string "reference_type", null: false
+    t.datetime "resolved_at"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["reference_type", "reference_id"], name: "index_action_items_on_reference_type_and_reference_id"
+    t.index ["user_id", "action_type", "reference_type", "reference_id"], name: "index_action_items_on_user_action_reference"
+    t.index ["user_id", "resolved_at"], name: "index_action_items_on_user_id_and_resolved_at"
+    t.index ["user_id"], name: "index_action_items_on_user_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -290,6 +304,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
     t.date "issued_on"
     t.text "legal_disclaimer"
     t.string "loss_reason"
+    t.string "loss_reason_detail"
+    t.datetime "lost_at"
     t.boolean "negotiated"
     t.text "notes"
     t.string "payment_term"
@@ -305,6 +321,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.string "spec_label"
     t.string "stalled_reason"
+    t.string "stalled_reason_detail"
     t.string "status"
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "template_id"
@@ -315,6 +332,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
     t.date "valid_until"
     t.datetime "viewed_at"
     t.string "win_reason"
+    t.string "win_reason_detail"
+    t.datetime "won_at"
     t.index ["accepted_at"], name: "index_quotes_on_accepted_at"
     t.index ["changes_requested_at"], name: "index_quotes_on_changes_requested_at"
     t.index ["company_id", "quote_no", "archived_at"], name: "index_quotes_on_company_quote_archived_at"
@@ -383,6 +402,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_07_211000) do
     t.index ["role"], name: "index_users_on_role"
   end
 
+  add_foreign_key "action_items", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addon_presets", "companies"

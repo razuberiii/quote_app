@@ -30,7 +30,7 @@ class QuotesController < ApplicationController
     @quote.template ||= current_user.company.quote_template_or_default
 
     if @quote.save
-      redirect_to @quote
+      redirect_to @quote, status: :see_other
     else
       ensure_quote_item_row
       render :new, status: :unprocessable_entity
@@ -38,6 +38,8 @@ class QuotesController < ApplicationController
   end
 
   def show
+    request.format = :html if request.format.turbo_stream? && params[:format] != "turbo_stream"
+
     @document_kind = resolved_document_kind
     set_superseded_context
     set_revision_compare_context
@@ -70,7 +72,7 @@ class QuotesController < ApplicationController
     @quote.template ||= current_user.company.quote_template_or_default
 
     if @quote.update(quote_params)
-      redirect_to @quote
+      redirect_to @quote, status: :see_other
     else
       ensure_quote_item_row
       render :edit, status: :unprocessable_entity
@@ -120,7 +122,7 @@ class QuotesController < ApplicationController
     current_user.company.quote_shares.where(quote_id: family_scope.select(:id)).update_all(expires_at: deletion_time, updated_at: deletion_time)
     ProductIntelligenceRefresher.refresh_products(affected_product_ids)
 
-    redirect_to @quote.customer, notice: "Quote thread #{@quote.quote_no} deleted. Public links now show as expired."
+    redirect_to @quote.customer, status: :see_other, notice: "Quote thread #{@quote.quote_no} deleted. Public links now show as expired."
   end
 
   def archive
@@ -135,7 +137,7 @@ class QuotesController < ApplicationController
     @quote.update!(archived_at: Time.current)
     latest = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no).order(revision_number: :desc).first
     redirect_target = latest || @quote.customer
-    redirect_to redirect_target, notice: "Revision V#{@quote.revision_number} archived from history."
+    redirect_to redirect_target, status: :see_other, notice: "Revision V#{@quote.revision_number} archived from history."
   end
 
   def export_pdf
@@ -221,7 +223,7 @@ class QuotesController < ApplicationController
     revision = @quote.build_revision
     revision.status = "draft" if revision.status.blank? || revision.status == "expired"
     revision.save!
-    redirect_to edit_quote_path(revision), notice: "Revision V#{revision.revision_number} created. Update pricing and share."
+    redirect_to edit_quote_path(revision), status: :see_other, notice: "Revision V#{revision.revision_number} created. Update pricing and share."
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("Quote duplicate_and_reprice failed: #{e.class} #{e.message}")
     redirect_to quote_path(@quote), alert: "Unable to create revision: #{e.record.errors.full_messages.to_sentence}"
@@ -278,10 +280,10 @@ class QuotesController < ApplicationController
       document_kind: resolved_document_kind,
       url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
     ).call
-    redirect_to quote_path(@quote), notice: "Reminder email sent. Next reminder will be available in 12 hours unless the quote gets viewed first."
+    redirect_to quote_path(@quote), status: :see_other, notice: "Reminder email sent. Next reminder will be available in 12 hours unless the quote gets viewed first."
   rescue StandardError => e
     Rails.logger.error("Quote reminder failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: "Unable to send reminder right now."
+    redirect_to quote_path(@quote), status: :see_other, alert: "Unable to send reminder right now."
   end
 
   def reopen
@@ -297,7 +299,7 @@ class QuotesController < ApplicationController
       reopened_at: Time.current,
       updated_at: Time.current
     )
-    redirect_to quote_path(@quote), notice: "Quote reopened for editing."
+    redirect_to quote_path(@quote), status: :see_other, notice: "Quote reopened for editing."
   end
 
   private
@@ -324,8 +326,11 @@ class QuotesController < ApplicationController
       :negotiated,
       :final_amount,
       :win_reason,
+      :win_reason_detail,
       :loss_reason,
+      :loss_reason_detail,
       :stalled_reason,
+      :stalled_reason_detail,
       :notes,
       :tax_amount,
       :shipping_amount,
@@ -531,7 +536,9 @@ class QuotesController < ApplicationController
       timeline_item(share_event_kind(latest_share_at), latest_share_at, share_event_label(latest_share_at), share_event_detail(latest_share_at)),
       timeline_item(:viewed, first_view_at, "Viewed", "Buyer opened the quote for the first time."),
       timeline_item(:revision, @quote.changes_requested_at, "Revision Requested", revision_request_detail),
-      timeline_item(:reopened, @quote.reopened_at, "Reopened", "Quote moved back to draft for editing."),
+      timeline_item(:reopened, reopened_event_time, "Reopened", "Quote moved back to draft for editing."),
+      timeline_item(:lost, lost_event_time, "Lost", "Buyer did not move forward with this revision."),
+      timeline_item(:won, won_event_time, "Won", "Quote marked as commercially won."),
       timeline_item(:accepted, @quote.accepted_at, "Accepted", "Buyer confirmed the quote."),
       timeline_item(:expired, expired_event_time, "Expired", "Validity window ended without closure.")
     ].compact.sort_by { |item| item[:at] }.reverse
@@ -568,8 +575,28 @@ class QuotesController < ApplicationController
     @quote.valid_until.to_time.end_of_day
   end
 
+  def lost_event_time
+    return nil unless @quote.workflow_state == "lost"
+
+    @quote.lost_at if @quote.respond_to?(:lost_at)
+  end
+
+  def won_event_time
+    return nil unless @quote.status.to_s == "won"
+
+    @quote.won_at if @quote.respond_to?(:won_at)
+  end
+
+  def reopened_event_time
+    return nil unless reopened_pending?
+
+    @quote.reopened_at
+  end
+
   def decision_outcome_value
     return "Accepted" if @quote.accepted_at.present?
+    return "Won" if @quote.status.to_s == "won"
+    return "Lost" if @quote.workflow_state == "lost"
     return "Revision Requested" if @quote.changes_requested_at.present?
     return "Expired" if expired_event_time.present?
     return "Reopened" if reopened_pending?
@@ -579,6 +606,8 @@ class QuotesController < ApplicationController
 
   def decision_outcome_detail
     return "Buyer accepted this revision." if @quote.accepted_at.present?
+    return "Quote marked as commercially won." if @quote.status.to_s == "won"
+    return "Buyer chose not to proceed with this revision." if @quote.workflow_state == "lost"
     return revision_request_detail if @quote.changes_requested_at.present?
     return "Validity window closed without a decision." if expired_event_time.present?
     return "Quote is back in draft for rework." if reopened_pending?
@@ -599,6 +628,8 @@ class QuotesController < ApplicationController
   end
 
   def pressure_value
+    return "Closed won" if @quote.status.to_s == "won"
+    return "Re-engage later" if @quote.workflow_state == "lost"
     return "Expired" if expired_event_time.present?
     return "Needs reshare" if reopened_pending?
     return "Needs revision" if @quote.changes_requested_at.present?
@@ -608,6 +639,8 @@ class QuotesController < ApplicationController
   end
 
   def pressure_detail
+    return "Track handoff, delivery, or renewal timing." if @quote.status.to_s == "won"
+    return "Create a new revision if the buyer comes back." if @quote.workflow_state == "lost"
     return "Follow up with a new revision or close the thread." if expired_event_time.present?
     return "Generate a fresh public link for the reopened revision." if reopened_pending?
     return "Buyer requested changes on this revision." if @quote.changes_requested_at.present?
@@ -618,6 +651,7 @@ class QuotesController < ApplicationController
 
   def reopened_pending?
     return false if @quote.reopened_at.blank?
+    return false unless @quote.workflow_state == "draft"
 
     latest_share_at = @quote.quote_shares.maximum(:created_at)
     latest_share_at.blank? || latest_share_at < @quote.reopened_at

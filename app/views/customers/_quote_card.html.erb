@@ -17,11 +17,11 @@
       <div class="quote-card-signal-row">
         <span class="quote-card-signal-pill is-<%= signal[:state] %>"><%= signal[:summary] %></span>
         <% if quote.win_reason.present? && card[:display_status] == "won" %>
-          <span class="quote-card-signal-detail">Win reason: <%= quote.win_reason.humanize %></span>
+          <span class="quote-card-signal-detail">Win reason: <%= quote.display_win_reason %></span>
         <% elsif quote.loss_reason.present? && card[:display_status] == "lost" %>
-          <span class="quote-card-signal-detail">Loss reason: <%= quote.loss_reason.humanize %></span>
+          <span class="quote-card-signal-detail">Loss reason: <%= quote.display_loss_reason %></span>
         <% elsif quote.stalled_reason.present? && %w[sent viewed negotiating expired].include?(card[:display_status]) %>
-          <span class="quote-card-signal-detail">Pressure: <%= quote.stalled_reason.humanize %></span>
+          <span class="quote-card-signal-detail">Pressure: <%= quote.display_stalled_reason %></span>
         <% elsif quote.valid_until.present? && card[:display_status] == "expired" %>
           <span class="quote-card-signal-detail">Expired on <%= quote.valid_until.strftime("%Y-%m-%d") %></span>
         <% end %>

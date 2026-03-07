@@ -4611,6 +4611,42 @@ input[type="submit"].btn,
   margin-top: 0.15rem;
 }
 
+.quote-edit-shell .error-messages {
+  margin: 0.8rem 0 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #f5c2c7;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff5f6 0%, #fff0f1 100%);
+  box-shadow: 0 8px 18px rgba(127, 29, 29, 0.04);
+  color: #8a1c2c;
+}
+
+.quote-edit-shell .error-messages h2 {
+  margin: 0 0 0.45rem;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #7f1d1d;
+}
+
+.quote-edit-shell .error-messages ul {
+  margin: 0;
+  padding-left: 1rem;
+}
+
+.quote-edit-shell .error-messages li + li {
+  margin-top: 0.18rem;
+}
+
+.quote-edit-shell .quote-field-invalid {
+  border-color: #f1aeb5 !important;
+  background: linear-gradient(180deg, #fff8f8 0%, #fff2f3 100%) !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.08) !important;
+}
+
+.quote-edit-shell .quote-field-label-invalid {
+  color: #9f1239;
+}
+
 @media (max-width: 768px) {
   .quote-items-responsive {
     overflow: visible !important;

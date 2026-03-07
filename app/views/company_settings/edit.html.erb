@@ -21,81 +21,81 @@
   <%= form_with model: @company, url: company_settings_path, method: :patch, local: true, multipart: true, class: "settings-form-grid", data: { dirty_guard: true } do |f| %>
     <div class="settings-section-title">1) Company Basic Information</div>
 
-    <div>
-      <%= f.label :name, "Company Name" %>
-      <%= f.text_field :name %>
-    </div>
+      <div class="<%= 'settings-field-error' if @company.errors[:name].any? %>">
+        <%= f.label :name, "Company Name" %>
+        <%= f.text_field :name %>
+      </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:legal_name].any? %>">
       <%= f.label :legal_name, "Legal Name" %>
       <%= f.text_field :legal_name %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:registration_number].any? %>">
       <%= f.label :registration_number, "Registration Number" %>
       <%= f.text_field :registration_number %>
     </div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:registration_details].any? %>">
       <%= f.label :registration_details, "Registration Details" %>
       <%= f.text_area :registration_details, rows: 3 %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:email].any? %>">
       <%= f.label :email, "Company Email" %>
       <%= f.email_field :email %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:phone].any? %>">
       <%= f.label :phone, "Company Phone" %>
       <%= f.text_field :phone %>
     </div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:address].any? %>">
       <%= f.label :address, "Company Address" %>
       <%= f.text_area :address, rows: 2 %>
     </div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:website].any? %>">
       <%= f.label :website, "Website" %>
       <%= f.text_field :website, placeholder: "example.com or https://example.com" %>
     </div>
 
     <div class="settings-section-title settings-grid-span-2">2) Default Business Parameters</div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:default_currency].any? %>">
       <%= f.label :default_currency, "Default Currency" %>
       <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY], @company.default_currency.presence || "USD") %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:default_validity_days].any? %>">
       <%= f.label :default_validity_days, "Default Validity Days" %>
       <%= f.number_field :default_validity_days, min: 1, step: 1 %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:default_trade_term].any? %>">
       <%= f.label :default_trade_term, "Default Trade Terms" %>
       <%= f.text_field :default_trade_term, placeholder: "EXW / FOB / CIF" %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:default_payment_term].any? %>">
       <%= f.label :default_payment_term, "Default Payment Terms" %>
       <%= f.text_field :default_payment_term, placeholder: "Net 30 / 50% deposit" %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:default_tax_rate].any? %>">
       <%= f.label :default_tax_rate, "Default Tax Rate (%)" %>
       <%= f.number_field :default_tax_rate, step: 0.01, min: 0 %>
     </div>
 
-    <div>
+    <div class="<%= 'settings-field-error' if @company.errors[:brand_color].any? || @template.errors[:accent_color].any? %>">
       <%= f.label :brand_color, "Brand Primary Color" %>
       <%= f.color_field :brand_color, value: (@company.brand_color.presence || "#1F4E79") %>
     </div>
 
     <div class="settings-section-title settings-grid-span-2">3) Branding & Default Template Behavior</div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:logo].any? %>">
       <div class="company-logo-row">
         <div class="company-logo-preview">
           <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>
@@ -120,7 +120,7 @@
       </div>
     </div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @template.errors[:show_logo].any? || @template.errors[:show_images].any? || @template.errors[:show_terms_section].any? || @template.errors[:show_notes].any? || @template.errors[:show_payment_term].any? || @template.errors[:show_customer_owner].any? %>">
       <div class="settings-checkbox-grid">
         <%= hidden_field_tag "company[template_show_logo]", "0" %>
         <label><%= check_box_tag "company[template_show_logo]", "1", @template.show_logo %> Show logo by default</label>
@@ -137,8 +137,93 @@
       </div>
     </div>
 
+    <div class="settings-section-title settings-grid-span-2">4) Reminder Email</div>
+
+    <div class="settings-grid-span-2">
+      <p class="team-members-hint">Used when sales clicks Send Reminder. Leave any field blank to use the default reminder text. Available variables: <code>%{quote_no}</code>, <code>%{company_name}</code>, <code>%{customer_name}</code>.</p>
+    </div>
+
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_subject].any? %>">
+      <%= f.label :reminder_email_subject, "Reminder Email Subject" %>
+      <%= f.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %>
+    </div>
+
+    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_body].any? %>">
+      <%= f.label :reminder_email_body, "Reminder Email Body" %>
+      <%= f.text_area :reminder_email_body, rows: 3, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %>
+    </div>
+
+    <div class="<%= 'settings-field-error' if @company.errors[:reminder_email_cta_label].any? %>">
+      <%= f.label :reminder_email_cta_label, "Reminder Button Label" %>
+      <%= f.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %>
+    </div>
+
     <div class="settings-grid-span-2 settings-actions">
       <%= f.submit "Save Company Settings", class: "btn btn-primary" %>
     </div>
   <% end %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Company Credentials</h2>
+  <p class="team-members-hint">These files appear as download links on public quotes and as a list in PDF export.</p>
+
+  <div class="quote-section-block" style="margin-bottom: 1rem;">
+    <h3>Upload Credential Document</h3>
+    <%= form_with model: @company_document, url: company_documents_path, local: true, multipart: true, class: "settings-form-grid" do |doc_form| %>
+      <div>
+        <%= doc_form.label :title, "Document Title" %>
+        <%= doc_form.text_field :title, placeholder: "Optional. Defaults to filename." %>
+      </div>
+      <div>
+        <%= doc_form.label :document_type %>
+        <%= doc_form.select :document_type, options_for_select(CompanyDocument::DOCUMENT_TYPES.map { |value| [value.humanize, value] }, @company_document.document_type.presence || "company_profile") %>
+      </div>
+      <div class="settings-grid-span-2">
+        <%= doc_form.label :file, "File" %>
+        <%= doc_form.file_field :file %>
+      </div>
+      <div class="settings-grid-span-2">
+        <%= doc_form.submit "Upload Document", class: "btn btn-secondary" %>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="quote-section-block">
+    <h3>Current Credentials</h3>
+    <% if @company_documents.any? %>
+      <div class="table-responsive">
+        <table class="customers-table saas-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Type</th>
+              <th>File</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            <% @company_documents.each do |document| %>
+              <tr>
+                <td><strong><%= document.title %></strong></td>
+                <td><%= document.document_type_label %></td>
+                <td>
+                  <% if document.file.attached? %>
+                    <%= link_to document.file.filename.to_s, rails_blob_path(document.file, disposition: "attachment") %>
+                  <% else %>
+                    -
+                  <% end %>
+                </td>
+                <td class="text-right">
+                  <%= button_to "Delete", company_document_path(document), method: :delete, data: { turbo_confirm: "Delete this document?" }, class: "btn btn-secondary" %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    <% else %>
+      <p class="team-members-hint">No credential documents uploaded yet.</p>
+    <% end %>
+  </div>
 </section>

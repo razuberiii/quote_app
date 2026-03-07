@@ -1,2 +1,12 @@
-#!/usr/bin/env ruby.exe
-exec "./bin/rails", "server", *ARGV
+#!/usr/bin/env ruby
+
+unless system("gem list foreman -i --silent")
+  puts "Installing foreman..."
+  system("gem install foreman") || abort("Failed to install foreman")
+end
+
+ENV["PORT"] ||= "3000"
+ENV["RUBY_DEBUG_OPEN"] = "true"
+ENV["RUBY_DEBUG_LAZY"] = "true"
+
+exec "foreman", "start", "-f", "Procfile.dev", *ARGV

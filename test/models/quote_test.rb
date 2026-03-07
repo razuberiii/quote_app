@@ -34,4 +34,29 @@ class QuoteTest < ActiveSupport::TestCase
     assert quote.valid?
     assert_equal quote.grand_total, quote.final_amount
   end
+
+  test "build_revision copies snapshot fields" do
+    item = quote_items(:one)
+    item.update!(
+      specifications: [ { key: "Power", value: "5kW" } ],
+      addon_charges: [ { name: "Packaging", amount: "25.00" } ],
+      spec_snapshot: [ { key: "Power", value: "5kW" } ],
+      addon_snapshot: [ { name: "Packaging", amount: "25.00" } ]
+    )
+
+    revision = quotes(:one).build_revision
+
+    assert_equal item.spec_snapshot, revision.quote_items.first.spec_snapshot
+    assert_equal item.addon_snapshot, revision.quote_items.first.addon_snapshot
+  end
+
+  test "can_send_reminder only after 48 hours when quote is still not viewed" do
+    quote = quotes(:one)
+    quote.update!(status: "sent", sent_at: 49.hours.ago, viewed_at: nil)
+
+    assert quote.can_send_reminder?
+
+    quote.update!(viewed_at: Time.current)
+    assert_not quote.can_send_reminder?
+  end
 end

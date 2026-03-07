@@ -17,13 +17,14 @@ Rails.application.routes.draw do
   get "email-change/confirm/:token", to: "email_changes#confirm", as: :email_change
 
   authenticated :user do
-    root "customers#index", as: :authenticated_root
+    root "dashboard#index", as: :authenticated_root
   end
 
   unauthenticated do
     root "landing#index"
   end
   get "demo", to: "landing#demo"
+  get "dashboard", to: "dashboard#index"
   get "sample-quote", to: "landing#sample_quote"
   get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
   get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
@@ -53,6 +54,10 @@ Rails.application.routes.draw do
       patch :set_default
     end
   end
+  resources :company_documents, only: [ :create, :destroy ]
+  resources :product_presets, only: [ :index ]
+  resources :spec_presets, except: [ :show ]
+  resources :addon_presets, except: [ :show ]
   resources :team_members, only: [ :index, :show, :update, :destroy ]
   resources :team_invitations, only: [ :index, :create, :destroy ], param: :token do
     member do
@@ -71,8 +76,10 @@ Rails.application.routes.draw do
       member do
         post :duplicate
         post :duplicate_and_reprice
+        post :archive
         post :reopen
         post :share
+        post :send_reminder
         patch :update_template
         get "export/pdf", action: :export_pdf, as: :export_pdf
         get "export/xlsx", action: :export_xlsx, as: :export_xlsx
@@ -82,6 +89,11 @@ Rails.application.routes.draw do
 
   get "quote/:id/export_pdf", to: "quotes#export_pdf", as: :legacy_export_pdf_quote
   get "quote/:id/export_excel", to: "quotes#export_xlsx", as: :legacy_export_excel_quote
+  resources :action_items, only: [] do
+    member do
+      patch :resolve
+    end
+  end
 
   namespace :admin do
     resources :users, only: [ :index, :update ]

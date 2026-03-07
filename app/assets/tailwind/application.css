@@ -1,0 +1,441 @@
+@import "tailwindcss";
+
+/*
+  Canonical UI styling entrypoint.
+  Preferred direction:
+  1. Use Tailwind utilities in views for layout/spacing when reasonable.
+  2. Put shared semantic component rules in app/assets/stylesheets/components.css.
+  3. Do not add new product-app UI rules to legacy_*.css.
+  4. When touching duplicated rules, migrate toward Tailwind + components and delete the legacy copy.
+*/
+
+/* Phase 1 migration bridge: keep existing visual tokens available in Tailwind. */
+@theme {
+  --color-brand-primary: #1f4e79;
+  --color-brand-on-primary: #ffffff;
+  --color-ui-nav-bg: #1f2937;
+  --color-ui-nav-fg: #ffffff;
+  --color-ui-table-head-bg: #334155;
+  --color-ui-table-head-fg: #ffffff;
+}
+
+/* Stable semantic classes for migrated filters/pills. */
+.app-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.app-filter-pill:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.app-filter-pill.is-active {
+  background: var(--brand-primary, #1f3650);
+  border-color: var(--brand-primary, #1f3650);
+  color: var(--brand-on-primary, #ffffff);
+  box-shadow: none;
+}
+
+.app-filter-pill.is-active:hover {
+  filter: brightness(0.98);
+  color: var(--brand-on-primary, #ffffff);
+}
+
+.app-filter-pill--kpi {
+  min-height: 40px;
+  padding: 0 16px;
+  font-size: 0.98rem;
+  font-weight: 600;
+}
+
+.app-filter-pill--kpi.is-active {
+  background: var(--brand-primary, #1f3650);
+  border-color: var(--brand-primary, #1f3650);
+  color: var(--brand-on-primary, #ffffff);
+}
+
+/* Explicit spacing helpers for customers filters, avoids utility-class mismatch. */
+.app-filter-stack {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.app-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.app-filter-row--spaced {
+  margin-bottom: 1rem;
+}
+
+.kpi-period-toggle {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.dashboard-alert-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  border-radius: 999px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #334155;
+  padding: 0 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.dashboard-alert-pill strong {
+  margin-right: 0.22rem;
+}
+
+.dashboard-alert-pill.is-danger {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.dashboard-alert-pill.is-today {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.dashboard-alert-pill.is-watch {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.dashboard-alert-pill.is-good {
+  border-color: #bbf7d0;
+  background: #ecfdf5;
+  color: #166534;
+}
+
+.sales-dashboard-content {
+  margin-top: 0.5rem;
+}
+
+.follow-up-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.quote-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-card {
+  background: #ffffff;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  border-left: 3px solid #cbd5e1;
+  padding: 0.75rem 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+  text-decoration: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.08);
+}
+
+.summary-card.active {
+  background: #ffffff;
+  border-color: #dbe3ee;
+  color: #0f172a;
+  box-shadow: 0 0 0 2px var(--brand-primary, #1d4ed8);
+}
+
+.summary-card strong {
+  font-size: 1.2rem;
+  color: #0f172a;
+}
+
+.summary-currency-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.12rem;
+}
+
+.summary-currency-lines strong {
+  font-size: 0.95rem;
+}
+
+.currency-lines-toggle {
+  margin-top: 0.18rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.46rem;
+  cursor: pointer;
+}
+
+.currency-lines-toggle:hover {
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.summary-label-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.summary-icon {
+  color: #475569;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+}
+
+.summary-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.summary-label {
+  font-size: 0.86rem;
+  color: #475569;
+  font-weight: 600;
+}
+
+.summary-today {
+  border-left-color: #3b82f6;
+  background: linear-gradient(90deg, #f4f8ff 0%, #ffffff 70%);
+}
+
+.summary-upcoming {
+  border-left-color: #f59e0b;
+  background: linear-gradient(90deg, #fffaf0 0%, #ffffff 70%);
+}
+
+.summary-overdue,
+.summary-lost {
+  border-left-color: #ef4444;
+  background: linear-gradient(90deg, #fff7f7 0%, #ffffff 70%);
+}
+
+.summary-normal {
+  border-left-color: #94a3b8;
+  background: linear-gradient(90deg, #f8fafc 0%, #ffffff 70%);
+}
+
+.summary-won {
+  border-left-color: #22c55e;
+  background: linear-gradient(90deg, #f4fbf6 0%, #ffffff 70%);
+}
+
+@media (max-width: 768px) {
+  .follow-up-summary,
+  .quote-summary-grid {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .follow-up-summary,
+  .quote-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quote-watermarked {
+  position: relative;
+  overflow: hidden;
+}
+
+.quote-watermarked::before {
+  content: attr(data-watermark);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(2rem, 8vw, 5.6rem);
+  letter-spacing: 0.22em;
+  color: rgb(15 23 42);
+  font-weight: 700;
+  transform: rotate(-18deg);
+  pointer-events: none;
+  z-index: 3;
+  mix-blend-mode: multiply;
+  opacity: var(--quote-watermark-opacity, 0.12);
+}
+
+.quote-watermarked > * {
+  position: relative;
+  z-index: 2;
+}
+
+.quote-watermark-image {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  max-width: 58%;
+  max-height: 52%;
+  opacity: var(--quote-watermark-opacity, 0.12);
+  transform: rotate(-18deg);
+  pointer-events: none;
+  z-index: 3;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+}
+
+[data-watermark-text-container].is-disabled input {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+[data-watermark-text-container].is-disabled label {
+  color: #64748b;
+}
+
+.quote-inline-link {
+  border: 0;
+  background: transparent;
+  color: #1d4ed8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.2rem 0;
+  cursor: pointer;
+}
+
+.quote-inline-link:hover {
+  text-decoration: underline;
+}
+
+.quote-discount-row {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.quote-live-discount,
+.quote-total-discount,
+.quote-total-saved,
+.quote-live-saved {
+  color: #b91c1c;
+  font-weight: 700;
+}
+
+.quote-total-reduction,
+.quote-live-reduction {
+  color: #64748b;
+}
+
+.quote-total-reduction strong,
+.quote-live-reduction strong {
+  text-decoration: line-through;
+  text-decoration-color: #fca5a5;
+}
+
+.quote-superseded-notice {
+  margin: 0 0 0.75rem 0;
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+}
+
+.quote-history-archive-list {
+  margin-top: 0.65rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.time-zone-search {
+  width: 100%;
+  margin-bottom: 0.4rem;
+}
+
+.quote-sales-signature-image {
+  max-width: 240px;
+  max-height: 90px;
+  object-fit: contain;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 0.2rem;
+}
+
+.app-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  width: 100%;
+  cursor: pointer;
+}
+
+.app-file-picker {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 2.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.app-file-picker-btn {
+  border: 1px solid #94a3b8;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #1e293b;
+  padding: 0.36rem 0.78rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.app-file-picker-btn:hover {
+  border-color: #64748b;
+  background: #eef2f7;
+}
+
+.app-file-picker-name {
+  color: #475569;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  word-break: break-all;
+}

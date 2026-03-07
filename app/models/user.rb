@@ -12,6 +12,7 @@ class User < ApplicationRecord
   validates :language, inclusion: { in: %w[en] }, allow_blank: true
 
   belongs_to :company
+  has_many :action_items, dependent: :destroy
   has_many :sent_team_invitations, class_name: "TeamInvitation", foreign_key: :invited_by_id, dependent: :destroy
   has_one_attached :avatar
   before_validation :ensure_company, on: :create
@@ -34,7 +35,7 @@ class User < ApplicationRecord
   end
 
   def quote_count_for_limit
-    company.quotes.where.not(quote_no: nil).distinct.count(:quote_no)
+    company.quotes.not_archived.where.not(quote_no: nil).distinct.count(:quote_no)
   end
 
   def can_manage_team?

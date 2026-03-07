@@ -1,0 +1,85 @@
+<section class="quote-revision-panel app-surface">
+  <div class="quote-revision-head">
+    <div>
+      <h3>Revision Compare</h3>
+      <p>V<%= @quote.revision_number %> compared with V<%= @previous_revision_quote.revision_number %>.</p>
+    </div>
+    <% if @change_summary.present? %>
+      <button type="button"
+              class="app-button app-button--secondary quote-copy-summary-btn"
+              data-copy-text="<%= @change_summary %>">
+        Copy Change Summary
+      </button>
+    <% end %>
+  </div>
+
+  <% if @revision_diff[:modified_items].blank? && @revision_diff[:added_items].blank? && @revision_diff[:removed_items].blank? && @revision_diff[:commercial_changes].blank? %>
+    <p class="quote-revision-empty">No commercial or item-level changes detected between these two revisions.</p>
+  <% else %>
+    <div class="quote-revision-grid">
+      <% if @revision_diff[:modified_items].any? %>
+        <article class="quote-revision-card">
+          <h4>Modified</h4>
+          <ul>
+            <% @revision_diff[:modified_items].each do |item| %>
+              <li>
+                <strong><%= item[:product_name] %></strong>
+                <span>Qty <%= item[:quantity_before] %> -> <%= item[:quantity_after] %></span>
+                <span>Unit <%= quote_money(item[:unit_price_before], @quote.currency) %> -> <%= quote_money(item[:unit_price_after], @quote.currency) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </article>
+      <% end %>
+
+      <% if @revision_diff[:added_items].any? %>
+        <article class="quote-revision-card">
+          <h4>Added</h4>
+          <ul>
+            <% @revision_diff[:added_items].each do |item| %>
+              <li>
+                <strong><%= item[:product_name] %></strong>
+                <span>Qty <%= item[:quantity_after] %></span>
+                <span>Unit <%= quote_money(item[:unit_price_after], @quote.currency) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </article>
+      <% end %>
+
+      <% if @revision_diff[:removed_items].any? %>
+        <article class="quote-revision-card">
+          <h4>Removed</h4>
+          <ul>
+            <% @revision_diff[:removed_items].each do |item| %>
+              <li>
+                <strong><%= item[:product_name] %></strong>
+                <span>Qty <%= item[:quantity_before] %></span>
+                <span>Unit <%= quote_money(item[:unit_price_before], @quote.currency) %></span>
+              </li>
+            <% end %>
+          </ul>
+        </article>
+      <% end %>
+
+      <% if @revision_diff[:commercial_changes].any? %>
+        <article class="quote-revision-card quote-revision-card--commercial">
+          <h4>Commercial Terms</h4>
+          <ul>
+            <% @revision_diff[:commercial_changes].each do |change| %>
+              <li>
+                <strong><%= change[:label] %></strong>
+                <span><%= change[:before] %> -> <%= change[:after] %></span>
+              </li>
+            <% end %>
+          </ul>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+
+  <p class="quote-revision-total">
+    <span>Total updated</span>
+    <strong><%= quote_money(@revision_diff[:total_before], @quote.currency) %> -> <%= quote_money(@revision_diff[:total_after], @quote.currency) %></strong>
+  </p>
+</section>

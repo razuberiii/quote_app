@@ -143,34 +143,13 @@
     font-size: 1.5rem;
   }
 
-  .follow-up-summary {
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-  }
-
-  .quote-summary-grid {
-    grid-template-columns: repeat(2, minmax(120px, 1fr));
-  }
-
-  .search-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-bar input[type="text"] {
-    min-width: 0;
-  }
-
-  .search-bar input[type="submit"],
-  .search-bar .btn,
   .header-actions .btn,
   form input[type="submit"],
   .actions .btn,
   .actions .button_to,
   .quote-toolbar .btn,
   .quote-toolbar .button_to,
-  .quote-card-actions .btn,
   .quote-card-actions .button_to,
-  .customer-task-actions .btn,
   .customer-task-actions .button_to {
     width: 100%;
   }
@@ -253,34 +232,8 @@
 
   .quote-document,
   .customer-details,
-  .quote-details,
-  .search-section {
+  .quote-details {
     padding: 1rem;
-  }
-
-  .quote-filter-bar {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.2rem;
-  }
-
-  .customer-list-filters {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-1);
-    overflow: visible;
-    padding-bottom: 0;
-  }
-
-  .quote-filter-pill {
-    white-space: nowrap;
-  }
-
-  .customer-list-filters .quote-filter-pill {
-    text-align: center;
-    padding: 0.45rem 0.35rem;
-    white-space: normal;
   }
 
   .quote-edit-summary {
@@ -328,10 +281,6 @@
   }
 
   .quote-card-actions .button_to {
-    width: 100%;
-  }
-
-  .quote-card-actions .btn {
     width: 100%;
   }
 

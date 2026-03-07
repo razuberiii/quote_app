@@ -75,8 +75,50 @@
           <label><%= f.check_box :show_terms_section, data: { template_preview_toggle: "terms" } %> Show terms section</label>
           <label><%= f.check_box :show_currency, data: { template_preview_toggle: "currency" } %> Show currency symbol/code</label>
           <label><%= f.check_box :show_closing_message, data: { template_preview_toggle: "closing" } %> Show closing message</label>
+          <label><%= f.check_box :show_watermark, data: { template_preview_toggle: "watermark" } %> Show watermark</label>
           <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> Show Rubusoo footer (white-label off by default)</label>
           <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
+        </div>
+        <div class="template-form-grid">
+          <div>
+            <%= f.label :signature_name, "Authorized by name (optional)" %>
+            <%= f.text_field :signature_name, placeholder: "e.g. Amy Chen", data: { template_preview_target: "signature-name" } %>
+            <p class="template-sub">Used for the signature footer text. Leave blank to hide "Authorized by".</p>
+          </div>
+          <div>
+            <%= f.label :signature_image, "Sales signature image" %>
+            <div class="app-file-picker" data-file-picker>
+              <%= f.file_field :signature_image, id: "quote_template_signature_image", accept: "image/*", class: "app-file-input", data: { template_preview_target: "signature-image-upload", file_picker_input: true, file_picker_name: "signature-file-name" } %>
+              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_signature_image">Choose file</button>
+              <span class="app-file-picker-name" id="signature-file-name"><%= quote_template.signature_image.attached? ? quote_template.signature_image.filename.to_s : "No file selected" %></span>
+            </div>
+            <p class="template-sub">This is the sales signature image shown to the customer.</p>
+            <% if quote_template.signature_image.attached? %>
+              <label><%= check_box_tag "quote_template[remove_signature_image]", "1", false %> Remove existing signature image</label>
+            <% end %>
+          </div>
+          <div data-watermark-text-container>
+            <%= f.label :watermark_text, "Watermark text" %>
+            <%= f.text_field :watermark_text, placeholder: "CONFIDENTIAL (leave empty to use company name)", data: { template_preview_target: "watermark-text" } %>
+            <p class="template-sub" data-watermark-mode-hint>If a watermark image is uploaded, image takes priority and text watermark is hidden.</p>
+          </div>
+          <div>
+            <%= f.label :watermark_image, "Watermark image" %>
+            <div class="app-file-picker" data-file-picker>
+              <%= f.file_field :watermark_image, id: "quote_template_watermark_image", accept: "image/*", class: "app-file-input", data: { template_preview_target: "watermark-image-upload", file_picker_input: true, file_picker_name: "watermark-file-name", existing_file: quote_template.watermark_image.attached? } %>
+              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_watermark_image">Choose file</button>
+              <span class="app-file-picker-name" id="watermark-file-name"><%= quote_template.watermark_image.attached? ? quote_template.watermark_image.filename.to_s : "No file selected" %></span>
+            </div>
+            <p class="template-sub">Watermark is rendered behind the quote content.</p>
+            <% if quote_template.watermark_image.attached? %>
+              <label><%= check_box_tag "quote_template[remove_watermark_image]", "1", false %> Remove existing watermark image</label>
+            <% end %>
+          </div>
+          <div>
+            <%= f.label :watermark_opacity, "Watermark intensity (%)" %>
+            <%= f.number_field :watermark_opacity, min: 3, max: 40, step: 1, data: { template_preview_target: "watermark-opacity" } %>
+            <p class="template-sub">Recommended range: 8-16. Higher value means darker watermark.</p>
+          </div>
         </div>
       </section>
 
@@ -259,7 +301,12 @@
           </div>
         </div>
       </div>
-      <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %> template-preview-viewport-desktop" data-template-preview style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+      <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %> template-preview-viewport-desktop<%= ' quote-watermarked' if quote_template.show_watermark? && quote_template.watermark_image.blank? %>" data-template-preview data-watermark="<%= template_watermark_text(quote_template, 'CONFIDENTIAL') %>" style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; --quote-watermark-opacity: <%= template_watermark_opacity(quote_template) %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
+        <% if quote_template.watermark_image.attached? %>
+          <img src="<%= url_for(quote_template.watermark_image) %>" alt="Watermark image preview" class="quote-watermark-image" data-template-preview-watermark-image data-visible="<%= quote_template.show_watermark? %>">
+        <% else %>
+          <img src="" alt="Watermark image preview" class="quote-watermark-image" data-template-preview-watermark-image hidden>
+        <% end %>
         <div class="preview-header preview-header-<%= quote_template.logo_position.presence || 'right' %>" data-template-preview-logo-position>
           <span data-template-preview-logo data-visible="<%= quote_template.show_logo? %>">LOGO</span>
           <strong data-template-preview-title><%= quote_template.quotation_title.presence || quote_template.resolved_document_title("quote") %></strong>
@@ -303,7 +350,12 @@
         <div class="preview-meta">
           <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong>Payment Term:</strong> TT 30% deposit, 70% before shipment</p>
           <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong>Notes:</strong> Price valid for 30 days.</p>
-          <p data-template-preview-signature data-visible="<%= quote_template.show_signature_block? %>">Authorized Signature ____________________</p>
+          <% if quote_template.signature_image.attached? %>
+            <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="Signature preview" class="quote-sales-signature-image"></p>
+          <% else %>
+            <p data-template-preview-signature-image hidden><img src="" alt="Signature preview" class="quote-sales-signature-image"></p>
+          <% end %>
+          <p data-template-preview-signature-name data-visible="<%= quote_template.show_signature_block? && quote_template.signature_name.present? %>"><strong>Authorized by:</strong> <span data-template-preview-signature-name-value><%= quote_template.signature_name.presence || "" %></span></p>
         </div>
         <div class="preview-terms" data-template-preview-terms data-visible="<%= quote_template.show_terms_section? %>">
           <strong>Terms:</strong> FOB Shanghai | Lead time 20 days.
@@ -342,6 +394,10 @@
     const contrastNode = form.querySelector("[data-template-preview-contrast]");
     const scenarioNode = form.querySelector("[data-template-preview-scenario]");
     const viewportButtons = Array.from(form.querySelectorAll("[data-template-preview-viewport-btn]"));
+    const previewWatermarkImage = qsp("[data-template-preview-watermark-image]");
+    const previewSignatureImage = qsp("[data-template-preview-signature-image] img");
+    let watermarkImageObjectUrl = "";
+    let signatureImageObjectUrl = "";
     const viewportClasses = [
       "template-preview-viewport-desktop",
       "template-preview-viewport-tablet",
@@ -591,11 +647,53 @@
       const separator = qs("[data-template-preview-target='thousand-separator']")?.value || "comma";
       const currencyMode = qs("[data-template-preview-target='currency-display-mode']")?.value || "symbol_prefix";
       const showCurrency = !!qs("[data-template-preview-toggle='currency']")?.checked;
+      const showWatermark = !!qs("[data-template-preview-toggle='watermark']")?.checked;
+      const watermarkTextInput = qs("[data-template-preview-target='watermark-text']")?.value?.trim() || "";
+      const watermarkOpacityRaw = Number.parseInt(qs("[data-template-preview-target='watermark-opacity']")?.value || "12", 10);
+      const signatureName = qs("[data-template-preview-target='signature-name']")?.value?.trim() || "";
+      const watermarkUploadInput = qs("[data-template-preview-target='watermark-image-upload']");
+      const signatureUploadInput = qs("[data-template-preview-target='signature-image-upload']");
+      const removeWatermarkImage = !!qs("[name='quote_template[remove_watermark_image]']")?.checked;
+      const removeSignatureImage = !!qs("[name='quote_template[remove_signature_image]']")?.checked;
+      let hasWatermarkImage = previewWatermarkImage && !!previewWatermarkImage.getAttribute("src") && !removeWatermarkImage;
+      let hasSignatureImage = previewSignatureImage && !!previewSignatureImage.getAttribute("src") && !removeSignatureImage;
 
       preview.classList.remove("template-preview-classic", "template-preview-modern", "template-preview-industry");
       preview.classList.add(`template-preview-${layout}`);
       preview.style.setProperty("--template-accent", accent);
+      const watermarkOpacity = Number.isNaN(watermarkOpacityRaw) ? 12 : Math.min(40, Math.max(3, watermarkOpacityRaw));
+      preview.style.setProperty("--quote-watermark-opacity", (watermarkOpacity / 100).toFixed(2));
       preview.style.fontFamily = `${font}, sans-serif`;
+      hasWatermarkImage = hasWatermarkImage || watermarkImageActive();
+      const watermarkText = hasWatermarkImage ? "" : (watermarkTextInput || "CONFIDENTIAL");
+      preview.classList.toggle("quote-watermarked", showWatermark && watermarkText.length > 0);
+      preview.dataset.watermark = showWatermark ? watermarkText : "";
+      if (previewWatermarkImage) {
+        const shouldShow = showWatermark && hasWatermarkImage;
+        previewWatermarkImage.hidden = !shouldShow;
+      }
+
+      if (!removeWatermarkImage && watermarkUploadInput && previewWatermarkImage && watermarkUploadInput.files && watermarkUploadInput.files[0]) {
+        const file = watermarkUploadInput.files[0];
+        if (file.type && file.type.startsWith("image/")) {
+          if (watermarkImageObjectUrl) URL.revokeObjectURL(watermarkImageObjectUrl);
+          watermarkImageObjectUrl = URL.createObjectURL(file);
+          previewWatermarkImage.src = watermarkImageObjectUrl;
+          preview.classList.toggle("quote-watermarked", false);
+          previewWatermarkImage.hidden = !showWatermark;
+          hasWatermarkImage = true;
+        }
+      }
+
+      if (!removeSignatureImage && signatureUploadInput && previewSignatureImage && signatureUploadInput.files && signatureUploadInput.files[0]) {
+        const file = signatureUploadInput.files[0];
+        if (file.type && file.type.startsWith("image/")) {
+          if (signatureImageObjectUrl) URL.revokeObjectURL(signatureImageObjectUrl);
+          signatureImageObjectUrl = URL.createObjectURL(file);
+          previewSignatureImage.src = signatureImageObjectUrl;
+          hasSignatureImage = true;
+        }
+      }
 
       const densityNode = qsp("[data-template-preview-density]");
       if (densityNode) {
@@ -640,6 +738,8 @@
       }
       const closingNode = qsp("[data-template-preview-closing]");
       if (closingNode) closingNode.textContent = closingMessage || "<No closing message>";
+      const signatureNameNode = qsp("[data-template-preview-signature-name-value]");
+      if (signatureNameNode) signatureNameNode.textContent = signatureName;
 
       preview.querySelectorAll("[data-template-preview-amount]").forEach((node) => {
         const raw = Number.parseFloat(node.dataset.rawAmount || "0");
@@ -656,19 +756,101 @@
       showNode("[data-template-preview-shipping]", !!qs("[data-template-preview-toggle='shipping']")?.checked);
       showNode("[data-template-preview-payment]", !!qs("[data-template-preview-toggle='payment']")?.checked);
       showNode("[data-template-preview-notes]", !!qs("[data-template-preview-toggle='notes']")?.checked);
-      showNode("[data-template-preview-signature]", !!qs("[data-template-preview-toggle='signature']")?.checked);
+      const showSignature = !!qs("[data-template-preview-toggle='signature']")?.checked;
+      showNode("[data-template-preview-signature-image]", showSignature && hasSignatureImage);
+      showNode("[data-template-preview-signature-name]", showSignature && signatureName.length > 0);
       showNode("[data-template-preview-customer-owner]", !!qs("[data-template-preview-toggle='customer-owner']")?.checked);
       showNode("[data-template-preview-valid-until]", !!qs("[data-template-preview-toggle='valid-until']")?.checked);
       showNode("[data-template-preview-terms]", !!qs("[data-template-preview-toggle='terms']")?.checked);
       showNode("[data-template-preview-images]", !!qs("[data-template-preview-toggle='images']")?.checked);
       showNode("[data-template-preview-closing]", !!qs("[data-template-preview-toggle='closing']")?.checked);
       showNode("[data-template-preview-saas-branding]", !!qs("[data-template-preview-toggle='saas-branding']")?.checked);
+      updateWatermarkModeUI();
       updateContrastWarning(accent);
       updateSaveStatus();
     };
 
     form.addEventListener("input", updatePreview);
     form.addEventListener("change", updatePreview);
+
+    const showWatermarkToggle = qs("[data-template-preview-toggle='watermark']");
+    const watermarkTextInput = qs("[data-template-preview-target='watermark-text']");
+    const watermarkFileInput = qs("[data-template-preview-target='watermark-image-upload']");
+    const watermarkOpacityInput = qs("[data-template-preview-target='watermark-opacity']");
+    const removeWatermarkImageInput = qs("[name='quote_template[remove_watermark_image]']");
+    const watermarkTextContainer = qs("[data-watermark-text-container]");
+    const watermarkModeHint = qs("[data-watermark-mode-hint]");
+    const showSignatureToggle = qs("[data-template-preview-toggle='signature']");
+    const signatureNameInput = qs("[data-template-preview-target='signature-name']");
+    const signatureFileInput = qs("[data-template-preview-target='signature-image-upload']");
+    const hasExistingWatermarkImage = watermarkFileInput?.dataset.existingFile === "true";
+
+    const watermarkImageActive = () => {
+      const hasNewUpload = !!(watermarkFileInput && watermarkFileInput.files && watermarkFileInput.files[0]);
+      const removeExisting = !!removeWatermarkImageInput?.checked;
+      const hasExisting = hasExistingWatermarkImage && !removeExisting;
+      return hasNewUpload || hasExisting;
+    };
+
+    const updateWatermarkModeUI = () => {
+      const imageMode = watermarkImageActive();
+      if (watermarkTextInput) watermarkTextInput.disabled = imageMode;
+      if (watermarkTextContainer) watermarkTextContainer.classList.toggle("is-disabled", imageMode);
+      if (watermarkModeHint) {
+        watermarkModeHint.textContent = imageMode ?
+          "Image watermark mode is active. Remove image to edit text watermark." :
+          "Text watermark mode is active. Upload an image to switch to image mode.";
+      }
+    };
+
+    const bindFilePickers = () => {
+      form.querySelectorAll("[data-file-picker-trigger]").forEach((button) => {
+        const inputId = button.dataset.filePickerTrigger;
+        const input = form.querySelector(`#${inputId}`);
+        if (!input) return;
+        button.addEventListener("click", () => input.click());
+      });
+
+      form.querySelectorAll("[data-file-picker-input]").forEach((input) => {
+        const fileNameTarget = input.dataset.filePickerName;
+        const fileNameNode = fileNameTarget ? form.querySelector(`#${fileNameTarget}`) : null;
+        if (!fileNameNode) return;
+        const updateFileName = () => {
+          fileNameNode.textContent = input.files && input.files[0] ? input.files[0].name : "No file selected";
+        };
+        input.addEventListener("change", updateFileName);
+        updateFileName();
+      });
+    };
+    bindFilePickers();
+
+    if (watermarkTextInput && showWatermarkToggle) {
+      watermarkTextInput.addEventListener("input", () => {
+        if (watermarkTextInput.value.trim()) showWatermarkToggle.checked = true;
+      });
+    }
+    if (watermarkFileInput && showWatermarkToggle) {
+      watermarkFileInput.addEventListener("change", () => {
+        if (watermarkFileInput.files && watermarkFileInput.files[0]) {
+          showWatermarkToggle.checked = true;
+          if (removeWatermarkImageInput) removeWatermarkImageInput.checked = false;
+        }
+        updateWatermarkModeUI();
+      });
+    }
+    if (removeWatermarkImageInput) {
+      removeWatermarkImageInput.addEventListener("change", updateWatermarkModeUI);
+    }
+    if (signatureFileInput && showSignatureToggle) {
+      signatureFileInput.addEventListener("change", () => {
+        if (signatureFileInput.files && signatureFileInput.files[0]) showSignatureToggle.checked = true;
+      });
+    }
+    if (signatureNameInput && showSignatureToggle) {
+      signatureNameInput.addEventListener("input", () => {
+        if (signatureNameInput.value.trim()) showSignatureToggle.checked = true;
+      });
+    }
     form.addEventListener("submit", () => {
       if (!statusNode) return;
       statusNode.textContent = "Saving...";
@@ -691,6 +873,7 @@
 
     applyViewport("desktop");
     applyScenario(scenarioNode?.value || "standard");
+    updateWatermarkModeUI();
     updatePreview();
   })();
 </script>

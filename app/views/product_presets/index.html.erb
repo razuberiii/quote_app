@@ -1,0 +1,53 @@
+<h1>Product Presets</h1>
+
+<section class="team-members-panel">
+  <p class="team-members-hint">Manage reusable specification and add-on libraries here, then bind them to products as defaults.</p>
+
+  <div class="product-presets-hub">
+    <article class="product-presets-card" id="spec-presets">
+      <div class="product-presets-card-head">
+        <div>
+          <h2>Spec Presets</h2>
+          <p>Reusable specification sets for voltage, material, dimensions, and other quote fields.</p>
+        </div>
+        <div class="product-presets-card-actions">
+          <%= link_to "Manage Specs", spec_presets_path, class: "btn btn-primary" %>
+          <%= link_to "New Spec Preset", spec_presets_path(anchor: "new"), class: "btn btn-secondary" %>
+        </div>
+      </div>
+
+      <% if @spec_presets.any? %>
+        <div class="product-presets-chip-list">
+          <% @spec_presets.limit(8).each do |preset| %>
+            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= preset.normalized_entries.size %> spec(s)</small></span>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="team-members-hint">No spec presets yet.</p>
+      <% end %>
+    </article>
+
+    <article class="product-presets-card" id="addon-presets">
+      <div class="product-presets-card-head">
+        <div>
+          <h2>Add-on Presets</h2>
+          <p>Reusable charge bundles like warranty, installation kits, packaging, or service options.</p>
+        </div>
+        <div class="product-presets-card-actions">
+          <%= link_to "Manage Add-ons", addon_presets_path, class: "btn btn-primary" %>
+          <%= link_to "New Add-on Preset", addon_presets_path(anchor: "new"), class: "btn btn-secondary" %>
+        </div>
+      </div>
+
+      <% if @addon_presets.any? %>
+        <div class="product-presets-chip-list">
+          <% @addon_presets.limit(8).each do |preset| %>
+            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= preset.normalized_entries.size %> add-on(s)</small></span>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="team-members-hint">No add-on presets yet.</p>
+      <% end %>
+    </article>
+  </div>
+</section>

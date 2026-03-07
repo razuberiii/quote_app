@@ -1,0 +1,39 @@
+<section class="quote-decision-review app-surface">
+  <div class="app-section-heading">
+    <div>
+      <h3>Decision Review</h3>
+      <p class="app-section-caption">One-screen read on buyer readiness, change scope, and the next move.</p>
+    </div>
+  </div>
+
+  <div class="quote-decision-review-grid">
+    <article class="quote-decision-review-card is-<%= @quote_decision_review[:recommended_move][:tone] %>">
+      <span>Recommended Move</span>
+      <strong><%= @quote_decision_review[:recommended_move][:label] %></strong>
+      <p><%= @quote_decision_review[:recommended_move][:detail] %></p>
+    </article>
+
+    <article class="quote-decision-review-card">
+      <span>Buyer Readiness</span>
+      <strong><%= @quote_decision_review[:buyer_readiness][:value] %></strong>
+      <p><%= @quote_decision_review[:buyer_readiness][:detail] %></p>
+    </article>
+
+    <article class="quote-decision-review-card">
+      <span>Revision Scope</span>
+      <strong><%= @quote_decision_review[:revision_scope][:value] %></strong>
+      <p><%= @quote_decision_review[:revision_scope][:detail] %></p>
+    </article>
+  </div>
+
+  <% if @quote_decision_review[:review_notes].any? %>
+    <div class="quote-decision-review-notes">
+      <span>Review Notes</span>
+      <ul>
+        <% @quote_decision_review[:review_notes].each do |note| %>
+          <li><%= note %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</section>

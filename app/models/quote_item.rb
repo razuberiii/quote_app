@@ -1,4 +1,6 @@
 class QuoteItem < ApplicationRecord
+  MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
+
   belongs_to :quote
   belongs_to :product, optional: true
 
@@ -9,10 +11,13 @@ class QuoteItem < ApplicationRecord
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validate :validate_addon_charge_amounts
   validate :product_company_matches_quote_company
+  validate :snapshots_locked_after_quote_sent
+  validate :monetary_values_fit_storage_precision
 
   before_validation :apply_product_defaults
   before_validation :normalize_structured_fields
   before_validation :calculate_amount
+  after_commit :refresh_related_product_stats
 
   scope :ordered, -> { order(created_at: :asc) }
 
@@ -25,11 +30,13 @@ class QuoteItem < ApplicationRecord
   end
 
   def specification_pairs
-    normalize_specifications(self[:specifications])
+    source = self[:spec_snapshot].presence || self[:specifications]
+    normalize_specifications(source)
   end
 
   def addon_charge_entries
-    normalize_addon_charges(self[:addon_charges])
+    source = self[:addon_snapshot].presence || self[:addon_charges]
+    normalize_addon_charges(source)
   end
 
   def specifications_text
@@ -40,7 +47,9 @@ class QuoteItem < ApplicationRecord
 
   def specifications_text=(value)
     @specifications_text = value.to_s
-    self[:specifications] = parse_specifications_text(value)
+    parsed = parse_specifications_text(value)
+    self[:specifications] = parsed
+    self[:spec_snapshot] = parsed
   end
 
   def addon_charges_text
@@ -51,7 +60,9 @@ class QuoteItem < ApplicationRecord
 
   def addon_charges_text=(value)
     @addon_charges_text = value.to_s
-    self[:addon_charges] = parse_addon_charges_text(value)
+    parsed = parse_addon_charges_text(value)
+    self[:addon_charges] = parsed
+    self[:addon_snapshot] = parsed
   end
 
   private
@@ -61,7 +72,7 @@ class QuoteItem < ApplicationRecord
 
     self.description = product.name if description.blank?
     self.unit_price = product.default_price if unit_price.blank?
-    apply_default_specification_from_product
+    apply_default_configuration_from_product
   end
 
   def calculate_amount
@@ -71,8 +82,12 @@ class QuoteItem < ApplicationRecord
   end
 
   def normalize_structured_fields
-    self[:specifications] = normalize_specifications(self[:specifications])
-    self[:addon_charges] = normalize_addon_charges(self[:addon_charges])
+    normalized_specs = normalize_specifications(self[:spec_snapshot].presence || self[:specifications])
+    normalized_addons = normalize_addon_charges(self[:addon_snapshot].presence || self[:addon_charges])
+    self[:spec_snapshot] = normalized_specs
+    self[:addon_snapshot] = normalized_addons
+    self[:specifications] = normalized_specs
+    self[:addon_charges] = normalized_addons
   end
 
   def normalize_specifications(raw)
@@ -114,14 +129,18 @@ class QuoteItem < ApplicationRecord
     end
   end
 
-  def apply_default_specification_from_product
-    return if specification_pairs.present?
-    return if product.default_specification.blank?
+  def apply_default_configuration_from_product
+    if specification_pairs.blank?
+      defaults = product.effective_default_specs.map { |entry| { key: entry[:name], value: entry[:value] } }
+      self[:spec_snapshot] = defaults if defaults.present?
+      self[:specifications] = defaults if defaults.present?
+    end
 
-    parsed_default_specification = parse_specifications_text(product.default_specification)
-    return if parsed_default_specification.blank?
+    return unless addon_charge_entries.blank?
 
-    self[:specifications] = parsed_default_specification
+    defaults = product.effective_default_addons.map { |entry| { name: entry[:name], amount: entry[:price] } }
+    self[:addon_snapshot] = defaults if defaults.present?
+    self[:addon_charges] = defaults if defaults.present?
   end
 
   def parse_addon_charges_text(value)
@@ -147,10 +166,38 @@ class QuoteItem < ApplicationRecord
     errors.add(:addon_charges, "must be greater than or equal to 0")
   end
 
+  def monetary_values_fit_storage_precision
+    if unit_price.present? && unit_price.to_d > MAX_DECIMAL_15_4
+      errors.add(:unit_price, "is too large")
+    end
+
+    if amount.present? && amount.to_d > MAX_DECIMAL_15_4
+      errors.add(:base, "Line total is too large for storage. Reduce quantity, unit price, or add-ons.")
+    end
+
+    if addon_total > MAX_DECIMAL_15_4
+      errors.add(:addon_charges, "total is too large")
+    end
+  end
+
   def product_company_matches_quote_company
     return if product.blank? || quote.blank?
     return if product.company_id == quote.company_id
 
     errors.add(:product, "must belong to the same company as the quote")
+  end
+
+  def snapshots_locked_after_quote_sent
+    return unless persisted?
+    return if quote.blank? || quote.draft?
+
+    if will_save_change_to_spec_snapshot? || will_save_change_to_addon_snapshot? || will_save_change_to_specifications? || will_save_change_to_addon_charges?
+      errors.add(:base, "Specifications and add-ons are locked once the quote is sent")
+    end
+  end
+
+  def refresh_related_product_stats
+    product_ids = [ product_id_previously_was, product_id ].compact.uniq
+    ProductIntelligenceRefresher.refresh_products(product_ids)
   end
 end

@@ -1,29 +1,46 @@
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>';">
+<% watermark_text = template_watermark_text(@template, @share.company.name) %>
+<% watermark_image_url = template_watermark_image_url(@template) %>
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+  <% if watermark_image_url.present? %>
+    <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
+  <% end %>
   <% spec_label = @snapshot["spec_label"].presence || @template.spec_label.presence || "Spec" %>
   <% addon_label = @snapshot["addon_label"].presence || @template.addon_label.presence || "Add-on" %>
   <% custom_title = @snapshot["custom_title"].presence %>
   <% quote = @share.quote %>
+  <% quote_deleted = quote.respond_to?(:deleted?) && quote.deleted? %>
+  <% quote_reopened = quote.status.to_s == "draft" && quote.reopened_at.present? %>
+  <% signature_image_url = template_signature_image_url(@template) %>
+  <% signature_name = template_signature_name(@template) %>
+  <% show_signature_section = @template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
   <% decision_state =
       if quote.accepted_at.present?
         "accepted"
       elsif quote.changes_requested_at.present?
         "changes_requested"
-      elsif quote.latest_revision_for_quote_no? && %w[sent viewed negotiating].include?(quote.status.to_s)
+      elsif !quote_reopened && quote.latest_revision_for_quote_no? && %w[sent viewed negotiating].include?(quote.status.to_s)
         "active"
       else
         "inactive"
       end %>
   <% revision_reason_options = [
-       "Price needs adjustment",
-       "Specification needs update",
-       "Add-on items need change",
-       "Payment terms need revision",
-       "Lead time / delivery needs revision",
-       "Need internal approval first"
+       [ "price adjustment", "Price adjustment" ],
+       [ "specification change", "Specification change" ],
+       [ "delivery terms", "Delivery terms" ],
+       [ "other", "Other" ]
      ] %>
   <div class="no-print quote-public-utility">
     <button type="button" class="quote-utility-btn" onclick="window.print()">Print</button>
   </div>
+  <% if quote_deleted %>
+    <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+      This quote has expired and is no longer actionable. Please contact your sales representative for the latest version.
+    </div>
+  <% elsif quote_reopened %>
+    <div class="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      This quote is currently being updated by the seller. Please contact your sales representative for the latest version.
+    </div>
+  <% end %>
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
@@ -55,11 +72,11 @@
 
     <article class="quote-meta-card">
       <h3>Buyer</h3>
-      <p><strong><%= @snapshot["customer_name"].presence || "-" %></strong></p>
-      <p>Contact: <%= @snapshot["customer_contact_name"].presence || "-" %></p>
-      <p><%= @snapshot["customer_address"].presence || "-" %></p>
-      <p><%= @snapshot["customer_phone"].presence || "-" %></p>
-      <p><%= @snapshot["customer_email"].presence || "-" %></p>
+      <p><strong>Company:</strong> <%= @snapshot["customer_name"].presence || "-" %></p>
+      <p><strong>Primary Contact:</strong> <%= @snapshot["customer_contact_name"].presence || "-" %></p>
+      <p><strong>Email:</strong> <%= @snapshot["customer_email"].presence || "-" %></p>
+      <p><strong>Phone:</strong> <%= @snapshot["customer_phone"].presence || "-" %></p>
+      <p><strong>Address:</strong> <%= @snapshot["customer_address"].presence || "-" %></p>
     </article>
 
     <article class="quote-meta-card">
@@ -158,6 +175,8 @@
   <% tax = @snapshot["tax_amount"].to_d %>
   <% shipping = @snapshot["shipping_amount"].to_d %>
   <% discount = @snapshot["discount_amount"].to_d %>
+  <% has_discount = discount.positive? %>
+  <% original_total = subtotal + tax + shipping %>
   <% grand_total = subtotal + tax + shipping - discount %>
   <aside class="quote-total-box">
     <p><span>Subtotal</span><strong><%= quote_money(subtotal, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
@@ -167,8 +186,14 @@
     <% if @template.show_shipping %>
       <p><span>Shipping</span><strong><%= quote_money(shipping, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
     <% end %>
-    <p><span>Discount</span><strong><%= quote_money(discount, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% if has_discount %>
+      <p class="quote-total-discount"><span>Discount</span><strong>-<%= quote_money(discount, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+      <p class="quote-total-reduction"><span>Original Total</span><strong><%= quote_money(original_total, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
     <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(grand_total, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% if has_discount %>
+      <p class="quote-total-saved"><span>You Save</span><strong><%= quote_money(discount, @snapshot["currency"], show_symbol: @template.show_currency) %></strong></p>
+    <% end %>
     <% if (closing_message = @template.resolved_closing_message).present? %>
       <p class="quote-engagement-note"><%= closing_message %></p>
     <% end %>
@@ -187,6 +212,31 @@
       <h3>Terms & Conditions</h3>
       <% terms_lines.each do |label, value| %>
         <p><strong><%= label %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% company_documents = @share.company.company_documents.includes(file_attachment: :blob).ordered %>
+  <% if company_documents.any? %>
+    <section class="quote-section-block">
+      <h3>Company Credentials</h3>
+      <% company_documents.each do |document| %>
+        <p>
+          <strong><%= document.title %></strong>
+          <% if document.file.attached? %>
+            <%= link_to "Download", rails_blob_path(document.file, disposition: "attachment") %>
+          <% end %>
+        </p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if show_signature_section %>
+    <section class="quote-section-block quote-signature-block">
+      <h3>Signature</h3>
+      <% if signature_image_url.present? %>
+        <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+      <% end %>
+      <% if signature_name.present? %>
+        <p><strong>Authorized by:</strong> <%= signature_name %></p>
       <% end %>
     </section>
   <% end %>
@@ -210,15 +260,32 @@
       <p class="quote-decision-status is-accepted">Quotation Accepted on <%= quote.accepted_at&.strftime("%Y-%m-%d %H:%M") %></p>
     <% elsif decision_state == "changes_requested" %>
       <p class="quote-decision-status is-revision">Revision Requested on <%= quote.changes_requested_at&.strftime("%Y-%m-%d %H:%M") %></p>
+      <% if quote.request_reason.present? %>
+        <p class="quote-decision-note">Reason: <%= quote.request_reason.humanize %></p>
+      <% end %>
       <% if quote.changes_request_message.present? %>
         <p class="quote-decision-note">Message: <%= quote.changes_request_message %></p>
       <% end %>
     <% elsif decision_state == "active" %>
       <div class="quote-public-actions">
-        <%= form_with url: accept_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept", onsubmit: "return window.confirm('Confirm acceptance of this quotation?');" } do %>
-          <button type="submit">Accept Quotation</button>
-        <% end %>
+        <button type="button" class="quote-decision-request-toggle js-open-accept-request">Accept Quotation</button>
         <button type="button" class="quote-decision-request-toggle js-open-revision-request">Request Revision</button>
+      </div>
+      <div class="quote-revision-modal js-accept-modal" hidden>
+        <div class="quote-revision-modal-backdrop js-close-accept-request"></div>
+        <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accept-request-title">
+          <div class="quote-revision-modal-head">
+            <h4 id="accept-request-title">Confirm Acceptance</h4>
+            <button type="button" class="quote-revision-modal-close js-close-accept-request" aria-label="Close">x</button>
+          </div>
+          <p class="quote-revision-modal-hint">Please confirm that you want to accept this quotation.</p>
+          <%= form_with url: accept_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept" } do %>
+            <div class="quote-public-revision-form-actions">
+              <button type="submit">Confirm Acceptance</button>
+              <button type="button" class="quote-decision-cancel js-close-accept-request">Cancel</button>
+            </div>
+          <% end %>
+        </div>
       </div>
       <div class="quote-revision-modal js-revision-modal" hidden>
         <div class="quote-revision-modal-backdrop js-close-revision-request"></div>
@@ -228,13 +295,13 @@
             <button type="button" class="quote-revision-modal-close js-close-revision-request" aria-label="Close">x</button>
           </div>
           <%= form_with url: request_revision_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-revision-form js-revision-request-form" } do |f| %>
-            <p class="quote-revision-modal-hint">Select one or more reasons, then add optional details.</p>
+            <p class="quote-revision-modal-hint">Select a reason, then add optional details.</p>
             <div class="quote-revision-reason-grid">
-              <% revision_reason_options.each_with_index do |reason, idx| %>
+              <% revision_reason_options.each_with_index do |(value, label), idx| %>
                 <% input_id = "revision_reason_#{idx}" %>
                 <label class="quote-revision-reason-option" for="<%= input_id %>">
-                  <%= check_box_tag "revision_reasons[]", reason, false, id: input_id %>
-                  <span><%= reason %></span>
+                  <%= radio_button_tag :request_reason, value, idx.zero?, id: input_id %>
+                  <span><%= label %></span>
                 </label>
               <% end %>
             </div>
@@ -249,6 +316,8 @@
           <% end %>
         </div>
       </div>
+    <% elsif quote_reopened %>
+      <p class="quote-decision-status">Decision actions are disabled while this quote is being updated by the seller.</p>
     <% else %>
       <p class="quote-decision-status">This revision is not currently open for public decision.</p>
     <% end %>
@@ -260,38 +329,42 @@
 
 <script>
   (() => {
-    const openBtn = document.querySelector(".js-open-revision-request");
-    const modal = document.querySelector(".js-revision-modal");
-    const closeButtons = Array.from(document.querySelectorAll(".js-close-revision-request"));
-    const form = document.querySelector(".js-revision-request-form");
-    if (!openBtn || !modal || !form || openBtn.dataset.bound === "true") return;
-    openBtn.dataset.bound = "true";
+    const bindModal = (openSelector, modalSelector, closeSelector, focusSelector) => {
+      const openBtn = document.querySelector(openSelector);
+      const modal = document.querySelector(modalSelector);
+      const closeButtons = Array.from(document.querySelectorAll(closeSelector));
+      if (!openBtn || !modal || openBtn.dataset.bound === "true") return;
+      openBtn.dataset.bound = "true";
 
-    const closeModal = () => {
-      modal.classList.remove("is-open");
-      window.setTimeout(() => {
-        modal.hidden = true;
-        openBtn.focus();
-      }, 180);
+      const closeModal = () => {
+        modal.classList.remove("is-open");
+        window.setTimeout(() => {
+          modal.hidden = true;
+          openBtn.focus();
+        }, 180);
+      };
+
+      openBtn.addEventListener("click", () => {
+        modal.hidden = false;
+        window.requestAnimationFrame(() => {
+          modal.classList.add("is-open");
+        });
+        const input = modal.querySelector(focusSelector);
+        if (input) input.focus();
+      });
+
+      closeButtons.forEach((button) => {
+        button.addEventListener("click", closeModal);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) {
+          closeModal();
+        }
+      });
     };
 
-    openBtn.addEventListener("click", () => {
-      modal.hidden = false;
-      window.requestAnimationFrame(() => {
-        modal.classList.add("is-open");
-      });
-      const input = form.querySelector("textarea");
-      if (input) input.focus();
-    });
-
-    closeButtons.forEach((button) => {
-      button.addEventListener("click", closeModal);
-    });
-
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && !modal.hidden) {
-        closeModal();
-      }
-    });
+    bindModal(".js-open-revision-request", ".js-revision-modal", ".js-close-revision-request", "textarea");
+    bindModal(".js-open-accept-request", ".js-accept-modal", ".js-close-accept-request", "button[type='submit']");
   })();
 </script>

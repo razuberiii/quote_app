@@ -24,11 +24,15 @@
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
 
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
+    <%# Styling load order: Tailwind tokens/utilities first, shared component layer next, legacy styles last only for pages not yet migrated. Do not add new app UI rules to legacy_* stylesheets. %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "base", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "layout", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "legacy_core", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "legacy_landing", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "legacy_ui", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "legacy", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "public_quote", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "marketing", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "seo", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
@@ -53,14 +57,16 @@
             <span></span>
           </button>
           <ul class="navbar-menu" id="primary-navigation">
-            <li><%= link_to "Customers", customers_path %></li>
-            <li><%= link_to "Products", products_path %></li>
-            <li><%= link_to "Template", quote_templates_path %></li>
+            <%= ui_nav_link "Dashboard", dashboard_path, icon: :dashboard %>
+            <%= ui_nav_link "Customers", customers_path, icon: :customers %>
+            <%= ui_nav_link "Products", products_path, icon: :products %>
+            <%= ui_nav_link "Product Presets", product_presets_path, icon: :presets %>
+            <%= ui_nav_link "Template", quote_templates_path, icon: :templates %>
             <% if current_user.can_manage_team? %>
-              <li><%= link_to "Team", team_members_path %></li>
+              <%= ui_nav_link "Team", team_members_path, icon: :team %>
             <% end %>
             <% if current_user.admin? %>
-              <li><%= link_to "Admin", admin_users_path %></li>
+              <%= ui_nav_link "Admin", admin_users_path, icon: :admin %>
             <% end %>
             <% invite_count = pending_team_invitations_count %>
             <li class="account-menu">

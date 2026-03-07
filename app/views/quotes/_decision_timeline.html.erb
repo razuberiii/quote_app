@@ -1,0 +1,33 @@
+<section class="quote-decision-timeline app-surface">
+  <div class="app-section-heading">
+    <div>
+      <h3>Decision Timeline</h3>
+      <p class="app-section-caption">Key decision and engagement moments for this revision.</p>
+    </div>
+  </div>
+
+  <div class="quote-decision-recap">
+    <% @quote_decision_recap.each do |item| %>
+      <article class="quote-decision-recap-card">
+        <span><%= item[:label] %></span>
+        <strong><%= item[:value] %></strong>
+        <p><%= item[:detail] %></p>
+      </article>
+    <% end %>
+  </div>
+
+  <div class="quote-decision-list">
+    <% @quote_decision_timeline.each do |event| %>
+      <article class="quote-decision-item is-<%= event[:kind] %>">
+        <div class="quote-decision-dot" aria-hidden="true"></div>
+        <div class="quote-decision-content">
+          <div class="quote-decision-topline">
+            <strong><%= event[:label] %></strong>
+            <span><%= format_in_user_time(event[:at], current_user) %></span>
+          </div>
+          <p><%= event[:detail] %></p>
+        </div>
+      </article>
+    <% end %>
+  </div>
+</section>

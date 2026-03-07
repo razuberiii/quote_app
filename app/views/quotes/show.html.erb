@@ -1,8 +1,10 @@
-<div id="quote-page-content">
-  <%= render "show_content" %>
-</div>
+<section class="app-page-shell">
+  <div id="quote-page-content">
+    <%= render "show_content" %>
+  </div>
 
-<div id="quote-toast" class="quote-toast" hidden></div>
+  <div id="quote-toast" class="quote-toast" hidden></div>
+</section>
 
 <script>
   (() => {
@@ -60,6 +62,143 @@
         showToast("Template updated");
       } catch (_) {
         showToast("Template update failed", true);
+      }
+    });
+
+    const copyText = async (text) => {
+      try {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_) {
+      }
+
+      try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        textarea.style.left = "-9999px";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return !!ok;
+      } catch (_) {
+        return false;
+      }
+    };
+
+    document.addEventListener("click", async (event) => {
+      const button = event.target.closest("[data-copy-text]");
+      if (!button) return;
+
+      event.preventDefault();
+      const copied = await copyText(button.dataset.copyText || "");
+      showToast(copied ? "Change summary copied" : "Copy failed on browser", !copied);
+    });
+  })();
+
+  (() => {
+    if (window.__quoteReminderTurnstileBound) return;
+    window.__quoteReminderTurnstileBound = true;
+
+    const siteKey = '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>';
+
+    const closeReminderModal = (modal) => {
+      if (!modal) return;
+
+      const responseField = document.getElementById(modal.dataset.reminderResponseId);
+      const loading = modal.querySelector(".js-quote-reminder-loading");
+      const widget = modal.querySelector(".js-quote-reminder-widget");
+      const success = modal.querySelector(".js-quote-reminder-success");
+
+      if (responseField) responseField.value = "";
+      modal.hidden = true;
+      if (loading) loading.hidden = false;
+      if (widget) widget.hidden = true;
+      if (success) success.hidden = true;
+    };
+
+    const renderReminderTurnstile = (modal) => {
+      if (!modal) return;
+
+      const loading = modal.querySelector(".js-quote-reminder-loading");
+      const widget = modal.querySelector(".js-quote-reminder-widget");
+      const success = modal.querySelector(".js-quote-reminder-success");
+      const form = document.getElementById(modal.dataset.reminderFormId);
+      const responseField = document.getElementById(modal.dataset.reminderResponseId);
+
+      if (!loading || !widget || !success || !form || !responseField) return;
+
+      loading.hidden = false;
+      widget.hidden = true;
+      success.hidden = true;
+      responseField.value = "";
+
+      const renderWidget = () => {
+        if (typeof turnstile === "undefined") {
+          window.setTimeout(renderWidget, 180);
+          return;
+        }
+
+        loading.hidden = true;
+        widget.hidden = false;
+
+        if (modal.dataset.widgetId) {
+          turnstile.reset(modal.dataset.widgetId);
+          return;
+        }
+
+        const widgetId = turnstile.render(widget, {
+          sitekey: siteKey,
+          theme: "light",
+          callback: (token) => {
+            responseField.value = token;
+            widget.hidden = true;
+            success.hidden = false;
+            window.setTimeout(() => form.requestSubmit(), 320);
+          },
+          "expired-callback": () => {
+            responseField.value = "";
+            success.hidden = true;
+            widget.hidden = false;
+          },
+          "error-callback": () => {
+            responseField.value = "";
+            success.hidden = true;
+            widget.hidden = false;
+          }
+        });
+
+        modal.dataset.widgetId = widgetId;
+      };
+
+      renderWidget();
+    };
+
+    document.addEventListener("click", (event) => {
+      const openButton = event.target.closest(".js-quote-reminder-open");
+      if (openButton) {
+        const modal = document.getElementById(openButton.dataset.reminderModalId);
+        if (!modal) return;
+        event.preventDefault();
+        modal.hidden = false;
+        renderReminderTurnstile(modal);
+        return;
+      }
+
+      const closeButton = event.target.closest(".js-quote-reminder-close");
+      if (closeButton) {
+        closeReminderModal(closeButton.closest(".quote-turnstile-modal"));
+        return;
+      }
+
+      if (event.target.classList.contains("quote-turnstile-modal")) {
+        closeReminderModal(event.target);
       }
     });
   })();

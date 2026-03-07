@@ -1,28 +1,51 @@
-<h1>Products</h1>
-
-<div class="search-section">
-  <%= form_with url: products_path, method: :get, local: true do |f| %>
-    <div class="search-bar">
-      <%= f.text_field :query, placeholder: "Search products...", value: @search_query %>
-      <%= f.submit "Search" %>
-      <% if @search_query.present? %>
-        <%= link_to "Clear", products_path, class: "btn btn-secondary" %>
+<section class="app-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1>Products</h1>
+      <p>Keep the catalog dense, searchable, and ready for quoting with less scanning overhead.</p>
+    </div>
+    <div class="app-page-header-actions">
+      <%= render "components/ui/button", href: new_product_path, variant: :primary, class: "page-primary-cta" do %>
+        + New Product
       <% end %>
     </div>
-  <% end %>
-</div>
+  </header>
 
-<div class="header-actions">
-  <%= link_to "+ New Product", new_product_path, class: "btn btn-primary" %>
-</div>
+  <div class="app-section-stack">
+    <section class="app-toolbar-surface app-toolbar-surface--compact">
+      <%= form_with url: products_path, method: :get, local: true do |f| %>
+        <div class="app-search-row">
+          <div class="app-search-field">
+            <span class="app-search-icon" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" class="app-search-icon-svg" viewBox="0 0 24 24" fill="none">
+                <path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+              </svg>
+            </span>
+            <%= f.text_field :query,
+                             placeholder: "Search products...",
+                             value: @search_query,
+                             class: "#{ui_input_classes} app-search-input" %>
+          </div>
+          <% if @search_query.present? %>
+            <%= link_to "Clear", products_path, class: "app-search-clear" %>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
 
-<% if @products.any? %>
-  <% if @search_query.present? %>
-    <p class="search-info">Found <strong><%= @products.count %></strong> product(s) matching "<strong><%= @search_query %></strong>"</p>
-  <% end %>
-  <article class="dashboard-panel product-library-panel">
-    <div class="table-responsive">
-      <table class="customers-table products-table">
+    <% if @products.any? %>
+      <section class="app-listing-shell">
+        <div class="app-section-heading">
+          <div>
+            <h2>Catalog</h2>
+            <p class="app-section-caption">Reusable products ready for quoting, presets, and revision-heavy sales flows.</p>
+          </div>
+        </div>
+        <% if @search_query.present? %>
+          <p class="search-info">Found <strong><%= @products.count %></strong> product(s) matching "<strong><%= @search_query %></strong>"</p>
+        <% end %>
+        <div class="table-responsive">
+          <%= render "components/ui/table", class: "customers-table products-table saas-table app-table-surface", table_class: "customers-table products-table saas-table app-data-table" do %>
       <thead>
         <tr>
           <th>Image</th>
@@ -75,9 +98,17 @@
           </tr>
         <% end %>
       </tbody>
-      </table>
-    </div>
-  </article>
-<% else %>
-  <p>No products yet. <%= link_to "Create one", new_product_path %></p>
-<% end %>
+          <% end %>
+        </div>
+      </section>
+    <% else %>
+      <%= ui_empty_state(
+            title: "No products yet",
+            body: "Create your first product to build a reusable catalog for quoting, presets, and exports.",
+            action_label: "Create Product",
+            action_path: new_product_path,
+            icon: :products
+          ) %>
+    <% end %>
+  </div>
+</section>

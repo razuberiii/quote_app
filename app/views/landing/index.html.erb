@@ -21,26 +21,90 @@
   </script>
 <% end %>
 
-<section class="marketing-hero">
+<section class="marketing-hero marketing-hero-split">
   <div class="marketing-hero-bg"></div>
   <div class="marketing-hero-content">
     <p class="marketing-kicker">BUILT FOR B2B SALES AND EXPORT TEAMS</p>
     <h1>Foreign Trade Quotation Software for B2B Export Teams</h1>
     <p class="marketing-subtitle">
-      Every revision saved. Buyers see the latest. No confusion.
+      Run revisions, buyer visibility, and export-ready quote output in one cleaner workflow.
     </p>
     <div class="marketing-cta-row">
       <%= link_to "Start for Free", new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
       <%= link_to "View Demo", @demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
       <%= link_to "See Live Example", @sample_quote_path, class: "marketing-sample-link", target: "_blank" %>
     </div>
+    <div class="marketing-proof-strip">
+      <span>Revision control built in</span>
+      <span>Buyer-facing live quote links</span>
+      <span>Professional PDF / Excel output</span>
+    </div>
+  </div>
+
+  <aside class="marketing-hero-aside">
+    <div class="marketing-artifact-window">
+      <div class="marketing-artifact-eyebrow">
+        <span>Fictional quote workflow</span>
+        <span>Revision-safe</span>
+      </div>
+      <div class="marketing-artifact-head">
+        <strong>Northforge Supply / QX-2026-118</strong>
+        <span>Buyer sees latest version only</span>
+      </div>
+      <div class="marketing-artifact-stack">
+        <article class="marketing-artifact-card is-accent">
+          <span class="marketing-artifact-label">Version control</span>
+          <strong>V3 approved for sending</strong>
+          <p>Previous revisions remain visible in history.</p>
+        </article>
+        <article class="marketing-artifact-card">
+          <span class="marketing-artifact-label">Buyer access</span>
+          <strong>Public quote link</strong>
+          <p>Share one browser-ready quote instead of attachment chains.</p>
+        </article>
+        <article class="marketing-artifact-card">
+          <span class="marketing-artifact-label">Output</span>
+          <strong>PDF / Excel export</strong>
+          <p>Keep approvals and finance handoff intact.</p>
+        </article>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<section class="marketing-section marketing-story-section">
+  <div class="marketing-story-grid">
+    <div>
+      <div class="marketing-section-head">
+        <p class="marketing-kicker">WHY TEAMS SWITCH</p>
+        <h2>Export quoting breaks when the workflow lives in files</h2>
+      </div>
+      <p class="marketing-story-lead">
+        Most teams do not need a heavy ERP quoting module. They need one dependable place to create, revise, share, and follow up on quotes without losing version control.
+      </p>
+    </div>
+    <div class="marketing-story-list">
+      <article>
+        <strong>Before</strong>
+        <p>Quotes move through spreadsheets, email attachments, and chat threads.</p>
+      </article>
+      <article>
+        <strong>After</strong>
+        <p>Rubusoo keeps the latest quote, revision history, buyer link, and export output in one operating layer.</p>
+      </article>
+      <article>
+        <strong>Why it matters</strong>
+        <p>Less version confusion. Faster response loops. Cleaner internal follow-up.</p>
+      </article>
+    </div>
   </div>
 </section>
 
 <section class="marketing-section">
   <div class="marketing-section-head">
-    <h2>Core Quotation CRM Features for Export Teams</h2>
-    <p>Core workflows for small teams and foreign trade operations.</p>
+    <p class="marketing-kicker">CORE CAPABILITIES</p>
+    <h2>Core quotation workflows, presented like a product not a brochure</h2>
+    <p>Everything below maps to features that already exist in the app today.</p>
   </div>
   <div class="marketing-grid marketing-grid-4">
     <article class="marketing-feature">
@@ -66,55 +130,79 @@
   </div>
 </section>
 
-<section class="marketing-section marketing-soft">
+<section class="marketing-section marketing-soft marketing-comparison-section">
   <div class="marketing-section-head">
-    <h2>Why Rubusoo</h2>
-    <p>A practical quoting stack without enterprise overhead.</p>
+    <p class="marketing-kicker">WHAT CHANGES</p>
+    <h2>A better operating layer for quoting</h2>
+    <p>Not “all-in-one ERP”. Not another file folder. A focused execution system for quote work.</p>
   </div>
-  <div class="marketing-grid marketing-grid-4">
+  <div class="marketing-comparison-grid">
     <article class="marketing-advantage">
-      <h3>Built for Small Teams</h3>
-      <p>No unnecessary features. Clear workflows. Built for your sales rhythm.</p>
+      <h3>Spreadsheet quoting</h3>
+      <p>Fast to start, but weak once revisions, approvals, and buyer updates pile up.</p>
+    </article>
+    <article class="marketing-advantage is-emphasis">
+      <h3>Rubusoo workflow</h3>
+      <p>One quote timeline. One buyer-facing link. One clean export path for internal handoff.</p>
     </article>
     <article class="marketing-advantage">
-      <h3>Better Follow-ups</h3>
-      <p>Know where every deal stands. Quote history in context. Next steps visible.</p>
-    </article>
-    <article class="marketing-advantage">
-      <h3>Professional Output</h3>
-      <p>Every quote reflects your brand. Buyer-ready. Finance-clear.</p>
-    </article>
-    <article class="marketing-advantage">
-      <h3>Template Driven</h3>
-      <p>Your design language. Reused across quotes. Safe, no messy customization.</p>
+      <h3>Heavy ERP quoting</h3>
+      <p>Powerful on paper, but often too slow and rigid for frontline export quote cycles.</p>
     </article>
   </div>
 </section>
 
 <section class="marketing-section">
   <div class="marketing-section-head">
-    <h2>How It Works</h2>
+    <p class="marketing-kicker">WORKFLOW</p>
+    <h2>How a quote actually moves through the system</h2>
+    <p>The page flow is simple on purpose: build, send, revise, export, follow up.</p>
   </div>
   <div class="marketing-steps">
     <article class="marketing-step">
       <span>1</span>
-      <h3>Add Your Data</h3>
-      <p>Add your products and customers.</p>
+      <h3>Set up products and customers</h3>
+      <p>Keep reusable catalog data and customer records in one place.</p>
     </article>
     <article class="marketing-step">
       <span>2</span>
-      <h3>Create the Quote</h3>
-      <p>Compose items, pricing, and terms. Use templates to move faster.</p>
+      <h3>Create from templates</h3>
+      <p>Compose pricing, terms, and document structure without rebuilding every quote from scratch.</p>
     </article>
     <article class="marketing-step">
       <span>3</span>
-      <h3>Share or Export</h3>
-      <p>Send a live link to buyers. Or export to PDF for approvals.</p>
+      <h3>Share or export</h3>
+      <p>Use a live buyer link when you want clarity, or export PDF / Excel when your process needs files.</p>
     </article>
     <article class="marketing-step">
       <span>4</span>
-      <h3>Revise and Close</h3>
-      <p>Revise anytime. Every version stays in history. Close faster.</p>
+      <h3>Revise with history intact</h3>
+      <p>Keep every quote version visible while sales and buyers move toward a decision.</p>
+    </article>
+  </div>
+</section>
+
+<section class="marketing-section marketing-proof-layout">
+  <div class="marketing-section-head">
+    <p class="marketing-kicker">FOR BOTH SIDES OF THE DEAL</p>
+    <h2>Internal execution stays clean while the buyer experience stays simple</h2>
+  </div>
+  <div class="marketing-dual-grid">
+    <article class="marketing-proof-panel">
+      <h3>For your team</h3>
+      <ul class="marketing-proof-list">
+        <li>Revision history stays attached to the quote itself.</li>
+        <li>Products, presets, and templates are reusable across deals.</li>
+        <li>Follow-up work is tied to the same customer and quote context.</li>
+      </ul>
+    </article>
+    <article class="marketing-proof-panel">
+      <h3>For the buyer</h3>
+      <ul class="marketing-proof-list">
+        <li>One live quote link instead of unclear attachment chains.</li>
+        <li>Professional PDF / Excel output when a file is still required.</li>
+        <li>Cleaner quote presentation with less friction and less confusion.</li>
+      </ul>
     </article>
   </div>
 </section>

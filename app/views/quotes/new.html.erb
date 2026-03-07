@@ -1,15 +1,20 @@
-<% if @quote.quote_no.present? %>
-  <h1>
-    New Revision Draft for <%= @quote.quote_no %>
-    <span class="status-badge status-<%= (@quote.status.presence || "draft") %>"><%= (@quote.status.presence || "draft").capitalize %></span>
-  </h1>
-<% else %>
-  <h1>
-    New Quote
-    <span class="status-badge status-<%= (@quote.status.presence || "draft") %>"><%= (@quote.status.presence || "draft").capitalize %></span>
-  </h1>
-<% end %>
+<section class="app-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <% if @quote.quote_no.present? %>
+        <h1>New Revision Draft</h1>
+        <p>Build the next revision for <strong><%= @quote.quote_no %></strong> with clearer pricing and grouped quote inputs.</p>
+      <% else %>
+        <h1>New Quote</h1>
+        <p>Create a structured quote draft with grouped details, products, pricing, and terms.</p>
+      <% end %>
+    </div>
+    <div class="app-page-header-actions">
+      <%= quote_status_badge(@quote.status.presence || "draft") %>
+    </div>
+  </header>
 
-<%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>
+  <%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>
 
-<%= link_to "Back to Customer", customer_path(@customer), class: "form-page-back-link" %>
+  <%= link_to "Back to Customer", customer_path(@customer), class: "form-page-back-link" %>
+</section>

@@ -1,0 +1,39 @@
+<h1 id="new">Add-on Presets</h1>
+
+<p><%= link_to "Back to Product Presets", product_presets_path, class: "form-page-back-link" %></p>
+
+<section class="team-members-panel">
+  <h2>Create Add-on Preset</h2>
+  <%= render "form", addon_preset: @addon_preset %>
+</section>
+
+<section class="team-members-panel">
+  <h2>Preset Library</h2>
+  <% if @addon_presets.any? %>
+    <div class="table-responsive">
+      <table class="customers-table saas-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Add-ons</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @addon_presets.each do |preset| %>
+            <tr>
+              <td><strong><%= preset.name %></strong></td>
+              <td><%= preset.normalized_entries.map { |entry| "#{entry[:name]}: #{entry[:price]}" }.join(" • ") %></td>
+              <td class="text-right">
+                <%= link_to "Edit", edit_addon_preset_path(preset), class: "btn btn-secondary" %>
+                <%= button_to "Delete", addon_preset_path(preset), method: :delete, data: { turbo_confirm: "Delete this add-on preset?" }, class: "btn btn-secondary" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <p class="team-members-hint">No add-on presets yet.</p>
+  <% end %>
+</section>

@@ -3,8 +3,11 @@
 <%= form_with model: product do |f| %>
   <div class="product-edit-layout">
     <aside class="product-edit-media">
-      <section class="quote-form-section">
-        <h3>Product Media</h3>
+      <section class="quote-form-section product-edit-panel product-edit-panel--media">
+        <div class="app-form-section-head">
+          <h3>Product Media</h3>
+          <p class="app-form-section-note">Maintain a clean image set so products feel ready for quoting and sharing.</p>
+        </div>
 
         <div class="product-main-image-panel">
           <p class="product-media-label">Main image</p>
@@ -74,28 +77,31 @@
       </section>
     </aside>
 
-    <div class="product-edit-content">
-      <section class="quote-form-section">
-        <h3>Basic Info</h3>
+    <div class="product-edit-content product-edit-stack">
+      <section class="quote-form-section product-edit-panel">
+        <div class="app-form-section-head">
+          <h3>Basic Info</h3>
+          <p class="app-form-section-note">Define the core identity buyers and sales will recognize instantly.</p>
+        </div>
         <div class="quote-form-grid">
           <div>
             <%= f.label :name %>
-            <%= f.text_field :name, placeholder: "Product Name" %>
+            <%= f.text_field :name, placeholder: "Product Name", class: ui_input_classes %>
           </div>
           <div>
             <%= f.label :sku %>
-            <%= f.text_field :sku, placeholder: "SKU/Product Code", class: ("input-error" if product.errors[:sku].any?) %>
+            <%= f.text_field :sku, placeholder: "SKU/Product Code", class: ui_input_classes(product.errors[:sku].any? ? "input-error" : nil) %>
             <% if product.errors[:sku].any? %>
               <p class="field-error-message"><%= product.errors.full_messages_for(:sku).first %></p>
             <% end %>
           </div>
           <div>
             <%= f.label :product_category, "Category" %>
-            <%= f.text_field :product_category, placeholder: "Pump / Fittings / Spare Parts" %>
+            <%= f.text_field :product_category, placeholder: "Pump / Fittings / Spare Parts", class: ui_input_classes %>
           </div>
           <div>
             <%= f.label :unit, "Unit" %>
-            <%= f.text_field :unit, placeholder: "pcs / set / kg / carton", list: "product_unit_options_#{form_key}" %>
+            <%= f.text_field :unit, placeholder: "pcs / set / kg / carton", list: "product_unit_options_#{form_key}", class: ui_input_classes %>
             <datalist id="product_unit_options_<%= form_key %>">
               <option value="pcs"></option>
               <option value="set"></option>
@@ -108,55 +114,124 @@
         </div>
       </section>
 
-      <section class="quote-form-section">
-        <h3>Pricing & Business</h3>
+      <section class="quote-form-section product-edit-panel">
+        <div class="app-form-section-head">
+          <h3>Pricing & Business</h3>
+          <p class="app-form-section-note">Keep reference pricing, currency, and commercial constraints together.</p>
+        </div>
         <div class="quote-form-grid">
           <div>
             <%= f.label :default_price, "Reference Price" %>
-            <%= f.number_field :default_price, step: 0.01, min: 0, placeholder: "0.00" %>
+            <%= f.number_field :default_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
           </div>
           <div>
             <%= f.label :price_currency, "Reference Price Currency" %>
-            <%= f.select :price_currency, Product::PRICE_CURRENCIES, {}, {} %>
+            <%= f.select :price_currency, Product::PRICE_CURRENCIES, {}, { class: ui_input_classes } %>
           </div>
           <div>
             <%= f.label :cost_price, "Cost Price (internal only)" %>
-            <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: "0.00" %>
+            <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
             <p class="quote-form-hint">Internal only. Not shown in quotation output.</p>
           </div>
           <div>
             <%= f.label :moq, "MOQ" %>
-            <%= f.number_field :moq, min: 0, step: 1, placeholder: "0" %>
+            <%= f.number_field :moq, min: 0, step: 1, placeholder: "0", class: ui_input_classes %>
           </div>
           <div>
             <%= f.label :lead_time, "Lead Time" %>
-            <%= f.text_field :lead_time, placeholder: "e.g. 15-20 days" %>
+            <%= f.text_field :lead_time, placeholder: "e.g. 15-20 days", class: ui_input_classes %>
           </div>
         </div>
       </section>
 
-      <section class="quote-form-section">
-        <h3>Description</h3>
+      <section class="quote-form-section product-edit-panel">
+        <div class="app-form-section-head">
+          <h3>Description</h3>
+          <p class="app-form-section-note">Add short operational context so sales does not need to re-explain the product each time.</p>
+        </div>
         <div class="quote-form-grid">
           <div class="quote-form-grid-span-2">
-            <%= f.label :default_specification, "Default Specification" %>
-            <%= f.text_area :default_specification, rows: 4, class: ("input-error" if product.errors[:default_specification].any?), placeholder: "Power: 5kW&#10;Voltage: 220V&#10;Material: SS304" %>
-            <p class="quote-form-hint">Auto-fills quote item specifications when matched. One pair per line, using :, =, or ： as separator</p>
-            <% if product.errors[:default_specification].any? %>
-              <p class="field-error-message js-default-spec-error"><%= product.errors.full_messages_for(:default_specification).first %></p>
-            <% else %>
-              <p class="field-error-message js-default-spec-error" hidden></p>
-            <% end %>
-          </div>
-          <div class="quote-form-grid-span-2">
             <%= f.label :description %>
-            <%= f.text_area :description, rows: 5, placeholder: "Product Description" %>
+            <%= f.text_area :description, rows: 5, placeholder: "Product Description", class: ui_input_classes %>
           </div>
         </div>
       </section>
 
-      <div class="quote-form-submit">
-        <%= f.submit submit_label, class: "btn btn-primary" %>
+      <section class="quote-form-section product-edit-panel">
+        <div class="app-form-section-head">
+          <h3>Configurator Presets</h3>
+          <p class="app-form-section-note">Bind reusable spec and add-on presets to this product. The selected default presets will auto-fill into quote items, and sales can still switch presets or edit rows inside a quote.</p>
+        </div>
+        <div class="quote-form-grid">
+          <div class="quote-form-grid-span-2">
+            <div class="product-configurator-card">
+              <div class="product-configurator-head">
+                <strong>Bound Spec Presets</strong>
+                <%= link_to "Manage Spec Presets", product_presets_path(anchor: "spec-presets"), class: "quote-kv-add" %>
+              </div>
+              <% if @spec_presets.any? %>
+                <%= hidden_field_tag "product[spec_preset_ids][]", "" %>
+                <div class="product-preset-list">
+                  <% @spec_presets.each do |preset| %>
+                    <label class="product-preset-option">
+                      <%= check_box_tag "product[spec_preset_ids][]", preset.id, product.spec_preset_ids.include?(preset.id) %>
+                      <span>
+                        <strong><%= preset.name %></strong>
+                        <small><%= preset.normalized_entries.first(4).map { |entry| "#{entry[:name]}: #{entry[:value]}" }.join(" • ") %></small>
+                      </span>
+                    </label>
+                  <% end %>
+                </div>
+                <div class="product-configurator-default">
+                  <%= f.label :default_spec_preset_id, "Default Spec Preset" %>
+                  <%= f.select :default_spec_preset_id, options_for_select(@spec_presets.map { |preset| [preset.name, preset.id] }, product.default_spec_preset_id), { include_blank: "No default preset" }, { class: ui_input_classes } %>
+                </div>
+              <% else %>
+                <p class="quote-form-hint">No spec presets yet. Create one first, then bind it to this product.</p>
+              <% end %>
+              <% if product.errors[:default_spec_preset].any? %>
+                <p class="field-error-message"><%= product.errors.full_messages_for(:default_spec_preset).first %></p>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="quote-form-grid-span-2">
+            <div class="product-configurator-card">
+              <div class="product-configurator-head">
+                <strong>Bound Add-on Presets</strong>
+                <%= link_to "Manage Add-on Presets", product_presets_path(anchor: "addon-presets"), class: "quote-kv-add" %>
+              </div>
+              <% if @addon_presets.any? %>
+                <%= hidden_field_tag "product[addon_preset_ids][]", "" %>
+                <div class="product-preset-list">
+                  <% @addon_presets.each do |preset| %>
+                    <label class="product-preset-option">
+                      <%= check_box_tag "product[addon_preset_ids][]", preset.id, product.addon_preset_ids.include?(preset.id) %>
+                      <span>
+                        <strong><%= preset.name %></strong>
+                        <small><%= preset.normalized_entries.first(4).map { |entry| "#{entry[:name]}: #{number_with_precision(entry[:price], precision: 2)}" }.join(" • ") %></small>
+                      </span>
+                    </label>
+                  <% end %>
+                </div>
+                <div class="product-configurator-default">
+                  <%= f.label :default_addon_preset_id, "Default Add-on Preset" %>
+                  <%= f.select :default_addon_preset_id, options_for_select(@addon_presets.map { |preset| [preset.name, preset.id] }, product.default_addon_preset_id), { include_blank: "No default preset" }, { class: ui_input_classes } %>
+                </div>
+              <% else %>
+                <p class="quote-form-hint">No add-on presets yet. Create one first, then bind it to this product.</p>
+              <% end %>
+              <% if product.errors[:default_addon_preset].any? %>
+                <p class="field-error-message"><%= product.errors.full_messages_for(:default_addon_preset).first %></p>
+              <% end %>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <div class="quote-form-submit product-edit-actions">
+        <%= f.submit submit_label, class: ui_button_classes(:primary) %>
       </div>
       <%= link_to back_label, back_path, class: "form-page-back-link" %>
     </div>
@@ -348,64 +423,5 @@
       syncInputFiles();
       renderPreview();
     });
-  })();
-
-  (() => {
-    const specInput = document.querySelector("textarea[name='product[default_specification]']");
-    if (!specInput || specInput.dataset.validationBound === "true") return;
-    specInput.dataset.validationBound = "true";
-
-    const form = specInput.closest("form");
-    const container = specInput.closest(".quote-form-grid-span-2");
-    let errorEl = container?.querySelector(".js-default-spec-error");
-
-    if (!errorEl && container) {
-      errorEl = document.createElement("p");
-      errorEl.className = "field-error-message js-default-spec-error";
-      errorEl.hidden = true;
-      container.appendChild(errorEl);
-    }
-
-    const validate = () => {
-      const lines = String(specInput.value || "").split(/\r?\n/);
-      const invalidLines = [];
-
-      lines.forEach((line, idx) => {
-        const text = line.trim();
-        if (!text) return;
-        const parts = text.split(/[:=：]/, 2).map((part) => part.trim());
-        if (parts.length < 2 || !parts[0] || !parts[1]) {
-          invalidLines.push(idx + 1);
-        }
-      });
-
-      if (!errorEl) return invalidLines.length === 0;
-
-      if (invalidLines.length > 0) {
-        const label = invalidLines.length === 1 ? "line" : "lines";
-        errorEl.textContent = `Invalid format on ${label} ${invalidLines.join(", ")}. Use key: value, key = value, or key：value (e.g. Power: 5kW).`;
-        errorEl.hidden = false;
-        specInput.classList.add("input-error");
-        specInput.setAttribute("aria-invalid", "true");
-        return false;
-      }
-
-      errorEl.hidden = true;
-      errorEl.textContent = "";
-      specInput.classList.remove("input-error");
-      specInput.removeAttribute("aria-invalid");
-      return true;
-    };
-
-    specInput.addEventListener("input", validate);
-    specInput.addEventListener("blur", validate);
-
-    if (form) {
-      form.addEventListener("submit", (event) => {
-        if (validate()) return;
-        event.preventDefault();
-        specInput.focus();
-      });
-    }
   })();
 </script>

@@ -48,9 +48,9 @@
     <div>
       <%= f.label :time_zone, "Time Zone" %>
       <%= f.select :time_zone,
-                   options_for_select(ActiveSupport::TimeZone.all.map(&:name), resource.time_zone.presence || Time.zone.name),
+                   options_for_select(time_zone_options_for_select, resource.time_zone.presence || "UTC"),
                    {},
-                   {} %>
+                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: "Search city, country, or GMT offset", phone_field: "#user_contact_phone" } } %>
     </div>
 
     <div>

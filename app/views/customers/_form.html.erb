@@ -9,12 +9,15 @@
   <% payment_options = Customer::PAYMENT_TERMS_OPTIONS.map { |value| [value.upcase.gsub("_", "/"), value] } %>
   <% owner_users = (@owner_users || []) %>
   <% selected_owner = owner_users.find { |user| user.id == customer.internal_owner_id } if Customer.internal_owner_enabled? %>
-  <% timezone_options = ActiveSupport::TimeZone.all.map { |zone| [zone.to_s, zone.name] } %>
+  <% timezone_options = time_zone_options_for_select %>
 
-  <% selected_tag_ids = customer.customer_tag_ids.map(&:to_i) %>
+  <% selected_tags = customer.ordered_customer_tags %>
+  <% selected_tag_ids = selected_tags.map(&:id) %>
+  <% selected_tag_names = selected_tags.map(&:name) %>
   <% initial_custom_tags = Array(params.dig(:customer, :new_tag_names)).reject(&:blank?) %>
   <% initial_custom_tags += params.dig(:customer, :custom_tags_input).to_s.split(",") %>
   <% initial_custom_tags = initial_custom_tags.map { |tag| tag.to_s.strip }.reject(&:blank?).uniq %>
+  <% selected_tag_names = (Array(params.dig(:customer, :tag_priority_names)).reject(&:blank?) + selected_tag_names + initial_custom_tags).map { |tag| tag.to_s.strip }.reject(&:blank?).uniq %>
 
   <% if customer.errors.any? %>
     <div class="error-messages">
@@ -30,7 +33,8 @@
   <div class="customer-profile-shell">
     <section class="customer-profile-section customer-profile-identity">
       <div class="customer-profile-section-head">
-        <h3>Section A - Identity Block</h3>
+        <h3>Company Information</h3>
+        <p class="app-form-section-note">Define the account identity, status, and profile details your team will work from.</p>
       </div>
       <div class="customer-identity-grid">
         <div class="customer-avatar-panel">
@@ -56,25 +60,25 @@
         <div class="customer-identity-fields">
           <div class="customer-profile-grid customer-profile-grid-2">
             <div class="customer-name-field">
-              <%= f.label :name, "Customer Name" %>
-              <%= f.text_field :name, placeholder: "Customer Name", required: true, class: "customer-name-input" %>
+              <%= f.label :name, "Company Name" %>
+              <%= f.text_field :name, placeholder: "Company Name", required: true, class: ui_input_classes("customer-name-input") %>
             </div>
             <div>
               <%= f.label :country %>
-              <%= f.text_field :country, placeholder: "Country" %>
+              <%= f.text_field :country, placeholder: "Country", class: ui_input_classes %>
             </div>
             <div>
               <%= f.label :status %>
               <div class="customer-status-select-wrap">
-                <%= f.select :status, status_options, { prompt: "Select Status" } %>
+                <%= f.select :status, status_options, { prompt: "Select Status" }, { class: ui_input_classes } %>
                 <% if customer.status.present? %>
-                  <span class="status-badge status-<%= customer.status_css %>"><%= customer.status_label %></span>
+                  <%= customer_status_badge(customer) %>
                 <% end %>
               </div>
             </div>
             <div>
               <%= f.label :customer_level, "Customer Level" %>
-              <%= f.select :customer_level, level_options, { include_blank: false } %>
+              <%= f.select :customer_level, level_options, { include_blank: false }, { class: ui_input_classes } %>
             </div>
           </div>
         </div>
@@ -83,32 +87,33 @@
 
     <section class="customer-profile-section">
       <div class="customer-profile-section-head">
-        <h3>Section B - Business & Contact</h3>
+        <h3>Primary Contact</h3>
+        <p class="app-form-section-note">Keep communication details and commercial ownership easy to scan.</p>
       </div>
       <div class="customer-profile-grid customer-profile-grid-2">
         <div>
-          <%= f.label :contact_name, "Contact Person" %>
-          <%= f.text_field :contact_name, placeholder: "Contact Person" %>
+          <%= f.label :contact_name, "Primary Contact Name" %>
+          <%= f.text_field :contact_name, placeholder: "Primary Contact Name", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :email %>
-          <%= f.email_field :email, placeholder: "Email" %>
+          <%= f.email_field :email, placeholder: "Email", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :phone %>
-          <%= f.text_field :phone, placeholder: "Phone" %>
+          <%= f.text_field :phone, placeholder: "Phone", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :payment_terms, "Payment Terms" %>
-          <%= f.select :payment_terms, payment_options, { prompt: "Select payment terms" } %>
+          <%= f.select :payment_terms, payment_options, { prompt: "Select payment terms" }, { class: ui_input_classes } %>
         </div>
         <div>
           <%= f.label :customer_source, "Source" %>
-          <%= f.select :customer_source, source_options, { prompt: "Select source" } %>
+          <%= f.select :customer_source, source_options, { prompt: "Select source" }, { class: ui_input_classes } %>
         </div>
         <div>
           <%= f.label :main_product_interest, "Main Product Interest" %>
-          <%= f.text_field :main_product_interest, placeholder: "Main product / category" %>
+          <%= f.text_field :main_product_interest, placeholder: "Main product / category", class: ui_input_classes %>
         </div>
         <% if Customer.internal_owner_enabled? %>
           <div>
@@ -157,46 +162,69 @@
         <% end %>
         <div>
           <%= f.label :next_follow_up_date, "Follow-up Date" %>
-          <%= f.date_field :next_follow_up_date %>
+          <%= f.date_field :next_follow_up_date, class: ui_input_classes %>
         </div>
       </div>
     </section>
 
     <section class="customer-profile-section">
       <div class="customer-profile-section-head">
-        <h3>Section C - Additional Info</h3>
+        <h3>Additional Information</h3>
+        <p class="app-form-section-note">Capture supporting context, tags, and notes without cluttering the main profile.</p>
       </div>
       <div class="customer-profile-grid customer-profile-grid-2">
         <div class="customer-grid-span-2">
           <%= f.label :address %>
-          <%= f.text_area :address, rows: 2, placeholder: "Address" %>
+          <%= f.text_area :address, rows: 2, placeholder: "Address", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :estimated_annual_volume, "Estimated Annual Volume" %>
-          <%= f.number_field :estimated_annual_volume, step: 0.01, min: 0, placeholder: "0.00" %>
+          <%= f.number_field :estimated_annual_volume, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :timezone %>
-          <%= f.select :timezone, timezone_options, { prompt: "Select timezone" } %>
+          <%= f.select :timezone,
+                       timezone_options,
+                       { prompt: "Select timezone" },
+                       { class: ui_input_classes, data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: "Search city, country, or GMT offset", phone_field: "#customer_phone" } } %>
         </div>
 
         <div class="customer-grid-span-2">
           <label>Tags</label>
+          <div class="customer-tag-priority" data-tag-priority>
+            <div class="customer-tag-priority-head">
+              <strong>Selected priority</strong>
+              <span class="customer-field-hint">Top to bottom = higher priority on this customer.</span>
+            </div>
+            <div class="customer-tag-priority-list" data-tag-priority-list>
+              <% selected_tag_names.each do |tag_name| %>
+                <div class="customer-tag-priority-item" data-tag-priority-item data-tag-name="<%= tag_name %>">
+                  <span class="customer-tag-priority-name"><%= tag_name %></span>
+                  <div class="customer-tag-priority-actions">
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="up">Up</button>
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="down">Down</button>
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn customer-tag-priority-remove') %>" data-tag-remove>Remove</button>
+                  </div>
+                  <%= hidden_field_tag "customer[tag_priority_names][]", tag_name, data: { tag_priority_hidden: true } %>
+                </div>
+              <% end %>
+            </div>
+          </div>
           <div class="customer-tag-cloud">
             <% (@available_tags || []).each do |tag| %>
-              <label class="customer-tag-chip">
+              <label class="customer-tag-chip" data-tag-chip>
                 <%= check_box_tag "customer[customer_tag_ids][]", tag.id, selected_tag_ids.include?(tag.id), id: "customer_tag_#{tag.id}" %>
-                <span><%= tag.name %></span>
+                <span data-tag-name="<%= tag.name %>"><%= tag.name %></span>
               </label>
             <% end %>
           </div>
           <div class="customer-tag-custom" data-customer-tag-builder>
-            <input type="text" placeholder="Add custom tag and press Enter" data-custom-tag-input>
-            <button type="button" class="btn btn-secondary" data-add-custom-tag>Add</button>
+            <input type="text" placeholder="Add custom tag and press Enter" data-custom-tag-input class="<%= ui_input_classes %>">
+            <button type="button" class="<%= ui_button_classes(:secondary) %>" data-add-custom-tag>Add</button>
             <div class="customer-tag-custom-list" data-custom-tag-list>
               <% initial_custom_tags.each do |tag_name| %>
-                <span class="customer-tag-chip customer-tag-chip-custom"><%= tag_name %></span>
-                <%= hidden_field_tag "customer[new_tag_names][]", tag_name %>
+                <span class="customer-tag-chip customer-tag-chip-custom" data-custom-tag-name="<%= tag_name %>"><%= tag_name %></span>
+                <%= hidden_field_tag "customer[new_tag_names][]", tag_name, data: { custom_tag_hidden: tag_name } %>
               <% end %>
             </div>
             <p class="customer-field-hint">Preset tags are reusable company-wide. Custom tags will be saved for reuse.</p>
@@ -205,19 +233,125 @@
 
         <div class="customer-grid-span-2">
           <%= f.label :notes %>
-          <%= f.text_area :notes, rows: 4, placeholder: "Notes" %>
+          <%= f.text_area :notes, rows: 4, placeholder: "Notes", class: ui_input_classes %>
         </div>
       </div>
     </section>
 
     <div class="customer-form-submit">
-      <%= f.submit submit_label, class: "btn btn-primary" %>
+      <%= f.submit submit_label, class: ui_button_classes(:primary) %>
     </div>
   </div>
 <% end %>
 
 <script>
   (() => {
+    const bindTagPriority = () => {
+      document.querySelectorAll("[data-tag-priority]").forEach((priorityRoot) => {
+        if (priorityRoot.dataset.bound === "true") return;
+        priorityRoot.dataset.bound = "true";
+
+        const form = priorityRoot.closest("form");
+        const list = priorityRoot.querySelector("[data-tag-priority-list]");
+        if (!form || !list) return;
+
+        const tagLabel = (name) => {
+          const wrapper = document.createElement("div");
+          wrapper.className = "customer-tag-priority-item";
+          wrapper.dataset.tagPriorityItem = "true";
+          wrapper.dataset.tagName = name;
+          wrapper.innerHTML = `
+            <span class="customer-tag-priority-name"></span>
+            <div class="customer-tag-priority-actions">
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">Up</button>
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">Down</button>
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>Remove</button>
+            </div>
+          `;
+          wrapper.querySelector(".customer-tag-priority-name").textContent = name;
+          const hidden = document.createElement("input");
+          hidden.type = "hidden";
+          hidden.name = "customer[tag_priority_names][]";
+          hidden.value = name;
+          hidden.dataset.tagPriorityHidden = "true";
+          wrapper.appendChild(hidden);
+          return wrapper;
+        };
+
+        const findCheckboxByName = (name) =>
+          Array.from(form.querySelectorAll("[data-tag-chip] input[type='checkbox']")).find((input) => {
+            const chipName = input.parentElement?.querySelector("[data-tag-name]")?.dataset.tagName;
+            return chipName === name;
+          });
+
+        const appendPriorityTag = (name) => {
+          const normalized = name.trim();
+          if (!normalized) return;
+          const exists = Array.from(list.querySelectorAll("[data-tag-priority-item]"))
+            .some((item) => item.dataset.tagName === normalized);
+          if (exists) return;
+
+          list.appendChild(tagLabel(normalized));
+        };
+
+        const removePriorityTag = (name) => {
+          list.querySelectorAll("[data-tag-priority-item]").forEach((item) => {
+            if (item.dataset.tagName === name) item.remove();
+          });
+        };
+
+        form.querySelectorAll("[data-tag-chip] input[type='checkbox']").forEach((input) => {
+          const name = input.parentElement?.querySelector("[data-tag-name]")?.dataset.tagName;
+          if (!name) return;
+          input.addEventListener("change", () => {
+            if (input.checked) {
+              appendPriorityTag(name);
+            } else {
+              removePriorityTag(name);
+            }
+          });
+        });
+
+        list.addEventListener("click", (event) => {
+          const item = event.target.closest("[data-tag-priority-item]");
+          if (!item) return;
+
+          if (event.target.closest("[data-tag-remove]")) {
+            const name = item.dataset.tagName;
+            item.remove();
+            const checkbox = findCheckboxByName(name);
+            if (checkbox) checkbox.checked = false;
+            if (!checkbox) {
+              const builderOwner = priorityRoot.parentElement;
+              builderOwner?.querySelectorAll("[data-custom-tag-name]").forEach((chip) => {
+                if (chip.dataset.customTagName === name) chip.remove();
+              });
+              builderOwner?.querySelectorAll("input[data-custom-tag-hidden]").forEach((hidden) => {
+                if (hidden.dataset.customTagHidden === name) hidden.remove();
+              });
+            }
+            return;
+          }
+
+          if (event.target.closest("[data-tag-move='up']")) {
+            const prev = item.previousElementSibling;
+            if (prev) list.insertBefore(item, prev);
+            return;
+          }
+
+          if (event.target.closest("[data-tag-move='down']")) {
+            const next = item.nextElementSibling;
+            if (next) list.insertBefore(next, item);
+          }
+        });
+
+        list.querySelectorAll("[data-tag-priority-item]").forEach((item) => {
+          const checkbox = findCheckboxByName(item.dataset.tagName);
+          if (checkbox) checkbox.checked = true;
+        });
+      });
+    };
+
     const bindCustomTagBuilder = () => {
       document.querySelectorAll("[data-customer-tag-builder]").forEach((builder) => {
         if (builder.dataset.bound === "true") return;
@@ -226,6 +360,7 @@
         const input = builder.querySelector("[data-custom-tag-input]");
         const addBtn = builder.querySelector("[data-add-custom-tag]");
         const list = builder.querySelector("[data-custom-tag-list]");
+        const priority = builder.parentElement?.querySelector("[data-tag-priority-list]");
         if (!input || !addBtn || !list) return;
 
         const existing = () =>
@@ -242,15 +377,43 @@
 
           const chip = document.createElement("span");
           chip.className = "customer-tag-chip customer-tag-chip-custom";
+          chip.dataset.customTagName = value;
           chip.textContent = value;
 
           const hidden = document.createElement("input");
           hidden.type = "hidden";
           hidden.name = "customer[new_tag_names][]";
           hidden.value = value;
+          hidden.dataset.customTagHidden = value;
 
           list.appendChild(chip);
           list.appendChild(hidden);
+          if (priority) {
+            const existingPriority = Array.from(priority.querySelectorAll("[data-tag-priority-item]"))
+              .some((node) => node.dataset.tagName === value);
+            if (!existingPriority) {
+              const item = document.createElement("div");
+              item.className = "customer-tag-priority-item";
+              item.dataset.tagPriorityItem = "true";
+              item.dataset.tagName = value;
+              item.innerHTML = `
+                <span class="customer-tag-priority-name"></span>
+                <div class="customer-tag-priority-actions">
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">Up</button>
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">Down</button>
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>Remove</button>
+                </div>
+              `;
+              item.querySelector(".customer-tag-priority-name").textContent = value;
+              const orderHidden = document.createElement("input");
+              orderHidden.type = "hidden";
+              orderHidden.name = "customer[tag_priority_names][]";
+              orderHidden.value = value;
+              orderHidden.dataset.tagPriorityHidden = "true";
+              item.appendChild(orderHidden);
+              priority.appendChild(item);
+            }
+          }
           input.value = "";
         };
 
@@ -315,7 +478,9 @@
     };
 
     bindCustomTagBuilder();
+    bindTagPriority();
     bindOwnerPicker();
+    document.addEventListener("turbo:load", bindTagPriority);
     document.addEventListener("turbo:load", bindCustomTagBuilder);
     document.addEventListener("turbo:load", bindOwnerPicker);
   })();

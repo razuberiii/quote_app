@@ -1,0 +1,529 @@
+/* Extracted from legacy.css during Tailwind migration phase 2. */
+
+.public-quote-themed .quote-doc-header {
+  border-bottom: 2px solid var(--doc-accent, #1f4e79);
+}
+
+.public-quote-themed .quote-doc-kicker {
+  color: var(--doc-accent, #1f4e79);
+}
+
+.public-quote-themed .quote-meta-card {
+  border-left: 3px solid var(--doc-accent, #1f4e79);
+}
+
+.public-quote-themed .quote-doc-table thead {
+  background-color: var(--doc-accent, #1f4e79);
+}
+
+.public-quote-themed .quote-doc-table thead th {
+  color: var(--doc-on-accent, #ffffff);
+}
+
+.public-quote-themed .quote-total-grand {
+  margin-top: 0.2rem;
+  padding: 0.55rem 0 0;
+  background: transparent;
+  color: #0f172a;
+  border-top: 1px solid #9fb4c8;
+  border-radius: 0;
+}
+
+.public-quote-themed .quote-total-grand span,
+.public-quote-themed .quote-total-grand strong {
+  color: inherit;
+}
+
+.public-quote-themed .quote-total-box p:not(.quote-total-grand) span {
+  color: #556b84;
+}
+
+.public-quote-themed .quote-total-box p:not(.quote-total-grand) strong {
+  color: #4a6380;
+}
+
+.public-quote-themed .quote-section-block h3 {
+  color: var(--doc-accent, #1f4e79);
+}
+
+.quote-public-utility {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.45rem;
+}
+
+.quote-utility-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #d1dbe7;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quote-utility-btn:hover {
+  background: #f8fafc;
+}
+
+.quote-decision-section {
+  margin-top: 1rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 0.75rem 0.85rem;
+}
+
+.quote-decision-section h3 {
+  margin: 0 0 0.45rem;
+  color: #0f172a;
+}
+
+.quote-decision-note {
+  margin: 0 0 0.45rem;
+  color: #475569;
+  font-size: 0.86rem;
+}
+
+.quote-decision-status {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.quote-decision-status.is-accepted {
+  color: #166534;
+}
+
+.quote-decision-status.is-revision {
+  color: #92400e;
+}
+
+.quote-public-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.quote-decision-accept button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--doc-accent, #1f4e79);
+  border-radius: 8px;
+  background: var(--doc-accent, #1f4e79);
+  color: var(--doc-on-accent, #ffffff);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quote-decision-accept button:hover {
+  filter: brightness(0.96);
+}
+
+.public-quote-themed .quote-public-actions .quote-decision-accept button {
+  border-color: var(--doc-accent, #1f4e79);
+  background: var(--doc-accent, #1f4e79);
+  color: var(--doc-on-accent, #ffffff);
+}
+
+.quote-decision-request-toggle,
+.quote-decision-cancel {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quote-decision-request-toggle:hover,
+.quote-decision-cancel:hover {
+  background: #f1f5f9;
+}
+
+.public-quote-themed .quote-public-actions .quote-decision-request-toggle,
+.public-quote-themed .quote-public-actions .quote-decision-cancel {
+  border-color: #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.quote-public-revision-form {
+  margin-top: 0.55rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.quote-revision-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 180ms ease-in-out;
+}
+
+.quote-revision-modal[hidden] {
+  display: none !important;
+}
+
+.quote-revision-modal.is-open {
+  opacity: 1;
+}
+
+.quote-revision-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.44);
+  opacity: 0;
+  transition: opacity 180ms ease-in-out;
+}
+
+.quote-revision-modal-dialog {
+  position: relative;
+  width: min(680px, 96vw);
+  max-height: 88vh;
+  overflow: auto;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0.9rem 0.95rem;
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.25);
+  opacity: 0;
+  transition: opacity 180ms ease-in-out;
+}
+
+.quote-revision-modal.is-open .quote-revision-modal-backdrop,
+.quote-revision-modal.is-open .quote-revision-modal-dialog {
+  opacity: 1;
+}
+
+.quote-revision-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.45rem;
+}
+
+.quote-revision-modal-head h4 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.quote-revision-modal-close {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 0.9rem;
+  min-width: 32px;
+  min-height: 32px;
+  cursor: pointer;
+}
+
+.quote-revision-modal-close:hover {
+  background: #f8fafc;
+}
+
+.quote-revision-modal-hint {
+  margin: 0 0 0.55rem;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+.quote-revision-reason-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.quote-revision-reason-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #f8fafc;
+  padding: 0.48rem 0.55rem;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.quote-revision-reason-option input[type="checkbox"] {
+  margin-top: 2px;
+}
+
+.quote-revision-reason-option:has(input:checked) {
+  border-color: var(--doc-accent, #1f4e79);
+  background: #edf4fb;
+}
+
+.quote-revision-custom {
+  margin-top: 0.25rem;
+}
+
+.quote-revision-custom label {
+  display: block;
+  margin-bottom: 0.28rem;
+  color: #334155;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.quote-public-revision-form textarea {
+  width: 100%;
+  min-height: 82px;
+  border: 1px solid #dbe3ee;
+  border-radius: 8px;
+  padding: 0.5rem 0.55rem;
+  resize: vertical;
+}
+
+@media (max-width: 720px) {
+  .quote-revision-reason-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quote-public-revision-form-actions {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.quote-public-revision-form-actions button[type="submit"] {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #0f766e;
+  border-radius: 8px;
+  background: #0f766e;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.quote-public-revision-form-actions button[type="submit"]:hover {
+  filter: brightness(0.96);
+}
+
+.public-quote-themed {
+  font-family: var(--doc-font), "Noto Sans", "Segoe UI", Arial, sans-serif;
+  border-color: #dbe3ee;
+}
+
+.public-layout-modern .quote-doc-table,
+.public-layout-modern .quote-doc-table td,
+.public-layout-modern .quote-doc-table th {
+  border-color: #e5eaf0;
+}
+
+.public-layout-industry {
+  border-width: 2px;
+}
+
+.public-layout-industry .quote-doc-table thead {
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+}
+
+.public-layout-classic .quote-doc-header {
+  border-bottom-width: 1px;
+}
+
+.public-quote-document .quote-public-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.public-quote-document .quote-items-table {
+  border-spacing: 0 6px;
+}
+
+@media print {
+  body.public-quote-body {
+    background: #fff !important;
+    color: #111827;
+  }
+
+  .public-quote-document {
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    border-radius: 0;
+    padding: 0.8rem;
+  }
+
+  .public-quote-document .quote-doc-table thead {
+    background: #f3f4f6 !important;
+    color: #111827 !important;
+  }
+
+  .public-quote-document .quote-meta-card,
+  .public-quote-document .quote-total-box,
+  .public-quote-document .quote-section-block {
+    background: #fff !important;
+    border: 1px solid #e5e7eb;
+  }
+
+  .public-quote-document .quote-total-grand {
+    color: #111827 !important;
+    background: #f3f4f6 !important;
+    border: 1px solid #d1d5db;
+  }
+}
+
+/* Public quote: clarity + trust + print stability (no business logic changes) */
+.public-quote-document .quote-meta-grid {
+  gap: 0.95rem;
+}
+
+.public-quote-document .quote-meta-card {
+  padding: 0.85rem 0.95rem;
+}
+
+.public-quote-document .quote-meta-card h3 {
+  margin-bottom: 0.5rem;
+}
+
+.public-quote-document .quote-meta-card p {
+  margin-bottom: 0.3rem;
+  line-height: 1.38;
+}
+
+.public-quote-document .quote-info-list {
+  display: grid;
+  gap: 0.12rem;
+}
+
+.public-quote-document .quote-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.8rem;
+  margin: 0;
+  padding: 0.18rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.public-quote-document .quote-info-row span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.public-quote-document .quote-info-row strong {
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.public-quote-document .quote-info-row.is-doc-number span {
+  color: #334155;
+  font-weight: 600;
+}
+
+.public-quote-document .quote-info-row.is-doc-number strong {
+  font-size: 0.98rem;
+  font-weight: 700;
+}
+
+.public-quote-document .quote-info-row.is-valid-until strong {
+  color: var(--doc-accent, #1f4e79);
+}
+
+.public-quote-document .quote-item-desc {
+  gap: 0.18rem;
+}
+
+.public-quote-document .quote-item-desc-main {
+  font-size: 0.95rem;
+  line-height: 1.32;
+}
+
+.public-quote-document .quote-item-desc-meta {
+  gap: 0.14rem;
+}
+
+.public-quote-document .quote-item-desc-sub {
+  font-size: 0.75rem;
+  line-height: 1.18;
+}
+
+.public-quote-document .quote-item-desc-sub.is-addon {
+  margin-top: 0.04rem;
+  padding-left: 0.45rem;
+  border-left: 2px solid #e2e8f0;
+  color: #64748b;
+}
+
+.public-quote-document .table-responsive {
+  margin-bottom: 0.8rem;
+}
+
+.public-quote-document .quote-total-box {
+  margin-top: 0.2rem;
+  padding: 0.8rem 0.95rem 0.7rem;
+}
+
+.public-quote-document .quote-total-grand {
+  margin-top: 0.2rem;
+  padding: 0.55rem 0 0;
+  font-size: 1.2rem;
+}
+
+.public-quote-document .quote-total-grand span {
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.public-quote-document .quote-total-grand strong {
+  color: #1f3650;
+  font-size: 1.34rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.public-quote-document .quote-engagement-note {
+  margin: 0.55rem 0 0.15rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed #d2dbe6;
+  color: var(--doc-accent, #1f4e79);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.public-quote-document .quote-public-footnote {
+  margin: 0.7rem 0 0;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+@media print {
+  .public-quote-document .quote-doc-table thead {
+    display: table-header-group;
+  }
+
+  .public-quote-document .quote-meta-card,
+  .public-quote-document .quote-total-box,
+  .public-quote-document .quote-section-block,
+  .public-quote-document .quote-doc-table tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .public-quote-document .quote-engagement-note,
+  .public-quote-document .quote-public-footnote {
+    color: #475569 !important;
+  }
+}
+
+

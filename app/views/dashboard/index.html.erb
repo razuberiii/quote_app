@@ -1,0 +1,502 @@
+<section class="app-page-shell sales-dashboard">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1>Dashboard</h1>
+      <p>Track pipeline momentum, follow-up pressure, and quote activity from one operating view.</p>
+    </div>
+    <div class="app-page-header-actions">
+      <div class="kpi-period-toggle" role="tablist" aria-label="KPI period">
+        <%= link_to "Weekly", dashboard_path(kpi_period: "week"), class: "app-filter-pill app-filter-pill--kpi #{@kpi_period == 'week' ? 'is-active' : ''}" %>
+        <%= link_to "Monthly", dashboard_path(kpi_period: "month"), class: "app-filter-pill app-filter-pill--kpi #{@kpi_period == 'month' ? 'is-active' : ''}" %>
+      </div>
+    </div>
+  </header>
+
+  <div class="sales-dashboard-content app-section-stack">
+    <section class="app-toolbar-surface app-toolbar-surface--compact">
+      <div class="app-section-heading">
+        <div>
+          <h2>Operating Snapshot</h2>
+          <p class="app-section-caption">Immediate pressure, current sales signals, and this period's pace.</p>
+        </div>
+      </div>
+      <div class="dashboard-alert-strip">
+      <% if @risk_snapshot[:overdue].positive? %>
+        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:overdue] %></strong> overdue follow-up(s)</span>
+      <% end %>
+      <% if @risk_snapshot[:due_today].positive? %>
+        <span class="dashboard-alert-pill is-today"><strong><%= @risk_snapshot[:due_today] %></strong> due today</span>
+      <% end %>
+      <% if @risk_snapshot[:stalled_high_value].positive? %>
+        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:stalled_high_value] %></strong> high-value stalled</span>
+      <% end %>
+      <% if @decision_snapshot[:accepted_count].positive? %>
+        <span class="dashboard-alert-pill is-good"><strong><%= @decision_snapshot[:accepted_count] %></strong> accepted</span>
+      <% end %>
+      <% if @decision_snapshot[:revision_requested_count].positive? %>
+        <span class="dashboard-alert-pill is-watch"><strong><%= @decision_snapshot[:revision_requested_count] %></strong> revision request(s)</span>
+      <% end %>
+      <% if @decision_snapshot[:negotiating_stale_count].positive? %>
+        <span class="dashboard-alert-pill is-danger"><strong><%= @decision_snapshot[:negotiating_stale_count] %></strong> negotiating 7d+</span>
+      <% end %>
+      <% if @risk_snapshot.values.all?(&:zero?) && @decision_snapshot[:negotiating_stale_count].zero? %>
+        <span class="dashboard-alert-pill is-good">No immediate risk signals.</span>
+      <% end %>
+      </div>
+    </section>
+
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-summary app-surface" do %>
+      <div class="dashboard-action-summary-head">
+        <h2>Action Required (<%= @action_required_summary[:total] %>)</h2>
+        <% if @action_required_summary[:has_risk] %>
+          <% risk_text_parts = [] %>
+          <% risk_text_parts << "#{@action_required_summary[:risk_customers]} risk customer(s)" if @action_required_summary[:risk_customers].positive? %>
+          <% risk_text_parts << "#{@action_required_summary[:decision_alerts]} stalled negotiation(s)" if @action_required_summary[:decision_alerts].positive? %>
+          <span class="dashboard-alert-pill is-danger dashboard-action-summary-risk"><%= risk_text_parts.join(" • ") %></span>
+        <% else %>
+          <span class="dashboard-alert-pill is-good dashboard-action-summary-risk">No immediate customer or decision risk</span>
+        <% end %>
+      </div>
+      <p class="dashboard-action-summary-note">
+        Handle overdue and stalled accounts first.
+      </p>
+    <% end %>
+
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-decision-snapshot app-surface" do %>
+      <div class="dashboard-action-summary-head">
+        <h2>Sales Signals</h2>
+        <span class="dashboard-decision-period"><%= @kpi_period == "month" ? "This month" : "This week" %></span>
+      </div>
+      <div class="dashboard-decision-flow">
+        <div class="dashboard-decision-column">
+          <h3>Outcome Signals</h3>
+          <div class="dashboard-decision-metrics">
+            <p class="dashboard-decision-metric">
+              <span>Accepted</span>
+              <strong><%= @decision_snapshot[:accepted_count] %></strong>
+            </p>
+            <p class="dashboard-decision-metric">
+              <span>Revision Requested</span>
+              <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
+            </p>
+          </div>
+        </div>
+        <div class="dashboard-decision-column">
+          <h3>Pressure Signals</h3>
+          <div class="dashboard-decision-metrics">
+            <p class="dashboard-decision-metric">
+              <span>Reopened</span>
+              <strong><%= @decision_snapshot[:reopened_count] %></strong>
+            </p>
+            <p class="dashboard-decision-metric">
+              <span>Negotiating 7d+</span>
+              <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
+            </p>
+          </div>
+        </div>
+        <div class="dashboard-decision-column dashboard-decision-column-attention">
+          <h3>Attention Signal</h3>
+          <div class="dashboard-decision-waiting">
+            <p>
+              <span>Public Actionable</span>
+              <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
+            </p>
+            <small>Awaiting client decision</small>
+          </div>
+        </div>
+      </div>
+      <%= render "shared/quote_funnel" %>
+    <% end %>
+
+    <div class="dashboard-kpi-row app-stat-grid">
+      <article class="dashboard-kpi-card app-stat-card">
+        <div class="dashboard-kpi-head">
+          <span class="app-stat-label">Open Deals</span>
+        </div>
+        <strong class="app-stat-value"><%= @dashboard_stats[:open_deals][:value] %></strong>
+        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
+      </article>
+      <article class="dashboard-kpi-card app-stat-card">
+        <div class="dashboard-kpi-head">
+          <span class="app-stat-label">Quotes This <%= @kpi_period == "month" ? "Month" : "Week" %></span>
+        </div>
+        <strong class="app-stat-value"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
+        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
+      </article>
+      <article class="dashboard-kpi-card app-stat-card">
+        <div class="dashboard-kpi-head">
+          <span class="app-stat-label">Pending Follow-ups</span>
+        </div>
+        <strong class="app-stat-value"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
+        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
+      </article>
+    </div>
+
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center app-surface" do %>
+      <h2>Today Focus</h2>
+      <% if @primary_action.present? %>
+        <div class="dashboard-action-list">
+          <div class="dashboard-action-item dashboard-action-item-primary is-<%= @primary_action[:priority] %>">
+            <div>
+              <span class="dashboard-action-primary-label">Top Priority</span>
+              <strong><%= @primary_action[:title] %></strong>
+              <p><%= @primary_action[:detail] %></p>
+            </div>
+            <%= render "components/ui/button", href: @primary_action[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
+              <%= @primary_action[:cta_label] %>
+            <% end %>
+          </div>
+          <% if @secondary_actions.any? %>
+            <div class="dashboard-action-more" data-action-more hidden>
+              <% @secondary_actions.each do |item| %>
+                <div class="dashboard-action-item is-<%= item[:priority] %>">
+                  <div>
+                    <span class="dashboard-action-secondary-label">Secondary</span>
+                    <strong><%= item[:title] %></strong>
+                    <p><%= item[:detail] %></p>
+                  </div>
+                  <%= render "components/ui/button", href: item[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
+                    <%= item[:cta_label] %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+            <%= render "components/ui/button",
+                       variant: :secondary,
+                       class: "dashboard-action-toggle dashboard-inline-toggle",
+                       attrs: { data: { action_toggle: true, expanded: "false", action_count: @secondary_actions.size } } do %>
+              Show more (<%= @secondary_actions.size %>)
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="team-members-hint">No high-priority actions today.</p>
+      <% end %>
+    <% end %>
+
+    <%= render "shared/action_items" %>
+
+    <div class="dashboard-detail-grid dashboard-detail-grid--overview">
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-overview-panel app-surface" do %>
+        <div class="app-section-heading">
+          <div>
+            <h2>Recent Quotes</h2>
+            <p class="app-section-caption">Showing 6 most recent quotes across active accounts.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-products-table app-table-surface", table_class: "dashboard-recent-table dashboard-products-table app-data-table" do %>
+            <thead>
+              <tr>
+                <th>Quote</th>
+                <th>Buyer</th>
+                <th>Status</th>
+                <th>Engagement</th>
+                <th>Next Move</th>
+                <th class="text-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @recent_quotes.any? %>
+                <% @recent_quotes.each do |entry| %>
+                  <tr>
+                    <td data-label="Quote">
+                      <strong><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
+                      <% if entry[:display_name].present? %>
+                        <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
+                      <% end %>
+                    </td>
+                    <td data-label="Buyer"><%= entry[:customer_name] %></td>
+                    <td data-label="Status">
+                      <%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %>
+                    </td>
+                    <td data-label="Engagement">
+                      <span class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></span>
+                    </td>
+                    <td data-label="Next Move"><%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %></td>
+                    <td data-label="Total" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td data-label="Recent Quotes" colspan="6" class="customers-empty-row">
+                    <%= ui_empty_state(
+                          title: "No quotes yet",
+                          body: "Create the first quote to start tracking deal momentum, engagement, and reminders.",
+                          action_label: "New Quote",
+                          action_path: customers_path,
+                          icon: :quotes
+                        ) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data app-surface" do %>
+        <div class="app-section-heading">
+          <div>
+            <h2>Deal Overview</h2>
+            <p class="app-section-caption">Momentum, product mix, and cycle quality across active pipeline.</p>
+          </div>
+        </div>
+        <ul class="dashboard-overview-list">
+          <li>
+            <div class="dashboard-overview-label-row">
+              <span>Top Product</span>
+              <small>last 30 days • <%= @deal_overview[:top_product_sample_size] %> quotes</small>
+            </div>
+            <strong class="dashboard-overview-value"><%= @deal_overview[:top_product] %></strong>
+          </li>
+          <li>
+            <div class="dashboard-overview-label-row">
+              <span>Average Quote Cycle</span>
+              <small><%= @deal_overview[:closed_cycle_sample_size] %> closed deals</small>
+            </div>
+            <strong class="dashboard-overview-value"><%= @deal_overview[:average_quote_cycle_days] %> days</strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:cycle_insight] %></p>
+          </li>
+          <li>
+            <div class="dashboard-overview-label-row">
+              <span>Revision Rate</span>
+              <small>active quotes</small>
+            </div>
+            <strong class="dashboard-overview-value"><%= @deal_overview[:revision_rate] %>%</strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:revision_insight] %></p>
+          </li>
+          <li>
+            <div class="dashboard-overview-label-row">
+              <span>Document Mix</span>
+              <small>quotation vs PI</small>
+            </div>
+            <strong class="dashboard-overview-value"><%= @deal_overview[:export_mix] %></strong>
+            <p class="dashboard-overview-insight"><%= @deal_overview[:decision_insight] %></p>
+          </li>
+        </ul>
+      <% end %>
+    </div>
+
+    <section class="dashboard-health-strip dashboard-health-band">
+      <% @dashboard_health_snapshot.each do |item| %>
+        <article class="dashboard-health-card is-<%= item[:tone] %>">
+          <span class="dashboard-health-label"><%= item[:label] %></span>
+          <strong><%= item[:value] %></strong>
+          <p><%= item[:detail] %></p>
+        </article>
+      <% end %>
+    </section>
+
+    <%= render "shared/performance_reports" %>
+
+    <div class="dashboard-detail-grid dashboard-detail-grid--lists">
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data app-surface" do %>
+        <div class="app-section-heading">
+          <div>
+            <h2>Top Quoted Products</h2>
+            <p class="app-section-caption">Based on distinct quotes per product.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Quoted</th>
+                <th>Won</th>
+                <th>Last Quoted</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @top_quoted_products.any? %>
+                <% @top_quoted_products.each do |product| %>
+                  <tr data-clickable-href="<%= product_path(product) %>" tabindex="0" aria-label="Open product <%= product.name %>">
+                    <td data-label="Product">
+                      <div class="dashboard-mobile-value">
+                        <strong><%= product.name %></strong>
+                      </div>
+                    </td>
+                    <td data-label="Quoted">
+                      <div class="dashboard-mobile-value"><%= product.quoted_count %></div>
+                    </td>
+                    <td data-label="Won">
+                      <div class="dashboard-mobile-value"><%= product.won_count %></div>
+                    </td>
+                    <td data-label="Last Quoted">
+                      <div class="dashboard-mobile-value"><%= product.last_quoted_at.present? ? format_in_user_time(product.last_quoted_at, current_user) : "-" %></div>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="4" class="customers-empty-row">
+                    <%= ui_empty_state(
+                          title: "No product activity yet",
+                          body: "Quoted product stats will appear here once products start showing up in live quotes.",
+                          icon: :products
+                        ) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          <% end %>
+        </div>
+        <div class="dashboard-mobile-list" aria-hidden="true">
+          <% if @top_quoted_products.any? %>
+            <% @top_quoted_products.each do |product| %>
+              <article class="dashboard-mobile-item" data-clickable-href="<%= product_path(product) %>" tabindex="0" aria-label="Open product <%= product.name %>">
+                <div class="dashboard-mobile-row">
+                  <span>Product</span>
+                  <strong><%= product.name %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Quoted</span>
+                  <strong><%= product.quoted_count %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Won</span>
+                  <strong><%= product.won_count %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Last Quoted</span>
+                  <strong><%= product.last_quoted_at.present? ? format_in_user_time(product.last_quoted_at, current_user) : "-" %></strong>
+                </div>
+              </article>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+
+      <%= render "components/ui/card", class: "dashboard-panel app-surface" do %>
+        <div class="app-section-heading">
+          <div>
+            <h2>Reminder Queue</h2>
+            <p class="app-section-caption">Sent quotes not viewed after 48 hours.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table dashboard-reminder-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table dashboard-reminder-table app-data-table" do %>
+            <thead>
+              <tr>
+                <th>Quote</th>
+                <th>Buyer</th>
+                <th>Sent</th>
+                <th class="dashboard-reminder-count-head">Count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if @reminder_quotes.any? %>
+                <% @reminder_quotes.each do |quote| %>
+                  <% reminder_title = quote.custom_title.presence || quote.quote_items.ordered.first&.product&.name.presence || quote.quote_items.ordered.first&.description.presence || "Quotation" %>
+                  <tr data-clickable-href="<%= quote_path(quote) %>" tabindex="0" aria-label="Open quote <%= quote.quote_no %>">
+                    <td data-label="Quote">
+                      <div class="dashboard-mobile-value">
+                        <strong><%= reminder_title %></strong>
+                        <small class="dashboard-quote-id"><%= quote.quote_no %></small>
+                      </div>
+                    </td>
+                    <td data-label="Buyer">
+                      <div class="dashboard-mobile-value"><%= quote.customer.name %></div>
+                    </td>
+                    <td data-label="Sent">
+                      <div class="dashboard-mobile-value"><%= format_in_user_time(quote.sent_at, current_user) %></div>
+                    </td>
+                    <td data-label="Count" class="dashboard-reminder-count">
+                      <div class="dashboard-mobile-value"><%= quote.reminder_count %></div>
+                    </td>
+                  </tr>
+                <% end %>
+              <% else %>
+                <tr>
+                  <td colspan="4" class="customers-empty-row">
+                    <%= ui_empty_state(
+                          title: "No reminders pending",
+                          body: "Once sent quotes sit unread long enough, they will appear here for review.",
+                          icon: :quotes
+                        ) %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          <% end %>
+        </div>
+        <div class="dashboard-mobile-list dashboard-mobile-list--reminders" aria-hidden="true">
+          <% if @reminder_quotes.any? %>
+            <% @reminder_quotes.each do |quote| %>
+              <% reminder_title = quote.custom_title.presence || quote.quote_items.ordered.first&.product&.name.presence || quote.quote_items.ordered.first&.description.presence || "Quotation" %>
+              <article class="dashboard-mobile-item" data-clickable-href="<%= quote_path(quote) %>" tabindex="0" aria-label="Open quote <%= quote.quote_no %>">
+                <div class="dashboard-mobile-row">
+                  <span>Quote</span>
+                  <div class="dashboard-mobile-stack">
+                    <strong><%= reminder_title %></strong>
+                    <small class="dashboard-quote-id"><%= quote.quote_no %></small>
+                  </div>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Buyer</span>
+                  <strong><%= quote.customer.name %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Sent</span>
+                  <strong><%= format_in_user_time(quote.sent_at, current_user) %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span>Count</span>
+                  <strong><%= quote.reminder_count %></strong>
+                </div>
+              </article>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const bindActionToggle = () => {
+      document.querySelectorAll("[data-action-toggle]").forEach((toggle) => {
+        const extra = document.querySelector("[data-action-more]");
+        if (!extra || toggle.dataset.bound === "true") return;
+        toggle.dataset.bound = "true";
+
+        const count = Number(toggle.dataset.actionCount || 0);
+        const applyState = (expanded) => {
+          extra.hidden = !expanded;
+          toggle.dataset.expanded = expanded ? "true" : "false";
+          toggle.textContent = expanded ? "Show less" : `Show more (${count})`;
+        };
+
+        applyState(false);
+
+        toggle.addEventListener("click", () => {
+          applyState(toggle.dataset.expanded !== "true");
+        });
+      });
+
+      document.querySelectorAll("[data-action-items-toggle]").forEach((toggle) => {
+        const extra = toggle.closest(".dashboard-task-list")?.querySelector("[data-action-items-more]");
+        if (!extra || toggle.dataset.bound === "true") return;
+        toggle.dataset.bound = "true";
+
+        const count = Number(toggle.dataset.actionCount || 0);
+        const applyState = (expanded) => {
+          extra.hidden = !expanded;
+          toggle.dataset.expanded = expanded ? "true" : "false";
+          toggle.textContent = expanded ? "Show less" : `Show more (${count})`;
+        };
+
+        applyState(false);
+
+        toggle.addEventListener("click", () => {
+          applyState(toggle.dataset.expanded !== "true");
+        });
+      });
+    };
+
+    bindActionToggle();
+    document.addEventListener("turbo:load", bindActionToggle);
+  })();
+</script>

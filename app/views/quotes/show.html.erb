@@ -216,6 +216,36 @@
     if (!container) return;
     if (container.dataset.liveRefresh !== "true") return;
 
+    const engagementDetailsSelector = ".quote-engagement-details";
+    const engagementState = window.__quoteEngagementDetailsState || { open: false };
+    window.__quoteEngagementDetailsState = engagementState;
+
+    const captureEngagementState = () => {
+      const el = container.querySelector(engagementDetailsSelector);
+      if (!el) return;
+      engagementState.open = el.open;
+    };
+
+    const applyEngagementState = () => {
+      const el = container.querySelector(engagementDetailsSelector);
+      if (!el) return;
+      if (engagementState.open) {
+        el.setAttribute("open", "");
+      } else {
+        el.removeAttribute("open");
+      }
+    };
+
+    const bindEngagementDetails = () => {
+      const el = container.querySelector(engagementDetailsSelector);
+      if (!el || el.dataset.bound === "true") return;
+      el.dataset.bound = "true";
+      el.addEventListener("toggle", () => {
+        engagementState.open = el.open;
+      });
+      applyEngagementState();
+    };
+
     let inFlight = false;
     let lastRefreshAt = 0;
     let intervalId = null;
@@ -255,6 +285,7 @@
 
       inFlight = true;
       try {
+        captureEngagementState();
         const response = await fetch(refreshUrl, {
           headers: { "Accept": "text/vnd.turbo-stream.html" },
           credentials: "same-origin"
@@ -264,6 +295,7 @@
         const streamHtml = await response.text();
         if (streamHtml.trim()) {
           Turbo.renderStreamMessage(streamHtml);
+          bindEngagementDetails();
           syncRefreshEligibility();
         }
         lastRefreshAt = Date.now();
@@ -281,5 +313,7 @@
 
     window.addEventListener("focus", () => refreshQuoteState(true));
     intervalId = window.setInterval(() => refreshQuoteState(false), 15000);
+
+    bindEngagementDetails();
   })();
 </script>

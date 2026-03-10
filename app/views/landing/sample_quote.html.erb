@@ -1,16 +1,16 @@
-<% content_for :title, "Rubusoo Sample Quote | Public Quote Example" %>
-<% content_for :meta_description, "View a sample public quote from Rubusoo, including buyer/seller details, line items, and payment terms." %>
+<% content_for :title, t("landing.view.sample_quote.meta_title") %>
+<% content_for :meta_description, t("landing.view.sample_quote.meta_description") %>
 <% content_for :canonical_url, sample_quote_url %>
 
 <section class="marketing-section marketing-sample-intro no-print">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">PUBLIC QUOTE EXAMPLE</p>
-    <h2>Sample buyer-facing quote</h2>
-    <p>This page shows the kind of browser-ready quote experience Rubusoo can publish. It is a static sample, not a live negotiation record.</p>
+    <p class="marketing-kicker"><%= t("landing.view.sample_quote.kicker") %></p>
+    <h2><%= t("landing.view.sample_quote.title") %></h2>
+    <p><%= t("landing.view.sample_quote.subtitle") %></p>
   </div>
   <div class="marketing-cta-row">
-    <%= link_to "View Demo Workspace", demo_path, class: "btn btn-primary marketing-cta-primary" %>
-    <%= link_to "Start for Free", new_user_registration_path, class: "btn btn-secondary marketing-cta-secondary" %>
+    <%= link_to t("landing.view.sample_quote.view_demo_workspace"), demo_path, class: "btn btn-primary marketing-cta-primary" %>
+    <%= link_to t("landing.view.sample_quote.start_for_free"), new_user_registration_path, class: "btn btn-secondary marketing-cta-secondary" %>
   </div>
 </section>
 
@@ -18,13 +18,13 @@
   <header class="quote-doc-header">
     <div>
       <p class="quote-doc-kicker"><%= @sample_quote[:document_title] %></p>
-      <h1>PI # <%= @sample_quote[:quote_no] %></h1>
+      <h1><%= t("landing.view.sample_quote.pi_number", number: @sample_quote[:quote_no]) %></h1>
     </div>
   </header>
 
   <section class="quote-meta-grid">
     <article class="quote-meta-card">
-      <h3>Seller</h3>
+      <h3><%= t("quote_document.labels.seller") %></h3>
       <p><strong><%= @sample_quote[:seller][:name] %></strong></p>
       <p><%= @sample_quote[:seller][:address] %></p>
       <p><%= @sample_quote[:seller][:phone] %></p>
@@ -33,20 +33,20 @@
     </article>
 
     <article class="quote-meta-card">
-      <h3>Buyer</h3>
+      <h3><%= t("quote_document.labels.buyer") %></h3>
       <p><strong><%= @sample_quote[:buyer][:name] %></strong></p>
-      <p>Contact: <%= @sample_quote[:buyer][:contact_name] %></p>
+      <p><%= t("quote_document.labels.contact") %>: <%= @sample_quote[:buyer][:contact_name] %></p>
       <p><%= @sample_quote[:buyer][:address] %></p>
       <p><%= @sample_quote[:buyer][:phone] %></p>
       <p><%= @sample_quote[:buyer][:email] %></p>
     </article>
 
     <article class="quote-meta-card">
-      <h3>Quote Info</h3>
-      <p><strong>Date:</strong> <%= @sample_quote[:issued_on] %></p>
-      <p><strong>Valid Until:</strong> <%= @sample_quote[:valid_until] %></p>
-      <p><strong>Currency:</strong> <%= @sample_quote[:currency] %></p>
-      <p><strong>Delivery:</strong> 20 working days</p>
+      <h3><%= t("quote_document.labels.quote_info") %></h3>
+      <p><strong><%= t("quote_document.labels.quote_date") %>:</strong> <%= @sample_quote[:issued_on] %></p>
+      <p><strong><%= t("quote_document.labels.valid_until") %>:</strong> <%= @sample_quote[:valid_until] %></p>
+      <p><strong><%= t("quote_document.labels.currency") %>:</strong> <%= @sample_quote[:currency] %></p>
+      <p><strong><%= t("quote_document.labels.delivery_notes") %>:</strong> <%= t("landing.view.sample_quote.delivery_days") %></p>
     </article>
   </section>
 
@@ -54,10 +54,10 @@
     <table class="quote-items-table quote-doc-table">
       <thead>
         <tr>
-          <th>Description</th>
-          <th>Qty</th>
-          <th>Unit Price</th>
-          <th>Line Total</th>
+          <th><%= t("quote_document.labels.description", default: "Description") %></th>
+          <th><%= t("quote_document.labels.qty", default: "Qty") %></th>
+          <th><%= t("quote_document.labels.unit_price", default: "Unit Price") %></th>
+          <th><%= t("quote_document.labels.line_total", default: "Line Total") %></th>
         </tr>
       </thead>
       <tbody>
@@ -77,22 +77,22 @@
   </div>
 
   <aside class="quote-total-box">
-    <p><span>Subtotal</span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
-    <p><span>Tax / VAT</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
-    <p><span>Shipping</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
-    <p><span>Discount</span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
-    <p class="quote-total-grand"><span>Grand Total</span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
+    <p><span><%= t("quote_document.labels.subtotal") %></span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
+    <p><span><%= t("quote_document.labels.tax_vat") %></span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p><span><%= t("quote_document.labels.shipping") %></span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p><span><%= t("quote_document.labels.discount") %></span><strong><%= number_to_currency(0, unit: "USD ") %></strong></p>
+    <p class="quote-total-grand"><span><%= t("quote_document.labels.grand_total") %></span><strong><%= number_to_currency(subtotal, unit: "USD ") %></strong></p>
   </aside>
 
   <section class="quote-section-block">
-    <h3>Terms & Conditions</h3>
-    <p><strong>Payment Terms:</strong> <%= @sample_quote[:terms][:payment] %></p>
-    <p><strong>Validity:</strong> <%= @sample_quote[:terms][:validity] %></p>
-    <p><strong>Delivery:</strong> <%= @sample_quote[:terms][:delivery] %></p>
-    <p><strong>Notes:</strong> <%= @sample_quote[:terms][:notes] %></p>
+    <h3><%= t("quote_document.sections.terms_and_conditions") %></h3>
+    <p><strong><%= t("quote_document.labels.payment_terms") %>:</strong> <%= @sample_quote[:terms][:payment] %></p>
+    <p><strong><%= t("landing.view.sample_quote.validity") %>:</strong> <%= @sample_quote[:terms][:validity] %></p>
+    <p><strong><%= t("landing.view.sample_quote.delivery") %>:</strong> <%= @sample_quote[:terms][:delivery] %></p>
+    <p><strong><%= t("quote_document.labels.notes") %>:</strong> <%= @sample_quote[:terms][:notes] %></p>
   </section>
 
   <div class="no-print quote-public-actions">
-    <button type="button" onclick="window.print()">Print</button>
+    <button type="button" onclick="window.print()"><%= t("landing.view.sample_quote.print") %></button>
   </div>
 </article>

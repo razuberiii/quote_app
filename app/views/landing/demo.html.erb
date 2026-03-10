@@ -1,50 +1,50 @@
-<% content_for :title, "Rubusoo Demo | Pipeline and Quote Workspace" %>
-<% content_for :meta_description, "Explore the Rubusoo demo workspace and see how your team can create quotes, track revisions, and close deals faster." %>
+<% content_for :title, t("landing.view.demo.meta_title") %>
+<% content_for :meta_description, t("landing.view.demo.meta_description") %>
 <% content_for :canonical_url, demo_url %>
 
 <section class="marketing-section demo-page">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">DEMO WORKSPACE</p>
-    <h1>See the quote workflow in product form</h1>
-    <p>Not a slideshow. A simplified view of the kind of queue, signals, and quote context Rubusoo is built to organize.</p>
-    <p class="demo-note">All names and numbers on this page are fictional examples for product presentation.</p>
+    <p class="marketing-kicker"><%= t("landing.view.demo.kicker") %></p>
+    <h1><%= t("landing.view.demo.title") %></h1>
+    <p><%= t("landing.view.demo.subtitle") %></p>
+    <p class="demo-note"><%= t("landing.view.demo.note") %></p>
   </div>
 
   <div class="marketing-proof-strip">
-    <span>Quote queue visibility</span>
-    <span>Revision-aware workflow</span>
-    <span>Buyer-ready output</span>
+    <span><%= t("landing.view.demo.proof_1") %></span>
+    <span><%= t("landing.view.demo.proof_2") %></span>
+    <span><%= t("landing.view.demo.proof_3") %></span>
   </div>
 
   <div class="demo-toolbar">
-    <span class="demo-pill">Open Deals: 14</span>
-    <span class="demo-pill">Quotes This Week: 27</span>
-    <span class="demo-pill">Pending Follow-ups: 9</span>
+    <span class="demo-pill"><%= t("landing.view.demo.open_deals", count: 14) %></span>
+    <span class="demo-pill"><%= t("landing.view.demo.quotes_this_week", count: 27) %></span>
+    <span class="demo-pill"><%= t("landing.view.demo.pending_follow_ups", count: 9) %></span>
   </div>
 
   <div class="demo-layout">
     <article class="demo-card">
       <div class="demo-card-head">
         <div>
-          <span class="demo-card-kicker">Queue</span>
-          <h2>Recent Quotes</h2>
+          <span class="demo-card-kicker"><%= t("landing.view.demo.queue_kicker") %></span>
+          <h2><%= t("landing.view.demo.recent_quotes") %></h2>
         </div>
-        <span class="demo-card-meta">Sorted by urgency</span>
+        <span class="demo-card-meta"><%= t("landing.view.demo.sorted_by_urgency") %></span>
       </div>
       <table class="demo-table">
         <thead>
           <tr>
-            <th>Quote No.</th>
-            <th>Buyer</th>
-            <th>Status</th>
-            <th>Total</th>
+            <th><%= t("landing.view.demo.table.quote_no") %></th>
+            <th><%= t("landing.view.demo.table.buyer") %></th>
+            <th><%= t("landing.view.demo.table.status") %></th>
+            <th><%= t("landing.view.demo.table.total") %></th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>QX-2026-118</td><td>Northforge Supply</td><td>Pending</td><td>USD 2,400.00</td></tr>
-          <tr><td>QX-2026-116</td><td>Red Mesa Imports</td><td>Revised</td><td>USD 18,750.00</td></tr>
-          <tr><td>QX-2026-115</td><td>Polar Gate Systems</td><td>Won</td><td>USD 9,120.00</td></tr>
-          <tr><td>QX-2026-113</td><td>Blue Current Motion</td><td>Pending</td><td>USD 6,840.00</td></tr>
+          <tr><td>QX-2026-118</td><td>Northforge Supply</td><td><%= t("landing.view.demo.status.pending") %></td><td>USD 2,400.00</td></tr>
+          <tr><td>QX-2026-116</td><td>Red Mesa Imports</td><td><%= t("landing.view.demo.status.revised") %></td><td>USD 18,750.00</td></tr>
+          <tr><td>QX-2026-115</td><td>Polar Gate Systems</td><td><%= t("landing.view.demo.status.won") %></td><td>USD 9,120.00</td></tr>
+          <tr><td>QX-2026-113</td><td>Blue Current Motion</td><td><%= t("landing.view.demo.status.pending") %></td><td>USD 6,840.00</td></tr>
         </tbody>
       </table>
     </article>
@@ -52,20 +52,20 @@
     <article class="demo-card demo-card-dark">
       <div class="demo-card-head">
         <div>
-          <span class="demo-card-kicker">Signals</span>
-          <h2>Deal Overview</h2>
+          <span class="demo-card-kicker"><%= t("landing.view.demo.signals_kicker") %></span>
+          <h2><%= t("landing.view.demo.deal_overview") %></h2>
         </div>
-        <span class="demo-card-meta">One account workspace</span>
+        <span class="demo-card-meta"><%= t("landing.view.demo.one_account_workspace") %></span>
       </div>
       <ul class="demo-list">
-        <li><strong>Top Product:</strong> Hydraulic Pump HZ-240</li>
-        <li><strong>Average Quote Cycle:</strong> 3.8 days</li>
-        <li><strong>Revision Rate:</strong> 41%</li>
-        <li><strong>Export Mix:</strong> 62% PI / 38% Quotation</li>
+        <li><strong><%= t("landing.view.demo.top_product") %></strong> Hydraulic Pump HZ-240</li>
+        <li><strong><%= t("landing.view.demo.average_quote_cycle") %></strong> 3.8 days</li>
+        <li><strong><%= t("landing.view.demo.revision_rate") %></strong> 41%</li>
+        <li><strong><%= t("landing.view.demo.export_mix") %></strong> 62% PI / 38% Quotation</li>
       </ul>
       <div class="demo-actions">
-        <%= link_to "Start Free Trial", new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-        <%= link_to "Open Sample Quote", sample_quote_path, class: "btn btn-secondary marketing-cta-secondary", target: "_blank" %>
+        <%= link_to t("landing.view.demo.start_free_trial"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
+        <%= link_to t("landing.view.demo.open_sample_quote"), sample_quote_path, class: "btn btn-secondary marketing-cta-secondary", target: "_blank" %>
       </div>
     </article>
   </div>

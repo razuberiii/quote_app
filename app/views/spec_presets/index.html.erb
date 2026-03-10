@@ -1,21 +1,21 @@
-<h1 id="new">Spec Presets</h1>
+<h1 id="new"><%= t("spec_presets.view.index.title") %></h1>
 
-<p><%= link_to "Back to Product Presets", product_presets_path, class: "form-page-back-link" %></p>
+<p><%= link_to t("spec_presets.view.index.back_to_product_presets"), product_presets_path, class: "form-page-back-link" %></p>
 
 <section class="team-members-panel">
-  <h2>Create Spec Preset</h2>
+  <h2><%= t("spec_presets.view.index.create_title") %></h2>
   <%= render "form", spec_preset: @spec_preset %>
 </section>
 
 <section class="team-members-panel">
-  <h2>Preset Library</h2>
+  <h2><%= t("spec_presets.view.index.library_title") %></h2>
   <% if @spec_presets.any? %>
     <div class="table-responsive">
       <table class="customers-table saas-table">
         <thead>
           <tr>
-            <th>Name</th>
-            <th>Specs</th>
+            <th><%= t("spec_presets.view.index.name") %></th>
+            <th><%= t("spec_presets.view.index.specs") %></th>
             <th></th>
           </tr>
         </thead>
@@ -25,8 +25,8 @@
               <td><strong><%= preset.name %></strong></td>
               <td><%= preset.normalized_entries.map { |entry| "#{entry[:name]}: #{entry[:value]}" }.join(" • ") %></td>
               <td class="text-right">
-                <%= link_to "Edit", edit_spec_preset_path(preset), class: "btn btn-secondary" %>
-                <%= button_to "Delete", spec_preset_path(preset), method: :delete, data: { turbo_confirm: "Delete this spec preset?" }, class: "btn btn-secondary" %>
+                <%= link_to t("spec_presets.view.index.edit"), edit_spec_preset_path(preset), class: "btn btn-secondary" %>
+                <%= button_to t("spec_presets.view.index.delete"), spec_preset_path(preset), method: :delete, data: { turbo_confirm: t("spec_presets.view.index.delete_confirm") }, class: "btn btn-secondary" %>
               </td>
             </tr>
           <% end %>
@@ -34,6 +34,6 @@
       </table>
     </div>
   <% else %>
-    <p class="team-members-hint">No spec presets yet.</p>
+    <p class="team-members-hint"><%= t("spec_presets.view.index.empty") %></p>
   <% end %>
 </section>

@@ -1,26 +1,26 @@
 <section class="quote-decision-review app-surface">
   <div class="app-section-heading">
     <div>
-      <h3>Decision Review</h3>
-      <p class="app-section-caption">One-screen read on buyer readiness, change scope, and the next move.</p>
+      <h3><%= t("quotes.view.decision_review.title") %></h3>
+      <p class="app-section-caption"><%= t("quotes.view.decision_review.subtitle") %></p>
     </div>
   </div>
 
   <div class="quote-decision-review-grid">
     <article class="quote-decision-review-card is-<%= @quote_decision_review[:recommended_move][:tone] %>">
-      <span>Recommended Move</span>
+      <span><%= t("quotes.view.decision_review.recommended_move") %></span>
       <strong><%= @quote_decision_review[:recommended_move][:label] %></strong>
       <p><%= @quote_decision_review[:recommended_move][:detail] %></p>
     </article>
 
     <article class="quote-decision-review-card">
-      <span>Buyer Readiness</span>
+      <span><%= t("quotes.view.decision_review.buyer_readiness") %></span>
       <strong><%= @quote_decision_review[:buyer_readiness][:value] %></strong>
       <p><%= @quote_decision_review[:buyer_readiness][:detail] %></p>
     </article>
 
     <article class="quote-decision-review-card">
-      <span>Revision Scope</span>
+      <span><%= t("quotes.view.decision_review.revision_scope") %></span>
       <strong><%= @quote_decision_review[:revision_scope][:value] %></strong>
       <p><%= @quote_decision_review[:revision_scope][:detail] %></p>
     </article>
@@ -28,7 +28,7 @@
 
   <% if @quote_decision_review[:review_notes].any? %>
     <div class="quote-decision-review-notes">
-      <span>Review Notes</span>
+      <span><%= t("quotes.view.decision_review.review_notes") %></span>
       <ul>
         <% @quote_decision_review[:review_notes].each do |note| %>
           <li><%= note %></li>

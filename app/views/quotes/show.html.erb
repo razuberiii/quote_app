@@ -212,21 +212,42 @@
     if (window.__quoteLiveRefreshBound) return;
     window.__quoteLiveRefreshBound = true;
 
-    const container = document.getElementById("quote-page-content");
-    if (!container) return;
-    if (container.dataset.liveRefresh !== "true") return;
+    const getContainer = () => document.getElementById("quote-page-content");
+    const initialContainer = getContainer();
+    if (!initialContainer) return;
+    if (initialContainer.dataset.liveRefresh !== "true") return;
 
     const engagementDetailsSelector = ".quote-engagement-details";
-    const engagementState = window.__quoteEngagementDetailsState || { open: false };
+    const storageKey = `quote:engagement-details:${window.location.pathname}`;
+    const readPersistedState = () => {
+      try {
+        return window.sessionStorage.getItem(storageKey) === "true";
+      } catch (_) {
+        return false;
+      }
+    };
+    const persistState = (open) => {
+      try {
+        window.sessionStorage.setItem(storageKey, open ? "true" : "false");
+      } catch (_) {
+      }
+    };
+
+    const engagementState = window.__quoteEngagementDetailsState || { open: readPersistedState() };
     window.__quoteEngagementDetailsState = engagementState;
 
     const captureEngagementState = () => {
+      const container = getContainer();
+      if (!container) return;
       const el = container.querySelector(engagementDetailsSelector);
       if (!el) return;
       engagementState.open = el.open;
+      persistState(engagementState.open);
     };
 
     const applyEngagementState = () => {
+      const container = getContainer();
+      if (!container) return;
       const el = container.querySelector(engagementDetailsSelector);
       if (!el) return;
       if (engagementState.open) {
@@ -237,11 +258,14 @@
     };
 
     const bindEngagementDetails = () => {
+      const container = getContainer();
+      if (!container) return;
       const el = container.querySelector(engagementDetailsSelector);
       if (!el || el.dataset.bound === "true") return;
       el.dataset.bound = "true";
       el.addEventListener("toggle", () => {
         engagementState.open = el.open;
+        persistState(engagementState.open);
       });
       applyEngagementState();
     };
@@ -251,7 +275,8 @@
     let intervalId = null;
 
     const stopLiveRefresh = () => {
-      container.dataset.liveRefresh = "false";
+      const container = getContainer();
+      if (container) container.dataset.liveRefresh = "false";
       if (intervalId) {
         window.clearInterval(intervalId);
         intervalId = null;
@@ -259,6 +284,8 @@
     };
 
     const syncRefreshEligibility = () => {
+      const container = getContainer();
+      if (!container) return false;
       const doc = container.querySelector(".quote-document");
       if (doc?.dataset.currentLatest !== "true") {
         stopLiveRefresh();
@@ -273,6 +300,8 @@
     };
 
     const refreshQuoteState = async (force = false) => {
+      const container = getContainer();
+      if (!container) return;
       if (!syncRefreshEligibility()) return;
       if (inFlight) return;
       if (!force && document.hidden) return;

@@ -1,12 +1,15 @@
-<h1>Templates</h1>
+<section class="app-page-shell template-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1><%= t("quote_templates.view.index.title") %></h1>
+      <p class="template-page-subtitle"><%= t("quote_templates.view.index.subtitle") %></p>
+    </div>
+    <div class="app-page-header-actions template-index-actions">
+      <%= link_to t("quote_templates.view.index.new_template"), new_quote_template_path, class: "btn btn-primary" %>
+    </div>
+  </header>
 
-<p class="template-page-subtitle">Build reusable brand presets for quotations and PI documents.</p>
-
-<div class="actions template-index-actions">
-  <%= link_to "New Template", new_quote_template_path, class: "btn btn-primary" %>
-</div>
-
-<div class="template-grid">
+  <div class="template-grid">
   <% @quote_templates.each do |template| %>
     <article class="template-card template-preset-card">
       <div class="template-card-head">
@@ -15,17 +18,17 @@
           <p class="template-sub">slug: <code><%= template.slug %></code></p>
         </div>
         <% if template.default_template? %>
-          <span class="template-default-pill">Default Preset</span>
+          <span class="template-default-pill"><%= t("quote_templates.view.index.default_preset") %></span>
         <% end %>
       </div>
 
       <div class="template-meta-compact">
         <p class="template-meta"><%= template.layout_type.titleize %> · <%= (template.layout_density.presence || "standard").titleize %></p>
         <p class="template-meta"><%= template.font_family.presence || "Noto Sans" %></p>
-        <p class="template-meta">Accent <span class="template-color-dot" style="background: <%= template.accent_color %>"></span><%= template.accent_color %></p>
+        <p class="template-meta"><%= t("quote_templates.view.index.accent") %> <span class="template-color-dot" style="background: <%= template.accent_color %>"></span><%= template.accent_color %></p>
       </div>
       <div class="template-usage-row">
-        <span class="next-action-pill is-muted">Used in <%= @template_usage_counts[template.id].to_i %> quote(s)</span>
+        <span class="next-action-pill is-muted"><%= t("quote_templates.view.index.used_in_quotes", count: @template_usage_counts[template.id].to_i) %></span>
       </div>
 
       <div class="template-preview template-preview-card template-preview-<%= template.layout_type %>" style="--template-accent: <%= template.accent_color.presence || '#1F4E79' %>; font-family: <%= template.font_family.presence || 'Noto Sans' %>, sans-serif;">
@@ -42,16 +45,17 @@
           <span><%= template.resolved_table_label("qty") %></span>
           <span><%= template.resolved_table_label("line_total") %></span>
         </div>
-        <div class="preview-total">Grand Total</div>
+        <div class="preview-total"><%= t("quote_document.labels.grand_total") %></div>
       </div>
 
       <div class="template-actions">
-        <%= link_to "Edit", edit_quote_template_path(template), class: "btn btn-secondary" %>
+        <%= link_to t("quote_templates.view.index.edit"), edit_quote_template_path(template), class: "btn btn-secondary" %>
         <% unless template.default_template? %>
-          <%= button_to "Set Default", set_default_quote_template_path(template), method: :patch, class: "btn btn-info", form: { data: { turbo: false } } %>
+          <%= button_to t("quote_templates.view.index.set_default"), set_default_quote_template_path(template), method: :patch, class: "btn btn-info", form: { data: { turbo: false } } %>
         <% end %>
-        <%= button_to "Delete", quote_template_path(template), method: :delete, class: "btn btn-danger", data: { turbo_confirm: "Delete this template?" } %>
+        <%= button_to t("quote_templates.view.index.delete"), quote_template_path(template), method: :delete, class: "btn btn-danger", data: { turbo_confirm: t("quote_templates.view.index.delete_confirm") } %>
       </div>
     </article>
   <% end %>
-</div>
+  </div>
+</section>

@@ -22,7 +22,7 @@ module Users
         sign_out(resource)
         redirect_params = { email: resource.email, auto_send: auto_send_state }
         redirect_params[:cooldown] = cooldown_seconds if cooldown_seconds.present?
-        redirect_to pending_email_verification_path(redirect_params), alert: "Please verify your email before logging in."
+        redirect_to pending_email_verification_path(redirect_params), alert: t("users.sessions.flash.verify_email_before_login")
         return
       end
 

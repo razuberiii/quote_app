@@ -1,9 +1,9 @@
 <section class="app-page-shell">
   <% product_meta_items = [
-       ["MOQ", @product.moq.presence],
-       ["Lead Time", @product.lead_time.presence],
-       ["Category", @product.product_category.presence],
-       ["Unit", @product.unit.presence]
+      [t("products.view.show.meta.moq"), @product.moq.presence],
+      [t("products.view.show.meta.lead_time"), @product.lead_time.presence],
+      [t("products.view.show.meta.category"), @product.product_category.presence],
+      [t("products.view.show.meta.unit"), @product.unit.presence]
      ].select { |_, value| value.present? } %>
   <% default_spec_entries = @product.effective_default_specs %>
   <% default_addon_entries = @product.effective_default_addons %>
@@ -24,16 +24,16 @@
         <% end %>
         <% if @product.unit.present? %>
           <span class="product-meta-divider">•</span>
-          Unit: <%= @product.unit %>
+          <%= t("products.view.show.meta.unit") %>: <%= @product.unit %>
         <% end %>
       </p>
     </div>
 
     <div class="product-show-header-actions app-page-header-actions">
       <%= render "components/ui/button", href: edit_product_path(@product), variant: :secondary, class: "product-show-edit-cta" do %>
-        Edit
+        <%= t("products.view.show.actions.edit") %>
       <% end %>
-      <%= button_to "Delete", product_path(@product), method: :delete, data: { turbo_confirm: "Delete this product?" }, class: ui_button_classes(:danger, "product-show-delete-cta") %>
+      <%= button_to t("products.view.show.actions.delete"), product_path(@product), method: :delete, data: { turbo_confirm: t("products.view.show.actions.delete_confirm") }, class: ui_button_classes(:danger, "product-show-delete-cta") %>
     </div>
   </header>
 
@@ -46,8 +46,8 @@
           class="product-show-main-image-trigger"
           data-product-lightbox-trigger
           data-full-src="<%= url_for(@product.display_image) %>"
-          data-alt="<%= @product.name %> main image">
-          <%= image_tag @product.display_image, class: "product-main-image product-main-image-hero product-show-main-image", alt: "Main product image" %>
+          data-alt="<%= t("products.view.show.main_image_alt", name: @product.name) %>">
+          <%= image_tag @product.display_image, class: "product-main-image product-main-image-hero product-show-main-image", alt: t("products.view.show.main_image_label") %>
         </button>
       </div>
     </section>
@@ -55,26 +55,26 @@
 
   <%= render "components/ui/card", class: "product-show-rail" do %>
     <div class="product-show-rail-head">
-      <span class="product-show-kicker">Overview</span>
+      <span class="product-show-kicker"><%= t("products.view.show.overview") %></span>
       <div class="product-show-badges">
-        <%= status_badge("Quoted #{@quote_reference_count}", :slate, "product-stat-pill") %>
+        <%= status_badge(t("products.view.show.quoted_count", count: @quote_reference_count), :slate, "product-stat-pill") %>
         <% if @last_referenced_at.present? %>
-          <%= status_badge("Last Used #{@last_referenced_at.strftime("%Y-%m-%d %H:%M")}", :indigo, "product-stat-pill") %>
+          <%= status_badge(t("products.view.show.last_used_at", time: @last_referenced_at.strftime("%Y-%m-%d %H:%M")), :indigo, "product-stat-pill") %>
         <% else %>
-          <%= status_badge("Last Used Never", :slate, "product-stat-pill") %>
+          <%= status_badge(t("products.view.show.last_used_never"), :slate, "product-stat-pill") %>
         <% end %>
       </div>
     </div>
 
     <div class="product-show-rail-price">
-      <span class="product-show-rail-label">Reference Price</span>
+      <span class="product-show-rail-label"><%= t("products.view.show.reference_price") %></span>
       <strong><%= number_with_precision(@product.default_price, precision: 2) %></strong>
       <span><%= @product.price_currency %></span>
     </div>
 
     <% if has_description %>
       <div class="product-show-rail-section">
-        <span class="product-show-kicker">Description</span>
+        <span class="product-show-kicker"><%= t("products.view.form.description") %></span>
         <div class="product-description-text product-show-rail-description"><%= simple_format(@product.description) %></div>
       </div>
     <% end %>
@@ -96,21 +96,21 @@
 <section class="product-show-content app-section-stack">
   <div class="product-show-grid product-show-grid--workspace">
     <%= render "components/ui/card", class: "product-show-block product-show-pricing" do %>
-      <h3>Pricing & Business</h3>
+      <h3><%= t("products.view.form.pricing_business") %></h3>
       <div class="product-show-pricing-list">
         <div class="product-show-pricing-rows">
           <p class="product-price-highlight">
-            <span class="product-show-label">Reference Price</span>
+            <span class="product-show-label"><%= t("products.view.show.reference_price") %></span>
             <span class="product-show-value">
               <strong><%= number_with_precision(@product.default_price, precision: 2) %></strong>
               <span class="product-price-currency"><%= @product.price_currency %></span>
             </span>
           </p>
           <p class="product-cost-secondary">
-            <span class="product-show-label">Cost Price</span>
+            <span class="product-show-label"><%= t("products.view.show.cost_price") %></span>
             <span class="product-show-value">
-              <span><%= @product.cost_price.present? ? number_with_precision(@product.cost_price, precision: 2) : "Not shared" %></span>
-              <span class="quote-form-hint">Internal only</span>
+              <span><%= @product.cost_price.present? ? number_with_precision(@product.cost_price, precision: 2) : t("products.view.show.not_shared") %></span>
+              <span class="quote-form-hint"><%= t("products.view.show.internal_only") %></span>
             </span>
           </p>
           <% if product_meta_items.any? %>
@@ -124,7 +124,7 @@
       </div>
 
       <div class="product-show-badges">
-        <%= status_badge("SKU #{@product.sku}", :slate, "product-stat-pill") %>
+        <%= status_badge("#{t("products.view.show.meta.sku")} #{@product.sku}", :slate, "product-stat-pill") %>
         <% if @product.product_category.present? %>
           <%= status_badge(@product.product_category, :slate, "product-stat-pill") %>
         <% end %>
@@ -132,12 +132,12 @@
     <% end %>
 
     <%= render "components/ui/card", class: "product-show-block product-show-configurator" do %>
-      <h3>Configurator</h3>
+      <h3><%= t("products.view.show.configurator") %></h3>
 
       <% if bound_spec_presets.any? || default_spec_entries.any? %>
         <div class="product-show-config-block">
-          <p class="product-show-subtitle"><strong>Specifications</strong></p>
-          <p class="product-show-preset-label"><%= @product.default_spec_preset.present? ? "Default preset: #{@product.default_spec_preset.name}" : "Using inline default specification values" %></p>
+          <p class="product-show-subtitle"><strong><%= t("products.view.show.specifications") %></strong></p>
+          <p class="product-show-preset-label"><%= @product.default_spec_preset.present? ? t("products.view.show.default_preset", name: @product.default_spec_preset.name) : t("products.view.show.using_inline_default_specs") %></p>
           <% if default_spec_entries.any? && @product.default_spec_preset.blank? %>
             <ul class="product-show-spec-list">
               <% default_spec_entries.each do |entry| %>
@@ -155,16 +155,16 @@
                   <div class="product-show-preset-card-top">
                     <span class="product-show-preset-name"><%= preset.name %></span>
                     <% if preset.id == @product.default_spec_preset_id %>
-                      <%= status_badge("Default", :indigo, "product-inline-badge") %>
+                      <%= status_badge(t("products.view.show.default"), :indigo, "product-inline-badge") %>
                     <% end %>
                   </div>
-                  <p><%= pluralize(preset.normalized_entries.size, "spec") %> bound</p>
+                  <p><%= t("products.view.show.bound_specs", count: preset.normalized_entries.size) %></p>
                   <div class="product-show-chip-row">
                     <% preset.normalized_entries.first(3).each do |entry| %>
                       <span><strong><%= entry[:name] %>:</strong> <%= entry[:value] %></span>
                     <% end %>
                     <% if preset.normalized_entries.size > 3 %>
-                      <span>+<%= preset.normalized_entries.size - 3 %> more</span>
+                      <span><%= t("products.view.show.more_count", count: preset.normalized_entries.size - 3) %></span>
                     <% end %>
                   </div>
                 </article>
@@ -176,8 +176,8 @@
 
       <% if bound_addon_presets.any? || default_addon_entries.any? %>
         <div class="product-show-config-block">
-          <p class="product-show-subtitle"><strong>Add-ons</strong></p>
-          <p class="product-show-preset-label"><%= @product.default_addon_preset.present? ? "Default preset: #{@product.default_addon_preset.name}" : "Using inline default add-on values" %></p>
+          <p class="product-show-subtitle"><strong><%= t("products.view.show.add_ons") %></strong></p>
+          <p class="product-show-preset-label"><%= @product.default_addon_preset.present? ? t("products.view.show.default_preset", name: @product.default_addon_preset.name) : t("products.view.show.using_inline_default_addons") %></p>
           <% if default_addon_entries.any? && @product.default_addon_preset.blank? %>
             <ul class="product-show-spec-list">
               <% default_addon_entries.each do |entry| %>
@@ -195,16 +195,16 @@
                   <div class="product-show-preset-card-top">
                     <span class="product-show-preset-name"><%= preset.name %></span>
                     <% if preset.id == @product.default_addon_preset_id %>
-                      <%= status_badge("Default", :indigo, "product-inline-badge") %>
+                      <%= status_badge(t("products.view.show.default"), :indigo, "product-inline-badge") %>
                     <% end %>
                   </div>
-                  <p><%= pluralize(preset.normalized_entries.size, "add-on") %> bound</p>
+                  <p><%= t("products.view.show.bound_addons", count: preset.normalized_entries.size) %></p>
                   <div class="product-show-chip-row">
                     <% preset.normalized_entries.first(3).each do |entry| %>
                       <span><strong><%= entry[:name] %>:</strong> <%= number_with_precision(entry[:price], precision: 2) %> <%= @product.price_currency %></span>
                     <% end %>
                     <% if preset.normalized_entries.size > 3 %>
-                      <span>+<%= preset.normalized_entries.size - 3 %> more</span>
+                      <span><%= t("products.view.show.more_count", count: preset.normalized_entries.size - 3) %></span>
                     <% end %>
                   </div>
                 </article>
@@ -215,14 +215,14 @@
       <% end %>
 
       <% if !has_config_content %>
-        <p class="quote-form-hint">No configuration content added yet.</p>
+        <p class="quote-form-hint"><%= t("products.view.show.no_configuration") %></p>
       <% end %>
     <% end %>
   </div>
 
   <% if @product.gallery_images.attached? %>
     <div class="product-gallery">
-      <h3>Gallery</h3>
+      <h3><%= t("products.view.form.gallery") %></h3>
       <div class="product-show-gallery-grid">
         <% @product.gallery_images.each do |gallery_image| %>
           <button
@@ -230,8 +230,8 @@
             class="product-show-gallery-trigger"
             data-product-lightbox-trigger
             data-full-src="<%= url_for(gallery_image) %>"
-            data-alt="<%= @product.name %> gallery image">
-            <%= image_tag gallery_image, class: "product-show-gallery-thumb", alt: "Product gallery image" %>
+            data-alt="<%= t("products.view.show.gallery_image_alt", name: @product.name) %>">
+            <%= image_tag gallery_image, class: "product-show-gallery-thumb", alt: t("products.view.show.gallery_image_label") %>
           </button>
         <% end %>
       </div>
@@ -241,11 +241,11 @@
 
 <div class="product-lightbox" data-product-lightbox hidden>
   <div class="product-lightbox-backdrop" data-product-lightbox-close></div>
-  <div class="product-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Image preview">
-    <button type="button" class="product-lightbox-close" aria-label="Close image preview" data-product-lightbox-close>×</button>
+  <div class="product-lightbox-dialog" role="dialog" aria-modal="true" aria-label="<%= t("products.view.show.image_preview") %>">
+    <button type="button" class="product-lightbox-close" aria-label="<%= t("products.view.show.close_image_preview") %>" data-product-lightbox-close>×</button>
     <img src="" alt="" class="product-lightbox-image" data-product-lightbox-image>
   </div>
 </div>
 
-  <%= link_to "Back to Products", products_path, class: "form-page-back-link" %>
+  <%= link_to t("products.view.show.back_to_products"), products_path, class: "form-page-back-link" %>
 </section>

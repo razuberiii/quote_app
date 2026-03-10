@@ -13,19 +13,19 @@ class TeamMembersController < ApplicationController
   def update
     requested_role = member_params[:company_role].to_s
     unless %w[admin member].include?(requested_role)
-      redirect_to team_members_path, alert: "Only admin/member can be assigned from this screen." and return
+      redirect_to team_members_path, alert: t("team_members.flash.only_admin_member") and return
     end
 
     if @member.company_owner?
-      redirect_to team_members_path, alert: "Owner role cannot be changed here." and return
+      redirect_to team_members_path, alert: t("team_members.flash.owner_role_cannot_change") and return
     end
 
     if @member == current_user
-      redirect_to team_members_path, alert: "You cannot change your own role." and return
+      redirect_to team_members_path, alert: t("team_members.flash.cannot_change_own_role") and return
     end
 
     if @member.update(company_role: requested_role)
-      redirect_to team_members_path, notice: "Member role updated."
+      redirect_to team_members_path, notice: t("team_members.flash.member_role_updated")
     else
       @members = current_user.company.users.order(:company_role, :id)
       @new_invitation = TeamInvitation.new(company_role: "member")
@@ -36,16 +36,16 @@ class TeamMembersController < ApplicationController
 
   def destroy
     if @member.company_owner?
-      redirect_to team_members_path, alert: "Owner cannot be removed." and return
+      redirect_to team_members_path, alert: t("team_members.flash.owner_cannot_removed") and return
     end
 
     if @member == current_user
-      redirect_to team_members_path, alert: "You cannot remove yourself." and return
+      redirect_to team_members_path, alert: t("team_members.flash.cannot_remove_self") and return
     end
 
     email = @member.email
     @member.move_to_personal_company!
-    redirect_to team_members_path, notice: "Removed from team: #{email}. Account preserved."
+    redirect_to team_members_path, notice: t("team_members.flash.removed_from_team", email: email)
   end
 
   private

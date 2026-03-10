@@ -1,8 +1,8 @@
-<%= render "shared/settings_header", title: "Account Settings", section: :account %>
+<%= render "shared/settings_header", title: t("users.registrations.view.edit.header_title"), section: :account %>
 
 <section class="team-members-panel">
-  <h2>Personal Profile</h2>
-  <p class="team-members-hint">Manage your working identity. Security verification is not required for profile-only changes.</p>
+  <h2><%= t("users.registrations.view.edit.personal_profile") %></h2>
+  <p class="team-members-hint"><%= t("users.registrations.view.edit.profile_hint") %></p>
   <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_profile", method: :put, multipart: true, data: { turbo: false, dirty_guard: true } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
@@ -10,17 +10,17 @@
       <div class="account-avatar-preview">
         <% has_avatar = resource.avatar.attached? && resource.avatar.blob&.persisted? %>
         <% if has_avatar %>
-          <%= image_tag resource.avatar, alt: "Avatar", id: "user_avatar_preview_img" %>
+          <%= image_tag resource.avatar, alt: t("users.registrations.view.edit.avatar_alt"), id: "user_avatar_preview_img" %>
         <% else %>
-          <%= tag.img id: "user_avatar_preview_img", alt: "Avatar", hidden: true %>
+          <%= tag.img id: "user_avatar_preview_img", alt: t("users.registrations.view.edit.avatar_alt"), hidden: true %>
         <% end %>
         <span id="user_avatar_preview_fallback" <%= "hidden" if has_avatar %>><%= resource.email.to_s.first.to_s.upcase %></span>
       </div>
       <div class="account-avatar-actions">
-        <%= f.label :avatar, "Upload Avatar" %>
+        <%= f.label :avatar, t("users.registrations.view.edit.upload_avatar") %>
         <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#user_avatar_preview_img", live_preview_fallback: "#user_avatar_preview_fallback" } %>
         <% if resource.avatar.attached? %>
-          <%= button_tag "Remove Current Avatar",
+          <%= button_tag t("users.registrations.view.edit.remove_current_avatar"),
                          type: "submit",
                          name: "user[remove_avatar]",
                          value: "1",
@@ -31,55 +31,55 @@
     </div>
 
     <div>
-      <%= f.label :full_name, "Display Name" %>
-      <%= f.text_field :full_name, placeholder: "How teammates and clients see your name" %>
+      <%= f.label :full_name, t("users.registrations.view.edit.display_name") %>
+      <%= f.text_field :full_name, placeholder: t("users.registrations.view.edit.display_name_placeholder") %>
     </div>
 
     <div>
-      <%= f.label :contact_phone, "Contact Number" %>
+      <%= f.label :contact_phone, t("users.registrations.view.edit.contact_number") %>
       <%= f.text_field :contact_phone, placeholder: "+1 ..." %>
     </div>
 
     <div>
-      <%= f.label :job_title, "Job Title" %>
-      <%= f.text_field :job_title, placeholder: "Sales Manager / Founder" %>
+      <%= f.label :job_title, t("users.registrations.view.edit.job_title") %>
+      <%= f.text_field :job_title, placeholder: t("users.registrations.view.edit.job_title_placeholder") %>
     </div>
 
     <div>
-      <%= f.label :time_zone, "Time Zone" %>
+      <%= f.label :time_zone, t("users.registrations.view.edit.time_zone") %>
       <%= f.select :time_zone,
                    options_for_select(time_zone_options_for_select, resource.time_zone.presence || "UTC"),
                    {},
-                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: "Search city, country, or GMT offset", phone_field: "#user_contact_phone" } } %>
+                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone" } } %>
     </div>
 
     <div>
-      <%= f.label :language, "Language" %>
-      <%= f.select :language, options_for_select([["English", "en"]], resource.language.presence || "en") %>
+      <%= f.label :language, t("users.registrations.view.edit.language") %>
+      <%= f.select :language, options_for_select([["English", "en"], ["简体中文", "zh-CN"], ["Espanol (LatAm)", "es-419"]], resource.language.presence || "en") %>
     </div>
 
     <%= f.hidden_field :email, value: resource.email %>
-    <%= f.submit "Update Profile", class: "btn btn-primary" %>
+    <%= f.submit t("users.registrations.view.edit.update_profile"), class: "btn btn-primary" %>
   <% end %>
 </section>
 
 <section class="team-members-panel">
-  <h2>Security Settings</h2>
-  <p class="team-members-hint">Change email or password here. Current password is required for security updates.</p>
+  <h2><%= t("users.registrations.view.edit.security_settings") %></h2>
+  <p class="team-members-hint"><%= t("users.registrations.view.edit.security_settings_hint") %></p>
 
   <!-- Email Display & Change -->
   <div style="margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">Email Address</label>
+    <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;"><%= t("users.registrations.view.edit.email_address") %></label>
     <div style="display: flex; align-items: center; gap: 10px;">
       <span style="padding: 8px 12px; background: #f5f5f5; border-radius: 4px; color: #666; flex: 1;">
         <%= resource.email %>
       </span>
       <button type="button" class="btn btn-secondary" id="change-email-btn" style="white-space: nowrap;">
-        Change Email
+        <%= t("users.registrations.view.edit.change_email") %>
       </button>
     </div>
     <p style="margin-top: 8px; font-size: 0.9em; color: #999;">
-      You'll need to verify the new email address before it becomes active.
+      <%= t("users.registrations.view.edit.email_verify_hint") %>
     </p>
   </div>
 
@@ -88,47 +88,47 @@
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div>
-      <%= f.label :password, "New password (optional)" %>
+      <%= f.label :password, t("users.registrations.view.edit.new_password_optional") %>
       <%= f.password_field :password, autocomplete: "new-password" %>
     </div>
 
     <div>
-      <%= f.label :password_confirmation, "Confirm new password" %>
+      <%= f.label :password_confirmation, t("users.registrations.view.edit.confirm_new_password") %>
       <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
     </div>
 
     <div>
-      <%= f.label :current_password, "Current password (required for security changes)" %>
+      <%= f.label :current_password, t("users.registrations.view.edit.current_password_required") %>
       <%= f.password_field :current_password, autocomplete: "current-password" %>
     </div>
 
-    <%= f.submit "Update Security Settings", class: "btn btn-primary" %>
+    <%= f.submit t("users.registrations.view.edit.update_security_settings"), class: "btn btn-primary" %>
   <% end %>
 </section>
 
 <section class="team-members-panel">
-  <h2>Company Invitations</h2>
+  <h2><%= t("users.registrations.view.edit.company_invitations") %></h2>
   <p class="team-members-hint">
-    You currently have <strong><%= pending_team_invitations_count %></strong> pending company invitation(s).
-    <%= link_to "Open Invitations", team_invitations_path %>
+    <%= t("users.registrations.view.edit.pending_invitations", count: pending_team_invitations_count) %>
+    <%= link_to t("users.registrations.view.edit.open_invitations"), team_invitations_path %>
   </p>
 </section>
 <!-- Email Change Modal -->
 <div id="email-change-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
   <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-    <h3 style="margin: 0 0 10px 0; color: #333;">Change Email Address</h3>
-    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">We'll send a verification link to your new email address. You must click it to complete the change.</p>
+    <h3 style="margin: 0 0 10px 0; color: #333;"><%= t("users.registrations.view.edit.change_email_address") %></h3>
+    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;"><%= t("users.registrations.view.edit.change_email_address_hint") %></p>
 
     <form id="email-change-form">
       <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;">New Email Address</label>
-        <input type="email" id="new-email-input" required placeholder="your-new-email@example.com" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;"><%= t("users.registrations.view.edit.new_email_address") %></label>
+        <input type="email" id="new-email-input" required placeholder="<%= t("users.registrations.view.edit.new_email_placeholder") %>" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
       </div>
 
       <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;">Current Password</label>
-        <input type="password" id="current-password-input" required placeholder="Enter your password to confirm" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
-        <p style="margin: 6px 0 0 0; font-size: 0.85em; color: #999;">For security, we need to verify your password.</p>
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;"><%= t("users.registrations.view.edit.current_password") %></label>
+        <input type="password" id="current-password-input" required placeholder="<%= t("users.registrations.view.edit.current_password_placeholder") %>" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+        <p style="margin: 6px 0 0 0; font-size: 0.85em; color: #999;"><%= t("users.registrations.view.edit.password_verify_hint") %></p>
       </div>
 
       <div id="email-change-error" style="display: none; margin-bottom: 15px; padding: 12px; background: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c33; font-size: 14px;"></div>
@@ -136,8 +136,8 @@
       <div id="email-change-success" style="display: none; margin-bottom: 15px; padding: 12px; background: #efe; border: 1px solid #cfc; border-radius: 4px; color: #3c3; font-size: 14px;"></div>
 
       <div style="display: flex; gap: 10px;">
-        <button type="submit" class="btn btn-primary" id="email-change-submit-btn" style="flex: 1;">Send Verification Email</button>
-        <button type="button" class="btn btn-secondary" id="email-change-cancel-btn" style="flex: 1;">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="email-change-submit-btn" style="flex: 1;"><%= t("users.registrations.view.edit.send_verification_email") %></button>
+        <button type="button" class="btn btn-secondary" id="email-change-cancel-btn" style="flex: 1;"><%= t("users.registrations.view.edit.cancel") %></button>
       </div>
     </form>
   </div>

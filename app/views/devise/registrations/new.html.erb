@@ -1,10 +1,10 @@
 <section class="auth-page">
   <div class="auth-card">
-    <h1>Sign up</h1>
+    <h1><%= t("users.registrations.view.new.title") %></h1>
 
     <% if @validation_error.present? %>
       <div class="error-messages">
-        <h2>Verification Error</h2>
+        <h2><%= t("users.registrations.view.new.verification_error") %></h2>
         <ul>
           <li><%= @validation_error %></li>
         </ul>
@@ -14,7 +14,7 @@
     <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "signup-form" }) do |f| %>
       <% if resource.errors.any? %>
         <div class="error-messages">
-          <h2><%= pluralize(resource.errors.count, "error") %> prevented sign up:</h2>
+          <h2><%= t("users.registrations.view.new.error_summary", count: resource.errors.count) %></h2>
           <ul>
             <% resource.errors.full_messages.each do |message| %>
               <li><%= message %></li>
@@ -24,20 +24,20 @@
       <% end %>
 
       <div>
-        <%= f.label :email %>
+        <%= f.label :email, t("users.registrations.view.new.email") %>
         <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
       </div>
 
       <div>
-        <%= f.label :password %>
+        <%= f.label :password, t("users.registrations.view.new.password") %>
         <% if @minimum_password_length %>
-          <small>(<%= @minimum_password_length %> characters minimum)</small>
+          <small><%= t("users.registrations.view.new.minimum_password", count: @minimum_password_length) %></small>
         <% end %>
         <%= f.password_field :password, autocomplete: "new-password" %>
       </div>
 
       <div>
-        <%= f.label :password_confirmation %>
+        <%= f.label :password_confirmation, t("users.registrations.view.new.password_confirmation") %>
         <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
       </div>
 
@@ -46,23 +46,23 @@
       <% end %>
 
       <div>
-        <%= f.submit "Create account", class: "btn btn-primary", id: "signup-submit-btn" %>
+        <%= f.submit t("users.registrations.view.new.create_account"), class: "btn btn-primary", id: "signup-submit-btn" %>
       </div>
     <% end %>
 
     <div class="auth-links">
-      <%= link_to "Log in", new_session_path(resource_name) %>
+      <%= link_to t("users.registrations.view.new.log_in"), new_session_path(resource_name) %>
     </div>
   </div>
 
   <!-- Verification Modal -->
   <div id="signup-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
     <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-      <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
-      <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+      <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;"><%= t("users.registrations.view.new.security_verification") %></h3>
+      <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;"><%= t("users.registrations.view.new.complete_verification") %></p>
       
       <div id="signup-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-        <p>Loading verification...</p>
+        <p><%= t("users.registrations.view.new.loading_verification") %></p>
       </div>
       
       <div id="signup-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
@@ -70,12 +70,15 @@
       </div>
       
       <div id="signup-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-        <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
+        <p style="color: #28a745; font-size: 16px; margin: 0;"><%= t("users.registrations.view.new.verified_submitting") %></p>
       </div>
     </div>
   </div>
 
   <script>
+    const creatingAccountLabel = "<%= j t("users.registrations.view.new.creating_account") %>";
+    const createAccountLabel = "<%= j t("users.registrations.view.new.create_account") %>";
+
     function initializeSignupForm() {
       const signupForm = document.getElementById('signup-form');
       const submitBtn = document.getElementById('signup-submit-btn');
@@ -115,7 +118,7 @@
         if (verificationComplete && turnstileResponse.value) {
           isSubmitting = true;
           submitBtn.disabled = true;
-          submitBtn.textContent = 'Creating account...';
+          submitBtn.textContent = creatingAccountLabel;
           signupForm.submit();
           return;
         }
@@ -180,14 +183,14 @@
           modal.style.display = 'none';
           turnstileResponse.value = ''; // Clear incomplete verification
           submitBtn.disabled = false; // Re-enable button
-          submitBtn.textContent = 'Create account';
+          submitBtn.textContent = createAccountLabel;
         }
       });
 
       // Restore button state on form reset
       signupForm.addEventListener('reset', function() {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Create account';
+        submitBtn.textContent = createAccountLabel;
         turnstileResponse.value = '';
         verificationComplete = false;
         isSubmitting = false;

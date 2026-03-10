@@ -1,5 +1,5 @@
-<% content_for :title, "Foreign Trade Quotation Software for B2B Export Teams | Rubusoo" %>
-<% content_for :meta_description, "Foreign trade quotation software for B2B export teams. Manage quote revisions, share live buyer links, and export professional PDF/Excel documents." %>
+<% content_for :title, t("landing.view.index.meta_title") %>
+<% content_for :meta_description, t("landing.view.index.meta_description") %>
 <% content_for :canonical_url, "https://www.rubusoo.com/" %>
 <% content_for :head do %>
   <script type="application/ld+json">
@@ -24,48 +24,48 @@
 <section class="marketing-hero marketing-hero-split">
   <div class="marketing-hero-bg"></div>
   <div class="marketing-hero-content">
-    <p class="marketing-kicker">BUILT FOR B2B SALES AND EXPORT TEAMS</p>
-    <h1>Foreign Trade Quotation Software for B2B Export Teams</h1>
+    <p class="marketing-kicker"><%= t("landing.view.index.hero_kicker") %></p>
+    <h1><%= t("landing.view.index.hero_title") %></h1>
     <p class="marketing-subtitle">
-      Run revisions, buyer visibility, and export-ready quote output in one cleaner workflow.
+      <%= t("landing.view.index.hero_subtitle") %>
     </p>
     <div class="marketing-cta-row">
-      <%= link_to "Start for Free", new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-      <%= link_to "View Demo", @demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
-      <%= link_to "See Live Example", @sample_quote_path, class: "marketing-sample-link", target: "_blank" %>
+      <%= link_to t("landing.view.index.start_for_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
+      <%= link_to t("landing.view.index.view_demo"), @demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
+      <%= link_to t("landing.view.index.see_live_example"), @sample_quote_path, class: "marketing-sample-link", target: "_blank" %>
     </div>
     <div class="marketing-proof-strip">
-      <span>Revision control built in</span>
-      <span>Buyer-facing live quote links</span>
-      <span>Professional PDF / Excel output</span>
+      <span><%= t("landing.view.index.proof_1") %></span>
+      <span><%= t("landing.view.index.proof_2") %></span>
+      <span><%= t("landing.view.index.proof_3") %></span>
     </div>
   </div>
 
   <aside class="marketing-hero-aside">
     <div class="marketing-artifact-window">
       <div class="marketing-artifact-eyebrow">
-        <span>Fictional quote workflow</span>
-        <span>Revision-safe</span>
+        <span><%= t("landing.view.index.artifact.eyebrow_left") %></span>
+        <span><%= t("landing.view.index.artifact.eyebrow_right") %></span>
       </div>
       <div class="marketing-artifact-head">
-        <strong>Northforge Supply / QX-2026-118</strong>
-        <span>Buyer sees latest version only</span>
+        <strong><%= t("landing.view.index.artifact.headline") %></strong>
+        <span><%= t("landing.view.index.artifact.subline") %></span>
       </div>
       <div class="marketing-artifact-stack">
         <article class="marketing-artifact-card is-accent">
-          <span class="marketing-artifact-label">Version control</span>
-          <strong>V3 approved for sending</strong>
-          <p>Previous revisions remain visible in history.</p>
+          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card1.label") %></span>
+          <strong><%= t("landing.view.index.artifact.card1.title") %></strong>
+          <p><%= t("landing.view.index.artifact.card1.body") %></p>
         </article>
         <article class="marketing-artifact-card">
-          <span class="marketing-artifact-label">Buyer access</span>
-          <strong>Public quote link</strong>
-          <p>Share one browser-ready quote instead of attachment chains.</p>
+          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card2.label") %></span>
+          <strong><%= t("landing.view.index.artifact.card2.title") %></strong>
+          <p><%= t("landing.view.index.artifact.card2.body") %></p>
         </article>
         <article class="marketing-artifact-card">
-          <span class="marketing-artifact-label">Output</span>
-          <strong>PDF / Excel export</strong>
-          <p>Keep approvals and finance handoff intact.</p>
+          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card3.label") %></span>
+          <strong><%= t("landing.view.index.artifact.card3.title") %></strong>
+          <p><%= t("landing.view.index.artifact.card3.body") %></p>
         </article>
       </div>
     </div>
@@ -76,25 +76,25 @@
   <div class="marketing-story-grid">
     <div>
       <div class="marketing-section-head">
-        <p class="marketing-kicker">WHY TEAMS SWITCH</p>
-        <h2>Export quoting breaks when the workflow lives in files</h2>
+        <p class="marketing-kicker"><%= t("landing.view.index.story.kicker") %></p>
+        <h2><%= t("landing.view.index.story.title") %></h2>
       </div>
       <p class="marketing-story-lead">
-        Most teams do not need a heavy ERP quoting module. They need one dependable place to create, revise, share, and follow up on quotes without losing version control.
+        <%= t("landing.view.index.story.lead") %>
       </p>
     </div>
     <div class="marketing-story-list">
       <article>
-        <strong>Before</strong>
-        <p>Quotes move through spreadsheets, email attachments, and chat threads.</p>
+        <strong><%= t("landing.view.index.story.before_title") %></strong>
+        <p><%= t("landing.view.index.story.before_body") %></p>
       </article>
       <article>
-        <strong>After</strong>
-        <p>Rubusoo keeps the latest quote, revision history, buyer link, and export output in one operating layer.</p>
+        <strong><%= t("landing.view.index.story.after_title") %></strong>
+        <p><%= t("landing.view.index.story.after_body") %></p>
       </article>
       <article>
-        <strong>Why it matters</strong>
-        <p>Less version confusion. Faster response loops. Cleaner internal follow-up.</p>
+        <strong><%= t("landing.view.index.story.why_title") %></strong>
+        <p><%= t("landing.view.index.story.why_body") %></p>
       </article>
     </div>
   </div>
@@ -102,106 +102,106 @@
 
 <section class="marketing-section">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">CORE CAPABILITIES</p>
-    <h2>Core quotation workflows, presented like a product not a brochure</h2>
-    <p>Everything below maps to features that already exist in the app today.</p>
+    <p class="marketing-kicker"><%= t("landing.view.index.capabilities.kicker") %></p>
+    <h2><%= t("landing.view.index.capabilities.title") %></h2>
+    <p><%= t("landing.view.index.capabilities.subtitle") %></p>
   </div>
   <div class="marketing-grid marketing-grid-4">
     <article class="marketing-feature">
       <div class="marketing-icon">V</div>
-      <h3>Quote Revision Control</h3>
-      <p>Every revision tracked. History never lost. Price changes stay visible.</p>
+      <h3><%= t("landing.view.index.capabilities.card1.title") %></h3>
+      <p><%= t("landing.view.index.capabilities.card1.body") %></p>
     </article>
     <article class="marketing-feature">
       <div class="marketing-icon">L</div>
-      <h3>Public Quote Link for Buyers</h3>
-      <p>Buyers see live quotes from any device. No login. No friction.</p>
+      <h3><%= t("landing.view.index.capabilities.card2.title") %></h3>
+      <p><%= t("landing.view.index.capabilities.card2.body") %></p>
     </article>
     <article class="marketing-feature">
       <div class="marketing-icon">Q</div>
-      <h3>Quotation CRM Workflow</h3>
-      <p>Compose from templates. Customize quickly. Send with confidence.</p>
+      <h3><%= t("landing.view.index.capabilities.card3.title") %></h3>
+      <p><%= t("landing.view.index.capabilities.card3.body") %></p>
     </article>
     <article class="marketing-feature">
       <div class="marketing-icon">E</div>
-      <h3>Export Quotation to PDF/Excel</h3>
-      <p>Export to PDF or Excel. Buyer-ready and accounting-approved.</p>
+      <h3><%= t("landing.view.index.capabilities.card4.title") %></h3>
+      <p><%= t("landing.view.index.capabilities.card4.body") %></p>
     </article>
   </div>
 </section>
 
 <section class="marketing-section marketing-soft marketing-comparison-section">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">WHAT CHANGES</p>
-    <h2>A better operating layer for quoting</h2>
-    <p>Not “all-in-one ERP”. Not another file folder. A focused execution system for quote work.</p>
+    <p class="marketing-kicker"><%= t("landing.view.index.comparison.kicker") %></p>
+    <h2><%= t("landing.view.index.comparison.title") %></h2>
+    <p><%= t("landing.view.index.comparison.subtitle") %></p>
   </div>
   <div class="marketing-comparison-grid">
     <article class="marketing-advantage">
-      <h3>Spreadsheet quoting</h3>
-      <p>Fast to start, but weak once revisions, approvals, and buyer updates pile up.</p>
+      <h3><%= t("landing.view.index.comparison.left_title") %></h3>
+      <p><%= t("landing.view.index.comparison.left_body") %></p>
     </article>
     <article class="marketing-advantage is-emphasis">
-      <h3>Rubusoo workflow</h3>
-      <p>One quote timeline. One buyer-facing link. One clean export path for internal handoff.</p>
+      <h3><%= t("landing.view.index.comparison.center_title") %></h3>
+      <p><%= t("landing.view.index.comparison.center_body") %></p>
     </article>
     <article class="marketing-advantage">
-      <h3>Heavy ERP quoting</h3>
-      <p>Powerful on paper, but often too slow and rigid for frontline export quote cycles.</p>
+      <h3><%= t("landing.view.index.comparison.right_title") %></h3>
+      <p><%= t("landing.view.index.comparison.right_body") %></p>
     </article>
   </div>
 </section>
 
 <section class="marketing-section">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">WORKFLOW</p>
-    <h2>How a quote actually moves through the system</h2>
-    <p>The page flow is simple on purpose: build, send, revise, export, follow up.</p>
+    <p class="marketing-kicker"><%= t("landing.view.index.workflow.kicker") %></p>
+    <h2><%= t("landing.view.index.workflow.title") %></h2>
+    <p><%= t("landing.view.index.workflow.subtitle") %></p>
   </div>
   <div class="marketing-steps">
     <article class="marketing-step">
       <span>1</span>
-      <h3>Set up products and customers</h3>
-      <p>Keep reusable catalog data and customer records in one place.</p>
+      <h3><%= t("landing.view.index.workflow.step1_title") %></h3>
+      <p><%= t("landing.view.index.workflow.step1_body") %></p>
     </article>
     <article class="marketing-step">
       <span>2</span>
-      <h3>Create from templates</h3>
-      <p>Compose pricing, terms, and document structure without rebuilding every quote from scratch.</p>
+      <h3><%= t("landing.view.index.workflow.step2_title") %></h3>
+      <p><%= t("landing.view.index.workflow.step2_body") %></p>
     </article>
     <article class="marketing-step">
       <span>3</span>
-      <h3>Share or export</h3>
-      <p>Use a live buyer link when you want clarity, or export PDF / Excel when your process needs files.</p>
+      <h3><%= t("landing.view.index.workflow.step3_title") %></h3>
+      <p><%= t("landing.view.index.workflow.step3_body") %></p>
     </article>
     <article class="marketing-step">
       <span>4</span>
-      <h3>Revise with history intact</h3>
-      <p>Keep every quote version visible while sales and buyers move toward a decision.</p>
+      <h3><%= t("landing.view.index.workflow.step4_title") %></h3>
+      <p><%= t("landing.view.index.workflow.step4_body") %></p>
     </article>
   </div>
 </section>
 
 <section class="marketing-section marketing-proof-layout">
   <div class="marketing-section-head">
-    <p class="marketing-kicker">FOR BOTH SIDES OF THE DEAL</p>
-    <h2>Internal execution stays clean while the buyer experience stays simple</h2>
+    <p class="marketing-kicker"><%= t("landing.view.index.dual.kicker") %></p>
+    <h2><%= t("landing.view.index.dual.title") %></h2>
   </div>
   <div class="marketing-dual-grid">
     <article class="marketing-proof-panel">
-      <h3>For your team</h3>
+      <h3><%= t("landing.view.index.dual.team_title") %></h3>
       <ul class="marketing-proof-list">
-        <li>Revision history stays attached to the quote itself.</li>
-        <li>Products, presets, and templates are reusable across deals.</li>
-        <li>Follow-up work is tied to the same customer and quote context.</li>
+        <li><%= t("landing.view.index.dual.team_1") %></li>
+        <li><%= t("landing.view.index.dual.team_2") %></li>
+        <li><%= t("landing.view.index.dual.team_3") %></li>
       </ul>
     </article>
     <article class="marketing-proof-panel">
-      <h3>For the buyer</h3>
+      <h3><%= t("landing.view.index.dual.buyer_title") %></h3>
       <ul class="marketing-proof-list">
-        <li>One live quote link instead of unclear attachment chains.</li>
-        <li>Professional PDF / Excel output when a file is still required.</li>
-        <li>Cleaner quote presentation with less friction and less confusion.</li>
+        <li><%= t("landing.view.index.dual.buyer_1") %></li>
+        <li><%= t("landing.view.index.dual.buyer_2") %></li>
+        <li><%= t("landing.view.index.dual.buyer_3") %></li>
       </ul>
     </article>
   </div>
@@ -209,105 +209,105 @@
 
 <section class="marketing-section marketing-explainer" id="what-is-quotation-software">
   <div class="marketing-section-head">
-    <h2>What Is Foreign Trade Quotation Software?</h2>
-    <p class="marketing-section-intro">A practical explanation for export-focused sales operations.</p>
+    <h2><%= t("landing.view.index.explainer.title") %></h2>
+    <p class="marketing-section-intro"><%= t("landing.view.index.explainer.intro") %></p>
   </div>
   <p class="marketing-explainer-summary">
-    Foreign trade quotation software helps B2B export teams control revisions, improve buyer visibility, and run faster quote follow-ups without heavy ERP overhead.
+    <%= t("landing.view.index.explainer.summary") %>
   </p>
   <ul class="marketing-explainer-keypoints">
-    <li>Replaces fragmented spreadsheets and attachments with one structured quote workflow.</li>
-    <li>Supports quote revision control and buyer-facing live links in daily sales execution.</li>
-    <li>Keeps export quotation management practical with professional PDF/Excel output.</li>
+    <li><%= t("landing.view.index.explainer.key_1") %></li>
+    <li><%= t("landing.view.index.explainer.key_2") %></li>
+    <li><%= t("landing.view.index.explainer.key_3") %></li>
   </ul>
 
   <details class="marketing-explainer-details">
-    <summary>Read full explanation</summary>
+    <summary><%= t("landing.view.index.explainer.read_full") %></summary>
 
-    <h3>Why Export Teams Need It</h3>
+    <h3><%= t("landing.view.index.explainer.need_title") %></h3>
     <p>
-      Foreign trade quotation software is the execution layer between lead discussions and final buyer confirmation in international sales.
+      <%= t("landing.view.index.explainer.need_p1") %>
     </p>
     <p>
-      For B2B export teams, quoting is not just document creation. It is revision management, buyer communication, and follow-up control inside one commercial workflow.
+      <%= t("landing.view.index.explainer.need_p2") %>
     </p>
 
-    <h3>Why Spreadsheet Quoting Breaks at Scale</h3>
+    <h3><%= t("landing.view.index.explainer.breaks_title") %></h3>
     <p>
-      Many teams start with spreadsheets, email threads, and attachment chains. That can work early, but volume quickly creates version confusion.
+      <%= t("landing.view.index.explainer.breaks_p1") %>
     </p>
     <ul>
-      <li>No single source of truth when quotes move across teammates.</li>
-      <li>Revision history gets fragmented across files and messages.</li>
-      <li>Buyers compare old attachments instead of the latest offer.</li>
+      <li><%= t("landing.view.index.explainer.breaks_1") %></li>
+      <li><%= t("landing.view.index.explainer.breaks_2") %></li>
+      <li><%= t("landing.view.index.explainer.breaks_3") %></li>
     </ul>
 
-    <h3>What a Practical Quotation CRM Should Do</h3>
+    <h3><%= t("landing.view.index.explainer.crm_title") %></h3>
     <p>
-      Excel remains useful for analysis, but it is weak for live export quotation management. ERP can provide deep governance, yet many exporters find it too heavy for frontline quoting speed.
+      <%= t("landing.view.index.explainer.crm_p1") %>
     </p>
     <p>
-      Teams need a balanced quotation CRM workflow: fast for daily negotiation, structured for reliable internal execution.
+      <%= t("landing.view.index.explainer.crm_p2") %>
     </p>
     <ul>
-      <li>Track revisions clearly and keep every version visible.</li>
-      <li>Share one buyer-facing live quote link to prevent confusion.</li>
-      <li>Export professional PDF/Excel files without extra manual work.</li>
+      <li><%= t("landing.view.index.explainer.crm_1") %></li>
+      <li><%= t("landing.view.index.explainer.crm_2") %></li>
+      <li><%= t("landing.view.index.explainer.crm_3") %></li>
     </ul>
     <p>
-      Rubusoo is built for that exact gap. It gives B2B export teams clearer buyer communication, fewer avoidable errors, and stronger follow-up discipline across the quote lifecycle.
+      <%= t("landing.view.index.explainer.crm_p3") %>
     </p>
   </details>
 </section>
 
 <section class="marketing-section marketing-faq">
   <div class="marketing-section-head">
-    <h2>FAQ</h2>
+    <h2><%= t("landing.view.index.faq.title") %></h2>
   </div>
   <details>
-    <summary>Can we use this with a small sales team?</summary>
-    <p>Yes. Built for lean teams. Minimal setup. Fast workflows. Professional output from day one.</p>
+    <summary><%= t("landing.view.index.faq.q1") %></summary>
+    <p><%= t("landing.view.index.faq.a1") %></p>
   </details>
   <details>
-    <summary>Do buyers need an account to view a quote link?</summary>
-    <p>No. They click a link, view the quote in the browser, and print. No account needed.</p>
+    <summary><%= t("landing.view.index.faq.q2") %></summary>
+    <p><%= t("landing.view.index.faq.a2") %></p>
   </details>
   <details>
-    <summary>Can we still export files for finance approval?</summary>
-    <p>Yes. PDF and Excel exports keep your accounting and approval workflows intact.</p>
+    <summary><%= t("landing.view.index.faq.q3") %></summary>
+    <p><%= t("landing.view.index.faq.a3") %></p>
   </details>
   <details>
-    <summary>What happens when we need to change pricing?</summary>
-    <p>Revisions are instant. Every version stays in history. Buyers always see the latest. No confusion.</p>
+    <summary><%= t("landing.view.index.faq.q4") %></summary>
+    <p><%= t("landing.view.index.faq.a4") %></p>
   </details>
 </section>
 
 <% contact_email = @contact_email || ContactMailer.contact_email_for_environment %>
 <section class="marketing-section marketing-contact" id="contact-us">
   <div class="marketing-section-head">
-    <h2>Contact Us</h2>
-    <p>Tell us your team size and current quoting workflow.</p>
-    <p style="margin-top: 12px; font-size: 0.95em; color: #666;">Built for teams who need clear revision control and buyer visibility.</p>
+    <h2><%= t("landing.view.index.contact.title") %></h2>
+    <p><%= t("landing.view.index.contact.subtitle") %></p>
+    <p style="margin-top: 12px; font-size: 0.95em; color: #666;"><%= t("landing.view.index.contact.hint") %></p>
   </div>
 
   <%= form_with model: (@contact_request || ContactRequest.new), url: contact_requests_path, local: true, class: "marketing-contact-form", id: "contact-form" do |f| %>
     <%= f.hidden_field :website, value: "", autocomplete: "off" %>
     <div class="marketing-contact-grid">
       <div>
-        <%= f.label :name, "Name" %>
+        <%= f.label :name, t("landing.view.index.contact.name") %>
         <%= f.text_field :name, required: true %>
       </div>
       <div>
-        <%= f.label :email, "Email" %>
+        <%= f.label :email, t("landing.view.index.contact.email") %>
         <%= f.email_field :email, required: true %>
       </div>
       <div>
-        <%= f.label :company, "Company" %>
+        <%= f.label :company, t("landing.view.index.contact.company") %>
         <%= f.text_field :company, required: true %>
       </div>
       <div class="marketing-contact-message-wrap">
-        <%= f.label :message, "Message" %>
-        <%= f.text_area :message, rows: 5, required: true, placeholder: "Share your quote process, team setup, and rollout timeline." %>
+        <%= f.label :message, t("landing.view.index.contact.message") %>
+        <%= f.text_area :message, rows: 5, required: true, placeholder: t("landing.view.index.contact.message_placeholder") %>
       </div>
     </div>
     
@@ -316,8 +316,8 @@
     <% end %>
 
     <div class="marketing-contact-actions">
-      <%= f.submit "Send Message", class: "btn btn-primary", id: "contact-submit-btn" %>
-      <span>or <%= mail_to contact_email, "email us directly", subject: "Rubusoo Inquiry" %></span>
+      <%= f.submit t("landing.view.index.contact.send_message"), class: "btn btn-primary", id: "contact-submit-btn" %>
+      <span><%= t("landing.view.index.contact.or") %> <%= mail_to contact_email, t("landing.view.index.contact.email_directly"), subject: "Rubusoo Inquiry" %></span>
     </div>
   <% end %>
 
@@ -325,11 +325,11 @@
   <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
     <div id="verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
       <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
-        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;"><%= t("landing.view.index.contact.security_verification") %></h3>
+        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;"><%= t("landing.view.index.contact.complete_verification") %></p>
         
         <div id="turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-          <p>Loading verification...</p>
+          <p><%= t("landing.view.index.contact.loading_verification") %></p>
         </div>
         
         <div id="turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
@@ -337,7 +337,7 @@
         </div>
         
         <div id="turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Submitting...</p>
+          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ <%= t("landing.view.index.contact.verified_submitting") %></p>
         </div>
       </div>
     </div>
@@ -383,7 +383,7 @@
         if (verificationComplete && turnstileResponse.value) {
           isSubmitting = true;
           submitBtn.disabled = true;
-          submitBtn.textContent = 'Sending...';
+          submitBtn.textContent = '<%= j t("landing.view.index.contact.sending") %>';
           contactForm.submit();
           return;
         }
@@ -448,14 +448,14 @@
           modal.style.display = 'none';
           turnstileResponse.value = ''; // Clear incomplete verification
           submitBtn.disabled = false; // Re-enable button
-          submitBtn.textContent = 'Send Message';
+          submitBtn.textContent = '<%= j t("landing.view.index.contact.send_message") %>';
         }
       });
 
       // Restore button state on form reset
       contactForm.addEventListener('reset', function() {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Send Message';
+        submitBtn.textContent = '<%= j t("landing.view.index.contact.send_message") %>';
         turnstileResponse.value = '';
         verificationComplete = false;
         isSubmitting = false;
@@ -471,19 +471,19 @@
 
 <section class="marketing-section marketing-related-inline">
   <div class="marketing-section-head">
-    <h2>Related Resources</h2>
+    <h2><%= t("landing.view.index.related_resources") %></h2>
   </div>
   <div class="marketing-footer-links">
-    <%= link_to "Foreign Trade Quotation Software", foreign_trade_quotation_software_path %>
-    <%= link_to "Quotation CRM for Export Teams", quotation_crm_for_export_teams_path %>
+    <%= link_to t("landing.view.index.related_resource_1"), foreign_trade_quotation_software_path %>
+    <%= link_to t("landing.view.index.related_resource_2"), quotation_crm_for_export_teams_path %>
   </div>
 </section>
 
 <footer class="marketing-footer">
-  <p>© <%= Time.current.year %> Rubusoo. All rights reserved.</p>
+  <p><%= t("landing.view.index.footer_copyright", year: Time.current.year) %></p>
   <div class="marketing-footer-links">
-    <a href="#">Privacy Policy</a>
-    <a href="#">Terms</a>
+    <a href="#"><%= t("landing.view.index.footer_privacy") %></a>
+    <a href="#"><%= t("landing.view.index.footer_terms") %></a>
     <a href="#">LinkedIn</a>
     <a href="#">X</a>
   </div>

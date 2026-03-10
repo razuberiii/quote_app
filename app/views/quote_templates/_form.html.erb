@@ -2,7 +2,7 @@
 <%= form_with model: quote_template, html: { class: "template-editor-form", data: { template_editor_form: true } } do |f| %>
   <% if quote_template.errors.any? %>
     <div class="error-messages">
-      <h2><%= pluralize(quote_template.errors.count, "error") %> prevented this template from being saved:</h2>
+      <h2><%= t("quote_templates.view.form.error_summary", count: quote_template.errors.count) %></h2>
       <ul>
         <% quote_template.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -13,16 +13,16 @@
 
   <section class="template-identity-row">
     <div>
-      <%= f.label :name, "Preset name" %>
-      <%= f.text_field :name, required: true, placeholder: "Modern B2B Quotation" %>
+      <%= f.label :name, t("quote_templates.view.form.preset_name") %>
+      <%= f.text_field :name, required: true, placeholder: t("quote_templates.view.form.preset_name_placeholder") %>
     </div>
     <div>
-      <%= f.label :slug, "Preset slug" %>
-      <%= f.text_field :slug, placeholder: "auto-from-name" %>
+      <%= f.label :slug, t("quote_templates.view.form.preset_slug") %>
+      <%= f.text_field :slug, placeholder: t("quote_templates.view.form.preset_slug_placeholder") %>
     </div>
     <div>
-      <%= f.label :document_kind, "Default document view" %>
-      <%= f.select :document_kind, [["Quotation", "quotation"], ["Proforma Invoice (PI)", "proforma_invoice"]], {}, data: { template_preview_target: "document-kind" } %>
+      <%= f.label :document_kind, t("quote_templates.view.form.default_document_view") %>
+      <%= f.select :document_kind, [[t("quote_templates.view.form.document_kind.quotation"), "quotation"], [t("quote_templates.view.form.document_kind.proforma_invoice"), "proforma_invoice"]], {}, data: { template_preview_target: "document-kind" } %>
     </div>
   </section>
 
@@ -30,114 +30,139 @@
     <div class="template-editor-sections">
       <section class="template-editor-section template-editor-section-visual">
         <header>
-          <h3>Visual Style</h3>
-          <p>Control the visual signature of your quotation documents.</p>
+          <h3><%= t("quote_templates.view.form.visual_style") %></h3>
+          <p><%= t("quote_templates.view.form.visual_style_hint") %></p>
         </header>
         <div class="template-form-grid">
           <div>
-            <%= f.label :layout_type, "Layout type" %>
+            <%= f.label :layout_type, t("quote_templates.view.form.layout_type") %>
             <%= f.select :layout_type, QuoteTemplate.layout_types.keys.map { |it| [it.titleize, it] }, {}, data: { template_preview_target: "layout" } %>
           </div>
           <div>
-            <%= f.label :layout_density, "Layout density" %>
-            <%= f.select :layout_density, [["Compact", "compact"], ["Standard", "standard"], ["Spacious", "spacious"]], {}, data: { template_preview_target: "density" } %>
+            <%= f.label :layout_density, t("quote_templates.view.form.layout_density") %>
+            <%= f.select :layout_density, [[t("quote_templates.view.form.layout_density_options.compact"), "compact"], [t("quote_templates.view.form.layout_density_options.standard"), "standard"], [t("quote_templates.view.form.layout_density_options.spacious"), "spacious"]], {}, data: { template_preview_target: "density" } %>
           </div>
           <div>
-            <%= f.label :accent_color, "Accent color" %>
+            <%= f.label :accent_color, t("quote_templates.view.form.accent_color") %>
             <%= f.color_field :accent_color, data: { template_preview_target: "accent" } %>
           </div>
           <div>
-            <%= f.label :font_family, "Font family" %>
+            <%= f.label :font_family, t("quote_templates.view.form.font_family") %>
             <%= f.select :font_family, ["Inter", "Noto Sans", "Segoe UI", "Arial", "Helvetica"], {}, data: { template_preview_target: "font" } %>
           </div>
           <div>
-            <%= f.label :logo_position, "Logo position" %>
-            <%= f.select :logo_position, [["Right Top", "right"], ["Left Top", "left"], ["Center", "center"]], {}, data: { template_preview_target: "logo-position" } %>
+            <%= f.label :logo_position, t("quote_templates.view.form.logo_position") %>
+            <%= f.select :logo_position, [[t("quote_templates.view.form.logo_position_options.right"), "right"], [t("quote_templates.view.form.logo_position_options.left"), "left"], [t("quote_templates.view.form.logo_position_options.center"), "center"]], {}, data: { template_preview_target: "logo-position" } %>
           </div>
         </div>
       </section>
 
       <section class="template-editor-section">
         <header>
-          <h3>Document Structure</h3>
-          <p>Decide which blocks should appear by default on quote output.</p>
+          <h3><%= t("quote_templates.view.form.document_structure") %></h3>
+          <p><%= t("quote_templates.view.form.document_structure_hint") %></p>
         </header>
         <div class="template-toggle-grid">
-          <label><%= f.check_box :show_logo, data: { template_preview_toggle: "logo" } %> Show logo</label>
-          <label><%= f.check_box :show_tax, data: { template_preview_toggle: "tax" } %> Show tax line</label>
-          <label><%= f.check_box :show_shipping, data: { template_preview_toggle: "shipping" } %> Show shipping line</label>
-          <label><%= f.check_box :show_payment_term, data: { template_preview_toggle: "payment" } %> Show payment term</label>
-          <label><%= f.check_box :show_customer_owner, data: { template_preview_toggle: "customer-owner" } %> Show sales owner</label>
-          <label><%= f.check_box :show_notes, data: { template_preview_toggle: "notes" } %> Show notes section</label>
-          <label><%= f.check_box :show_signature_block, data: { template_preview_toggle: "signature" } %> Show signature block</label>
-          <label><%= f.check_box :show_images, data: { template_preview_toggle: "images" } %> Show product images</label>
-          <label><%= f.check_box :show_valid_until, data: { template_preview_toggle: "valid-until" } %> Show valid until</label>
-          <label><%= f.check_box :show_terms_section, data: { template_preview_toggle: "terms" } %> Show terms section</label>
-          <label><%= f.check_box :show_currency, data: { template_preview_toggle: "currency" } %> Show currency symbol/code</label>
-          <label><%= f.check_box :show_closing_message, data: { template_preview_toggle: "closing" } %> Show closing message</label>
-          <label><%= f.check_box :show_watermark, data: { template_preview_toggle: "watermark" } %> Show watermark</label>
-          <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> Show Rubusoo footer (white-label off by default)</label>
-          <label><%= f.check_box :excel_show_grid_lines %> Show Excel gridlines</label>
+          <label><%= f.check_box :show_logo, data: { template_preview_toggle: "logo" } %> <%= t("quote_templates.view.form.show_logo") %></label>
+          <label><%= f.check_box :show_tax, data: { template_preview_toggle: "tax" } %> <%= t("quote_templates.view.form.show_tax") %></label>
+          <label><%= f.check_box :show_shipping, data: { template_preview_toggle: "shipping" } %> <%= t("quote_templates.view.form.show_shipping") %></label>
+          <label><%= f.check_box :show_payment_term, data: { template_preview_toggle: "payment" } %> <%= t("quote_templates.view.form.show_payment_term") %></label>
+          <label><%= f.check_box :show_customer_owner, data: { template_preview_toggle: "customer-owner" } %> <%= t("quote_templates.view.form.show_sales_owner") %></label>
+          <label><%= f.check_box :show_notes, data: { template_preview_toggle: "notes" } %> <%= t("quote_templates.view.form.show_notes") %></label>
+          <label><%= f.check_box :show_signature_block, data: { template_preview_toggle: "signature" } %> <%= t("quote_templates.view.form.show_signature_block") %></label>
+          <label><%= f.check_box :show_images, data: { template_preview_toggle: "images" } %> <%= t("quote_templates.view.form.show_product_images") %></label>
+          <label><%= f.check_box :show_valid_until, data: { template_preview_toggle: "valid-until" } %> <%= t("quote_templates.view.form.show_valid_until") %></label>
+          <label><%= f.check_box :show_terms_section, data: { template_preview_toggle: "terms" } %> <%= t("quote_templates.view.form.show_terms_section") %></label>
+          <label><%= f.check_box :show_currency, data: { template_preview_toggle: "currency" } %> <%= t("quote_templates.view.form.show_currency") %></label>
+          <label><%= f.check_box :show_closing_message, data: { template_preview_toggle: "closing" } %> <%= t("quote_templates.view.form.show_closing_message") %></label>
+          <label><%= f.check_box :show_watermark, data: { template_preview_toggle: "watermark" } %> <%= t("quote_templates.view.form.show_watermark") %></label>
+          <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> <%= t("quote_templates.view.form.show_saas_branding") %></label>
+          <label><%= f.check_box :excel_show_grid_lines %> <%= t("quote_templates.view.form.show_excel_gridlines") %></label>
         </div>
         <div class="template-form-grid">
           <div>
-            <%= f.label :signature_name, "Authorized by name (optional)" %>
-            <%= f.text_field :signature_name, placeholder: "e.g. Amy Chen", data: { template_preview_target: "signature-name" } %>
-            <p class="template-sub">Used for the signature footer text. Leave blank to hide "Authorized by".</p>
+            <%= f.label :signature_name, t("quote_templates.view.form.signature_name") %>
+            <%= f.text_field :signature_name, placeholder: t("quote_templates.view.form.signature_name_placeholder"), data: { template_preview_target: "signature-name" } %>
+            <p class="template-sub"><%= t("quote_templates.view.form.signature_name_hint") %></p>
           </div>
           <div>
-            <%= f.label :signature_image, "Sales signature image" %>
+            <%= f.label :signature_image, t("quote_templates.view.form.signature_image") %>
             <div class="app-file-picker" data-file-picker>
               <%= f.file_field :signature_image, id: "quote_template_signature_image", accept: "image/*", class: "app-file-input", data: { template_preview_target: "signature-image-upload", file_picker_input: true, file_picker_name: "signature-file-name" } %>
-              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_signature_image">Choose file</button>
-              <span class="app-file-picker-name" id="signature-file-name"><%= quote_template.signature_image.attached? ? quote_template.signature_image.filename.to_s : "No file selected" %></span>
+              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_signature_image"><%= t("quote_templates.view.form.choose_file") %></button>
+              <span class="app-file-picker-name" id="signature-file-name"><%= quote_template.signature_image.attached? ? quote_template.signature_image.filename.to_s : t("quote_templates.view.form.no_file_selected") %></span>
             </div>
-            <p class="template-sub">This is the sales signature image shown to the customer.</p>
+            <p class="template-sub"><%= t("quote_templates.view.form.signature_image_hint") %></p>
             <% if quote_template.signature_image.attached? %>
-              <label><%= check_box_tag "quote_template[remove_signature_image]", "1", false %> Remove existing signature image</label>
+              <label><%= check_box_tag "quote_template[remove_signature_image]", "1", false %> <%= t("quote_templates.view.form.remove_existing_signature_image") %></label>
             <% end %>
           </div>
           <div data-watermark-text-container>
-            <%= f.label :watermark_text, "Watermark text" %>
-            <%= f.text_field :watermark_text, placeholder: "CONFIDENTIAL (leave empty to use company name)", data: { template_preview_target: "watermark-text" } %>
-            <p class="template-sub" data-watermark-mode-hint>If a watermark image is uploaded, image takes priority and text watermark is hidden.</p>
+            <%= f.label :watermark_text, t("quote_templates.view.form.watermark_text") %>
+            <%= f.text_field :watermark_text, placeholder: t("quote_templates.view.form.watermark_text_placeholder"), data: { template_preview_target: "watermark-text" } %>
+            <p class="template-sub" data-watermark-mode-hint><%= t("quote_templates.view.form.watermark_text_hint") %></p>
           </div>
           <div>
-            <%= f.label :watermark_image, "Watermark image" %>
+            <%= f.label :watermark_image, t("quote_templates.view.form.watermark_image") %>
             <div class="app-file-picker" data-file-picker>
               <%= f.file_field :watermark_image, id: "quote_template_watermark_image", accept: "image/*", class: "app-file-input", data: { template_preview_target: "watermark-image-upload", file_picker_input: true, file_picker_name: "watermark-file-name", existing_file: quote_template.watermark_image.attached? } %>
-              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_watermark_image">Choose file</button>
-              <span class="app-file-picker-name" id="watermark-file-name"><%= quote_template.watermark_image.attached? ? quote_template.watermark_image.filename.to_s : "No file selected" %></span>
+              <button type="button" class="app-file-picker-btn" data-file-picker-trigger="quote_template_watermark_image"><%= t("quote_templates.view.form.choose_file") %></button>
+              <span class="app-file-picker-name" id="watermark-file-name"><%= quote_template.watermark_image.attached? ? quote_template.watermark_image.filename.to_s : t("quote_templates.view.form.no_file_selected") %></span>
             </div>
-            <p class="template-sub">Watermark is rendered behind the quote content.</p>
+            <p class="template-sub"><%= t("quote_templates.view.form.watermark_image_hint") %></p>
             <% if quote_template.watermark_image.attached? %>
-              <label><%= check_box_tag "quote_template[remove_watermark_image]", "1", false %> Remove existing watermark image</label>
+              <label><%= check_box_tag "quote_template[remove_watermark_image]", "1", false %> <%= t("quote_templates.view.form.remove_existing_watermark_image") %></label>
             <% end %>
           </div>
           <div>
-            <%= f.label :watermark_opacity, "Watermark intensity (%)" %>
+            <%= f.label :watermark_opacity, t("quote_templates.view.form.watermark_intensity") %>
             <%= f.number_field :watermark_opacity, min: 3, max: 40, step: 1, data: { template_preview_target: "watermark-opacity" } %>
-            <p class="template-sub">Recommended range: 8-16. Higher value means darker watermark.</p>
+            <p class="template-sub"><%= t("quote_templates.view.form.watermark_intensity_hint") %></p>
           </div>
         </div>
       </section>
 
       <section class="template-editor-section template-editor-section-compact">
         <header>
-          <h3>Number & Format</h3>
-          <p>Set money readability standards for all exported quote documents.</p>
+          <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
+          <p><%= t("quote_templates.view.form.output_language_hint") %></p>
         </header>
         <div class="template-form-grid">
           <div>
-            <%= f.label :amount_decimals, "Decimal places" %>
+            <%= f.label :webview_locale, t("quote_templates.view.form.webview_locale") %>
+            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+          </div>
+          <div>
+            <%= f.label :public_link_locale, t("quote_templates.view.form.public_link_locale") %>
+            <%= f.select :public_link_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+          </div>
+          <div>
+            <%= f.label :pdf_locale, t("quote_templates.view.form.pdf_locale") %>
+            <%= f.select :pdf_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+          </div>
+          <div>
+            <%= f.label :excel_locale, t("quote_templates.view.form.excel_locale") %>
+            <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+          </div>
+        </div>
+      </section>
+
+      <section class="template-editor-section template-editor-section-compact">
+        <header>
+          <h3><%= t("quote_templates.view.form.number_format") %></h3>
+          <p><%= t("quote_templates.view.form.number_format_hint") %></p>
+        </header>
+        <div class="template-form-grid">
+          <div>
+            <%= f.label :amount_decimals, t("quote_templates.view.form.decimal_places") %>
             <%= f.select :amount_decimals, [["0", 0], ["2", 2]], {}, data: { template_preview_target: "amount-decimals" } %>
           </div>
           <div>
-            <%= f.label :thousand_separator, "Thousand separator" %>
+            <%= f.label :thousand_separator, t("quote_templates.view.form.thousand_separator") %>
             <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]], {}, data: { template_preview_target: "thousand-separator" } %>
           </div>
           <div>
-            <%= f.label :currency_display_mode, "Currency display" %>
+            <%= f.label :currency_display_mode, t("quote_templates.view.form.currency_display") %>
             <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]], {}, data: { template_preview_target: "currency-display-mode" } %>
           </div>
         </div>
@@ -146,67 +171,67 @@
       <% if advanced_collapsible %>
         <details class="template-editor-section template-editor-section-advanced" open>
           <summary class="template-editor-summary">
-            <strong>Labels & Text</strong>
-            <span>Advanced settings</span>
+            <strong><%= t("quote_templates.view.form.labels_text") %></strong>
+            <span><%= t("quote_templates.view.form.advanced_settings") %></span>
           </summary>
           <div class="template-editor-section-body">
             <div class="template-form-grid">
               <div>
-                <%= f.label :description_label, "Description label" %>
+                <%= f.label :description_label, t("quote_templates.view.form.description_label") %>
                 <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
               </div>
               <div>
-                <%= f.label :spec_label, "Spec label" %>
-                <%= f.text_field :spec_label, placeholder: "Spec", data: { template_preview_target: "label-spec" } %>
+                <%= f.label :spec_label, t("quote_templates.view.form.spec_label") %>
+                <%= f.text_field :spec_label, placeholder: t("quote_templates.view.form.spec_placeholder"), data: { template_preview_target: "label-spec" } %>
               </div>
               <div>
-                <%= f.label :addon_label, "Add-on label" %>
-                <%= f.text_field :addon_label, placeholder: "Add-on", data: { template_preview_target: "label-addon" } %>
+                <%= f.label :addon_label, t("quote_templates.view.form.addon_label") %>
+                <%= f.text_field :addon_label, placeholder: t("quote_templates.view.form.addon_placeholder"), data: { template_preview_target: "label-addon" } %>
               </div>
               <div>
-                <%= f.label :qty_label, "Qty label" %>
+                <%= f.label :qty_label, t("quote_templates.view.form.qty_label") %>
                 <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
               </div>
               <div>
-                <%= f.label :unit_price_label, "Unit price label" %>
+                <%= f.label :unit_price_label, t("quote_templates.view.form.unit_price_label") %>
                 <%= f.text_field :unit_price_label, data: { template_preview_target: "label-unit-price" } %>
               </div>
               <div>
-                <%= f.label :line_total_label, "Line total label" %>
+                <%= f.label :line_total_label, t("quote_templates.view.form.line_total_label") %>
                 <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
               </div>
               <div>
-                <%= f.label :quotation_title, "Quotation title" %>
-                <%= f.text_field :quotation_title, placeholder: "QUOTATION", data: { template_preview_target: "title-quote" } %>
+                <%= f.label :quotation_title, t("quote_templates.view.form.quotation_title") %>
+                <%= f.text_field :quotation_title, placeholder: t("quote_templates.view.form.quotation_title_placeholder"), data: { template_preview_target: "title-quote" } %>
               </div>
               <div>
-                <%= f.label :quotation_number_label, "Quotation number label" %>
-                <%= f.text_field :quotation_number_label, placeholder: "Quote #", data: { template_preview_target: "number-label-quote" } %>
+                <%= f.label :quotation_number_label, t("quote_templates.view.form.quotation_number_label") %>
+                <%= f.text_field :quotation_number_label, placeholder: t("quote_templates.view.form.quotation_number_placeholder"), data: { template_preview_target: "number-label-quote" } %>
               </div>
               <div>
-                <%= f.label :pi_title, "PI title" %>
-                <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
+                <%= f.label :pi_title, t("quote_templates.view.form.pi_title") %>
+                <%= f.text_field :pi_title, placeholder: t("quote_templates.view.form.pi_title_placeholder") %>
               </div>
               <div>
-                <%= f.label :pi_number_label, "PI number label" %>
-                <%= f.text_field :pi_number_label, placeholder: "PI #", data: { template_preview_target: "number-label-pi" } %>
+                <%= f.label :pi_number_label, t("quote_templates.view.form.pi_number_label") %>
+                <%= f.text_field :pi_number_label, placeholder: t("quote_templates.view.form.pi_number_placeholder"), data: { template_preview_target: "number-label-pi" } %>
               </div>
               <div class="template-span-2">
-                <%= f.label :quotation_footer_note, "Quotation footer note" %>
+                <%= f.label :quotation_footer_note, t("quote_templates.view.form.quotation_footer_note") %>
                 <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
               </div>
               <div class="template-span-2">
-                <%= f.label :pi_footer_note, "PI footer note" %>
+                <%= f.label :pi_footer_note, t("quote_templates.view.form.pi_footer_note") %>
                 <%= f.text_area :pi_footer_note, rows: 2 %>
               </div>
               <div class="template-span-2">
-                <%= f.label :footer_text, "Fallback footer text" %>
+                <%= f.label :footer_text, t("quote_templates.view.form.fallback_footer_text") %>
                 <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
               </div>
               <div class="template-span-2">
-                <%= f.label :closing_message, "Closing message under Grand Total" %>
+                <%= f.label :closing_message, t("quote_templates.view.form.closing_message") %>
                 <%= f.text_area :closing_message, rows: 2, placeholder: QuoteTemplate::DEFAULT_CLOSING_MESSAGE %>
-                <p class="template-sub">Optional. Leave empty to hide message completely even if toggle is on.</p>
+                <p class="template-sub"><%= t("quote_templates.view.form.closing_message_hint") %></p>
               </div>
             </div>
           </div>
@@ -214,66 +239,66 @@
       <% else %>
         <section class="template-editor-section template-editor-section-advanced">
           <header>
-            <h3>Labels & Text</h3>
-            <p>Advanced text settings for table labels, document titles, and footer notes.</p>
+            <h3><%= t("quote_templates.view.form.labels_text") %></h3>
+            <p><%= t("quote_templates.view.form.labels_text_hint") %></p>
           </header>
           <div class="template-form-grid">
             <div>
-              <%= f.label :description_label, "Description label" %>
+              <%= f.label :description_label, t("quote_templates.view.form.description_label") %>
               <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
             </div>
             <div>
-              <%= f.label :spec_label, "Spec label" %>
-              <%= f.text_field :spec_label, placeholder: "Spec", data: { template_preview_target: "label-spec" } %>
+              <%= f.label :spec_label, t("quote_templates.view.form.spec_label") %>
+              <%= f.text_field :spec_label, placeholder: t("quote_templates.view.form.spec_placeholder"), data: { template_preview_target: "label-spec" } %>
             </div>
             <div>
-              <%= f.label :addon_label, "Add-on label" %>
-              <%= f.text_field :addon_label, placeholder: "Add-on", data: { template_preview_target: "label-addon" } %>
+              <%= f.label :addon_label, t("quote_templates.view.form.addon_label") %>
+              <%= f.text_field :addon_label, placeholder: t("quote_templates.view.form.addon_placeholder"), data: { template_preview_target: "label-addon" } %>
             </div>
             <div>
-              <%= f.label :qty_label, "Qty label" %>
+              <%= f.label :qty_label, t("quote_templates.view.form.qty_label") %>
               <%= f.text_field :qty_label, data: { template_preview_target: "label-qty" } %>
             </div>
             <div>
-              <%= f.label :unit_price_label, "Unit price label" %>
+              <%= f.label :unit_price_label, t("quote_templates.view.form.unit_price_label") %>
               <%= f.text_field :unit_price_label, data: { template_preview_target: "label-unit-price" } %>
             </div>
             <div>
-              <%= f.label :line_total_label, "Line total label" %>
+              <%= f.label :line_total_label, t("quote_templates.view.form.line_total_label") %>
               <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
             </div>
             <div>
-              <%= f.label :quotation_title, "Quotation title" %>
-              <%= f.text_field :quotation_title, placeholder: "QUOTATION", data: { template_preview_target: "title-quote" } %>
+              <%= f.label :quotation_title, t("quote_templates.view.form.quotation_title") %>
+              <%= f.text_field :quotation_title, placeholder: t("quote_templates.view.form.quotation_title_placeholder"), data: { template_preview_target: "title-quote" } %>
             </div>
             <div>
-              <%= f.label :quotation_number_label, "Quotation number label" %>
-              <%= f.text_field :quotation_number_label, placeholder: "Quote #", data: { template_preview_target: "number-label-quote" } %>
+              <%= f.label :quotation_number_label, t("quote_templates.view.form.quotation_number_label") %>
+              <%= f.text_field :quotation_number_label, placeholder: t("quote_templates.view.form.quotation_number_placeholder"), data: { template_preview_target: "number-label-quote" } %>
             </div>
             <div>
-              <%= f.label :pi_title, "PI title" %>
-              <%= f.text_field :pi_title, placeholder: "PROFORMA INVOICE" %>
+              <%= f.label :pi_title, t("quote_templates.view.form.pi_title") %>
+              <%= f.text_field :pi_title, placeholder: t("quote_templates.view.form.pi_title_placeholder") %>
             </div>
             <div>
-              <%= f.label :pi_number_label, "PI number label" %>
-              <%= f.text_field :pi_number_label, placeholder: "PI #", data: { template_preview_target: "number-label-pi" } %>
+              <%= f.label :pi_number_label, t("quote_templates.view.form.pi_number_label") %>
+              <%= f.text_field :pi_number_label, placeholder: t("quote_templates.view.form.pi_number_placeholder"), data: { template_preview_target: "number-label-pi" } %>
             </div>
             <div class="template-span-2">
-              <%= f.label :quotation_footer_note, "Quotation footer note" %>
+              <%= f.label :quotation_footer_note, t("quote_templates.view.form.quotation_footer_note") %>
               <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
             </div>
             <div class="template-span-2">
-              <%= f.label :pi_footer_note, "PI footer note" %>
+              <%= f.label :pi_footer_note, t("quote_templates.view.form.pi_footer_note") %>
               <%= f.text_area :pi_footer_note, rows: 2 %>
             </div>
             <div class="template-span-2">
-              <%= f.label :footer_text, "Fallback footer text" %>
+              <%= f.label :footer_text, t("quote_templates.view.form.fallback_footer_text") %>
               <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
             </div>
             <div class="template-span-2">
-              <%= f.label :closing_message, "Closing message under Grand Total" %>
+              <%= f.label :closing_message, t("quote_templates.view.form.closing_message") %>
               <%= f.text_area :closing_message, rows: 2, placeholder: QuoteTemplate::DEFAULT_CLOSING_MESSAGE %>
-              <p class="template-sub">Optional. Leave empty to hide message completely even if toggle is on.</p>
+              <p class="template-sub"><%= t("quote_templates.view.form.closing_message_hint") %></p>
             </div>
           </div>
         </section>
@@ -282,33 +307,33 @@
 
     <aside class="template-live-pane">
       <div class="template-live-pane-header">
-        <h3>Live Preview</h3>
-        <p>Real-time rendering with quote-like content.</p>
+        <h3><%= t("quote_templates.view.form.live_preview") %></h3>
+        <p><%= t("quote_templates.view.form.live_preview_hint") %></p>
         <div class="template-live-pane-tools">
-          <span class="template-preview-status is-saved" data-template-preview-status>Saved</span>
+          <span class="template-preview-status is-saved" data-template-preview-status><%= t("quote_templates.view.form.preview_saved") %></span>
           <div class="template-preview-scenario">
-            <label for="template_preview_scenario">Scenario</label>
+            <label for="template_preview_scenario"><%= t("quote_templates.view.form.preview_scenario") %></label>
             <select id="template_preview_scenario" data-template-preview-scenario>
-              <option value="standard">Standard</option>
-              <option value="long_text">Long Content</option>
-              <option value="spec_heavy">Spec Heavy</option>
+              <option value="standard"><%= t("quote_templates.view.form.preview_scenario_standard") %></option>
+              <option value="long_text"><%= t("quote_templates.view.form.preview_scenario_long") %></option>
+              <option value="spec_heavy"><%= t("quote_templates.view.form.preview_scenario_spec_heavy") %></option>
             </select>
           </div>
           <div class="template-preview-viewport-switch" data-template-preview-viewports>
-            <button type="button" class="is-active" data-template-preview-viewport-btn="desktop" aria-pressed="true">Desktop</button>
-            <button type="button" data-template-preview-viewport-btn="tablet" aria-pressed="false">Tablet</button>
-            <button type="button" data-template-preview-viewport-btn="mobile" aria-pressed="false">Mobile</button>
+            <button type="button" class="is-active" data-template-preview-viewport-btn="desktop" aria-pressed="true"><%= t("quote_templates.view.form.viewport_desktop") %></button>
+            <button type="button" data-template-preview-viewport-btn="tablet" aria-pressed="false"><%= t("quote_templates.view.form.viewport_tablet") %></button>
+            <button type="button" data-template-preview-viewport-btn="mobile" aria-pressed="false"><%= t("quote_templates.view.form.viewport_mobile") %></button>
           </div>
         </div>
       </div>
       <div class="template-preview template-preview-large template-preview-<%= quote_template.layout_type.presence || 'classic' %> template-preview-viewport-desktop<%= ' quote-watermarked' if quote_template.show_watermark? && quote_template.watermark_image.blank? %>" data-template-preview data-watermark="<%= template_watermark_text(quote_template, 'CONFIDENTIAL') %>" style="--template-accent: <%= quote_template.accent_color.presence || '#1F4E79' %>; --quote-watermark-opacity: <%= template_watermark_opacity(quote_template) %>; font-family: <%= quote_template.font_family.presence || 'Noto Sans' %>, sans-serif;">
         <% if quote_template.watermark_image.attached? %>
-          <img src="<%= url_for(quote_template.watermark_image) %>" alt="Watermark image preview" class="quote-watermark-image" data-template-preview-watermark-image data-visible="<%= quote_template.show_watermark? %>">
+          <img src="<%= url_for(quote_template.watermark_image) %>" alt="<%= t("quote_templates.view.form.watermark_image_preview_alt") %>" class="quote-watermark-image" data-template-preview-watermark-image data-visible="<%= quote_template.show_watermark? %>">
         <% else %>
-          <img src="" alt="Watermark image preview" class="quote-watermark-image" data-template-preview-watermark-image hidden>
+          <img src="" alt="<%= t("quote_templates.view.form.watermark_image_preview_alt") %>" class="quote-watermark-image" data-template-preview-watermark-image hidden>
         <% end %>
         <div class="preview-header preview-header-<%= quote_template.logo_position.presence || 'right' %>" data-template-preview-logo-position>
-          <span data-template-preview-logo data-visible="<%= quote_template.show_logo? %>">LOGO</span>
+          <span data-template-preview-logo data-visible="<%= quote_template.show_logo? %>"><%= t("quote_templates.view.form.logo_placeholder") %></span>
           <strong data-template-preview-title><%= quote_template.quotation_title.presence || quote_template.resolved_document_title("quote") %></strong>
         </div>
         <div class="preview-body preview-body-rich preview-density-<%= quote_template.layout_density.presence || 'standard' %>" data-template-preview-density>
@@ -316,22 +341,22 @@
           <div></div>
         </div>
         <div class="preview-doc-meta">
-          <p><span data-template-preview-number-label><%= quote_template.quotation_number_label.presence || "Quote #" %></span><strong>QT-2026-0001</strong></p>
-          <p data-template-preview-valid-until data-visible="<%= quote_template.show_valid_until? %>"><span>Valid Until</span><strong>2026-04-02</strong></p>
-          <p data-template-preview-customer-owner data-visible="<%= quote_template.show_customer_owner? %>"><span>Sales Owner</span><strong>Amy Chen</strong></p>
+          <p><span data-template-preview-number-label><%= quote_template.quotation_number_label.presence || t("quote_templates.view.form.quotation_number_placeholder") %></span><strong>QT-2026-0001</strong></p>
+          <p data-template-preview-valid-until data-visible="<%= quote_template.show_valid_until? %>"><span><%= t("quote_document.labels.valid_until") %></span><strong>2026-04-02</strong></p>
+          <p data-template-preview-customer-owner data-visible="<%= quote_template.show_customer_owner? %>"><span><%= t("quote_document.labels.sales_owner") %></span><strong>Amy Chen</strong></p>
         </div>
         <div class="preview-table preview-table-rich">
           <div class="preview-table-head">
-            <span data-template-preview-label-description><%= quote_template.description_label.presence || "Description" %></span>
-            <span data-template-preview-label-qty><%= quote_template.qty_label.presence || "Qty" %></span>
-            <span data-template-preview-label-unit-price><%= quote_template.unit_price_label.presence || "Unit Price" %></span>
-            <span data-template-preview-label-line-total><%= quote_template.line_total_label.presence || "Line Total" %></span>
+              <span data-template-preview-label-description><%= quote_template.description_label.presence || t("quote_document.labels.description") %></span>
+              <span data-template-preview-label-qty><%= quote_template.qty_label.presence || t("quote_document.labels.qty") %></span>
+              <span data-template-preview-label-unit-price><%= quote_template.unit_price_label.presence || t("quote_document.labels.unit_price") %></span>
+              <span data-template-preview-label-line-total><%= quote_template.line_total_label.presence || t("quote_document.labels.line_total") %></span>
           </div>
           <div class="preview-table-row">
             <span>
               <span data-template-preview-item-desc-1>Pump body SS304</span>
-              <small class="preview-item-extra"><span data-template-preview-spec-label><%= quote_template.spec_label.presence || "Spec" %></span>: <span data-template-preview-item-spec-1>316L / IP55</span></small>
-              <small class="preview-item-extra is-addon"><span data-template-preview-addon-label><%= quote_template.addon_label.presence || "Add-on" %></span>: <span data-template-preview-item-addon-1>Wooden Case (+$35)</span></small>
+              <small class="preview-item-extra"><span data-template-preview-spec-label><%= quote_template.spec_label.presence || t("quote_document.labels.spec") %></span>: <span data-template-preview-item-spec-1>316L / IP55</span></small>
+              <small class="preview-item-extra is-addon"><span data-template-preview-addon-label><%= quote_template.addon_label.presence || t("quote_document.labels.addon") %></span>: <span data-template-preview-item-addon-1>Wooden Case (+$35)</span></small>
             </span>
             <span data-template-preview-item-qty-1>2</span>
             <span data-template-preview-amount data-template-preview-item-unit-1 data-raw-amount="900"></span>
@@ -341,29 +366,29 @@
           <div class="preview-table-row"><span data-template-preview-item-desc-3>Installation kit</span><span data-template-preview-item-qty-3>3</span><span data-template-preview-amount data-template-preview-item-unit-3 data-raw-amount="130"></span><span data-template-preview-amount data-template-preview-item-line-3 data-raw-amount="390"></span></div>
         </div>
         <div class="preview-summary">
-          <p><span>Subtotal</span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
-          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span>Tax / VAT</span><strong data-template-preview-amount data-template-preview-tax-amount data-raw-amount="281"></strong></p>
-          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span>Shipping</span><strong data-template-preview-amount data-template-preview-shipping-amount data-raw-amount="120"></strong></p>
-          <p class="preview-total"><span>Grand Total</span><strong data-template-preview-amount data-template-preview-grand-total data-raw-amount="3211"></strong></p>
+          <p><span><%= t("quote_document.labels.subtotal") %></span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
+          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span><%= t("quote_document.labels.tax_vat") %></span><strong data-template-preview-amount data-template-preview-tax-amount data-raw-amount="281"></strong></p>
+          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span><%= t("quote_document.labels.shipping") %></span><strong data-template-preview-amount data-template-preview-shipping-amount data-raw-amount="120"></strong></p>
+          <p class="preview-total"><span><%= t("quote_document.labels.grand_total") %></span><strong data-template-preview-amount data-template-preview-grand-total data-raw-amount="3211"></strong></p>
           <p class="preview-closing" data-template-preview-closing data-visible="<%= quote_template.show_closing_message? %>"><%= quote_template.resolved_closing_message.presence || QuoteTemplate::DEFAULT_CLOSING_MESSAGE %></p>
         </div>
         <div class="preview-meta">
-          <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong>Payment Term:</strong> TT 30% deposit, 70% before shipment</p>
-          <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong>Notes:</strong> Price valid for 30 days.</p>
+          <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong><%= t("quote_document.labels.payment_terms") %>:</strong> TT 30% deposit, 70% before shipment</p>
+          <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong><%= t("quote_document.labels.notes") %>:</strong> Price valid for 30 days.</p>
           <% if quote_template.signature_image.attached? %>
-            <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="Signature preview" class="quote-sales-signature-image"></p>
+            <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="<%= t("quote_templates.view.form.signature_preview_alt") %>" class="quote-sales-signature-image"></p>
           <% else %>
-            <p data-template-preview-signature-image hidden><img src="" alt="Signature preview" class="quote-sales-signature-image"></p>
+            <p data-template-preview-signature-image hidden><img src="" alt="<%= t("quote_templates.view.form.signature_preview_alt") %>" class="quote-sales-signature-image"></p>
           <% end %>
-          <p data-template-preview-signature-name data-visible="<%= quote_template.show_signature_block? && quote_template.signature_name.present? %>"><strong>Authorized by:</strong> <span data-template-preview-signature-name-value><%= quote_template.signature_name.presence || "" %></span></p>
+          <p data-template-preview-signature-name data-visible="<%= quote_template.show_signature_block? && quote_template.signature_name.present? %>"><strong><%= t("quote_document.labels.authorized_by") %>:</strong> <span data-template-preview-signature-name-value><%= quote_template.signature_name.presence || "" %></span></p>
         </div>
         <div class="preview-terms" data-template-preview-terms data-visible="<%= quote_template.show_terms_section? %>">
-          <strong>Terms:</strong> FOB Shanghai | Lead time 20 days.
+          <strong><%= t("quote_document.labels.terms") %>:</strong> FOB Shanghai | Lead time 20 days.
         </div>
         <div class="preview-image-strip" data-template-preview-images data-visible="<%= quote_template.show_images? %>">
           <span></span><span></span><span></span>
         </div>
-        <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || "Thank you for your business." %></p>
+        <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || t("quote_templates.view.form.default_footer_note") %></p>
         <p class="preview-saas-footnote" data-template-preview-saas-branding data-visible="<%= quote_template.show_saas_branding? %>"><%= quote_template.saas_branding_footer_text %></p>
       </div>
       <p class="template-preview-contrast-note" data-template-preview-contrast hidden></p>
@@ -371,10 +396,10 @@
   </div>
 
   <div class="template-form-footer">
-    <label class="template-default-check"><%= check_box_tag :make_default, "1", quote_template.default_template? %> Set as default template</label>
+    <label class="template-default-check"><%= check_box_tag :make_default, "1", quote_template.default_template? %> <%= t("quote_templates.view.form.set_as_default") %></label>
     <div class="actions">
       <%= f.submit class: "btn btn-primary" %>
-      <%= link_to "Back", quote_templates_path, class: "btn btn-secondary" %>
+      <%= link_to t("quote_templates.view.form.back"), quote_templates_path, class: "btn btn-secondary" %>
     </div>
   </div>
 <% end %>

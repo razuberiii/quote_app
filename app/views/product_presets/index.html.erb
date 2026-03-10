@@ -1,52 +1,55 @@
-<h1>Product Presets</h1>
-
-<section class="team-members-panel">
-  <p class="team-members-hint">Manage reusable specification and add-on libraries here, then bind them to products as defaults.</p>
+<section class="app-page-shell product-presets-page-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1><%= t("product_presets.view.index.title") %></h1>
+      <p class="product-presets-page-subtitle"><%= t("product_presets.view.index.subtitle") %></p>
+    </div>
+  </header>
 
   <div class="product-presets-hub">
     <article class="product-presets-card" id="spec-presets">
       <div class="product-presets-card-head">
         <div>
-          <h2>Spec Presets</h2>
-          <p>Reusable specification sets for voltage, material, dimensions, and other quote fields.</p>
+          <h2><%= t("product_presets.view.index.spec_title") %></h2>
+          <p><%= t("product_presets.view.index.spec_caption") %></p>
         </div>
         <div class="product-presets-card-actions">
-          <%= link_to "Manage Specs", spec_presets_path, class: "btn btn-primary" %>
-          <%= link_to "New Spec Preset", spec_presets_path(anchor: "new"), class: "btn btn-secondary" %>
+          <%= link_to t("product_presets.view.index.manage_specs"), spec_presets_path, class: "btn btn-primary" %>
+          <%= link_to t("product_presets.view.index.new_spec_preset"), spec_presets_path(anchor: "new"), class: "btn btn-secondary" %>
         </div>
       </div>
 
       <% if @spec_presets.any? %>
         <div class="product-presets-chip-list">
           <% @spec_presets.limit(8).each do |preset| %>
-            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= preset.normalized_entries.size %> spec(s)</small></span>
+            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= t("product_presets.view.index.spec_count", count: preset.normalized_entries.size) %></small></span>
           <% end %>
         </div>
       <% else %>
-        <p class="team-members-hint">No spec presets yet.</p>
+        <p class="team-members-hint"><%= t("product_presets.view.index.no_spec_presets") %></p>
       <% end %>
     </article>
 
     <article class="product-presets-card" id="addon-presets">
       <div class="product-presets-card-head">
         <div>
-          <h2>Add-on Presets</h2>
-          <p>Reusable charge bundles like warranty, installation kits, packaging, or service options.</p>
+          <h2><%= t("product_presets.view.index.addon_title") %></h2>
+          <p><%= t("product_presets.view.index.addon_caption") %></p>
         </div>
         <div class="product-presets-card-actions">
-          <%= link_to "Manage Add-ons", addon_presets_path, class: "btn btn-primary" %>
-          <%= link_to "New Add-on Preset", addon_presets_path(anchor: "new"), class: "btn btn-secondary" %>
+          <%= link_to t("product_presets.view.index.manage_addons"), addon_presets_path, class: "btn btn-primary" %>
+          <%= link_to t("product_presets.view.index.new_addon_preset"), addon_presets_path(anchor: "new"), class: "btn btn-secondary" %>
         </div>
       </div>
 
       <% if @addon_presets.any? %>
         <div class="product-presets-chip-list">
           <% @addon_presets.limit(8).each do |preset| %>
-            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= preset.normalized_entries.size %> add-on(s)</small></span>
+            <span class="product-presets-chip"><strong><%= preset.name %></strong><small><%= t("product_presets.view.index.addon_count", count: preset.normalized_entries.size) %></small></span>
           <% end %>
         </div>
       <% else %>
-        <p class="team-members-hint">No add-on presets yet.</p>
+        <p class="team-members-hint"><%= t("product_presets.view.index.no_addon_presets") %></p>
       <% end %>
     </article>
   </div>

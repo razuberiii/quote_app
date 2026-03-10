@@ -16,5 +16,5 @@
 
   <%= render "form", quote: @quote, form_model: [ @customer, @quote ] %>
 
-  <%= link_to "Back to Customer", customer_path(@customer), class: "form-page-back-link" %>
+  <%= link_to t("quotes.view.show.back_to_customer"), customer_path(@customer), class: "form-page-back-link" %>
 </section>

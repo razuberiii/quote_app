@@ -2,7 +2,7 @@
 <header class="app-page-header">
   <div class="app-page-header-main">
     <h1><%= @customer.name %></h1>
-    <p>Review account status, active quotes, follow-up timing, and customer history from one workspace.</p>
+    <p><%= t("customers.view.show.subtitle") %></p>
     <div class="app-page-header-meta">
       <%= customer_status_badge(@customer) %>
     </div>
@@ -10,7 +10,7 @@
   <div class="app-page-header-actions">
     <%= link_to customers_path, class: "customer-back-link" do %>
       <span aria-hidden="true">←</span>
-      <span>Back to Customers</span>
+      <span><%= t("customers.view.show.back_to_customers") %></span>
     <% end %>
   </div>
 </header>
@@ -29,7 +29,7 @@
           </span>
           <div>
             <strong><%= @customer.name %></strong>
-            <p><%= @customer.email.presence || "No email" %></p>
+            <p><%= @customer.email.presence || t("customers.view.show.no_email") %></p>
             <% if @customer.ordered_tag_names.any? %>
               <div class="customer-profile-tags">
                 <% @customer.ordered_tag_names.each do |tag_name| %>
@@ -40,27 +40,27 @@
           </div>
         </div>
         <%= render "components/ui/button", href: edit_customer_path(@customer), variant: :secondary, class: "customer-edit-cta" do %>
-          Edit Customer
+          <%= t("customers.view.show.edit_customer") %>
         <% end %>
       </div>
     <% end %>
 
     <section class="quote-edit-summary customer-top-summary app-stat-grid">
       <article class="quote-edit-summary-card app-surface">
-        <span class="summary-label">Total Quotes</span>
+        <span class="summary-label"><%= t("customers.view.show.total_quotes") %></span>
         <strong><%= @customer_summary[:total_quotes] %></strong>
       </article>
       <article class="quote-edit-summary-card app-surface">
-        <span class="summary-label">Latest Quote</span>
-        <strong><%= @customer_summary[:latest_quote_at]&.strftime("%Y-%m-%d") || "No quote yet" %></strong>
+        <span class="summary-label"><%= t("customers.view.show.latest_quote") %></span>
+        <strong><%= @customer_summary[:latest_quote_at]&.strftime("%Y-%m-%d") || t("customers.view.show.no_quote_yet") %></strong>
       </article>
       <article class="quote-edit-summary-card app-surface">
-        <span class="summary-label">Sales Stage</span>
+        <span class="summary-label"><%= t("customers.view.show.sales_stage") %></span>
         <strong><%= @customer_summary[:sales_stage] %></strong>
         <%= customer_status_badge(@customer) %>
       </article>
       <article class="quote-edit-summary-card app-surface">
-        <span class="summary-label">Engagement</span>
+        <span class="summary-label"><%= t("customers.view.show.engagement") %></span>
         <strong><%= @customer_engagement[:label] %></strong>
         <%= status_badge(@customer_engagement[:label], @customer_engagement[:css].to_s.include?("risk") ? :red : (@customer_engagement[:css].to_s.include?("cooling") ? :amber : :green), "customer-engagement-badge #{@customer_engagement[:css]}") %>
       </article>
@@ -68,8 +68,8 @@
 
     <section class="customer-operating-signals app-surface">
       <div class="app-section-heading">
-        <h3>Operating Signals</h3>
-        <span class="app-subtle-note">Trusted from follow-up timing, quote activity, and observed views.</span>
+        <h3><%= t("customers.view.show.operating_signals") %></h3>
+        <span class="app-subtle-note"><%= t("customers.view.show.operating_signals_hint") %></span>
       </div>
       <div class="customer-operating-grid">
         <% @customer_operating_signals.each do |signal| %>
@@ -83,48 +83,48 @@
     </section>
 
     <details class="customer-details-collapsible app-surface">
-      <summary>Company and Contact Details</summary>
+      <summary><%= t("customers.view.show.company_contact_details") %></summary>
       <div class="customer-details">
-        <p><strong>Company Name:</strong> <%= @customer.name.presence || "-" %></p>
-        <p><strong>Country:</strong> <%= @customer.country.presence || "-" %></p>
-        <p><strong>Customer Level:</strong> <%= @customer.customer_level.to_s.humanize %></p>
-        <p><strong>Status:</strong> <%= customer_status_badge(@customer) %></p>
-        <p><strong>Primary Contact Name:</strong> <%= @customer.contact_name.presence || "-" %></p>
-        <p><strong>Email:</strong> <%= @customer.email.presence || "-" %></p>
-        <p><strong>Phone:</strong> <%= @customer.phone.presence || "-" %></p>
-        <p><strong>Address:</strong> <%= @customer.address.presence || "-" %></p>
-        <p><strong>Payment Terms:</strong> <%= @customer.payment_terms.to_s.upcase.gsub("_", "/").presence || "-" %></p>
-        <p><strong>Main Product Interest:</strong> <%= @customer.main_product_interest.presence || "-" %></p>
-        <p><strong>Internal Owner:</strong> <%= @customer.internal_owner_display_name %></p>
-        <p><strong>Estimated Annual Volume:</strong> <%= @customer.estimated_annual_volume.present? ? number_with_precision(@customer.estimated_annual_volume, precision: 2, delimiter: ",") : "-" %></p>
-        <p><strong>Timezone:</strong> <%= @customer.timezone.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.company_name") %>:</strong> <%= @customer.name.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.country") %>:</strong> <%= @customer.country.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.customer_level") %>:</strong> <%= @customer.customer_level.to_s.humanize %></p>
+        <p><strong><%= t("customers.view.show.status") %>:</strong> <%= customer_status_badge(@customer) %></p>
+        <p><strong><%= t("customers.view.show.primary_contact_name") %>:</strong> <%= @customer.contact_name.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.email") %>:</strong> <%= @customer.email.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.phone") %>:</strong> <%= @customer.phone.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.address") %>:</strong> <%= @customer.address.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.payment_terms") %>:</strong> <%= @customer.payment_terms.to_s.upcase.gsub("_", "/").presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.main_product_interest") %>:</strong> <%= @customer.main_product_interest.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.internal_owner") %>:</strong> <%= @customer.internal_owner_display_name %></p>
+        <p><strong><%= t("customers.view.show.estimated_annual_volume") %>:</strong> <%= @customer.estimated_annual_volume.present? ? number_with_precision(@customer.estimated_annual_volume, precision: 2, delimiter: ",") : "-" %></p>
+        <p><strong><%= t("customers.view.show.timezone") %>:</strong> <%= @customer.timezone.presence || "-" %></p>
         <% if @customer.ordered_tag_names.any? %>
-          <p><strong>Tags:</strong> <%= @customer.ordered_tag_names.join(", ") %></p>
+          <p><strong><%= t("customers.view.show.tags") %>:</strong> <%= @customer.ordered_tag_names.join(", ") %></p>
         <% end %>
-        <p><strong>Latest Customer Signal:</strong> <%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || "No customer behavior yet" %></p>
+        <p><strong><%= t("customers.view.show.latest_customer_signal") %>:</strong> <%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || t("customers.view.show.no_customer_behavior") %></p>
         <p class="customer-next-follow-up-line follow-up-<%= @customer.follow_up_status %>">
-          <strong>Next Follow-up:</strong> <%= @customer.next_follow_up_date&.strftime("%Y-%m-%d") || "N/A" %>
+          <strong><%= t("customers.view.show.next_follow_up") %>:</strong> <%= @customer.next_follow_up_date&.strftime("%Y-%m-%d") || t("customers.view.show.not_available") %>
           <% if @customer.follow_up_overdue? %>
-            <span class="overdue-badge">OVERDUE</span>
+            <span class="overdue-badge"><%= t("customers.view.show.overdue_badge") %></span>
           <% elsif @customer.follow_up_due_today? %>
-            <span class="today-badge">TODAY</span>
+            <span class="today-badge"><%= t("customers.view.show.today_badge") %></span>
           <% elsif @customer.follow_up_status == "upcoming" %>
-            <span class="upcoming-badge">DUE SOON</span>
+            <span class="upcoming-badge"><%= t("customers.view.show.due_soon_badge") %></span>
           <% end %>
         </p>
         <% if @customer.notes.present? %>
-          <p><strong>Notes:</strong> <%= @customer.notes %></p>
+          <p><strong><%= t("customers.view.show.notes") %>:</strong> <%= @customer.notes %></p>
         <% end %>
       </div>
     </details>
 
     <section class="customer-follow-up-callout app-surface follow-up-<%= @customer.follow_up_status %>">
       <div>
-        <span class="summary-label">Follow-up Action</span>
+        <span class="summary-label"><%= t("customers.view.show.follow_up_action") %></span>
         <strong><%= @follow_up_text %></strong>
         <div class="customer-follow-up-meta">
-          <span>Last signal: <%= @days_since_last_signal.nil? ? "N/A" : "#{@days_since_last_signal}d ago" %></span>
-          <span>Next follow-up: <%= @days_until_follow_up.nil? ? "Not scheduled" : (@days_until_follow_up.negative? ? "#{@days_until_follow_up.abs}d overdue" : "in #{@days_until_follow_up}d") %></span>
+          <span><%= t("customers.view.show.last_signal") %>: <%= @days_since_last_signal.nil? ? t("customers.view.show.not_available") : t("customers.view.show.days_ago", count: @days_since_last_signal) %></span>
+          <span><%= t("customers.view.show.next_follow_up") %>: <%= @days_until_follow_up.nil? ? t("customers.view.show.not_scheduled") : (@days_until_follow_up.negative? ? t("customers.view.show.days_overdue", count: @days_until_follow_up.abs) : t("customers.view.show.in_days", count: @days_until_follow_up)) %></span>
         </div>
       </div>
       <div class="customer-follow-up-callout-actions">
@@ -138,8 +138,8 @@
 
     <section class="customer-task-board app-surface">
       <div class="app-section-heading">
-        <h3>Next Tasks</h3>
-        <span class="app-subtle-note">Operational follow-ups and pending work.</span>
+        <h3><%= t("customers.view.show.next_tasks") %></h3>
+        <span class="app-subtle-note"><%= t("customers.view.show.next_tasks_hint") %></span>
       </div>
       <% if @visible_follow_up_tasks.any? %>
         <div class="customer-task-list">
@@ -159,7 +159,7 @@
                   <% end %>
                 </div>
               <% else %>
-                <div class="customer-task-actions customer-task-actions-note">Use Follow-up Action controls above</div>
+                <div class="customer-task-actions customer-task-actions-note"><%= t("customers.view.show.use_follow_up_controls") %></div>
               <% end %>
             </article>
           <% end %>
@@ -172,7 +172,7 @@
             data-expanded="false"
             data-task-count="<%= @hidden_follow_up_tasks.size %>"
           >
-            Show all tasks (<%= @hidden_follow_up_tasks.size %>)
+            <%= t("customers.view.show.show_all_tasks", count: @hidden_follow_up_tasks.size) %>
           </button>
           <div class="customer-task-list customer-task-more" data-task-more hidden>
             <% @hidden_follow_up_tasks.each do |task| %>
@@ -191,30 +191,30 @@
                     <% end %>
                   </div>
                 <% else %>
-                  <div class="customer-task-actions customer-task-actions-note">Use Follow-up Action controls above</div>
+                  <div class="customer-task-actions customer-task-actions-note"><%= t("customers.view.show.use_follow_up_controls") %></div>
                 <% end %>
               </article>
             <% end %>
           </div>
         <% end %>
       <% else %>
-        <p class="team-members-hint">No immediate tasks.</p>
+        <p class="team-members-hint"><%= t("customers.view.show.no_immediate_tasks") %></p>
       <% end %>
     </section>
 
     <section class="customer-timeline app-surface">
       <div class="app-section-heading">
-        <h3>Customer Timeline</h3>
-        <span class="app-subtle-note">High-signal and system events in one stream.</span>
+        <h3><%= t("customers.view.show.customer_timeline") %></h3>
+        <span class="app-subtle-note"><%= t("customers.view.show.customer_timeline_hint") %></span>
       </div>
       <% if @high_signal_timeline_events.any? || @system_timeline_events.any? %>
         <p class="customer-timeline-hint">
-          Latest customer behavior:
-          <strong><%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || "No customer behavior yet" %></strong>
+          <%= t("customers.view.show.latest_customer_behavior") %>:
+          <strong><%= @latest_customer_signal_at&.strftime("%Y-%m-%d %H:%M") || t("customers.view.show.no_customer_behavior") %></strong>
         </p>
 
         <% if @visible_high_signal_timeline_events.any? %>
-          <h4 class="customer-timeline-subhead">High Signal</h4>
+          <h4 class="customer-timeline-subhead"><%= t("customers.view.show.high_signal") %></h4>
           <div class="customer-timeline-list <%= 'customer-timeline-list-scroll' if @high_signal_timeline_events.size > 7 %>">
             <% @visible_high_signal_timeline_events.each do |event| %>
               <article class="customer-timeline-item is-<%= event[:tone] %>">
@@ -235,7 +235,7 @@
               data-expanded="false"
               data-high-count="<%= @hidden_high_signal_timeline_events.size %>"
             >
-              Show older high signals (<%= @hidden_high_signal_timeline_events.size %>)
+              <%= t("customers.view.show.show_older_high_signals", count: @hidden_high_signal_timeline_events.size) %>
             </button>
             <div class="customer-timeline-more" data-high-signal-more hidden>
               <% @hidden_high_signal_timeline_events.each do |event| %>
@@ -251,7 +251,7 @@
             </div>
           <% end %>
         <% else %>
-          <p class="team-members-hint">No customer behavior signals yet.</p>
+          <p class="team-members-hint"><%= t("customers.view.show.no_customer_behavior_signals") %></p>
         <% end %>
 
         <% if @system_timeline_events.any? %>
@@ -262,10 +262,10 @@
             data-expanded="false"
             data-system-count="<%= @system_timeline_events.size %>"
           >
-            Show system activity (<%= @system_timeline_events.size %>)
+            <%= t("customers.view.show.show_system_activity", count: @system_timeline_events.size) %>
           </button>
           <div class="customer-timeline-more customer-timeline-system" data-system-timeline-more hidden>
-            <h4 class="customer-timeline-subhead">System Activity</h4>
+            <h4 class="customer-timeline-subhead"><%= t("customers.view.show.system_activity") %></h4>
             <% @system_timeline_events.each do |event| %>
               <article class="customer-timeline-item is-<%= event[:tone] %>">
                 <div class="customer-timeline-dot"></div>
@@ -279,7 +279,7 @@
           </div>
         <% end %>
       <% else %>
-        <p class="team-members-hint">No timeline events yet.</p>
+        <p class="team-members-hint"><%= t("customers.view.show.no_timeline_events") %></p>
       <% end %>
     </section>
   </aside>
@@ -288,15 +288,15 @@
     <section class="app-toolbar-surface customer-quote-workbench">
       <div class="app-section-heading customer-quote-action-bar">
         <div>
-          <span class="customer-actions-title">Quote Actions</span>
-          <p class="app-section-caption">Create, filter, and act on revisions from one account workspace.</p>
+          <span class="customer-actions-title"><%= t("customers.view.show.quote_actions") %></span>
+          <p class="app-section-caption"><%= t("customers.view.show.quote_actions_hint") %></p>
         </div>
         <div class="actions customer-quote-actions">
-          <%= link_to "New Quote", new_customer_quote_path(@customer), class: ui_button_classes(:primary, "customer-new-quote-cta") %>
-          <%= button_to "Delete Customer",
+          <%= link_to t("customers.view.show.new_quote"), new_customer_quote_path(@customer), class: ui_button_classes(:primary, "customer-new-quote-cta") %>
+          <%= button_to t("customers.view.show.delete_customer"),
                         customer_path(@customer),
                         method: :delete,
-                        data: { turbo_confirm: "Delete customer #{@customer.name}? This removes the account record." },
+                        data: { turbo_confirm: t("customers.view.show.delete_customer_confirm", name: @customer.name) },
                         class: ui_button_classes(:danger, "customer-delete-cta") %>
         </div>
       </div>
@@ -304,41 +304,41 @@
       <div class="app-section-heading customer-quotes-header">
         <h3>
           <% if @quote_view == "active" %>
-            Active Quotes (<%= @active_quote_cards.size %>)
+            <%= t("customers.view.show.active_quotes", count: @active_quote_cards.size) %>
           <% elsif @quote_view == "recent" %>
-            Recent Quotes (10)
+            <%= t("customers.view.show.recent_quotes") %>
           <% else %>
-            All Quotes (<%= @all_quote_cards.size %>)
+            <%= t("customers.view.show.all_quotes", count: @all_quote_cards.size) %>
           <% end %>
         </h3>
-        <span class="app-subtle-note">Priority queue, search, and revision flow for this account.</span>
+        <span class="app-subtle-note"><%= t("customers.view.show.quote_workspace_hint") %></span>
       </div>
 
       <% if @quote_view == "active" %>
-        <p class="quotes-mode-note">Showing top 5 by priority. Sorted by action priority.</p>
+        <p class="quotes-mode-note"><%= t("customers.view.show.active_mode_note") %></p>
         <p class="quotes-structure-note">
-          <strong><%= @active_quote_cards.size %></strong> Active
-          <span>• <%= @active_quote_breakdown["draft"] %> Draft</span>
-          <span>• <%= @active_quote_breakdown["sent"] %> Sent</span>
-          <span>• <%= @active_quote_breakdown["viewed"] %> Viewed</span>
-          <span>• <%= @active_quote_breakdown["negotiating"] %> Negotiating</span>
+          <strong><%= @active_quote_cards.size %></strong> <%= t("customers.view.show.active") %>
+          <span>• <%= @active_quote_breakdown["draft"] %> <%= t("customers.view.show.quote_status.draft") %></span>
+          <span>• <%= @active_quote_breakdown["sent"] %> <%= t("customers.view.show.quote_status.sent") %></span>
+          <span>• <%= @active_quote_breakdown["viewed"] %> <%= t("customers.view.show.quote_status.viewed") %></span>
+          <span>• <%= @active_quote_breakdown["negotiating"] %> <%= t("customers.view.show.quote_status.negotiating") %></span>
         </p>
       <% end %>
 
       <div class="quote-summary-grid customer-quote-summary-grid">
         <div class="summary-card summary-normal">
-          <span class="summary-label">Total Quotes</span>
+          <span class="summary-label"><%= t("customers.view.show.total_quotes") %></span>
           <strong><%= @quote_summary[:total_count] %></strong>
         </div>
         <div class="summary-card summary-won">
-          <span class="summary-label">Won Amount</span>
+          <span class="summary-label"><%= t("customers.view.show.won_amount") %></span>
           <div class="summary-currency-lines" data-currency-group>
             <% if @quote_summary[:won_amounts_by_currency].any? %>
               <% @quote_summary[:won_amounts_by_currency].each_with_index do |(currency, amount), idx| %>
                 <strong class="<%= "currency-line-extra" if idx > 0 %>" <%= "hidden" if idx > 0 %>><%= currency %>: <%= quote_money(amount, currency) %></strong>
               <% end %>
               <% if @quote_summary[:won_amounts_by_currency].size > 1 %>
-                <button type="button" class="currency-lines-toggle" data-currency-toggle>Show all currencies</button>
+                <button type="button" class="currency-lines-toggle" data-currency-toggle><%= t("customers.view.show.show_all_currencies") %></button>
               <% end %>
             <% else %>
               <strong>-</strong>
@@ -346,14 +346,14 @@
           </div>
         </div>
         <div class="summary-card summary-lost">
-          <span class="summary-label">Lost Amount</span>
+          <span class="summary-label"><%= t("customers.view.show.lost_amount") %></span>
           <div class="summary-currency-lines" data-currency-group>
             <% if @quote_summary[:lost_amounts_by_currency].any? %>
               <% @quote_summary[:lost_amounts_by_currency].each_with_index do |(currency, amount), idx| %>
                 <strong class="<%= "currency-line-extra" if idx > 0 %>" <%= "hidden" if idx > 0 %>><%= currency %>: <%= quote_money(amount, currency) %></strong>
               <% end %>
               <% if @quote_summary[:lost_amounts_by_currency].size > 1 %>
-                <button type="button" class="currency-lines-toggle" data-currency-toggle>Show all currencies</button>
+                <button type="button" class="currency-lines-toggle" data-currency-toggle><%= t("customers.view.show.show_all_currencies") %></button>
               <% end %>
             <% else %>
               <strong>-</strong>
@@ -361,13 +361,13 @@
           </div>
         </div>
         <div class="summary-card summary-upcoming">
-          <span class="summary-label">Avg Discount</span>
+          <span class="summary-label"><%= t("customers.view.show.avg_discount") %></span>
           <strong><%= @quote_summary[:avg_discount_pct] %>%</strong>
         </div>
       </div>
 
       <div class="app-filter-row app-filter-row--spaced customer-quote-status-filters">
-        <% [["All", "all"], ["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]].each do |label, value| %>
+        <% [[t("customers.view.show.filters.all"), "all"], [t("customers.view.show.filters.draft"), "draft"], [t("customers.view.show.filters.sent"), "sent"], [t("customers.view.show.filters.viewed"), "viewed"], [t("customers.view.show.filters.negotiating"), "negotiating"], [t("customers.view.show.filters.won"), "won"], [t("customers.view.show.filters.lost"), "lost"], [t("customers.view.show.filters.expired"), "expired"]].each do |label, value| %>
           <%= link_to label,
                       customer_path(@customer, quote_status: value, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: @quote_view),
                       class: "app-filter-pill #{@quote_status_filter == value ? 'is-active' : ''}" %>
@@ -375,13 +375,13 @@
       </div>
 
       <div class="app-filter-row app-filter-row--spaced customer-quote-view-filters">
-        <%= link_to "Active Quotes (#{@active_quote_cards.size})",
+        <%= link_to t("customers.view.show.active_quotes", count: @active_quote_cards.size),
                     customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: "active"),
                     class: "app-filter-pill #{@quote_view == 'active' ? 'is-active' : ''}" %>
-        <%= link_to "Recent (10)",
+        <%= link_to t("customers.view.show.recent_10"),
                     customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: "recent"),
                     class: "app-filter-pill #{@quote_view == 'recent' ? 'is-active' : ''}" %>
-        <%= link_to "All",
+        <%= link_to t("customers.view.show.filters.all"),
                     customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: "all"),
                     class: "app-filter-pill #{@quote_view == 'all' ? 'is-active' : ''}" %>
       </div>
@@ -391,12 +391,12 @@
           <%= f.hidden_field :quote_status, value: @quote_status_filter %>
           <%= f.hidden_field :quote_view, value: @quote_view %>
           <div class="quote-queue-toolbar-grid">
-            <%= f.text_field :quote_query, value: @quote_query, placeholder: "Search quote no, product, notes...", class: ui_input_classes %>
+            <%= f.text_field :quote_query, value: @quote_query, placeholder: t("customers.view.show.search_quotes_placeholder"), class: ui_input_classes %>
             <%= f.select :quote_sort,
-                         options_for_select([["Priority Queue", "priority"], ["Newest", "newest"], ["Highest Amount", "amount_high"], ["Status", "status"]], @quote_sort),
+                         options_for_select([[t("customers.view.show.sort.priority"), "priority"], [t("customers.view.show.sort.newest"), "newest"], [t("customers.view.show.sort.highest_amount"), "amount_high"], [t("customers.view.show.sort.status"), "status"]], @quote_sort),
                          {},
                          { class: ui_input_classes } %>
-            <%= f.button "Apply", type: :submit, class: ui_button_classes(:secondary, "customer-toolbar-apply") %>
+            <%= f.button t("customers.view.show.apply"), type: :submit, class: ui_button_classes(:secondary, "customer-toolbar-apply") %>
           </div>
         <% end %>
       </div>
@@ -416,7 +416,7 @@
           data-expanded="false"
           data-active-count="<%= @active_quote_cards.size %>"
         >
-          View all <%= @active_quote_cards.size %>
+          <%= t("customers.view.show.view_all", count: @active_quote_cards.size) %>
         </button>
         <div class="quote-card-list quote-card-list-scroll" data-active-quote-more hidden>
           <% @active_quote_cards.drop(5).each do |card| %>
@@ -429,13 +429,13 @@
           <% prev_page = @quotes_page.to_i - 1 %>
           <% next_page = @quotes_page.to_i + 1 %>
           <% if prev_page >= 1 %>
-            <%= link_to "Previous",
+            <%= link_to t("customers.view.show.previous"),
                         customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: @quote_view, quotes_page: prev_page),
                         class: ui_button_classes(:secondary) %>
           <% end %>
-          <span>Page <strong><%= @quotes_page %></strong> / <%= @quotes_total_pages %></span>
+          <span><%= t("customers.view.show.page") %> <strong><%= @quotes_page %></strong> / <%= @quotes_total_pages %></span>
           <% if next_page <= @quotes_total_pages.to_i %>
-            <%= link_to "Next",
+            <%= link_to t("customers.view.show.next"),
                         customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: @quote_view, quotes_page: next_page),
                         class: ui_button_classes(:secondary) %>
           <% end %>
@@ -443,9 +443,9 @@
       <% end %>
     <% else %>
       <%= ui_empty_state(
-            title: "No quotes in this view",
-            body: "Try a different status filter or create a new quote for this customer.",
-            action_label: "New Quote",
+            title: t("customers.view.show.no_quotes_title"),
+            body: t("customers.view.show.no_quotes_body"),
+            action_label: t("customers.view.show.new_quote"),
             action_path: new_customer_quote_path(@customer),
             icon: :quotes
           ) %>
@@ -470,7 +470,7 @@
           line.hidden = !collapsed;
         });
         toggle.dataset.expanded = collapsed ? "true" : "false";
-        toggle.textContent = collapsed ? "Show less" : "Show all currencies";
+        toggle.textContent = collapsed ? "<%= j t("customers.view.show.show_less") %>" : "<%= j t("customers.view.show.show_all_currencies") %>";
       });
     });
   })();
@@ -486,7 +486,7 @@
       const applyState = (expanded) => {
         extraContainer.hidden = !expanded;
         toggle.dataset.expanded = expanded ? "true" : "false";
-        toggle.textContent = expanded ? "Collapse list" : `View all ${count}`;
+        toggle.textContent = expanded ? "<%= j t("customers.view.show.collapse_list") %>" : `<%= j t("customers.view.show.view_all_prefix") %> ${count}`;
       };
 
       applyState(false);
@@ -508,7 +508,7 @@
       const applyState = (expanded) => {
         extraContainer.hidden = !expanded;
         toggle.dataset.expanded = expanded ? "true" : "false";
-        toggle.textContent = expanded ? "Hide extra tasks" : `Show all tasks (${count})`;
+        toggle.textContent = expanded ? "<%= j t("customers.view.show.hide_extra_tasks") %>" : `<%= j t("customers.view.show.show_all_tasks_prefix") %> (${count})`;
       };
 
       applyState(false);
@@ -530,7 +530,7 @@
       const applyState = (expanded) => {
         extraContainer.hidden = !expanded;
         toggle.dataset.expanded = expanded ? "true" : "false";
-        toggle.textContent = expanded ? "Hide older high signals" : `Show older high signals (${count})`;
+        toggle.textContent = expanded ? "<%= j t("customers.view.show.hide_older_high_signals") %>" : `<%= j t("customers.view.show.show_older_high_signals_prefix") %> (${count})`;
       };
 
       applyState(false);
@@ -552,7 +552,7 @@
       const applyState = (expanded) => {
         extraContainer.hidden = !expanded;
         toggle.dataset.expanded = expanded ? "true" : "false";
-        toggle.textContent = expanded ? "Hide system activity" : `Show system activity (${count})`;
+        toggle.textContent = expanded ? "<%= j t("customers.view.show.hide_system_activity") %>" : `<%= j t("customers.view.show.show_system_activity_prefix") %> (${count})`;
       };
 
       applyState(false);

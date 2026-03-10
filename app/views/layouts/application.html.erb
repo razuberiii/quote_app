@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for?(:title) ? yield(:title) : "Rubusoo" %></title>
+    <title><%= content_for?(:title) ? yield(:title) : t("app.brand_name") %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : seo_description %>">
     <meta name="robots" content="<%= content_for?(:meta_robots) ? yield(:meta_robots) : "index,follow" %>">
@@ -26,15 +26,16 @@
 
     <%# Styling load order: Tailwind tokens/utilities first, shared component layer next, legacy styles last only for pages not yet migrated. Do not add new app UI rules to legacy_* stylesheets. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "base", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "layout", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "legacy_core", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "legacy_landing", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "legacy_ui", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "public_quote", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "marketing", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "seo", "data-turbo-track": "reload" %>
+    <% if controller_path.start_with?("landing") || controller_path.start_with?("seo") %>
+      <%= stylesheet_link_tag "marketing", "data-turbo-track": "reload" %>
+    <% end %>
+    <% if controller_path.start_with?("seo") %>
+      <%= stylesheet_link_tag "seo", "data-turbo-track": "reload" %>
+    <% end %>
     <%= javascript_importmap_tags %>
 
     <!-- Cloudflare Turnstile -->
@@ -45,32 +46,47 @@
     <nav class="navbar">
       <div class="navbar-container">
         <div class="navbar-brand-wrap">
-          <h1><%= link_to "Rubusoo", root_path %></h1>
+          <h1><%= link_to t("app.brand_name"), root_path %></h1>
           <% if user_signed_in? %>
             <span class="navbar-company-context"><%= current_user.company.name %></span>
           <% end %>
         </div>
         <% if user_signed_in? %>
+          <% products_nav_active = ["products", "product_presets", "addon_presets", "spec_presets"].include?(controller_path) %>
+          <% account_nav_active = ["users/registrations", "company_settings", "team_invitations", "email_changes"].include?(controller_path) %>
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Toggle navigation">
             <span></span>
             <span></span>
             <span></span>
           </button>
           <ul class="navbar-menu" id="primary-navigation">
-            <%= ui_nav_link "Dashboard", dashboard_path, icon: :dashboard %>
-            <%= ui_nav_link "Customers", customers_path, icon: :customers %>
-            <%= ui_nav_link "Products", products_path, icon: :products %>
-            <%= ui_nav_link "Product Presets", product_presets_path, icon: :presets %>
-            <%= ui_nav_link "Template", quote_templates_path, icon: :templates %>
+            <%= ui_nav_link t("nav.dashboard"), dashboard_path, icon: :dashboard %>
+            <%= ui_nav_link t("nav.customers"), customers_path, icon: :customers %>
+            <li class="nav-group <%= "is-active" if products_nav_active %>">
+              <details class="nav-group-details">
+                <summary class="app-nav-link nav-group-trigger <%= "is-active" if products_nav_active %>">
+                  <span class="app-nav-link-icon"><%= ui_nav_icon(:products) %></span>
+                  <span class="app-nav-link-label"><%= t("nav.products") %></span>
+                  <span class="nav-group-caret" aria-hidden="true">▾</span>
+                </summary>
+                <div class="nav-group-menu app-dropdown-panel">
+                  <%= link_to t("nav.products"), products_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if controller_path == "products")].compact.join(" ") %>
+                  <%= link_to t("nav.presets"), product_presets_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if ["product_presets", "addon_presets", "spec_presets"].include?(controller_path))].compact.join(" ") %>
+                </div>
+              </details>
+            </li>
+            <%= ui_nav_link t("nav.template"), quote_templates_path, icon: :templates %>
             <% if current_user.can_manage_team? %>
-              <%= ui_nav_link "Team", team_members_path, icon: :team %>
+              <%= ui_nav_link t("nav.team"), team_members_path, icon: :team %>
             <% end %>
             <% if current_user.admin? %>
-              <%= ui_nav_link "Admin", admin_users_path, icon: :admin %>
+              <%= ui_nav_link t("nav.admin"), admin_users_path, icon: :admin %>
             <% end %>
-            <% invite_count = pending_team_invitations_count %>
-            <li class="account-menu">
-              <button class="account-menu-trigger"
+          </ul>
+          <% invite_count = pending_team_invitations_count %>
+          <div class="navbar-controls">
+            <div class="account-menu">
+                    <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"
                       aria-expanded="false"
                       aria-controls="account-dropdown">
@@ -81,40 +97,61 @@
                     <%= current_user.email.to_s.first.to_s.upcase %>
                   <% end %>
                 </span>
-                <span>Account</span>
+                <span><%= t("account.menu") %></span>
                 <% if invite_count.positive? %>
                   <span class="account-notice-badge"><%= invite_count %></span>
                 <% end %>
               </button>
-              <div class="account-dropdown" id="account-dropdown" hidden>
-                <p class="account-dropdown-group-label">Settings</p>
-                <%= link_to "Account Settings", edit_user_registration_path %>
+              <div class="account-dropdown app-dropdown-panel" id="account-dropdown" hidden>
+                <p class="account-dropdown-group-label app-dropdown-group-label"><%= t("account.settings") %></p>
+                <%= link_to t("account.account_settings"), edit_user_registration_path, class: "app-dropdown-link account-dropdown-link" %>
                 <% if current_user.can_manage_templates? %>
-                  <%= link_to "Company Settings", edit_company_settings_path %>
+                  <%= link_to t("account.company_settings"), edit_company_settings_path, class: "app-dropdown-link account-dropdown-link" %>
                 <% end %>
-                <% if current_user.can_manage_team? %>
-                  <%= link_to "Team Management", team_members_path %>
-                <% end %>
-                <% if current_user.can_manage_templates? %>
-                  <%= link_to "Template Settings", quote_templates_path %>
-                <% end %>
-                <p class="account-dropdown-group-label">Workspace</p>
-                <%= link_to "My Invitations#{invite_count.positive? ? " (#{invite_count})" : ""}", team_invitations_path %>
-                <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete } %>
+                <p class="account-dropdown-group-label app-dropdown-group-label"><%= t("account.workspace") %></p>
+                <%= link_to t("account.my_invitations", count: invite_count), team_invitations_path, class: "app-dropdown-link account-dropdown-link" %>
+                <%= link_to t("account.logout"), destroy_user_session_path, class: "app-dropdown-link account-dropdown-link", data: { turbo_method: :delete } %>
               </div>
-            </li>
-          </ul>
+            </div>
+            <div class="locale-nav-item">
+              <%= render "layouts/locale_nav" %>
+            </div>
+          </div>
         <% else %>
-          <ul class="navbar-menu navbar-menu-public">
-            <li><%= link_to "Home", root_path %></li>
-            <li><%= link_to "Start Free", new_user_registration_path, class: "navbar-cta-link" %></li>
-            <li><%= link_to "Login", new_user_session_path %></li>
+          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <ul class="navbar-menu navbar-menu-public" id="public-navigation">
+            <li><%= link_to t("nav.home"), root_path %></li>
+            <li><%= link_to t("nav.start_free"), new_user_registration_path, class: "navbar-cta-link" %></li>
+            <li><%= link_to t("nav.login"), new_user_session_path %></li>
           </ul>
+          <%= render "layouts/locale_nav" %>
         <% end %>
       </div>
     </nav>
 
     <main>
+      <% breadcrumbs = app_breadcrumb_items %>
+      <% if breadcrumbs.any? %>
+        <nav class="app-breadcrumb" aria-label="Breadcrumb">
+          <ol class="app-breadcrumb-list">
+            <% breadcrumbs.each_with_index do |item, index| %>
+              <% is_last = index == breadcrumbs.length - 1 %>
+              <li class="app-breadcrumb-item">
+                <% if item[:path].present? && !is_last %>
+                  <%= link_to item[:label], item[:path], class: "app-breadcrumb-link" %>
+                <% else %>
+                  <span class="app-breadcrumb-current"><%= item[:label] %></span>
+                <% end %>
+              </li>
+            <% end %>
+          </ol>
+        </nav>
+      <% end %>
+
       <% if notice %>
         <div class="alert alert-success"><%= notice %></div>
       <% end %>
@@ -238,40 +275,225 @@
           });
         };
 
+        const setupNavGroups = () => {
+          const desktopNavMatcher = window.matchMedia("(min-width: 1461px)");
+          const closeTimers = new WeakMap();
+          const hoverCloseDelayMs = 180;
+
+          const clearCloseTimer = (details) => {
+            const timerId = closeTimers.get(details);
+            if (!timerId) return;
+            window.clearTimeout(timerId);
+            closeTimers.delete(details);
+          };
+
+          const scheduleClose = (details) => {
+            clearCloseTimer(details);
+            const timerId = window.setTimeout(() => {
+              if (details.dataset.pinned === "true") return;
+              details.removeAttribute("open");
+              closeTimers.delete(details);
+            }, hoverCloseDelayMs);
+            closeTimers.set(details, timerId);
+          };
+
+          const closeNavGroups = (except) => {
+            document.querySelectorAll(".nav-group-details[open]").forEach((details) => {
+              if (except && details === except) return;
+              clearCloseTimer(details);
+              details.removeAttribute("open");
+              details.dataset.pinned = "false";
+            });
+          };
+
+          document.querySelectorAll(".nav-group-details").forEach((details) => {
+            if (details.dataset.bound === "true") return;
+            details.dataset.bound = "true";
+            details.dataset.pinned = "false";
+
+            const summary = details.querySelector(".nav-group-trigger");
+            if (summary) {
+              summary.addEventListener("click", (event) => {
+                event.preventDefault();
+                const isOpen = details.hasAttribute("open");
+                const isPinned = details.dataset.pinned === "true";
+
+                if (!isOpen) {
+                  closeNavGroups(details);
+                  details.setAttribute("open", "open");
+                  details.dataset.pinned = "true";
+                  return;
+                }
+
+                if (isPinned) {
+                  details.removeAttribute("open");
+                  details.dataset.pinned = "false";
+                  return;
+                }
+
+                details.dataset.pinned = "true";
+              });
+            }
+
+            details.addEventListener("mouseenter", () => {
+              if (!desktopNavMatcher.matches) return;
+              clearCloseTimer(details);
+              if (details.dataset.pinned === "true") return;
+              closeNavGroups(details);
+              details.setAttribute("open", "open");
+            });
+
+            details.addEventListener("mouseleave", () => {
+              if (!desktopNavMatcher.matches) return;
+              if (details.dataset.pinned === "true") return;
+              scheduleClose(details);
+            });
+
+            details.querySelectorAll(".nav-group-menu a").forEach((link) => {
+              if (link.dataset.bound === "true") return;
+              link.dataset.bound = "true";
+              link.addEventListener("click", () => {
+                clearCloseTimer(details);
+                details.removeAttribute("open");
+                details.dataset.pinned = "false";
+              });
+            });
+          });
+
+          if (window.__navGroupOutsideBound !== true) {
+            window.__navGroupOutsideBound = true;
+
+            document.addEventListener("click", (event) => {
+              const insideNavGroup = event.target.closest(".nav-group");
+              if (insideNavGroup) return;
+              closeNavGroups();
+            });
+
+            document.addEventListener("keydown", (event) => {
+              if (event.key !== "Escape") return;
+              closeNavGroups();
+            });
+          }
+        };
+
+        const setupAccountMenu = () => {
+          const accountMenu = document.querySelector(".account-menu");
+          const accountTrigger = document.querySelector(".account-menu-trigger");
+          const accountDropdown = document.getElementById("account-dropdown");
+          if (!accountMenu || !accountTrigger || !accountDropdown) return;
+
+          const desktopNavMatcher = window.matchMedia("(min-width: 1461px)");
+          const hoverCloseDelayMs = 180;
+
+          const openAccountMenu = (pinned) => {
+            accountMenu.classList.add("is-open");
+            accountMenu.dataset.pinned = pinned ? "true" : "false";
+            accountDropdown.hidden = false;
+            accountTrigger.setAttribute("aria-expanded", "true");
+          };
+
+          const closeAccountMenu = () => {
+            accountMenu.classList.remove("is-open");
+            accountMenu.dataset.pinned = "false";
+            accountDropdown.hidden = true;
+            accountTrigger.setAttribute("aria-expanded", "false");
+          };
+
+          const clearCloseTimer = () => {
+            if (!accountMenu.dataset.closeTimer) return;
+            window.clearTimeout(Number(accountMenu.dataset.closeTimer));
+            accountMenu.dataset.closeTimer = "";
+          };
+
+          const scheduleClose = () => {
+            clearCloseTimer();
+            accountMenu.dataset.closeTimer = String(window.setTimeout(() => {
+              if (accountMenu.dataset.pinned === "true") return;
+              closeAccountMenu();
+            }, hoverCloseDelayMs));
+          };
+
+          if (accountTrigger.dataset.bound !== "true") {
+            accountTrigger.dataset.bound = "true";
+
+            accountTrigger.addEventListener("click", () => {
+              clearCloseTimer();
+              const isOpen = accountMenu.classList.contains("is-open");
+              const isPinned = accountMenu.dataset.pinned === "true";
+
+              if (!isOpen) {
+                openAccountMenu(true);
+                return;
+              }
+
+              if (isPinned) {
+                closeAccountMenu();
+                return;
+              }
+
+              openAccountMenu(true);
+            });
+          }
+
+          if (accountMenu.dataset.hoverBound !== "true") {
+            accountMenu.dataset.hoverBound = "true";
+
+            accountMenu.addEventListener("mouseenter", () => {
+              if (!desktopNavMatcher.matches) return;
+              clearCloseTimer();
+              if (accountMenu.dataset.pinned === "true") return;
+              openAccountMenu(false);
+            });
+
+            accountMenu.addEventListener("mouseleave", () => {
+              if (!desktopNavMatcher.matches) return;
+              if (accountMenu.dataset.pinned === "true") return;
+              scheduleClose();
+            });
+
+            accountDropdown.querySelectorAll("a").forEach((link) => {
+              if (link.dataset.bound === "true") return;
+              link.dataset.bound = "true";
+              link.addEventListener("click", () => {
+                clearCloseTimer();
+                closeAccountMenu();
+              });
+            });
+          }
+
+          if (window.__accountMenuOutsideBound !== true) {
+            window.__accountMenuOutsideBound = true;
+
+            document.addEventListener("click", (event) => {
+              const insideAccountMenu = event.target.closest(".account-menu");
+              if (insideAccountMenu) return;
+              clearCloseTimer();
+              closeAccountMenu();
+            });
+
+            document.addEventListener("keydown", (event) => {
+              if (event.key !== "Escape") return;
+              clearCloseTimer();
+              closeAccountMenu();
+            });
+          }
+        };
+
         const onLoad = () => {
           setupToastApi();
           setupDirtyGuards();
           setupRevealAnimations();
+          setupNavGroups();
+          setupAccountMenu();
 
           const container = document.querySelector(".navbar-container");
           const toggle = document.querySelector(".navbar-toggle");
-          const accountMenu = document.querySelector(".account-menu");
-          const accountTrigger = document.querySelector(".account-menu-trigger");
-          const accountDropdown = document.getElementById("account-dropdown");
           if (container && toggle && toggle.dataset.bound !== "true") {
             toggle.dataset.bound = "true";
 
             toggle.addEventListener("click", () => {
               const isOpen = container.classList.toggle("menu-open");
               toggle.setAttribute("aria-expanded", String(isOpen));
-            });
-          }
-
-          if (accountMenu && accountTrigger && accountDropdown && accountTrigger.dataset.bound !== "true") {
-            accountTrigger.dataset.bound = "true";
-
-            accountTrigger.addEventListener("click", () => {
-              const isOpen = accountMenu.classList.toggle("is-open");
-              accountDropdown.hidden = !isOpen;
-              accountTrigger.setAttribute("aria-expanded", String(isOpen));
-            });
-
-            document.addEventListener("click", (event) => {
-              if (!accountMenu.classList.contains("is-open")) return;
-              if (event.target.closest(".account-menu")) return;
-              accountMenu.classList.remove("is-open");
-              accountDropdown.hidden = true;
-              accountTrigger.setAttribute("aria-expanded", "false");
             });
           }
         };

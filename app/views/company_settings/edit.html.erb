@@ -1,9 +1,9 @@
-<%= render "shared/settings_header", title: "Company Settings", section: :company %>
+<%= render "shared/settings_header", title: t("company_settings.view.edit.header_title"), section: :company %>
 
 <section class="team-members-panel">
   <% if @company.errors.any? || @template.errors.any? %>
     <div class="settings-error-summary">
-      <h3>Could not save settings</h3>
+      <h3><%= t("company_settings.view.edit.could_not_save") %></h3>
       <ul>
         <% @company.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -15,102 +15,102 @@
     </div>
   <% end %>
 
-  <h2>Company Profile</h2>
-  <p class="team-members-hint">These settings apply to your whole company workspace.</p>
+  <h2><%= t("company_settings.view.edit.company_profile") %></h2>
+  <p class="team-members-hint"><%= t("company_settings.view.edit.profile_hint") %></p>
 
   <%= form_with model: @company, url: company_settings_path, method: :patch, local: true, multipart: true, class: "settings-form-grid", data: { dirty_guard: true } do |f| %>
-    <div class="settings-section-title">1) Company Basic Information</div>
+    <div class="settings-section-title"><%= t("company_settings.view.edit.section_company_basic") %></div>
 
       <div class="<%= 'settings-field-error' if @company.errors[:name].any? %>">
-        <%= f.label :name, "Company Name" %>
+        <%= f.label :name, t("company_settings.view.edit.company_name") %>
         <%= f.text_field :name %>
       </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:legal_name].any? %>">
-      <%= f.label :legal_name, "Legal Name" %>
+      <%= f.label :legal_name, t("company_settings.view.edit.legal_name") %>
       <%= f.text_field :legal_name %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:registration_number].any? %>">
-      <%= f.label :registration_number, "Registration Number" %>
+      <%= f.label :registration_number, t("company_settings.view.edit.registration_number") %>
       <%= f.text_field :registration_number %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:registration_details].any? %>">
-      <%= f.label :registration_details, "Registration Details" %>
+      <%= f.label :registration_details, t("company_settings.view.edit.registration_details") %>
       <%= f.text_area :registration_details, rows: 3 %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:email].any? %>">
-      <%= f.label :email, "Company Email" %>
+      <%= f.label :email, t("company_settings.view.edit.company_email") %>
       <%= f.email_field :email %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:phone].any? %>">
-      <%= f.label :phone, "Company Phone" %>
+      <%= f.label :phone, t("company_settings.view.edit.company_phone") %>
       <%= f.text_field :phone %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:address].any? %>">
-      <%= f.label :address, "Company Address" %>
+      <%= f.label :address, t("company_settings.view.edit.company_address") %>
       <%= f.text_area :address, rows: 2 %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:website].any? %>">
-      <%= f.label :website, "Website" %>
-      <%= f.text_field :website, placeholder: "example.com or https://example.com" %>
+      <%= f.label :website, t("company_settings.view.edit.website") %>
+      <%= f.text_field :website, placeholder: t("company_settings.view.edit.website_placeholder") %>
     </div>
 
-    <div class="settings-section-title settings-grid-span-2">2) Default Business Parameters</div>
+    <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_default_business") %></div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_currency].any? %>">
-      <%= f.label :default_currency, "Default Currency" %>
+      <%= f.label :default_currency, t("company_settings.view.edit.default_currency") %>
       <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY], @company.default_currency.presence || "USD") %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_validity_days].any? %>">
-      <%= f.label :default_validity_days, "Default Validity Days" %>
+      <%= f.label :default_validity_days, t("company_settings.view.edit.default_validity_days") %>
       <%= f.number_field :default_validity_days, min: 1, step: 1 %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_trade_term].any? %>">
-      <%= f.label :default_trade_term, "Default Trade Terms" %>
-      <%= f.text_field :default_trade_term, placeholder: "EXW / FOB / CIF" %>
+      <%= f.label :default_trade_term, t("company_settings.view.edit.default_trade_terms") %>
+      <%= f.text_field :default_trade_term, placeholder: t("company_settings.view.edit.default_trade_terms_placeholder") %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_payment_term].any? %>">
-      <%= f.label :default_payment_term, "Default Payment Terms" %>
-      <%= f.text_field :default_payment_term, placeholder: "Net 30 / 50% deposit" %>
+      <%= f.label :default_payment_term, t("company_settings.view.edit.default_payment_terms") %>
+      <%= f.text_field :default_payment_term, placeholder: t("company_settings.view.edit.default_payment_terms_placeholder") %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_tax_rate].any? %>">
-      <%= f.label :default_tax_rate, "Default Tax Rate (%)" %>
+      <%= f.label :default_tax_rate, t("company_settings.view.edit.default_tax_rate") %>
       <%= f.number_field :default_tax_rate, step: 0.01, min: 0 %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:brand_color].any? || @template.errors[:accent_color].any? %>">
-      <%= f.label :brand_color, "Brand Primary Color" %>
+      <%= f.label :brand_color, t("company_settings.view.edit.brand_primary_color") %>
       <%= f.color_field :brand_color, value: (@company.brand_color.presence || "#1F4E79") %>
     </div>
 
-    <div class="settings-section-title settings-grid-span-2">3) Branding & Default Template Behavior</div>
+    <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_branding_behavior") %></div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:logo].any? %>">
       <div class="company-logo-row">
         <div class="company-logo-preview">
           <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>
           <% if has_logo %>
-            <%= image_tag @company.logo, alt: "Company Logo", id: "company_logo_preview_img" %>
+            <%= image_tag @company.logo, alt: t("company_settings.view.edit.company_logo_alt"), id: "company_logo_preview_img" %>
           <% else %>
-            <%= tag.img id: "company_logo_preview_img", alt: "Company Logo", hidden: true %>
+            <%= tag.img id: "company_logo_preview_img", alt: t("company_settings.view.edit.company_logo_alt"), hidden: true %>
           <% end %>
           <span id="company_logo_preview_fallback" <%= "hidden" if has_logo %>><%= @company.name.to_s.first.to_s.upcase %></span>
         </div>
         <div class="company-logo-actions">
-          <%= f.label :logo, "Upload Company Logo" %>
+          <%= f.label :logo, t("company_settings.view.edit.upload_company_logo") %>
           <%= f.file_field :logo, accept: "image/*", data: { live_preview_target: "#company_logo_preview_img", live_preview_fallback: "#company_logo_preview_fallback" } %>
           <% if @company.logo.attached? %>
-            <%= button_tag "Remove Current Logo",
+            <%= button_tag t("company_settings.view.edit.remove_current_logo"),
                            type: "submit",
                            name: "company[remove_logo]",
                            value: "1",
@@ -123,43 +123,43 @@
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @template.errors[:show_logo].any? || @template.errors[:show_images].any? || @template.errors[:show_terms_section].any? || @template.errors[:show_notes].any? || @template.errors[:show_payment_term].any? || @template.errors[:show_customer_owner].any? %>">
       <div class="settings-checkbox-grid">
         <%= hidden_field_tag "company[template_show_logo]", "0" %>
-        <label><%= check_box_tag "company[template_show_logo]", "1", @template.show_logo %> Show logo by default</label>
+        <label><%= check_box_tag "company[template_show_logo]", "1", @template.show_logo %> <%= t("company_settings.view.edit.show_logo_default") %></label>
         <%= hidden_field_tag "company[template_show_images]", "0" %>
-        <label><%= check_box_tag "company[template_show_images]", "1", @template.show_images %> Show images by default</label>
+        <label><%= check_box_tag "company[template_show_images]", "1", @template.show_images %> <%= t("company_settings.view.edit.show_images_default") %></label>
         <%= hidden_field_tag "company[template_show_terms_section]", "0" %>
-        <label><%= check_box_tag "company[template_show_terms_section]", "1", @template.show_terms_section %> Show terms section by default</label>
+        <label><%= check_box_tag "company[template_show_terms_section]", "1", @template.show_terms_section %> <%= t("company_settings.view.edit.show_terms_default") %></label>
         <%= hidden_field_tag "company[template_show_notes]", "0" %>
-        <label><%= check_box_tag "company[template_show_notes]", "1", @template.show_notes %> Show notes by default</label>
+        <label><%= check_box_tag "company[template_show_notes]", "1", @template.show_notes %> <%= t("company_settings.view.edit.show_notes_default") %></label>
         <%= hidden_field_tag "company[template_show_payment_term]", "0" %>
-        <label><%= check_box_tag "company[template_show_payment_term]", "1", @template.show_payment_term %> Show payment terms by default</label>
+        <label><%= check_box_tag "company[template_show_payment_term]", "1", @template.show_payment_term %> <%= t("company_settings.view.edit.show_payment_terms_default") %></label>
         <%= hidden_field_tag "company[template_show_customer_owner]", "0" %>
-        <label><%= check_box_tag "company[template_show_customer_owner]", "1", @template.show_customer_owner %> Show sales owner by default</label>
+        <label><%= check_box_tag "company[template_show_customer_owner]", "1", @template.show_customer_owner %> <%= t("company_settings.view.edit.show_sales_owner_default") %></label>
       </div>
     </div>
 
-    <div class="settings-section-title settings-grid-span-2">4) Reminder Email</div>
+    <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_reminder_email") %></div>
 
     <div class="settings-grid-span-2">
-      <p class="team-members-hint">Used when sales clicks Send Reminder. Leave any field blank to use the default reminder text. Available variables: <code>%{quote_no}</code>, <code>%{company_name}</code>, <code>%{customer_name}</code>.</p>
+      <p class="team-members-hint"><%= t("company_settings.view.edit.reminder_hint_html") %></p>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_subject].any? %>">
-      <%= f.label :reminder_email_subject, "Reminder Email Subject" %>
+      <%= f.label :reminder_email_subject, t("company_settings.view.edit.reminder_email_subject") %>
       <%= f.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_body].any? %>">
-      <%= f.label :reminder_email_body, "Reminder Email Body" %>
+      <%= f.label :reminder_email_body, t("company_settings.view.edit.reminder_email_body") %>
       <%= f.text_area :reminder_email_body, rows: 3, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:reminder_email_cta_label].any? %>">
-      <%= f.label :reminder_email_cta_label, "Reminder Button Label" %>
+      <%= f.label :reminder_email_cta_label, t("company_settings.view.edit.reminder_button_label") %>
       <%= f.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %>
     </div>
 
     <div class="settings-grid-span-2 settings-actions">
-      <%= f.submit "Save Company Settings", class: "btn btn-primary" %>
+      <%= f.submit t("company_settings.view.edit.save_company_settings"), class: "btn btn-primary" %>
     </div>
   <% end %>
 </section>

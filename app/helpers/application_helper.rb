@@ -47,7 +47,7 @@ module ApplicationHelper
   def relative_in_user_time(value, user = current_user)
     return nil if value.blank?
 
-    "#{time_ago_in_words(value.in_time_zone(user_preferred_time_zone(user)))} ago"
+    t("datetime.ago", time: time_ago_in_words(value.in_time_zone(user_preferred_time_zone(user))), default: "%{time} ago")
   end
 
   def time_zone_options_for_select
@@ -127,7 +127,50 @@ module ApplicationHelper
     raw = template&.respond_to?(:watermark_opacity) ? template.watermark_opacity : nil
     percent = raw.to_i
     percent = 12 if percent <= 0
-    percent = [[percent, 3].max, 40].min
+    percent = [ [ percent, 3 ].max, 40 ].min
     format("%.2f", percent / 100.0)
+  end
+
+  def app_breadcrumb_items
+    return [] unless user_signed_in?
+
+    case controller_path
+    when "dashboard"
+      [
+        { label: t("nav.dashboard"), path: nil }
+      ]
+    when "customers"
+      [
+        { label: t("nav.customers"), path: nil }
+      ]
+    when "products"
+      [
+        { label: t("nav.products"), path: nil }
+      ]
+    when "product_presets", "addon_presets", "spec_presets"
+      [
+        { label: t("nav.products"), path: products_path },
+        { label: t("nav.presets"), path: nil }
+      ]
+    when "quote_templates"
+      [
+        { label: t("nav.template"), path: nil }
+      ]
+    when "team_members"
+      [
+        { label: t("nav.team"), path: nil }
+      ]
+    when "team_invitations"
+      [
+        { label: t("nav.team"), path: team_members_path },
+        { label: t("settings.invitations"), path: nil }
+      ]
+    when "admin/users"
+      [
+        { label: t("nav.admin"), path: nil }
+      ]
+    else
+      []
+    end
   end
 end

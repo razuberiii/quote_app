@@ -19,56 +19,56 @@ class QuoteDecisionReviewService
     if @quote.accepted_at.present?
       {
         tone: "good",
-        label: "Move to fulfillment",
-        detail: "Buyer has already accepted this revision. Shift from selling to delivery handoff."
+        label: t("recommended_move.move_to_fulfillment.label"),
+        detail: t("recommended_move.move_to_fulfillment.detail")
       }
     elsif @quote.status.to_s == "won"
       {
         tone: "good",
-        label: "Move to handoff",
-        detail: "This revision is marked won internally. Coordinate delivery, paperwork, or onboarding."
+        label: t("recommended_move.move_to_handoff.label"),
+        detail: t("recommended_move.move_to_handoff.detail")
       }
     elsif @quote.workflow_state == "lost"
       {
         tone: "watch",
-        label: "Re-open only if interest returns",
-        detail: "This revision was marked lost. Create a new revision if the buyer re-engages."
+        label: t("recommended_move.reopen_if_interest_returns.label"),
+        detail: t("recommended_move.reopen_if_interest_returns.detail")
       }
     elsif reopened_pending?
       {
         tone: "watch",
-        label: "Update and reshare",
-        detail: "This quote is back in draft. Finish edits and generate a fresh public link."
+        label: t("recommended_move.update_and_reshare.label"),
+        detail: t("recommended_move.update_and_reshare.detail")
       }
     elsif @quote.changes_requested_at.present?
       {
         tone: "watch",
-        label: "Prepare next revision",
-        detail: "Customer asked for changes. Use the request context and ship the next revision quickly."
+        label: t("recommended_move.prepare_next_revision.label"),
+        detail: t("recommended_move.prepare_next_revision.detail")
       }
     elsif first_share_at.blank?
       {
         tone: "watch",
-        label: "Share public link",
-        detail: "No public link activity yet. Generate a share link before chasing buyer feedback."
+        label: t("recommended_move.share_public_link.label"),
+        detail: t("recommended_move.share_public_link.detail")
       }
     elsif first_view_at.blank?
       {
         tone: "watch",
-        label: "Send reminder",
-        detail: "Quote has been shared but not viewed. Nudge the buyer before the thread goes cold."
+        label: t("recommended_move.send_reminder.label"),
+        detail: t("recommended_move.send_reminder.detail")
       }
     elsif expiring_soon?
       {
         tone: "urgent",
-        label: "Close before expiry",
-        detail: "Buyer has engaged and the validity window is tight. Push decision or send a revision today."
+        label: t("recommended_move.close_before_expiry.label"),
+        detail: t("recommended_move.close_before_expiry.detail")
       }
     else
       {
         tone: "good",
-        label: "Follow up while warm",
-        detail: "Buyer activity exists. Reconfirm timing, pricing fit, and next decision checkpoint."
+        label: t("recommended_move.follow_up_while_warm.label"),
+        detail: t("recommended_move.follow_up_while_warm.detail")
       }
     end
   end
@@ -76,38 +76,38 @@ class QuoteDecisionReviewService
   def buyer_readiness
     if @quote.accepted_at.present?
       {
-        value: "Committed",
-        detail: "Accepted via quote workflow."
+        value: t("buyer_readiness.committed.value"),
+        detail: t("buyer_readiness.committed.detail")
       }
     elsif @quote.status.to_s == "won"
       {
-        value: "Won",
-        detail: "Marked won internally."
+        value: t("buyer_readiness.won.value"),
+        detail: t("buyer_readiness.won.detail")
       }
     elsif @quote.changes_requested_at.present?
       {
-        value: "Engaged",
-        detail: "Buyer asked for changes instead of going silent."
+        value: t("buyer_readiness.engaged.value"),
+        detail: t("buyer_readiness.engaged.detail")
       }
     elsif total_views >= 2
       {
-        value: "Warm",
-        detail: "#{total_views} views recorded on the public link."
+        value: t("buyer_readiness.warm.value"),
+        detail: t("buyer_readiness.warm.detail", count: total_views)
       }
     elsif first_view_at.present?
       {
-        value: "Interested",
-        detail: "Buyer has viewed the quote once."
+        value: t("buyer_readiness.interested.value"),
+        detail: t("buyer_readiness.interested.detail")
       }
     elsif first_share_at.present?
       {
-        value: "Cold",
-        detail: "Shared externally, but no view recorded yet."
+        value: t("buyer_readiness.cold.value"),
+        detail: t("buyer_readiness.cold.detail")
       }
     else
       {
-        value: "Not Started",
-        detail: "No public share or buyer engagement yet."
+        value: t("buyer_readiness.not_started.value"),
+        detail: t("buyer_readiness.not_started.detail")
       }
     end
   end
@@ -120,33 +120,37 @@ class QuoteDecisionReviewService
 
     if @revision_diff.blank?
       {
-        value: "No compare",
-        detail: "This revision has no previous version to compare."
+        value: t("revision_scope.no_compare.value"),
+        detail: t("revision_scope.no_compare.detail")
       }
     elsif item_changes.zero? && commercial_changes.zero?
       {
-        value: "No change",
-        detail: "Current and previous revisions are commercially identical."
+        value: t("revision_scope.no_change.value"),
+        detail: t("revision_scope.no_change.detail")
       }
     else
       {
-        value: "#{item_changes} item / #{commercial_changes} term",
-        detail: "Detected #{item_changes} item-level and #{commercial_changes} commercial change(s) versus the previous revision."
+        value: t("revision_scope.changed.value", item_count: item_changes, term_count: commercial_changes),
+        detail: t("revision_scope.changed.detail", item_count: item_changes, commercial_count: commercial_changes)
       }
     end
   end
 
   def review_notes
     notes = []
-    notes << "Accepted on #{format_date(@quote.accepted_at)}." if @quote.accepted_at.present?
-    notes << "Marked won on #{format_date(@quote.won_at)}." if @quote.respond_to?(:won_at) && @quote.won_at.present?
-    notes << "Marked lost on #{format_date(@quote.lost_at)}." if @quote.respond_to?(:lost_at) && @quote.workflow_state == "lost" && @quote.lost_at.present?
-    notes << "Revision requested on #{format_date(@quote.changes_requested_at)}." if @quote.changes_requested_at.present?
-    notes << "First viewed on #{format_date(first_view_at)}." if first_view_at.present?
-    notes << "Shared #{share_count} time#{'s' unless share_count == 1}." if share_count.positive?
-    notes << "Valid until #{@quote.valid_until.strftime('%Y-%m-%d')}." if @quote.valid_until.present?
-    notes << "Revision reopened on #{format_date(@quote.reopened_at)}." if reopened_pending?
+    notes << t("review_notes.accepted_on", date: format_date(@quote.accepted_at)) if @quote.accepted_at.present?
+    notes << t("review_notes.marked_won_on", date: format_date(@quote.won_at)) if @quote.respond_to?(:won_at) && @quote.won_at.present?
+    notes << t("review_notes.marked_lost_on", date: format_date(@quote.lost_at)) if @quote.respond_to?(:lost_at) && @quote.workflow_state == "lost" && @quote.lost_at.present?
+    notes << t("review_notes.revision_requested_on", date: format_date(@quote.changes_requested_at)) if @quote.changes_requested_at.present?
+    notes << t("review_notes.first_viewed_on", date: format_date(first_view_at)) if first_view_at.present?
+    notes << t("review_notes.shared_times", count: share_count) if share_count.positive?
+    notes << t("review_notes.valid_until", date: @quote.valid_until.strftime("%Y-%m-%d")) if @quote.valid_until.present?
+    notes << t("review_notes.revision_reopened_on", date: format_date(@quote.reopened_at)) if reopened_pending?
     notes.first(4)
+  end
+
+  def t(key, **options)
+    I18n.t("quotes.logic.decision_review.#{key}", **options)
   end
 
   def first_share_at

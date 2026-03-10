@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "open3"
+
+command = ["ruby", "bin/rails", "tailwindcss:build"]
+quiet_patterns = [
+  /VIPS-WARNING/i,
+  /vips-(heif|jxl|magick|openslide|poppler)\.dll/i
+]
+
+Open3.popen2e(*command) do |_stdin, stdout_err, wait_thr|
+  stdout_err.each_line do |line|
+    next if quiet_patterns.any? { |pattern| line.match?(pattern) }
+
+    $stdout.print(line)
+  end
+
+  exit(wait_thr.value.exitstatus || 0)
+end

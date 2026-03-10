@@ -9,7 +9,7 @@ module Admin
 
     def update
       if @user.update(user_params)
-        redirect_to admin_users_path, notice: "Role updated."
+        redirect_to admin_users_path, notice: t("admin.users.flash.role_updated")
       else
         @users = User.includes(:company).order(:id)
         render :index, status: :unprocessable_entity

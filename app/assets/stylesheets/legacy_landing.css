@@ -365,73 +365,6 @@ a:hover {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .navbar-container {
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-  }
-
-  .navbar-toggle {
-    display: inline-flex;
-  }
-
-  .navbar-menu {
-    width: 100%;
-    display: none;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-1);
-    margin-top: 0.25rem;
-  }
-
-  .navbar-menu-public {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-    gap: var(--space-1);
-  }
-
-  .navbar-container.menu-open .navbar-menu {
-    display: grid;
-  }
-
-  .navbar-menu li {
-    margin-bottom: 0;
-  }
-
-  .navbar-menu a {
-    display: block;
-    padding: 0.45rem 0.55rem;
-    border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .account-menu {
-    width: 100%;
-  }
-
-  .account-menu-trigger {
-    width: 100%;
-    justify-content: flex-start;
-  }
-
-  .account-dropdown {
-    position: static;
-    margin-top: 0.35rem;
-    width: 100%;
-    box-shadow: none;
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-  }
-
-  .account-dropdown a {
-    color: #fff;
-  }
-
-  .account-dropdown a:hover {
-    background: rgba(255, 255, 255, 0.12);
-  }
-
   .table-responsive {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
@@ -747,10 +680,6 @@ a:hover {
 }
 
 @media (max-width: 480px) {
-  .navbar-menu {
-    grid-template-columns: 1fr;
-  }
-
   .customer-mobile-metrics {
     grid-template-columns: 1fr;
   }
@@ -2712,15 +2641,6 @@ a:hover {
 }
 
 @media (max-width: 768px) {
-  .navbar-brand-wrap {
-    gap: var(--space-1);
-  }
-
-  .navbar-company-context {
-    font-size: 0.72rem;
-    padding: 0 8px;
-  }
-
   .team-overview-grid {
     grid-template-columns: 1fr;
   }

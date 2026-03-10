@@ -1,8 +1,8 @@
 <%= render "components/ui/card", class: "dashboard-panel dashboard-action-required app-surface" do %>
   <div class="dashboard-action-summary-head">
-    <h2>Action Required</h2>
+    <h2><%= t("dashboard.view.action_items.title") %></h2>
     <span class="dashboard-alert-pill <%= @generated_action_items.any? ? 'is-watch' : 'is-good' %>">
-      <%= pluralize(@generated_action_items.count, "open item") %>
+      <%= t("dashboard.view.action_items.open_items", count: @generated_action_items.count) %>
     </span>
   </div>
 
@@ -16,8 +16,8 @@
             <p><%= item.reference.is_a?(Quote) ? item.reference.customer.name : item.reference_label %></p>
           </div>
           <div class="dashboard-task-actions">
-            <%= link_to "Open", item.link_path, class: "dashboard-next-step-btn is-neutral" %>
-            <%= button_to "Mark handled", resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
+            <%= link_to t("dashboard.view.action_items.open"), item.link_path, class: "dashboard-next-step-btn is-neutral" %>
+            <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
           </div>
         </article>
       <% end %>
@@ -32,25 +32,25 @@
                 <p><%= item.reference.is_a?(Quote) ? item.reference.customer.name : item.reference_label %></p>
               </div>
               <div class="dashboard-task-actions">
-                <%= link_to "Open", item.link_path, class: "dashboard-next-step-btn is-neutral" %>
-                <%= button_to "Mark handled", resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
+                <%= link_to t("dashboard.view.action_items.open"), item.link_path, class: "dashboard-next-step-btn is-neutral" %>
+                <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
               </div>
             </article>
           <% end %>
         </div>
 
         <div class="dashboard-task-footer">
-          <p><%= pluralize(@generated_action_items.size - 4, "more open item") %> in the queue.</p>
+          <p><%= t("dashboard.view.action_items.more_open_items_in_queue", count: @generated_action_items.size - 4) %></p>
           <%= render "components/ui/button",
                      variant: :secondary,
                      class: "dashboard-inline-toggle",
                      attrs: { data: { action_items_toggle: true, action_count: @generated_action_items.size - 4, expanded: "false" } } do %>
-            Show more (<%= @generated_action_items.size - 4 %>)
+            <%= t("dashboard.view.index.show_more", count: @generated_action_items.size - 4) %>
           <% end %>
         </div>
       <% end %>
     </div>
   <% else %>
-    <p class="dashboard-panel-note">No unresolved action items. Current quote flow looks clean.</p>
+    <p class="dashboard-panel-note"><%= t("dashboard.view.action_items.no_unresolved") %></p>
   <% end %>
 <% end %>

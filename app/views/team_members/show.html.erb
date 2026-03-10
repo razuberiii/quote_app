@@ -1,21 +1,21 @@
-<%= render "shared/settings_header", title: "Team Member Profile", section: :team %>
+<%= render "shared/settings_header", title: t("team_members.view.show.header_title"), section: :team %>
 
 <section class="team-members-panel">
   <div class="member-profile-head">
     <div class="member-profile-avatar">
       <% if @member.avatar.attached? %>
-        <%= image_tag @member.avatar, alt: "Avatar" %>
+        <%= image_tag @member.avatar, alt: t("team_members.view.show.avatar_alt") %>
       <% else %>
         <span><%= @member.email.to_s.first.to_s.upcase %></span>
       <% end %>
     </div>
     <div class="member-profile-meta">
       <h2><%= @member.email %></h2>
-      <p><strong>Company Role:</strong> <span class="role-badge role-badge-<%= @member.company_role %>"><%= @member.company_role.capitalize %></span></p>
-      <p><strong>Company:</strong> <%= @member.company.name %></p>
-      <p><strong>Joined:</strong> <%= @member.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+      <p><strong><%= t("team_members.view.show.company_role") %>:</strong> <span class="role-badge role-badge-<%= @member.company_role %>"><%= @member.company_role.capitalize %></span></p>
+      <p><strong><%= t("team_members.view.show.company") %>:</strong> <%= @member.company.name %></p>
+      <p><strong><%= t("team_members.view.show.joined") %>:</strong> <%= @member.created_at.strftime("%Y-%m-%d %H:%M") %></p>
     </div>
   </div>
 </section>
 
-<%= link_to "Back to Team", team_members_path, class: "btn btn-secondary" %>
+<%= link_to t("team_members.view.show.back"), team_members_path, class: "btn btn-secondary" %>

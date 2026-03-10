@@ -1,38 +1,38 @@
 <div class="dashboard-funnel-inline">
   <div class="dashboard-funnel-inline-head">
-    <h3>Quote Funnel</h3>
-    <span>Current quote-thread counts and conversion rates.</span>
+    <h3><%= t("dashboard.view.quote_funnel.title") %></h3>
+    <span><%= t("dashboard.view.quote_funnel.caption") %></span>
   </div>
   <div class="dashboard-funnel-grid">
     <article class="dashboard-funnel-step">
-      <span>Sent</span>
+      <span><%= t("dashboard.view.quote_funnel.sent") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_sent] %></strong>
       </div>
     </article>
     <article class="dashboard-funnel-step">
-      <span>Viewed</span>
+      <span><%= t("dashboard.view.quote_funnel.viewed") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_viewed] %></strong>
         <small><%= @quote_funnel[:view_rate] %>%</small>
       </div>
     </article>
     <article class="dashboard-funnel-step">
-      <span>Revisions</span>
+      <span><%= t("dashboard.view.quote_funnel.revisions") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:revisions_requested] %></strong>
         <small><%= @quote_funnel[:revision_rate] %>%</small>
       </div>
     </article>
     <article class="dashboard-funnel-step">
-      <span>Accepted</span>
+      <span><%= t("dashboard.view.quote_funnel.accepted") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_accepted] %></strong>
         <small><%= @quote_funnel[:acceptance_rate] %>%</small>
       </div>
     </article>
     <article class="dashboard-funnel-step">
-      <span>Lost</span>
+      <span><%= t("dashboard.view.quote_funnel.lost") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_lost] %></strong>
         <small><%= @quote_funnel[:loss_rate] %>%</small>

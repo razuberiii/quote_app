@@ -5,23 +5,23 @@
     <aside class="product-edit-media">
       <section class="quote-form-section product-edit-panel product-edit-panel--media">
         <div class="app-form-section-head">
-          <h3>Product Media</h3>
-          <p class="app-form-section-note">Maintain a clean image set so products feel ready for quoting and sharing.</p>
+          <h3><%= t("products.view.form.product_media") %></h3>
+          <p class="app-form-section-note"><%= t("products.view.form.product_media_hint") %></p>
         </div>
 
         <div class="product-main-image-panel">
-          <p class="product-media-label">Main image</p>
+          <p class="product-media-label"><%= t("products.view.form.main_image") %></p>
           <% if product.display_image.present? %>
             <div class="product-main-image-frame">
-              <%= image_tag product.display_image, class: "product-main-image product-main-image-large product-edit-main-image", alt: "Main product image" %>
+              <%= image_tag product.display_image, class: "product-main-image product-main-image-large product-edit-main-image", alt: t("products.view.form.main_product_image_alt") %>
             </div>
           <% else %>
-            <p class="quote-form-hint">No image yet. Upload images to build gallery.</p>
+            <p class="quote-form-hint"><%= t("products.view.form.no_image_hint") %></p>
           <% end %>
         </div>
 
         <div class="product-upload-panel">
-          <%= f.label :gallery_images, product.new_record? ? "Upload Images" : "Add More Images" %>
+          <%= f.label :gallery_images, product.new_record? ? t("products.view.form.upload_images") : t("products.view.form.add_more_images") %>
           <%= f.file_field :gallery_images, accept: "image/*", multiple: true, id: "product_gallery_images_#{form_key}", data: { has_display: product.display_image.present? } %>
           <%= hidden_field_tag "product[primary_uploaded_image_index]", "", id: "product_primary_uploaded_image_index_#{form_key}" %>
           <div id="product_gallery_preview_<%= form_key %>" class="product-upload-preview" hidden></div>
@@ -30,43 +30,43 @@
         <% if product.gallery_images.attached? %>
           <div class="product-gallery-editor">
             <div class="product-gallery-toolbar">
-              <p class="product-media-label">Gallery</p>
+              <p class="product-media-label"><%= t("products.view.form.gallery") %></p>
               <div class="product-gallery-toolbar-actions">
-                <button type="button" class="product-ghost-btn" id="product_gallery_select_all_<%= form_key %>">Select all</button>
-                <button type="button" class="product-ghost-btn is-danger" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled>Delete selected</button>
+                <button type="button" class="product-ghost-btn" id="product_gallery_select_all_<%= form_key %>"><%= t("products.view.form.select_all") %></button>
+                <button type="button" class="product-ghost-btn is-danger" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled><%= t("products.view.form.delete_selected") %></button>
               </div>
             </div>
-            <p class="quote-form-hint" id="product_gallery_selected_count_<%= form_key %>">0 selected</p>
+            <p class="quote-form-hint" id="product_gallery_selected_count_<%= form_key %>"><%= t("products.view.form.selected_count", count: 0) %></p>
             <div class="product-gallery-grid">
               <% product.gallery_images.attachments.each do |attachment| %>
                 <% is_main = product.image.attached? && product.image.blob_id == attachment.blob_id %>
                 <article class="product-gallery-item">
                   <div class="product-gallery-media">
-                    <label class="product-gallery-select-toggle" title="Select image">
+                    <label class="product-gallery-select-toggle" title="<%= t("products.view.form.select_image") %>">
                       <input type="checkbox" class="product-gallery-select-input" value="<%= attachment.id %>">
                       <span class="product-gallery-select-indicator"></span>
                     </label>
 
                     <% if is_main %>
                       <div class="product-gallery-thumb-wrap is-current">
-                        <%= image_tag attachment, class: "product-gallery-thumb", alt: "Gallery image" %>
+                        <%= image_tag attachment, class: "product-gallery-thumb", alt: t("products.view.form.gallery_image_alt") %>
                       </div>
                     <% else %>
-                      <%= link_to set_primary_image_product_path(product, attachment_id: attachment.id), data: { turbo_method: :patch }, class: "product-gallery-thumb-wrap", title: "Set as main image" do %>
-                        <%= image_tag attachment, class: "product-gallery-thumb", alt: "Gallery image" %>
+                      <%= link_to set_primary_image_product_path(product, attachment_id: attachment.id), data: { turbo_method: :patch }, class: "product-gallery-thumb-wrap", title: t("products.view.form.set_as_main_image") do %>
+                        <%= image_tag attachment, class: "product-gallery-thumb", alt: t("products.view.form.gallery_image_alt") %>
                       <% end %>
                     <% end %>
 
                     <%= link_to remove_gallery_image_product_path(product, attachment_id: attachment.id),
-                                data: { turbo_method: :delete, turbo_confirm: "Delete this image?" },
+                                data: { turbo_method: :delete, turbo_confirm: t("products.view.form.delete_image_confirm") },
                                 class: "product-gallery-delete-icon",
-                                title: "Delete image",
-                                aria: { label: "Delete image" } do %>
+                                title: t("products.view.form.delete_image"),
+                                aria: { label: t("products.view.form.delete_image") } do %>
                       ×
                     <% end %>
 
                     <% if is_main %>
-                      <span class="product-gallery-main-badge">Main</span>
+                      <span class="product-gallery-main-badge"><%= t("products.view.form.main") %></span>
                     <% end %>
                   </div>
                 </article>
@@ -80,28 +80,28 @@
     <div class="product-edit-content product-edit-stack">
       <section class="quote-form-section product-edit-panel">
         <div class="app-form-section-head">
-          <h3>Basic Info</h3>
-          <p class="app-form-section-note">Define the core identity buyers and sales will recognize instantly.</p>
+          <h3><%= t("products.view.form.basic_info") %></h3>
+          <p class="app-form-section-note"><%= t("products.view.form.basic_info_hint") %></p>
         </div>
         <div class="quote-form-grid">
           <div>
             <%= f.label :name %>
-            <%= f.text_field :name, placeholder: "Product Name", class: ui_input_classes %>
+            <%= f.text_field :name, placeholder: t("products.view.form.product_name"), class: ui_input_classes %>
           </div>
           <div>
             <%= f.label :sku %>
-            <%= f.text_field :sku, placeholder: "SKU/Product Code", class: ui_input_classes(product.errors[:sku].any? ? "input-error" : nil) %>
+            <%= f.text_field :sku, placeholder: t("products.view.form.sku_placeholder"), class: ui_input_classes(product.errors[:sku].any? ? "input-error" : nil) %>
             <% if product.errors[:sku].any? %>
               <p class="field-error-message"><%= product.errors.full_messages_for(:sku).first %></p>
             <% end %>
           </div>
           <div>
-            <%= f.label :product_category, "Category" %>
-            <%= f.text_field :product_category, placeholder: "Pump / Fittings / Spare Parts", class: ui_input_classes %>
+            <%= f.label :product_category, t("products.view.form.category") %>
+            <%= f.text_field :product_category, placeholder: t("products.view.form.category_placeholder"), class: ui_input_classes %>
           </div>
           <div>
-            <%= f.label :unit, "Unit" %>
-            <%= f.text_field :unit, placeholder: "pcs / set / kg / carton", list: "product_unit_options_#{form_key}", class: ui_input_classes %>
+            <%= f.label :unit, t("products.view.form.unit") %>
+            <%= f.text_field :unit, placeholder: t("products.view.form.unit_placeholder"), list: "product_unit_options_#{form_key}", class: ui_input_classes %>
             <datalist id="product_unit_options_<%= form_key %>">
               <option value="pcs"></option>
               <option value="set"></option>
@@ -116,58 +116,58 @@
 
       <section class="quote-form-section product-edit-panel">
         <div class="app-form-section-head">
-          <h3>Pricing & Business</h3>
-          <p class="app-form-section-note">Keep reference pricing, currency, and commercial constraints together.</p>
+          <h3><%= t("products.view.form.pricing_business") %></h3>
+          <p class="app-form-section-note"><%= t("products.view.form.pricing_business_hint") %></p>
         </div>
         <div class="quote-form-grid">
           <div>
-            <%= f.label :default_price, "Reference Price" %>
+            <%= f.label :default_price, t("products.view.form.reference_price") %>
             <%= f.number_field :default_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
           </div>
           <div>
-            <%= f.label :price_currency, "Reference Price Currency" %>
+            <%= f.label :price_currency, t("products.view.form.reference_price_currency") %>
             <%= f.select :price_currency, Product::PRICE_CURRENCIES, {}, { class: ui_input_classes } %>
           </div>
           <div>
-            <%= f.label :cost_price, "Cost Price (internal only)" %>
+            <%= f.label :cost_price, t("products.view.form.cost_price") %>
             <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
-            <p class="quote-form-hint">Internal only. Not shown in quotation output.</p>
+            <p class="quote-form-hint"><%= t("products.view.form.cost_price_hint") %></p>
           </div>
           <div>
             <%= f.label :moq, "MOQ" %>
             <%= f.number_field :moq, min: 0, step: 1, placeholder: "0", class: ui_input_classes %>
           </div>
           <div>
-            <%= f.label :lead_time, "Lead Time" %>
-            <%= f.text_field :lead_time, placeholder: "e.g. 15-20 days", class: ui_input_classes %>
+            <%= f.label :lead_time, t("products.view.form.lead_time") %>
+            <%= f.text_field :lead_time, placeholder: t("products.view.form.lead_time_placeholder"), class: ui_input_classes %>
           </div>
         </div>
       </section>
 
       <section class="quote-form-section product-edit-panel">
         <div class="app-form-section-head">
-          <h3>Description</h3>
-          <p class="app-form-section-note">Add short operational context so sales does not need to re-explain the product each time.</p>
+          <h3><%= t("products.view.form.description") %></h3>
+          <p class="app-form-section-note"><%= t("products.view.form.description_hint") %></p>
         </div>
         <div class="quote-form-grid">
           <div class="quote-form-grid-span-2">
             <%= f.label :description %>
-            <%= f.text_area :description, rows: 5, placeholder: "Product Description", class: ui_input_classes %>
+            <%= f.text_area :description, rows: 5, placeholder: t("products.view.form.product_description"), class: ui_input_classes %>
           </div>
         </div>
       </section>
 
       <section class="quote-form-section product-edit-panel">
         <div class="app-form-section-head">
-          <h3>Configurator Presets</h3>
-          <p class="app-form-section-note">Bind reusable spec and add-on presets to this product. The selected default presets will auto-fill into quote items, and sales can still switch presets or edit rows inside a quote.</p>
+          <h3><%= t("products.view.form.configurator_presets") %></h3>
+          <p class="app-form-section-note"><%= t("products.view.form.configurator_presets_hint") %></p>
         </div>
         <div class="quote-form-grid">
           <div class="quote-form-grid-span-2">
             <div class="product-configurator-card">
               <div class="product-configurator-head">
-                <strong>Bound Spec Presets</strong>
-                <%= link_to "Manage Spec Presets", product_presets_path(anchor: "spec-presets"), class: "quote-kv-add" %>
+                <strong><%= t("products.view.form.bound_spec_presets") %></strong>
+                <%= link_to t("products.view.form.manage_spec_presets"), product_presets_path(anchor: "spec-presets"), class: "quote-kv-add" %>
               </div>
               <% if @spec_presets.any? %>
                 <%= hidden_field_tag "product[spec_preset_ids][]", "" %>
@@ -183,11 +183,11 @@
                   <% end %>
                 </div>
                 <div class="product-configurator-default">
-                  <%= f.label :default_spec_preset_id, "Default Spec Preset" %>
-                  <%= f.select :default_spec_preset_id, options_for_select(@spec_presets.map { |preset| [preset.name, preset.id] }, product.default_spec_preset_id), { include_blank: "No default preset" }, { class: ui_input_classes } %>
+                  <%= f.label :default_spec_preset_id, t("products.view.form.default_spec_preset") %>
+                  <%= f.select :default_spec_preset_id, options_for_select(@spec_presets.map { |preset| [preset.name, preset.id] }, product.default_spec_preset_id), { include_blank: t("products.view.form.no_default_preset") }, { class: ui_input_classes } %>
                 </div>
               <% else %>
-                <p class="quote-form-hint">No spec presets yet. Create one first, then bind it to this product.</p>
+                <p class="quote-form-hint"><%= t("products.view.form.no_spec_presets") %></p>
               <% end %>
               <% if product.errors[:default_spec_preset].any? %>
                 <p class="field-error-message"><%= product.errors.full_messages_for(:default_spec_preset).first %></p>
@@ -198,8 +198,8 @@
           <div class="quote-form-grid-span-2">
             <div class="product-configurator-card">
               <div class="product-configurator-head">
-                <strong>Bound Add-on Presets</strong>
-                <%= link_to "Manage Add-on Presets", product_presets_path(anchor: "addon-presets"), class: "quote-kv-add" %>
+                <strong><%= t("products.view.form.bound_addon_presets") %></strong>
+                <%= link_to t("products.view.form.manage_addon_presets"), product_presets_path(anchor: "addon-presets"), class: "quote-kv-add" %>
               </div>
               <% if @addon_presets.any? %>
                 <%= hidden_field_tag "product[addon_preset_ids][]", "" %>
@@ -215,11 +215,11 @@
                   <% end %>
                 </div>
                 <div class="product-configurator-default">
-                  <%= f.label :default_addon_preset_id, "Default Add-on Preset" %>
-                  <%= f.select :default_addon_preset_id, options_for_select(@addon_presets.map { |preset| [preset.name, preset.id] }, product.default_addon_preset_id), { include_blank: "No default preset" }, { class: ui_input_classes } %>
+                  <%= f.label :default_addon_preset_id, t("products.view.form.default_addon_preset") %>
+                  <%= f.select :default_addon_preset_id, options_for_select(@addon_presets.map { |preset| [preset.name, preset.id] }, product.default_addon_preset_id), { include_blank: t("products.view.form.no_default_preset") }, { class: ui_input_classes } %>
                 </div>
               <% else %>
-                <p class="quote-form-hint">No add-on presets yet. Create one first, then bind it to this product.</p>
+                <p class="quote-form-hint"><%= t("products.view.form.no_addon_presets") %></p>
               <% end %>
               <% if product.errors[:default_addon_preset].any? %>
                 <p class="field-error-message"><%= product.errors.full_messages_for(:default_addon_preset).first %></p>
@@ -240,6 +240,12 @@
 
 <script>
   (() => {
+    const selectedCountLabel = "<%= j t("products.view.form.selected_count", count: "%{count}") %>";
+    const deleteSelectedConfirmLabel = "<%= j t("products.view.form.delete_selected_confirm", count: "%{count}") %>";
+    const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
+    const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
+    const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
+
     const selectAllBtn = document.getElementById("product_gallery_select_all_<%= form_key %>");
     const deleteSelectedBtn = document.getElementById("product_gallery_delete_selected_<%= form_key %>");
     const selectedCountEl = document.getElementById("product_gallery_selected_count_<%= form_key %>");
@@ -253,7 +259,7 @@
         checkboxes.forEach((input) => {
           input.closest(".product-gallery-item")?.classList.toggle("is-selected", input.checked);
         });
-        selectedCountEl.textContent = `${selected.length} selected`;
+        selectedCountEl.textContent = selectedCountLabel.replace("%{count}", String(selected.length));
         deleteSelectedBtn.disabled = selected.length === 0;
       };
 
@@ -270,7 +276,7 @@
       deleteSelectedBtn.addEventListener("click", () => {
         const selected = checkboxes.filter((input) => input.checked).map((input) => input.value);
         if (!selected.length) return;
-        if (!window.confirm(`Delete ${selected.length} selected image(s)?`)) return;
+        if (!window.confirm(deleteSelectedConfirmLabel.replace("%{count}", String(selected.length)))) return;
 
         const form = document.createElement("form");
         form.method = "post";
@@ -350,7 +356,7 @@
         item.type = "button";
         item.className = "product-upload-preview-item";
         item.dataset.index = String(index);
-        item.title = "Set as main image";
+        item.title = setAsMainImageLabel;
 
         const img = document.createElement("img");
         img.className = "product-upload-preview-thumb";
@@ -360,13 +366,13 @@
 
         const label = document.createElement("span");
         label.className = "product-upload-preview-label";
-        label.textContent = "Set as main";
+        label.textContent = setAsMainLabel;
 
         const remove = document.createElement("button");
         remove.type = "button";
         remove.className = "product-upload-preview-remove";
         remove.textContent = "×";
-        remove.title = "Remove file";
+        remove.title = removeFileLabel;
         remove.addEventListener("click", (event) => {
           event.stopPropagation();
           const current = selectedIndex();

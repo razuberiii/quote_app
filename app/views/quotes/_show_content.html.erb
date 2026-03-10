@@ -1,16 +1,17 @@
-<%= link_to "← Back to Customer", @quote.customer, class: "quote-back-link quote-back-link-top" %>
+<%= link_to "\u2190 #{t("quotes.view.show.back_to_customer")}", @quote.customer, class: "quote-back-link quote-back-link-top" %>
 
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
 <% workflow_state = @quote.workflow_state %>
 <% current_latest_revision = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
+<% quote_document_locale = @quote_document_locale || I18n.locale %>
 <div class="quote-document quote-document-shell<%= " quote-watermarked" if watermark_text.present? %>"
      data-watermark="<%= watermark_text %>"
      data-has-newer-revision="<%= @has_newer_revision ? "true" : "false" %>"
      data-current-latest="<%= current_latest_revision ? "true" : "false" %>"
      style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
   <% if watermark_image_url.present? %>
-    <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
+    <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-watermark-image">
   <% end %>
   <% active_template = @template %>
   <% spec_label = @quote.resolved_spec_label %>
@@ -20,25 +21,27 @@
   <% original_total = (@quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d).round(2) %>
   <% has_discount = discount_amount.positive? %>
   <% savings_amount = has_discount ? discount_amount : 0.to_d %>
-  <header class="quote-doc-header">
-    <div>
-      <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
-      <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %> <span class="quote-doc-version">V<%= @quote.revision_number %></span></h1>
-      <% if @quote.custom_title.present? %>
-        <p class="quote-doc-subtitle"><%= @quote.custom_title %></p>
-      <% end %>
-    </div>
-    <%= quote_status_badge(@quote.status) %>
-  </header>
+  <% I18n.with_locale(quote_document_locale) do %>
+    <header class="quote-doc-header">
+      <div>
+        <p class="quote-doc-kicker"><%= @template.resolved_document_title(@document_kind).titleize %></p>
+        <h1><%= @template.resolved_document_number_label(@document_kind) %> <%= @quote.quote_no %> <span class="quote-doc-version">V<%= @quote.revision_number %></span></h1>
+        <% if @quote.custom_title.present? %>
+          <p class="quote-doc-subtitle"><%= @quote.custom_title %></p>
+        <% end %>
+      </div>
+      <%= quote_status_badge(@quote.status) %>
+    </header>
+  <% end %>
   <% if @has_newer_revision && @latest_revision_quote.present? %>
     <p class="quote-superseded-notice">
-      This quote has been replaced by a newer revision.
-      <%= link_to "View latest version (V#{@latest_revision_quote.revision_number})", quote_path(@latest_revision_quote), class: "quote-back-link-inline" %>
+      <%= t("quotes.view.show.superseded_notice") %>
+      <%= link_to t("quotes.view.show.view_latest_version", revision: @latest_revision_quote.revision_number), quote_path(@latest_revision_quote), class: "quote-back-link-inline" %>
     </p>
   <% end %>
   <% if @quote.status.to_s == "draft" && @quote.reopened_at.present? %>
     <p class="quote-superseded-notice">
-      This quote was reopened for editing. Public decision actions are now disabled until you share an updated version.
+      <%= t("quotes.view.show.reopened_notice") %>
     </p>
   <% end %>
 <% days_left = @quote.valid_until.present? ? (@quote.valid_until - Date.current).to_i : nil %>
@@ -47,49 +50,49 @@
 <% next_action_text =
     case workflow_state
     when "lost"
-      "Create a new revision if buyer interest returns"
+      t("quotes.view.show.next_action_lost")
     when "accepted"
-      "Move to fulfillment and handoff"
+      t("quotes.view.show.next_action_accepted")
     when "draft"
-      "Finish edits and reshare the latest revision"
+      t("quotes.view.show.next_action_draft")
     when "expired"
-      "Follow up with a new revision or close the thread"
+      t("quotes.view.show.next_action_expired")
     else
-      viewed_flag ? "Discuss terms and close" : "Share public link to trigger first view"
+      viewed_flag ? t("quotes.view.show.next_action_viewed") : t("quotes.view.show.next_action_not_viewed")
     end %>
 <% urgency_text =
       if days_left.nil?
-        "No expiry date set."
+        t("quotes.view.show.urgency_no_expiry")
       elsif days_left.negative?
-        "Expired #{days_left.abs} day(s) ago. Follow up now."
+        t("quotes.view.show.urgency_expired", count: days_left.abs)
       elsif days_left <= 3
-        "Expiring in #{days_left} day(s). Recommended to follow up today."
+        t("quotes.view.show.urgency_expiring", count: days_left)
       else
-        "Valid for #{days_left} more day(s)."
+        t("quotes.view.show.urgency_valid", count: days_left)
       end %>
   <section class="quote-signal-strip <%= 'is-urgent' if days_left.present? && days_left <= 3 %>">
     <div class="quote-signal-item">
-      <span class="quote-signal-label">Momentum</span>
+      <span class="quote-signal-label"><%= t("quotes.view.show.momentum") %></span>
       <strong><%= urgency_text %></strong>
     </div>
     <div class="quote-signal-item">
-      <span class="quote-signal-label">Engagement</span>
-      <strong><%= viewed_flag ? "Viewed (#{total_views} view#{'s' unless total_views == 1})" : "Not viewed yet" %></strong>
+      <span class="quote-signal-label"><%= t("quotes.view.show.engagement") %></span>
+      <strong><%= viewed_flag ? t("quotes.view.show.viewed_count", count: total_views) : t("quotes.view.show.not_viewed_yet") %></strong>
     </div>
     <div class="quote-signal-item">
-      <span class="quote-signal-label">Next Action</span>
+      <span class="quote-signal-label"><%= t("quotes.view.show.next_action") %></span>
       <strong><%= next_action_text %></strong>
     </div>
   </section>
 
   <details class="quote-engagement-details">
-    <summary>Engagement Details</summary>
+    <summary><%= t("quotes.view.show.engagement_details") %></summary>
     <% access_events = @quote.quote_shares.flat_map { |share| Array(share.view_events) } %>
     <% country_counts = Hash.new(0) %>
     <% ip_counts = Hash.new(0) %>
     <% access_events.each do |event| %>
-      <% country = event["country"].presence || "Unknown" %>
-      <% ip = event["ip"].presence || "Unknown" %>
+      <% country = event["country"].presence || t("quotes.view.show.unknown") %>
+      <% ip = event["ip"].presence || t("quotes.view.show.unknown") %>
       <% country_counts[country] += 1 %>
       <% ip_counts[ip] += 1 %>
     <% end %>
@@ -109,15 +112,15 @@
       <% "#{formatted_at}#{tags.any? ? " [#{tags.join(' | ')}]" : ""}" %>
     <% end %>
     <div class="quote-engagement-details-grid">
-      <p><strong>Time Zone:</strong> <%= viewer_tz.name %></p>
-      <p><strong>Sent:</strong> <%= format_in_user_time(@quote.sent_at, current_user) %> <%= "(#{relative_in_user_time(@quote.sent_at, current_user)})" if @quote.sent_at.present? %></p>
-      <p><strong>Last Shared:</strong> <span id="quote-last-shared-at"><%= format_in_user_time(@quote.quote_shares.maximum(:created_at), current_user) %></span></p>
-      <p><strong>First Viewed:</strong> <%= format_in_user_time(@quote.quote_shares.minimum(:first_viewed_at), current_user) %></p>
-      <p><strong>Last Viewed:</strong> <%= format_in_user_time(@quote.viewed_at, current_user) %> <%= "(#{relative_in_user_time(@quote.viewed_at, current_user)})" if @quote.viewed_at.present? %></p>
-      <p><strong>Total Views:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
-      <p><strong>Top Countries:</strong> <%= top_countries.any? ? top_countries.map { |country, count| "#{country} (#{count})" }.join(", ") : "-" %></p>
-      <p><strong>Top IPs:</strong> <%= top_ips.any? ? top_ips.map { |ip, count| "#{ip} (#{count})" }.join(", ") : "-" %></p>
-      <p><strong>Recent Accesses:</strong> <%= recent_access_lines.any? ? recent_access_lines.join(" | ") : "-" %></p>
+      <p><strong><%= t("quotes.view.show.time_zone") %>:</strong> <%= viewer_tz.name %></p>
+      <p><strong><%= t("quotes.view.show.sent") %>:</strong> <%= format_in_user_time(@quote.sent_at, current_user) %> <%= "(#{relative_in_user_time(@quote.sent_at, current_user)})" if @quote.sent_at.present? %></p>
+      <p><strong><%= t("quotes.view.show.last_shared") %>:</strong> <span id="quote-last-shared-at"><%= format_in_user_time(@quote.quote_shares.maximum(:created_at), current_user) %></span></p>
+      <p><strong><%= t("quotes.view.show.first_viewed") %>:</strong> <%= format_in_user_time(@quote.quote_shares.minimum(:first_viewed_at), current_user) %></p>
+      <p><strong><%= t("quotes.view.show.last_viewed") %>:</strong> <%= format_in_user_time(@quote.viewed_at, current_user) %> <%= "(#{relative_in_user_time(@quote.viewed_at, current_user)})" if @quote.viewed_at.present? %></p>
+      <p><strong><%= t("quotes.view.show.total_views") %>:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
+      <p><strong><%= t("quotes.view.show.top_countries") %>:</strong> <%= top_countries.any? ? top_countries.map { |country, count| "#{country} (#{count})" }.join(", ") : "-" %></p>
+      <p><strong><%= t("quotes.view.show.top_ips") %>:</strong> <%= top_ips.any? ? top_ips.map { |ip, count| "#{ip} (#{count})" }.join(", ") : "-" %></p>
+      <p><strong><%= t("quotes.view.show.recent_accesses") %>:</strong> <%= recent_access_lines.any? ? recent_access_lines.join(" | ") : "-" %></p>
     </div>
   </details>
 
@@ -135,12 +138,13 @@
     <%= render "decision_timeline" %>
   <% end %>
 
+  <% I18n.with_locale(quote_document_locale) do %>
   <section class="quote-meta-grid">
     <article class="quote-meta-card">
-      <h3>Seller</h3>
+      <h3><%= t("quote_document.labels.seller") %></h3>
       <p><strong><%= @quote.company.name %></strong></p>
       <% if active_template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
-        <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
+        <p><%= t("quote_document.labels.sales_owner") %>: <%= @quote.customer.internal_owner_display_name %></p>
       <% end %>
       <p><%= @quote.company.address.presence || "-" %></p>
       <p><%= @quote.company.phone.presence || "-" %></p>
@@ -149,25 +153,25 @@
     </article>
 
     <article class="quote-meta-card">
-      <h3>Buyer</h3>
-      <p><strong>Company:</strong> <%= @quote.customer.name.presence || "-" %></p>
-      <p><strong>Primary Contact:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
-      <p><strong>Email:</strong> <%= @quote.customer.email.presence || "-" %></p>
-      <p><strong>Phone:</strong> <%= @quote.customer.phone.presence || "-" %></p>
-      <p><strong>Address:</strong> <%= @quote.customer.address.presence || "-" %></p>
+      <h3><%= t("quote_document.labels.buyer") %></h3>
+      <p><strong><%= t("quote_document.labels.company", default: "Company") %>:</strong> <%= @quote.customer.name.presence || "-" %></p>
+      <p><strong><%= t("quote_document.labels.primary_contact", default: "Primary Contact") %>:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
+      <p><strong><%= t("quote_document.labels.email", default: "Email") %>:</strong> <%= @quote.customer.email.presence || "-" %></p>
+      <p><strong><%= t("quote_document.labels.phone", default: "Phone") %>:</strong> <%= @quote.customer.phone.presence || "-" %></p>
+      <p><strong><%= t("quote_document.labels.address", default: "Address") %>:</strong> <%= @quote.customer.address.presence || "-" %></p>
     </article>
 
     <article class="quote-meta-card">
-      <h3>Quote Info</h3>
+      <h3><%= t("quote_document.labels.quote_info", default: "Quote Info") %></h3>
       <div class="quote-info-list">
         <p class="quote-info-row is-doc-number"><span><%= @template.resolved_document_number_label(@document_kind) %></span><strong><%= @quote.quote_no %></strong></p>
         <% if @quote.custom_title.present? %>
-          <p class="quote-info-row"><span>Title</span><strong><%= @quote.custom_title %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.title", default: "Title") %></span><strong><%= @quote.custom_title %></strong></p>
         <% end %>
-        <p class="quote-info-row"><span><%= @document_kind == "pi" ? "PI Date" : "Quote Date" %></span><strong><%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></strong></p>
+        <p class="quote-info-row"><span><%= @document_kind == "pi" ? t("quote_document.labels.pi_date") : t("quote_document.labels.quote_date") %></span><strong><%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></strong></p>
         <% if @quote.valid_until.present? %>
           <p class="quote-info-row is-valid-until">
-            <span>Valid Until</span>
+            <span><%= t("quote_document.labels.valid_until") %></span>
             <strong>
               <%= @quote.valid_until.strftime("%Y-%m-%d") %>
               <% if days_left.negative? %>
@@ -178,34 +182,34 @@
             </strong>
           </p>
         <% end %>
-        <p class="quote-info-row"><span>Currency</span><strong><%= @quote.currency %></strong></p>
+        <p class="quote-info-row"><span><%= t("quote_document.labels.currency") %></span><strong><%= @quote.currency %></strong></p>
         <% if @quote.trade_term.present? %>
-          <p class="quote-info-row"><span>Trade Terms</span><strong><%= @quote.trade_term %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.trade_terms") %></span><strong><%= @quote.trade_term %></strong></p>
         <% end %>
-        <p class="quote-info-row"><span>Status</span><strong><%= @quote.status&.capitalize %></strong></p>
+        <p class="quote-info-row"><span><%= t("quote_document.labels.status", default: "Status") %></span><strong><%= @quote.status&.capitalize %></strong></p>
         <% if @quote.win_reason.present? %>
-          <p class="quote-info-row"><span>Win Reason</span><strong><%= @quote.display_win_reason %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.win_reason", default: "Win Reason") %></span><strong><%= @quote.display_win_reason %></strong></p>
         <% end %>
         <% if @quote.loss_reason.present? %>
-          <p class="quote-info-row"><span>Loss Reason</span><strong><%= @quote.display_loss_reason %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.loss_reason", default: "Loss Reason") %></span><strong><%= @quote.display_loss_reason %></strong></p>
         <% end %>
         <% if @quote.stalled_reason.present? %>
-          <p class="quote-info-row"><span>Stalled Reason</span><strong><%= @quote.display_stalled_reason %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.stalled_reason", default: "Stalled Reason") %></span><strong><%= @quote.display_stalled_reason %></strong></p>
         <% end %>
         <% if @quote.accepted_at.present? %>
-          <p class="quote-info-row"><span>Accepted At</span><strong><%= @quote.accepted_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.accepted_at", default: "Accepted At") %></span><strong><%= @quote.accepted_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
         <% end %>
         <% if @quote.changes_requested_at.present? %>
-          <p class="quote-info-row"><span>Revision Requested</span><strong><%= @quote.changes_requested_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.revision_requested", default: "Revision Requested") %></span><strong><%= @quote.changes_requested_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
           <% if @quote.request_reason.present? %>
-            <p class="quote-info-row"><span>Request Reason</span><strong><%= @quote.request_reason.humanize %></strong></p>
+            <p class="quote-info-row"><span><%= t("quote_document.labels.request_reason", default: "Request Reason") %></span><strong><%= @quote.request_reason.humanize %></strong></p>
           <% end %>
           <% if @quote.changes_request_message.present? %>
-            <p class="quote-info-row"><span>Client Request</span><strong><%= @quote.changes_request_message %></strong></p>
+            <p class="quote-info-row"><span><%= t("quote_document.labels.client_request", default: "Client Request") %></span><strong><%= @quote.changes_request_message %></strong></p>
           <% end %>
         <% end %>
         <% if @quote.reopened_at.present? %>
-          <p class="quote-info-row"><span>Reopened At</span><strong><%= @quote.reopened_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
+          <p class="quote-info-row"><span><%= t("quote_document.labels.reopened_at", default: "Reopened At") %></span><strong><%= @quote.reopened_at.strftime("%Y-%m-%d %H:%M") %></strong></p>
         <% end %>
       </div>
     </article>
@@ -213,10 +217,10 @@
   </section>
 
   <div class="app-section-heading">
-    <h3>Items</h3>
+    <h3><%= t("quote_document.labels.items", default: "Items") %></h3>
     <span class="app-subtle-note"><%= pluralize(@quote.quote_items.ordered.size, "line item") %></span>
   </div>
-  <div class="table-responsive">
+  <div class="table-responsive quote-items-responsive">
     <table class="quote-items-table quote-doc-table app-data-table">
       <colgroup>
         <% if active_template.show_images? %>
@@ -230,12 +234,12 @@
       <thead>
         <tr>
           <% if active_template.show_images? %>
-            <th>Image</th>
+            <th><%= t("quote_document.labels.image") %></th>
           <% end %>
-          <th>Item Details</th>
-          <th class="quote-col-right">Qty</th>
-          <th class="quote-col-right quote-col-money">Unit Price</th>
-          <th class="quote-col-right quote-col-money">Line Total</th>
+          <th><%= @template.resolved_table_label("description") %></th>
+          <th class="quote-col-right"><%= @template.resolved_table_label("qty") %></th>
+          <th class="quote-col-right quote-col-money"><%= @template.resolved_table_label("unit_price") %></th>
+          <th class="quote-col-right quote-col-money"><%= @template.resolved_table_label("line_total") %></th>
         </tr>
       </thead>
       <tbody>
@@ -252,7 +256,7 @@
             <% end %>
             <td>
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.product&.name.presence || "Item" %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || t("quote_document.labels.item") %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
                     <% if item.specification_pairs.any? %>
@@ -285,20 +289,20 @@
   </div>
 
   <aside class="quote-total-box">
-    <p><span>Subtotal</span><strong><%= quote_money(@quote.subtotal, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+    <p><span><%= t("quote_document.labels.subtotal") %></span><strong><%= quote_money(@quote.subtotal, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% if active_template.show_tax %>
-      <p><span>Tax / VAT</span><strong><%= quote_money(@quote.tax_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+      <p><span><%= t("quote_document.labels.tax_vat") %></span><strong><%= quote_money(@quote.tax_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
     <% if active_template.show_shipping %>
-      <p><span>Shipping</span><strong><%= quote_money(@quote.shipping_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+      <p><span><%= t("quote_document.labels.shipping") %></span><strong><%= quote_money(@quote.shipping_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
     <% if has_discount %>
-      <p class="quote-total-discount"><span>Discount</span><strong>-<%= quote_money(discount_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
-      <p class="quote-total-reduction"><span>Original Total</span><strong><%= quote_money(original_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+      <p class="quote-total-discount"><span><%= t("quote_document.labels.discount") %></span><strong>-<%= quote_money(discount_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+      <p class="quote-total-reduction"><span><%= t("quote_document.labels.original_total", default: "Original Total") %></span><strong><%= quote_money(original_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
-    <p class="quote-total-grand"><span>Grand Total</span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+    <p class="quote-total-grand"><span><%= t("quote_document.labels.grand_total") %></span><strong><%= quote_money(@quote.grand_total, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% if has_discount %>
-      <p class="quote-total-saved"><span>You Save</span><strong><%= quote_money(savings_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
+      <p class="quote-total-saved"><span><%= t("quote_document.labels.you_save", default: "You Save") %></span><strong><%= quote_money(savings_amount, @quote.currency, show_symbol: active_template.show_currency) %></strong></p>
     <% end %>
     <% if (closing_message = active_template.resolved_closing_message).present? %>
       <p class="quote-engagement-note"><%= closing_message %></p>
@@ -307,15 +311,15 @@
 
   <% terms_lines = [] %>
   <% if active_template.show_terms_section %>
-    <% terms_lines << [ "Payment Terms", @quote.payment_term ] if active_template.show_payment_term && @quote.payment_term.present? %>
-    <% terms_lines << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present? %>
-    <% terms_lines << [ "Terms", @quote.terms_text ] if @quote.terms_text.present? %>
-    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present? %>
-    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present? %>
+    <% terms_lines << [ t("quote_document.labels.payment_terms"), @quote.payment_term ] if active_template.show_payment_term && @quote.payment_term.present? %>
+    <% terms_lines << [ t("quote_document.labels.trade_terms"), @quote.trade_term ] if @quote.trade_term.present? %>
+    <% terms_lines << [ t("quote_document.labels.terms"), @quote.terms_text ] if @quote.terms_text.present? %>
+    <% terms_lines << [ t("quote_document.labels.legal_disclaimer"), @quote.legal_disclaimer ] if @quote.legal_disclaimer.present? %>
+    <% terms_lines << [ t("quote_document.labels.delivery_notes"), @quote.delivery_notes ] if @quote.delivery_notes.present? %>
   <% end %>
   <% if terms_lines.any? %>
     <section class="quote-section-block">
-      <h3>Terms & Conditions</h3>
+      <h3><%= t("quote_document.sections.terms_and_conditions") %></h3>
       <% terms_lines.each do |label, value| %>
         <p><strong><%= label %>:</strong> <%= value %></p>
       <% end %>
@@ -324,14 +328,14 @@
 
   <% if active_template.show_notes && @quote.notes.present? %>
     <section class="quote-section-block">
-      <h3>Internal Notes</h3>
+      <h3><%= t("quote_document.labels.notes") %></h3>
       <p><%= simple_format(@quote.notes) %></p>
     </section>
   <% end %>
   <% company_documents = @quote.company.company_documents.includes(file_attachment: :blob).ordered %>
   <% if company_documents.any? %>
     <section class="quote-section-block">
-      <h3>Company Credentials</h3>
+      <h3><%= t("quote_document.sections.company_credentials") %></h3>
       <% company_documents.each do |document| %>
         <p><strong><%= document.title %></strong> <span class="quote-form-hint">(<%= document.document_type_label %>)</span></p>
       <% end %>
@@ -344,23 +348,24 @@
   <% show_signature_section = active_template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
   <% if footer_note.present? %>
     <section class="quote-section-block">
-      <h3>Footer Note</h3>
+      <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
       <div><%= simple_format(footer_note) %></div>
     </section>
   <% end %>
   <% if show_signature_section %>
     <section class="quote-section-block quote-signature-block">
-      <h3>Signature</h3>
+      <h3><%= t("quote_document.sections.signature") %></h3>
       <% if signature_image_url.present? %>
-        <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+        <p><img src="<%= signature_image_url %>" alt="<%= t("quote_document.labels.sales_signature", default: "Sales signature") %>" class="quote-sales-signature-image"></p>
       <% end %>
       <% if signature_name.present? %>
-        <p><strong>Authorized by:</strong> <%= signature_name %></p>
+        <p><strong><%= t("quote_document.labels.authorized_by") %>:</strong> <%= signature_name %></p>
       <% end %>
     </section>
   <% end %>
   <% if active_template.show_saas_branding %>
     <p class="quote-public-footnote"><%= active_template.saas_branding_footer_text %></p>
+  <% end %>
   <% end %>
 </div>
 
@@ -368,25 +373,25 @@
   <div class="quote-toolbar-left">
     <% if @quote.can_edit_revision? %>
       <div class="quote-template-picker">
-        <label for="template_select_<%= @quote.id %>">Template</label>
+        <label for="template_select_<%= @quote.id %>"><%= t("quotes.view.show.toolbar.template") %></label>
         <%= select_tag :template_id,
                        options_from_collection_for_select(@template_options, :id, :name, @template.id),
                        id: "template_select_#{@quote.id}",
                        class: "js-template-select #{ui_input_classes}",
-                       data: { update_url: update_template_quote_path(@quote), doc: @document_kind, searchable_select: true, search_placeholder: "Search template" } %>
+                       data: { update_url: update_template_quote_path(@quote), doc: @document_kind, searchable_select: true, search_placeholder: t("quotes.view.show.toolbar.search_template") } %>
       </div>
     <% end %>
 
     <details class="quote-toolbar-export">
-      <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary">Export</summary>
+      <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary"><%= t("quotes.view.show.toolbar.export") %></summary>
       <div class="quote-toolbar-export-menu">
-        <%= button_to "Download PDF",
+        <%= button_to t("quotes.view.show.toolbar.download_pdf"),
                       export_pdf_quote_path(@quote),
                       method: :get,
                       params: { doc: @document_kind, document_kind: @document_kind },
                       form: { data: { turbo: false } },
                       class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-        <%= link_to "Download Excel", export_xlsx_quote_path(@quote, doc: @document_kind), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary", data: { turbo: false } %>
+        <%= link_to t("quotes.view.show.toolbar.download_excel"), export_xlsx_quote_path(@quote, doc: @document_kind), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary", data: { turbo: false } %>
       </div>
     </details>
   </div>
@@ -394,33 +399,33 @@
   <div class="quote-toolbar-right">
     <div class="quote-toolbar-right-secondary">
       <% if @quote.can_edit_revision? %>
-        <%= link_to "Edit", edit_quote_path(@quote), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+        <%= link_to t("quotes.view.show.toolbar.edit"), edit_quote_path(@quote), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
       <% end %>
       <% if @quote.can_create_new_revision? %>
-        <%= button_to "New Revision", duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+        <%= button_to t("quotes.view.show.toolbar.new_revision"), duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
       <% end %>
       <% if @quote.can_reopen? %>
-        <%= button_to "Reopen Quote",
+        <%= button_to t("quotes.view.show.toolbar.reopen_quote"),
                       reopen_quote_path(@quote),
                       method: :post,
-                      form: { data: { turbo_confirm: "Reopening this quote will allow editing again and mark the public version as outdated. Customers will not be able to accept it until a new version is shared." } },
+                      form: { data: { turbo_confirm: t("quotes.view.show.toolbar.reopen_confirm") } },
                       class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
       <% end %>
       <% if @quote.can_copy_and_reprice? %>
-        <%= button_to "Copy & Reprice", duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+        <%= button_to t("quotes.view.show.toolbar.copy_reprice"), duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
       <% end %>
       <% if @quote.can_switch_document? %>
         <% if @document_kind == "pi" %>
-          <%= link_to "Switch to Quotation", quote_path(@quote, doc: "quote", document_kind: "quote"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+          <%= link_to t("quotes.view.show.toolbar.switch_to_quotation"), quote_path(@quote, doc: "quote", document_kind: "quote"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
         <% else %>
-          <%= link_to "Switch to PI", quote_path(@quote, doc: "pi", document_kind: "pi"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+          <%= link_to t("quotes.view.show.toolbar.switch_to_pi"), quote_path(@quote, doc: "pi", document_kind: "pi"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
         <% end %>
       <% end %>
     </div>
     <div class="quote-toolbar-right-primary">
       <% if @quote.can_send_reminder? %>
         <% if ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-          <%= button_to "Send Reminder",
+          <%= button_to t("quotes.view.show.toolbar.send_reminder"),
                         send_reminder_quote_path(@quote, doc: @document_kind),
                         method: :post,
                         class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
@@ -437,7 +442,7 @@
               <button type="button"
                       class="<%= "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary js-quote-reminder-open" %>"
                       data-reminder-modal-id="<%= reminder_modal_id %>">
-                Send Reminder
+                <%= t("quotes.view.show.toolbar.send_reminder") %>
               </button>
             <% end %>
 
@@ -447,12 +452,12 @@
                  data-reminder-form-id="<%= reminder_form_id %>"
                  data-reminder-response-id="<%= reminder_response_id %>">
               <div class="quote-turnstile-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="<%= "#{reminder_modal_id}-title" %>">
-                <button type="button" class="quote-turnstile-modal__close js-quote-reminder-close" aria-label="Close verification">×</button>
-                <h3 id="<%= "#{reminder_modal_id}-title" %>">Verify before sending reminder</h3>
-                <p>Use the same security check as sign up and contact send, then we will send the reminder email.</p>
-                <div class="quote-turnstile-modal__loading js-quote-reminder-loading">Loading verification...</div>
+                <button type="button" class="quote-turnstile-modal__close js-quote-reminder-close" aria-label="<%= t("quotes.view.show.toolbar.close_verification") %>">×</button>
+                <h3 id="<%= "#{reminder_modal_id}-title" %>"><%= t("quotes.view.show.toolbar.verify_before_reminder") %></h3>
+                <p><%= t("quotes.view.show.toolbar.verify_before_reminder_hint") %></p>
+                <div class="quote-turnstile-modal__loading js-quote-reminder-loading"><%= t("quotes.view.show.toolbar.loading_verification") %></div>
                 <div class="quote-turnstile-modal__widget js-quote-reminder-widget" hidden></div>
-                <div class="quote-turnstile-modal__success js-quote-reminder-success" hidden>Verified. Sending reminder...</div>
+                <div class="quote-turnstile-modal__success js-quote-reminder-success" hidden><%= t("quotes.view.show.toolbar.verified_sending") %></div>
               </div>
             </div>
           </div>
@@ -463,23 +468,23 @@
           <button type="button"
                   class="quote-btn quote-btn-primary js-share-public-link"
                   data-share-url="<%= share_quote_path(@quote, doc: @document_kind, format: :json) %>">
-            Share Public Link
+            <%= t("quotes.view.show.toolbar.share_public_link") %>
           </button>
           <div class="share-link-panel" id="quote-share-panel" hidden>
             <div class="share-link-panel-message" id="quote-share-message"></div>
             <div class="share-link-panel-actions">
-              <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn">Copy Link</button>
-              <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link">Open</a>
+              <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
+              <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
             </div>
           </div>
         </div>
       <% end %>
       <% if @quote.can_delete_quote_family? %>
-        <%= button_to "Delete Quote",
+        <%= button_to t("quotes.view.show.toolbar.delete_quote"),
                       quote_path(@quote),
                       method: :delete,
-                      form: { data: { turbo_confirm: "Delete the entire quote thread #{@quote.quote_no} including all revisions and expire any public links? This cannot be undone." },
-                              onsubmit: "if (!confirm('Final warning: this will expire public links and remove the full quote thread.')) return false; if (prompt('Type DELETE to confirm quote thread removal') !== 'DELETE') return false;" },
+                      form: { data: { turbo_confirm: t("quotes.view.show.toolbar.delete_confirm", quote_no: @quote.quote_no) },
+                              onsubmit: "if (!confirm('#{j(t("quotes.view.show.toolbar.delete_final_warning"))}')) return false; if (prompt('#{j(t("quotes.view.show.toolbar.delete_prompt"))}') !== 'DELETE') return false;" },
                       class: "#{ui_button_classes(:danger)} quote-btn quote-btn-danger" %>
       <% end %>
     </div>
@@ -488,14 +493,14 @@
 
 <section class="quote-history app-surface">
   <div class="app-section-heading">
-    <h3>History</h3>
-    <span class="app-subtle-note">Revision trail and archive actions</span>
+    <h3><%= t("quotes.view.show.history.title") %></h3>
+    <span class="app-subtle-note"><%= t("quotes.view.show.history.subtitle") %></span>
   </div>
   <% revisions = @quote.customer.quotes.not_archived.where(quote_no: @quote.quote_no).order(revision_number: :desc).to_a %>
   <% latest_revision = revisions.first %>
   <p class="quote-history-meta">
-    <span><strong><%= revisions.size %></strong> revision(s)</span>
-    <span>Current updated: <strong><%= format_in_user_time(@quote.updated_at, current_user) %></strong></span>
+    <span><strong><%= revisions.size %></strong> <%= t("quotes.view.show.history.revisions_count") %></span>
+    <span><%= t("quotes.view.show.history.current_updated") %>: <strong><%= format_in_user_time(@quote.updated_at, current_user) %></strong></span>
   </p>
   <div class="quote-history-tabs">
     <% revisions.each do |q| %>
@@ -505,16 +510,16 @@
       <% if is_current %>
         <span class="<%= tab_class %>">
           <%= label %>
-          <span class="history-tab-tag">Current</span>
+          <span class="history-tab-tag"><%= t("quotes.view.show.history.current") %></span>
           <% if latest_revision&.id == q.id %>
-            <span class="history-tab-tag history-tab-tag-latest">Latest</span>
+            <span class="history-tab-tag history-tab-tag-latest"><%= t("quotes.view.show.history.latest") %></span>
           <% end %>
         </span>
       <% else %>
         <%= link_to quote_path(q), class: tab_class do %>
           <%= label %>
           <% if latest_revision&.id == q.id %>
-            <span class="history-tab-tag history-tab-tag-latest">Latest</span>
+            <span class="history-tab-tag history-tab-tag-latest"><%= t("quotes.view.show.history.latest") %></span>
           <% end %>
         <% end %>
       <% end %>
@@ -524,7 +529,7 @@
   <% if archivable_revisions.any? %>
     <div class="quote-history-archive-list">
       <% archivable_revisions.each do |q| %>
-        <%= button_to "Archive V#{q.revision_number}", archive_quote_path(q), method: :post, form: { data: { turbo_confirm: "Archive revision V#{q.revision_number} from history?" } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+        <%= button_to t("quotes.view.show.history.archive_revision", revision: q.revision_number), archive_quote_path(q), method: :post, form: { data: { turbo_confirm: t("quotes.view.show.history.archive_confirm", revision: q.revision_number) } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
       <% end %>
     </div>
   <% end %>
@@ -618,7 +623,7 @@
 
         const payload = await response.json().catch(() => ({}));
         if (!response.ok || !payload.url) {
-          throw new Error(payload.message || "Unable to generate public link");
+          throw new Error(payload.message || "<%= j(t("quotes.view.show.toolbar.unable_generate_public_link")) %>");
         }
 
         const copied = await copyText(payload.url);
@@ -640,11 +645,11 @@
           lastSharedAt.textContent = stamp;
         }
         if (copied) {
-          showPanel("Public link ready. Copied to clipboard.");
-          window.showAppToast?.("Public link copied.", "success");
+          showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_copied")) %>");
+          window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_copied")) %>", "success");
         } else {
-          showPanel("Public link ready. Copy manually if needed.");
-          window.showAppToast?.("Public link ready. Copy manually if needed.", "warn");
+          showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>");
+          window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>", "warn");
         }
         window.setTimeout(() => window.refreshQuoteState?.(true), 120);
       } catch (error) {
@@ -652,8 +657,8 @@
         openLink.href = "#";
         openLink.hidden = true;
         syncPanelState();
-        showPanel(error.message || "Share failed", true);
-        window.showAppToast?.(error.message || "Share failed", "error");
+        showPanel(error.message || "<%= j(t("quotes.view.show.toolbar.share_failed")) %>", true);
+        window.showAppToast?.(error.message || "<%= j(t("quotes.view.show.toolbar.share_failed")) %>", "error");
       } finally {
         button.disabled = false;
       }
@@ -662,8 +667,8 @@
     copyButton.addEventListener("click", async () => {
       if (!currentShareUrl) return;
       const copied = await copyText(currentShareUrl);
-      showPanel(copied ? "Link copied." : "Copy failed on browser.", !copied);
-      window.showAppToast?.(copied ? "Link copied." : "Copy failed on browser.", copied ? "success" : "error");
+      showPanel(copied ? "<%= j(t("quotes.view.show.toolbar.link_copied")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", !copied);
+      window.showAppToast?.(copied ? "<%= j(t("quotes.view.show.toolbar.link_copied")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", copied ? "success" : "error");
     });
 
     openLink.addEventListener("click", () => {
@@ -684,7 +689,7 @@
     openLink.href = sharePanelState.openHref || "#";
     openLink.hidden = sharePanelState.openHidden !== false;
     if (sharePanelState.visible) {
-      showPanel(sharePanelState.message || "Public link ready.", !!sharePanelState.isError);
+      showPanel(sharePanelState.message || "<%= j(t("quotes.view.show.toolbar.public_link_ready")) %>", !!sharePanelState.isError);
     } else {
       hidePanel();
     }

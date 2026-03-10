@@ -64,7 +64,8 @@ class Customer < ApplicationRecord
   end
 
   def status_label
-    status.to_s.humanize.presence || "New"
+    normalized = status_css
+    I18n.t("customers.status_labels.#{normalized}", default: status.to_s.humanize.presence || I18n.t("customers.status_labels.new", default: "New"))
   end
 
   def status_css

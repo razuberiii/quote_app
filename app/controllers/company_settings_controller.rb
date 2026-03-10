@@ -20,9 +20,9 @@ class CompanySettingsController < ApplicationController
       @template.update!(template_attrs) if template_attrs.present?
     end
 
-    redirect_to edit_company_settings_path, notice: "Company settings updated."
+    redirect_to edit_company_settings_path, notice: t("company_settings.flash.updated")
   rescue ActiveRecord::RecordInvalid
-    flash.now[:alert] = "Please check the highlighted fields."
+    flash.now[:alert] = t("company_settings.flash.check_highlighted_fields")
     render :edit, status: :unprocessable_entity
   end
 

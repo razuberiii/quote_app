@@ -9,7 +9,7 @@ class AddonPresetsController < ApplicationController
   def create
     @addon_preset = current_user.company.addon_presets.new(addon_preset_params)
     if @addon_preset.save
-      redirect_to addon_presets_path, notice: "Add-on preset created."
+      redirect_to addon_presets_path, notice: t("addon_presets.flash.created")
     else
       @addon_presets = current_user.company.addon_presets.ordered
       render :index, status: :unprocessable_entity
@@ -21,7 +21,7 @@ class AddonPresetsController < ApplicationController
 
   def update
     if @addon_preset.update(addon_preset_params)
-      redirect_to addon_presets_path, notice: "Add-on preset updated."
+      redirect_to addon_presets_path, notice: t("addon_presets.flash.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -29,7 +29,7 @@ class AddonPresetsController < ApplicationController
 
   def destroy
     @addon_preset.destroy
-    redirect_to addon_presets_path, notice: "Add-on preset deleted."
+    redirect_to addon_presets_path, notice: t("addon_presets.flash.deleted")
   end
 
   private

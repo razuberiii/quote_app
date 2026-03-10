@@ -136,7 +136,7 @@ class CustomersController < ApplicationController
 
   def create
     unless current_user.can_create_customer?
-      redirect_to customers_path, alert: "Free plan limit reached: #{current_user.customer_count_for_limit}/#{User::FREE_CUSTOMER_LIMIT} customers used." and return
+      redirect_to customers_path, alert: t("customers.flash.free_plan_limit_reached", used: current_user.customer_count_for_limit, limit: User::FREE_CUSTOMER_LIMIT) and return
     end
 
     @customer = current_user.company.customers.new
@@ -175,20 +175,20 @@ class CustomersController < ApplicationController
 
   def mark_follow_up
     @customer.mark_followed_today!
-    redirect_to @customer, notice: "Follow-up marked for today. Next follow-up scheduled at #{@customer.next_follow_up_date.strftime('%Y-%m-%d')}"
+    redirect_to @customer, notice: t("customers.flash.follow_up_marked_today", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
   end
 
   def schedule_follow_up
     days = params[:days].to_i
     allowed_days = [ 0, 3, 7, 14, 30 ]
     unless allowed_days.include?(days)
-      redirect_to @customer, alert: "Unsupported follow-up interval." and return
+      redirect_to @customer, alert: t("customers.flash.unsupported_follow_up_interval") and return
     end
 
     target_date = Date.current + days.days
     if @customer.update(next_follow_up_date: target_date)
       label = days.zero? ? "today" : "in #{days} days"
-      redirect_to @customer, notice: "Next follow-up scheduled for #{target_date.strftime('%Y-%m-%d')} (#{label})."
+      redirect_to @customer, notice: t("customers.flash.next_follow_up_scheduled", date: target_date.strftime("%Y-%m-%d"), label: label)
     else
       redirect_to @customer, alert: @customer.errors.full_messages.to_sentence
     end
@@ -506,15 +506,15 @@ class CustomersController < ApplicationController
     follow_up_state = follow_up_interval_state(avg_follow_up_gap)
 
     {
-      top_product: top_item_name || "Not enough data yet",
+      top_product: top_item_name || I18n.t("dashboard.logic.not_enough_data"),
       top_product_sample_size: latest_quotes.count,
       average_quote_cycle_days: closed_cycle_days.empty? ? 0 : (closed_cycle_days.sum.to_f / closed_cycle_days.size).round(1),
       closed_cycle_sample_size: closed_cycle_days.size,
       revision_rate: revision_rate,
-      export_mix: total_mix.zero? ? "Quotation 0% / PI 0%" : "Quotation #{((quotation_count.to_f / total_mix) * 100).round}% / PI #{((pi_count.to_f / total_mix) * 100).round}%",
+      export_mix: total_mix.zero? ? I18n.t("dashboard.logic.export_mix_zero") : I18n.t("dashboard.logic.export_mix", quotation: ((quotation_count.to_f / total_mix) * 100).round, pi: ((pi_count.to_f / total_mix) * 100).round),
       cycle_insight: cycle_state,
       revision_insight: revision_state,
-      decision_insight: "Follow-up interval: #{follow_up_state}",
+      decision_insight: I18n.t("dashboard.logic.follow_up_interval", state: follow_up_state),
       closed_win_rate: closed_win_rate
     }
   end
@@ -543,22 +543,22 @@ class CustomersController < ApplicationController
 
     [
       {
-        label: "Operational Risk",
-        value: "#{risk_customers} account#{'s' unless risk_customers == 1}",
+        label: I18n.t("dashboard.logic.operational_risk"),
+        value: I18n.t("dashboard.logic.accounts", count: risk_customers),
         tone: risk_customers.positive? ? :danger : :good,
-        detail: risk_customers.positive? ? "Follow-up pressure needs attention." : "No urgent account risk."
+        detail: risk_customers.positive? ? I18n.t("dashboard.logic.follow_up_pressure_attention") : I18n.t("dashboard.logic.no_urgent_account_risk")
       },
       {
-        label: "Momentum",
+        label: I18n.t("dashboard.logic.momentum"),
         value: "#{recent_motion_quotes.count}/#{active_quotes.count.nonzero? || 0}",
         tone: recent_motion_quotes.any? ? :good : :neutral,
-        detail: active_quotes.any? ? "Active quotes touched in the last 7 days." : "No active quotes yet."
+        detail: active_quotes.any? ? I18n.t("dashboard.logic.active_quotes_touched") : I18n.t("dashboard.logic.no_active_quotes_yet")
       },
       {
-        label: "Observed Engagement",
+        label: I18n.t("dashboard.logic.observed_engagement"),
         value: "#{viewed_quotes.count}/#{active_quotes.count.nonzero? || 0}",
         tone: viewed_quotes.any? ? :watch : :neutral,
-        detail: active_quotes.any? ? "Quotes with actual buyer view evidence." : "No viewable quote evidence yet."
+        detail: active_quotes.any? ? I18n.t("dashboard.logic.quotes_with_view_evidence") : I18n.t("dashboard.logic.no_viewable_quote_evidence")
       }
     ]
   end
@@ -577,12 +577,12 @@ class CustomersController < ApplicationController
           quote: quote,
           quote_no: quote.quote_no,
           display_name: quote.custom_title.presence || quote.quote_items.ordered.first&.product&.name.presence || quote.quote_items.ordered.first&.description.presence,
-          customer_name: quote.customer&.name || "Unknown customer",
+          customer_name: quote.customer&.name || I18n.t("dashboard.logic.unknown_customer"),
           status: status,
           view_signal: view_signal,
           next_action: next_action,
           total: quote.grand_total,
-          currency: quote.currency.to_s.upcase.presence || "USD",
+          currency: quote.currency.to_s.upcase.presence || I18n.t("dashboard.logic.default_currency"),
           updated_at: quote.updated_at
         }
       end
@@ -630,11 +630,11 @@ class CustomersController < ApplicationController
 
   def build_kpi_value(current_value, previous_value, period, kind:)
     change = percent_change(current_value, previous_value)
-    period_label = period == "month" ? "month" : "week"
+    period_label = period == "month" ? I18n.t("dashboard.logic.period_month") : I18n.t("dashboard.logic.period_week")
     health = kpi_health_state(kind, current_value, change)
     {
       value: current_value,
-      trend_text: format("%+d%% vs last %s", change.round, period_label),
+      trend_text: I18n.t("dashboard.logic.trend_vs_last_period", value: change.round, period: period_label),
       trend_class: kpi_trend_class(kind, change),
       health_label: health[:label],
       health_class: health[:class]
@@ -652,27 +652,27 @@ class CustomersController < ApplicationController
     case kind
     when :risk
       if current_value.to_i >= 10 || change >= 30
-        { label: "Risk", class: "is-risk" }
+        { label: I18n.t("dashboard.logic.health.risk"), class: "is-risk" }
       elsif current_value.to_i >= 4 || change >= 10
-        { label: "Watch", class: "is-watch" }
+        { label: I18n.t("dashboard.logic.health.watch"), class: "is-watch" }
       else
-        { label: "Stable", class: "is-stable" }
+        { label: I18n.t("dashboard.logic.health.stable"), class: "is-stable" }
       end
     when :throughput
       if change <= -25
-        { label: "Risk", class: "is-risk" }
+        { label: I18n.t("dashboard.logic.health.risk"), class: "is-risk" }
       elsif change <= -10 || change >= 20
-        { label: "Watch", class: "is-watch" }
+        { label: I18n.t("dashboard.logic.health.watch"), class: "is-watch" }
       else
-        { label: "Stable", class: "is-stable" }
+        { label: I18n.t("dashboard.logic.health.stable"), class: "is-stable" }
       end
     else
       if change <= -20
-        { label: "Risk", class: "is-risk" }
+        { label: I18n.t("dashboard.logic.health.risk"), class: "is-risk" }
       elsif change <= -5 || change >= 15
-        { label: "Watch", class: "is-watch" }
+        { label: I18n.t("dashboard.logic.health.watch"), class: "is-watch" }
       else
-        { label: "Stable", class: "is-stable" }
+        { label: I18n.t("dashboard.logic.health.stable"), class: "is-stable" }
       end
     end
   end
@@ -706,9 +706,9 @@ class CustomersController < ApplicationController
     customers.select(&:follow_up_due_today?).first(4).each do |customer|
       items << {
         priority: "watch",
-        title: "#{customer.name}: follow-up due today",
-        detail: "Contact now and update next follow-up date.",
-        cta_label: "Open Customer",
+        title: I18n.t("dashboard.logic.action.follow_up_due_today_title", name: customer.name),
+        detail: I18n.t("dashboard.logic.action.follow_up_due_today_detail"),
+        cta_label: I18n.t("dashboard.logic.action.open_customer"),
         cta_path: customer_path(customer)
       }
     end
@@ -717,9 +717,9 @@ class CustomersController < ApplicationController
       overdue_days = (Date.current - customer.next_follow_up_date).to_i
       items << {
         priority: "urgent",
-        title: "#{customer.name}: overdue follow-up",
-        detail: "Overdue by #{overdue_days} day(s). High risk of inactivity.",
-        cta_label: "Open Customer",
+        title: I18n.t("dashboard.logic.action.overdue_follow_up_title", name: customer.name),
+        detail: I18n.t("dashboard.logic.action.overdue_follow_up_detail", days: overdue_days),
+        cta_label: I18n.t("dashboard.logic.action.open_customer"),
         cta_path: customer_path(customer)
       }
     end
@@ -727,9 +727,9 @@ class CustomersController < ApplicationController
     customers.select { |customer| high_value_customer?(customer, metrics) && stalled_customer?(customer) }.first(3).each do |customer|
       items << {
         priority: "urgent",
-        title: "#{customer.name}: high value but stalled",
-        detail: "Large quote value with no recent movement. Re-engage this account.",
-        cta_label: "Open Customer",
+        title: I18n.t("dashboard.logic.action.high_value_stalled_title", name: customer.name),
+        detail: I18n.t("dashboard.logic.action.high_value_stalled_detail"),
+        cta_label: I18n.t("dashboard.logic.action.open_customer"),
         cta_path: customer_path(customer)
       }
     end
@@ -737,9 +737,9 @@ class CustomersController < ApplicationController
     customers.select { |customer| customer.last_follow_up_date.blank? || customer.last_follow_up_date < Date.current - 14.days }.first(3).each do |customer|
       items << {
         priority: "watch",
-        title: "#{customer.name}: no recent follow-up",
-        detail: "No follow-up in 14+ days. Add this to today's touchpoints.",
-        cta_label: "Open Customer",
+        title: I18n.t("dashboard.logic.action.no_recent_follow_up_title", name: customer.name),
+        detail: I18n.t("dashboard.logic.action.no_recent_follow_up_detail"),
+        cta_label: I18n.t("dashboard.logic.action.open_customer"),
         cta_path: customer_path(customer)
       }
     end
@@ -747,9 +747,9 @@ class CustomersController < ApplicationController
     customers.select { |customer| customer.next_follow_up_date.blank? }.first(2).each do |customer|
       items << {
         priority: "normal",
-        title: "#{customer.name}: no follow-up schedule",
-        detail: "Set a next touchpoint to avoid pipeline drop.",
-        cta_label: "Open Customer",
+        title: I18n.t("dashboard.logic.action.no_follow_up_schedule_title", name: customer.name),
+        detail: I18n.t("dashboard.logic.action.no_follow_up_schedule_detail"),
+        cta_label: I18n.t("dashboard.logic.action.open_customer"),
         cta_path: customer_path(customer)
       }
     end
@@ -764,9 +764,9 @@ class CustomersController < ApplicationController
         quote_name = quote_display_name(quote)
         items << {
           priority: "urgent",
-          title: "#{quote_name}: negotiating stalled",
-          detail: "No update for #{stale_days} day(s). Push next revision or close decision.",
-          cta_label: "Open Quote",
+          title: I18n.t("dashboard.logic.action.negotiating_stalled_title", name: quote_name),
+          detail: I18n.t("dashboard.logic.action.negotiating_stalled_detail", days: stale_days),
+          cta_label: I18n.t("dashboard.logic.action.open_quote"),
           cta_path: quote_path(quote)
         }
       end
@@ -836,27 +836,27 @@ class CustomersController < ApplicationController
   end
 
   def quote_cycle_state(closed_cycle_days)
-    return "Within healthy band" if closed_cycle_days.empty?
+    return I18n.t("dashboard.logic.health_band.within") if closed_cycle_days.empty?
 
     average_days = closed_cycle_days.sum.to_f / closed_cycle_days.size
-    return "Within healthy band" if average_days <= 14
-    return "Below target" if average_days <= 28
+    return I18n.t("dashboard.logic.health_band.within") if average_days <= 14
+    return I18n.t("dashboard.logic.health_band.below") if average_days <= 28
 
-    "Above optimal range"
+    I18n.t("dashboard.logic.health_band.above")
   end
 
   def revision_state_for(revision_rate)
-    return "Within healthy band" if revision_rate <= 25
-    return "Below target" if revision_rate <= 45
+    return I18n.t("dashboard.logic.health_band.within") if revision_rate <= 25
+    return I18n.t("dashboard.logic.health_band.below") if revision_rate <= 45
 
-    "Above optimal range"
+    I18n.t("dashboard.logic.health_band.above")
   end
 
   def follow_up_interval_state(avg_follow_up_gap)
-    return "Within healthy band" if avg_follow_up_gap <= 7
-    return "Below target" if avg_follow_up_gap <= 14
+    return I18n.t("dashboard.logic.health_band.within") if avg_follow_up_gap <= 7
+    return I18n.t("dashboard.logic.health_band.below") if avg_follow_up_gap <= 14
 
-    "Above optimal range"
+    I18n.t("dashboard.logic.health_band.above")
   end
 
   def recent_quote_priority(quote)
@@ -874,57 +874,57 @@ class CustomersController < ApplicationController
 
   def recent_quote_next_action(quote, status)
     if status == "sent" && quote.viewed_at.blank?
-      "Send reminder"
+      I18n.t("dashboard.logic.next_action.send_reminder")
     elsif status == "expired"
-      "Create revision"
+      I18n.t("dashboard.logic.next_action.create_revision")
     elsif status == "negotiating"
-      "Push to close"
+      I18n.t("dashboard.logic.next_action.push_to_close")
     elsif status == "viewed"
-      "Follow up now"
+      I18n.t("dashboard.logic.next_action.follow_up_now")
     else
-      "Review"
+      I18n.t("dashboard.logic.next_action.review")
     end
   end
 
   def recent_quote_signals(quote, status)
     if status == "draft"
       [
-        "Draft, not shared",
-        { label: "Send Now", path: edit_quote_path(quote), style: "is-watch" }
+        I18n.t("dashboard.logic.signal.draft_not_shared"),
+        { label: I18n.t("dashboard.logic.signal.send_now"), path: edit_quote_path(quote), style: "is-watch" }
       ]
     elsif status == "sent" && quote.viewed_at.blank? && quote.sent_at.present? && quote.sent_at <= 3.days.ago
       [
-        "Sent, no view 3d+",
-        { label: "Check Quote", path: quote_path(quote), style: "is-attention" }
+        I18n.t("dashboard.logic.signal.sent_no_view_3d"),
+        { label: I18n.t("dashboard.logic.signal.check_quote"), path: quote_path(quote), style: "is-attention" }
       ]
     elsif status == "sent" && quote.viewed_at.blank?
       [
-        "Sent, awaiting view",
-        { label: "Check Signal", path: quote_path(quote), style: "is-watch" }
+        I18n.t("dashboard.logic.signal.sent_awaiting_view"),
+        { label: I18n.t("dashboard.logic.signal.check_signal"), path: quote_path(quote), style: "is-watch" }
       ]
     elsif %w[viewed negotiating].include?(status)
       [
-        status == "negotiating" ? "Viewed, in negotiation" : "Viewed",
-        { label: "Follow Up Today", path: quote_path(quote), style: "is-primary" }
+        status == "negotiating" ? I18n.t("dashboard.logic.signal.viewed_in_negotiation") : I18n.t("dashboard.logic.signal.viewed"),
+        { label: I18n.t("dashboard.logic.signal.follow_up_today"), path: quote_path(quote), style: "is-primary" }
       ]
     elsif status == "won"
       [
-        "Decision recorded",
-        { label: "Review", path: quote_path(quote), style: "is-neutral" }
+        I18n.t("dashboard.logic.signal.decision_recorded"),
+        { label: I18n.t("dashboard.logic.signal.review"), path: quote_path(quote), style: "is-neutral" }
       ]
     elsif status == "lost"
       [
-        "Closed lost",
-        { label: "Review", path: quote_path(quote), style: "is-neutral" }
+        I18n.t("dashboard.logic.signal.closed_lost"),
+        { label: I18n.t("dashboard.logic.signal.review"), path: quote_path(quote), style: "is-neutral" }
       ]
     elsif status == "expired"
       [
-        "Expired",
-        { label: "Create revision", path: quote_path(quote), style: "is-watch" }
+        I18n.t("dashboard.logic.signal.expired"),
+        { label: I18n.t("dashboard.logic.signal.create_revision"), path: quote_path(quote), style: "is-watch" }
       ]
     else
       [
-        "No active signal",
+        I18n.t("dashboard.logic.signal.no_active_signal"),
         { label: recent_quote_next_action(quote, status), path: quote_path(quote), style: "is-neutral" }
       ]
     end
@@ -935,9 +935,9 @@ class CustomersController < ApplicationController
       {
         priority: 0,
         state: "watch",
-        summary: "Draft not sent",
-        detail: "Complete and send this quote.",
-        label: "Complete & Send",
+        summary: I18n.t("customers.logic.quote_push_signal.draft.summary"),
+        detail: I18n.t("customers.logic.quote_push_signal.draft.detail"),
+        label: I18n.t("customers.logic.quote_push_signal.draft.label"),
         path: edit_quote_path(quote),
         method: :get
       }
@@ -947,9 +947,9 @@ class CustomersController < ApplicationController
         {
           priority: 0,
           state: "risk",
-          summary: "Sent 7d+ with no view",
-          detail: "Review the quote before deciding whether to send a reminder.",
-          label: "Check Quote",
+          summary: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.summary"),
+          detail: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.detail"),
+          label: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.label"),
           path: quote_path(quote),
           method: :get
         }
@@ -957,9 +957,9 @@ class CustomersController < ApplicationController
         {
           priority: 2,
           state: "watch",
-          summary: "Sent, awaiting first view",
-          detail: "Monitor customer signal.",
-          label: "Check Status",
+          summary: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.summary"),
+          detail: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.detail"),
+          label: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.label"),
           path: quote_path(quote),
           method: :get
         }
@@ -968,9 +968,9 @@ class CustomersController < ApplicationController
       {
         priority: 1,
         state: "watch",
-        summary: "Viewed, no follow-up",
-        detail: "Schedule next touchpoint now.",
-        label: "Schedule Follow-up",
+        summary: I18n.t("customers.logic.quote_push_signal.viewed_no_follow_up.summary"),
+        detail: I18n.t("customers.logic.quote_push_signal.viewed_no_follow_up.detail"),
+        label: I18n.t("customers.logic.quote_push_signal.viewed_no_follow_up.label"),
         path: schedule_follow_up_customer_path(customer, days: 3),
         method: :post
       }
@@ -978,9 +978,9 @@ class CustomersController < ApplicationController
       {
         priority: 1,
         state: "risk",
-        summary: "Expired quote",
-        detail: "Create revision to re-open conversation.",
-        label: "Create Revision",
+        summary: I18n.t("customers.logic.quote_push_signal.expired.summary"),
+        detail: I18n.t("customers.logic.quote_push_signal.expired.detail"),
+        label: I18n.t("customers.logic.quote_push_signal.expired.label"),
         path: duplicate_quote_path(quote),
         method: :post
       }
@@ -988,9 +988,9 @@ class CustomersController < ApplicationController
       {
         priority: 4,
         state: "stable",
-        summary: "No immediate action",
-        detail: "Review quote details when needed.",
-        label: "Review",
+        summary: I18n.t("customers.logic.quote_push_signal.no_immediate_action.summary"),
+        detail: I18n.t("customers.logic.quote_push_signal.no_immediate_action.detail"),
+        label: I18n.t("customers.logic.quote_push_signal.no_immediate_action.label"),
         path: quote_path(quote),
         method: :get
       }
@@ -1074,13 +1074,13 @@ class CustomersController < ApplicationController
 
   def customer_engagement_state(customer, latest_signal_at)
     if customer.follow_up_overdue?
-      { label: "At Risk", css: "is-risk" }
+      { label: I18n.t("customers.logic.engagement_state.at_risk"), css: "is-risk" }
     elsif latest_signal_at.present? && latest_signal_at.to_date >= Date.current - 7.days
-      { label: "Active", css: "is-active" }
+      { label: I18n.t("customers.logic.engagement_state.active"), css: "is-active" }
     elsif latest_signal_at.present? && latest_signal_at.to_date >= Date.current - 21.days
-      { label: "Cooling", css: "is-cooling" }
+      { label: I18n.t("customers.logic.engagement_state.cooling"), css: "is-cooling" }
     else
-      { label: "At Risk", css: "is-risk" }
+      { label: I18n.t("customers.logic.engagement_state.at_risk"), css: "is-risk" }
     end
   end
 
@@ -1093,86 +1093,86 @@ class CustomersController < ApplicationController
     risk_signal =
       if customer.follow_up_overdue?
         {
-          label: "Operational Risk",
-          value: "High",
+          label: I18n.t("customers.logic.operating_signals.risk.label"),
+          value: I18n.t("customers.logic.operating_signals.risk.high"),
           tone: :danger,
-          detail: "Follow-up is overdue and needs action now."
+          detail: I18n.t("customers.logic.operating_signals.risk.high_detail")
         }
       elsif customer.follow_up_due_today?
         {
-          label: "Operational Risk",
-          value: "Watch",
+          label: I18n.t("customers.logic.operating_signals.risk.label"),
+          value: I18n.t("customers.logic.operating_signals.risk.watch"),
           tone: :watch,
-          detail: "Follow-up is due today."
+          detail: I18n.t("customers.logic.operating_signals.risk.watch_detail")
         }
       elsif customer.next_follow_up_date.blank? && quote_cards.any?
         {
-          label: "Operational Risk",
-          value: "Unscheduled",
+          label: I18n.t("customers.logic.operating_signals.risk.label"),
+          value: I18n.t("customers.logic.operating_signals.risk.unscheduled"),
           tone: :watch,
-          detail: "Active account but no next follow-up date is set."
+          detail: I18n.t("customers.logic.operating_signals.risk.unscheduled_detail")
         }
       else
         {
-          label: "Operational Risk",
-          value: "Controlled",
+          label: I18n.t("customers.logic.operating_signals.risk.label"),
+          value: I18n.t("customers.logic.operating_signals.risk.controlled"),
           tone: :good,
-          detail: "Follow-up timing is currently under control."
+          detail: I18n.t("customers.logic.operating_signals.risk.controlled_detail")
         }
       end
 
     momentum_signal =
       if latest_quote.blank?
         {
-          label: "Momentum",
-          value: "No quotes",
+          label: I18n.t("customers.logic.operating_signals.momentum.label"),
+          value: I18n.t("customers.logic.operating_signals.momentum.no_quotes"),
           tone: :neutral,
-          detail: "There is no quote activity to evaluate yet."
+          detail: I18n.t("customers.logic.operating_signals.momentum.no_quotes_detail")
         }
-      elsif [latest_quote.updated_at, latest_signal_at].compact.any? { |at| at.to_date >= Date.current - 7.days }
+      elsif [ latest_quote.updated_at, latest_signal_at ].compact.any? { |at| at.to_date >= Date.current - 7.days }
         {
-          label: "Momentum",
-          value: "Moving",
+          label: I18n.t("customers.logic.operating_signals.momentum.label"),
+          value: I18n.t("customers.logic.operating_signals.momentum.moving"),
           tone: :good,
-          detail: "Quote or buyer activity happened in the last 7 days."
+          detail: I18n.t("customers.logic.operating_signals.momentum.moving_detail")
         }
-      elsif [latest_quote.updated_at, latest_signal_at].compact.any? { |at| at.to_date >= Date.current - 21.days }
+      elsif [ latest_quote.updated_at, latest_signal_at ].compact.any? { |at| at.to_date >= Date.current - 21.days }
         {
-          label: "Momentum",
-          value: "Cooling",
+          label: I18n.t("customers.logic.operating_signals.momentum.label"),
+          value: I18n.t("customers.logic.operating_signals.momentum.cooling"),
           tone: :watch,
-          detail: "There is some activity, but pace is slowing down."
+          detail: I18n.t("customers.logic.operating_signals.momentum.cooling_detail")
         }
       else
         {
-          label: "Momentum",
-          value: "Stalled",
+          label: I18n.t("customers.logic.operating_signals.momentum.label"),
+          value: I18n.t("customers.logic.operating_signals.momentum.stalled"),
           tone: :danger,
-          detail: "No meaningful quote or buyer movement in 21+ days."
+          detail: I18n.t("customers.logic.operating_signals.momentum.stalled_detail")
         }
       end
 
     engagement_signal =
       if total_views.positive? || latest_signal_at.present?
         {
-          label: "Observed Engagement",
-          value: total_views.positive? ? "Observed" : "Indirect",
+          label: I18n.t("customers.logic.operating_signals.engagement.label"),
+          value: total_views.positive? ? I18n.t("customers.logic.operating_signals.engagement.observed") : I18n.t("customers.logic.operating_signals.engagement.indirect"),
           tone: total_views.positive? ? :good : :watch,
-          detail: total_views.positive? ? "#{total_views} buyer view#{'s' unless total_views == 1} recorded on shared quotes." : "Timeline has customer signals, but not direct quote views."
+          detail: total_views.positive? ? I18n.t("customers.logic.operating_signals.engagement.observed_detail", count: total_views) : I18n.t("customers.logic.operating_signals.engagement.indirect_detail")
         }
       elsif %w[sent viewed negotiating].include?(latest_status)
         {
-          label: "Observed Engagement",
-          value: "Low visibility",
+          label: I18n.t("customers.logic.operating_signals.engagement.label"),
+          value: I18n.t("customers.logic.operating_signals.engagement.low_visibility"),
           tone: :neutral,
-          detail: "Quote is live, but there is no buyer-view evidence yet."
+          detail: I18n.t("customers.logic.operating_signals.engagement.low_visibility_detail")
         }
       else
         {
-          label: "Observed Engagement",
-          value: "N/A",
+          label: I18n.t("customers.logic.operating_signals.engagement.label"),
+          value: I18n.t("customers.logic.operating_signals.engagement.not_available"),
           tone: :neutral,
-          detail: "No live quote signal is available for this account."
+          detail: I18n.t("customers.logic.operating_signals.engagement.not_available_detail")
         }
       end
 
@@ -1181,23 +1181,23 @@ class CustomersController < ApplicationController
 
   def follow_up_text_for(customer)
     if customer.follow_up_overdue?
-      "Follow-up overdue. Action required now."
+      I18n.t("customers.logic.follow_up_text.overdue")
     elsif customer.follow_up_due_today?
-      "Follow-up due today."
+      I18n.t("customers.logic.follow_up_text.due_today")
     elsif customer.follow_up_status == "upcoming"
-      "Follow-up scheduled soon."
+      I18n.t("customers.logic.follow_up_text.upcoming")
     else
-      "No follow-up date scheduled."
+      I18n.t("customers.logic.follow_up_text.not_scheduled")
     end
   end
 
   def follow_up_primary_action_for(customer)
     if customer.follow_up_overdue? || customer.follow_up_due_today?
-      { label: "Mark Followed Today", path: mark_follow_up_customer_path(customer), method: :post }
+      { label: I18n.t("customers.logic.follow_up_primary_action.mark_followed_today"), path: mark_follow_up_customer_path(customer), method: :post }
     elsif customer.next_follow_up_date.blank?
-      { label: "Schedule +7d", path: schedule_follow_up_customer_path(customer, days: 7), method: :post }
+      { label: I18n.t("customers.logic.follow_up_primary_action.schedule_plus_7d"), path: schedule_follow_up_customer_path(customer, days: 7), method: :post }
     else
-      { label: "Adjust Follow-up", path: edit_customer_path(customer), method: :get }
+      { label: I18n.t("customers.logic.follow_up_primary_action.adjust_follow_up"), path: edit_customer_path(customer), method: :get }
     end
   end
 
@@ -1206,15 +1206,15 @@ class CustomersController < ApplicationController
       metrics_data = metrics.fetch(customer)
       signal =
         if customer.follow_up_overdue?
-          { label: "Follow today", klass: "is-danger", row_risk: "risk-high", reason: "Overdue follow-up" }
+          { label: I18n.t("customers.logic.row_signal.follow_today"), klass: "is-danger", row_risk: "risk-high", reason: I18n.t("customers.logic.row_signal.overdue_follow_up") }
         elsif customer.follow_up_due_today?
-          { label: "Contact now", klass: "is-today", row_risk: "risk-medium", reason: "Due today" }
+          { label: I18n.t("customers.logic.row_signal.contact_now"), klass: "is-today", row_risk: "risk-medium", reason: I18n.t("customers.logic.row_signal.due_today") }
         elsif high_value_customer?(customer, metrics) && stalled_customer?(customer)
-          { label: "Re-engage", klass: "is-upcoming", row_risk: "risk-medium", reason: "High value but stalled" }
+          { label: I18n.t("customers.logic.row_signal.re_engage"), klass: "is-upcoming", row_risk: "risk-medium", reason: I18n.t("customers.logic.row_signal.high_value_stalled") }
         elsif customer.follow_up_upcoming?
-          { label: "Prepare quote", klass: "is-upcoming", row_risk: "risk-low", reason: "Due soon" }
+          { label: I18n.t("customers.logic.row_signal.prepare_quote"), klass: "is-upcoming", row_risk: "risk-low", reason: I18n.t("customers.logic.row_signal.due_soon") }
         else
-          { label: "Set schedule", klass: "is-muted", row_risk: "risk-low", reason: "No urgent risk" }
+          { label: I18n.t("customers.logic.row_signal.set_schedule"), klass: "is-muted", row_risk: "risk-low", reason: I18n.t("customers.logic.row_signal.no_urgent_risk") }
         end
 
       hash[customer.id] = signal.merge(total_quote_amount: metrics_data[:total_quote_amount].to_d)
@@ -1237,8 +1237,8 @@ class CustomersController < ApplicationController
     if customer.next_follow_up_date.blank?
       tasks << {
         priority: "normal",
-        title: "Set next follow-up date",
-        detail: "No follow-up date is scheduled for this customer.",
+        title: I18n.t("customers.logic.follow_up_tasks.set_next_follow_up_date.title"),
+        detail: I18n.t("customers.logic.follow_up_tasks.set_next_follow_up_date.detail"),
         cta_label: nil,
         cta_path: nil
       }
@@ -1246,16 +1246,16 @@ class CustomersController < ApplicationController
       overdue_days = (today - customer.next_follow_up_date).to_i
       tasks << {
         priority: "urgent",
-        title: "Follow-up overdue",
-        detail: "Overdue by #{overdue_days} day(s). Contact customer now.",
+        title: I18n.t("customers.logic.follow_up_tasks.follow_up_overdue.title"),
+        detail: I18n.t("customers.logic.follow_up_tasks.follow_up_overdue.detail", days: overdue_days),
         cta_label: nil,
         cta_path: nil
       }
     elsif customer.follow_up_due_today?
       tasks << {
         priority: "today",
-        title: "Follow-up due today",
-        detail: "Touch base with customer and update next action.",
+        title: I18n.t("customers.logic.follow_up_tasks.follow_up_due_today.title"),
+        detail: I18n.t("customers.logic.follow_up_tasks.follow_up_due_today.detail"),
         cta_label: nil,
         cta_path: nil
       }
@@ -1263,8 +1263,8 @@ class CustomersController < ApplicationController
       days_left = (customer.next_follow_up_date - today).to_i
       tasks << {
         priority: days_left <= 7 ? "upcoming" : "normal",
-        title: "Upcoming follow-up",
-        detail: "Scheduled in #{days_left} day(s) on #{customer.next_follow_up_date.strftime('%Y-%m-%d')}.",
+        title: I18n.t("customers.logic.follow_up_tasks.upcoming_follow_up.title"),
+        detail: I18n.t("customers.logic.follow_up_tasks.upcoming_follow_up.detail", days: days_left, date: customer.next_follow_up_date.strftime("%Y-%m-%d")),
         cta_label: nil,
         cta_path: nil
       }
@@ -1281,18 +1281,18 @@ class CustomersController < ApplicationController
         if days_left.negative?
           tasks << {
             priority: "urgent",
-            title: "#{quote_name} expired",
-            detail: "Expired on #{quote.valid_until.strftime('%Y-%m-%d')}. Consider sending a revision.",
-            cta_label: "Open Quote",
+            title: I18n.t("customers.logic.follow_up_tasks.quote_expired.title", quote_name: quote_name),
+            detail: I18n.t("customers.logic.follow_up_tasks.quote_expired.detail", date: quote.valid_until.strftime("%Y-%m-%d")),
+            cta_label: I18n.t("customers.logic.follow_up_tasks.open_quote"),
             cta_path: quote_path(quote)
           }
           next
         elsif days_left <= 3
           tasks << {
             priority: "today",
-            title: "#{quote_name} expiring soon",
-            detail: "Expires in #{days_left} day(s). Follow up before expiry.",
-            cta_label: "Open Quote",
+            title: I18n.t("customers.logic.follow_up_tasks.quote_expiring_soon.title", quote_name: quote_name),
+            detail: I18n.t("customers.logic.follow_up_tasks.quote_expiring_soon.detail", days: days_left),
+            cta_label: I18n.t("customers.logic.follow_up_tasks.open_quote"),
             cta_path: quote_path(quote)
           }
         end
@@ -1301,9 +1301,9 @@ class CustomersController < ApplicationController
       if quote.sent_at.present? && quote.viewed_at.blank?
         tasks << {
           priority: "upcoming",
-          title: "#{quote_name} not viewed yet",
-          detail: "Sent at #{quote.sent_at.strftime('%Y-%m-%d %H:%M')}. Consider a reminder.",
-          cta_label: "Open Quote",
+          title: I18n.t("customers.logic.follow_up_tasks.quote_not_viewed_yet.title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.follow_up_tasks.quote_not_viewed_yet.detail", sent_at: quote.sent_at.strftime("%Y-%m-%d %H:%M")),
+          cta_label: I18n.t("customers.logic.follow_up_tasks.open_quote"),
           cta_path: quote_path(quote)
         }
       end
@@ -1321,8 +1321,8 @@ class CustomersController < ApplicationController
       at: customer.created_at,
       tone: "normal",
       category: "system_activity",
-      title: "Customer created",
-      detail: "#{customer.name} was added to your workspace."
+      title: I18n.t("customers.logic.timeline.customer_created_title"),
+      detail: I18n.t("customers.logic.timeline.customer_created_detail", name: customer.name)
     }
 
     if customer.last_follow_up_date.present?
@@ -1330,8 +1330,8 @@ class CustomersController < ApplicationController
         at: customer.last_follow_up_date.in_time_zone.end_of_day,
         tone: "good",
         category: "high_signal",
-        title: "Follow-up completed",
-        detail: "Last follow-up marked on #{customer.last_follow_up_date.strftime('%Y-%m-%d')}."
+        title: I18n.t("customers.logic.timeline.follow_up_completed_title"),
+        detail: I18n.t("customers.logic.timeline.follow_up_completed_detail", date: customer.last_follow_up_date.strftime("%Y-%m-%d"))
       }
     end
 
@@ -1341,7 +1341,7 @@ class CustomersController < ApplicationController
         at: customer.next_follow_up_date.in_time_zone.beginning_of_day,
         tone: tone,
         category: "system_activity",
-        title: "Next follow-up scheduled",
+        title: I18n.t("customers.logic.timeline.next_follow_up_scheduled_title"),
         detail: customer.next_follow_up_date.strftime("%Y-%m-%d")
       }
     end
@@ -1354,8 +1354,8 @@ class CustomersController < ApplicationController
         at: quote.created_at,
         tone: "normal",
         category: "system_activity",
-        title: "#{quote_name} created",
-        detail: "Revision V#{quote.revision_number}."
+        title: I18n.t("customers.logic.timeline.quote_created_title", quote_name: quote_name),
+        detail: I18n.t("customers.logic.timeline.revision_detail", revision: quote.revision_number)
       }
 
       if quote.updated_at.present? && quote.updated_at > quote.created_at
@@ -1363,8 +1363,8 @@ class CustomersController < ApplicationController
           at: quote.updated_at,
           tone: "normal",
           category: "system_activity",
-          title: "#{quote_name} updated",
-          detail: "Latest status: #{display_status.capitalize}."
+          title: I18n.t("customers.logic.timeline.quote_updated_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.latest_status_detail", status: I18n.t("quotes.view.form.status_options.#{display_status}", default: display_status.to_s.humanize))
         }
       end
 
@@ -1373,8 +1373,8 @@ class CustomersController < ApplicationController
           at: quote.sent_at,
           tone: "today",
           category: "system_activity",
-          title: "#{quote_name} sent",
-          detail: "Sent to customer."
+          title: I18n.t("customers.logic.timeline.quote_sent_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.quote_sent_detail")
         }
       end
 
@@ -1383,8 +1383,8 @@ class CustomersController < ApplicationController
           at: quote.viewed_at,
           tone: "good",
           category: "high_signal",
-          title: "#{quote_name} viewed",
-          detail: "Opened by customer."
+          title: I18n.t("customers.logic.timeline.quote_viewed_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.quote_viewed_detail")
         }
       end
 
@@ -1393,8 +1393,8 @@ class CustomersController < ApplicationController
           at: quote.changes_requested_at,
           tone: "today",
           category: "high_signal",
-          title: "#{quote_name} revision requested",
-          detail: quote.changes_request_message.present? ? "Client request: #{quote.changes_request_message}" : "Customer requested updates to this revision."
+          title: I18n.t("customers.logic.timeline.quote_revision_requested_title", quote_name: quote_name),
+          detail: quote.changes_request_message.present? ? I18n.t("customers.logic.timeline.client_request_detail", message: quote.changes_request_message) : I18n.t("customers.logic.timeline.customer_requested_updates")
         }
       end
 
@@ -1403,8 +1403,8 @@ class CustomersController < ApplicationController
           at: quote.accepted_at,
           tone: "good",
           category: "high_signal",
-          title: "#{quote_name} accepted",
-          detail: "Accepted via public link."
+          title: I18n.t("customers.logic.timeline.quote_accepted_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.accepted_via_public_link")
         }
       end
 
@@ -1413,8 +1413,8 @@ class CustomersController < ApplicationController
           at: quote.reopened_at,
           tone: "normal",
           category: "system_activity",
-          title: "#{quote_name} reopened",
-          detail: "Reopened for editing."
+          title: I18n.t("customers.logic.timeline.quote_reopened_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.quote_reopened_detail")
         }
       end
 
@@ -1423,8 +1423,8 @@ class CustomersController < ApplicationController
           at: quote.updated_at,
           tone: "good",
           category: "high_signal",
-          title: "#{quote_name} won",
-          detail: "Marked as Won internally."
+          title: I18n.t("customers.logic.timeline.quote_won_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.marked_won_internally")
         }
       end
 
@@ -1432,17 +1432,17 @@ class CustomersController < ApplicationController
         tone = display_status == "lost" ? "urgent" : "normal"
         status_detail =
           if display_status == "lost" && quote.loss_reason.present?
-            "Marked Lost. Reason: #{quote.loss_reason.humanize}"
+            I18n.t("customers.logic.timeline.marked_lost_reason", reason: quote.display_loss_reason)
           elsif display_status == "expired" && quote.stalled_reason.present?
-            "Expired. Pressure reason: #{quote.stalled_reason.humanize}"
+            I18n.t("customers.logic.timeline.expired_pressure_reason", reason: quote.display_stalled_reason)
           else
-            "Final status changed to #{display_status.capitalize}."
+            I18n.t("customers.logic.timeline.final_status_changed", status: I18n.t("quotes.view.form.status_options.#{display_status}", default: display_status.to_s.humanize))
           end
         events << {
           at: quote.updated_at,
           tone: tone,
           category: display_status == "lost" ? "high_signal" : "system_activity",
-          title: "#{quote_name} #{display_status}",
+          title: I18n.t("customers.logic.timeline.quote_status_title", quote_name: quote_name, status: I18n.t("quotes.view.form.status_options.#{display_status}", default: display_status.to_s.humanize)),
           detail: status_detail
         }
       end
@@ -1452,8 +1452,8 @@ class CustomersController < ApplicationController
           at: quote.updated_at,
           tone: "good",
           category: "high_signal",
-          title: "#{quote_name} win reason captured",
-          detail: quote.win_reason.humanize
+          title: I18n.t("customers.logic.timeline.win_reason_captured_title", quote_name: quote_name),
+          detail: quote.display_win_reason
         }
       end
 
@@ -1462,8 +1462,8 @@ class CustomersController < ApplicationController
           at: quote.reminder_sent_at,
           tone: "normal",
           category: "system_activity",
-          title: "#{quote_name} reminder sent",
-          detail: "Reminder email sent after no buyer view."
+          title: I18n.t("customers.logic.timeline.reminder_sent_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.reminder_sent_detail")
         }
       end
 
@@ -1474,8 +1474,8 @@ class CustomersController < ApplicationController
           at: latest_share.created_at,
           tone: "normal",
           category: "system_activity",
-          title: shares.size > 1 ? "Public links shared (#{shares.size})" : "Public link shared",
-          detail: "Public link generated for this quote."
+          title: shares.size > 1 ? I18n.t("customers.logic.timeline.public_links_shared", count: shares.size) : I18n.t("customers.logic.timeline.public_link_shared"),
+          detail: I18n.t("customers.logic.timeline.public_link_generated")
         }
 
         first_view = shares.filter_map(&:first_viewed_at).min
@@ -1484,8 +1484,8 @@ class CustomersController < ApplicationController
             at: first_view,
             tone: "good",
             category: "high_signal",
-            title: "Public link first viewed",
-            detail: "Viewed via public link."
+            title: I18n.t("customers.logic.timeline.public_link_first_viewed"),
+            detail: I18n.t("customers.logic.timeline.viewed_via_public_link")
           }
         end
 
@@ -1496,8 +1496,8 @@ class CustomersController < ApplicationController
             at: latest_view,
             tone: "normal",
             category: "system_activity",
-            title: "Public link activity",
-            detail: "Viewed #{total_views} time#{'s' unless total_views == 1} via public link."
+            title: I18n.t("customers.logic.timeline.public_link_activity"),
+            detail: I18n.t("customers.logic.timeline.viewed_times_via_public_link", count: total_views)
           }
         end
       end
@@ -1507,8 +1507,8 @@ class CustomersController < ApplicationController
           at: quote.archived_at,
           tone: "normal",
           category: "system_activity",
-          title: "#{quote_name} archived",
-          detail: "Revision V#{quote.revision_number} archived from visible history."
+          title: I18n.t("customers.logic.timeline.quote_archived_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.revision_archived_detail", revision: quote.revision_number)
         }
       end
 
@@ -1517,8 +1517,8 @@ class CustomersController < ApplicationController
           at: quote.deleted_at,
           tone: "normal",
           category: "system_activity",
-          title: "#{quote_name} deleted",
-          detail: "Quote thread deleted and public links expired."
+          title: I18n.t("customers.logic.timeline.quote_deleted_title", quote_name: quote_name),
+          detail: I18n.t("customers.logic.timeline.quote_deleted_detail")
         }
       end
     end

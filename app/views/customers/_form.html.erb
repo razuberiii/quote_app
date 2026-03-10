@@ -1,12 +1,12 @@
 <%= form_with model: customer, html: { class: "customer-profile-form", multipart: true } do |f| %>
-  <% status_options = Customer::SALES_STATUSES.map { |value| [value.humanize, value] } %>
+  <% status_options = Customer::SALES_STATUSES.map { |value| [t("customers.view.form.status_options.#{value}", default: value.humanize), value] } %>
   <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
-    <% status_options.unshift(["#{customer.status.humanize} (legacy)", customer.status]) %>
+    <% status_options.unshift([t("customers.view.form.legacy_status", status: customer.status.humanize), customer.status]) %>
   <% end %>
 
-  <% level_options = Customer::CUSTOMER_LEVELS.map { |value| [value.humanize, value] } %>
-  <% source_options = Customer::CUSTOMER_SOURCES.map { |value| [value.humanize, value] } %>
-  <% payment_options = Customer::PAYMENT_TERMS_OPTIONS.map { |value| [value.upcase.gsub("_", "/"), value] } %>
+  <% level_options = Customer::CUSTOMER_LEVELS.map { |value| [t("customers.view.form.level_options.#{value}", default: value.humanize), value] } %>
+  <% source_options = Customer::CUSTOMER_SOURCES.map { |value| [t("customers.view.form.source_options.#{value}", default: value.humanize), value] } %>
+  <% payment_options = Customer::PAYMENT_TERMS_OPTIONS.map { |value| [t("customers.view.form.payment_options.#{value}", default: value.upcase.gsub("_", "/")), value] } %>
   <% owner_users = (@owner_users || []) %>
   <% selected_owner = owner_users.find { |user| user.id == customer.internal_owner_id } if Customer.internal_owner_enabled? %>
   <% timezone_options = time_zone_options_for_select %>
@@ -21,7 +21,7 @@
 
   <% if customer.errors.any? %>
     <div class="error-messages">
-      <h2><%= pluralize(customer.errors.count, "error") %> prevented this customer from being saved:</h2>
+      <h2><%= t("customers.view.form.error_summary", count: customer.errors.count) %></h2>
       <ul>
         <% customer.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -33,51 +33,51 @@
   <div class="customer-profile-shell">
     <section class="customer-profile-section customer-profile-identity">
       <div class="customer-profile-section-head">
-        <h3>Company Information</h3>
-        <p class="app-form-section-note">Define the account identity, status, and profile details your team will work from.</p>
+        <h3><%= t("customers.view.form.company_information") %></h3>
+        <p class="app-form-section-note"><%= t("customers.view.form.company_information_hint") %></p>
       </div>
       <div class="customer-identity-grid">
         <div class="customer-avatar-panel">
           <div class="customer-avatar-preview">
             <% has_avatar = customer.avatar.attached? && customer.avatar.blob&.persisted? %>
             <% if has_avatar %>
-              <%= image_tag customer.avatar, alt: "#{customer.name} avatar", id: "customer_avatar_preview_img" %>
+              <%= image_tag customer.avatar, alt: t("customers.view.form.customer_avatar_alt", name: customer.name), id: "customer_avatar_preview_img" %>
             <% else %>
-              <%= tag.img id: "customer_avatar_preview_img", alt: "#{customer.name} avatar", hidden: true %>
+              <%= tag.img id: "customer_avatar_preview_img", alt: t("customers.view.form.customer_avatar_alt", name: customer.name), hidden: true %>
             <% end %>
             <span id="customer_avatar_preview_fallback" <%= "hidden" if has_avatar %>><%= customer.avatar_initial %></span>
           </div>
           <div class="customer-avatar-fields">
-            <%= f.label :avatar, "Avatar" %>
+            <%= f.label :avatar, t("customers.view.form.avatar") %>
             <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#customer_avatar_preview_img", live_preview_fallback: "#customer_avatar_preview_fallback" } %>
             <% if customer.avatar.attached? %>
-              <label class="customer-avatar-remove"><%= check_box_tag "customer[remove_avatar]", "1", false %> Remove current avatar</label>
+              <label class="customer-avatar-remove"><%= check_box_tag "customer[remove_avatar]", "1", false %> <%= t("customers.view.form.remove_current_avatar") %></label>
             <% end %>
-            <p class="customer-field-hint">If no image is uploaded, the first letter of customer name is used.</p>
+            <p class="customer-field-hint"><%= t("customers.view.form.avatar_hint") %></p>
           </div>
         </div>
 
         <div class="customer-identity-fields">
           <div class="customer-profile-grid customer-profile-grid-2">
             <div class="customer-name-field">
-              <%= f.label :name, "Company Name" %>
-              <%= f.text_field :name, placeholder: "Company Name", required: true, class: ui_input_classes("customer-name-input") %>
+              <%= f.label :name, t("customers.view.form.company_name") %>
+              <%= f.text_field :name, placeholder: t("customers.view.form.company_name"), required: true, class: ui_input_classes("customer-name-input") %>
             </div>
             <div>
-              <%= f.label :country %>
-              <%= f.text_field :country, placeholder: "Country", class: ui_input_classes %>
+              <%= f.label :country, t("customers.view.form.country") %>
+              <%= f.text_field :country, placeholder: t("customers.view.form.country"), class: ui_input_classes %>
             </div>
             <div>
-              <%= f.label :status %>
+              <%= f.label :status, t("customers.view.form.status") %>
               <div class="customer-status-select-wrap">
-                <%= f.select :status, status_options, { prompt: "Select Status" }, { class: ui_input_classes } %>
+                <%= f.select :status, status_options, { prompt: t("customers.view.form.select_status") }, { class: ui_input_classes } %>
                 <% if customer.status.present? %>
                   <%= customer_status_badge(customer) %>
                 <% end %>
               </div>
             </div>
             <div>
-              <%= f.label :customer_level, "Customer Level" %>
+              <%= f.label :customer_level, t("customers.view.form.customer_level") %>
               <%= f.select :customer_level, level_options, { include_blank: false }, { class: ui_input_classes } %>
             </div>
           </div>
@@ -87,48 +87,48 @@
 
     <section class="customer-profile-section">
       <div class="customer-profile-section-head">
-        <h3>Primary Contact</h3>
-        <p class="app-form-section-note">Keep communication details and commercial ownership easy to scan.</p>
+        <h3><%= t("customers.view.form.primary_contact") %></h3>
+        <p class="app-form-section-note"><%= t("customers.view.form.primary_contact_hint") %></p>
       </div>
       <div class="customer-profile-grid customer-profile-grid-2">
         <div>
-          <%= f.label :contact_name, "Primary Contact Name" %>
-          <%= f.text_field :contact_name, placeholder: "Primary Contact Name", class: ui_input_classes %>
+          <%= f.label :contact_name, t("customers.view.form.primary_contact_name") %>
+          <%= f.text_field :contact_name, placeholder: t("customers.view.form.primary_contact_name"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :email %>
-          <%= f.email_field :email, placeholder: "Email", class: ui_input_classes %>
+          <%= f.label :email, t("customers.view.form.email") %>
+          <%= f.email_field :email, placeholder: t("customers.view.form.email"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :phone %>
-          <%= f.text_field :phone, placeholder: "Phone", class: ui_input_classes %>
+          <%= f.label :phone, t("customers.view.form.phone") %>
+          <%= f.text_field :phone, placeholder: t("customers.view.form.phone"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :payment_terms, "Payment Terms" %>
-          <%= f.select :payment_terms, payment_options, { prompt: "Select payment terms" }, { class: ui_input_classes } %>
+          <%= f.label :payment_terms, t("customers.view.form.payment_terms") %>
+          <%= f.select :payment_terms, payment_options, { prompt: t("customers.view.form.select_payment_terms") }, { class: ui_input_classes } %>
         </div>
         <div>
-          <%= f.label :customer_source, "Source" %>
-          <%= f.select :customer_source, source_options, { prompt: "Select source" }, { class: ui_input_classes } %>
+          <%= f.label :customer_source, t("customers.view.form.source") %>
+          <%= f.select :customer_source, source_options, { prompt: t("customers.view.form.select_source") }, { class: ui_input_classes } %>
         </div>
         <div>
-          <%= f.label :main_product_interest, "Main Product Interest" %>
-          <%= f.text_field :main_product_interest, placeholder: "Main product / category", class: ui_input_classes %>
+          <%= f.label :main_product_interest, t("customers.view.form.main_product_interest") %>
+          <%= f.text_field :main_product_interest, placeholder: t("customers.view.form.main_product_interest_placeholder"), class: ui_input_classes %>
         </div>
         <% if Customer.internal_owner_enabled? %>
           <div>
-            <label for="customer_internal_owner_id">Internal Owner</label>
+            <label for="customer_internal_owner_id"><%= t("customers.view.form.internal_owner") %></label>
             <div class="owner-picker" data-owner-picker>
               <%= hidden_field_tag "customer[internal_owner_id]", customer.internal_owner_id, id: "customer_internal_owner_id" %>
               <button type="button" class="owner-picker-trigger" data-owner-trigger>
                 <span class="owner-picker-avatar">
                   <% selected_owner_avatar_url = selected_owner&.avatar&.attached? && selected_owner.avatar.blob&.persisted? ? url_for(selected_owner.avatar) : nil %>
-                  <img src="<%= selected_owner_avatar_url %>" alt="Owner avatar" data-owner-selected-avatar <%= "hidden" if selected_owner_avatar_url.blank? %>>
+                  <img src="<%= selected_owner_avatar_url %>" alt="<%= t("customers.view.form.owner_avatar_alt") %>" data-owner-selected-avatar <%= "hidden" if selected_owner_avatar_url.blank? %>>
                   <span data-owner-selected-initial <%= "hidden" if selected_owner_avatar_url.present? %>><%= (selected_owner&.full_name.presence || selected_owner&.email || "?").to_s.first.to_s.upcase %></span>
                 </span>
                 <span class="owner-picker-meta">
-                  <strong data-owner-selected-name><%= selected_owner&.full_name.presence || selected_owner&.email || "Select internal owner" %></strong>
-                  <small data-owner-selected-email><%= selected_owner&.email || "Choose from your team members" %></small>
+                  <strong data-owner-selected-name><%= selected_owner&.full_name.presence || selected_owner&.email || t("customers.view.form.select_internal_owner") %></strong>
+                  <small data-owner-selected-email><%= selected_owner&.email || t("customers.view.form.choose_team_owner") %></small>
                 </span>
               </button>
               <div class="owner-picker-menu" data-owner-menu hidden>
@@ -144,7 +144,7 @@
                   >
                     <span class="owner-picker-avatar">
                       <% if user.avatar.attached? && user.avatar.blob&.persisted? %>
-                        <%= image_tag user.avatar, alt: "Owner avatar" %>
+                        <%= image_tag user.avatar, alt: t("customers.view.form.owner_avatar_alt") %>
                       <% else %>
                         <span><%= (user.full_name.presence || user.email).to_s.first.to_s.upcase %></span>
                       <% end %>
@@ -157,11 +157,11 @@
                 <% end %>
               </div>
             </div>
-            <p class="customer-field-hint">Owner can be shown on quote by template switch (default: ON).</p>
+            <p class="customer-field-hint"><%= t("customers.view.form.owner_hint") %></p>
           </div>
         <% end %>
         <div>
-          <%= f.label :next_follow_up_date, "Follow-up Date" %>
+          <%= f.label :next_follow_up_date, t("customers.view.form.follow_up_date") %>
           <%= f.date_field :next_follow_up_date, class: ui_input_classes %>
         </div>
       </div>
@@ -169,41 +169,41 @@
 
     <section class="customer-profile-section">
       <div class="customer-profile-section-head">
-        <h3>Additional Information</h3>
-        <p class="app-form-section-note">Capture supporting context, tags, and notes without cluttering the main profile.</p>
+        <h3><%= t("customers.view.form.additional_information") %></h3>
+        <p class="app-form-section-note"><%= t("customers.view.form.additional_information_hint") %></p>
       </div>
       <div class="customer-profile-grid customer-profile-grid-2">
         <div class="customer-grid-span-2">
-          <%= f.label :address %>
-          <%= f.text_area :address, rows: 2, placeholder: "Address", class: ui_input_classes %>
+          <%= f.label :address, t("customers.view.form.address") %>
+          <%= f.text_area :address, rows: 2, placeholder: t("customers.view.form.address"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :estimated_annual_volume, "Estimated Annual Volume" %>
+          <%= f.label :estimated_annual_volume, t("customers.view.form.estimated_annual_volume") %>
           <%= f.number_field :estimated_annual_volume, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :timezone %>
+          <%= f.label :timezone, t("customers.view.form.timezone") %>
           <%= f.select :timezone,
                        timezone_options,
-                       { prompt: "Select timezone" },
-                       { class: ui_input_classes, data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: "Search city, country, or GMT offset", phone_field: "#customer_phone" } } %>
+                       { prompt: t("customers.view.form.select_timezone") },
+                       { class: ui_input_classes, data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("customers.view.form.search_timezone_placeholder"), phone_field: "#customer_phone" } } %>
         </div>
 
         <div class="customer-grid-span-2">
-          <label>Tags</label>
+          <label><%= t("customers.view.form.tags") %></label>
           <div class="customer-tag-priority" data-tag-priority>
             <div class="customer-tag-priority-head">
-              <strong>Selected priority</strong>
-              <span class="customer-field-hint">Top to bottom = higher priority on this customer.</span>
+              <strong><%= t("customers.view.form.selected_priority") %></strong>
+              <span class="customer-field-hint"><%= t("customers.view.form.selected_priority_hint") %></span>
             </div>
             <div class="customer-tag-priority-list" data-tag-priority-list>
               <% selected_tag_names.each do |tag_name| %>
                 <div class="customer-tag-priority-item" data-tag-priority-item data-tag-name="<%= tag_name %>">
                   <span class="customer-tag-priority-name"><%= tag_name %></span>
                   <div class="customer-tag-priority-actions">
-                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="up">Up</button>
-                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="down">Down</button>
-                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn customer-tag-priority-remove') %>" data-tag-remove>Remove</button>
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="up"><%= t("customers.view.form.up") %></button>
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="down"><%= t("customers.view.form.down") %></button>
+                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn customer-tag-priority-remove') %>" data-tag-remove><%= t("customers.view.form.remove") %></button>
                   </div>
                   <%= hidden_field_tag "customer[tag_priority_names][]", tag_name, data: { tag_priority_hidden: true } %>
                 </div>
@@ -219,21 +219,21 @@
             <% end %>
           </div>
           <div class="customer-tag-custom" data-customer-tag-builder>
-            <input type="text" placeholder="Add custom tag and press Enter" data-custom-tag-input class="<%= ui_input_classes %>">
-            <button type="button" class="<%= ui_button_classes(:secondary) %>" data-add-custom-tag>Add</button>
+            <input type="text" placeholder="<%= t("customers.view.form.add_custom_tag_placeholder") %>" data-custom-tag-input class="<%= ui_input_classes %>">
+            <button type="button" class="<%= ui_button_classes(:secondary) %>" data-add-custom-tag><%= t("customers.view.form.add") %></button>
             <div class="customer-tag-custom-list" data-custom-tag-list>
               <% initial_custom_tags.each do |tag_name| %>
                 <span class="customer-tag-chip customer-tag-chip-custom" data-custom-tag-name="<%= tag_name %>"><%= tag_name %></span>
                 <%= hidden_field_tag "customer[new_tag_names][]", tag_name, data: { custom_tag_hidden: tag_name } %>
               <% end %>
             </div>
-            <p class="customer-field-hint">Preset tags are reusable company-wide. Custom tags will be saved for reuse.</p>
+            <p class="customer-field-hint"><%= t("customers.view.form.tags_hint") %></p>
           </div>
         </div>
 
         <div class="customer-grid-span-2">
-          <%= f.label :notes %>
-          <%= f.text_area :notes, rows: 4, placeholder: "Notes", class: ui_input_classes %>
+          <%= f.label :notes, t("customers.view.form.notes") %>
+          <%= f.text_area :notes, rows: 4, placeholder: t("customers.view.form.notes"), class: ui_input_classes %>
         </div>
       </div>
     </section>
@@ -246,6 +246,12 @@
 
 <script>
   (() => {
+    const tagMoveUpLabel = "<%= j t("customers.view.form.up") %>";
+    const tagMoveDownLabel = "<%= j t("customers.view.form.down") %>";
+    const tagRemoveLabel = "<%= j t("customers.view.form.remove") %>";
+    const selectInternalOwnerLabel = "<%= j t("customers.view.form.select_internal_owner") %>";
+    const chooseTeamOwnerLabel = "<%= j t("customers.view.form.choose_team_owner") %>";
+
     const bindTagPriority = () => {
       document.querySelectorAll("[data-tag-priority]").forEach((priorityRoot) => {
         if (priorityRoot.dataset.bound === "true") return;
@@ -263,9 +269,9 @@
           wrapper.innerHTML = `
             <span class="customer-tag-priority-name"></span>
             <div class="customer-tag-priority-actions">
-              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">Up</button>
-              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">Down</button>
-              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>Remove</button>
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">${tagMoveUpLabel}</button>
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">${tagMoveDownLabel}</button>
+              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>${tagRemoveLabel}</button>
             </div>
           `;
           wrapper.querySelector(".customer-tag-priority-name").textContent = name;
@@ -399,9 +405,9 @@
               item.innerHTML = `
                 <span class="customer-tag-priority-name"></span>
                 <div class="customer-tag-priority-actions">
-                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">Up</button>
-                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">Down</button>
-                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>Remove</button>
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">${tagMoveUpLabel}</button>
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">${tagMoveDownLabel}</button>
+                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>${tagRemoveLabel}</button>
                 </div>
               `;
               item.querySelector(".customer-tag-priority-name").textContent = value;
@@ -450,8 +456,8 @@
         picker.querySelectorAll("[data-owner-option]").forEach((option) => {
           option.addEventListener("click", () => {
             hidden.value = option.dataset.ownerId || "";
-            selectedName.textContent = option.dataset.ownerName || "Select internal owner";
-            selectedEmail.textContent = option.dataset.ownerEmail || "Choose from your team members";
+            selectedName.textContent = option.dataset.ownerName || selectInternalOwnerLabel;
+            selectedEmail.textContent = option.dataset.ownerEmail || chooseTeamOwnerLabel;
             if (selectedInitial) {
               selectedInitial.textContent = (option.dataset.ownerName || "?").trim().charAt(0).toUpperCase();
             }

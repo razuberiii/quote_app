@@ -5,47 +5,47 @@
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% was_viewed = quote.viewed_at.present? %>
-<% submit_loading_label = quote.persisted? ? "Updating..." : "Creating..." %>
+<% submit_loading_label = quote.persisted? ? t("quotes.view.form.updating") : t("quotes.view.form.creating") %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
 <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specs: p.effective_default_specs, default_addons: p.effective_default_addons, spec_presets: p.available_spec_preset_payloads, addon_presets: p.available_addon_preset_payloads, default_spec_preset_id: p.default_spec_preset_id, default_addon_preset_id: p.default_addon_preset_id } }.to_json %>
 
 <div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-viewed="<%= was_viewed %>" data-has-errors="<%= quote.errors.any? %>">
   <section class="quote-edit-summary app-stat-grid quote-edit-summary--workspace">
     <article class="quote-edit-summary-card">
-      <span class="summary-label">Current Status</span>
+      <span class="summary-label"><%= t("quotes.view.form.current_status") %></span>
       <strong id="quote-summary-status-text"><%= status_value.capitalize %></strong>
       <span id="quote-summary-status-badge"><%= quote_status_badge(status_value) %></span>
     </article>
     <article class="quote-edit-summary-card quote-edit-summary-card-grand">
-      <span class="summary-label">Grand Total</span>
+      <span class="summary-label"><%= t("quotes.view.form.grand_total") %></span>
       <strong id="quote-summary-grand-total"><%= quote_money(grand_total_value, quote.currency) %></strong>
     </article>
     <article class="quote-edit-summary-card">
-      <span class="summary-label">Discount Rate</span>
+      <span class="summary-label"><%= t("quotes.view.form.discount_rate") %></span>
       <strong id="quote-summary-discount-rate"><%= discount_pct_value %>%</strong>
     </article>
     <article class="quote-edit-summary-card">
-      <span class="summary-label">Expiry</span>
+      <span class="summary-label"><%= t("quotes.view.form.expiry") %></span>
       <strong id="quote-summary-expiry">
         <% if days_left_value.nil? %>
-          No date
+          <%= t("quotes.view.form.no_date") %>
         <% elsif days_left_value.negative? %>
-          Expired
+          <%= t("quotes.view.form.expired") %>
         <% else %>
-          <%= days_left_value %> day(s) left
+          <%= t("quotes.view.form.days_left", count: days_left_value) %>
         <% end %>
       </strong>
     </article>
     <article class="quote-edit-summary-card">
-      <span class="summary-label">Viewed</span>
-      <strong id="quote-summary-viewed"><%= was_viewed ? "Yes" : "No" %></strong>
+      <span class="summary-label"><%= t("quotes.view.form.viewed") %></span>
+      <strong id="quote-summary-viewed"><%= was_viewed ? t("quotes.view.form.yes") : t("quotes.view.form.no") %></strong>
     </article>
   </section>
 
   <%= form_with model: form_model, html: { id: "quote-form", novalidate: true } do |f| %>
     <% if quote.errors.any? %>
       <div class="error-messages">
-        <h2><%= pluralize(quote.errors.count, "error") %> prevented this quote from being saved:</h2>
+        <h2><%= t("quotes.view.form.error_summary", count: quote.errors.count) %></h2>
         <ul>
           <% quote.errors.full_messages.each do |message| %>
             <li><%= message %></li>
@@ -55,7 +55,7 @@
     <% end %>
 
     <div class="quote-form-inline-error js-quote-client-error" role="alert" hidden>
-      <strong>Please complete the required fields before saving.</strong>
+      <strong><%= t("quotes.view.form.complete_required_fields") %></strong>
       <ul class="js-quote-client-error-list"></ul>
     </div>
 
@@ -63,23 +63,23 @@
 
     <section class="quote-form-section quote-form-panel">
       <div class="app-form-section-head">
-        <h3>Basic Information</h3>
-        <p class="app-form-section-note">Set document identity, template, currency, and validity before building line items.</p>
+        <h3><%= t("quotes.view.form.basic_information") %></h3>
+        <p class="app-form-section-note"><%= t("quotes.view.form.basic_information_hint") %></p>
       </div>
       <div class="quote-form-grid">
         <div>
-          <%= f.label :template_id, "Template" %>
+          <%= f.label :template_id, t("quotes.view.form.template") %>
           <%= f.select :template_id,
                        (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] },
                        { include_blank: false },
-                       { class: ui_input_classes, data: { searchable_select: true, search_placeholder: "Search template" } } %>
+                       { class: ui_input_classes, data: { searchable_select: true, search_placeholder: t("quotes.view.form.search_template") } } %>
         </div>
         <div>
           <%= f.label :currency %>
           <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD" ], {}, { class: ui_input_classes } %>
         </div>
         <div>
-          <%= f.label :issued_on, "Quote date" %>
+          <%= f.label :issued_on, t("quotes.view.form.quote_date") %>
           <%= f.date_field :issued_on, class: ui_input_classes %>
         </div>
         <div>
@@ -87,96 +87,99 @@
           <%= f.date_field :valid_until, class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
-          <%= f.label :custom_title, "Custom Quotation Title (optional)" %>
-          <%= f.text_field :custom_title, placeholder: "Project Falcon - Q2 Equipment Package", class: ui_input_classes %>
+          <%= f.label :custom_title, t("quotes.view.form.custom_title") %>
+          <%= f.text_field :custom_title, placeholder: t("quotes.view.form.custom_title_placeholder"), class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :status %>
-          <%= f.select :status, [["Draft", "draft"], ["Sent", "sent"], ["Viewed", "viewed"], ["Negotiating", "negotiating"], ["Won", "won"], ["Lost", "lost"], ["Expired", "expired"]], {}, { class: ui_input_classes } %>
+          <%= f.select :status,
+                       [[t("quotes.view.form.status_options.draft"), "draft"], [t("quotes.view.form.status_options.sent"), "sent"], [t("quotes.view.form.status_options.viewed"), "viewed"], [t("quotes.view.form.status_options.negotiating"), "negotiating"], [t("quotes.view.form.status_options.won"), "won"], [t("quotes.view.form.status_options.lost"), "lost"], [t("quotes.view.form.status_options.expired"), "expired"]],
+                       {},
+                       { class: ui_input_classes } %>
         </div>
       </div>
     </section>
 
     <section class="quote-form-section quote-form-panel">
       <div class="app-form-section-head">
-        <h3>Business Terms</h3>
-        <p class="app-form-section-note">Capture the commercial terms buyers actually review alongside pricing.</p>
+        <h3><%= t("quotes.view.form.business_terms") %></h3>
+        <p class="app-form-section-note"><%= t("quotes.view.form.business_terms_hint") %></p>
       </div>
       <div class="quote-form-grid">
         <div>
           <%= f.label :payment_term %>
-          <%= f.text_field :payment_term, placeholder: "30% advance, 70% before shipment", class: ui_input_classes %>
+          <%= f.text_field :payment_term, placeholder: t("quotes.view.form.payment_term_placeholder"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :trade_term, "Trade terms" %>
-          <%= f.text_field :trade_term, placeholder: "FOB / CIF / EXW", class: ui_input_classes %>
+          <%= f.label :trade_term, t("quotes.view.form.trade_terms") %>
+          <%= f.text_field :trade_term, placeholder: t("quotes.view.form.trade_terms_placeholder"), class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :delivery_notes %>
-          <%= f.text_area :delivery_notes, rows: 2, placeholder: "Delivery / export notes", class: ui_input_classes %>
+          <%= f.text_area :delivery_notes, rows: 2, placeholder: t("quotes.view.form.delivery_notes_placeholder"), class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
-          <%= f.label :terms_text, "Terms" %>
-          <%= f.text_area :terms_text, rows: 3, placeholder: "Payment terms, validity statement, etc.", class: ui_input_classes %>
+          <%= f.label :terms_text, t("quotes.view.form.terms") %>
+          <%= f.text_area :terms_text, rows: 3, placeholder: t("quotes.view.form.terms_placeholder"), class: ui_input_classes %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :legal_disclaimer %>
-          <%= f.text_area :legal_disclaimer, rows: 2, placeholder: "Optional legal disclaimer", class: ui_input_classes %>
+          <%= f.text_area :legal_disclaimer, rows: 2, placeholder: t("quotes.view.form.legal_disclaimer_placeholder"), class: ui_input_classes %>
         </div>
       </div>
     </section>
 
     <section class="quote-form-section quote-form-panel">
       <div class="app-form-section-head">
-        <h3>Internal Information</h3>
-        <p class="app-form-section-note">Keep internal notes and post-decision data separate from the buyer-facing quote.</p>
+        <h3><%= t("quotes.view.form.internal_information") %></h3>
+        <p class="app-form-section-note"><%= t("quotes.view.form.internal_information_hint") %></p>
       </div>
       <div class="quote-form-grid">
         <div class="quote-form-grid-span-2">
           <%= f.label :notes %>
-          <%= f.text_area :notes, rows: 3, placeholder: "Internal notes (not required in public view)", class: ui_input_classes %>
+          <%= f.text_area :notes, rows: 3, placeholder: t("quotes.view.form.internal_notes_placeholder"), class: ui_input_classes %>
         </div>
         <div class="quote-conditional" data-show-when-status="won">
-          <%= f.label :final_amount, "Final amount (actual deal)" %>
+          <%= f.label :final_amount, t("quotes.view.form.final_amount") %>
           <%= f.number_field :final_amount, step: 0.01, class: ui_input_classes("js-final-amount") %>
         </div>
         <div class="quote-conditional" data-show-when-status="won">
           <%= f.label :win_reason %>
           <%= f.select :win_reason,
                        Quote.reason_options_for(:win).map { |reason| [reason.humanize, reason] },
-                       { include_blank: "Select win reason" },
+                       { include_blank: t("quotes.view.form.select_win_reason") },
                        { class: ui_input_classes("js-win-reason") } %>
         </div>
         <div class="quote-conditional quote-conditional-detail" data-show-when-status="won" data-reason-detail-for="win">
-          <%= f.label :win_reason_detail, "Win reason details" %>
+          <%= f.label :win_reason_detail, t("quotes.view.form.win_reason_details") %>
           <%= f.text_field :win_reason_detail,
-                           placeholder: "Describe the specific win reason",
+                           placeholder: t("quotes.view.form.win_reason_details_placeholder"),
                            class: ui_input_classes("js-win-reason-detail") %>
         </div>
         <div class="quote-conditional" data-show-when-status="lost">
           <%= f.label :loss_reason %>
           <%= f.select :loss_reason,
                        Quote.reason_options_for(:loss).map { |reason| [reason.humanize, reason] },
-                       { include_blank: "Select loss reason" },
+                       { include_blank: t("quotes.view.form.select_loss_reason") },
                        { class: ui_input_classes("js-loss-reason") } %>
         </div>
         <div class="quote-conditional quote-conditional-detail" data-show-when-status="lost" data-reason-detail-for="loss">
-          <%= f.label :loss_reason_detail, "Loss reason details" %>
+          <%= f.label :loss_reason_detail, t("quotes.view.form.loss_reason_details") %>
           <%= f.text_field :loss_reason_detail,
-                           placeholder: "Describe the specific loss reason",
+                           placeholder: t("quotes.view.form.loss_reason_details_placeholder"),
                            class: ui_input_classes("js-loss-reason-detail") %>
         </div>
         <div class="quote-conditional quote-form-grid-span-2" data-show-when-status="sent,viewed,negotiating,expired">
-          <%= f.label :stalled_reason, "Stalled / pressure reason" %>
+          <%= f.label :stalled_reason, t("quotes.view.form.stalled_reason") %>
           <%= f.select :stalled_reason,
                        Quote.reason_options_for(:stalled).map { |reason| [reason.humanize, reason] },
-                       { include_blank: "Select stalled reason" },
+                       { include_blank: t("quotes.view.form.select_stalled_reason") },
                        { class: ui_input_classes("js-stalled-reason") } %>
         </div>
         <div class="quote-conditional quote-conditional-detail quote-form-grid-span-2" data-show-when-status="sent,viewed,negotiating,expired" data-reason-detail-for="stalled">
-          <%= f.label :stalled_reason_detail, "Pressure reason details" %>
+          <%= f.label :stalled_reason_detail, t("quotes.view.form.pressure_reason_details") %>
           <%= f.text_field :stalled_reason_detail,
-                           placeholder: "Describe the specific blocker or pressure",
+                           placeholder: t("quotes.view.form.pressure_reason_details_placeholder"),
                            class: ui_input_classes("js-stalled-reason-detail") %>
         </div>
       </div>
@@ -185,65 +188,65 @@
     <section class="quote-form-section quote-form-section-totals quote-form-panel">
       <div class="quote-totals-inputs">
         <div class="app-form-section-head">
-          <h3>Totals Inputs</h3>
-          <p class="app-form-section-note quote-money-context">Settlement currency: <strong class="js-currency-code"><%= quote.currency %></strong></p>
+          <h3><%= t("quotes.view.form.totals_inputs") %></h3>
+          <p class="app-form-section-note quote-money-context"><%= t("quotes.view.form.settlement_currency") %>: <strong class="js-currency-code"><%= quote.currency %></strong></p>
         </div>
         <div class="quote-form-grid">
           <div>
-            <%= f.label :tax_amount, "Tax / VAT" %>
+            <%= f.label :tax_amount, t("quotes.view.form.tax_vat") %>
             <div class="quote-money-input">
               <%= f.number_field :tax_amount, step: 0.01, class: ui_input_classes("js-tax-input") %>
             </div>
           </div>
           <div>
-            <%= f.label :shipping_amount, "Shipping / Handling" %>
+            <%= f.label :shipping_amount, t("quotes.view.form.shipping_handling") %>
             <div class="quote-money-input">
               <%= f.number_field :shipping_amount, step: 0.01, class: ui_input_classes("js-shipping-input") %>
             </div>
           </div>
           <div class="quote-discount-row js-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>>
-            <%= f.label :discount_amount, "Discount" %>
+            <%= f.label :discount_amount, t("quotes.view.form.discount") %>
             <div class="quote-money-input">
               <%= f.number_field :discount_amount, step: 0.01, class: ui_input_classes("js-discount-input") %>
             </div>
-            <button type="button" class="quote-inline-link js-remove-discount">Remove discount</button>
+            <button type="button" class="quote-inline-link js-remove-discount"><%= t("quotes.view.form.remove_discount") %></button>
           </div>
         </div>
-        <button type="button" class="quote-inline-link js-add-discount" <%= "hidden" if quote.discount_amount.to_d.positive? %>>+ Add Discount</button>
+        <button type="button" class="quote-inline-link js-add-discount" <%= "hidden" if quote.discount_amount.to_d.positive? %>><%= t("quotes.view.form.add_discount") %></button>
       </div>
 
       <aside class="quote-live-totals">
-        <h4>Totals</h4>
-        <p><span>Subtotal</span><strong id="quote-live-subtotal"><%= quote_money(subtotal_value, quote.currency) %></strong></p>
-        <p><span>Add-ons Total</span><strong id="quote-live-addons"><%= quote_money(add_ons_value, quote.currency) %></strong></p>
-        <p><span>Tax / VAT</span><strong id="quote-live-tax"><%= quote_money(quote.tax_amount.to_d, quote.currency) %></strong></p>
-        <p><span>Shipping</span><strong id="quote-live-shipping"><%= quote_money(quote.shipping_amount.to_d, quote.currency) %></strong></p>
-        <p class="quote-live-reduction js-live-original-total" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>Original Total</span><strong id="quote-live-original-total"><%= quote_money((subtotal_value + quote.tax_amount.to_d + quote.shipping_amount.to_d), quote.currency) %></strong></p>
-        <p class="quote-live-discount js-live-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>Discount</span><strong id="quote-live-discount"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
-        <p class="quote-live-grand"><span>Grand Total</span><strong id="quote-live-grand"><%= quote_money(grand_total_value, quote.currency) %></strong></p>
-        <p class="quote-live-saved js-live-saved-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span>You Save</span><strong id="quote-live-saved"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
+        <h4><%= t("quotes.view.form.totals") %></h4>
+        <p><span><%= t("quotes.view.form.subtotal") %></span><strong id="quote-live-subtotal"><%= quote_money(subtotal_value, quote.currency) %></strong></p>
+        <p><span><%= t("quotes.view.form.addons_total") %></span><strong id="quote-live-addons"><%= quote_money(add_ons_value, quote.currency) %></strong></p>
+        <p><span><%= t("quotes.view.form.tax_vat") %></span><strong id="quote-live-tax"><%= quote_money(quote.tax_amount.to_d, quote.currency) %></strong></p>
+        <p><span><%= t("quotes.view.form.shipping") %></span><strong id="quote-live-shipping"><%= quote_money(quote.shipping_amount.to_d, quote.currency) %></strong></p>
+        <p class="quote-live-reduction js-live-original-total" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span><%= t("quotes.view.form.original_total") %></span><strong id="quote-live-original-total"><%= quote_money((subtotal_value + quote.tax_amount.to_d + quote.shipping_amount.to_d), quote.currency) %></strong></p>
+        <p class="quote-live-discount js-live-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span><%= t("quotes.view.form.discount") %></span><strong id="quote-live-discount"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
+        <p class="quote-live-grand"><span><%= t("quotes.view.form.grand_total") %></span><strong id="quote-live-grand"><%= quote_money(grand_total_value, quote.currency) %></strong></p>
+        <p class="quote-live-saved js-live-saved-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span><%= t("quotes.view.form.you_save") %></span><strong id="quote-live-saved"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
       </aside>
     </section>
 
     <section class="quote-form-section quote-form-panel">
       <div class="app-form-section-head">
-        <h3>Quote Items</h3>
-        <p class="app-form-section-note">Search products, switch presets, and edit specs or add-ons without losing quote context.</p>
+        <h3><%= t("quotes.view.form.quote_items") %></h3>
+        <p class="app-form-section-note"><%= t("quotes.view.form.quote_items_hint") %></p>
       </div>
       <p class="quote-form-hint">
-        Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
+        <%= t("quotes.view.form.quote_item_hint_1") %>
       </p>
       <p class="quote-form-hint">
-        Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
+        <%= t("quotes.view.form.quote_item_hint_2") %>
       </p>
-      <p class="quote-form-hint">If product reference currency differs from quote currency, unit price will not be auto-filled.</p>
-      <p class="quote-form-hint">Specifications and add-ons can load from product presets, switch to another preset, or be pasted as text line by line.</p>
+      <p class="quote-form-hint"><%= t("quotes.view.form.quote_item_hint_3") %></p>
+      <p class="quote-form-hint"><%= t("quotes.view.form.quote_item_hint_4") %></p>
       <p class="quote-form-hint quote-form-hint-warning" id="quote-currency-mismatch-warning" hidden>
-        Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually.
+        <%= t("quotes.view.form.currency_mismatch_warning") %>
       </p>
       <% if monetary_error_messages.any? %>
         <div class="quote-form-inline-error" role="alert">
-          <strong>Pricing needs attention before this quote can be saved.</strong>
+          <strong><%= t("quotes.view.form.pricing_attention_needed") %></strong>
           <ul>
             <% monetary_error_messages.each do |message| %>
               <li><%= message %></li>
@@ -257,12 +260,12 @@
           <table class="quote-items-table app-data-table">
             <thead>
               <tr>
-                <th>Product Name</th>
-                <th>Specifications</th>
-                <th>Add-ons</th>
-                <th>Unit Price</th>
-                <th>Quantity</th>
-                <th>Remove</th>
+                <th><%= t("quotes.view.form.product_name") %></th>
+                <th><%= t("quotes.view.form.specifications") %></th>
+                <th><%= t("quotes.view.form.add_ons") %></th>
+                <th><%= t("quotes.view.form.unit_price") %></th>
+                <th><%= t("quotes.view.form.quantity") %></th>
+                <th><%= t("quotes.view.form.remove") %></th>
               </tr>
             </thead>
             <tbody id="quote-items-body">
@@ -272,7 +275,7 @@
                 <tr class="quote-item-row">
                   <td class="quote-col-product">
                     <div class="product-search">
-                      <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="Type to search product">
+                      <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="<%= t("quotes.view.form.type_to_search_product") %>">
                       <div class="js-product-dropdown"></div>
                     </div>
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -282,23 +285,23 @@
                   <td class="quote-col-specs">
                     <% spec_payloads = item.product&.available_spec_preset_payloads || [] %>
                     <select class="js-spec-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_spec_preset_id %>">
-                      <option value="">Custom specs</option>
+                      <option value=""><%= t("quotes.view.form.custom_specs") %></option>
                       <% spec_payloads.each do |preset| %>
                         <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_spec_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
                       <% end %>
                     </select>
                     <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
                     <div class="quote-kv-summary js-spec-summary"></div>
-                    <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
+                    <button type="button" class="quote-kv-open js-open-spec-editor"><%= t("quotes.view.form.edit_specs") %></button>
                     <div class="quote-kv-editor js-spec-editor" data-kind="spec">
                       <div class="quote-kv-editor-head">
-                        <strong>Specifications</strong>
-                        <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                        <strong><%= t("quotes.view.form.specifications") %></strong>
+                        <button type="button" class="quote-kv-close js-kv-close"><%= t("quotes.view.form.close") %></button>
                       </div>
                       <div class="quote-kv-bulk">
-                        <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Power: 5kW&#10;Voltage: 220V"></textarea>
+                        <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="<%= t("quotes.view.form.spec_bulk_placeholder") %>"></textarea>
                         <div class="quote-kv-bulk-actions">
-                          <button type="button" class="quote-kv-parse js-spec-bulk-apply">Apply text</button>
+                          <button type="button" class="quote-kv-parse js-spec-bulk-apply"><%= t("quotes.view.form.apply_text") %></button>
                           <span class="quote-kv-bulk-check js-spec-bulk-check" aria-live="polite"></span>
                         </div>
                       </div>
@@ -306,38 +309,38 @@
                         <% spec_rows = item.specification_pairs.presence || [ { key: "", value: "" } ] %>
                         <% spec_rows.each do |pair| %>
                           <div class="quote-kv-row">
-                            <input type="text" class="js-kv-key" value="<%= pair[:key] %>" placeholder="e.g. Power">
-                            <input type="text" class="js-kv-value" value="<%= pair[:value] %>" placeholder="e.g. 5kW">
-                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove specification">&times;</button>
+                            <input type="text" class="js-kv-key" value="<%= pair[:key] %>" placeholder="<%= t("quotes.view.form.spec_key_placeholder") %>">
+                            <input type="text" class="js-kv-value" value="<%= pair[:value] %>" placeholder="<%= t("quotes.view.form.spec_value_placeholder") %>">
+                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="<%= t("quotes.view.form.remove_specification") %>">&times;</button>
                           </div>
                         <% end %>
                       </div>
                       <div class="quote-kv-actions">
-                        <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
-                        <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
+                        <button type="button" class="quote-kv-add js-kv-add"><%= t("quotes.view.form.add_spec") %></button>
+                        <button type="button" class="quote-kv-clear js-kv-clear-all"><%= t("quotes.view.form.clear_all") %></button>
                       </div>
                     </div>
                   </td>
                   <td class="quote-col-addons">
                     <% addon_payloads = item.product&.available_addon_preset_payloads || [] %>
                     <select class="js-addon-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_addon_preset_id %>">
-                      <option value="">Custom add-ons</option>
+                      <option value=""><%= t("quotes.view.form.custom_add_ons") %></option>
                       <% addon_payloads.each do |preset| %>
                         <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_addon_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
                       <% end %>
                     </select>
                     <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120" %>
                     <div class="quote-kv-summary js-addon-summary"></div>
-                    <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
+                    <button type="button" class="quote-kv-open js-open-addon-editor"><%= t("quotes.view.form.edit_add_ons") %></button>
                     <div class="quote-kv-editor js-addon-editor" data-kind="addon">
                       <div class="quote-kv-editor-head">
-                        <strong>Add-ons</strong>
-                        <button type="button" class="quote-kv-close js-kv-close">Close</button>
+                        <strong><%= t("quotes.view.form.add_ons") %></strong>
+                        <button type="button" class="quote-kv-close js-kv-close"><%= t("quotes.view.form.close") %></button>
                       </div>
                       <div class="quote-kv-bulk">
-                        <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Packaging: 30&#10;Installation = 120"></textarea>
+                        <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="<%= t("quotes.view.form.addon_bulk_placeholder") %>"></textarea>
                         <div class="quote-kv-bulk-actions">
-                          <button type="button" class="quote-kv-parse js-addon-bulk-apply">Apply text</button>
+                          <button type="button" class="quote-kv-parse js-addon-bulk-apply"><%= t("quotes.view.form.apply_text") %></button>
                           <span class="quote-kv-bulk-check js-addon-bulk-check" aria-live="polite"></span>
                         </div>
                       </div>
@@ -345,15 +348,15 @@
                         <% addon_rows = item.addon_charge_entries.presence || [ { name: "", amount: "" } ] %>
                         <% addon_rows.each do |entry| %>
                           <div class="quote-kv-row quote-kv-row-addon">
-                            <input type="text" class="js-addon-name" value="<%= entry[:name] %>" placeholder="e.g. Packaging">
+                            <input type="text" class="js-addon-name" value="<%= entry[:name] %>" placeholder="<%= t("quotes.view.form.addon_name_placeholder") %>">
                             <input type="number" step="0.01" min="0" class="js-addon-amount" value="<%= entry[:amount] %>" placeholder="0.00">
-                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="Remove add-on">&times;</button>
+                            <button type="button" class="quote-kv-remove js-kv-remove" aria-label="<%= t("quotes.view.form.remove_add_on") %>">&times;</button>
                           </div>
                         <% end %>
                       </div>
                       <div class="quote-kv-actions">
-                        <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
-                        <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
+                        <button type="button" class="quote-kv-add js-kv-add"><%= t("quotes.view.form.add_add_on") %></button>
+                        <button type="button" class="quote-kv-clear js-kv-clear-all"><%= t("quotes.view.form.clear_all") %></button>
                       </div>
                     </div>
                   </td>
@@ -365,7 +368,7 @@
                   </td>
                   <td class="quote-col-remove">
                     <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
-                    <button type="button" class="quote-item-remove-icon js-remove-item" aria-label="Remove item">&times;</button>
+                    <button type="button" class="quote-item-remove-icon js-remove-item" aria-label="<%= t("quotes.view.form.remove_item") %>">&times;</button>
                   </td>
                 </tr>
               <% end %>
@@ -374,13 +377,13 @@
         </div>
 
         <div class="quote-form-add-row">
-          <button type="button" class="<%= ui_button_classes(:secondary) %>" id="add-quote-item">+ Add Item</button>
+          <button type="button" class="<%= ui_button_classes(:secondary) %>" id="add-quote-item"><%= t("quotes.view.form.add_item") %></button>
         </div>
       </div>
     </section>
 
     <div class="quote-form-submit">
-      <%= f.submit nil, class: ui_button_classes(:primary), data: { default_label: (quote.persisted? ? "Update Quote" : "Create Quote") } %>
+      <%= f.submit nil, class: ui_button_classes(:primary), data: { default_label: (quote.persisted? ? t("quotes.view.form.update_quote") : t("quotes.view.form.create_quote")) } %>
     </div>
   <% end %>
 </div>
@@ -435,13 +438,13 @@
     const clientErrorList = form?.querySelector(".js-quote-client-error-list");
 
     const statusLabels = {
-      draft: "Draft",
-      sent: "Sent",
-      viewed: "Viewed",
-      negotiating: "Negotiating",
-      won: "Won",
-      lost: "Lost",
-      expired: "Expired"
+      draft: "<%= j(t('quotes.view.form.status_options.draft')) %>",
+      sent: "<%= j(t('quotes.view.form.status_options.sent')) %>",
+      viewed: "<%= j(t('quotes.view.form.status_options.viewed')) %>",
+      negotiating: "<%= j(t('quotes.view.form.status_options.negotiating')) %>",
+      won: "<%= j(t('quotes.view.form.status_options.won')) %>",
+      lost: "<%= j(t('quotes.view.form.status_options.lost')) %>",
+      expired: "<%= j(t('quotes.view.form.status_options.expired')) %>"
     };
     const statusBadgeClasses = {
       draft: "app-status-badge app-status-badge--blue",

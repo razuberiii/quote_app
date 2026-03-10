@@ -1,2 +1,2 @@
 web: ruby bin/rails server
-css: ruby bin/rails tailwindcss:watch
+css: ruby bin/tailwind_watch_quiet

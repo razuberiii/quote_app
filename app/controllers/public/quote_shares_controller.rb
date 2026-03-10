@@ -7,6 +7,7 @@ module Public
     before_action :set_share
     before_action :set_template
     before_action :set_document_kind, only: %i[show]
+    around_action :with_public_link_locale, only: %i[show accept request_revision]
 
     def show
       @share.track_view!(country: request_country, ip: request_client_ip, user_agent: request_user_agent) unless internal_preview_request?
@@ -17,7 +18,7 @@ module Public
 
     def accept
       unless allow_public_accept_action?
-        redirect_to public_quote_share_path(@share.token, status_message: "This revision is no longer actionable.") and return
+        redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.revision_not_actionable")) and return
       end
 
       accepted_at = Time.current
@@ -30,12 +31,12 @@ module Public
         status: "won",
         updated_at: accepted_at
       )
-      redirect_to public_quote_share_path(@share.token, status_message: "Quotation accepted. Thank you.")
+      redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.quotation_accepted"))
     end
 
     def request_revision
       unless allow_public_revision_action?
-        redirect_to public_quote_share_path(@share.token, status_message: "This revision is no longer actionable.") and return
+        redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.revision_not_actionable")) and return
       end
 
       selected_reason = params[:request_reason].to_s.strip
@@ -49,7 +50,7 @@ module Public
         changes_request_message: client_message,
         updated_at: Time.current
       )
-      redirect_to public_quote_share_path(@share.token, status_message: "Revision request sent.")
+      redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.revision_request_sent"))
     end
 
     private
@@ -147,6 +148,11 @@ module Public
       return if latest_share.blank?
 
       @latest_share_url = public_quote_share_path(latest_share.token, doc: @document_kind)
+    end
+
+    def with_public_link_locale
+      locale = @template&.output_locale_for(:public_link) || "en"
+      I18n.with_locale(locale) { yield }
     end
   end
 end

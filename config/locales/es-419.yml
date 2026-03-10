@@ -1,0 +1,2115 @@
+---
+es-419:
+  app:
+    brand_name: Rubusoo
+  nav:
+    home: Inicio
+    dashboard: Panel
+    customers: Clientes
+    products: Productos
+    product_presets: Plantillas
+    presets: Plantillas
+    template: Plantilla
+    team: Equipo
+    admin: Admin
+    start_free: Comenzar gratis
+    login: Iniciar sesion
+  account:
+    menu: Cuenta
+    settings: Configuracion
+    workspace: Espacio de trabajo
+    account_settings: Configuracion de cuenta
+    company_settings: Configuracion de empresa
+    team_management: Gestion de equipo
+    template_settings: Configuracion de plantilla
+    my_invitations:
+      one: Mi invitacion (%{count})
+      other: Mis invitaciones (%{count})
+    logout: Cerrar sesion
+  locale:
+    switcher: Idioma
+    switcher_short: Lang
+    switcher_label: Selector de idioma
+  datetime:
+    ago: hace %{time}
+  dashboard:
+    view:
+      index:
+        title: Dashboard
+        subtitle: Track pipeline momentum, follow-up pressure, and quote activity from one operating view.
+        kpi_period: KPI period
+        weekly: Weekly
+        monthly: Monthly
+        operating_snapshot: Operating Snapshot
+        operating_snapshot_caption: Immediate pressure, current sales signals, and this period's pace.
+        overdue_followups: overdue follow-up(s)
+        due_today: due today
+        high_value_stalled: high-value stalled
+        accepted: accepted
+        revision_requests: revision request(s)
+        negotiating_stale: negotiating 7d+
+        no_immediate_risk: No immediate risk signals.
+        action_required: Action Required (%{count})
+        risk_customers: "%{count} risk customer(s)"
+        stalled_negotiations: "%{count} stalled negotiation(s)"
+        no_customer_or_decision_risk: No immediate customer or decision risk
+        handle_overdue_first: Handle overdue and stalled accounts first.
+        sales_signals: Sales Signals
+        this_month: This month
+        this_week: This week
+        outcome_signals: Outcome Signals
+        revision_requested: Revision Requested
+        pressure_signals: Pressure Signals
+        reopened: Reopened
+        attention_signal: Attention Signal
+        public_actionable: Public Actionable
+        awaiting_client_decision: Awaiting client decision
+        open_deals: Open Deals
+        quotes_this_period: Quotes This %{period}
+        period_month: Month
+        period_week: Week
+        pending_followups: Pending Follow-ups
+        today_focus: Today Focus
+        top_priority: Top Priority
+        secondary: Secondary
+        show_more: Show more (%{count})
+        show_less: Show less
+        no_high_priority_actions: No high-priority actions today.
+        recent_quotes: Recent Quotes
+        recent_quotes_caption: Showing 6 most recent quotes across active accounts.
+        quote: Quote
+        buyer: Buyer
+        status: Status
+        engagement: Engagement
+        next_move: Next Move
+        total: Total
+        no_quotes_yet: No quotes yet
+        no_quotes_yet_body: Create the first quote to start tracking deal momentum, engagement, and reminders.
+        new_quote: New Quote
+        deal_overview: Deal Overview
+        deal_overview_caption: Momentum, product mix, and cycle quality across active pipeline.
+        top_product: Top Product
+        last_30_days_quotes: last 30 days • %{count} quotes
+        average_quote_cycle: Average Quote Cycle
+        closed_deals: "%{count} closed deals"
+        days_value: "%{count} days"
+        revision_rate: Revision Rate
+        active_quotes: active quotes
+        document_mix: Document Mix
+        quotation_vs_pi: quotation vs PI
+        top_quoted_products: Top Quoted Products
+        top_quoted_products_caption: Based on distinct quotes per product.
+        product: Product
+        quoted: Quoted
+        won: Won
+        last_quoted: Last Quoted
+        open_product: Open product %{name}
+        no_product_activity: No product activity yet
+        no_product_activity_body: Quoted product stats will appear here once products start showing up in live quotes.
+        reminder_queue: Reminder Queue
+        reminder_queue_caption: Sent quotes not viewed after 48 hours.
+        sent: Sent
+        count: Count
+        quotation: Quotation
+        open_quote: Open quote %{no}
+        no_reminders_pending: No reminders pending
+        no_reminders_pending_body: Once sent quotes sit unread long enough, they will appear here for review.
+      quote_funnel:
+        title: Quote Funnel
+        caption: Current quote-thread counts and conversion rates.
+        sent: Sent
+        viewed: Viewed
+        revisions: Revisions
+        accepted: Accepted
+        lost: Lost
+      action_items:
+        title: Action Required
+        open_items: "%{count} open item(s)"
+        open: Open
+        mark_handled: Mark handled
+        more_open_items_in_queue: "%{count} more open item(s) in the queue."
+        no_unresolved: No unresolved action items. Current quote flow looks clean.
+      performance_reports:
+        sales_ownership: Sales Ownership
+        sales_ownership_caption: Account load and quote outcomes by internal owner.
+        accounts: "%{count} account(s)"
+        open_won: "%{open} open • %{won} won"
+        threads: "%{count} threads"
+        win_rate: "%{rate}% win rate"
+        overdue: "%{count} overdue"
+        latest: latest
+        showing_top_owners: Showing top %{count} owners by current quote load and outcomes.
+        assign_internal_owners: Assign internal owners to customers to see ownership load here.
+        customer_portfolio: Customer Portfolio
+        customer_portfolio_caption: Most active accounts ranked by open and won quote threads.
+        follow_up_overdue: follow-up overdue
+        follow_up_normal: follow-up normal
+        open: "%{count} open"
+        won: "%{count} won"
+        showing_top_accounts: Showing top %{count} accounts by active quote momentum.
+        customer_portfolio_empty: Customer portfolio data will appear once quotes are active.
+    logic:
+      action_items:
+        quote_viewed: Buyer viewed %{reference}. Follow up while momentum is warm.
+        quote_not_viewed: "%{reference} has not been viewed for 3 days after sending."
+        quote_expiring: "%{reference} is close to expiry."
+        revision_requested: Buyer requested changes on %{reference}.
+      not_enough_data: Not enough data yet
+      export_mix_zero: Quotation 0% / PI 0%
+      export_mix: Quotation %{quotation}% / PI %{pi}%
+      follow_up_interval: 'Follow-up interval: %{state}'
+      unknown_customer: Unknown customer
+      default_currency: USD
+      operational_risk: Operational Risk
+      accounts: "%{count} account(s)"
+      follow_up_pressure_attention: Follow-up pressure needs attention.
+      no_urgent_account_risk: No urgent account risk.
+      momentum: Momentum
+      active_quotes_touched: Active quotes touched in the last 7 days.
+      no_active_quotes_yet: No active quotes yet.
+      observed_engagement: Observed Engagement
+      quotes_with_view_evidence: Quotes with actual buyer view evidence.
+      no_viewable_quote_evidence: No viewable quote evidence yet.
+      period_month: month
+      period_week: week
+      trend_vs_last_period: "%{value}% vs last %{period}"
+      health:
+        risk: Risk
+        watch: Watch
+        stable: Stable
+      health_band:
+        within: Within healthy band
+        below: Below target
+        above: Above optimal range
+      next_action:
+        send_reminder: Send reminder
+        create_revision: Create revision
+        push_to_close: Push to close
+        follow_up_now: Follow up now
+        review: Review
+      signal:
+        draft_not_shared: Draft, not shared
+        send_now: Send Now
+        sent_no_view_3d: Sent, no view 3d+
+        check_quote: Check Quote
+        sent_awaiting_view: Sent, awaiting view
+        check_signal: Check Signal
+        viewed_in_negotiation: Viewed, in negotiation
+        viewed: Viewed
+        follow_up_today: Follow Up Today
+        decision_recorded: Decision recorded
+        review: Review
+        closed_lost: Closed lost
+        expired: Expired
+        create_revision: Create revision
+        no_active_signal: No active signal
+      action:
+        follow_up_due_today_title: "%{name}: follow-up due today"
+        follow_up_due_today_detail: Contact now and update next follow-up date.
+        overdue_follow_up_title: "%{name}: overdue follow-up"
+        overdue_follow_up_detail: Overdue by %{days} day(s). High risk of inactivity.
+        high_value_stalled_title: "%{name}: high value but stalled"
+        high_value_stalled_detail: Large quote value with no recent movement. Re-engage this account.
+        no_recent_follow_up_title: "%{name}: no recent follow-up"
+        no_recent_follow_up_detail: No follow-up in 14+ days. Add this to today's touchpoints.
+        no_follow_up_schedule_title: "%{name}: no follow-up schedule"
+        no_follow_up_schedule_detail: Set a next touchpoint to avoid pipeline drop.
+        negotiating_stalled_title: "%{name}: negotiating stalled"
+        negotiating_stalled_detail: No update for %{days} day(s). Push next revision or close decision.
+        open_customer: Open Customer
+        open_quote: Open Quote
+  flash:
+    not_authorized: Not authorized.
+    verify_email: Please verify your email address to continue. Check your email for a verification link.
+    action_item_resolved: Action marked handled.
+  settings:
+    company: Company
+    signed_in_as: Signed in as
+    company_role: Company role
+    navigation_label: Settings navigation
+    account: Account
+    invitations: Invitations
+    team: Team
+    template: Template
+  quotes:
+    change_summary:
+      header: 'Revision Update Summary:'
+      quantity_updated: "- %{product} quantity updated: %{before} -> %{after}"
+      unit_price_updated: "- %{product} unit price updated: %{before} -> %{after}"
+      added_item: "- Added new item: %{product}"
+      removed_item: "- Removed item: %{product}"
+      commercial_updated: "- %{label} updated: %{before} -> %{after}"
+      total_updated: 'Total updated: %{before} -> %{after}'
+    view:
+      decision_review:
+        title: Decision Review
+        subtitle: One-screen read on buyer readiness, change scope, and the next move.
+        recommended_move: Recommended Move
+        buyer_readiness: Buyer Readiness
+        revision_scope: Revision Scope
+        review_notes: Review Notes
+      decision_timeline:
+        title: Decision Timeline
+        subtitle: Key decision and engagement moments for this revision.
+        show_older_events: Show older events (%{count})
+      revision_diff:
+        title: Revision Compare
+        compare_versions: V%{current} compared with V%{previous}.
+        copy_change_summary: Copy Change Summary
+        empty: No commercial or item-level changes detected between these two revisions.
+        modified: Modified
+        added: Added
+        removed: Removed
+        commercial_terms: Commercial Terms
+        qty_change: Qty %{before} -> %{after}
+        unit_change: Unit %{before} -> %{after}
+        qty: Qty %{value}
+        unit: Unit %{value}
+        total_updated: Total updated
+      show:
+        back_to_customer: Back to Customer
+        superseded_notice: A newer revision is available for this quote thread.
+        view_latest_version: View latest V%{revision}
+        reopened_notice: This quote was reopened and is now editable as draft.
+        next_action_lost: Closed as lost. Review reason and re-engage only if conditions change.
+        next_action_accepted: Buyer accepted. Move to handoff and fulfillment prep.
+        next_action_draft: Draft in progress. Complete and send to start buyer engagement.
+        next_action_expired: Quote expired. Create a revision and re-open discussion.
+        next_action_viewed: Buyer has viewed this quote. Follow up while momentum is warm.
+        next_action_not_viewed: Shared but not viewed yet. Consider sending a reminder.
+        urgency_no_expiry: No expiry date
+        urgency_expired: Expired %{count} day(s) ago
+        urgency_expiring: Expires in %{count} day(s)
+        urgency_valid: Valid for %{count} more day(s)
+        momentum: Momentum
+        engagement: Engagement
+        viewed_count: "%{count} total view(s)"
+        not_viewed_yet: Not viewed yet
+        next_action: Next Action
+        engagement_details: Engagement Details
+        unknown: Unknown
+        time_zone: Time Zone
+        sent: Sent
+        last_shared: Last Shared
+        first_viewed: First Viewed
+        last_viewed: Last Viewed
+        total_views: Total Views
+        top_countries: Top Countries
+        top_ips: Top IPs
+        recent_accesses: Recent Accesses
+        toolbar:
+          template: Template
+          search_template: Search template
+          export: Export
+          download_pdf: Download PDF
+          download_excel: Download Excel
+          edit: Edit
+          new_revision: New Revision
+          reopen_quote: Reopen Quote
+          reopen_confirm: Reopening this quote will allow editing again and mark the public version as outdated. Customers will not be able to accept it until a new version is shared.
+          copy_reprice: Copy and Reprice
+          switch_to_quotation: Switch to Quotation
+          switch_to_pi: Switch to PI
+          send_reminder: Send Reminder
+          close_verification: Close verification
+          verify_before_reminder: Verify before sending reminder
+          verify_before_reminder_hint: Use the same security check as sign up and contact send, then we will send the reminder email.
+          loading_verification: Loading verification...
+          verified_sending: Verified. Sending reminder...
+          share_public_link: Share Public Link
+          copy_link: Copy Link
+          open: Open
+          delete_quote: Delete Quote
+          delete_confirm: Delete the entire quote thread %{quote_no} including all revisions and expire any public links? This cannot be undone.
+          delete_final_warning: 'Final warning: this will expire public links and remove the full quote thread.'
+          delete_prompt: Type DELETE to confirm quote thread removal
+          unable_generate_public_link: Unable to generate public link
+          public_link_ready: Public link ready.
+          public_link_ready_copied: Public link ready. Copied to clipboard.
+          public_link_ready_manual: Public link ready. Copy manually if needed.
+          public_link_copied: Public link copied.
+          share_failed: Share failed
+          link_copied: Link copied.
+          copy_failed_browser: Copy failed on browser.
+        history:
+          title: History
+          subtitle: Revision trail and archive actions
+          revisions_count: revision(s)
+          current_updated: Current updated
+          current: Current
+          latest: Latest
+          archive_revision: Archive V%{revision}
+          archive_confirm: Archive revision V%{revision} from history?
+      form:
+        updating: Updating...
+        creating: Creating...
+        current_status: Current Status
+        grand_total: Grand Total
+        discount_rate: Discount Rate
+        expiry: Expiry
+        no_date: No date
+        expired: Expired
+        days_left: "%{count} day(s) left"
+        viewed: Viewed
+        true: 'Yes'
+        false: 'No'
+        error_summary: "%{count} error(s) prevented this quote from being saved:"
+        complete_required_fields: Please complete the required fields before saving.
+        basic_information: Basic Information
+        basic_information_hint: Set document identity, template, currency, and validity before building line items.
+        template: Template
+        search_template: Search template
+        quote_date: Quote date
+        custom_title: Custom Quotation Title (optional)
+        custom_title_placeholder: Project Falcon - Q2 Equipment Package
+        status_options:
+          draft: Draft
+          sent: Sent
+          viewed: Viewed
+          negotiating: Negotiating
+          won: Won
+          lost: Lost
+          expired: Expired
+        business_terms: Business Terms
+        business_terms_hint: Capture the commercial terms buyers actually review alongside pricing.
+        payment_term_placeholder: 30% advance, 70% before shipment
+        trade_terms: Trade terms
+        trade_terms_placeholder: FOB / CIF / EXW
+        delivery_notes_placeholder: Delivery / export notes
+        terms: Terms
+        terms_placeholder: Payment terms, validity statement, etc.
+        legal_disclaimer_placeholder: Optional legal disclaimer
+        internal_information: Internal Information
+        internal_information_hint: Keep internal notes and post-decision data separate from the buyer-facing quote.
+        internal_notes_placeholder: Internal notes (not required in public view)
+        final_amount: Final amount (actual deal)
+        select_win_reason: Select win reason
+        win_reason_details: Win reason details
+        win_reason_details_placeholder: Describe the specific win reason
+        select_loss_reason: Select loss reason
+        loss_reason_details: Loss reason details
+        loss_reason_details_placeholder: Describe the specific loss reason
+        stalled_reason: Stalled / pressure reason
+        select_stalled_reason: Select stalled reason
+        pressure_reason_details: Pressure reason details
+        pressure_reason_details_placeholder: Describe the specific blocker or pressure
+        totals_inputs: Totals Inputs
+        settlement_currency: Settlement currency
+        tax_vat: Tax / VAT
+        shipping_handling: Shipping / Handling
+        discount: Discount
+        remove_discount: Remove discount
+        add_discount: "+ Add Discount"
+        totals: Totals
+        subtotal: Subtotal
+        addons_total: Add-ons Total
+        shipping: Shipping
+        original_total: Original Total
+        you_save: You Save
+        quote_items: Quote Items
+        quote_items_hint: Search products, switch presets, and edit specs or add-ons without losing quote context.
+        quote_item_hint_1: Type product name to search and auto-match. If not found, keep typing and submit as a custom item.
+        quote_item_hint_2: Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
+        quote_item_hint_3: If product reference currency differs from quote currency, unit price will not be auto-filled.
+        quote_item_hint_4: Specifications and add-ons can load from product presets, switch to another preset, or be pasted as text line by line.
+        currency_mismatch_warning: 'Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually.'
+        pricing_attention_needed: Pricing needs attention before this quote can be saved.
+        product_name: Product Name
+        specifications: Specifications
+        add_ons: Add-ons
+        unit_price: Unit Price
+        quantity: Quantity
+        remove: Remove
+        type_to_search_product: Type to search product
+        custom_specs: Custom specs
+        edit_specs: Edit specs
+        close: Close
+        spec_bulk_placeholder: |-
+          One line per item, e.g.
+          Power: 5kW
+          Voltage: 220V
+        apply_text: Apply text
+        spec_key_placeholder: e.g. Power
+        spec_value_placeholder: e.g. 5kW
+        remove_specification: Remove specification
+        add_spec: "+ Spec"
+        clear_all: Clear all
+        custom_add_ons: Custom add-ons
+        edit_add_ons: Edit add-ons
+        addon_bulk_placeholder: |-
+          One line per item, e.g.
+          Packaging: 30
+          Installation = 120
+        addon_name_placeholder: e.g. Packaging
+        remove_add_on: Remove add-on
+        add_add_on: "+ Add-on"
+        remove_item: Remove item
+        add_item: "+ Add Item"
+        update_quote: Update Quote
+        create_quote: Create Quote
+    flash:
+      free_plan_limit_reached: 'Free plan limit reached: %{used}/%{limit} company quotes used.'
+      revision_read_only: This revision is read-only in the current state.
+      template_change_not_allowed: Template cannot be changed in the current state.
+      no_template_available: No template available. Please create a quote template first.
+      template_updated: Template updated
+      template_not_found: Template not found. Reverted to current template.
+      delete_latest_revision_only: Only the latest active revision can delete the whole quote thread.
+      quote_thread_deleted: Quote thread %{quote_no} deleted. Public links now show as expired.
+      archive_not_ready: Archive feature is not ready. Please run database migrations on the server.
+      archive_non_latest_only: Only non-latest revisions can be archived.
+      revision_archived: Revision V%{revision} archived from history.
+      pdf_export_failed: PDF export failed on server. Please verify wkhtmltopdf is installed and configured.
+      new_revision_not_available: New revision is not available for the current quote state.
+      revision_draft_created: Revision draft created from quote %{quote_no}. Edit and save to create a new version.
+      revision_schema_mismatch: Revision failed due to schema mismatch. Please run database migrations on the server.
+      copy_reprice_not_available: Copy & Reprice is not available for the current quote state.
+      revision_created_update_pricing: Revision V%{revision} created. Update pricing and share.
+      unable_create_revision: 'Unable to create revision: %{errors}'
+      sharing_disabled: Sharing is disabled for the current quote state.
+      unable_create_public_share_link: 'Unable to create public share link: %{errors}'
+      unable_create_public_share_link_now: Unable to create public share link right now. Please try again.
+      reminder_not_available: Reminder is not available for this quote.
+      reminder_verification_required: Please complete verification before sending a reminder.
+      reminder_verification_failed: Verification failed. Please try again.
+      reminder_sent: Reminder email sent. Next reminder will be available in 12 hours unless the quote gets viewed first.
+      unable_send_reminder: Unable to send reminder right now.
+      reopen_not_available: Reopen is not available for the current quote state.
+      quote_reopened: Quote reopened for editing.
+    logic:
+      decision_review:
+        recommended_move:
+          move_to_fulfillment:
+            label: Move to fulfillment
+            detail: Buyer has already accepted this revision. Shift from selling to delivery handoff.
+          move_to_handoff:
+            label: Move to handoff
+            detail: This revision is marked won internally. Coordinate delivery, paperwork, or onboarding.
+          reopen_if_interest_returns:
+            label: Re-open only if interest returns
+            detail: This revision was marked lost. Create a new revision if the buyer re-engages.
+          update_and_reshare:
+            label: Update and reshare
+            detail: This quote is back in draft. Finish edits and generate a fresh public link.
+          prepare_next_revision:
+            label: Prepare next revision
+            detail: Customer asked for changes. Use the request context and ship the next revision quickly.
+          share_public_link:
+            label: Share public link
+            detail: No public link activity yet. Generate a share link before chasing buyer feedback.
+          send_reminder:
+            label: Send reminder
+            detail: Quote has been shared but not viewed. Nudge the buyer before the thread goes cold.
+          close_before_expiry:
+            label: Close before expiry
+            detail: Buyer has engaged and the validity window is tight. Push decision or send a revision today.
+          follow_up_while_warm:
+            label: Follow up while warm
+            detail: Buyer activity exists. Reconfirm timing, pricing fit, and next decision checkpoint.
+        buyer_readiness:
+          committed:
+            value: Committed
+            detail: Accepted via quote workflow.
+          won:
+            value: Won
+            detail: Marked won internally.
+          engaged:
+            value: Engaged
+            detail: Buyer asked for changes instead of going silent.
+          warm:
+            value: Warm
+            detail: "%{count} views recorded on the public link."
+          interested:
+            value: Interested
+            detail: Buyer has viewed the quote once.
+          cold:
+            value: Cold
+            detail: Shared externally, but no view recorded yet.
+          not_started:
+            value: Not Started
+            detail: No public share or buyer engagement yet.
+        revision_scope:
+          no_compare:
+            value: No compare
+            detail: This revision has no previous version to compare.
+          no_change:
+            value: No change
+            detail: Current and previous revisions are commercially identical.
+          changed:
+            value: "%{item_count} item / %{term_count} term"
+            detail: Detected %{item_count} item-level and %{commercial_count} commercial change(s) versus the previous revision.
+        review_notes:
+          accepted_on: Accepted on %{date}.
+          marked_won_on: Marked won on %{date}.
+          marked_lost_on: Marked lost on %{date}.
+          revision_requested_on: Revision requested on %{date}.
+          first_viewed_on: First viewed on %{date}.
+          shared_times: Shared %{count} time(s).
+          valid_until: Valid until %{date}.
+          revision_reopened_on: Revision reopened on %{date}.
+      decision_timeline:
+        recap:
+          outcome:
+            label: Outcome
+          buyer_signal:
+            label: Buyer Signal
+            viewed: Viewed
+            no_view_yet: No view yet
+          share_status:
+            label: Share Status
+            links: "%{count} links"
+            not_shared: Not shared
+            last_shared: Last shared %{time}.
+            generate_link: Generate a public link to start engagement.
+          pressure:
+            label: Pressure
+        events:
+          created:
+            label: Created
+            detail: Quote version prepared.
+          shared:
+            label: Shared
+            detail: Public quote link generated and ready to send.
+          reshared:
+            label: Reshared
+            detail: Fresh public quote link generated after reopening.
+          viewed:
+            label: Viewed
+            detail: Buyer opened the quote for the first time.
+          revision_requested:
+            label: Revision Requested
+          reopened:
+            label: Reopened
+            detail: Quote moved back to draft for editing.
+          lost:
+            label: Lost
+            detail: Buyer did not move forward with this revision.
+          won:
+            label: Won
+            detail: Quote marked as commercially won.
+          accepted:
+            label: Accepted
+            detail: Buyer confirmed the quote.
+          expired:
+            label: Expired
+            detail: Validity window ended without closure.
+        revision_request:
+          default_detail: Buyer asked for an update.
+        outcome:
+          accepted: Accepted
+          won: Won
+          lost: Lost
+          revision_requested: Revision Requested
+          expired: Expired
+          reopened: Reopened
+        outcome_detail:
+          accepted: Buyer accepted this revision.
+          won: Quote marked as commercially won.
+          lost: Buyer chose not to proceed with this revision.
+          expired: Validity window closed without a decision.
+          reopened: Quote is back in draft for rework.
+          waiting: Waiting for buyer movement on this revision.
+        buyer_signal:
+          no_view: No buyer view recorded yet.
+          first_seen: First seen %{time}.
+          last_activity: Last activity %{time} (%{count} views).
+          single_view: Single recorded view.
+        pressure:
+          closed_won: Closed won
+          reengage_later: Re-engage later
+          expired: Expired
+          needs_reshare: Needs reshare
+          needs_revision: Needs revision
+          days_left: "%{count}d left"
+          stable: Stable
+        pressure_detail:
+          closed_won: Track handoff, delivery, or renewal timing.
+          reengage_later: Create a new revision if the buyer comes back.
+          expired: Follow up with a new revision or close the thread.
+          needs_reshare: Generate a fresh public link for the reopened revision.
+          needs_revision: Buyer requested changes on this revision.
+          days_left: Act before validity runs out.
+          stable: No immediate expiry or revision pressure.
+  customers:
+    status_labels:
+      new: New
+      potential: Potential
+      contacted: Contacted
+      quoting: Quoting
+      negotiating: Negotiating
+      following: Following
+      won: Won
+      closed: Closed
+      lost: Lost
+      paused: Paused
+      inactive: Inactive
+    view:
+      quote_card:
+        next_action: Next Action
+        win_reason: 'Win reason: %{reason}'
+        loss_reason: 'Loss reason: %{reason}'
+        pressure: 'Pressure: %{reason}'
+        expired_on: Expired on %{date}
+        total: Total
+        updated: Updated
+        valid_until: Valid Until
+        valid_until_expired: "%{date} (Expired)"
+        valid_until_days_left: "%{date} (%{count}d left)"
+        original: Original
+      index:
+        title: Customers
+        subtitle: Manage account health, follow-up pressure, and commercial progress in one dense customer queue.
+        new_customer: "+ New Customer"
+        search_placeholder: Search customers...
+        clear: Clear
+        all_customers: All Customers
+        high_value: High Value
+        at_risk: At Risk
+        clear_follow_up_filter: Clear Follow-up Filter
+        today: Today
+        soon_7_days: Soon (7 days)
+        overdue: Overdue
+        no_schedule: No schedule
+        accounts: Accounts
+        accounts_caption: Sorted commercial accounts with follow-up pressure, value, and next action in one view.
+        search_found: Found %{count} customer(s) matching "%{query}"
+        overdue_badge: OVERDUE
+        today_badge: TODAY
+        soon_badge: SOON
+        empty_filtered_title: No customers in this view
+        empty_filtered_body: Try a different filter or search term to surface the accounts you need.
+        empty_title: No customers yet
+        empty_body: Create your first customer to start tracking follow-ups, quotes, and account momentum.
+        create_customer: Create Customer
+        table:
+          name: Name
+          country: Country
+          contact: Contact
+          email: Email
+          status: Status
+          total_quote_amount: Total Quote Amount
+          total_won_amount: Total Won Amount
+          win_rate: Win Rate
+          last_follow_up: Last Follow-up
+          next_follow_up: Next Follow-up
+          next_action: Next Action
+        win_rate_progress_aria: Win rate progress
+      new:
+        title: New Customer
+        create_customer: Create Customer
+        back_to_customers: Back to Customers
+      form:
+        error_summary: "%{count} error(s) prevented this customer from being saved:"
+        company_information: Company Information
+        company_information_hint: Define the account identity, status, and profile details your team will work from.
+        customer_avatar_alt: "%{name} avatar"
+        avatar: Avatar
+        remove_current_avatar: Remove current avatar
+        avatar_hint: If no image is uploaded, the first letter of customer name is used.
+        company_name: Company Name
+        country: Country
+        status: Status
+        select_status: Select Status
+        legacy_status: "%{status} (legacy)"
+        customer_level: Customer Level
+        primary_contact: Primary Contact
+        primary_contact_hint: Keep communication details and commercial ownership easy to scan.
+        primary_contact_name: Primary Contact Name
+        email: Email
+        phone: Phone
+        payment_terms: Payment Terms
+        select_payment_terms: Select payment terms
+        source: Source
+        select_source: Select source
+        main_product_interest: Main Product Interest
+        main_product_interest_placeholder: Main product / category
+        internal_owner: Internal Owner
+        owner_avatar_alt: Owner avatar
+        select_internal_owner: Select internal owner
+        choose_team_owner: Choose from your team members
+        owner_hint: 'Owner can be shown on quote by template switch (default: ON).'
+        follow_up_date: Follow-up Date
+        additional_information: Additional Information
+        additional_information_hint: Capture supporting context, tags, and notes without cluttering the main profile.
+        address: Address
+        estimated_annual_volume: Estimated Annual Volume
+        timezone: Timezone
+        select_timezone: Select timezone
+        search_timezone_placeholder: Search city, country, or GMT offset
+        tags: Tags
+        selected_priority: Selected priority
+        selected_priority_hint: Top to bottom = higher priority on this customer.
+        up: Up
+        down: Down
+        remove: Remove
+        add_custom_tag_placeholder: Add custom tag and press Enter
+        add: Add
+        tags_hint: Preset tags are reusable company-wide. Custom tags will be saved for reuse.
+        notes: Notes
+        status_options:
+          lead: Lead
+          contacted: Contacted
+          in_progress: In Progress
+          won: Won
+          lost: Lost
+          inactive: Inactive
+        level_options:
+          normal: Normal
+          vip: Vip
+          key_account: Key Account
+        source_options:
+          referral: Referral
+          website: Website
+          exhibition: Exhibition
+          social_media: Social Media
+          other: Other
+        payment_options:
+          t_t: T/T
+          l_c: L/C
+          o_a: O/A
+          cash: CASH
+      edit:
+        title: 'Edit Customer: %{name}'
+        update_customer: Update Customer
+        back_to_customer: Back to Customer
+      show:
+        subtitle: Track customer health, quote activity, and execution signals in one workspace.
+        back_to_customers: Back to Customers
+        no_email: No email
+        edit_customer: Edit Customer
+        total_quotes: Total Quotes
+        latest_quote: Latest Quote
+        no_quote_yet: No quote yet
+        sales_stage: Sales Stage
+        engagement: Engagement
+        operating_signals: Operating Signals
+        operating_signals_hint: Trusted from follow-up timing, quote activity, and observed views.
+        company_contact_details: Company and Contact Details
+        no_customer_behavior: No customer behavior yet
+        follow_up_action: Follow-up Action
+        next_tasks: Next Tasks
+        next_tasks_hint: Operational follow-ups and pending work.
+        use_follow_up_controls: Use Follow-up Action controls above
+        show_all_tasks: Show all tasks (%{count})
+        no_immediate_tasks: No immediate tasks.
+        customer_timeline: Customer Timeline
+        customer_timeline_hint: High-signal and system events in one stream.
+        high_signal: High Signal
+        show_older_high_signals: Show older high signals (%{count})
+        no_customer_behavior_signals: No customer behavior signals yet.
+        show_system_activity: Show system activity (%{count})
+        system_activity: System Activity
+        no_timeline_events: No timeline events yet.
+        company_name: Company Name
+        country: Country
+        customer_level: Customer Level
+        status: Status
+        primary_contact_name: Primary Contact Name
+        email: Email
+        phone: Phone
+        address: Address
+        payment_terms: Payment Terms
+        main_product_interest: Main Product Interest
+        internal_owner: Internal Owner
+        estimated_annual_volume: Estimated Annual Volume
+        timezone: Timezone
+        tags: Tags
+        latest_customer_signal: Latest Customer Signal
+        next_follow_up: Next Follow-up
+        not_available: N/A
+        overdue_badge: OVERDUE
+        today_badge: TODAY
+        due_soon_badge: DUE SOON
+        notes: Notes
+        last_signal: Last signal
+        days_ago: "%{count}d ago"
+        not_scheduled: Not scheduled
+        days_overdue: "%{count}d overdue"
+        in_days: in %{count}d
+        quote_actions: Quote Actions
+        quote_actions_hint: Create, filter, and act on revisions from one account workspace.
+        new_quote: New Quote
+        delete_customer: Delete Customer
+        delete_customer_confirm: Delete customer %{name}? This removes the account record.
+        active_quotes: Active Quotes (%{count})
+        recent_quotes: Recent Quotes (10)
+        all_quotes: All Quotes (%{count})
+        quote_workspace_hint: Priority queue, search, and revision flow for this account.
+        active_mode_note: Showing top 5 by priority. Sorted by action priority.
+        active: Active
+        quote_status:
+          draft: Draft
+          sent: Sent
+          viewed: Viewed
+          negotiating: Negotiating
+        won_amount: Won Amount
+        lost_amount: Lost Amount
+        show_all_currencies: Show all currencies
+        avg_discount: Avg Discount
+        filters:
+          all: All
+          draft: Draft
+          sent: Sent
+          viewed: Viewed
+          negotiating: Negotiating
+          won: Won
+          lost: Lost
+          expired: Expired
+        recent_10: Recent (10)
+        search_quotes_placeholder: Search quote no, product, notes...
+        sort:
+          priority: Priority Queue
+          newest: Newest
+          highest_amount: Highest Amount
+          status: Status
+        apply: Apply
+        view_all: View all %{count}
+        previous: Previous
+        page: Page
+        next: Next
+        no_quotes_title: No quotes in this view
+        no_quotes_body: Try a different status filter or create a new quote for this customer.
+        show_less: Show less
+        collapse_list: Collapse list
+        view_all_prefix: View all
+        hide_extra_tasks: Hide extra tasks
+        show_all_tasks_prefix: Show all tasks
+        hide_older_high_signals: Hide older high signals
+        show_older_high_signals_prefix: Show older high signals
+        hide_system_activity: Hide system activity
+        show_system_activity_prefix: Show system activity
+        latest_customer_behavior: Latest customer behavior
+    logic:
+      quote_push_signal:
+        draft:
+          summary: Draft not sent
+          detail: Complete and send this quote.
+          label: Complete & Send
+        sent_no_view_over_7d:
+          summary: Sent 7d+ with no view
+          detail: Review the quote before deciding whether to send a reminder.
+          label: Check Quote
+        sent_waiting_first_view:
+          summary: Sent, awaiting first view
+          detail: Monitor customer signal.
+          label: Check Status
+        viewed_no_follow_up:
+          summary: Viewed, no follow-up
+          detail: Schedule next touchpoint now.
+          label: Schedule Follow-up
+        expired:
+          summary: Expired quote
+          detail: Create revision to re-open conversation.
+          label: Create Revision
+        no_immediate_action:
+          summary: No immediate action
+          detail: Review quote details when needed.
+          label: Review
+      engagement_state:
+        at_risk: At Risk
+        active: Active
+        cooling: Cooling
+      operating_signals:
+        risk:
+          label: Operational Risk
+          high: High
+          high_detail: Follow-up is overdue and needs action now.
+          watch: Watch
+          watch_detail: Follow-up is due today.
+          unscheduled: Unscheduled
+          unscheduled_detail: Active account but no next follow-up date is set.
+          controlled: Controlled
+          controlled_detail: Follow-up timing is currently under control.
+        momentum:
+          label: Momentum
+          no_quotes: No quotes
+          no_quotes_detail: There is no quote activity to evaluate yet.
+          moving: Moving
+          moving_detail: Quote or buyer activity happened in the last 7 days.
+          cooling: Cooling
+          cooling_detail: There is some activity, but pace is slowing down.
+          stalled: Stalled
+          stalled_detail: No meaningful quote or buyer movement in 21+ days.
+        engagement:
+          label: Observed Engagement
+          observed: Observed
+          observed_detail: "%{count} buyer view(s) recorded on shared quotes."
+          indirect: Indirect
+          indirect_detail: Timeline has customer signals, but not direct quote views.
+          low_visibility: Low visibility
+          low_visibility_detail: Quote is live, but there is no buyer-view evidence yet.
+          not_available: N/A
+          not_available_detail: No live quote signal is available for this account.
+      follow_up_text:
+        overdue: Follow-up overdue. Action required now.
+        due_today: Follow-up due today.
+        upcoming: Follow-up scheduled soon.
+        not_scheduled: No follow-up date scheduled.
+      follow_up_primary_action:
+        mark_followed_today: Mark Followed Today
+        schedule_plus_7d: Schedule +7d
+        adjust_follow_up: Adjust Follow-up
+      row_signal:
+        follow_today: Follow today
+        overdue_follow_up: Overdue follow-up
+        contact_now: Contact now
+        due_today: Due today
+        re_engage: Re-engage
+        high_value_stalled: High value but stalled
+        prepare_quote: Prepare quote
+        due_soon: Due soon
+        set_schedule: Set schedule
+        no_urgent_risk: No urgent risk
+      follow_up_tasks:
+        open_quote: Open Quote
+        set_next_follow_up_date:
+          title: Set next follow-up date
+          detail: No follow-up date is scheduled for this customer.
+        follow_up_overdue:
+          title: Follow-up overdue
+          detail: Overdue by %{days} day(s). Contact customer now.
+        follow_up_due_today:
+          title: Follow-up due today
+          detail: Touch base with customer and update next action.
+        upcoming_follow_up:
+          title: Upcoming follow-up
+          detail: Scheduled in %{days} day(s) on %{date}.
+        quote_expired:
+          title: "%{quote_name} expired"
+          detail: Expired on %{date}. Consider sending a revision.
+        quote_expiring_soon:
+          title: "%{quote_name} expiring soon"
+          detail: Expires in %{days} day(s). Follow up before expiry.
+        quote_not_viewed_yet:
+          title: "%{quote_name} not viewed yet"
+          detail: Sent at %{sent_at}. Consider a reminder.
+      timeline:
+        customer_created_title: Customer created
+        customer_created_detail: "%{name} was added to your workspace."
+        follow_up_completed_title: Follow-up completed
+        follow_up_completed_detail: Last follow-up marked on %{date}.
+        next_follow_up_scheduled_title: Next follow-up scheduled
+        quote_created_title: "%{quote_name} created"
+        revision_detail: Revision V%{revision}.
+        quote_updated_title: "%{quote_name} updated"
+        latest_status_detail: 'Latest status: %{status}.'
+        quote_sent_title: "%{quote_name} sent"
+        quote_sent_detail: Sent to customer.
+        quote_viewed_title: "%{quote_name} viewed"
+        quote_viewed_detail: Opened by customer.
+        quote_revision_requested_title: "%{quote_name} revision requested"
+        client_request_detail: 'Client request: %{message}'
+        customer_requested_updates: Customer requested updates to this revision.
+        quote_accepted_title: "%{quote_name} accepted"
+        accepted_via_public_link: Accepted via public link.
+        quote_reopened_title: "%{quote_name} reopened"
+        quote_reopened_detail: Reopened for editing.
+        quote_won_title: "%{quote_name} won"
+        marked_won_internally: Marked as Won internally.
+        marked_lost_reason: 'Marked Lost. Reason: %{reason}'
+        expired_pressure_reason: 'Expired. Pressure reason: %{reason}'
+        final_status_changed: Final status changed to %{status}.
+        quote_status_title: "%{quote_name} %{status}"
+        win_reason_captured_title: "%{quote_name} win reason captured"
+        reminder_sent_title: "%{quote_name} reminder sent"
+        reminder_sent_detail: Reminder email sent after no buyer view.
+        public_links_shared: Public links shared (%{count})
+        public_link_shared: Public link shared
+        public_link_generated: Public link generated for this quote.
+        public_link_first_viewed: Public link first viewed
+        viewed_via_public_link: Viewed via public link.
+        public_link_activity: Public link activity
+        viewed_times_via_public_link: Viewed %{count} time(s) via public link.
+        quote_archived_title: "%{quote_name} archived"
+        revision_archived_detail: Revision V%{revision} archived from visible history.
+        quote_deleted_title: "%{quote_name} deleted"
+        quote_deleted_detail: Quote thread deleted and public links expired.
+    flash:
+      free_plan_limit_reached: 'Free plan limit reached: %{used}/%{limit} customers used.'
+      follow_up_marked_today: Follow-up marked for today. Next follow-up scheduled at %{date}
+      unsupported_follow_up_interval: Unsupported follow-up interval.
+      next_follow_up_scheduled: Next follow-up scheduled for %{date} (%{label}).
+  products:
+    view:
+      index:
+        title: Products
+        subtitle: Keep the catalog dense, searchable, and ready for quoting with less scanning overhead.
+        new_product: "+ New Product"
+        search_placeholder: Search products...
+        clear_search: Clear
+        catalog_title: Catalog
+        catalog_caption: Reusable products ready for quoting, presets, and revision-heavy sales flows.
+        search_results_html: Found <strong>%{count}</strong> product(s) matching "<strong>%{query}</strong>"
+        table:
+          image: Image
+          name: Name
+          sku: SKU
+          reference_price: Reference Price
+          quoted: Quoted
+          last_used: Last Used
+        open_product_aria: Open product %{name}
+        never: Never
+        open_actions_aria: Open actions
+        actions:
+          view: View
+          edit: Edit
+          delete: Delete
+          delete_confirm: Delete this product?
+        empty_title: No products yet
+        empty_body: Create your first product to build a reusable catalog for quoting, presets, and exports.
+        empty_action: Create Product
+      form:
+        product_media: Product Media
+        product_media_hint: Maintain a clean image set so products feel ready for quoting and sharing.
+        main_image: Main image
+        main_product_image_alt: Main product image
+        no_image_hint: No image yet. Upload images to build gallery.
+        upload_images: Upload Images
+        add_more_images: Add More Images
+        gallery: Gallery
+        select_all: Select all
+        delete_selected: Delete selected
+        selected_count: "%{count} selected"
+        select_image: Select image
+        gallery_image_alt: Gallery image
+        set_as_main_image: Set as main image
+        delete_image_confirm: Delete this image?
+        delete_image: Delete image
+        main: Main
+        basic_info: Basic Info
+        basic_info_hint: Define the core identity buyers and sales will recognize instantly.
+        product_name: Product Name
+        sku_placeholder: SKU/Product Code
+        category: Category
+        category_placeholder: Pump / Fittings / Spare Parts
+        unit: Unit
+        unit_placeholder: pcs / set / kg / carton
+        pricing_business: Pricing & Business
+        pricing_business_hint: Keep reference pricing, currency, and commercial constraints together.
+        reference_price: Reference Price
+        reference_price_currency: Reference Price Currency
+        cost_price: Cost Price (internal only)
+        cost_price_hint: Internal only. Not shown in quotation output.
+        lead_time: Lead Time
+        lead_time_placeholder: e.g. 15-20 days
+        description: Description
+        description_hint: Add short operational context so sales does not need to re-explain the product each time.
+        product_description: Product Description
+        configurator_presets: Configurator Presets
+        configurator_presets_hint: Bind reusable spec and add-on presets to this product. The selected default presets will auto-fill into quote items, and sales can still switch presets or edit rows inside a quote.
+        bound_spec_presets: Bound Spec Presets
+        manage_spec_presets: Manage Spec Presets
+        default_spec_preset: Default Spec Preset
+        no_default_preset: No default preset
+        no_spec_presets: No spec presets yet. Create one first, then bind it to this product.
+        bound_addon_presets: Bound Add-on Presets
+        manage_addon_presets: Manage Add-on Presets
+        default_addon_preset: Default Add-on Preset
+        no_addon_presets: No add-on presets yet. Create one first, then bind it to this product.
+        delete_selected_confirm: Delete %{count} selected image(s)?
+        set_as_main: Set as main
+        remove_file: Remove file
+      show:
+        overview: Overview
+        quoted_count: Quoted %{count}
+        last_used_at: Last Used %{time}
+        last_used_never: Last Used Never
+        reference_price: Reference Price
+        cost_price: Cost Price
+        not_shared: Not shared
+        internal_only: Internal only
+        configurator: Configurator
+        specifications: Specifications
+        add_ons: Add-ons
+        default_preset: 'Default preset: %{name}'
+        using_inline_default_specs: Using inline default specification values
+        using_inline_default_addons: Using inline default add-on values
+        default: Default
+        bound_specs: "%{count} spec(s) bound"
+        bound_addons: "%{count} add-on(s) bound"
+        more_count: "+%{count} more"
+        no_configuration: No configuration content added yet.
+        main_image_alt: "%{name} main image"
+        main_image_label: Main product image
+        gallery_image_alt: "%{name} gallery image"
+        gallery_image_label: Product gallery image
+        image_preview: Image preview
+        close_image_preview: Close image preview
+        back_to_products: Back to Products
+        meta:
+          moq: MOQ
+          lead_time: Lead Time
+          category: Category
+          unit: Unit
+          sku: SKU
+        actions:
+          edit: Edit
+          delete: Delete
+          delete_confirm: Delete this product?
+      edit:
+        title: Edit Product
+        subtitle_html: Update pricing, media, description, and default preset bindings for <strong>%{name}</strong>.
+        submit_label: Update Product
+        back_to_product: Back to Product
+      new:
+        title: New Product
+        subtitle: Add a catalog item with pricing, media, and reusable preset bindings.
+        submit_label: Create Product
+        back_to_products: Back to Products
+    flash:
+      created: Product created successfully
+      updated: Product updated successfully
+      deleted: Product deleted successfully
+      image_not_found: Image not found
+      display_image_updated: Display image updated
+      display_image_removed: Display image removed
+      gallery_image_removed: Gallery image removed
+      no_images_selected: No images selected
+      images_removed: "%{count} image(s) removed"
+  addon_presets:
+    view:
+      form:
+        preset_name: Preset Name
+        name_placeholder: Export Package / Premium Service
+        addons_text: Add-ons Text
+        entries_placeholder: |-
+          Extended Warranty: 50
+          Installation Kit: 120
+        hint_html: 'One line per item. Use <code>name: price</code> format.'
+        update: Update Add-on Preset
+        create: Create Add-on Preset
+      index:
+        title: Add-on Presets
+        back_to_product_presets: Back to Product Presets
+        create_title: Create Add-on Preset
+        library_title: Preset Library
+        name: Name
+        addons: Add-ons
+        edit: Edit
+        delete: Delete
+        delete_confirm: Delete this add-on preset?
+        empty: No add-on presets yet.
+      edit:
+        title: Edit Add-on Preset
+        back: Back to Add-on Presets
+    flash:
+      created: Add-on preset created.
+      updated: Add-on preset updated.
+      deleted: Add-on preset deleted.
+  spec_presets:
+    view:
+      form:
+        preset_name: Preset Name
+        name_placeholder: Motor 220V / Export Standard
+        specifications_text: Specifications Text
+        entries_placeholder: |-
+          Voltage: 220V
+          Frequency: 50Hz
+          Material: SS304
+        hint_html: 'One line per item. Use <code>name: value</code>, <code>name=value</code>, or Chinese colon.'
+        update: Update Spec Preset
+        create: Create Spec Preset
+      index:
+        title: Spec Presets
+        back_to_product_presets: Back to Product Presets
+        create_title: Create Spec Preset
+        library_title: Preset Library
+        name: Name
+        specs: Specs
+        edit: Edit
+        delete: Delete
+        delete_confirm: Delete this spec preset?
+        empty: No spec presets yet.
+      edit:
+        title: Edit Spec Preset
+        back: Back to Spec Presets
+    flash:
+      created: Spec preset created.
+      updated: Spec preset updated.
+      deleted: Spec preset deleted.
+  product_presets:
+    view:
+      index:
+        title: Product Presets
+        subtitle: Manage reusable specification and add-on libraries here, then bind them to products as defaults.
+        spec_title: Spec Presets
+        spec_caption: Reusable specification sets for voltage, material, dimensions, and other quote fields.
+        manage_specs: Manage Specs
+        new_spec_preset: New Spec Preset
+        spec_count: "%{count} spec(s)"
+        no_spec_presets: No spec presets yet.
+        addon_title: Add-on Presets
+        addon_caption: Reusable charge bundles like warranty, installation kits, packaging, or service options.
+        manage_addons: Manage Add-ons
+        new_addon_preset: New Add-on Preset
+        addon_count: "%{count} add-on(s)"
+        no_addon_presets: No add-on presets yet.
+  quote_templates:
+    flash:
+      created: Template created
+      updated: Template updated
+      deleted: Template deleted
+      default_updated: Default template updated
+    view:
+      index:
+        title: Templates
+        subtitle: Build reusable brand presets for quotations and PI documents.
+        new_template: New Template
+        default_preset: Default Preset
+        accent: Accent
+        used_in_quotes: Used in %{count} quote(s)
+        edit: Edit
+        set_default: Set Default
+        delete: Delete
+        delete_confirm: Delete this template?
+      edit:
+        title: Edit Brand Preset
+        subtitle: Tune visual style, structure, and labels from one focused design center.
+      form:
+        error_summary: "%{count} error(s) prevented this template from being saved:"
+        preset_name: Preset name
+        preset_name_placeholder: Modern B2B Quotation
+        preset_slug: Preset slug
+        preset_slug_placeholder: auto-from-name
+        default_document_view: Default document view
+        document_kind:
+          quotation: Quotation
+          proforma_invoice: Proforma Invoice (PI)
+        visual_style: Visual Style
+        visual_style_hint: Control the visual signature of your quotation documents.
+        back: Back
+        output_language_title: Output Language
+        output_language_hint: Set language per output channel. Defaults to English.
+        webview_locale: Webview
+        public_link_locale: Public Link
+        pdf_locale: PDF
+        excel_locale: Excel
+        output_language_webview: Webview
+        output_language_public_link: Public Link
+        output_language_pdf: PDF
+        output_language_excel: Excel
+        layout_type: Layout type
+        layout_density: Layout density
+        layout_density_options:
+          compact: Compact
+          standard: Standard
+          spacious: Spacious
+        accent_color: Accent color
+        font_family: Font family
+        logo_position: Logo position
+        logo_position_options:
+          right: Right Top
+          left: Left Top
+          center: Center
+        document_structure: Document Structure
+        document_structure_hint: Decide which blocks should appear by default on quote output.
+        show_logo: Show logo
+        show_tax: Show tax line
+        show_shipping: Show shipping line
+        show_payment_term: Show payment term
+        show_sales_owner: Show sales owner
+        show_notes: Show notes section
+        show_signature_block: Show signature block
+        show_product_images: Show product images
+        show_valid_until: Show valid until
+        show_terms_section: Show terms section
+        show_currency: Show currency symbol/code
+        show_closing_message: Show closing message
+        show_watermark: Show watermark
+        show_saas_branding: Show Rubusoo footer (white-label off by default)
+        show_excel_gridlines: Show Excel gridlines
+        signature_name: Authorized by name (optional)
+        signature_name_placeholder: e.g. Amy Chen
+        signature_name_hint: Used for the signature footer text. Leave blank to hide "Authorized by".
+        signature_image: Sales signature image
+        choose_file: Choose file
+        no_file_selected: No file selected
+        signature_image_hint: This is the sales signature image shown to the customer.
+        remove_existing_signature_image: Remove existing signature image
+        watermark_text: Watermark text
+        watermark_text_placeholder: CONFIDENTIAL (leave empty to use company name)
+        watermark_text_hint: If a watermark image is uploaded, image takes priority and text watermark is hidden.
+        watermark_image: Watermark image
+        watermark_image_hint: Watermark is rendered behind the quote content.
+        remove_existing_watermark_image: Remove existing watermark image
+        watermark_intensity: Watermark intensity (%)
+        watermark_intensity_hint: 'Recommended range: 8-16. Higher value means darker watermark.'
+        number_format: Number & Format
+        number_format_hint: Set money readability standards for all exported quote documents.
+        decimal_places: Decimal places
+        thousand_separator: Thousand separator
+        currency_display: Currency display
+        advanced_settings: Advanced settings
+        labels_text: Labels & Text
+        labels_text_hint: Advanced text settings for table labels, document titles, and footer notes.
+        description_label: Description label
+        spec_label: Spec label
+        spec_placeholder: Spec
+        addon_label: Add-on label
+        addon_placeholder: Add-on
+        qty_label: Qty label
+        unit_price_label: Unit price label
+        line_total_label: Line total label
+        quotation_title: Quotation title
+        quotation_title_placeholder: QUOTATION
+        quotation_number_label: Quotation number label
+        quotation_number_placeholder: 'Quote #'
+        pi_title: PI title
+        pi_title_placeholder: PROFORMA INVOICE
+        pi_number_label: PI number label
+        pi_number_placeholder: 'PI #'
+        quotation_footer_note: Quotation footer note
+        pi_footer_note: PI footer note
+        fallback_footer_text: Fallback footer text
+        closing_message: Closing message under Grand Total
+        closing_message_hint: Optional. Leave empty to hide message completely even if toggle is on.
+        live_preview: Live Preview
+        live_preview_hint: Real-time rendering with quote-like content.
+        preview_saved: Saved
+        preview_scenario: Scenario
+        preview_scenario_standard: Standard
+        preview_scenario_long: Long Content
+        preview_scenario_spec_heavy: Spec Heavy
+        viewport_desktop: Desktop
+        viewport_tablet: Tablet
+        viewport_mobile: Mobile
+        watermark_image_preview_alt: Watermark image preview
+        signature_preview_alt: Signature preview
+        set_as_default: Set as default template
+        logo_placeholder: LOGO
+        default_footer_note: Thank you for your business.
+  quote_document:
+    titles:
+      quotation: Cotizacion
+      pi: Factura proforma
+    sheet:
+      quote: Quote
+      pi: PI
+    sections:
+      terms_and_conditions: Terms & Conditions
+      company_credentials: Company Credentials
+      footer: Footer
+      signature: Signature
+    labels:
+      watermark: Watermark
+      quote_number: No. cotizacion
+      pi_number: No. PI
+      valid_until: Valida hasta
+      currency: Moneda
+      trade_terms: Terminos comerciales
+      status: Status
+      win_reason: Win Reason
+      loss_reason: Loss Reason
+      stalled_reason: Stalled Reason
+      accepted_at: Accepted At
+      revision_requested: Revision Requested
+      request_reason: Request Reason
+      client_request: Client Request
+      reopened_at: Reopened At
+      sales_owner: Sales Owner
+      seller: Vendedor
+      buyer: Comprador
+      company: Company
+      primary_contact: Primary Contact
+      email: Email
+      phone: Phone
+      address: Address
+      quote_info: Informacion de cotizacion
+      title: Title
+      contact: Contacto
+      items: Items
+      description: Descripcion
+      qty: Cant.
+      unit_price: Precio unitario
+      line_total: Total
+      'no': No.
+      image: Image
+      download: Download
+      quote_date: Fecha de cotizacion
+      pi_date: PI Date
+      subtotal: Subtotal
+      tax_vat: Impuesto / IVA
+      shipping: Envio
+      discount: Descuento
+      original_total: Total original
+      you_save: You Save
+      grand_total: Grand Total
+      payment_terms: Terminos de pago
+      terms: Terminos
+      legal_disclaimer: Aviso legal
+      delivery_notes: Notas de entrega
+      notes: Notes
+      authorized_by: Authorized by
+      sales_signature: Sales signature
+      spec: Spec
+      addon: Add-on
+      item: Item
+      total: Total
+      company_credentials: Credenciales de la empresa
+      issued_by: Emitido por
+      accepted_by: Aceptado por
+      accepted_on: Aceptado el
+    notes:
+      you_save: Ahorras
+  company_documents:
+    flash:
+      uploaded: Company document uploaded.
+      removed: Company document removed.
+  company_settings:
+    view:
+      edit:
+        header_title: Company Settings
+        could_not_save: Could not save settings
+        company_profile: Company Profile
+        profile_hint: These settings apply to your whole company workspace.
+        section_company_basic: 1) Company Basic Information
+        company_name: Company Name
+        legal_name: Legal Name
+        registration_number: Registration Number
+        registration_details: Registration Details
+        company_email: Company Email
+        company_phone: Company Phone
+        company_address: Company Address
+        website: Website
+        website_placeholder: example.com or https://example.com
+        section_default_business: 2) Default Business Parameters
+        default_currency: Default Currency
+        default_validity_days: Default Validity Days
+        default_trade_terms: Default Trade Terms
+        default_trade_terms_placeholder: EXW / FOB / CIF
+        default_payment_terms: Default Payment Terms
+        default_payment_terms_placeholder: Net 30 / 50% deposit
+        default_tax_rate: Default Tax Rate (%)
+        brand_primary_color: Brand Primary Color
+        section_branding_behavior: 3) Branding & Default Template Behavior
+        company_logo_alt: Company Logo
+        upload_company_logo: Upload Company Logo
+        remove_current_logo: Remove Current Logo
+        show_logo_default: Show logo by default
+        show_images_default: Show images by default
+        show_terms_default: Show terms section by default
+        show_notes_default: Show notes by default
+        show_payment_terms_default: Show payment terms by default
+        show_sales_owner_default: Show sales owner by default
+        section_reminder_email: 4) Reminder Email
+        reminder_hint_html: 'Used when sales clicks Send Reminder. Leave any field blank to use the default reminder text. Available variables: quote_no, company_name, customer_name.'
+        reminder_email_subject: Reminder Email Subject
+        reminder_email_body: Reminder Email Body
+        reminder_button_label: Reminder Button Label
+        save_company_settings: Save Company Settings
+    flash:
+      updated: Company settings updated.
+      check_highlighted_fields: Please check the highlighted fields.
+  contact_requests:
+    flash:
+      bot_verification_required: Bot verification is required. Please complete the CAPTCHA.
+      bot_verification_failed: Bot verification failed. Please try again.
+      received: Thanks! We received your message and will reply by email.
+      send_failed: Message send failed. Please try again in a moment, or email us directly.
+  email_verifications:
+    flash:
+      verified_success: Email verified successfully! You can now log in.
+      generic_sent: If an account with that email exists, a verification email has been sent.
+      already_verified: This email is already verified. Please log in.
+      wait_before_request: Please wait %{seconds} seconds before requesting again
+      sent_to: Verification email sent to %{email}
+      failed_send: Failed to send verification email
+      error_occurred: An error occurred
+      bot_verification_required: Bot verification is required
+      bot_verification_failed: Bot verification failed. Please try again.
+  team_members:
+    view:
+      index:
+        header_title: Team Management
+        overview_title: Company Team Overview
+        total_members: Total Members
+        pending_invitations: Pending Invitations
+        your_permission: Your Permission
+        invite_title: Invite Member
+        invite_hint: Member must have an account first. Invitation will appear in their account.
+        email: Email
+        company_role: Company Role
+        member_role: Member
+        admin_role: Admin
+        create_invitation: Create Invitation
+        pending_section: Pending Invitations
+        current_team: Current Team
+        pending: Pending
+        active: Active
+        revoke: Revoke
+        revoke_confirm: Revoke invitation for %{email}?
+        no_pending: No pending invitations.
+        view_profile: View profile
+        owner_protected: Owner (protected)
+        self_role_locked: You (self-role locked)
+        update: Update
+        remove_from_team: Remove from Team
+        remove_confirm: Remove %{email} from %{company}? Their account will be kept.
+        roles:
+          member: Member
+          admin: Admin
+          owner: Owner
+        pending_table:
+          email: Email
+          role: Role
+          status: Status
+          expires: Expires
+          actions: Actions
+        members_table:
+          avatar: Avatar
+          email: Email
+          company_role: Company Role
+          status: Status
+          actions: Actions
+      show:
+        header_title: Team Member Profile
+        avatar_alt: Avatar
+        company_role: Company Role
+        company: Company
+        joined: Joined
+        back: Back to Team
+    flash:
+      only_admin_member: Only admin/member can be assigned from this screen.
+      owner_role_cannot_change: Owner role cannot be changed here.
+      cannot_change_own_role: You cannot change your own role.
+      member_role_updated: Member role updated.
+      owner_cannot_removed: Owner cannot be removed.
+      cannot_remove_self: You cannot remove yourself.
+      removed_from_team: 'Removed from team: %{email}. Account preserved.'
+  team_invitations:
+    view:
+      index:
+        header_title: My Invitations
+        hint: Invitations are account-level notifications. Accepting one will switch your company workspace.
+        company: Company
+        role: Role
+        invited_by: Invited By
+        status: Status
+        expires: Expires
+        action: Action
+        pending: Pending
+        accept: Accept
+        empty: No pending invitations.
+    flash:
+      email_already_member: This email is already a member of your company.
+      no_account_found: No account found for this email. Ask them to sign up first.
+      pending_invitation_exists: A pending invitation already exists for this email.
+      invitation_created: Invitation created for %{email}.
+      invitation_revoked: Invitation revoked.
+      joined_company: You joined %{company}.
+      unable_accept: 'Unable to accept invitation: %{message}'
+  admin:
+    users:
+      flash:
+        role_updated: Role updated.
+  users:
+    registrations:
+      view:
+        new:
+          title: Sign up
+          verification_error: Verification Error
+          error_summary: "%{count} error(s) prevented sign up:"
+          email: Email
+          password: Password
+          minimum_password: "(%{count} characters minimum)"
+          password_confirmation: Password confirmation
+          create_account: Create account
+          creating_account: Creating account...
+          log_in: Log in
+          security_verification: Security Verification
+          complete_verification: Please complete the verification to continue
+          loading_verification: Loading verification...
+          verified_submitting: "✓ Verified! Submitting..."
+        edit:
+          header_title: Account Settings
+          personal_profile: Personal Profile
+          profile_hint: Manage your working identity. Security verification is not required for profile-only changes.
+          avatar_alt: Avatar
+          upload_avatar: Upload Avatar
+          remove_current_avatar: Remove Current Avatar
+          display_name: Display Name
+          display_name_placeholder: How teammates and clients see your name
+          contact_number: Contact Number
+          job_title: Job Title
+          job_title_placeholder: Sales Manager / Founder
+          time_zone: Time Zone
+          search_timezone_placeholder: Search city, country, or GMT offset
+          language: Language
+          update_profile: Update Profile
+          security_settings: Security Settings
+          security_settings_hint: Change email or password here. Current password is required for security updates.
+          email_address: Email Address
+          change_email: Change Email
+          email_verify_hint: You'll need to verify the new email address before it becomes active.
+          new_password_optional: New password (optional)
+          confirm_new_password: Confirm new password
+          current_password_required: Current password (required for security changes)
+          update_security_settings: Update Security Settings
+          company_invitations: Company Invitations
+          pending_invitations: You currently have %{count} pending company invitation(s).
+          open_invitations: Open Invitations
+          change_email_address: Change Email Address
+          change_email_address_hint: We'll send a verification link to your new email address. You must click it to complete the change.
+          new_email_address: New Email Address
+          new_email_placeholder: your-new-email@example.com
+          current_password: Current Password
+          current_password_placeholder: Enter your password to confirm
+          password_verify_hint: For security, we need to verify your password.
+          send_verification_email: Send Verification Email
+          cancel: Cancel
+    sessions:
+      view:
+        new:
+          title: Log in
+          email: Email
+          password: Password
+          remember_me: Remember me
+          submit: Log in
+          sign_up: Sign up
+      flash:
+        verify_email_before_login: Please verify your email before logging in.
+  devise:
+    sessions:
+      signed_in: Signed in successfully.
+      user:
+        signed_in: Signed in successfully.
+  email_changes:
+    flash:
+      invalid_password: Invalid password
+      invalid_email_format: Invalid email format
+      current_email: This is your current email
+      email_in_use: Email already in use
+      verification_sent: Verification email sent to %{email}. Please check your email to confirm the change.
+      failed_send: Failed to send verification email
+      error_occurred: An error occurred. Please try again.
+      bot_verification_required: Bot verification is required
+      bot_verification_failed: Bot verification failed. Please try again.
+  public_quote_shares:
+    flash:
+      revision_not_actionable: This revision is no longer actionable.
+      quotation_accepted: Quotation accepted. Thank you.
+      revision_request_sent: Revision request sent.
+  landing:
+    view:
+      index:
+        meta_title: Foreign Trade Quotation Software for B2B Export Teams | Rubusoo
+        meta_description: Foreign trade quotation software for B2B export teams. Manage quote revisions, share live buyer links, and export professional PDF/Excel documents.
+        hero_kicker: BUILT FOR B2B SALES AND EXPORT TEAMS
+        hero_title: Foreign Trade Quotation Software for B2B Export Teams
+        hero_subtitle: Run revisions, buyer visibility, and export-ready quote output in one cleaner workflow.
+        start_for_free: Start for Free
+        view_demo: View Demo
+        see_live_example: See Live Example
+        proof_1: Revision control built in
+        proof_2: Buyer-facing live quote links
+        proof_3: Professional PDF / Excel output
+        artifact:
+          eyebrow_left: Fictional quote workflow
+          eyebrow_right: Revision-safe
+          headline: Northforge Supply / QX-2026-118
+          subline: Buyer sees latest version only
+          card1:
+            label: Version control
+            title: V3 approved for sending
+            body: Previous revisions remain visible in history.
+          card2:
+            label: Buyer access
+            title: Public quote link
+            body: Share one browser-ready quote instead of attachment chains.
+          card3:
+            label: Output
+            title: PDF / Excel export
+            body: Keep approvals and finance handoff intact.
+        story:
+          kicker: WHY TEAMS SWITCH
+          title: Export quoting breaks when the workflow lives in files
+          lead: Most teams do not need a heavy ERP quoting module. They need one dependable place to create, revise, share, and follow up on quotes without losing version control.
+          before_title: Before
+          before_body: Quotes move through spreadsheets, email attachments, and chat threads.
+          after_title: After
+          after_body: Rubusoo keeps the latest quote, revision history, buyer link, and export output in one operating layer.
+          why_title: Why it matters
+          why_body: Less version confusion. Faster response loops. Cleaner internal follow-up.
+        capabilities:
+          kicker: CORE CAPABILITIES
+          title: Core quotation workflows, presented like a product not a brochure
+          subtitle: Everything below maps to features that already exist in the app today.
+          card1:
+            title: Quote Revision Control
+            body: Every revision tracked. History never lost. Price changes stay visible.
+          card2:
+            title: Public Quote Link for Buyers
+            body: Buyers see live quotes from any device. No login. No friction.
+          card3:
+            title: Quotation CRM Workflow
+            body: Compose from templates. Customize quickly. Send with confidence.
+          card4:
+            title: Export Quotation to PDF/Excel
+            body: Export to PDF or Excel. Buyer-ready and accounting-approved.
+        comparison:
+          kicker: WHAT CHANGES
+          title: A better operating layer for quoting
+          subtitle: Not all-in-one ERP. Not another file folder. A focused execution system for quote work.
+          left_title: Spreadsheet quoting
+          left_body: Fast to start, but weak once revisions, approvals, and buyer updates pile up.
+          center_title: Rubusoo workflow
+          center_body: One quote timeline. One buyer-facing link. One clean export path for internal handoff.
+          right_title: Heavy ERP quoting
+          right_body: Powerful on paper, but often too slow and rigid for frontline export quote cycles.
+        workflow:
+          kicker: WORKFLOW
+          title: How a quote actually moves through the system
+          subtitle: 'The page flow is simple on purpose: build, send, revise, export, follow up.'
+          step1_title: Set up products and customers
+          step1_body: Keep reusable catalog data and customer records in one place.
+          step2_title: Create from templates
+          step2_body: Compose pricing, terms, and document structure without rebuilding every quote from scratch.
+          step3_title: Share or export
+          step3_body: Use a live buyer link when you want clarity, or export PDF / Excel when your process needs files.
+          step4_title: Revise with history intact
+          step4_body: Keep every quote version visible while sales and buyers move toward a decision.
+        dual:
+          kicker: FOR BOTH SIDES OF THE DEAL
+          title: Internal execution stays clean while the buyer experience stays simple
+          team_title: For your team
+          team_1: Revision history stays attached to the quote itself.
+          team_2: Products, presets, and templates are reusable across deals.
+          team_3: Follow-up work is tied to the same customer and quote context.
+          buyer_title: For the buyer
+          buyer_1: One live quote link instead of unclear attachment chains.
+          buyer_2: Professional PDF / Excel output when a file is still required.
+          buyer_3: Cleaner quote presentation with less friction and less confusion.
+        explainer:
+          title: What Is Foreign Trade Quotation Software?
+          intro: A practical explanation for export-focused sales operations.
+          summary: Foreign trade quotation software helps B2B export teams control revisions, improve buyer visibility, and run faster quote follow-ups without heavy ERP overhead.
+          key_1: Replaces fragmented spreadsheets and attachments with one structured quote workflow.
+          key_2: Supports quote revision control and buyer-facing live links in daily sales execution.
+          key_3: Keeps export quotation management practical with professional PDF/Excel output.
+          read_full: Read full explanation
+          need_title: Why Export Teams Need It
+          need_p1: Foreign trade quotation software is the execution layer between lead discussions and final buyer confirmation in international sales.
+          need_p2: For B2B export teams, quoting is not just document creation. It is revision management, buyer communication, and follow-up control inside one commercial workflow.
+          breaks_title: Why Spreadsheet Quoting Breaks at Scale
+          breaks_p1: Many teams start with spreadsheets, email threads, and attachment chains. That can work early, but volume quickly creates version confusion.
+          breaks_1: No single source of truth when quotes move across teammates.
+          breaks_2: Revision history gets fragmented across files and messages.
+          breaks_3: Buyers compare old attachments instead of the latest offer.
+          crm_title: What a Practical Quotation CRM Should Do
+          crm_p1: Excel remains useful for analysis, but it is weak for live export quotation management. ERP can provide deep governance, yet many exporters find it too heavy for frontline quoting speed.
+          crm_p2: 'Teams need a balanced quotation CRM workflow: fast for daily negotiation, structured for reliable internal execution.'
+          crm_1: Track revisions clearly and keep every version visible.
+          crm_2: Share one buyer-facing live quote link to prevent confusion.
+          crm_3: Export professional PDF/Excel files without extra manual work.
+          crm_p3: Rubusoo is built for that exact gap. It gives B2B export teams clearer buyer communication, fewer avoidable errors, and stronger follow-up discipline across the quote lifecycle.
+        faq:
+          title: FAQ
+          q1: Can we use this with a small sales team?
+          a1: Yes. Built for lean teams. Minimal setup. Fast workflows. Professional output from day one.
+          q2: Do buyers need an account to view a quote link?
+          a2: No. They click a link, view the quote in the browser, and print. No account needed.
+          q3: Can we still export files for finance approval?
+          a3: Yes. PDF and Excel exports keep your accounting and approval workflows intact.
+          q4: What happens when we need to change pricing?
+          a4: Revisions are instant. Every version stays in history. Buyers always see the latest. No confusion.
+        contact:
+          title: Contact Us
+          subtitle: Tell us your team size and current quoting workflow.
+          hint: Built for teams who need clear revision control and buyer visibility.
+          name: Name
+          email: Email
+          company: Company
+          message: Message
+          message_placeholder: Share your quote process, team setup, and rollout timeline.
+          send_message: Send Message
+          sending: Sending...
+          or: or
+          email_directly: email us directly
+          security_verification: Security Verification
+          complete_verification: Please complete the verification to continue
+          loading_verification: Loading verification...
+          verified_submitting: Verified! Submitting...
+        related_resources: Related Resources
+        related_resource_1: Foreign Trade Quotation Software
+        related_resource_2: Quotation CRM for Export Teams
+        footer_copyright: "© %{year} Rubusoo. All rights reserved."
+        footer_privacy: Privacy Policy
+        footer_terms: Terms
+      demo:
+        meta_title: Rubusoo Demo | Pipeline and Quote Workspace
+        meta_description: Explore the Rubusoo demo workspace and see how your team can create quotes, track revisions, and close deals faster.
+        kicker: DEMO WORKSPACE
+        title: See the quote workflow in product form
+        subtitle: Not a slideshow. A simplified view of the kind of queue, signals, and quote context Rubusoo is built to organize.
+        note: All names and numbers on this page are fictional examples for product presentation.
+        proof_1: Quote queue visibility
+        proof_2: Revision-aware workflow
+        proof_3: Buyer-ready output
+        open_deals: 'Open Deals: %{count}'
+        quotes_this_week: 'Quotes This Week: %{count}'
+        pending_follow_ups: 'Pending Follow-ups: %{count}'
+        queue_kicker: Queue
+        recent_quotes: Recent Quotes
+        sorted_by_urgency: Sorted by urgency
+        table:
+          quote_no: Quote No.
+          buyer: Buyer
+          status: Status
+          total: Total
+        status:
+          pending: Pending
+          revised: Revised
+          won: Won
+        signals_kicker: Signals
+        deal_overview: Deal Overview
+        one_account_workspace: One account workspace
+        top_product: 'Top Product:'
+        average_quote_cycle: 'Average Quote Cycle:'
+        revision_rate: 'Revision Rate:'
+        export_mix: 'Export Mix:'
+        start_free_trial: Start Free Trial
+        open_sample_quote: Open Sample Quote
+      sample_quote:
+        meta_title: Rubusoo Sample Quote | Public Quote Example
+        meta_description: View a sample public quote from Rubusoo, including buyer/seller details, line items, and payment terms.
+        kicker: PUBLIC QUOTE EXAMPLE
+        title: Sample buyer-facing quote
+        subtitle: This page shows the kind of browser-ready quote experience Rubusoo can publish. It is a static sample, not a live negotiation record.
+        view_demo_workspace: View Demo Workspace
+        start_for_free: Start for Free
+        pi_number: 'PI # %{number}'
+        delivery_days: 20 working days
+        validity: Validity
+        delivery: Delivery
+        print: Print
+  seo:
+    view:
+      foreign_trade_quotation_software:
+        meta:
+          title: Foreign Trade Quotation Software | Export Quote Management System | Rubusoo
+          description: Foreign trade quotation software built for B2B export teams. Structured export quotation management without heavy ERP systems.
+        hero:
+          kicker: EXPORT QUOTE EXECUTION
+          title: Foreign Trade Quotation Software for B2B Export Teams
+          summary: Foreign trade quotation software gives export teams one controlled quoting workflow.
+          paragraph_1: It replaces scattered Excel files and attachment chains with structured revision control, buyer visibility, and fast export-ready output.
+          paragraph_2: Rubusoo is an export quotation tool built for B2B export teams that need execution speed without heavy ERP overhead.
+          proof_1: Quote revisions stay visible
+          proof_2: Buyer link stays current
+          proof_3: PDF / Excel export stays available
+          start_free: Start Free
+          live_example: See Live Example
+        signals:
+          primary_gain:
+            label: Primary gain
+            title: One current quote view
+            detail: Reduce version confusion across buyers, reps, and internal approvals.
+          workflow:
+            label: Workflow
+            title: Revise, share, export
+            detail: Use live links for clarity, or keep PDF / Excel output when files are still required.
+          fit:
+            label: Fit
+            title: For lean export teams
+            detail: Focused quoting operations without claiming to replace every ERP workflow.
+        toc:
+          title: On this page
+          introduction: Introduction
+          spreadsheet_problems: Problems with Spreadsheet-based Quoting
+          erp_shortfalls: Why ERP Quoting Modules Fall Short
+          comparison_table: Excel vs ERP vs Rubusoo
+          team_needs: What Export Teams Actually Need
+          rubusoo_solves: How Rubusoo Solves It
+          faq: FAQ
+        spreadsheet_problems:
+          title: Problems with Spreadsheet-based Quoting
+          summary: Spreadsheet quoting breaks when export deal volume and revision speed increase.
+          paragraph: Teams lose execution speed because quote updates are spread across files, chats, and email attachments.
+          item_1: Version confusion grows when multiple quote files circulate across teammates.
+          item_2: Manual updates delay buyer response in fast export negotiations.
+          item_3: Quote revision control is difficult across email attachment chains.
+          item_4: Formula and copy errors create direct margin and trust risk.
+          item_5: Buyer visibility drops when the latest quote is not clearly accessible.
+          closing: That is why many teams adopt foreign trade quotation software as a spreadsheet alternative for export teams.
+        erp_shortfalls:
+          title: Why ERP Quoting Modules Fall Short
+          summary: ERP modules are often too heavy for frontline export quotation execution.
+          paragraph: Many teams need fast quote turnaround first, then deeper enterprise controls later.
+          item_1: ERP workflows are often too rigid for rapid revision loops.
+          item_2: Implementation and customization overhead can slow sales adoption.
+          item_3: Most teams need practical export quotation speed before enterprise complexity.
+          closing_prefix: A lightweight export quotation tool is usually the better operating layer for B2B export teams, especially when paired with a
+          closing_link: workflow-based quotation CRM model
+        comparison:
+          title: Excel vs ERP vs Rubusoo
+          subtitle: A quick comparison for version control, buyer visibility, and export readiness.
+          headers:
+            criteria: Criteria
+            excel: Excel
+            erp: ERP Quoting Module
+            rubusoo: Rubusoo
+          row_1:
+            criteria: Quote revision control
+            excel: Manual and file-based
+            erp: Structured but complex
+            rubusoo: Built-in quote revision control
+          row_2:
+            criteria: Buyer visibility
+            excel: Attachment confusion risk
+            erp: Possible with setup
+            rubusoo: Single live buyer quote link
+          row_3:
+            criteria: Adoption speed
+            excel: Fast start, weak governance
+            erp: Slow rollout and training
+            rubusoo: Lightweight and practical
+          row_4:
+            criteria: Export readiness
+            excel: Manual formatting needed
+            erp: Depends on configuration
+            rubusoo: PDF/Excel export ready
+          row_5:
+            criteria: Fit for B2B export teams
+            excel: Limited at scale
+            erp: Powerful but heavy
+            rubusoo: Focused export quotation management
+        mini_panel:
+          simple_title: What stays simple
+          simple_body: You still get PDF / Excel output, so teams do not need to force every customer into a public-link workflow.
+          cleaner_title: What gets cleaner
+          cleaner_body: Revision control, buyer visibility, and quote follow-up stop living across disconnected files and messages.
+        team_needs:
+          title: What Export Teams Actually Need
+          summary: Export teams need quote execution discipline, not file management overhead.
+          paragraph: A practical foreign trade quotation software flow should keep speed and control in the same workspace.
+          item_1: Reliable quote revision control with visible version history.
+          item_2: Buyer-facing quote links that always show the latest approved quote.
+          item_3: Fast quote editing for cross-border negotiation cycles.
+          item_4: Export-ready PDF/Excel output for approvals and operations.
+          closing: Teams move faster when these needs are handled in one export quotation management workflow.
+        rubusoo_solves:
+          title: How Rubusoo Solves It
+          summary: Rubusoo turns export quoting into one repeatable execution system.
+          paragraph: It maps daily quoting problems to clear operational controls without adding workflow bloat.
+          item_1_label: Version confusion
+          item_1_detail: Structured quote revision control keeps history visible.
+          item_2_label: Buyer uncertainty
+          item_2_detail: Live quote links improve buyer visibility without login friction.
+          item_3_label: Slow updates
+          item_3_detail: Faster editing supports high-frequency export revisions.
+          item_4_label: Manual output work
+          item_4_detail: PDF/Excel export stays fast and consistent.
+          closing: This gives B2B export teams cleaner execution, faster turnaround, and more predictable quote delivery.
+        faq:
+          title: FAQ
+          q1: Can small export teams adopt foreign trade quotation software without long setup?
+          a1: Yes. Rubusoo is designed as a lightweight export quotation tool with fast onboarding for lean teams.
+          q2: Is Rubusoo a spreadsheet alternative for export teams replacing Excel quoting?
+          a2: Yes. It replaces file-based quote tracking with structured quote revision control and clearer buyer updates.
+          q3: Does Rubusoo support buyer-facing quote links without account logins?
+          a3: Yes. Buyers can view the latest quote through a direct link, which improves visibility and reduces confusion.
+          q4: Can we still export quotes to PDF and Excel for approvals?
+          a4: Yes. Rubusoo supports export-ready PDF and Excel files alongside live-link quoting workflows.
+        cta:
+          title: Adopt an Export Quotation Tool That Teams Use Daily
+          body: Replace spreadsheet quoting with foreign trade quotation software built for rapid adoption, clear revisions, and faster buyer response.
+      quotation_crm_for_export_teams:
+        meta:
+          title: Quotation CRM for Export Teams | B2B Quote Workflow | Rubusoo
+          description: Quotation CRM designed for export sales teams. Manage revisions, buyer visibility, and follow-up workflows in one system.
+        hero:
+          kicker: WORKFLOW-BASED QUOTATION CRM
+          title: Quotation CRM for Export Teams
+          summary: Quotation CRM for export teams should run execution, not just store quote records.
+          paragraph_1: Rubusoo connects quote revision control, buyer-facing quote links, and follow-up workflow for export sales in one operating layer.
+          paragraph_2: Teams respond faster, keep version clarity, and protect deal momentum across cross-border cycles.
+          proof_1: Revision-aware CRM workflow
+          proof_2: Buyer-facing quote access
+          proof_3: Follow-up tied to quote state
+          start_free: Start Free
+          view_demo: View Demo
+        signals:
+          crm_role:
+            label: CRM role
+            title: Execution, not just storage
+            detail: Quote status, revisions, and next actions stay in the same operating context.
+          buyer_clarity:
+            label: Buyer clarity
+            title: One latest quote view
+            detail: Use a direct quote link instead of relying entirely on file attachments.
+          team_rhythm:
+            label: Team rhythm
+            title: Follow-up linked to state
+            detail: Sales activity stays connected to what is actually happening in the quote lifecycle.
+        toc:
+          title: On this page
+          workflow_matters: Why Workflow Matters in Export Quoting
+          revision_control: Quote Revision Control as the Core Layer
+          buyer_visibility: Buyer-facing Quote Link and Visibility
+          follow_up_workflow: Follow-up Workflow for Export Sales
+          rubusoo_positioning: Rubusoo as Workflow-based Quotation CRM
+          faq: FAQ
+        workflow_matters:
+          title: Why Workflow Matters in Export Quoting
+          summary: Without workflow structure, quote execution quality drops.
+          paragraph: Export teams handle revisions, clarifications, and follow-ups daily. Fragmented coordination slows decisions and weakens conversion pace.
+          item_1: Keep quote revisions organized in a clear execution timeline.
+          item_2: Maintain buyer-facing visibility with one current quote view.
+          item_3: Connect follow-up actions directly to quote status.
+          item_4: Improve execution consistency across reps and managers.
+        revision_control:
+          title: Quote Revision Control as the Core Execution Layer
+          summary: Quote revision control is the backbone of export quotation CRM.
+          paragraph: In active negotiations, pricing and terms change often. Each change needs visibility, ownership, and clear buyer communication.
+          item_1: Track each revision with context, not only file names.
+          item_2: Align internal review and buyer response around one timeline.
+          item_3: Reduce pricing and version errors during negotiation.
+          item_4: Move from document updates to controlled execution.
+          closing: This is the practical execution layer behind quotation CRM for export teams.
+        buyer_visibility:
+          title: Buyer-facing Quote Link Improves Visibility and Trust
+          summary: Buyer-facing quote links remove version ambiguity immediately.
+          paragraph: Attachment-based updates create doubt about what is current. One live quote link keeps buyer visibility consistent across revisions.
+          item_1: Reduce confusion about which quote version is final.
+          item_2: Speed up buyer response loops across time zones.
+          item_3: Build trust through consistent quote presentation.
+        follow_up_workflow:
+          title: Follow-up Workflow for Export Sales
+          summary: Deal momentum depends on follow-up discipline tied to quote status.
+          paragraph: A workflow-based quotation CRM should connect reminders and next actions directly to live quote progression.
+          item_1: Assign next action ownership tied to quote stage.
+          item_2: Use reminder cadence linked to revision events.
+          item_3: Track sent, pending, and updated quote state clearly.
+          item_4: Give managers cleaner execution signals across opportunities.
+        rubusoo_positioning:
+          title: Rubusoo as a Workflow-based Export Quotation CRM
+          summary: Rubusoo turns quote work into a controlled execution system.
+          paragraph_prefix: It is built for export quotation CRM operations where revision speed and follow-up quality decide outcomes, while still aligning with
+          paragraph_link: foreign trade quotation software fundamentals
+          item_1_label: Export quotation CRM
+          item_1_detail: built for cross-border sales execution.
+          item_2_label: Quote revision control
+          item_2_detail: visible timeline with cleaner team coordination.
+          item_3_label: Buyer-facing quote link
+          item_3_detail: latest version visibility with low friction.
+          item_4_label: Follow-up workflow for export sales
+          item_4_detail: actions connected to quote status.
+          closing: When execution quality improves, teams close faster with less coordination friction.
+        mini_panel:
+          claim_title: What this page does claim
+          claim_body: Rubusoo helps structure revisions, buyer visibility, and follow-up workflow around quoting.
+          non_claim_title: What this page does not claim
+          non_claim_body: It does not pretend every buyer interaction can be measured if your team works mainly through PDF and email.
+        faq:
+          title: FAQ
+          q1: How is quotation CRM for export teams different from a normal CRM?
+          a1: 'It focuses on quote execution: revisions, buyer visibility, and follow-up tied directly to quote progress.'
+          q2: Does Rubusoo support quote revision control for active negotiations?
+          a2: Yes. Revisions are tracked in a clear workflow so teams can manage buyer changes with confidence.
+          q3: Can buyers view quotes through a buyer-facing quote link?
+          a3: Yes. Buyers can access the latest quote directly, which improves clarity and shortens response loops.
+          q4: Does Rubusoo support follow-up workflow for export sales teams?
+          a4: Yes. Follow-up actions are connected to quote status to improve execution rhythm and deal momentum.
+        cta:
+          title: Improve Quote Execution and Deal Momentum
+          body: Adopt a workflow-based quotation CRM for export teams and run stronger revision control, buyer visibility, and follow-up execution in one system.

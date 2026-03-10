@@ -9,7 +9,7 @@ class User < ApplicationRecord
 
   enum :role, { user: 0, vip: 1, admin: 2 }, default: :user
   enum :company_role, { owner: 0, admin: 1, member: 2 }, default: :member, prefix: :company
-  validates :language, inclusion: { in: %w[en] }, allow_blank: true
+  validates :language, inclusion: { in: %w[en zh-CN es-419] }, allow_blank: true
 
   belongs_to :company
   has_many :action_items, dependent: :destroy

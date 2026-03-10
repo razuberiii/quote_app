@@ -20,7 +20,7 @@ class QuoteTemplatesController < ApplicationController
       if params[:make_default] == "1" || current_user.company.quote_templates.count == 1
         apply_default_template!(@quote_template)
       end
-      redirect_to quote_templates_path, notice: "Template created"
+      redirect_to quote_templates_path, notice: t("quote_templates.flash.created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -34,7 +34,7 @@ class QuoteTemplatesController < ApplicationController
 
     if @quote_template.update(quote_template_params)
       apply_default_template!(@quote_template) if params[:make_default] == "1"
-      redirect_to quote_templates_path, notice: "Template updated"
+      redirect_to quote_templates_path, notice: t("quote_templates.flash.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -43,12 +43,12 @@ class QuoteTemplatesController < ApplicationController
   def destroy
     @quote_template.destroy
     current_user.company.ensure_default_template!
-    redirect_to quote_templates_path, notice: "Template deleted"
+    redirect_to quote_templates_path, notice: t("quote_templates.flash.deleted")
   end
 
   def set_default
     apply_default_template!(@quote_template)
-    redirect_to quote_templates_path, notice: "Default template updated"
+    redirect_to quote_templates_path, notice: t("quote_templates.flash.default_updated")
   end
 
   private
@@ -98,6 +98,10 @@ class QuoteTemplatesController < ApplicationController
       :watermark_opacity,
       :watermark_image,
       :document_kind,
+      :webview_locale,
+      :public_link_locale,
+      :pdf_locale,
+      :excel_locale,
       :quotation_title,
       :quotation_number_label,
       :quotation_footer_note,
@@ -159,7 +163,11 @@ class QuoteTemplatesController < ApplicationController
       show_notes: true,
       show_watermark: false,
       watermark_text: "",
-      watermark_opacity: 12
+      watermark_opacity: 12,
+      webview_locale: "en",
+      public_link_locale: "en",
+      pdf_locale: "en",
+      excel_locale: "en"
     }
   end
 

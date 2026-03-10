@@ -1,14 +1,14 @@
 <section class="app-page-shell">
   <header class="app-page-header">
     <div class="app-page-header-main">
-      <h1>New Product</h1>
-      <p>Add a catalog item with pricing, media, and reusable preset bindings.</p>
+      <h1><%= t("products.view.new.title") %></h1>
+      <p><%= t("products.view.new.subtitle") %></p>
     </div>
   </header>
 
   <%= render "form",
              product: @product,
-             submit_label: "Create Product",
+             submit_label: t("products.view.new.submit_label"),
              back_path: products_path,
-             back_label: "Back to Products" %>
+             back_label: t("products.view.new.back_to_products") %>
 </section>

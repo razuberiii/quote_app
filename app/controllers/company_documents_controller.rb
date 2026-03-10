@@ -7,7 +7,7 @@ class CompanyDocumentsController < ApplicationController
     @company_document = @company.company_documents.new(company_document_params)
 
     if @company_document.save
-      redirect_to edit_company_settings_path, notice: "Company document uploaded."
+      redirect_to edit_company_settings_path, notice: t("company_documents.flash.uploaded")
     else
       redirect_to edit_company_settings_path, alert: @company_document.errors.full_messages.to_sentence
     end
@@ -15,7 +15,7 @@ class CompanyDocumentsController < ApplicationController
 
   def destroy
     @company_document.destroy
-    redirect_to edit_company_settings_path, notice: "Company document removed."
+    redirect_to edit_company_settings_path, notice: t("company_documents.flash.removed")
   end
 
   private

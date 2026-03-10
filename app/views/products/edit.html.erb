@@ -1,14 +1,14 @@
 <section class="app-page-shell">
   <header class="app-page-header">
     <div class="app-page-header-main">
-      <h1>Edit Product</h1>
-      <p>Update pricing, media, description, and default preset bindings for <strong><%= @product.name %></strong>.</p>
+      <h1><%= t("products.view.edit.title") %></h1>
+      <p><%= t("products.view.edit.subtitle_html", name: @product.name) %></p>
     </div>
   </header>
 
   <%= render "form",
              product: @product,
-             submit_label: "Update Product",
+             submit_label: t("products.view.edit.submit_label"),
              back_path: @product,
-             back_label: "Back to Product" %>
+             back_label: t("products.view.edit.back_to_product") %>
 </section>

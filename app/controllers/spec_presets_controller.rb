@@ -9,7 +9,7 @@ class SpecPresetsController < ApplicationController
   def create
     @spec_preset = current_user.company.spec_presets.new(spec_preset_params)
     if @spec_preset.save
-      redirect_to spec_presets_path, notice: "Spec preset created."
+      redirect_to spec_presets_path, notice: t("spec_presets.flash.created")
     else
       @spec_presets = current_user.company.spec_presets.ordered
       render :index, status: :unprocessable_entity
@@ -21,7 +21,7 @@ class SpecPresetsController < ApplicationController
 
   def update
     if @spec_preset.update(spec_preset_params)
-      redirect_to spec_presets_path, notice: "Spec preset updated."
+      redirect_to spec_presets_path, notice: t("spec_presets.flash.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -29,7 +29,7 @@ class SpecPresetsController < ApplicationController
 
   def destroy
     @spec_preset.destroy
-    redirect_to spec_presets_path, notice: "Spec preset deleted."
+    redirect_to spec_presets_path, notice: t("spec_presets.flash.deleted")
   end
 
   private

@@ -1,8 +1,8 @@
 <section class="quote-decision-timeline app-surface">
   <div class="app-section-heading">
     <div>
-      <h3>Decision Timeline</h3>
-      <p class="app-section-caption">Key decision and engagement moments for this revision.</p>
+      <h3><%= t("quotes.view.decision_timeline.title") %></h3>
+      <p class="app-section-caption"><%= t("quotes.view.decision_timeline.subtitle") %></p>
     </div>
   </div>
 
@@ -36,7 +36,7 @@
 
   <% if hidden_events.any? %>
     <details class="quote-decision-more">
-      <summary>Show older events (<%= hidden_events.size %>)</summary>
+      <summary><%= t("quotes.view.decision_timeline.show_older_events", count: hidden_events.size) %></summary>
       <div class="quote-decision-list is-secondary">
         <% hidden_events.each do |event| %>
           <article class="quote-decision-item is-<%= event[:kind] %>">

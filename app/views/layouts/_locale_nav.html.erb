@@ -1,0 +1,24 @@
+<div class="locale-nav" role="navigation" aria-label="<%= t('locale.switcher_label') %>">
+  <details class="locale-nav-dropdown">
+    <summary class="locale-nav-trigger">
+      <span class="locale-nav-meta">
+        <strong class="locale-nav-current" title="<%= current_locale_nav_item[:label] %>"><%= current_locale_nav_item[:short_label] %></strong>
+        <span class="locale-nav-title"><%= t("locale.switcher_short") %></span>
+      </span>
+      <span class="locale-nav-caret" aria-hidden="true">▾</span>
+    </summary>
+    <div class="locale-nav-menu" role="menu" aria-label="<%= t('locale.switcher_label') %>">
+      <% locale_nav_items.each do |item| %>
+        <% locale_code = item[:locale].to_s %>
+        <% active = I18n.locale.to_s == locale_code %>
+        <%= link_to item[:label],
+                    url_for(locale: item[:locale]),
+                    class: "locale-nav-link#{active ? " is-active" : ""}",
+                    lang: locale_code,
+                    hreflang: locale_code,
+                    role: "menuitem",
+                    aria: { current: (active ? "true" : nil) } %>
+      <% end %>
+    </div>
+  </details>
+</div>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_022500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -242,6 +242,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_022500) do
     t.string "document_kind", default: "quotation", null: false
     t.string "document_number_label", default: "", null: false
     t.string "document_title", default: "", null: false
+    t.string "excel_locale", default: "en", null: false
     t.boolean "excel_show_grid_lines", default: false, null: false
     t.string "font_family", default: "Noto Sans", null: false
     t.text "footer_note", default: "", null: false
@@ -251,9 +252,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_022500) do
     t.string "line_total_label", default: "Line Total", null: false
     t.string "logo_position", default: "right", null: false
     t.string "name", default: "Default Template", null: false
+    t.string "pdf_locale", default: "en", null: false
     t.text "pi_footer_note", default: "", null: false
     t.string "pi_number_label", default: "", null: false
     t.string "pi_title", default: "", null: false
+    t.string "public_link_locale", default: "en", null: false
     t.string "qty_label", default: "Qty", null: false
     t.text "quotation_footer_note", default: "", null: false
     t.string "quotation_number_label", default: "", null: false
@@ -282,6 +285,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_022500) do
     t.datetime "updated_at", null: false
     t.integer "watermark_opacity", default: 12, null: false
     t.string "watermark_text", default: "", null: false
+    t.string "webview_locale", default: "en", null: false
     t.index ["company_id", "slug"], name: "index_quote_templates_on_company_id_and_slug", unique: true
     t.index ["company_id"], name: "index_quote_templates_on_company_id"
   end

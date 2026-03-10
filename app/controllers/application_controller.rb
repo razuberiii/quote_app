@@ -2,14 +2,45 @@ class ApplicationController < ActionController::Base
   include TurnstileVerifiable
 
   before_action :authenticate_user!
+  before_action :set_locale
   before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
-  helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color
+  helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color,
+                :locale_nav_items, :current_locale_nav_item
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
   private
+
+  def set_locale
+    locale = params[:locale].presence || current_user&.language.presence
+    normalized_locale = locale.to_s.tr("_", "-")
+
+    I18n.locale = if I18n.available_locales.map(&:to_s).include?(normalized_locale)
+      normalized_locale
+    else
+      I18n.default_locale
+    end
+  end
+
+  def default_url_options
+    return {} if I18n.locale.to_s == I18n.default_locale.to_s
+
+    { locale: I18n.locale }
+  end
+
+  def locale_nav_items
+    [
+      { locale: :en, label: "English", short_label: "EN" },
+      { locale: :"zh-CN", label: "简体中文", short_label: "中文" },
+      { locale: :"es-419", label: "Espanol (LatAm)", short_label: "ES" }
+    ]
+  end
+
+  def current_locale_nav_item
+    locale_nav_items.find { |item| item[:locale].to_s == I18n.locale.to_s } || locale_nav_items.first
+  end
 
   def ensure_email_verified!
     # Skip in development environment
@@ -24,7 +55,7 @@ class ApplicationController < ActionController::Base
     # These are users who have no verification token/timestamp, meaning they signed up before this feature
     return if current_user.email_verification_token.blank? && current_user.email_verification_token_sent_at.blank?
 
-    redirect_to pending_email_verification_path(email: current_user.email), alert: "Please verify your email address to continue. Check your email for a verification link."
+    redirect_to pending_email_verification_path(email: current_user.email), alert: t("flash.verify_email")
   end
 
   def should_skip_email_verification_check?
@@ -40,19 +71,19 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin!
-    redirect_to root_path, alert: "Not authorized." unless current_user&.admin?
+    redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.admin?
   end
 
   def require_company_team_manager!
-    redirect_to root_path, alert: "Not authorized." unless current_user&.can_manage_team?
+    redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.can_manage_team?
   end
 
   def require_company_template_manager!
-    redirect_to root_path, alert: "Not authorized." unless current_user&.can_manage_templates?
+    redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.can_manage_templates?
   end
 
   def require_company_settings_manager!
-    redirect_to root_path, alert: "Not authorized." unless current_user&.can_manage_templates?
+    redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.can_manage_templates?
   end
 
   def pending_team_invitations_count

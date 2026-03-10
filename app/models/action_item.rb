@@ -22,13 +22,13 @@ class ActionItem < ApplicationRecord
   def message
     case action_type
     when "quote_viewed"
-      "Buyer viewed #{reference_label}. Follow up while momentum is warm."
+      I18n.t("dashboard.logic.action_items.quote_viewed", reference: reference_label)
     when "quote_not_viewed"
-      "#{reference_label} has not been viewed for 3 days after sending."
+      I18n.t("dashboard.logic.action_items.quote_not_viewed", reference: reference_label)
     when "quote_expiring"
-      "#{reference_label} is close to expiry."
+      I18n.t("dashboard.logic.action_items.quote_expiring", reference: reference_label)
     when "revision_requested"
-      "Buyer requested changes on #{reference_label}."
+      I18n.t("dashboard.logic.action_items.revision_requested", reference: reference_label)
     else
       reference_label
     end

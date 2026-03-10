@@ -11,23 +11,23 @@ class EmailChangesController < ApplicationController
 
     # Validate password
     unless @user.valid_password?(params[:current_password])
-      return render json: { error: "Invalid password" }, status: :unauthorized
+      return render json: { error: t("email_changes.flash.invalid_password") }, status: :unauthorized
     end
 
     new_email = params[:new_email]&.strip&.downcase
 
     # Basic validation
     unless new_email.present? && new_email =~ URI::MailTo::EMAIL_REGEXP
-      return render json: { error: "Invalid email format" }, status: :unprocessable_entity
+      return render json: { error: t("email_changes.flash.invalid_email_format") }, status: :unprocessable_entity
     end
 
     # Check if email is already in use
     if @user.email == new_email
-      return render json: { error: "This is your current email" }, status: :unprocessable_entity
+      return render json: { error: t("email_changes.flash.current_email") }, status: :unprocessable_entity
     end
 
     if User.where(email: new_email).where.not(id: @user.id).exists?
-      return render json: { error: "Email already in use" }, status: :unprocessable_entity
+      return render json: { error: t("email_changes.flash.email_in_use") }, status: :unprocessable_entity
     end
 
     # Generate and send confirmation email
@@ -39,14 +39,14 @@ class EmailChangesController < ApplicationController
     )
       render json: {
         success: true,
-        message: "Verification email sent to #{new_email}. Please check your email to confirm the change."
+        message: t("email_changes.flash.verification_sent", email: new_email)
       }
     else
-      render json: { error: "Failed to send verification email" }, status: :unprocessable_entity
+      render json: { error: t("email_changes.flash.failed_send") }, status: :unprocessable_entity
     end
   rescue StandardError => e
     Rails.logger.error("[email_changes#request_change] #{e.class}: #{e.message}")
-    render json: { error: "An error occurred. Please try again." }, status: :unprocessable_entity
+    render json: { error: t("email_changes.flash.error_occurred") }, status: :unprocessable_entity
   end
 
   def confirm
@@ -64,8 +64,8 @@ class EmailChangesController < ApplicationController
   def verify_turnstile!
     verify_turnstile_for_json!(
       token: params[:cf_turnstile_response],
-      missing_message: "Bot verification is required",
-      failed_message: "Bot verification failed. Please try again."
+      missing_message: t("email_changes.flash.bot_verification_required"),
+      failed_message: t("email_changes.flash.bot_verification_failed")
     )
   end
 end

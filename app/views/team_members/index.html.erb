@@ -1,65 +1,65 @@
-<%= render "shared/settings_header", title: "Team Management", section: :team %>
+<%= render "shared/settings_header", title: t("team_members.view.index.header_title"), section: :team %>
 
 <section class="team-members-panel">
-  <h2>Company Team Overview</h2>
+  <h2><%= t("team_members.view.index.overview_title") %></h2>
   <div class="team-overview-grid">
     <div class="team-overview-item">
-      <span>Total Members</span>
+      <span><%= t("team_members.view.index.total_members") %></span>
       <strong><%= @members.size %></strong>
     </div>
     <div class="team-overview-item">
-      <span>Pending Invitations</span>
+      <span><%= t("team_members.view.index.pending_invitations") %></span>
       <strong><%= @pending_invitations.size %></strong>
     </div>
     <div class="team-overview-item">
-      <span>Your Permission</span>
-      <strong><%= current_user.company_role.capitalize %></strong>
+      <span><%= t("team_members.view.index.your_permission") %></span>
+      <strong><%= t("team_members.view.index.roles.#{current_user.company_role}", default: current_user.company_role.to_s.humanize) %></strong>
     </div>
   </div>
 </section>
 
 <section class="team-members-panel">
-  <h2>Invite Member</h2>
-  <p class="team-members-hint">Member must have an account first. Invitation will appear in their account.</p>
+  <h2><%= t("team_members.view.index.invite_title") %></h2>
+  <p class="team-members-hint"><%= t("team_members.view.index.invite_hint") %></p>
   <%= form_with model: @new_invitation, url: team_invitations_path, local: true do |f| %>
     <div>
-      <%= f.label :email, "Email" %>
+      <%= f.label :email, t("team_members.view.index.email") %>
       <%= f.email_field :email, required: true %>
     </div>
     <div>
-      <%= f.label :company_role, "Company Role" %>
-      <%= f.select :company_role, [["Member", "member"], ["Admin", "admin"]] %>
+      <%= f.label :company_role, t("team_members.view.index.company_role") %>
+      <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]] %>
     </div>
-    <%= f.submit "Create Invitation", class: "btn btn-primary" %>
+    <%= f.submit t("team_members.view.index.create_invitation"), class: "btn btn-primary" %>
   <% end %>
 </section>
 
 <section class="team-members-panel">
-  <h2>Pending Invitations</h2>
+  <h2><%= t("team_members.view.index.pending_section") %></h2>
   <% if @pending_invitations.any? %>
     <div class="table-responsive">
       <table>
         <thead>
           <tr>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Expires</th>
-            <th>Actions</th>
+            <th><%= t("team_members.view.index.pending_table.email") %></th>
+            <th><%= t("team_members.view.index.pending_table.role") %></th>
+            <th><%= t("team_members.view.index.pending_table.status") %></th>
+            <th><%= t("team_members.view.index.pending_table.expires") %></th>
+            <th><%= t("team_members.view.index.pending_table.actions") %></th>
           </tr>
         </thead>
         <tbody>
           <% @pending_invitations.each do |invitation| %>
             <tr>
               <td><%= invitation.email %></td>
-              <td><span class="role-badge role-badge-<%= invitation.company_role %>"><%= invitation.company_role.capitalize %></span></td>
-              <td><span class="status-badge status-badge-pending">Pending</span></td>
+              <td><span class="role-badge role-badge-<%= invitation.company_role %>"><%= t("team_members.view.index.roles.#{invitation.company_role}", default: invitation.company_role.to_s.humanize) %></span></td>
+              <td><span class="status-badge status-badge-pending"><%= t("team_members.view.index.pending") %></span></td>
               <td><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
               <td>
-                <%= button_to "Revoke",
+                <%= button_to t("team_members.view.index.revoke"),
                               team_invitation_path(invitation.token),
                               method: :delete,
-                              data: { turbo_confirm: "Revoke invitation for #{invitation.email}?" },
+                              data: { turbo_confirm: t("team_members.view.index.revoke_confirm", email: invitation.email) },
                               class: "btn btn-danger" %>
               </td>
             </tr>
@@ -68,21 +68,21 @@
       </table>
     </div>
   <% else %>
-    <p class="team-members-hint">No pending invitations.</p>
+    <p class="team-members-hint"><%= t("team_members.view.index.no_pending") %></p>
   <% end %>
 </section>
 
 <section class="team-members-panel">
-  <h2>Current Team</h2>
+  <h2><%= t("team_members.view.index.current_team") %></h2>
   <div class="table-responsive">
     <table>
       <thead>
         <tr>
-          <th>Avatar</th>
-          <th>Email</th>
-          <th>Company Role</th>
-          <th>Status</th>
-          <th>Actions</th>
+          <th><%= t("team_members.view.index.members_table.avatar") %></th>
+          <th><%= t("team_members.view.index.members_table.email") %></th>
+          <th><%= t("team_members.view.index.members_table.company_role") %></th>
+          <th><%= t("team_members.view.index.members_table.status") %></th>
+          <th><%= t("team_members.view.index.members_table.actions") %></th>
         </tr>
       </thead>
       <tbody>
@@ -90,9 +90,9 @@
           <tr>
             <td>
               <div class="team-avatar-cell">
-                <%= link_to team_member_path(member), class: "team-avatar-link", title: "View profile" do %>
+                <%= link_to team_member_path(member), class: "team-avatar-link", title: t("team_members.view.index.view_profile") do %>
                   <% if member.avatar.attached? %>
-                    <%= image_tag member.avatar, alt: "Avatar", class: "team-avatar-thumb" %>
+                    <%= image_tag member.avatar, alt: t("team_members.view.show.avatar_alt"), class: "team-avatar-thumb" %>
                   <% else %>
                     <span class="team-avatar-thumb team-avatar-fallback"><%= member.email.to_s.first.to_s.upcase %></span>
                   <% end %>
@@ -100,28 +100,28 @@
               </div>
             </td>
             <td><%= link_to member.email, team_member_path(member), class: "team-member-email-link" %></td>
-            <td><span class="role-badge role-badge-<%= member.company_role %>"><%= member.company_role.capitalize %></span></td>
-            <td><span class="status-badge status-badge-active">Active</span></td>
+            <td><span class="role-badge role-badge-<%= member.company_role %>"><%= t("team_members.view.index.roles.#{member.company_role}", default: member.company_role.to_s.humanize) %></span></td>
+            <td><span class="status-badge status-badge-active"><%= t("team_members.view.index.active") %></span></td>
             <td>
               <% if member.company_owner? %>
                 <div class="team-actions">
-                  <span class="team-action-note">Owner (protected)</span>
+                  <span class="team-action-note"><%= t("team_members.view.index.owner_protected") %></span>
                 </div>
               <% elsif member == current_user %>
                 <div class="team-actions">
-                  <span class="team-action-note">You (self-role locked)</span>
+                  <span class="team-action-note"><%= t("team_members.view.index.self_role_locked") %></span>
                 </div>
               <% else %>
                 <div class="team-actions">
                   <%= form_with model: member, url: team_member_path(member), method: :patch, local: true, class: "inline-form" do |f| %>
-                    <%= f.select :company_role, [["Member", "member"], ["Admin", "admin"]], {}, {} %>
-                    <%= f.submit "Update", class: "btn btn-secondary" %>
+                    <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, {} %>
+                    <%= f.submit t("team_members.view.index.update"), class: "btn btn-secondary" %>
                   <% end %>
                   <% unless member == current_user %>
-                    <%= button_to "Remove from Team",
+                    <%= button_to t("team_members.view.index.remove_from_team"),
                                   team_member_path(member),
                                   method: :delete,
-                                  data: { turbo_confirm: "Remove #{member.email} from #{current_user.company.name}? Their account will be kept." },
+                                  data: { turbo_confirm: t("team_members.view.index.remove_confirm", email: member.email, company: current_user.company.name) },
                                   class: "btn btn-danger" %>
                   <% end %>
                 </div>

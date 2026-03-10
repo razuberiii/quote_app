@@ -1,5 +1,5 @@
-<h1>Edit Customer: <%= @customer.name %></h1>
+<h1><%= t("customers.view.edit.title", name: @customer.name) %></h1>
 
-<%= render "form", customer: @customer, submit_label: "Update Customer" %>
+<%= render "form", customer: @customer, submit_label: t("customers.view.edit.update_customer") %>
 
-<%= link_to "Back to Customer", @customer, class: "form-page-back-link" %>
+<%= link_to t("customers.view.edit.back_to_customer"), @customer, class: "form-page-back-link" %>

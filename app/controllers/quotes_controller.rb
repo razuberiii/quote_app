@@ -6,6 +6,8 @@ class QuotesController < ApplicationController
   before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template]
   before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
   before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
+  around_action :with_quote_output_locale, only: %i[export_pdf export_xlsx]
+  before_action :set_quote_document_locale, only: %i[show update_template]
   helper_method :quote_item_image_data_uri, :quote_logo_data_uri, :quote_watermark_data_uri
 
   def index
@@ -22,7 +24,7 @@ class QuotesController < ApplicationController
   def create
     unless current_user.can_create_quote?
       used = current_user.quote_count_for_limit
-      redirect_to @customer, alert: "Free plan limit reached: #{used}/#{User::FREE_QUOTE_LIMIT} company quotes used." and return
+      redirect_to @customer, alert: t("quotes.flash.free_plan_limit_reached", used: used, limit: User::FREE_QUOTE_LIMIT) and return
     end
 
     @quote = @customer.quotes.new(quote_params)
@@ -59,14 +61,14 @@ class QuotesController < ApplicationController
 
   def edit
     unless @quote.can_edit_revision?
-      redirect_to quote_path(@quote), alert: "This revision is read-only in the current state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.revision_read_only") and return
     end
     ensure_quote_item_row
   end
 
   def update
     unless @quote.can_edit_revision?
-      redirect_to quote_path(@quote), alert: "This revision is read-only in the current state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.revision_read_only") and return
     end
 
     @quote.template ||= current_user.company.quote_template_or_default
@@ -81,7 +83,7 @@ class QuotesController < ApplicationController
 
   def update_template
     unless @quote.can_edit_revision?
-      redirect_to quote_path(@quote), alert: "Template cannot be changed in the current state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.template_change_not_allowed") and return
     end
 
     requested_template_id = params[:template_id].presence
@@ -89,7 +91,7 @@ class QuotesController < ApplicationController
     template ||= current_user.company.quote_template_or_default
     template = current_user.company.quote_templates.order(:created_at).first if template&.new_record?
     unless template
-      redirect_to quote_path(@quote), alert: "No template available. Please create a quote template first." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.no_template_available") and return
     end
 
     @quote.update!(template: template)
@@ -103,16 +105,16 @@ class QuotesController < ApplicationController
           partial: "quotes/show_content"
         )
       end
-      format.json { render json: { message: "Template updated" } }
-      format.html { redirect_to quote_path(@quote, doc: @document_kind), notice: "Template updated" }
+      format.json { render json: { message: t("quotes.flash.template_updated") } }
+      format.html { redirect_to quote_path(@quote, doc: @document_kind), notice: t("quotes.flash.template_updated") }
     end
   rescue ActiveRecord::RecordNotFound
-    redirect_to quote_path(@quote), alert: "Template not found. Reverted to current template."
+    redirect_to quote_path(@quote), alert: t("quotes.flash.template_not_found")
   end
 
   def destroy
     unless @quote.can_delete_quote_family?
-      redirect_to quote_path(@quote), alert: "Only the latest active revision can delete the whole quote thread." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.delete_latest_revision_only") and return
     end
 
     deletion_time = Time.current
@@ -122,22 +124,22 @@ class QuotesController < ApplicationController
     current_user.company.quote_shares.where(quote_id: family_scope.select(:id)).update_all(expires_at: deletion_time, updated_at: deletion_time)
     ProductIntelligenceRefresher.refresh_products(affected_product_ids)
 
-    redirect_to @quote.customer, status: :see_other, notice: "Quote thread #{@quote.quote_no} deleted. Public links now show as expired."
+    redirect_to @quote.customer, status: :see_other, notice: t("quotes.flash.quote_thread_deleted", quote_no: @quote.quote_no)
   end
 
   def archive
     unless Quote.column_names.include?("archived_at")
-      redirect_to quote_path(@quote), alert: "Archive feature is not ready. Please run database migrations on the server." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.archive_not_ready") and return
     end
 
     unless @quote.can_archive_revision?
-      redirect_to quote_path(@quote), alert: "Only non-latest revisions can be archived." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.archive_non_latest_only") and return
     end
 
     @quote.update!(archived_at: Time.current)
     latest = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no).order(revision_number: :desc).first
     redirect_target = latest || @quote.customer
-    redirect_to redirect_target, status: :see_other, notice: "Revision V#{@quote.revision_number} archived from history."
+    redirect_to redirect_target, status: :see_other, notice: t("quotes.flash.revision_archived", revision: @quote.revision_number)
   end
 
   def export_pdf
@@ -181,7 +183,7 @@ class QuotesController < ApplicationController
               disposition: "attachment"
   rescue StandardError => e
     Rails.logger.error("Quote PDF export failed: #{e.class} #{e.message}; wkhtmltopdf=#{configured_wkhtmltopdf_path.inspect}")
-    redirect_to quote_path(@quote), alert: "PDF export failed on server. Please verify wkhtmltopdf is installed and configured."
+    redirect_to quote_path(@quote), alert: t("quotes.flash.pdf_export_failed")
   end
 
   def export_xlsx
@@ -202,39 +204,39 @@ class QuotesController < ApplicationController
 
   def duplicate
     unless @quote.can_create_new_revision?
-      redirect_to quote_path(@quote), alert: "New revision is not available for the current quote state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.new_revision_not_available") and return
     end
 
     @customer = @quote.customer
     @quote = @quote.build_revision
     ensure_quote_item_row
-    flash.now[:notice] = "Revision draft created from quote #{@quote.quote_no}. Edit and save to create a new version."
+    flash.now[:notice] = t("quotes.flash.revision_draft_created", quote_no: @quote.quote_no)
     render :new, formats: :html
   rescue ActiveModel::UnknownAttributeError => e
     Rails.logger.error("Quote revision failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: "Revision failed due to schema mismatch. Please run database migrations on the server."
+    redirect_to quote_path(@quote), alert: t("quotes.flash.revision_schema_mismatch")
   end
 
   def duplicate_and_reprice
     unless @quote.can_copy_and_reprice?
-      redirect_to quote_path(@quote), alert: "Copy & Reprice is not available for the current quote state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.copy_reprice_not_available") and return
     end
 
     revision = @quote.build_revision
     revision.status = "draft" if revision.status.blank? || revision.status == "expired"
     revision.save!
-    redirect_to edit_quote_path(revision), status: :see_other, notice: "Revision V#{revision.revision_number} created. Update pricing and share."
+    redirect_to edit_quote_path(revision), status: :see_other, notice: t("quotes.flash.revision_created_update_pricing", revision: revision.revision_number)
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("Quote duplicate_and_reprice failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: "Unable to create revision: #{e.record.errors.full_messages.to_sentence}"
+    redirect_to quote_path(@quote), alert: t("quotes.flash.unable_create_revision", errors: e.record.errors.full_messages.to_sentence)
   rescue ActiveModel::UnknownAttributeError => e
     Rails.logger.error("Quote duplicate_and_reprice failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: "Revision failed due to schema mismatch. Please run database migrations on the server."
+    redirect_to quote_path(@quote), alert: t("quotes.flash.revision_schema_mismatch")
   end
 
   def share
     unless @quote.can_share_publicly?
-      redirect_to quote_path(@quote), alert: "Sharing is disabled for the current quote state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.sharing_disabled") and return
     end
 
     publish_result = QuoteSharePublisher.new(
@@ -251,26 +253,26 @@ class QuotesController < ApplicationController
   rescue ActiveRecord::RecordInvalid => e
     Rails.logger.error("Quote share failed: #{e.class} #{e.message}")
     respond_to do |format|
-      format.json { render json: { message: "Unable to create public share link: #{e.record.errors.full_messages.to_sentence}" }, status: :unprocessable_entity }
-      format.html { redirect_to quote_path(@quote), alert: "Unable to create public share link: #{e.record.errors.full_messages.to_sentence}" }
+      format.json { render json: { message: t("quotes.flash.unable_create_public_share_link", errors: e.record.errors.full_messages.to_sentence) }, status: :unprocessable_entity }
+      format.html { redirect_to quote_path(@quote), alert: t("quotes.flash.unable_create_public_share_link", errors: e.record.errors.full_messages.to_sentence) }
     end
   rescue StandardError => e
     Rails.logger.error("Quote share failed: #{e.class} #{e.message}")
     respond_to do |format|
-      format.json { render json: { message: "Unable to create public share link right now. Please try again." }, status: :internal_server_error }
-      format.html { redirect_to quote_path(@quote), alert: "Unable to create public share link right now. Please try again." }
+      format.json { render json: { message: t("quotes.flash.unable_create_public_share_link_now") }, status: :internal_server_error }
+      format.html { redirect_to quote_path(@quote), alert: t("quotes.flash.unable_create_public_share_link_now") }
     end
   end
 
   def send_reminder
     unless @quote.can_send_reminder?
-      redirect_to quote_path(@quote), alert: "Reminder is not available for this quote." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.reminder_not_available") and return
     end
 
     unless verify_turnstile_for_html!(
       token: params[:cf_turnstile_response],
-      on_missing: -> { redirect_to quote_path(@quote), alert: "Please complete verification before sending a reminder." },
-      on_failed: -> { redirect_to quote_path(@quote), alert: "Verification failed. Please try again." }
+      on_missing: -> { redirect_to quote_path(@quote), alert: t("quotes.flash.reminder_verification_required") },
+      on_failed: -> { redirect_to quote_path(@quote), alert: t("quotes.flash.reminder_verification_failed") }
     )
       return
     end
@@ -280,15 +282,15 @@ class QuotesController < ApplicationController
       document_kind: resolved_document_kind,
       url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
     ).call
-    redirect_to quote_path(@quote), status: :see_other, notice: "Reminder email sent. Next reminder will be available in 12 hours unless the quote gets viewed first."
+    redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.reminder_sent")
   rescue StandardError => e
     Rails.logger.error("Quote reminder failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), status: :see_other, alert: "Unable to send reminder right now."
+    redirect_to quote_path(@quote), status: :see_other, alert: t("quotes.flash.unable_send_reminder")
   end
 
   def reopen
     unless @quote.can_reopen?
-      redirect_to quote_path(@quote), alert: "Reopen is not available for the current quote state." and return
+      redirect_to quote_path(@quote), alert: t("quotes.flash.reopen_not_available") and return
     end
 
     @quote.update_columns(
@@ -299,7 +301,7 @@ class QuotesController < ApplicationController
       reopened_at: Time.current,
       updated_at: Time.current
     )
-    redirect_to quote_path(@quote), status: :see_other, notice: "Quote reopened for editing."
+    redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.quote_reopened")
   end
 
   private
@@ -395,6 +397,23 @@ class QuotesController < ApplicationController
 
   def default_document_kind
     @template.document_kind == "proforma_invoice" ? "pi" : "quote"
+  end
+
+  def set_quote_document_locale
+    @quote_document_locale = (@template || @quote&.template || current_user.company.quote_template_or_default)&.output_locale_for(:webview) || I18n.locale
+  end
+
+  def with_quote_output_locale
+    channel =
+      case action_name
+      when "show" then :webview
+      when "export_pdf" then :pdf
+      when "export_xlsx" then :excel
+      else :webview
+      end
+
+    locale = (@template || @quote&.template || current_user.company.quote_template_or_default)&.output_locale_for(channel) || "en"
+    I18n.with_locale(locale) { yield }
   end
 
   def quote_item_image_data_uri(item)
@@ -510,37 +529,37 @@ class QuotesController < ApplicationController
 
     @quote_decision_recap = [
       {
-        label: "Outcome",
+        label: dt_t("recap.outcome.label"),
         value: decision_outcome_value,
         detail: decision_outcome_detail
       },
       {
-        label: "Buyer Signal",
-        value: first_view_at.present? ? "Viewed" : "No view yet",
+        label: dt_t("recap.buyer_signal.label"),
+        value: first_view_at.present? ? dt_t("recap.buyer_signal.viewed") : dt_t("recap.buyer_signal.no_view_yet"),
         detail: buyer_signal_detail(first_view_at, last_view_at, total_views)
       },
       {
-        label: "Share Status",
-        value: first_share_at.present? ? "#{@quote.quote_shares.size} link#{'s' unless @quote.quote_shares.size == 1}" : "Not shared",
-        detail: latest_share_at.present? ? "Last shared #{format_in_user_time(latest_share_at, current_user)}." : "Generate a public link to start engagement."
+        label: dt_t("recap.share_status.label"),
+        value: first_share_at.present? ? dt_t("recap.share_status.links", count: @quote.quote_shares.size) : dt_t("recap.share_status.not_shared"),
+        detail: latest_share_at.present? ? dt_t("recap.share_status.last_shared", time: format_in_user_time(latest_share_at, current_user)) : dt_t("recap.share_status.generate_link")
       },
       {
-        label: "Pressure",
+        label: dt_t("recap.pressure.label"),
         value: pressure_value,
         detail: pressure_detail
       }
     ]
 
     @quote_decision_timeline = [
-      timeline_item(:created, @quote.issued_on&.to_time || @quote.created_at, "Created", "Quote version prepared."),
+      timeline_item(:created, @quote.issued_on&.to_time || @quote.created_at, dt_t("events.created.label"), dt_t("events.created.detail")),
       timeline_item(share_event_kind(latest_share_at), latest_share_at, share_event_label(latest_share_at), share_event_detail(latest_share_at)),
-      timeline_item(:viewed, first_view_at, "Viewed", "Buyer opened the quote for the first time."),
-      timeline_item(:revision, @quote.changes_requested_at, "Revision Requested", revision_request_detail),
-      timeline_item(:reopened, reopened_event_time, "Reopened", "Quote moved back to draft for editing."),
-      timeline_item(:lost, lost_event_time, "Lost", "Buyer did not move forward with this revision."),
-      timeline_item(:won, won_event_time, "Won", "Quote marked as commercially won."),
-      timeline_item(:accepted, @quote.accepted_at, "Accepted", "Buyer confirmed the quote."),
-      timeline_item(:expired, expired_event_time, "Expired", "Validity window ended without closure.")
+      timeline_item(:viewed, first_view_at, dt_t("events.viewed.label"), dt_t("events.viewed.detail")),
+      timeline_item(:revision, @quote.changes_requested_at, dt_t("events.revision_requested.label"), revision_request_detail),
+      timeline_item(:reopened, reopened_event_time, dt_t("events.reopened.label"), dt_t("events.reopened.detail")),
+      timeline_item(:lost, lost_event_time, dt_t("events.lost.label"), dt_t("events.lost.detail")),
+      timeline_item(:won, won_event_time, dt_t("events.won.label"), dt_t("events.won.detail")),
+      timeline_item(:accepted, @quote.accepted_at, dt_t("events.accepted.label"), dt_t("events.accepted.detail")),
+      timeline_item(:expired, expired_event_time, dt_t("events.expired.label"), dt_t("events.expired.detail"))
     ].compact.sort_by { |item| item[:at] }.reverse
   end
 
@@ -566,7 +585,7 @@ class QuotesController < ApplicationController
     detail_parts = []
     detail_parts << @quote.request_reason.to_s.humanize if @quote.request_reason.present?
     detail_parts << @quote.changes_request_message if @quote.changes_request_message.present?
-    detail_parts.presence&.join(" • ") || "Buyer asked for an update."
+    detail_parts.presence&.join(" • ") || dt_t("revision_request.default_detail")
   end
 
   def expired_event_time
@@ -594,59 +613,59 @@ class QuotesController < ApplicationController
   end
 
   def decision_outcome_value
-    return "Accepted" if @quote.accepted_at.present?
-    return "Won" if @quote.status.to_s == "won"
-    return "Lost" if @quote.workflow_state == "lost"
-    return "Revision Requested" if @quote.changes_requested_at.present?
-    return "Expired" if expired_event_time.present?
-    return "Reopened" if reopened_pending?
+    return dt_t("outcome.accepted") if @quote.accepted_at.present?
+    return dt_t("outcome.won") if @quote.status.to_s == "won"
+    return dt_t("outcome.lost") if @quote.workflow_state == "lost"
+    return dt_t("outcome.revision_requested") if @quote.changes_requested_at.present?
+    return dt_t("outcome.expired") if expired_event_time.present?
+    return dt_t("outcome.reopened") if reopened_pending?
 
     @quote.workflow_state.to_s.humanize
   end
 
   def decision_outcome_detail
-    return "Buyer accepted this revision." if @quote.accepted_at.present?
-    return "Quote marked as commercially won." if @quote.status.to_s == "won"
-    return "Buyer chose not to proceed with this revision." if @quote.workflow_state == "lost"
+    return dt_t("outcome_detail.accepted") if @quote.accepted_at.present?
+    return dt_t("outcome_detail.won") if @quote.status.to_s == "won"
+    return dt_t("outcome_detail.lost") if @quote.workflow_state == "lost"
     return revision_request_detail if @quote.changes_requested_at.present?
-    return "Validity window closed without a decision." if expired_event_time.present?
-    return "Quote is back in draft for rework." if reopened_pending?
+    return dt_t("outcome_detail.expired") if expired_event_time.present?
+    return dt_t("outcome_detail.reopened") if reopened_pending?
 
-    "Waiting for buyer movement on this revision."
+    dt_t("outcome_detail.waiting")
   end
 
   def buyer_signal_detail(first_view_at, last_view_at, total_views)
-    return "No buyer view recorded yet." if first_view_at.blank?
+    return dt_t("buyer_signal.no_view") if first_view_at.blank?
 
-    detail = "First seen #{format_in_user_time(first_view_at, current_user)}."
+    detail = dt_t("buyer_signal.first_seen", time: format_in_user_time(first_view_at, current_user))
     if total_views.to_i > 1 && last_view_at.present?
-      detail += " Last activity #{format_in_user_time(last_view_at, current_user)} (#{total_views} views)."
+      detail += " " + dt_t("buyer_signal.last_activity", time: format_in_user_time(last_view_at, current_user), count: total_views)
     elsif total_views.to_i == 1
-      detail += " Single recorded view."
+      detail += " " + dt_t("buyer_signal.single_view")
     end
     detail
   end
 
   def pressure_value
-    return "Closed won" if @quote.status.to_s == "won"
-    return "Re-engage later" if @quote.workflow_state == "lost"
-    return "Expired" if expired_event_time.present?
-    return "Needs reshare" if reopened_pending?
-    return "Needs revision" if @quote.changes_requested_at.present?
-    return "#{@quote.expires_in_days}d left" if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+    return dt_t("pressure.closed_won") if @quote.status.to_s == "won"
+    return dt_t("pressure.reengage_later") if @quote.workflow_state == "lost"
+    return dt_t("pressure.expired") if expired_event_time.present?
+    return dt_t("pressure.needs_reshare") if reopened_pending?
+    return dt_t("pressure.needs_revision") if @quote.changes_requested_at.present?
+    return dt_t("pressure.days_left", count: @quote.expires_in_days) if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
 
-    "Stable"
+    dt_t("pressure.stable")
   end
 
   def pressure_detail
-    return "Track handoff, delivery, or renewal timing." if @quote.status.to_s == "won"
-    return "Create a new revision if the buyer comes back." if @quote.workflow_state == "lost"
-    return "Follow up with a new revision or close the thread." if expired_event_time.present?
-    return "Generate a fresh public link for the reopened revision." if reopened_pending?
-    return "Buyer requested changes on this revision." if @quote.changes_requested_at.present?
-    return "Act before validity runs out." if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
+    return dt_t("pressure_detail.closed_won") if @quote.status.to_s == "won"
+    return dt_t("pressure_detail.reengage_later") if @quote.workflow_state == "lost"
+    return dt_t("pressure_detail.expired") if expired_event_time.present?
+    return dt_t("pressure_detail.needs_reshare") if reopened_pending?
+    return dt_t("pressure_detail.needs_revision") if @quote.changes_requested_at.present?
+    return dt_t("pressure_detail.days_left") if @quote.expires_in_days.present? && @quote.expires_in_days <= 3
 
-    "No immediate expiry or revision pressure."
+    dt_t("pressure_detail.stable")
   end
 
   def reopened_pending?
@@ -665,15 +684,19 @@ class QuotesController < ApplicationController
   end
 
   def share_event_label(latest_share_at)
-    return "Reshared" if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
+    return dt_t("events.reshared.label") if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
 
-    "Shared"
+    dt_t("events.shared.label")
   end
 
   def share_event_detail(latest_share_at)
-    return "Fresh public quote link generated after reopening." if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
+    return dt_t("events.reshared.detail") if latest_share_at.present? && @quote.reopened_at.present? && latest_share_at > @quote.reopened_at
 
-    "Public quote link generated and ready to send."
+    dt_t("events.shared.detail")
+  end
+
+  def dt_t(key, **options)
+    I18n.t("quotes.logic.decision_timeline.#{key}", **options)
   end
 
   def format_in_user_time(value, user = current_user, format: "%Y-%m-%d %H:%M")

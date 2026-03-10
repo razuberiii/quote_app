@@ -14,21 +14,21 @@ class TeamInvitationsController < ApplicationController
     role = invitation_params[:company_role].presence || "member"
 
     if current_user.company.users.where("LOWER(email) = ?", email).exists?
-      redirect_to team_members_path, alert: "This email is already a member of your company." and return
+      redirect_to team_members_path, alert: t("team_invitations.flash.email_already_member") and return
     end
 
     existing_user = User.find_by("LOWER(email) = ?", email)
     if existing_user.blank?
-      redirect_to team_members_path, alert: "No account found for this email. Ask them to sign up first." and return
+      redirect_to team_members_path, alert: t("team_invitations.flash.no_account_found") and return
     end
 
     if existing_user.company_id == current_user.company_id
-      redirect_to team_members_path, alert: "This email is already a member of your company." and return
+      redirect_to team_members_path, alert: t("team_invitations.flash.email_already_member") and return
     end
 
     invitation = current_user.company.team_invitations.active.find_by("LOWER(email) = ?", email)
     if invitation.present?
-      redirect_to team_members_path, alert: "A pending invitation already exists for this email." and return
+      redirect_to team_members_path, alert: t("team_invitations.flash.pending_invitation_exists") and return
     end
 
     @invitation = current_user.company.team_invitations.new(
@@ -38,7 +38,7 @@ class TeamInvitationsController < ApplicationController
     )
 
     if @invitation.save
-      redirect_to team_members_path, notice: "Invitation created for #{email}."
+      redirect_to team_members_path, notice: t("team_invitations.flash.invitation_created", email: email)
     else
       redirect_to team_members_path, alert: @invitation.errors.full_messages.to_sentence
     end
@@ -46,15 +46,15 @@ class TeamInvitationsController < ApplicationController
 
   def destroy
     @invitation.destroy
-    redirect_to team_members_path, notice: "Invitation revoked."
+    redirect_to team_members_path, notice: t("team_invitations.flash.invitation_revoked")
   end
 
   def accept
     begin
       @invitation.accept!(current_user)
-      redirect_to team_invitations_path, notice: "You joined #{@invitation.company.name}."
+      redirect_to team_invitations_path, notice: t("team_invitations.flash.joined_company", company: @invitation.company.name)
     rescue ArgumentError, ActiveRecord::RecordInvalid => e
-      redirect_to team_invitations_path, alert: "Unable to accept invitation: #{e.message}"
+      redirect_to team_invitations_path, alert: t("team_invitations.flash.unable_accept", message: e.message)
     end
   end
 

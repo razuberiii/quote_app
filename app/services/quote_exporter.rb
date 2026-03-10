@@ -153,9 +153,9 @@ class QuoteExporter
     right_lines = [
       "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}",
       "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}",
-      (@template.show_valid_until && @quote.valid_until.present? ? "Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}" : nil),
-      (@template.show_currency ? "Currency: #{@quote.currency}" : nil),
-      (@quote.trade_term.present? ? "Trade Terms: #{@quote.trade_term}" : nil)
+      (@template.show_valid_until && @quote.valid_until.present? ? "#{doc_t('labels.valid_until')}: #{@quote.valid_until.strftime('%Y-%m-%d')}" : nil),
+      (@template.show_currency ? "#{doc_t('labels.currency')}: #{@quote.currency}" : nil),
+      (@quote.trade_term.present? ? "#{doc_t('labels.trade_terms')}: #{@quote.trade_term}" : nil)
     ].compact.map { |line| pdf_text(line) }.join("\n")
 
     pdf.table([ [ left_lines, right_lines ] ], width: width, cell_style: { borders: [], padding: [ 2, 0, 2, 0 ] }) do |t|
@@ -170,10 +170,10 @@ class QuoteExporter
   def render_pdf_parties(pdf)
     width = pdf_content_width(pdf)
     accent = pdf_color
-    sales_owner_line = sales_owner_display_name.present? ? "Sales Owner: #{sales_owner_display_name}" : nil
+    sales_owner_line = sales_owner_display_name.present? ? "#{doc_t('labels.sales_owner')}: #{sales_owner_display_name}" : nil
 
     seller_lines = [
-      "SELLER",
+      doc_t("labels.seller").upcase,
       @company.name,
       sales_owner_line,
       @company.address,
@@ -183,9 +183,9 @@ class QuoteExporter
     ].compact_blank.map { |line| pdf_text(line) }.join("\n")
 
     buyer_lines = [
-      "BUYER",
+      doc_t("labels.buyer").upcase,
       @customer.name,
-      "Contact: #{@customer.contact_name}",
+      "#{doc_t('labels.contact')}: #{@customer.contact_name}",
       @customer.address,
       @customer.phone,
       @customer.email
@@ -217,9 +217,9 @@ class QuoteExporter
       rows << row
     end
 
-    qty_col = pdf_item_headers.index("Qty")
-    unit_col = pdf_item_headers.index("Unit Price")
-    total_col = pdf_item_headers.index("Line Total")
+    qty_col = pdf_item_headers.index(@template.resolved_table_label("qty"))
+    unit_col = pdf_item_headers.index(@template.resolved_table_label("unit_price"))
+    total_col = pdf_item_headers.index(@template.resolved_table_label("line_total"))
 
     pdf.table(rows, header: true, width: width) do |t|
       t.cells.borders = []
@@ -238,9 +238,9 @@ class QuoteExporter
       t.columns(total_col).valign = :top
 
       if @template.show_images?
-        image_col = pdf_item_headers.index("Image")
+        image_col = pdf_item_headers.index(doc_t("labels.image"))
         no_col = 0
-        desc_col = pdf_item_headers.index("Description")
+        desc_col = pdf_item_headers.index(@template.resolved_table_label("description"))
 
         t.columns(no_col).width = 26
         t.columns(image_col).width = 54
@@ -250,7 +250,7 @@ class QuoteExporter
         t.columns(desc_col).width = width - (26 + 54 + 42 + 74 + 84)
       else
         no_col = 0
-        desc_col = pdf_item_headers.index("Description")
+        desc_col = pdf_item_headers.index(@template.resolved_table_label("description"))
 
         t.columns(no_col).width = 26
         t.columns(qty_col).width = 42
@@ -268,11 +268,11 @@ class QuoteExporter
 
   def render_pdf_totals(pdf)
     totals_rows = []
-    totals_rows << [ "Subtotal", total_value_text(@quote.subtotal) ]
-    totals_rows << [ "Tax / VAT", total_value_text(@quote.tax_amount) ] if @template.show_tax
-    totals_rows << [ "Shipping", total_value_text(@quote.shipping_amount) ] if @template.show_shipping
-    totals_rows << [ "Discount", total_value_text(@quote.discount_amount) ]
-    totals_rows << [ "Grand Total", total_value_text(@quote.grand_total) ]
+    totals_rows << [ doc_t("labels.subtotal"), total_value_text(@quote.subtotal) ]
+    totals_rows << [ doc_t("labels.tax_vat"), total_value_text(@quote.tax_amount) ] if @template.show_tax
+    totals_rows << [ doc_t("labels.shipping"), total_value_text(@quote.shipping_amount) ] if @template.show_shipping
+    totals_rows << [ doc_t("labels.discount"), total_value_text(@quote.discount_amount) ]
+    totals_rows << [ doc_t("labels.grand_total"), total_value_text(@quote.grand_total) ]
 
     width = [ pdf_content_width(pdf) * 0.43, 260 ].min
 
@@ -303,15 +303,15 @@ class QuoteExporter
     return unless @template.show_terms_section
 
     lines = []
-    lines << "Payment Terms: #{@quote.payment_term}" if @template.show_payment_term && @quote.payment_term.present?
-    lines << "Trade Terms: #{@quote.trade_term}" if @quote.trade_term.present?
-    lines << "Terms: #{@quote.terms_text}" if @quote.terms_text.present?
-    lines << "Legal Disclaimer: #{@quote.legal_disclaimer}" if @quote.legal_disclaimer.present?
-    lines << "Delivery Notes: #{@quote.delivery_notes}" if @quote.delivery_notes.present?
-    lines << "Notes: #{@quote.notes}" if @template.show_notes && @quote.notes.present?
+    lines << "#{doc_t('labels.payment_terms')}: #{@quote.payment_term}" if @template.show_payment_term && @quote.payment_term.present?
+    lines << "#{doc_t('labels.trade_terms')}: #{@quote.trade_term}" if @quote.trade_term.present?
+    lines << "#{doc_t('labels.terms')}: #{@quote.terms_text}" if @quote.terms_text.present?
+    lines << "#{doc_t('labels.legal_disclaimer')}: #{@quote.legal_disclaimer}" if @quote.legal_disclaimer.present?
+    lines << "#{doc_t('labels.delivery_notes')}: #{@quote.delivery_notes}" if @quote.delivery_notes.present?
+    lines << "#{doc_t('labels.notes')}: #{@quote.notes}" if @template.show_notes && @quote.notes.present?
     return if lines.empty?
 
-    pdf.text "Terms & Conditions", style: :bold, size: 11
+    pdf.text doc_t("sections.terms_and_conditions"), style: :bold, size: 11
     pdf.move_down 4
     lines.each { |line| pdf.text pdf_text(line), size: 10 }
     pdf.move_down 10
@@ -321,7 +321,7 @@ class QuoteExporter
     documents = @company.company_documents.ordered
     return if documents.empty?
 
-    pdf.text "Company Credentials", style: :bold, size: 11
+    pdf.text doc_t("sections.company_credentials"), style: :bold, size: 11
     pdf.move_down 4
     documents.each do |document|
       pdf.text pdf_text("#{document.title} (#{document.document_type_label})"), size: 10
@@ -333,7 +333,7 @@ class QuoteExporter
     footer_note = @template.resolved_footer_note(@document_kind)
     return if footer_note.blank?
 
-    pdf.text "Footer", style: :bold, size: 11
+    pdf.text doc_t("sections.footer"), style: :bold, size: 11
     pdf.move_down 3
     pdf.text pdf_text(footer_note), size: 10
     pdf.move_down 8
@@ -345,13 +345,13 @@ class QuoteExporter
     return unless @template.show_signature_block && (signature_image_io.present? || signature_name.present?)
 
     pdf.move_down 8
-    pdf.text "Signature:"
+    pdf.text "#{doc_t('sections.signature')}:"
     if signature_image_io
       pdf.move_down 2
       pdf.image(signature_image_io, fit: [ 180, 60 ], position: :left)
       pdf.move_down 4
     end
-    pdf.text "Authorized by: #{pdf_text(signature_name)}" if signature_name.present?
+    pdf.text "#{doc_t('labels.authorized_by')}: #{pdf_text(signature_name)}" if signature_name.present?
   end
 
   def render_excel_header(sheet, styles, config)
@@ -405,7 +405,7 @@ class QuoteExporter
     sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 3
 
     start_row = sheet.rows.size + 1
-    sheet.add_row [ "Seller", nil, nil, "Buyer", nil, nil ],
+    sheet.add_row [ doc_t("labels.seller"), nil, nil, doc_t("labels.buyer"), nil, nil ],
                   style: [ styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block], styles[:section_block] ],
                   height: 20
     sheet.merge_cells("A#{start_row}:C#{start_row}")
@@ -413,7 +413,7 @@ class QuoteExporter
 
     seller_lines = [
       excel_text(@company.name),
-      sales_owner_display_name.present? ? excel_text("Sales Owner: #{sales_owner_display_name}") : nil,
+      sales_owner_display_name.present? ? excel_text("#{doc_t('labels.sales_owner')}: #{sales_owner_display_name}") : nil,
       excel_text(@company.address.presence || "-"),
       excel_text(@company.phone.presence || "-"),
       excel_text(@company.email.presence || "-"),
@@ -421,7 +421,7 @@ class QuoteExporter
     ].compact
     buyer_lines = [
       excel_text(@customer.name),
-      excel_text("Contact: #{@customer.contact_name.presence || '-'}"),
+      excel_text("#{doc_t('labels.contact')}: #{@customer.contact_name.presence || '-'}"),
       excel_text(@customer.address.presence || "-"),
       excel_text(@customer.phone.presence || "-"),
       excel_text(@customer.email.presence || "-")
@@ -440,7 +440,7 @@ class QuoteExporter
   end
 
   def render_excel_items(sheet, styles)
-    headers = [ "No.", "Image", "Description", "Qty", "Unit Price", "Line Total" ]
+    headers = [ doc_t("labels.no"), doc_t("labels.image"), @template.resolved_table_label("description"), @template.resolved_table_label("qty"), @template.resolved_table_label("unit_price"), @template.resolved_table_label("line_total") ]
     header_styles = [ styles[:header_left], styles[:header_left], styles[:header_left], styles[:header_right], styles[:header_right], styles[:header_right] ]
     sheet.add_row headers, style: header_styles, height: 21
     header_row_index = sheet.rows.size - 1
@@ -488,12 +488,12 @@ class QuoteExporter
     sheet.merge_cells("D#{separator_row}:E#{separator_row}")
 
     totals_start = sheet.rows.size + 1
-    add_excel_total_row(sheet, "Subtotal", @quote.subtotal.to_f, ctx, styles)
-    add_excel_total_row(sheet, "Tax / VAT", @quote.tax_amount.to_f, ctx, styles) if @template.show_tax
-    add_excel_total_row(sheet, "Shipping", @quote.shipping_amount.to_f, ctx, styles) if @template.show_shipping
-    add_excel_total_row(sheet, "Discount", @quote.discount_amount.to_f, ctx, styles)
+    add_excel_total_row(sheet, doc_t("labels.subtotal"), @quote.subtotal.to_f, ctx, styles)
+    add_excel_total_row(sheet, doc_t("labels.tax_vat"), @quote.tax_amount.to_f, ctx, styles) if @template.show_tax
+    add_excel_total_row(sheet, doc_t("labels.shipping"), @quote.shipping_amount.to_f, ctx, styles) if @template.show_shipping
+    add_excel_total_row(sheet, doc_t("labels.discount"), @quote.discount_amount.to_f, ctx, styles)
 
-    row = summary_row_data("Grand Total", @quote.grand_total.to_f, ctx[:width], ctx[:label_col], ctx[:value_col])
+    row = summary_row_data(doc_t("labels.grand_total"), @quote.grand_total.to_f, ctx[:width], ctx[:label_col], ctx[:value_col])
     style = summary_row_styles(ctx[:width], ctx[:label_col], ctx[:value_col], styles[:grand_total_label], styles[:grand_total])
     sheet.add_row row, style: style, height: 22
 
@@ -507,18 +507,18 @@ class QuoteExporter
   def render_excel_sections(sheet, styles)
     if @template.show_terms_section
       terms_rows = []
-      terms_rows << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
-      terms_rows << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present?
-      terms_rows << [ "Terms", @quote.terms_text ] if @quote.terms_text.present?
-      terms_rows << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present?
-      terms_rows << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present?
+      terms_rows << [ doc_t("labels.payment_terms"), @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
+      terms_rows << [ doc_t("labels.trade_terms"), @quote.trade_term ] if @quote.trade_term.present?
+      terms_rows << [ doc_t("labels.terms"), @quote.terms_text ] if @quote.terms_text.present?
+      terms_rows << [ doc_t("labels.legal_disclaimer"), @quote.legal_disclaimer ] if @quote.legal_disclaimer.present?
+      terms_rows << [ doc_t("labels.delivery_notes"), @quote.delivery_notes ] if @quote.delivery_notes.present?
 
       if terms_rows.any?
         divider_row = sheet.rows.size + 1
         sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
         sheet.merge_cells("A#{divider_row}:F#{divider_row}")
         sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-        sheet.add_row [ "Terms & Conditions" ], style: styles[:section]
+        sheet.add_row [ doc_t("sections.terms_and_conditions") ], style: styles[:section]
         sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
 
         terms_rows.each do |label, value|
@@ -529,13 +529,13 @@ class QuoteExporter
 
     if @template.show_notes && @quote.notes.present?
       sheet.add_row []
-      add_excel_terms_row(sheet, styles, "Notes", @quote.notes)
+      add_excel_terms_row(sheet, styles, doc_t("labels.notes"), @quote.notes)
     end
 
     footer_note = @template.resolved_footer_note(@document_kind)
     if footer_note.present?
       sheet.add_row []
-      add_excel_terms_row(sheet, styles, "Footer", footer_note)
+      add_excel_terms_row(sheet, styles, doc_t("sections.footer"), footer_note)
     end
   end
 
@@ -730,9 +730,9 @@ class QuoteExporter
   end
 
   def pdf_item_headers
-    headers = [ "No." ]
-    headers << "Image" if @template.show_images?
-    headers.concat([ "Description", "Qty", "Unit Price", "Line Total" ])
+    headers = [ doc_t("labels.no") ]
+    headers << doc_t("labels.image") if @template.show_images?
+    headers.concat([ @template.resolved_table_label("description"), @template.resolved_table_label("qty"), @template.resolved_table_label("unit_price"), @template.resolved_table_label("line_total") ])
   end
 
   def pdf_image_cell(item)
@@ -743,7 +743,7 @@ class QuoteExporter
     path = ActiveStorage::Blob.service.path_for(attachment.blob.key)
     { image: path, fit: [ 38, 38 ], position: :center, vposition: :center }
   rescue StandardError
-    "Image"
+    doc_t("labels.image")
   end
 
   def product_display_attachment(product)
@@ -808,15 +808,15 @@ class QuoteExporter
     visible_lines = [ line_count, 1 ].max
     base_height = 24 + (visible_lines * 18)
     base_height = [ base_height, 64 ].max if with_images
-    [[base_height, 32].max, 260].min
+    [ [ base_height, 32 ].max, 260 ].min
   end
 
   def xlsx_sheet_name
-    @document_kind == "pi" ? "PI" : "Quote"
+    @document_kind == "pi" ? doc_t("sheet.pi") : doc_t("sheet.quote")
   end
 
   def document_date_label
-    @document_kind == "pi" ? "PI Date" : "Quote Date"
+    @document_kind == "pi" ? doc_t("labels.pi_date") : doc_t("labels.quote_date")
   end
 
   def total_value_text(value)
@@ -834,27 +834,31 @@ class QuoteExporter
   def pdf_item_description_text(item)
     lines = [ item.description.to_s ]
     item.specification_pairs.each do |pair|
-      lines << "Spec: #{pair[:key]} - #{pair[:value]}"
+      lines << "#{doc_t('labels.spec')}: #{pair[:key]} - #{pair[:value]}"
     end
     item.addon_charge_entries.each do |entry|
-      lines << "Add-on: #{entry[:name]} (#{money_text(entry[:amount])})"
+      lines << "#{doc_t('labels.addon')}: #{entry[:name]} (#{money_text(entry[:amount])})"
     end
     lines.join("\n")
   end
 
   def excel_item_description_text(item)
-    title = item.product&.name.presence || item.description.to_s.presence || "Item"
+    title = item.product&.name.presence || item.description.to_s.presence || doc_t("labels.item")
     lines = [ title ]
     if item.description.present? && item.description.to_s != title
       lines << item.description.to_s
     end
     item.specification_pairs.each do |pair|
-      lines << "Spec: #{pair[:key]} - #{pair[:value]}"
+      lines << "#{doc_t('labels.spec')}: #{pair[:key]} - #{pair[:value]}"
     end
     item.addon_charge_entries.each do |entry|
-      lines << "  Add-on: #{entry[:name]} (#{money_text(entry[:amount])})"
+      lines << "  #{doc_t('labels.addon')}: #{entry[:name]} (#{money_text(entry[:amount])})"
     end
     lines.join("\n")
+  end
+
+  def doc_t(key, **options)
+    I18n.t("quote_document.#{key}", **options)
   end
 
   def pdf_text(value)

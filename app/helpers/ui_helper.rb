@@ -68,7 +68,7 @@ module UiHelper
       request.path == normalized_path || request.path.start_with?("#{normalized_path}/")
     end
     content_tag :li do
-      link_to path, class: ["app-nav-link", ("is-active" if is_active)].compact.join(" ") do
+      link_to path, class: [ "app-nav-link", ("is-active" if is_active) ].compact.join(" ") do
         safe_join(
           [
             content_tag(:span, (NAV_ICONS[icon&.to_sym] || NAV_ICONS[:dashboard]).html_safe, class: "app-nav-link-icon"),
@@ -77,6 +77,10 @@ module UiHelper
         )
       end
     end
+  end
+
+  def ui_nav_icon(icon)
+    (NAV_ICONS[icon&.to_sym] || NAV_ICONS[:dashboard]).html_safe
   end
 
   def status_badge(label, color = :blue, extra_classes = nil)

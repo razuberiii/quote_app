@@ -1,6 +1,6 @@
-<h1>Edit Add-on Preset</h1>
+<h1><%= t("addon_presets.view.edit.title") %></h1>
 
 <section class="team-members-panel">
   <%= render "form", addon_preset: @addon_preset %>
-  <p><%= link_to "Back to Add-on Presets", addon_presets_path, class: "form-page-back-link" %></p>
+  <p><%= link_to t("addon_presets.view.edit.back"), addon_presets_path, class: "form-page-back-link" %></p>
 </section>

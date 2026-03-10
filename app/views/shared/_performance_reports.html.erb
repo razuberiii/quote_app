@@ -2,8 +2,8 @@
   <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data dashboard-overview-panel app-surface" do %>
     <div class="app-section-heading">
       <div>
-        <h2>Sales Ownership</h2>
-        <p class="app-section-caption">Account load and quote outcomes by internal owner.</p>
+        <h2><%= t("dashboard.view.performance_reports.sales_ownership") %></h2>
+        <p class="app-section-caption"><%= t("dashboard.view.performance_reports.sales_ownership_caption") %></p>
       </div>
     </div>
     <% sales_rows = @performance_report[:sales_ownership].first(3) %>
@@ -14,36 +14,36 @@
             <div class="dashboard-report-main">
               <div class="dashboard-report-topline">
                 <span><%= row[:owner_name] %></span>
-                <small><%= pluralize(row[:account_count], "account") %></small>
+                <small><%= t("dashboard.view.performance_reports.accounts", count: row[:account_count]) %></small>
               </div>
-              <strong class="dashboard-overview-value"><%= row[:open_quotes] %> open <span>•</span> <%= row[:won_quotes] %> won</strong>
+              <strong class="dashboard-overview-value"><%= t("dashboard.view.performance_reports.open_won", open: row[:open_quotes], won: row[:won_quotes]) %></strong>
             </div>
             <div class="dashboard-report-meta">
-              <span><%= row[:quote_threads] %> threads</span>
-              <span><%= row[:win_rate] %>% win rate</span>
+              <span><%= t("dashboard.view.performance_reports.threads", count: row[:quote_threads]) %></span>
+              <span><%= t("dashboard.view.performance_reports.win_rate", rate: row[:win_rate]) %></span>
               <% if row[:overdue_accounts].positive? %>
-                <span><%= row[:overdue_accounts] %> overdue</span>
+                <span><%= t("dashboard.view.performance_reports.overdue", count: row[:overdue_accounts]) %></span>
               <% end %>
               <% if row[:last_quote_at].present? %>
-                <span>latest <%= format_in_user_time(row[:last_quote_at], current_user) %></span>
+                <span><%= t("dashboard.view.performance_reports.latest") %> <%= format_in_user_time(row[:last_quote_at], current_user) %></span>
               <% end %>
             </div>
           </li>
         <% end %>
       </ul>
       <% if @performance_report[:sales_ownership].size > sales_rows.size %>
-        <p class="dashboard-panel-note">Showing top <%= sales_rows.size %> owners by current quote load and outcomes.</p>
+        <p class="dashboard-panel-note"><%= t("dashboard.view.performance_reports.showing_top_owners", count: sales_rows.size) %></p>
       <% end %>
     <% else %>
-      <p class="team-members-hint">Assign internal owners to customers to see ownership load here.</p>
+      <p class="team-members-hint"><%= t("dashboard.view.performance_reports.assign_internal_owners") %></p>
     <% end %>
   <% end %>
 
   <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data dashboard-overview-panel app-surface" do %>
     <div class="app-section-heading">
       <div>
-        <h2>Customer Portfolio</h2>
-        <p class="app-section-caption">Most active accounts ranked by open and won quote threads.</p>
+        <h2><%= t("dashboard.view.performance_reports.customer_portfolio") %></h2>
+        <p class="app-section-caption"><%= t("dashboard.view.performance_reports.customer_portfolio_caption") %></p>
       </div>
     </div>
     <% portfolio_rows = @performance_report[:customer_portfolio].first(3) %>
@@ -54,27 +54,27 @@
             <div class="dashboard-report-main">
               <div class="dashboard-report-topline">
                 <span><%= row[:owner_name] %></span>
-                <small><%= row[:overdue_follow_up] ? "follow-up overdue" : "follow-up normal" %></small>
+                <small><%= row[:overdue_follow_up] ? t("dashboard.view.performance_reports.follow_up_overdue") : t("dashboard.view.performance_reports.follow_up_normal") %></small>
               </div>
               <strong class="dashboard-overview-value"><%= link_to row[:name], customer_path(row[:customer]), class: "dashboard-report-link" %></strong>
             </div>
             <div class="dashboard-report-meta">
-              <span><%= row[:open_quotes] %> open</span>
-              <span><%= row[:won_quotes] %> won</span>
-              <span><%= row[:quote_threads] %> threads</span>
-              <span><%= row[:win_rate] %>% win rate</span>
+              <span><%= t("dashboard.view.performance_reports.open", count: row[:open_quotes]) %></span>
+              <span><%= t("dashboard.view.performance_reports.won", count: row[:won_quotes]) %></span>
+              <span><%= t("dashboard.view.performance_reports.threads", count: row[:quote_threads]) %></span>
+              <span><%= t("dashboard.view.performance_reports.win_rate", rate: row[:win_rate]) %></span>
               <% if row[:last_quote_at].present? %>
-                <span>latest <%= format_in_user_time(row[:last_quote_at], current_user) %></span>
+                <span><%= t("dashboard.view.performance_reports.latest") %> <%= format_in_user_time(row[:last_quote_at], current_user) %></span>
               <% end %>
             </div>
           </li>
         <% end %>
       </ul>
       <% if @performance_report[:customer_portfolio].size > portfolio_rows.size %>
-        <p class="dashboard-panel-note">Showing top <%= portfolio_rows.size %> accounts by active quote momentum.</p>
+        <p class="dashboard-panel-note"><%= t("dashboard.view.performance_reports.showing_top_accounts", count: portfolio_rows.size) %></p>
       <% end %>
     <% else %>
-      <p class="team-members-hint">Customer portfolio data will appear once quotes are active.</p>
+      <p class="team-members-hint"><%= t("dashboard.view.performance_reports.customer_portfolio_empty") %></p>
     <% end %>
   <% end %>
 </div>

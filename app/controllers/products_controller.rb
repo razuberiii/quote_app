@@ -42,7 +42,7 @@ class ProductsController < ApplicationController
     if @product.save
       attach_uploaded_gallery_images(@product)
       @product.ensure_display_image!
-      redirect_to @product, notice: "Product created successfully"
+      redirect_to @product, notice: t("products.flash.created")
     else
       render :new, status: :unprocessable_entity
     end
@@ -65,7 +65,7 @@ class ProductsController < ApplicationController
     if @product.update(product_params)
       attach_uploaded_gallery_images(@product)
       @product.ensure_display_image!
-      redirect_to @product, notice: "Product updated successfully"
+      redirect_to @product, notice: t("products.flash.updated")
     else
       render :edit, status: :unprocessable_entity
     end
@@ -83,40 +83,40 @@ class ProductsController < ApplicationController
 
   def destroy
     @product.destroy
-    redirect_to products_path, notice: "Product deleted successfully"
+    redirect_to products_path, notice: t("products.flash.deleted")
   end
 
   def set_primary_image
     attachment = @product.gallery_images.attachments.find_by(id: params[:attachment_id])
-    return redirect_to edit_product_path(@product), alert: "Image not found" unless attachment
+    return redirect_to edit_product_path(@product), alert: t("products.flash.image_not_found") unless attachment
 
     @product.image.attach(attachment.blob)
-    redirect_to edit_product_path(@product), notice: "Display image updated"
+    redirect_to edit_product_path(@product), notice: t("products.flash.display_image_updated")
   end
 
   def remove_primary_image
     @product.image.purge_later if @product.image.attached?
     @product.reload
     @product.ensure_display_image!
-    redirect_to edit_product_path(@product), notice: "Display image removed"
+    redirect_to edit_product_path(@product), notice: t("products.flash.display_image_removed")
   end
 
   def remove_gallery_image
     attachment = @product.gallery_images.attachments.find_by(id: params[:attachment_id])
-    return redirect_to edit_product_path(@product), alert: "Image not found" unless attachment
+    return redirect_to edit_product_path(@product), alert: t("products.flash.image_not_found") unless attachment
 
     removing_primary = @product.image.attached? && @product.image.blob_id == attachment.blob_id
     attachment.purge_later
     @product.image.purge_later if removing_primary
     @product.reload
     @product.ensure_display_image!
-    redirect_to edit_product_path(@product), notice: "Gallery image removed"
+    redirect_to edit_product_path(@product), notice: t("products.flash.gallery_image_removed")
   end
 
   def bulk_remove_gallery_images
     ids = Array(params[:attachment_ids]).reject(&:blank?).map(&:to_i)
     attachments = @product.gallery_images.attachments.where(id: ids)
-    return redirect_to edit_product_path(@product), alert: "No images selected" if attachments.blank?
+    return redirect_to edit_product_path(@product), alert: t("products.flash.no_images_selected") if attachments.blank?
 
     removing_primary = @product.image.attached? && attachments.any? { |a| a.blob_id == @product.image.blob_id }
     attachments.each(&:purge_later)
@@ -124,7 +124,7 @@ class ProductsController < ApplicationController
     @product.reload
     @product.ensure_display_image!
 
-    redirect_to edit_product_path(@product), notice: "#{attachments.size} image(s) removed"
+    redirect_to edit_product_path(@product), notice: t("products.flash.images_removed", count: attachments.size)
   end
 
   private

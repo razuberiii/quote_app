@@ -29,6 +29,7 @@ class QuoteTest < ActiveSupport::TestCase
   test "won status auto-fills final amount from grand total when blank" do
     quote = quotes(:one)
     quote.status = "won"
+    quote.win_reason = "price_accepted"
     quote.final_amount = nil
 
     assert quote.valid?

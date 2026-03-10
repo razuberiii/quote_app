@@ -56,8 +56,18 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     )
     @quote.update!(status: "sent", sent_at: 3.days.ago, viewed_at: nil)
 
-    assert_emails 1 do
-      post send_reminder_quote_url(@quote)
+    previous_skip = ENV["SKIP_TURNSTILE_VERIFICATION"]
+    ENV["SKIP_TURNSTILE_VERIFICATION"] = "true"
+    begin
+      assert_emails 1 do
+        post send_reminder_quote_url(@quote)
+      end
+    ensure
+      if previous_skip.nil?
+        ENV.delete("SKIP_TURNSTILE_VERIFICATION")
+      else
+        ENV["SKIP_TURNSTILE_VERIFICATION"] = previous_skip
+      end
     end
 
     assert_redirected_to quote_url(@quote)

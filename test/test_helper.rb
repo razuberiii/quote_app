@@ -4,8 +4,12 @@ require "rails/test_help"
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers
-    parallelize(workers: :number_of_processors, with: :threads)
+    # Default to single-worker test runs on Windows/PostgreSQL to avoid
+    # fixture FK validation deadlocks. Set TEST_WORKERS>1 to opt in.
+    test_workers = ENV.fetch("TEST_WORKERS", "1").to_i
+    if test_workers > 1
+      parallelize(workers: test_workers, with: :threads)
+    end
 
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all

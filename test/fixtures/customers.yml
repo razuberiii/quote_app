@@ -5,7 +5,7 @@ one:
   name: MyString
   country: MyString
   contact_name: MyString
-  email: MyString
+  email: buyer_one@example.com
   status: MyString
   next_follow_up_date: 2026-02-11
   last_follow_up_date: 2026-02-11
@@ -16,7 +16,7 @@ two:
   name: MyString
   country: MyString
   contact_name: MyString
-  email: MyString
+  email: buyer_two@example.com
   status: MyString
   next_follow_up_date: 2026-02-11
   last_follow_up_date: 2026-02-11

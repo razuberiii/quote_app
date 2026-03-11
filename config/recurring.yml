@@ -10,6 +10,18 @@
 #     schedule: at 5am every day
 
 production:
+  quote_expiry_sweep:
+    class: QuoteExpiryJob
+    schedule: every day at 00:05
+
+  quote_reminder_sweep:
+    class: QuoteReminderJob
+    schedule: every day at 09:00
+
+  follow_up_due_notifications:
+    class: FollowUpDueNotificationJob
+    schedule: every day at 08:30
+
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12

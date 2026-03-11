@@ -91,7 +91,10 @@
         <p><strong><%= t("customers.view.show.status") %>:</strong> <%= customer_status_badge(@customer) %></p>
         <p><strong><%= t("customers.view.show.primary_contact_name") %>:</strong> <%= @customer.contact_name.presence || "-" %></p>
         <p><strong><%= t("customers.view.show.email") %>:</strong> <%= @customer.email.presence || "-" %></p>
-        <p><strong><%= t("customers.view.show.phone") %>:</strong> <%= @customer.phone.presence || "-" %></p>
+        <p><strong><%= t("customers.view.show.phone") %>:</strong> <%= @customer.formatted_phone.presence || "-" %></p>
+        <% if @customer.tax_id.present? %>
+          <p><strong><%= t("customers.view.show.tax_id", default: "Tax ID") %>:</strong> <%= [@customer.tax_id_type.presence, @customer.tax_id].compact.join(" ") %></p>
+        <% end %>
         <p><strong><%= t("customers.view.show.address") %>:</strong> <%= @customer.address.presence || "-" %></p>
         <p><strong><%= t("customers.view.show.payment_terms") %>:</strong> <%= @customer.payment_terms.to_s.upcase.gsub("_", "/").presence || "-" %></p>
         <p><strong><%= t("customers.view.show.main_product_interest") %>:</strong> <%= @customer.main_product_interest.presence || "-" %></p>
@@ -201,6 +204,13 @@
         <p class="team-members-hint"><%= t("customers.view.show.no_immediate_tasks") %></p>
       <% end %>
     </section>
+
+    <%= render "follow_up_assistant",
+               customer: @customer,
+               follow_up_quote: @follow_up_assistant_quote,
+               message: @suggested_follow_up_message,
+               best_contact_time: @best_contact_time,
+               quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
 
     <section class="customer-timeline app-surface">
       <div class="app-section-heading">
@@ -564,5 +574,212 @@
 
     bindSystemTimelineToggle();
     document.addEventListener("turbo:load", bindSystemTimelineToggle);
+  })();
+
+  (() => {
+    const bindFollowUpAssistant = () => {
+      const form = document.querySelector("[data-follow-up-assistant-form]");
+      if (!form || form.dataset.bound === "true") return;
+      form.dataset.bound = "true";
+
+      const csrf = document.querySelector("meta[name='csrf-token']")?.content;
+      const messageInput = form.querySelector("[data-follow-up-message]");
+      const copyButton = form.querySelector("[data-follow-up-copy]");
+      const whatsappButton = form.querySelector("[data-follow-up-whatsapp]");
+      const emailButton = form.querySelector("[data-follow-up-email]");
+      const feedback = form.querySelector("[data-follow-up-feedback]");
+      const quoteIdInput = form.querySelector("input[name='follow_up[quote_id]']");
+      const turnstileResponse = form.querySelector("[data-follow-up-turnstile-response]");
+      const skipTurnstile = form.dataset.skipTurnstile === "true";
+
+      const emailModal = emailButton ? document.getElementById(emailButton.dataset.turnstileModalId || "") : null;
+      const emailModalLoading = emailModal?.querySelector("[data-follow-up-email-loading]");
+      const emailModalWidget = emailModal?.querySelector("[data-follow-up-email-widget]");
+      const emailModalSuccess = emailModal?.querySelector("[data-follow-up-email-success]");
+
+      const showFeedback = (text, isError = false) => {
+        if (feedback) {
+          feedback.textContent = text;
+          feedback.hidden = false;
+          feedback.classList.toggle("is-error", isError);
+        }
+      };
+
+      const copyText = async (text) => {
+        try {
+          if (navigator.clipboard?.writeText && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return true;
+          }
+        } catch (_) {
+        }
+
+        try {
+          const textarea = document.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.top = "-9999px";
+          textarea.style.left = "-9999px";
+          document.body.appendChild(textarea);
+          textarea.focus();
+          textarea.select();
+          const ok = document.execCommand("copy");
+          document.body.removeChild(textarea);
+          return !!ok;
+        } catch (_) {
+          return false;
+        }
+      };
+
+      const resetEmailVerification = () => {
+        if (turnstileResponse) turnstileResponse.value = "";
+        if (emailModalLoading) emailModalLoading.hidden = false;
+        if (emailModalWidget) emailModalWidget.hidden = true;
+        if (emailModalSuccess) emailModalSuccess.hidden = true;
+      };
+
+      const closeEmailModal = () => {
+        if (!emailModal) return;
+        emailModal.hidden = true;
+        resetEmailVerification();
+      };
+
+      const submitEmailFollowUp = () => {
+        if (!emailButton) return;
+        const actionUrl = emailButton.dataset.emailAction;
+        if (!actionUrl) return;
+
+        form.action = actionUrl;
+        form.method = "post";
+        form.requestSubmit();
+      };
+
+      const renderEmailTurnstile = () => {
+        if (!emailModal || !emailModalWidget || !emailModalLoading || !emailModalSuccess) return;
+
+        const siteKey = form.dataset.turnstileSiteKey;
+        if (!siteKey) return;
+
+        resetEmailVerification();
+
+        const renderWidget = () => {
+          if (typeof turnstile === "undefined") {
+            window.setTimeout(renderWidget, 180);
+            return;
+          }
+
+          emailModalLoading.hidden = true;
+          emailModalWidget.hidden = false;
+
+          if (emailModal.dataset.widgetId) {
+            turnstile.reset(emailModal.dataset.widgetId);
+            return;
+          }
+
+          const widgetId = turnstile.render(emailModalWidget, {
+            sitekey: siteKey,
+            theme: "light",
+            callback: (token) => {
+              if (turnstileResponse) turnstileResponse.value = token;
+              emailModalWidget.hidden = true;
+              emailModalSuccess.hidden = false;
+              window.setTimeout(() => {
+                closeEmailModal();
+                submitEmailFollowUp();
+              }, 260);
+            },
+            "expired-callback": () => {
+              if (turnstileResponse) turnstileResponse.value = "";
+              emailModalSuccess.hidden = true;
+              emailModalWidget.hidden = false;
+            },
+            "error-callback": () => {
+              if (turnstileResponse) turnstileResponse.value = "";
+              emailModalSuccess.hidden = true;
+              emailModalWidget.hidden = false;
+            }
+          });
+
+          emailModal.dataset.widgetId = widgetId;
+        };
+
+        renderWidget();
+      };
+
+      copyButton?.addEventListener("click", async () => {
+        const copied = await copyText(messageInput?.value || "");
+        const text = copied ? form.dataset.copySuccess : form.dataset.copyFailure;
+        showFeedback(text, !copied);
+        window.showAppToast?.(text, copied ? "success" : "error");
+      });
+
+      whatsappButton?.addEventListener("click", async () => {
+        whatsappButton.disabled = true;
+
+        try {
+          const response = await fetch(form.dataset.whatsappUrl, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+              "X-CSRF-Token": csrf || ""
+            },
+            credentials: "same-origin",
+            body: JSON.stringify({
+              follow_up: {
+                message: messageInput?.value || "",
+                quote_id: quoteIdInput?.value || ""
+              }
+            })
+          });
+
+          const payload = await response.json().catch(() => ({}));
+          if (!response.ok || !payload.url) {
+            throw new Error(payload.message || form.dataset.whatsappFailed);
+          }
+
+          window.open(payload.url, "_blank", "noopener");
+          if (payload.notice) {
+            window.showAppToast?.(payload.notice, "success");
+          }
+
+          window.location.href = payload.redirect_url || window.location.href;
+        } catch (error) {
+          const text = error.message || form.dataset.whatsappFailed;
+          showFeedback(text, true);
+          window.showAppToast?.(text, "error");
+        } finally {
+          whatsappButton.disabled = false;
+        }
+      });
+
+      emailButton?.addEventListener("click", (event) => {
+        event.preventDefault();
+
+        if (skipTurnstile) {
+          submitEmailFollowUp();
+          return;
+        }
+
+        if (!emailModal) {
+          showFeedback(form.dataset.emailVerifyRequired, true);
+          window.showAppToast?.(form.dataset.emailVerifyRequired, "error");
+          return;
+        }
+
+        emailModal.hidden = false;
+        renderEmailTurnstile();
+      });
+
+      emailModal?.addEventListener("click", (event) => {
+        if (event.target === emailModal || event.target.closest("[data-follow-up-email-modal-close]")) {
+          closeEmailModal();
+        }
+      });
+    };
+
+    bindFollowUpAssistant();
+    document.addEventListener("turbo:load", bindFollowUpAssistant);
   })();
 </script>

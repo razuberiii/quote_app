@@ -16,7 +16,7 @@ class UiHelperTest < ActionView::TestCase
 
     html = customer_status_badge(customer)
 
-    assert_includes html, "Contacted"
+    assert_includes html, customer.status_label
     assert_includes html, "app-status-badge--indigo"
   end
 

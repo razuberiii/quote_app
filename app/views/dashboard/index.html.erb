@@ -47,7 +47,7 @@
 
     <%= render "components/ui/card", class: "dashboard-panel dashboard-action-summary app-surface" do %>
       <div class="dashboard-action-summary-head">
-        <h2><%= t("dashboard.view.index.action_required", count: @action_required_summary[:total]) %></h2>
+        <h2><%= t("dashboard.view.index.action_overview", count: @action_required_summary[:total]) %></h2>
         <% if @action_required_summary[:has_risk] %>
           <% risk_text_parts = [] %>
           <% risk_text_parts << t("dashboard.view.index.risk_customers", count: @action_required_summary[:risk_customers]) if @action_required_summary[:risk_customers].positive? %>
@@ -60,6 +60,16 @@
       <p class="dashboard-action-summary-note">
         <%= t("dashboard.view.index.handle_overdue_first") %>
       </p>
+      <% if @action_required_summary[:total].positive? %>
+        <%= render "components/ui/button",
+                   tag: :button,
+                   type: :button,
+                   variant: :secondary,
+                   class: "dashboard-action-link",
+                   attrs: { data: { scroll_target: "action-items-section" } } do %>
+          <%= t("dashboard.view.index.jump_to_action_items", count: @action_required_summary[:total]) %>
+        <% end %>
+      <% end %>
     <% end %>
 
     <%= render "components/ui/card", class: "dashboard-panel dashboard-decision-snapshot app-surface" do %>
@@ -132,6 +142,7 @@
       </article>
     </div>
 
+    <div id="today-focus-section">
     <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center app-surface" do %>
       <h2><%= t("dashboard.view.index.today_focus") %></h2>
       <% if @primary_action.present? %>
@@ -142,8 +153,12 @@
               <strong><%= @primary_action[:title] %></strong>
               <p><%= @primary_action[:detail] %></p>
             </div>
-            <%= render "components/ui/button", href: @primary_action[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
-              <%= @primary_action[:cta_label] %>
+            <% if @primary_action[:cta_method].to_sym == :post %>
+              <%= button_to @primary_action[:cta_label], @primary_action[:cta_path], method: :post, form: { data: { turbo: false } }, class: ui_button_classes(:secondary, "dashboard-action-link") %>
+            <% else %>
+              <%= render "components/ui/button", href: @primary_action[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
+                <%= @primary_action[:cta_label] %>
+              <% end %>
             <% end %>
           </div>
           <% if @secondary_actions.any? %>
@@ -155,8 +170,12 @@
                     <strong><%= item[:title] %></strong>
                     <p><%= item[:detail] %></p>
                   </div>
-                  <%= render "components/ui/button", href: item[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
-                    <%= item[:cta_label] %>
+                  <% if item[:cta_method].to_sym == :post %>
+                    <%= button_to item[:cta_label], item[:cta_path], method: :post, form: { data: { turbo: false } }, class: ui_button_classes(:secondary, "dashboard-action-link") %>
+                  <% else %>
+                    <%= render "components/ui/button", href: item[:cta_path], variant: :secondary, class: "dashboard-action-link" do %>
+                      <%= item[:cta_label] %>
+                    <% end %>
                   <% end %>
                 </div>
               <% end %>
@@ -173,6 +192,63 @@
         <p class="team-members-hint"><%= t("dashboard.view.index.no_high_priority_actions") %></p>
       <% end %>
     <% end %>
+    </div>
+
+    <div id="deal-radar-section">
+    <%= render "components/ui/card", class: "dashboard-panel app-surface" do %>
+      <div class="dashboard-action-summary-head">
+        <h2><%= t("dashboard.view.index.deal_radar") %></h2>
+        <span class="dashboard-alert-pill <%= @deal_radar_signals.any? ? 'is-watch' : 'is-good' %>">
+          <%= t("dashboard.view.index.deal_radar_count", count: @deal_radar_signals.size) %>
+        </span>
+      </div>
+
+      <% if @deal_radar_signals.any? %>
+        <div class="dashboard-action-list">
+          <% @deal_radar_signals.first(3).each do |entry| %>
+            <div class="dashboard-action-item is-<%= entry[:signal].priority %>">
+              <div>
+                <span class="dashboard-action-secondary-label"><%= entry[:signal].label %></span>
+                <strong><%= entry[:quote].customer&.name.presence || t("dashboard.logic.unknown_customer") %> · <%= entry[:quote].custom_title.presence || entry[:quote].quote_items.ordered.first&.product&.name.presence || entry[:quote].quote_items.ordered.first&.description.presence || entry[:quote].quote_no %></strong>
+                <small class="dashboard-quote-id"><%= entry[:quote].quote_no %></small>
+                <p><%= entry[:detail] %></p>
+              </div>
+              <%= render "components/ui/button", href: quote_path(entry[:quote]), variant: :secondary, class: "dashboard-action-link" do %>
+                <%= t("dashboard.view.index.view_quote") %>
+              <% end %>
+            </div>
+          <% end %>
+
+          <% if @deal_radar_signals.size > 3 %>
+            <div class="dashboard-action-more" data-deal-radar-more hidden>
+              <% @deal_radar_signals.drop(3).each do |entry| %>
+                <div class="dashboard-action-item is-<%= entry[:signal].priority %>">
+                  <div>
+                    <span class="dashboard-action-secondary-label"><%= entry[:signal].label %></span>
+                    <strong><%= entry[:quote].customer&.name.presence || t("dashboard.logic.unknown_customer") %> · <%= entry[:quote].custom_title.presence || entry[:quote].quote_items.ordered.first&.product&.name.presence || entry[:quote].quote_items.ordered.first&.description.presence || entry[:quote].quote_no %></strong>
+                    <small class="dashboard-quote-id"><%= entry[:quote].quote_no %></small>
+                    <p><%= entry[:detail] %></p>
+                  </div>
+                  <%= render "components/ui/button", href: quote_path(entry[:quote]), variant: :secondary, class: "dashboard-action-link" do %>
+                    <%= t("dashboard.view.index.view_quote") %>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+
+            <%= render "components/ui/button",
+                       variant: :secondary,
+                       class: "dashboard-action-toggle dashboard-inline-toggle",
+                       attrs: { data: { deal_radar_toggle: true, expanded: "false", action_count: @deal_radar_signals.size - 3 } } do %>
+              <%= t("dashboard.view.index.show_more", count: @deal_radar_signals.size - 3) %>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="team-members-hint"><%= t("dashboard.view.index.deal_radar_empty") %></p>
+      <% end %>
+    <% end %>
+    </div>
 
     <%= render "shared/action_items" %>
 
@@ -213,7 +289,7 @@
                     <td data-label="<%= t("dashboard.view.index.engagement") %>">
                       <span class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></span>
                     </td>
-                    <td data-label="<%= t("dashboard.view.index.next_move") %>"><%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %></td>
+                    <td data-label="<%= t("dashboard.view.index.next_move") %>"><span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span></td>
                     <td data-label="<%= t("dashboard.view.index.total") %>" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
                   </tr>
                 <% end %>
@@ -451,6 +527,8 @@
         </div>
       <% end %>
     </div>
+
+    <%= render "dashboard/sales_insights" %>
   </div>
 </section>
 
@@ -495,6 +573,37 @@
 
         toggle.addEventListener("click", () => {
           applyState(toggle.dataset.expanded !== "true");
+        });
+      });
+
+      document.querySelectorAll("[data-deal-radar-toggle]").forEach((toggle) => {
+        const extra = toggle.closest(".dashboard-action-list")?.querySelector("[data-deal-radar-more]");
+        if (!extra || toggle.dataset.bound === "true") return;
+        toggle.dataset.bound = "true";
+
+        const count = Number(toggle.dataset.actionCount || 0);
+        const applyState = (expanded) => {
+          extra.hidden = !expanded;
+          toggle.dataset.expanded = expanded ? "true" : "false";
+          toggle.textContent = expanded ? showLessLabel : showMoreLabel.replace("%{count}", String(count));
+        };
+
+        applyState(false);
+
+        toggle.addEventListener("click", () => {
+          applyState(toggle.dataset.expanded !== "true");
+        });
+      });
+
+      document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+        if (button.dataset.boundScroll === "true") return;
+        button.dataset.boundScroll = "true";
+
+        button.addEventListener("click", () => {
+          const targetId = button.dataset.scrollTarget;
+          if (!targetId) return;
+          const target = document.getElementById(targetId);
+          target?.scrollIntoView({ behavior: "smooth", block: "start" });
         });
       });
     };

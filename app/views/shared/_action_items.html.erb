@@ -1,14 +1,19 @@
+<section id="action-items-section">
 <%= render "components/ui/card", class: "dashboard-panel dashboard-action-required app-surface" do %>
+  <% signal_presenter = QuoteSignalPresenter.new(locale: I18n.locale) %>
+  <% action_items = local_assigns[:action_items] || @system_action_items || @generated_action_items || [] %>
   <div class="dashboard-action-summary-head">
-    <h2><%= t("dashboard.view.action_items.title") %></h2>
-    <span class="dashboard-alert-pill <%= @generated_action_items.any? ? 'is-watch' : 'is-good' %>">
-      <%= t("dashboard.view.action_items.open_items", count: @generated_action_items.count) %>
+    <h2><%= t("dashboard.view.action_items.system_title") %></h2>
+    <span class="dashboard-alert-pill <%= action_items.any? ? 'is-watch' : 'is-good' %>">
+      <%= t("dashboard.view.action_items.open_items", count: action_items.count) %>
     </span>
   </div>
+  <p class="dashboard-panel-note"><%= t("dashboard.view.action_items.system_note") %></p>
 
-  <% if @generated_action_items.any? %>
+  <% if action_items.any? %>
     <div class="dashboard-task-list">
-      <% @generated_action_items.first(4).each do |item| %>
+      <% action_items.first(4).each do |item| %>
+        <% item_cta = signal_presenter.action_item_cta(item) %>
         <article class="dashboard-task-item is-<%= item.priority %>">
           <div>
             <strong><%= item.headline %></strong>
@@ -16,15 +21,20 @@
             <p><%= item.reference.is_a?(Quote) ? item.reference.customer.name : item.reference_label %></p>
           </div>
           <div class="dashboard-task-actions">
-            <%= link_to t("dashboard.view.action_items.open"), item.link_path, class: "dashboard-next-step-btn is-neutral" %>
+            <% if item_cta.method == :post %>
+              <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: "dashboard-next-step-btn is-neutral" %>
+            <% else %>
+              <%= link_to item_cta.label, item_cta.path, class: "dashboard-next-step-btn is-neutral" %>
+            <% end %>
             <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
           </div>
         </article>
       <% end %>
 
-      <% if @generated_action_items.size > 4 %>
+      <% if action_items.size > 4 %>
         <div class="dashboard-task-more" data-action-items-more hidden>
-          <% @generated_action_items.drop(4).each do |item| %>
+          <% action_items.drop(4).each do |item| %>
+            <% item_cta = signal_presenter.action_item_cta(item) %>
             <article class="dashboard-task-item is-<%= item.priority %>">
               <div>
                 <strong><%= item.headline %></strong>
@@ -32,7 +42,11 @@
                 <p><%= item.reference.is_a?(Quote) ? item.reference.customer.name : item.reference_label %></p>
               </div>
               <div class="dashboard-task-actions">
-                <%= link_to t("dashboard.view.action_items.open"), item.link_path, class: "dashboard-next-step-btn is-neutral" %>
+                <% if item_cta.method == :post %>
+                  <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: "dashboard-next-step-btn is-neutral" %>
+                <% else %>
+                  <%= link_to item_cta.label, item_cta.path, class: "dashboard-next-step-btn is-neutral" %>
+                <% end %>
                 <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
               </div>
             </article>
@@ -40,12 +54,11 @@
         </div>
 
         <div class="dashboard-task-footer">
-          <p><%= t("dashboard.view.action_items.more_open_items_in_queue", count: @generated_action_items.size - 4) %></p>
           <%= render "components/ui/button",
                      variant: :secondary,
-                     class: "dashboard-inline-toggle",
-                     attrs: { data: { action_items_toggle: true, action_count: @generated_action_items.size - 4, expanded: "false" } } do %>
-            <%= t("dashboard.view.index.show_more", count: @generated_action_items.size - 4) %>
+                     class: "dashboard-action-toggle dashboard-inline-toggle",
+                     attrs: { data: { action_items_toggle: true, action_count: action_items.size - 4, expanded: "false" } } do %>
+            <%= t("dashboard.view.index.show_more", count: action_items.size - 4) %>
           <% end %>
         </div>
       <% end %>
@@ -54,3 +67,4 @@
     <p class="dashboard-panel-note"><%= t("dashboard.view.action_items.no_unresolved") %></p>
   <% end %>
 <% end %>
+</section>

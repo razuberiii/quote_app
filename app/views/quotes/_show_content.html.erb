@@ -5,6 +5,8 @@
 <% workflow_state = @quote.workflow_state %>
 <% current_latest_revision = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
 <% quote_document_locale = @quote_document_locale || I18n.locale %>
+<% reason_missing = (@quote.status.to_s == "won" && @quote.win_reason.blank?) || (@quote.status.to_s == "lost" && @quote.loss_reason.blank?) %>
+<% reason_action_label = @quote.status.to_s == "won" ? t("quotes.view.show.toolbar.add_win_reason") : t("quotes.view.show.toolbar.add_loss_reason") %>
 <div class="quote-document quote-document-shell<%= " quote-watermarked" if watermark_text.present? %>"
      data-watermark="<%= watermark_text %>"
      data-has-newer-revision="<%= @has_newer_revision ? "true" : "false" %>"
@@ -47,18 +49,50 @@
 <% days_left = @quote.valid_until.present? ? (@quote.valid_until - Date.current).to_i : nil %>
 <% total_views = @quote.quote_shares.sum(&:view_count) %>
 <% viewed_flag = @quote.viewed_at.present? || total_views.positive? %>
-<% next_action_text =
-    case workflow_state
-    when "lost"
-      t("quotes.view.show.next_action_lost")
-    when "accepted"
-      t("quotes.view.show.next_action_accepted")
-    when "draft"
-      t("quotes.view.show.next_action_draft")
-    when "expired"
-      t("quotes.view.show.next_action_expired")
+<% avg_view_duration_seconds = @quote.avg_view_duration_seconds.to_i %>
+<% avg_view_duration_text =
+    if avg_view_duration_seconds.positive?
+      distance_of_time_in_words(0, avg_view_duration_seconds, include_seconds: avg_view_duration_seconds < 60)
+    end %>
+<% engagement_duration_suffix = avg_view_duration_text.present? ? t("quotes.view.show.engagement_time_suffix", duration: avg_view_duration_text) : "" %>
+<% engagement_text =
+    if !viewed_flag
+      t("quotes.view.show.not_viewed_yet")
+    elsif @quote.engagement_label == :hot
+      t("quotes.view.show.engagement_hot_signal", count: total_views, duration_suffix: engagement_duration_suffix)
+    elsif avg_view_duration_seconds >= 120 || @quote.engagement_label == :warm
+      t("quotes.view.show.engagement_warm_signal", count: total_views, duration_suffix: engagement_duration_suffix)
     else
-      viewed_flag ? t("quotes.view.show.next_action_viewed") : t("quotes.view.show.next_action_not_viewed")
+      t("quotes.view.show.viewed_count", count: total_views)
+    end %>
+<% next_action_text =
+    if @quote.status.to_s == "won" && @quote.win_reason.blank?
+      t("quotes.view.show.next_action_fill_win_reason")
+    elsif @quote.status.to_s == "lost" && @quote.loss_reason.blank?
+      t("quotes.view.show.next_action_fill_loss_reason")
+    else
+      case workflow_state
+      when "lost"
+        t("quotes.view.show.next_action_lost")
+      when "accepted"
+        t("quotes.view.show.next_action_accepted")
+      when "draft"
+        t("quotes.view.show.next_action_draft")
+      when "expired"
+        t("quotes.view.show.next_action_expired")
+      else
+        if @quote.revision_requests_count.positive?
+          t("quotes.view.show.next_action_revision_requested", count: @quote.revision_requests_count)
+        elsif @quote_signal.present?
+          @quote_signal.cta_label
+        elsif @quote.engagement_label == :hot
+          t("quotes.view.show.next_action_hot")
+        elsif avg_view_duration_seconds >= 120
+          t("quotes.view.show.next_action_engaged")
+        else
+          viewed_flag ? t("quotes.view.show.next_action_viewed") : t("quotes.view.show.next_action_not_viewed")
+        end
+      end
     end %>
 <% urgency_text =
       if days_left.nil?
@@ -77,16 +111,17 @@
     </div>
     <div class="quote-signal-item">
       <span class="quote-signal-label"><%= t("quotes.view.show.engagement") %></span>
-      <strong><%= viewed_flag ? t("quotes.view.show.viewed_count", count: total_views) : t("quotes.view.show.not_viewed_yet") %></strong>
+      <strong><%= engagement_text %></strong>
     </div>
     <div class="quote-signal-item">
-      <span class="quote-signal-label"><%= t("quotes.view.show.next_action") %></span>
+      <span class="quote-signal-label"><%= t("quotes.view.show.current_focus") %></span>
       <strong><%= next_action_text %></strong>
     </div>
   </section>
 
   <details class="quote-engagement-details">
     <summary><%= t("quotes.view.show.engagement_details") %></summary>
+    <%= render "shared/quote_engagement_panel" %>
     <% access_events = @quote.quote_shares.flat_map { |share| Array(share.view_events) } %>
     <% country_counts = Hash.new(0) %>
     <% ip_counts = Hash.new(0) %>
@@ -157,7 +192,10 @@
       <p><strong><%= t("quote_document.labels.company", default: "Company") %>:</strong> <%= @quote.customer.name.presence || "-" %></p>
       <p><strong><%= t("quote_document.labels.primary_contact", default: "Primary Contact") %>:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
       <p><strong><%= t("quote_document.labels.email", default: "Email") %>:</strong> <%= @quote.customer.email.presence || "-" %></p>
-      <p><strong><%= t("quote_document.labels.phone", default: "Phone") %>:</strong> <%= @quote.customer.phone.presence || "-" %></p>
+      <p><strong><%= t("quote_document.labels.phone", default: "Phone") %>:</strong> <%= @quote.customer.formatted_phone.presence || "-" %></p>
+      <% if @quote.customer.tax_id.present? %>
+        <p><strong><%= t("quote_document.labels.tax_id", default: "Tax ID") %>:</strong> <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
+      <% end %>
       <p><strong><%= t("quote_document.labels.address", default: "Address") %>:</strong> <%= @quote.customer.address.presence || "-" %></p>
     </article>
 
@@ -423,6 +461,13 @@
       <% end %>
     </div>
     <div class="quote-toolbar-right-primary">
+      <% if reason_missing %>
+        <button type="button"
+                class="<%= "#{ui_button_classes(:primary)} quote-btn quote-btn-primary js-quote-reason-open" %>"
+                data-reason-modal-id="quote-reason-modal-<%= @quote.id %>">
+          <%= reason_action_label %>
+        </button>
+      <% end %>
       <% if @quote.can_send_reminder? %>
         <% if ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
           <%= button_to t("quotes.view.show.toolbar.send_reminder"),
@@ -464,6 +509,16 @@
         <% end %>
       <% end %>
       <% if @quote.can_share_publicly? %>
+        <% wa_phone_raw = @quote.customer.whatsapp_phone %>
+        <%# Keep this copied share message aligned with the current template webview locale.
+            If QuoteTemplate::OUTPUT_LOCALES changes, update quotes.share_message.* too. %>
+        <% share_msg_template = quote_share_message_template(@quote, locale: @quote_document_locale) %>
+        <script>
+          window.__quoteShareCommsData = {
+            messageTemplate: <%= raw share_msg_template.to_json %>,
+            phone: <%= raw wa_phone_raw.to_json %>
+          };
+        </script>
         <div class="share-link-group">
           <button type="button"
                   class="quote-btn quote-btn-primary js-share-public-link"
@@ -472,9 +527,18 @@
           </button>
           <div class="share-link-panel" id="quote-share-panel" hidden>
             <div class="share-link-panel-message" id="quote-share-message"></div>
+            <div class="share-link-panel-editor">
+              <label class="share-link-panel-editor-label" for="quote-share-message-editor"><%= t("quotes.view.show.comms.editor_label", default: "Share Message") %></label>
+              <textarea id="quote-share-message-editor" class="share-link-panel-editor-input" rows="5" placeholder="<%= t("quotes.view.show.comms.editor_placeholder", default: "You can edit this message before copying or sending.") %>"></textarea>
+              <p class="share-link-panel-editor-hint"><%= t("quotes.view.show.comms.editor_hint", default: "Tip: personalize the greeting or payment details before sending.") %></p>
+            </div>
             <div class="share-link-panel-actions">
               <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
               <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
+              <button type="button" class="share-link-panel-btn" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
+              <% if wa_phone_raw.present? %>
+                <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
+              <% end %>
             </div>
           </div>
         </div>
@@ -490,6 +554,61 @@
     </div>
   </div>
 </div>
+
+<% if reason_missing %>
+  <% reason_modal_id = "quote-reason-modal-#{@quote.id}" %>
+  <div class="quote-turnstile-modal quote-reason-modal"
+       id="<%= reason_modal_id %>"
+       data-open-by-default="<%= params[:fill_reason].to_s == "1" ? "true" : "false" %>"
+       hidden>
+    <div class="quote-turnstile-modal__dialog quote-reason-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="<%= "#{reason_modal_id}-title" %>">
+      <button type="button" class="quote-turnstile-modal__close js-quote-reason-close" aria-label="<%= t("quotes.view.show.toolbar.close_reason_modal") %>">×</button>
+      <h3 id="<%= "#{reason_modal_id}-title" %>"><%= reason_action_label %></h3>
+      <p><%= @quote.status.to_s == "won" ? t("quotes.view.show.toolbar.fill_win_reason_hint") : t("quotes.view.show.toolbar.fill_loss_reason_hint") %></p>
+      <div class="quote-reason-actions" style="margin-bottom: .75rem;">
+        <%= render "shared/quote_reason_options_modal",
+                   modal_id: "quote-reason-options-modal-show-#{@quote.id}",
+                   current_status: @quote.status %>
+      </div>
+
+      <%= form_with model: @quote,
+                    url: update_outcome_reason_quote_path(@quote),
+                    method: :patch,
+                    local: true,
+                    html: { class: "quote-reason-form", data: { turbo: false } } do |f| %>
+        <% if @quote.status.to_s == "won" %>
+          <div class="quote-reason-field">
+            <%= f.label :win_reason, t("quotes.view.form.select_win_reason") %>
+            <%= f.select :win_reason,
+                         Quote.reason_option_pairs_for(:win, company: @quote.company),
+                         { include_blank: t("quotes.view.form.select_win_reason") },
+                         { class: ui_input_classes("js-quote-reason-kind"), data: { reason_kind: "win" } } %>
+          </div>
+          <div class="quote-reason-field js-quote-reason-detail-wrap" hidden>
+            <%= f.label :win_reason_detail, t("quotes.view.form.win_reason_details") %>
+            <%= f.text_field :win_reason_detail, placeholder: t("quotes.view.form.win_reason_details_placeholder"), class: ui_input_classes %>
+          </div>
+        <% else %>
+          <div class="quote-reason-field">
+            <%= f.label :loss_reason, t("quotes.view.form.select_loss_reason") %>
+            <%= f.select :loss_reason,
+                         Quote.reason_option_pairs_for(:loss, company: @quote.company),
+                         { include_blank: t("quotes.view.form.select_loss_reason") },
+                         { class: ui_input_classes("js-quote-reason-kind"), data: { reason_kind: "loss" } } %>
+          </div>
+          <div class="quote-reason-field js-quote-reason-detail-wrap" hidden>
+            <%= f.label :loss_reason_detail, t("quotes.view.form.loss_reason_details") %>
+            <%= f.text_field :loss_reason_detail, placeholder: t("quotes.view.form.loss_reason_details_placeholder"), class: ui_input_classes %>
+          </div>
+        <% end %>
+
+        <div class="quote-reason-actions">
+          <%= f.submit t("quotes.view.show.toolbar.save_reason"), class: ui_button_classes(:primary) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
 
 <section class="quote-history app-surface">
   <div class="app-section-heading">
@@ -542,18 +661,23 @@
     const message = document.getElementById("quote-share-message");
     const copyButton = document.getElementById("quote-share-copy-btn");
     const openLink = document.getElementById("quote-share-open-link");
+    const copyMessageButton = document.getElementById("quote-share-copy-message-btn");
+    const whatsappButton = document.getElementById("quote-share-whatsapp-btn");
+    const messageEditor = document.getElementById("quote-share-message-editor");
     const lastSharedAt = document.getElementById("quote-last-shared-at");
     if (!button || !panel || !message || !copyButton || !openLink || button.dataset.bound === "true") return;
     button.dataset.bound = "true";
 
     const csrf = document.querySelector("meta[name='csrf-token']")?.content;
+    const commsData = window.__quoteShareCommsData || {};
     const sharePanelState = window.__quoteSharePanelState || {
       visible: false,
       message: "",
       isError: false,
       currentShareUrl: "",
       openHref: "#",
-      openHidden: true
+      openHidden: true,
+      messageDraft: ""
     };
     window.__quoteSharePanelState = sharePanelState;
     let currentShareUrl = "";
@@ -565,6 +689,7 @@
       sharePanelState.currentShareUrl = currentShareUrl;
       sharePanelState.openHref = openLink.getAttribute("href") || "#";
       sharePanelState.openHidden = openLink.hidden;
+      sharePanelState.messageDraft = messageEditor?.value || "";
     };
 
     const showPanel = (text, isError = false) => {
@@ -607,6 +732,24 @@
       }
     };
 
+    const buildDefaultMessage = () => (commsData.messageTemplate || "").replace("__SHARE_URL__", currentShareUrl);
+    const buildMessage = () => {
+      const draft = messageEditor?.value?.trim();
+      return draft || buildDefaultMessage();
+    };
+    const whatsappPhone = (commsData.phone || "").replace(/[^\d+]/g, "");
+
+    const syncWhatsappHref = () => {
+      if (!whatsappButton) return;
+
+      if (!currentShareUrl || !whatsappPhone) {
+        whatsappButton.href = "#";
+        return;
+      }
+
+      whatsappButton.href = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(buildMessage())}`;
+    };
+
     button.addEventListener("click", async () => {
       button.disabled = true;
       try {
@@ -628,6 +771,10 @@
 
         const copied = await copyText(payload.url);
         currentShareUrl = payload.url;
+        if (messageEditor) {
+          messageEditor.value = buildDefaultMessage();
+        }
+        syncWhatsappHref();
         try {
           const previewUrl = new URL(payload.url, window.location.origin);
           previewUrl.searchParams.set("preview", "1");
@@ -654,6 +801,7 @@
         window.setTimeout(() => window.refreshQuoteState?.(true), 120);
       } catch (error) {
         currentShareUrl = "";
+        syncWhatsappHref();
         openLink.href = "#";
         openLink.hidden = true;
         syncPanelState();
@@ -671,8 +819,30 @@
       window.showAppToast?.(copied ? "<%= j(t("quotes.view.show.toolbar.link_copied")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", copied ? "success" : "error");
     });
 
+    copyMessageButton?.addEventListener("click", async () => {
+      if (!currentShareUrl) return;
+      const copied = await copyText(buildMessage());
+      showPanel(copied ? "<%= j(t("quotes.view.show.comms.message_copied", default: "Message copied!")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", !copied);
+      window.showAppToast?.(copied ? "<%= j(t("quotes.view.show.comms.message_copied", default: "Message copied!")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", copied ? "success" : "error");
+    });
+
+    whatsappButton?.addEventListener("click", (event) => {
+      if (!currentShareUrl || !whatsappPhone) {
+        event.preventDefault();
+        return;
+      }
+
+      hidePanel();
+      window.showAppToast?.("<%= j(t("quotes.view.show.comms.whatsapp_opened", default: "WhatsApp opened")) %>", "success");
+    });
+
     openLink.addEventListener("click", () => {
       hidePanel();
+    });
+
+    messageEditor?.addEventListener("input", () => {
+      syncPanelState();
+      syncWhatsappHref();
     });
 
     document.addEventListener("click", (event) => {
@@ -686,6 +856,10 @@
     });
 
     currentShareUrl = sharePanelState.currentShareUrl || "";
+    if (messageEditor) {
+      messageEditor.value = sharePanelState.messageDraft || (currentShareUrl ? buildDefaultMessage() : "");
+    }
+    syncWhatsappHref();
     openLink.href = sharePanelState.openHref || "#";
     openLink.hidden = sharePanelState.openHidden !== false;
     if (sharePanelState.visible) {
@@ -693,6 +867,62 @@
     } else {
       hidePanel();
     }
+  })();
+
+  (() => {
+    const modals = document.querySelectorAll(".quote-reason-modal");
+    if (!modals.length) return;
+
+    const closeReasonModal = (modal) => {
+      if (!modal) return;
+      modal.hidden = true;
+    };
+
+    const syncReasonDetail = (modal) => {
+      const select = modal.querySelector(".js-quote-reason-kind");
+      const detailWrap = modal.querySelector(".js-quote-reason-detail-wrap");
+      if (!select || !detailWrap) return;
+      detailWrap.hidden = select.value !== "other";
+    };
+
+    modals.forEach((modal) => {
+      syncReasonDetail(modal);
+      if (modal.dataset.openByDefault === "true") {
+        modal.hidden = false;
+      }
+    });
+
+    document.addEventListener("change", (event) => {
+      if (!event.target.matches(".js-quote-reason-kind")) return;
+      syncReasonDetail(event.target.closest(".quote-reason-modal"));
+    });
+
+    document.addEventListener("click", (event) => {
+      const openButton = event.target.closest(".js-quote-reason-open");
+      if (openButton) {
+        const modal = document.getElementById(openButton.dataset.reasonModalId);
+        if (!modal) return;
+        event.preventDefault();
+        modal.hidden = false;
+        syncReasonDetail(modal);
+        return;
+      }
+
+      const closeButton = event.target.closest(".js-quote-reason-close");
+      if (closeButton) {
+        closeReasonModal(closeButton.closest(".quote-reason-modal"));
+        return;
+      }
+
+      if (event.target.classList.contains("quote-reason-modal")) {
+        closeReasonModal(event.target);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      modals.forEach((modal) => closeReasonModal(modal));
+    });
   })();
 
   (() => {

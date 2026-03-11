@@ -1,7 +1,7 @@
 class Product < ApplicationRecord
   require "cgi"
 
-  PRICE_CURRENCIES = %w[USD EUR GBP CNY JPY AUD CAD SGD HKD].freeze
+  PRICE_CURRENCIES = %w[USD EUR GBP CNY JPY AUD CAD SGD HKD MXN BRL COP CLP PEN ARS].freeze
 
   belongs_to :company
   has_many :quote_items, dependent: :nullify

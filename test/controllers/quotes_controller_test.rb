@@ -79,4 +79,34 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, @quote.reminder_count
     assert @quote.reminder_sent_at.present?
   end
+
+  test "update_outcome_reason updates win reason for won quote" do
+    @quote.update_columns(status: "won", win_reason: nil, win_reason_detail: nil)
+
+    patch update_outcome_reason_quote_url(@quote), params: {
+      quote: {
+        win_reason: "price_accepted",
+        win_reason_detail: "Accepted after final call"
+      }
+    }
+
+    assert_redirected_to quote_url(@quote)
+    @quote.reload
+    assert_equal "price_accepted", @quote.win_reason
+    assert_equal "Accepted after final call", @quote.win_reason_detail
+  end
+
+  test "update_outcome_reason rejects non won_or_lost quote" do
+    @quote.update_columns(status: "sent", win_reason: nil, win_reason_detail: nil)
+
+    patch update_outcome_reason_quote_url(@quote), params: {
+      quote: {
+        win_reason: "price_accepted"
+      }
+    }
+
+    assert_redirected_to quote_url(@quote)
+    @quote.reload
+    assert_nil @quote.win_reason
+  end
 end

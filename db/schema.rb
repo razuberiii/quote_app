@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_11_195000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -98,6 +98,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
     t.index ["company_id"], name: "index_company_documents_on_company_id"
   end
 
+  create_table "customer_follow_up_events", force: :cascade do |t|
+    t.string "channel", null: false
+    t.datetime "contacted_at", null: false
+    t.datetime "created_at", null: false
+    t.bigint "customer_id", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.text "note"
+    t.bigint "quote_id"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["channel"], name: "index_customer_follow_up_events_on_channel"
+    t.index ["customer_id", "contacted_at"], name: "index_customer_follow_up_events_on_customer_and_contacted_at"
+    t.index ["customer_id"], name: "index_customer_follow_up_events_on_customer_id"
+    t.index ["quote_id"], name: "index_customer_follow_up_events_on_quote_id"
+    t.index ["user_id"], name: "index_customer_follow_up_events_on_user_id"
+  end
+
   create_table "customer_taggings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "customer_id", null: false
@@ -137,11 +154,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
     t.text "notes"
     t.string "payment_terms"
     t.string "phone"
+    t.string "phone_country_code"
     t.string "status"
+    t.string "tax_id"
+    t.string "tax_id_type"
     t.string "timezone"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_customers_on_company_id"
     t.index ["internal_owner_id"], name: "index_customers_on_internal_owner_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.jsonb "data", default: {}, comment: "Contextual data: quote_id, quote_no, customer_name, etc"
+    t.datetime "dismissed_at", comment: "When user dismissed the notification"
+    t.string "kind", null: false, comment: "Type of notification: quote_viewed, etc"
+    t.datetime "read_at", comment: "When user read the notification"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["user_id", "created_at"], name: "index_notifications_on_user_id_and_created_at", order: { created_at: :desc }
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "product_addon_presets", force: :cascade do |t|
@@ -210,6 +243,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
     t.datetime "updated_at", null: false
     t.index ["quote_id", "created_at"], name: "index_quote_items_on_quote_id_and_created_at"
     t.index ["quote_id"], name: "index_quote_items_on_quote_id"
+  end
+
+  create_table "quote_reason_options", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "key", null: false
+    t.string "kind", null: false
+    t.string "label", null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "kind", "active", "position"], name: "idx_quote_reason_options_company_kind_order"
+    t.index ["company_id", "kind", "key"], name: "idx_quote_reason_options_company_kind_key", unique: true
+    t.index ["company_id"], name: "index_quote_reason_options_on_company_id"
   end
 
   create_table "quote_shares", force: :cascade do |t|
@@ -288,6 +335,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
     t.string "webview_locale", default: "en", null: false
     t.index ["company_id", "slug"], name: "index_quote_templates_on_company_id_and_slug", unique: true
     t.index ["company_id"], name: "index_quote_templates_on_company_id"
+  end
+
+  create_table "quote_view_events", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.integer "duration_ms", comment: "Time spent on page in milliseconds"
+    t.bigint "quote_share_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["quote_share_id", "created_at"], name: "index_quote_view_events_on_quote_share_id_and_created_at"
+    t.index ["quote_share_id"], name: "index_quote_view_events_on_quote_share_id"
   end
 
   create_table "quotes", force: :cascade do |t|
@@ -411,11 +467,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addon_presets", "companies"
   add_foreign_key "company_documents", "companies"
+  add_foreign_key "customer_follow_up_events", "customers"
+  add_foreign_key "customer_follow_up_events", "quotes"
+  add_foreign_key "customer_follow_up_events", "users"
   add_foreign_key "customer_taggings", "customer_tags"
   add_foreign_key "customer_taggings", "customers"
   add_foreign_key "customer_tags", "companies"
   add_foreign_key "customers", "companies"
   add_foreign_key "customers", "users", column: "internal_owner_id"
+  add_foreign_key "notifications", "users"
   add_foreign_key "product_addon_presets", "addon_presets"
   add_foreign_key "product_addon_presets", "products"
   add_foreign_key "product_spec_presets", "products"
@@ -424,9 +484,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_010100) do
   add_foreign_key "products", "companies"
   add_foreign_key "products", "spec_presets", column: "default_spec_preset_id"
   add_foreign_key "quote_items", "quotes"
+  add_foreign_key "quote_reason_options", "companies"
   add_foreign_key "quote_shares", "companies"
   add_foreign_key "quote_shares", "quotes"
   add_foreign_key "quote_templates", "companies"
+  add_foreign_key "quote_view_events", "quote_shares"
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
   add_foreign_key "quotes", "quote_templates", column: "template_id"

@@ -1,0 +1,65 @@
+<% unread_notifications = current_user.notifications.unread.recent.limit(10) %>
+<% unread_count = unread_notifications.count %>
+
+<div class="notification-bell-container">
+  <details class="notification-bell-dropdown">
+    <summary class="notification-bell-trigger" aria-label="<%= t("notifications.aria_label", count: unread_count) %>">
+      <span class="notification-bell-icon">
+        🔔
+      </span>
+        <span class="notification-badge<%= ' is-zero' if unread_count == 0 %>" id="notification-badge-count"<%= ' hidden' if unread_count == 0 %>><%= unread_count > 9 ? "9+" : unread_count %></span>
+    </summary>
+    <div class="notification-bell-menu">
+      <div class="notification-bell-header">
+        <span><%= t("notifications.title") %></span>
+        <% if unread_count > 0 %>
+          <%= button_to t("notifications.mark_all_read"),
+                mark_all_read_notifications_path,
+                method: :patch,
+                class: "notification-mark-all-btn",
+                form: { data: { turbo: false } } %>
+        <% end %>
+      </div>
+      <% if unread_notifications.any? %>
+        <ul class="notification-list">
+          <% unread_notifications.each do |notification| %>
+            <% normalized_kind = notification.normalized_kind %>
+            <% icon = case normalized_kind
+                      when "quote_accepted" then "✅"
+                      when "quote_revision_requested" then "📝"
+                      else "👁️"
+                      end %>
+            <li class="notification-item<%= " is-unread" if notification.read_at.blank? %>">
+              <div class="notification-item-icon"><%= icon %></div>
+              <div class="notification-item-content">
+                <div class="notification-item-text">
+                  <% case normalized_kind %>
+                  <% when "quote_accepted" %>
+                    <%= t("notifications.messages.quote_accepted", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
+                  <% when "quote_revision_requested" %>
+                    <%= t("notifications.messages.quote_revision_requested", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
+                  <% else %>
+                    <%= t("notifications.messages.quote_viewed", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
+                    <% if notification.data["viewer_country"].present? %>
+                      · <%= notification.data["viewer_country"] %>
+                    <% end %>
+                  <% end %>
+                </div>
+                <div class="notification-item-time">
+                  <%= t("notifications.time_ago", time: time_ago_in_words(notification.created_at)) %>
+                </div>
+              </div>
+              <% if notification.data["quote_id"].present? %>
+                <%= link_to t("notifications.open_link"),
+                      mark_read_notification_path(notification),
+                      class: "notification-item-link" %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="notification-empty"><%= t("notifications.empty") %></p>
+      <% end %>
+    </div>
+  </details>
+</div>

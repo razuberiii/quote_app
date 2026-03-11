@@ -219,6 +219,10 @@
 
     const engagementDetailsSelector = ".quote-engagement-details";
     const storageKey = `quote:engagement-details:${window.location.pathname}`;
+    const hasOpenBlockingModal = () => {
+      return Array.from(document.querySelectorAll(".quote-turnstile-modal, .quote-reason-options-modal")).some((modal) => !modal.hidden);
+    };
+
     const readPersistedState = () => {
       try {
         return window.sessionStorage.getItem(storageKey) === "true";
@@ -233,41 +237,32 @@
       }
     };
 
-    const engagementState = window.__quoteEngagementDetailsState || { open: readPersistedState() };
-    window.__quoteEngagementDetailsState = engagementState;
-
-    const captureEngagementState = () => {
-      const container = getContainer();
-      if (!container) return;
-      const el = container.querySelector(engagementDetailsSelector);
-      if (!el) return;
-      engagementState.open = el.open;
-      persistState(engagementState.open);
-    };
-
-    const applyEngagementState = () => {
-      const container = getContainer();
-      if (!container) return;
-      const el = container.querySelector(engagementDetailsSelector);
-      if (!el) return;
-      if (engagementState.open) {
-        el.setAttribute("open", "");
-      } else {
-        el.removeAttribute("open");
-      }
+    // Read the live <details>.open and write it onto the container dataset.
+    // Must be called BEFORE any async operation (while the element still exists).
+    const snapshotEngagement = () => {
+      const c = getContainer();
+      if (!c) return;
+      const el = c.querySelector(engagementDetailsSelector);
+      if (el) c.dataset.engagementOpen = el.open ? "true" : "false";
     };
 
     const bindEngagementDetails = () => {
       const container = getContainer();
       if (!container) return;
+      // Init from sessionStorage the very first time (attribute not yet on the element)
+      if (!("engagementOpen" in container.dataset)) {
+        container.dataset.engagementOpen = readPersistedState() ? "true" : "false";
+      }
       const el = container.querySelector(engagementDetailsSelector);
       if (!el || el.dataset.bound === "true") return;
       el.dataset.bound = "true";
       el.addEventListener("toggle", () => {
-        engagementState.open = el.open;
-        persistState(engagementState.open);
+        container.dataset.engagementOpen = el.open ? "true" : "false";
+        persistState(el.open);
       });
-      applyEngagementState();
+      // container.dataset.engagementOpen holds the correct value:
+      // either from snapshotEngagement() (post-refresh) or from sessionStorage (initial load)
+      if (container.dataset.engagementOpen === "true") el.setAttribute("open", "");
     };
 
     let inFlight = false;
@@ -304,6 +299,7 @@
       if (!container) return;
       if (!syncRefreshEligibility()) return;
       if (inFlight) return;
+      if (hasOpenBlockingModal()) return;
       if (!force && document.hidden) return;
 
       const now = Date.now();
@@ -312,9 +308,12 @@
       const refreshUrl = container.dataset.refreshUrl;
       if (!refreshUrl) return;
 
+      // Snapshot the live <details>.open BEFORE the async fetch so we have
+      // the ground-truth state even if the user toggles during the request.
+      snapshotEngagement();
+
       inFlight = true;
       try {
-        captureEngagementState();
         const response = await fetch(refreshUrl, {
           headers: { "Accept": "text/vnd.turbo-stream.html" },
           credentials: "same-origin"
@@ -323,9 +322,15 @@
 
         const streamHtml = await response.text();
         if (streamHtml.trim()) {
+          // container.dataset.engagementOpen already holds the correct value from snapshotEngagement().
+          // Turbo.renderStreamMessage uses Promise microtasks internally; requestAnimationFrame
+          // runs after all pending microtasks AND browser DOM mutations, making it
+          // more reliable than setTimeout(0) for post-render state restoration.
           Turbo.renderStreamMessage(streamHtml);
-          bindEngagementDetails();
-          syncRefreshEligibility();
+          window.requestAnimationFrame(() => {
+            bindEngagementDetails();
+            syncRefreshEligibility();
+          });
         }
         lastRefreshAt = Date.now();
       } catch (_) {

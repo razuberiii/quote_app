@@ -1,0 +1,7 @@
+<%= t("follow_up.mailer.greeting", name: @customer.contact_name.presence || @customer.name) %>
+
+<%= @message %>
+
+<% if @sender.present? %>
+<%= t("follow_up.mailer.signature", sender: @sender.full_name.presence || @sender.email, company_name: @company.name) %>
+<% end %>

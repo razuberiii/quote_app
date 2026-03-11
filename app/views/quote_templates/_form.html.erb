@@ -126,11 +126,21 @@
         <header>
           <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
           <p><%= t("quote_templates.view.form.output_language_hint") %></p>
+          <div class="output-lang-sync-row">
+            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select>
+              <% quote_template.output_locale_options.each do |label, value| %>
+                <option value="<%= value %>"><%= label %></option>
+              <% end %>
+            </select>
+            <button type="button" class="btn btn-sm btn-secondary" data-output-lang-sync-btn>
+              <%= t("quote_templates.view.form.apply_all_locales") %>
+            </button>
+          </div>
         </header>
         <div class="template-form-grid">
           <div>
-            <%= f.label :webview_locale, t("quote_templates.view.form.webview_locale") %>
-            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+            <%= f.label :webview_locale, t("quote_templates.view.form.output_language_webview") %>
+            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { template_preview_target: "webview-locale" } %>
           </div>
           <div>
             <%= f.label :public_link_locale, t("quote_templates.view.form.public_link_locale") %>
@@ -342,8 +352,8 @@
         </div>
         <div class="preview-doc-meta">
           <p><span data-template-preview-number-label><%= quote_template.quotation_number_label.presence || t("quote_templates.view.form.quotation_number_placeholder") %></span><strong>QT-2026-0001</strong></p>
-          <p data-template-preview-valid-until data-visible="<%= quote_template.show_valid_until? %>"><span><%= t("quote_document.labels.valid_until") %></span><strong>2026-04-02</strong></p>
-          <p data-template-preview-customer-owner data-visible="<%= quote_template.show_customer_owner? %>"><span><%= t("quote_document.labels.sales_owner") %></span><strong>Amy Chen</strong></p>
+          <p data-template-preview-valid-until data-visible="<%= quote_template.show_valid_until? %>"><span data-preview-i18n-label="valid_until"><%= t("quote_document.labels.valid_until") %></span><strong>2026-04-02</strong></p>
+          <p data-template-preview-customer-owner data-visible="<%= quote_template.show_customer_owner? %>"><span data-preview-i18n-label="sales_owner"><%= t("quote_document.labels.sales_owner") %></span><strong>Amy Chen</strong></p>
         </div>
         <div class="preview-table preview-table-rich">
           <div class="preview-table-head">
@@ -366,15 +376,15 @@
           <div class="preview-table-row"><span data-template-preview-item-desc-3>Installation kit</span><span data-template-preview-item-qty-3>3</span><span data-template-preview-amount data-template-preview-item-unit-3 data-raw-amount="130"></span><span data-template-preview-amount data-template-preview-item-line-3 data-raw-amount="390"></span></div>
         </div>
         <div class="preview-summary">
-          <p><span><%= t("quote_document.labels.subtotal") %></span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
-          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span><%= t("quote_document.labels.tax_vat") %></span><strong data-template-preview-amount data-template-preview-tax-amount data-raw-amount="281"></strong></p>
-          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span><%= t("quote_document.labels.shipping") %></span><strong data-template-preview-amount data-template-preview-shipping-amount data-raw-amount="120"></strong></p>
-          <p class="preview-total"><span><%= t("quote_document.labels.grand_total") %></span><strong data-template-preview-amount data-template-preview-grand-total data-raw-amount="3211"></strong></p>
+          <p><span data-preview-i18n-label="subtotal"><%= t("quote_document.labels.subtotal") %></span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
+          <p data-template-preview-tax data-visible="<%= quote_template.show_tax? %>"><span data-preview-i18n-label="tax_vat"><%= t("quote_document.labels.tax_vat") %></span><strong data-template-preview-amount data-template-preview-tax-amount data-raw-amount="281"></strong></p>
+          <p data-template-preview-shipping data-visible="<%= quote_template.show_shipping? %>"><span data-preview-i18n-label="shipping"><%= t("quote_document.labels.shipping") %></span><strong data-template-preview-amount data-template-preview-shipping-amount data-raw-amount="120"></strong></p>
+          <p class="preview-total"><span data-preview-i18n-label="grand_total"><%= t("quote_document.labels.grand_total") %></span><strong data-template-preview-amount data-template-preview-grand-total data-raw-amount="3211"></strong></p>
           <p class="preview-closing" data-template-preview-closing data-visible="<%= quote_template.show_closing_message? %>"><%= quote_template.resolved_closing_message.presence || QuoteTemplate::DEFAULT_CLOSING_MESSAGE %></p>
         </div>
         <div class="preview-meta">
-          <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong><%= t("quote_document.labels.payment_terms") %>:</strong> TT 30% deposit, 70% before shipment</p>
-          <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong><%= t("quote_document.labels.notes") %>:</strong> Price valid for 30 days.</p>
+          <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong><span data-preview-i18n-label="payment_terms"><%= t("quote_document.labels.payment_terms") %></span>:</strong> TT 30% deposit, 70% before shipment</p>
+          <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong><span data-preview-i18n-label="notes"><%= t("quote_document.labels.notes") %></span>:</strong> Price valid for 30 days.</p>
           <% if quote_template.signature_image.attached? %>
             <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="<%= t("quote_templates.view.form.signature_preview_alt") %>" class="quote-sales-signature-image"></p>
           <% else %>
@@ -405,6 +415,45 @@
 <% end %>
 
 <script>
+  const PREVIEW_I18N = <%= {
+    "en" => {
+      "valid_until"    => I18n.t("quote_document.labels.valid_until",   locale: "en"),
+      "sales_owner"    => I18n.t("quote_document.labels.sales_owner",   locale: "en"),
+      "subtotal"       => I18n.t("quote_document.labels.subtotal",      locale: "en"),
+      "tax_vat"        => I18n.t("quote_document.labels.tax_vat",       locale: "en"),
+      "shipping"       => I18n.t("quote_document.labels.shipping",      locale: "en"),
+      "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: "en"),
+      "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: "en"),
+      "notes"          => I18n.t("quote_document.labels.notes",         locale: "en"),
+      "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: "en"),
+      "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: "en"),
+    },
+    "zh-CN" => {
+      "valid_until"    => I18n.t("quote_document.labels.valid_until",   locale: :"zh-CN"),
+      "sales_owner"    => I18n.t("quote_document.labels.sales_owner",   locale: :"zh-CN"),
+      "subtotal"       => I18n.t("quote_document.labels.subtotal",      locale: :"zh-CN"),
+      "tax_vat"        => I18n.t("quote_document.labels.tax_vat",       locale: :"zh-CN"),
+      "shipping"       => I18n.t("quote_document.labels.shipping",      locale: :"zh-CN"),
+      "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"zh-CN"),
+      "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"zh-CN"),
+      "notes"          => I18n.t("quote_document.labels.notes",         locale: :"zh-CN"),
+      "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"zh-CN"),
+      "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"zh-CN"),
+    },
+    "es-419" => {
+      "valid_until"    => I18n.t("quote_document.labels.valid_until",   locale: :"es-419"),
+      "sales_owner"    => I18n.t("quote_document.labels.sales_owner",   locale: :"es-419"),
+      "subtotal"       => I18n.t("quote_document.labels.subtotal",      locale: :"es-419"),
+      "tax_vat"        => I18n.t("quote_document.labels.tax_vat",       locale: :"es-419"),
+      "shipping"       => I18n.t("quote_document.labels.shipping",      locale: :"es-419"),
+      "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"es-419"),
+      "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"es-419"),
+      "notes"          => I18n.t("quote_document.labels.notes",         locale: :"es-419"),
+      "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"es-419"),
+      "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"es-419"),
+    }
+  }.to_json.html_safe %>;
+
   (() => {
     const form = document.querySelector("[data-template-editor-form]");
     if (!form || form.dataset.previewBound === "true") return;
@@ -792,6 +841,15 @@
       showNode("[data-template-preview-saas-branding]", !!qs("[data-template-preview-toggle='saas-branding']")?.checked);
       updateWatermarkModeUI();
       updateContrastWarning(accent);
+
+      // Update locale-dependent labels in the preview
+      const webviewLocale = qs("[data-template-preview-target='webview-locale']")?.value || "en";
+      const localeLabels = PREVIEW_I18N[webviewLocale] || PREVIEW_I18N["en"];
+      preview.querySelectorAll("[data-preview-i18n-label]").forEach((node) => {
+        const key = node.dataset.previewI18nLabel;
+        if (localeLabels[key]) node.textContent = localeLabels[key];
+      });
+
       updateSaveStatus();
     };
 
@@ -900,5 +958,21 @@
     applyScenario(scenarioNode?.value || "standard");
     updateWatermarkModeUI();
     updatePreview();
+
+    // Sync-all locale button
+    const syncBtn = form.querySelector("[data-output-lang-sync-btn]");
+    const syncSelect = form.querySelector("[data-output-lang-sync-select]");
+    if (syncBtn && syncSelect) {
+      syncBtn.addEventListener("click", () => {
+        const locale = syncSelect.value;
+        ["webview_locale", "public_link_locale", "pdf_locale", "excel_locale"].forEach((name) => {
+          const field = qs(`[name='quote_template[${name}]']`);
+          if (field) {
+            field.value = locale;
+            field.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+        });
+      });
+    }
   })();
 </script>

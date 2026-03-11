@@ -43,12 +43,19 @@ class Quote < ApplicationRecord
     "AUD" => "A$",
     "CAD" => "C$",
     "SGD" => "S$",
-    "HKD" => "HK$"
+    "HKD" => "HK$",
+    "MXN" => "MX$",
+    "BRL" => "R$",
+    "COP" => "COP",
+    "CLP" => "CLP",
+    "PEN" => "S/",
+    "ARS" => "ARS"
   }.freeze
 
   belongs_to :company
   belongs_to :customer
   belongs_to :template, class_name: "QuoteTemplate", optional: true
+  has_many :customer_follow_up_events, dependent: :nullify
   has_many :quote_items, dependent: :destroy
   has_many :quote_shares, dependent: :destroy
   accepts_nested_attributes_for :quote_items,
@@ -99,6 +106,8 @@ class Quote < ApplicationRecord
     query = "%#{query}%"
     where("quote_no ILIKE ? OR currency ILIKE ?", query, query)
   }
+  scope :recent_30_days, -> { where(created_at: 30.days.ago..Time.current) }
+  scope :won_or_lost, -> { where(status: %w[won lost]) }
 
   def title
     custom_title.presence || quote_items.ordered.first&.description.presence || "Quotation #{quote_no}"
@@ -112,14 +121,14 @@ class Quote < ApplicationRecord
     return if win_reason.blank?
     return win_reason_detail if win_reason == "other" && win_reason_detail.present?
 
-    win_reason.humanize
+    self.class.reason_label_for(:win, win_reason, company: company)
   end
 
   def display_loss_reason
     return if loss_reason.blank?
     return loss_reason_detail if loss_reason == "other" && loss_reason_detail.present?
 
-    loss_reason.humanize
+    self.class.reason_label_for(:loss, loss_reason, company: company)
   end
 
   def display_stalled_reason
@@ -230,6 +239,65 @@ class Quote < ApplicationRecord
     return nil if valid_until.blank?
 
     (valid_until - Date.current).to_i
+  end
+
+  def active_for_signal?
+    %w[sent viewed negotiating].include?(status.to_s)
+  end
+
+  def engagement_score
+    score = 0
+    # View count: 2 points each
+    score += view_count * 2
+    # Revision requests: 5 points each
+    score += revision_requests_count * 5
+    # Average view duration: 1 point per minute
+    avg_duration = avg_view_duration_seconds / 60
+    score += avg_duration if avg_duration > 0
+    score
+  end
+
+  def engagement_label
+    case engagement_score
+    when 0..5
+      :cold
+    when 6..15
+      :warm
+    else
+      :hot
+    end
+  end
+
+  def view_count
+    quote_shares.sum(&:view_count).to_i
+  end
+
+  def last_viewed_at
+    share_last_viewed_at =
+      if association(:quote_shares).loaded?
+        quote_shares.map(&:last_viewed_at).compact.max
+      else
+        quote_shares.maximum(:last_viewed_at)
+      end
+
+    [ viewed_at, share_last_viewed_at ].compact.max
+  end
+
+  def revision_requests_count
+    changes_request_count = 0
+    if changes_requested_at.present?
+      # Count revisions created after this quote's first revision request
+      earliest_change_request = Quote.where(quote_no: quote_no).where("changes_requested_at IS NOT NULL").minimum(:changes_requested_at)
+      if earliest_change_request.present?
+        change_request_revisions = Quote.where(quote_no: quote_no).where("created_at >= ?", earliest_change_request).count
+        changes_request_count = change_request_revisions - 1  # Subtract 1 for the initial quote
+      end
+    end
+    changes_request_count
+  end
+
+  def avg_view_duration_seconds
+    quote_shares.map(&:avg_view_duration_seconds).sum / [ quote_shares.count, 1 ].max
   end
 
   def draft?
@@ -455,11 +523,11 @@ class Quote < ApplicationRecord
   end
 
   def reason_values_are_allowed
-    if will_save_change_to_win_reason? && win_reason.present? && !WIN_REASONS.include?(win_reason)
+    if will_save_change_to_win_reason? && win_reason.present? && !self.class.reason_options_for(:win, company: company).include?(win_reason)
       errors.add(:win_reason, "is not supported")
     end
 
-    if will_save_change_to_loss_reason? && loss_reason.present? && !LOSS_REASONS.include?(loss_reason)
+    if will_save_change_to_loss_reason? && loss_reason.present? && !self.class.reason_options_for(:loss, company: company).include?(loss_reason)
       errors.add(:loss_reason, "is not supported")
     end
 
@@ -477,17 +545,70 @@ class Quote < ApplicationRecord
         .update_all(status: "expired", updated_at: Time.current)
     end
 
-    def reason_options_for(kind)
+    def reason_options_for(kind, company: nil)
+      normalized_kind = kind.to_sym
+
+      reason_option_pairs_for(normalized_kind, company: company).map { |(_label, key)| key }
+    end
+
+    def reason_option_pairs_for(kind, company: nil)
+      normalized_kind = kind.to_sym
+
+      pairs = default_reason_option_pairs_for(normalized_kind)
+
+      if company.present? && normalized_kind.in?([ :win, :loss ]) && defined?(QuoteReasonOption) && QuoteReasonOption.table_exists?
+        configured_reason_option_pairs_for(company, normalized_kind).each do |label, key|
+          index = pairs.index { |(_existing_label, existing_key)| existing_key == key }
+          if index
+            pairs[index] = [ label, key ]
+          else
+            pairs << [ label, key ]
+          end
+        end
+      end
+
+      pairs
+    end
+
+    def reason_label_for(kind, value, company: nil)
+      return if value.blank?
+
+      normalized_kind = kind.to_sym
+      key = value.to_s
+      if company.present? && normalized_kind.in?([ :win, :loss ]) && defined?(QuoteReasonOption) && QuoteReasonOption.table_exists?
+        label = company.quote_reason_options.active.for_kind(normalized_kind).where(key: key).pick(:label)
+        return label if label.present?
+      end
+
+      case normalized_kind
+      when :win
+        I18n.t("analytics.reason_labels.win.#{key}", default: key.humanize)
+      when :loss
+        I18n.t("analytics.reason_labels.loss.#{key}", default: key.humanize)
+      else
+        key.humanize
+      end
+    end
+
+    private
+
+    def default_reason_option_pairs_for(kind)
       case kind.to_sym
       when :win
-        WIN_REASONS
+        WIN_REASONS.reject { |reason| reason == "other" }
+          .map { |reason| [ I18n.t("analytics.reason_labels.win.#{reason}", default: reason.humanize), reason ] }
       when :loss
-        LOSS_REASONS
+        LOSS_REASONS.reject { |reason| reason == "other" }
+          .map { |reason| [ I18n.t("analytics.reason_labels.loss.#{reason}", default: reason.humanize), reason ] }
       when :stalled
-        STALLED_REASONS
+        STALLED_REASONS.map { |reason| [ reason.humanize, reason ] }
       else
         []
       end
+    end
+
+    def configured_reason_option_pairs_for(company, kind)
+      company.quote_reason_options.active.for_kind(kind).ordered.pluck(:label, :key)
     end
   end
 
@@ -501,5 +622,4 @@ class Quote < ApplicationRecord
   def refresh_related_product_stats
     ProductIntelligenceRefresher.refresh_for_quote(self)
   end
-
 end

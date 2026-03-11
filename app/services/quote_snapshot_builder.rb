@@ -8,7 +8,7 @@ class QuoteSnapshotBuilder
     snapshot["customer_name"] = @quote.customer.name
     snapshot["customer_contact_name"] = @quote.customer.contact_name
     snapshot["customer_address"] = @quote.customer.address
-    snapshot["customer_phone"] = @quote.customer.phone
+    snapshot["customer_phone"] = @quote.customer.formatted_phone
     snapshot["customer_email"] = @quote.customer.email
     snapshot["trade_term"] = @quote.trade_term
     snapshot["spec_label"] = @quote.resolved_spec_label

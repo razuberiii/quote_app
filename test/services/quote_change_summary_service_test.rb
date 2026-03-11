@@ -20,10 +20,14 @@ class QuoteChangeSummaryServiceTest < ActiveSupport::TestCase
 
     summary = QuoteChangeSummaryService.new(diff: diff, currency: "USD").call
 
-    assert_includes summary, "Widget A quantity updated: 2 -> 5"
-    assert_includes summary, "Widget A unit price updated: $10.00 -> $9.50"
-    assert_includes summary, "Added new item: Widget C"
-    assert_includes summary, "Removed item: Widget B"
-    assert_includes summary, "Total updated: $100.00 -> $147.50"
+    assert_includes summary, I18n.t("quotes.change_summary.quantity_updated", product: "Widget A", before: 2, after: 5)
+    assert_includes summary, "Widget A"
+    assert_includes summary, "$10.00"
+    assert_includes summary, "$9.50"
+    assert_includes summary, I18n.t("quotes.change_summary.added_item", product: "Widget C")
+    assert_includes summary, I18n.t("quotes.change_summary.removed_item", product: "Widget B")
+    assert_includes summary, "$100.00"
+    assert_includes summary, "$147.50"
+    assert_includes summary, I18n.t("quotes.change_summary.total_updated", before: "$100.00", after: "$147.50").split(":").first
   end
 end

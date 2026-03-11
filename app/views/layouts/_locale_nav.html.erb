@@ -12,7 +12,7 @@
         <% locale_code = item[:locale].to_s %>
         <% active = I18n.locale.to_s == locale_code %>
         <%= link_to item[:label],
-                    url_for(locale: item[:locale]),
+                    locale_switch_url(item[:locale]),
                     class: "locale-nav-link#{active ? " is-active" : ""}",
                     lang: locale_code,
                     hreflang: locale_code,

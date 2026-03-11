@@ -48,7 +48,7 @@
     <div>
       <%= f.label :time_zone, t("users.registrations.view.edit.time_zone") %>
       <%= f.select :time_zone,
-                   options_for_select(time_zone_options_for_select, resource.time_zone.presence || "UTC"),
+                   time_zone_options_for_select(resource.time_zone.presence || "UTC"),
                    {},
                    { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone" } } %>
     </div>

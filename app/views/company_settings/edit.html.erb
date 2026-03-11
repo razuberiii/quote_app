@@ -65,7 +65,7 @@
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_currency].any? %>">
       <%= f.label :default_currency, t("company_settings.view.edit.default_currency") %>
-      <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY], @company.default_currency.presence || "USD") %>
+      <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY MXN BRL COP CLP PEN ARS], @company.default_currency.presence || "USD") %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_validity_days].any? %>">

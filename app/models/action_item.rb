@@ -1,15 +1,27 @@
 class ActionItem < ApplicationRecord
-  ACTION_TYPES = %w[
+  LEGACY_ACTION_TYPES = %w[
     quote_viewed
     quote_not_viewed
     quote_expiring
+  ].freeze
+
+  ACTION_TYPES = %w[
+    follow_up_due
+    win_reason_missing
+    loss_reason_missing
     revision_requested
+    expiring_soon
+    hot_engagement_no_follow_up
+    viewed_no_follow_up
+    not_viewed_3d
+    not_viewed_7d
+    stalled_negotiation
   ].freeze
 
   belongs_to :user
   belongs_to :reference, polymorphic: true
 
-  validates :action_type, inclusion: { in: ACTION_TYPES }
+  validates :action_type, inclusion: { in: ACTION_TYPES + LEGACY_ACTION_TYPES }
   validates :reference_type, :reference_id, presence: true
 
   scope :unresolved, -> { where(resolved_at: nil) }
@@ -20,18 +32,10 @@ class ActionItem < ApplicationRecord
   end
 
   def message
-    case action_type
-    when "quote_viewed"
-      I18n.t("dashboard.logic.action_items.quote_viewed", reference: reference_label)
-    when "quote_not_viewed"
-      I18n.t("dashboard.logic.action_items.quote_not_viewed", reference: reference_label)
-    when "quote_expiring"
-      I18n.t("dashboard.logic.action_items.quote_expiring", reference: reference_label)
-    when "revision_requested"
-      I18n.t("dashboard.logic.action_items.revision_requested", reference: reference_label)
-    else
-      reference_label
-    end
+    return I18n.t("action_items.#{action_type}.label", reference: reference_label) if I18n.exists?("action_items.#{action_type}.label")
+    return I18n.t("dashboard.logic.action_items.#{action_type}", reference: reference_label) if I18n.exists?("dashboard.logic.action_items.#{action_type}")
+
+    I18n.t("signals.#{action_type}", default: reference_label)
   end
 
   def headline
@@ -53,23 +57,21 @@ class ActionItem < ApplicationRecord
     reference_type.to_s
   end
 
-  def link_path
-    return Rails.application.routes.url_helpers.quote_path(reference) if reference.is_a?(Quote)
-    return Rails.application.routes.url_helpers.customer_path(reference) if reference.is_a?(Customer)
-
-    "#"
-  end
-
   def priority
+    return :urgent if %w[win_reason_missing loss_reason_missing].include?(action_type)
+    return :urgent if %w[revision_requested expiring_soon hot_engagement_no_follow_up].include?(action_type)
+    return :watch if action_type == "follow_up_due"
+    return :risk if action_type == "not_viewed_7d"
+    return :watch if %w[viewed_no_follow_up not_viewed_3d stalled_negotiation].include?(action_type)
     return :urgent if action_type == "quote_expiring"
-    return :watch if action_type == "revision_requested"
-    return :watch if action_type == "quote_viewed"
+    return :watch if %w[quote_viewed].include?(action_type)
+    return :normal if action_type == "quote_not_viewed"
 
     :normal
   end
 
   def priority_rank
-    { urgent: 0, watch: 1, normal: 2 }.fetch(priority, 3)
+    { urgent: 0, risk: 1, watch: 2, normal: 3 }.fetch(priority, 4)
   end
 
   private

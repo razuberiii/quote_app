@@ -16,6 +16,7 @@ class Company < ApplicationRecord
   has_many :spec_presets, dependent: :destroy
   has_many :addon_presets, dependent: :destroy
   has_many :quote_templates, dependent: :destroy
+  has_many :quote_reason_options, dependent: :destroy
   has_many :company_documents, dependent: :destroy
   has_many :team_invitations, dependent: :destroy
   has_many :customer_tags, dependent: :destroy

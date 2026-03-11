@@ -2,7 +2,7 @@ class QuotesController < ApplicationController
   require "base64"
 
   before_action :set_customer, only: %i[new create]
-  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive]
+  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive update_outcome_reason]
   before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template]
   before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
   before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
@@ -304,6 +304,20 @@ class QuotesController < ApplicationController
     redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.quote_reopened")
   end
 
+  def update_outcome_reason
+    status = @quote.status.to_s
+    unless %w[won lost].include?(status)
+      redirect_to quote_path(@quote), alert: t("quotes.flash.reason_update_not_available") and return
+    end
+
+    attrs = outcome_reason_params_for(status)
+    if @quote.update(attrs)
+      redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.reason_updated")
+    else
+      redirect_to quote_path(@quote, fill_reason: 1), alert: @quote.errors.full_messages.to_sentence
+    end
+  end
+
   private
 
   def set_customer
@@ -313,6 +327,17 @@ class QuotesController < ApplicationController
   def set_quote
     Quote.expire_overdue_for_company!(current_user.company_id)
     @quote = current_user.company.quotes.not_archived.includes({ quote_items: :product }, :customer, :template, :quote_shares).find(params[:id])
+  end
+
+  def outcome_reason_params_for(status)
+    case status
+    when "won"
+      params.require(:quote).permit(:win_reason, :win_reason_detail)
+    when "lost"
+      params.require(:quote).permit(:loss_reason, :loss_reason_detail)
+    else
+      {}
+    end
   end
 
   def quote_params
@@ -564,6 +589,7 @@ class QuotesController < ApplicationController
   end
 
   def set_decision_review_context
+    @quote_signal = QuoteSignalService.new(@quote).call
     @quote_decision_review = QuoteDecisionReviewService.new(
       quote: @quote,
       revision_diff: @revision_diff

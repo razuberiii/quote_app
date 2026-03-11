@@ -1,5 +1,7 @@
 <% quote = card[:quote] %>
 <% signal = card[:push_signal] %>
+<% signal_presenter = QuoteSignalPresenter.new(locale: I18n.locale) %>
+<% signal_cta = signal[:quote_signal].present? ? signal_presenter.signal_cta(signal: signal[:quote_signal], quote: quote) : nil %>
 <article class="quote-card" onclick="window.location='<%= quote_path(card[:quote]) %>'">
   <div class="quote-card-action-callout <%= "is-urgent" if signal[:state] == "risk" %>">
     <span class="quote-card-callout-label"><%= t("customers.view.quote_card.next_action") %></span>
@@ -65,7 +67,15 @@
   </div>
 
   <div class="quote-card-actions" onclick="event.stopPropagation();">
-    <% if signal[:method] == :post %>
+    <% if signal_cta&.method == :post %>
+      <%= button_to signal_cta.label,
+                    signal_cta.path,
+                    method: :post,
+                    form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" },
+                    class: ui_button_classes(:primary, "quote-action-primary") %>
+    <% elsif signal_cta.present? %>
+      <%= link_to signal_cta.label, signal_cta.path, class: ui_button_classes(:primary, "quote-action-primary") %>
+    <% elsif signal[:method] == :post %>
       <%= button_to signal[:label],
                     signal[:path],
                     method: :post,

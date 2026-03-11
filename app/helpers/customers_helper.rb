@@ -19,4 +19,24 @@ module CustomersHelper
       ])
     end
   end
+
+  def whatsapp_follow_up_link(customer, message)
+    phone = customer&.whatsapp_phone.to_s.gsub(/\D+/, "")
+    return nil if phone.blank?
+    return nil if message.to_s.strip.blank?
+
+    encoded_message = ERB::Util.url_encode(message.to_s)
+    "https://wa.me/#{phone}?text=#{encoded_message}"
+  end
+
+  def follow_up_signal_label(quote_view_status, quote_expiry_status, quote_signal_type = nil)
+    if quote_signal_type.present? && I18n.exists?("follow_up.assistant.signal_labels.#{quote_signal_type}")
+      return quote_signal_type
+    end
+
+    return "expired" if quote_expiry_status.to_s == "expired"
+    return quote_view_status if %w[viewed not_viewed].include?(quote_view_status.to_s)
+
+    "generic"
+  end
 end

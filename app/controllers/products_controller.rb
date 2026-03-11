@@ -26,10 +26,38 @@ class ProductsController < ApplicationController
 
   def show
     reference_scope = @product.quote_items
-      .joins(:quote)
+      .joins(quote: :customer)
       .where(quotes: { company_id: current_user.company_id, archived_at: nil, deleted_at: nil })
     @quote_reference_count = reference_scope.distinct.count("quotes.quote_no")
     @last_referenced_at = reference_scope.maximum("quotes.updated_at")
+    # DISTINCT ON (quotes.quote_no) picks the latest revision per customer engagement,
+    # preventing earlier revisions at different prices from skewing the average.
+    dedup_price_sql = reference_scope
+      .select("DISTINCT ON (quotes.quote_no) quote_items.unit_price")
+      .order("quotes.quote_no, quotes.updated_at DESC")
+      .to_sql
+    @average_quoted_price = ApplicationRecord.connection
+      .select_value("SELECT AVG(unit_price) FROM (#{dedup_price_sql}) AS dedup_prices")
+      &.to_f
+      &.round(2)
+    recent_price_scope = reference_scope
+      .select(
+        "DISTINCT ON (quotes.quote_no) " \
+        "quotes.id AS quote_id, " \
+        "quotes.quote_no, " \
+        "quotes.custom_title, " \
+        "quotes.currency, " \
+        "customers.name AS customer_name, " \
+        "quote_items.unit_price, " \
+        "quote_items.quantity, " \
+        "quotes.updated_at"
+      )
+      .order(Arel.sql("quotes.quote_no, quotes.updated_at DESC"))
+    @recent_quoted_prices = QuoteItem
+      .from("(#{recent_price_scope.to_sql}) recent_quote_prices")
+      .select("recent_quote_prices.*")
+      .order("recent_quote_prices.updated_at DESC")
+      .limit(10)
   end
 
   def new

@@ -60,4 +60,46 @@ class QuoteTest < ActiveSupport::TestCase
     quote.update!(viewed_at: Time.current)
     assert_not quote.can_send_reminder?
   end
+
+  test "won status still requires standardized win reason even when detail is present" do
+    quote = quotes(:one)
+    quote.status = "won"
+    quote.win_reason = nil
+    quote.win_reason_detail = "Client trusted our faster delivery"
+
+    assert_not quote.valid?
+    assert_includes quote.errors[:win_reason], "is required when quote status is Won"
+  end
+
+  test "lost status still requires standardized loss reason even when detail is present" do
+    quote = quotes(:one)
+    quote.status = "lost"
+    quote.loss_reason = nil
+    quote.loss_reason_detail = "Buyer postponed project internally"
+
+    assert_not quote.valid?
+    assert_includes quote.errors[:loss_reason], "is required when quote status is Lost"
+  end
+
+  test "reason option pairs keep defaults and append company dictionary entries" do
+    skip "quote_reason_options table missing" unless defined?(QuoteReasonOption) && QuoteReasonOption.table_exists?
+
+    company = companies(:one)
+    company.quote_reason_options.create!(kind: "win", key: "fast_delivery", label: "Fast Delivery")
+
+    pairs = Quote.reason_option_pairs_for(:win, company: company)
+
+    assert_includes pairs, [ "Fast Delivery", "fast_delivery" ]
+    assert_includes pairs, [ I18n.t("analytics.reason_labels.win.price_accepted", default: "Price accepted"), "price_accepted" ]
+  end
+
+  test "display win reason prefers company dictionary label" do
+    skip "quote_reason_options table missing" unless defined?(QuoteReasonOption) && QuoteReasonOption.table_exists?
+
+    quote = quotes(:one)
+    quote.company.quote_reason_options.create!(kind: "win", key: "faster_delivery", label: "Faster Delivery")
+    quote.win_reason = "faster_delivery"
+
+    assert_equal "Faster Delivery", quote.display_win_reason
+  end
 end

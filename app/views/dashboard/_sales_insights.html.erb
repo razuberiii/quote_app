@@ -1,0 +1,161 @@
+<%# Sales Insights — analytics section rendered at the bottom of the dashboard %>
+<div class="sales-insights-section app-section-stack" id="sales-insights-section">
+  <div class="app-section-heading">
+    <div>
+      <h2><%= t("analytics.sales_insights.title") %></h2>
+      <p class="app-section-caption"><%= t("analytics.sales_insights.subtitle") %></p>
+    </div>
+  </div>
+
+  <div class="sales-insights-grid">
+
+    <%# ── Win / Loss Distribution ──────────────────────────────── %>
+    <%= render "components/ui/card", class: "sales-insight-card sales-insight-card--wide app-surface" do %>
+      <h3 class="sales-insight-card__title"><%= t("analytics.win_loss_distribution.title") %></h3>
+      <div class="sales-insight-card__body sales-insight-win-loss">
+        <div class="sales-insight-subsection">
+          <h4><%= t("analytics.win_loss_distribution.wins_title") %></h4>
+          <% if @analytics_win_loss[:win_reasons].any? %>
+            <ul class="sales-insight-dist-list">
+              <% @analytics_win_loss[:win_reasons].each do |row| %>
+                <li class="sales-insight-dist-item">
+                  <span class="sales-insight-dist-label"><%= row[:label] %></span>
+                  <span class="sales-insight-dist-bar-wrap">
+                    <span class="sales-insight-dist-bar is-win" style="width:<%= row[:pct] %>%"></span>
+                  </span>
+                  <span class="sales-insight-dist-pct"><%= row[:pct] %>%</span>
+                  <span class="sales-insight-dist-count">(<%= row[:count] %>)</span>
+                </li>
+              <% end %>
+            </ul>
+          <% else %>
+            <p class="app-empty-note"><%= t("analytics.win_loss_distribution.no_wins") %></p>
+          <% end %>
+        </div>
+        <div class="sales-insight-subsection">
+          <h4><%= t("analytics.win_loss_distribution.losses_title") %></h4>
+          <% if @analytics_win_loss[:loss_reasons].any? %>
+            <ul class="sales-insight-dist-list">
+              <% @analytics_win_loss[:loss_reasons].each do |row| %>
+                <li class="sales-insight-dist-item">
+                  <span class="sales-insight-dist-label"><%= row[:label] %></span>
+                  <span class="sales-insight-dist-bar-wrap">
+                    <span class="sales-insight-dist-bar is-loss" style="width:<%= row[:pct] %>%"></span>
+                  </span>
+                  <span class="sales-insight-dist-pct"><%= row[:pct] %>%</span>
+                  <span class="sales-insight-dist-count">(<%= row[:count] %>)</span>
+                </li>
+              <% end %>
+            </ul>
+            <% if @analytics_win_loss[:loss_other_details].any? %>
+              <details class="sales-insight-other-details">
+                <summary><%= t("analytics.win_loss_distribution.other_details") %></summary>
+                <ul class="sales-insight-dist-list">
+                  <% @analytics_win_loss[:loss_other_details].each do |row| %>
+                    <li class="sales-insight-dist-item">
+                      <span class="sales-insight-dist-label"><%= row[:detail] %></span>
+                      <span class="sales-insight-dist-count">× <%= row[:count] %></span>
+                    </li>
+                  <% end %>
+                </ul>
+              </details>
+            <% end %>
+          <% else %>
+            <p class="app-empty-note"><%= t("analytics.win_loss_distribution.no_losses") %></p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <%# ── Revision Depth ──────────────────────────────────────── %>
+    <%= render "components/ui/card", class: "sales-insight-card sales-insight-card--wide app-surface" do %>
+      <h3 class="sales-insight-card__title"><%= t("analytics.revision_depth.title") %></h3>
+      <div class="sales-insight-card__body">
+        <% if @analytics_revision.any? %>
+          <div class="table-responsive">
+            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+              <thead>
+                <tr>
+                  <th><%= t("analytics.revision_depth.revision") % { n: "#" } %></th>
+                  <th class="text-right"><%= t("analytics.revision_depth.total") %></th>
+                  <th class="text-right"><%= t("analytics.revision_depth.wins") %></th>
+                  <th class="text-right"><%= t("analytics.revision_depth.win_rate") %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @analytics_revision.each do |row| %>
+                  <tr>
+                    <td><%= t("analytics.revision_depth.revision", n: row[:revision_number]) %></td>
+                    <td class="text-right"><%= row[:total] %></td>
+                    <td class="text-right"><%= row[:wins] %></td>
+                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>"><%= row[:win_rate] %>%</td>
+                  </tr>
+                <% end %>
+              </tbody>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="app-empty-note"><%= t("analytics.revision_depth.no_data") %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# ── Top Products ─────────────────────────────────────────── %>
+    <%= render "components/ui/card", class: "sales-insight-card sales-insight-card--wide app-surface" do %>
+      <h3 class="sales-insight-card__title"><%= t("analytics.product_intelligence.title") %></h3>
+      <div class="sales-insight-card__body">
+        <% if @analytics_top_products.any? %>
+          <div class="table-responsive">
+            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+              <thead>
+                <tr>
+                  <th></th>
+                  <th class="text-right"><%= t("analytics.product_intelligence.quotes_30d") %></th>
+                  <th class="text-right"><%= t("analytics.product_intelligence.wins") %></th>
+                  <th class="text-right"><%= t("analytics.product_intelligence.win_rate") %></th>
+                  <th class="text-right"><%= t("analytics.product_intelligence.avg_price") %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @analytics_top_products.each do |row| %>
+                  <tr>
+                    <td><%= row[:product_name] %></td>
+                    <td class="text-right"><%= row[:quotes_count] %></td>
+                    <td class="text-right"><%= row[:wins_count] %></td>
+                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>"><%= row[:win_rate] %>%</td>
+                    <td class="text-right"><%= number_to_currency(row[:avg_price], precision: 0) %></td>
+                  </tr>
+                <% end %>
+              </tbody>
+            <% end %>
+          </div>
+        <% else %>
+          <p class="app-empty-note"><%= t("analytics.product_intelligence.no_data") %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%# ── Silent Customers ────────────────────────────────────── %>
+    <%= render "components/ui/card", class: "sales-insight-card app-surface" do %>
+      <h3 class="sales-insight-card__title"><%= t("analytics.customer_silent.title") %></h3>
+      <div class="sales-insight-card__body">
+        <% if @analytics_silent_customers.any? %>
+          <ul class="sales-insight-silent-list">
+            <% @analytics_silent_customers.each do |customer| %>
+              <% svc = CustomerEngagementSignalService.new(customer) %>
+              <li class="sales-insight-silent-item">
+                <%= link_to customer.name, customer_path(customer), class: "sales-insight-silent-name" %>
+                <span class="sales-insight-silent-meta">
+                  <%= t("analytics.customer_silent.detail", days: svc.days_since_last_view) %>
+                </span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="app-empty-note"><%= t("analytics.customer_silent.no_silent") %></p>
+        <% end %>
+      </div>
+    <% end %>
+
+  </div><%# /.sales-insights-grid %>
+</div><%# /.sales-insights-section %>

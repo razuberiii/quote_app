@@ -1,6 +1,7 @@
 class QuoteShare < ApplicationRecord
   belongs_to :company
   belongs_to :quote
+  has_many :quote_view_events, dependent: :destroy
 
   validates :token, presence: true, uniqueness: true
   validates :snapshot, presence: true
@@ -14,8 +15,10 @@ class QuoteShare < ApplicationRecord
   def track_view!(country: nil, ip: nil, user_agent: nil)
     now = Time.current
     first_view = false
+    first_view_country = nil
     with_lock do
       first_view = first_viewed_at.blank?
+      first_view_country = country if first_view
       self.view_count = view_count.to_i + 1
       self.first_viewed_at ||= now
       self.last_viewed_at = now
@@ -44,5 +47,22 @@ class QuoteShare < ApplicationRecord
       end
 
     quote.update_columns(viewed_at: now, status: next_status, updated_at: Time.current)
+
+    # Create internal notification on first view only
+    if first_view
+      Notification.create_quote_view_notification(quote, first_view_country)
+    end
+  end
+
+  def avg_view_duration_seconds
+    duration_ms = quote_view_events.average(:duration_ms).to_i
+    (duration_ms / 1000).to_i
+  end
+
+  def avg_view_duration_formatted
+    seconds = avg_view_duration_seconds
+    minutes = seconds / 60
+    secs = seconds % 60
+    "#{minutes}m #{secs}s"
   end
 end

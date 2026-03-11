@@ -1,0 +1,348 @@
+<% can_manage_reason_options = current_user&.can_manage_templates? %>
+<% company_for_reasons = current_user&.company %>
+<% win_reason_items = can_manage_reason_options && company_for_reasons.present? && defined?(QuoteReasonOption) && QuoteReasonOption.table_exists? ? company_for_reasons.quote_reason_options.for_kind(:win).ordered.to_a : [] %>
+<% loss_reason_items = can_manage_reason_options && company_for_reasons.present? && defined?(QuoteReasonOption) && QuoteReasonOption.table_exists? ? company_for_reasons.quote_reason_options.for_kind(:loss).ordered.to_a : [] %>
+<% modal_id ||= "quote-reason-options-modal" %>
+<% current_status ||= nil %>
+
+<% if can_manage_reason_options %>
+  <button type="button" class="<%= ui_button_classes(:secondary) %> js-reason-options-open" data-reason-options-modal-id="<%= modal_id %>">
+    <%= t("quotes.view.form.manage_reason_dictionary") %>
+  </button>
+
+  <div class="quote-turnstile-modal quote-reason-options-modal"
+       id="<%= modal_id %>"
+       data-current-status="<%= current_status %>"
+       data-create-url="<%= quote_reason_options_path %>"
+       hidden>
+    <div class="quote-turnstile-modal__dialog quote-reason-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="<%= "#{modal_id}-title" %>">
+      <button type="button" class="quote-turnstile-modal__close js-reason-options-close" aria-label="<%= t("quotes.view.form.close_reason_dictionary") %>">×</button>
+      <h3 id="<%= "#{modal_id}-title" %>"><%= t("quotes.view.form.reason_dictionary_title") %></h3>
+      <p><%= t("quotes.view.form.reason_dictionary_hint") %></p>
+      <p class="app-subtle-note js-reason-option-feedback" role="status" aria-live="polite"></p>
+
+      <div class="quote-reason-options-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <section data-reason-kind-section="win" data-reason-kind="win">
+          <h4><%= t("quotes.view.form.select_win_reason") %></h4>
+          <ul class="sales-insight-dist-list js-reason-option-list" data-reason-kind="win" <%= "hidden" unless win_reason_items.any? %>>
+              <% win_reason_items.each do |item| %>
+                <li class="sales-insight-dist-item" style="grid-template-columns:minmax(120px,1fr) auto;">
+                  <span class="sales-insight-dist-label"><%= item.label %></span>
+                  <button type="button"
+                          class="<%= ui_button_classes(:secondary) %> js-reason-option-delete"
+                          data-reason-option-id="<%= item.id %>"
+                      data-reason-option-key="<%= item.key %>"
+                          data-reason-option-kind="win"
+                          data-delete-url="<%= quote_reason_option_path(item) %>">
+                    <%= t("quotes.view.form.delete_reason_option") %>
+                  </button>
+                </li>
+              <% end %>
+          </ul>
+          <p class="app-empty-note js-reason-option-empty" data-reason-kind="win" <%= "hidden" if win_reason_items.any? %>><%= t("quotes.view.form.no_custom_reason_options") %></p>
+
+          <div class="js-reason-option-create-panel" data-reason-kind="win">
+            <div class="quote-reason-field" style="margin-top:.5rem;">
+              <label><%= t("quotes.view.form.new_reason_label") %></label>
+              <input type="text" class="<%= ui_input_classes %> js-reason-option-label" required>
+            </div>
+            <div class="quote-reason-field">
+              <label><%= t("quotes.view.form.new_reason_key") %></label>
+              <input type="text" class="<%= ui_input_classes %> js-reason-option-key" placeholder="<%= t("quotes.view.form.reason_key_placeholder") %>">
+              <p class="app-subtle-note"><%= t("quotes.view.form.reason_key_hint") %></p>
+            </div>
+            <button type="button" class="<%= ui_button_classes(:secondary, "quote-reason-option-add-btn js-reason-option-create") %>" data-reason-kind="win">
+              <%= t("quotes.view.form.add_reason_option") %>
+            </button>
+          </div>
+        </section>
+
+        <section data-reason-kind-section="loss" data-reason-kind="loss">
+          <h4><%= t("quotes.view.form.select_loss_reason") %></h4>
+          <ul class="sales-insight-dist-list js-reason-option-list" data-reason-kind="loss" <%= "hidden" unless loss_reason_items.any? %>>
+              <% loss_reason_items.each do |item| %>
+                <li class="sales-insight-dist-item" style="grid-template-columns:minmax(120px,1fr) auto;">
+                  <span class="sales-insight-dist-label"><%= item.label %></span>
+                  <button type="button"
+                          class="<%= ui_button_classes(:secondary) %> js-reason-option-delete"
+                          data-reason-option-id="<%= item.id %>"
+                      data-reason-option-key="<%= item.key %>"
+                          data-reason-option-kind="loss"
+                          data-delete-url="<%= quote_reason_option_path(item) %>">
+                    <%= t("quotes.view.form.delete_reason_option") %>
+                  </button>
+                </li>
+              <% end %>
+          </ul>
+          <p class="app-empty-note js-reason-option-empty" data-reason-kind="loss" <%= "hidden" if loss_reason_items.any? %>><%= t("quotes.view.form.no_custom_reason_options") %></p>
+
+          <div class="js-reason-option-create-panel" data-reason-kind="loss">
+            <div class="quote-reason-field" style="margin-top:.5rem;">
+              <label><%= t("quotes.view.form.new_reason_label") %></label>
+              <input type="text" class="<%= ui_input_classes %> js-reason-option-label" required>
+            </div>
+            <div class="quote-reason-field">
+              <label><%= t("quotes.view.form.new_reason_key") %></label>
+              <input type="text" class="<%= ui_input_classes %> js-reason-option-key" placeholder="<%= t("quotes.view.form.reason_key_placeholder") %>">
+              <p class="app-subtle-note"><%= t("quotes.view.form.reason_key_hint") %></p>
+            </div>
+            <button type="button" class="<%= ui_button_classes(:secondary, "quote-reason-option-add-btn js-reason-option-create") %>" data-reason-kind="loss">
+              <%= t("quotes.view.form.add_reason_option") %>
+            </button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      if (window.__quoteReasonOptionsModalBound) return;
+      window.__quoteReasonOptionsModalBound = true;
+
+      const closeModal = (modal) => {
+        if (!modal) return;
+        modal.hidden = true;
+      };
+
+      const normalizeStatus = (status) => String(status || "").trim().toLowerCase();
+
+      const statusToReasonKind = (status) => {
+        const normalized = normalizeStatus(status);
+        if (normalized === "won" || normalized === "accepted") return "win";
+        if (normalized === "lost") return "loss";
+        return null;
+      };
+
+      const resolvePreferredKind = (openButton, modal) => {
+        const formRoot = openButton?.closest("#quote-edit-root");
+        const formStatus = formRoot?.querySelector("[name='quote[status]']")?.value;
+        const modalStatus = modal?.dataset.currentStatus;
+        return statusToReasonKind(formStatus || modalStatus);
+      };
+
+      const syncReasonKindSections = (modal, preferredKind) => {
+        if (!modal) return;
+        const grid = modal.querySelector(".quote-reason-options-grid");
+        const sections = modal.querySelectorAll("[data-reason-kind-section]");
+        let visibleCount = 0;
+
+        sections.forEach((section) => {
+          const kind = section.dataset.reasonKindSection;
+          const visible = !preferredKind || kind === preferredKind;
+          section.hidden = !visible;
+          if (visible) visibleCount += 1;
+        });
+
+        if (grid) {
+          grid.style.gridTemplateColumns = visibleCount <= 1 ? "1fr" : "1fr 1fr";
+        }
+      };
+
+      const setFeedback = (modal, message, isError = false) => {
+        const feedback = modal?.querySelector(".js-reason-option-feedback");
+        if (!feedback) return;
+        feedback.textContent = message || "";
+        feedback.style.color = isError ? "#b42318" : "";
+      };
+
+      const reasonSelectsForKind = (kind) => {
+        const normalizedKind = String(kind || "").trim();
+        if (normalizedKind === "win") {
+          return document.querySelectorAll("select.js-win-reason, select.js-quote-reason-kind[data-reason-kind='win']");
+        }
+        if (normalizedKind === "loss") {
+          return document.querySelectorAll("select.js-loss-reason, select.js-quote-reason-kind[data-reason-kind='loss']");
+        }
+        return [];
+      };
+
+      const upsertReasonOptionIntoSelect = (select, key, label) => {
+        if (!select || !key || !label) return;
+        const options = Array.from(select.options || []);
+        const existing = options.find((option) => option.value === key);
+        if (existing) {
+          existing.textContent = label;
+        } else {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = label;
+          select.appendChild(option);
+        }
+        select.value = key;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      };
+
+      const createReasonListItem = (option) => {
+        const li = document.createElement("li");
+        li.className = "sales-insight-dist-item";
+        li.style.gridTemplateColumns = "minmax(120px,1fr) auto";
+        li.dataset.reasonOptionId = option.id;
+        li.dataset.reasonOptionKind = option.kind;
+
+        const labelSpan = document.createElement("span");
+        labelSpan.className = "sales-insight-dist-label";
+        labelSpan.textContent = option.label;
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "app-ui-button app-ui-button--secondary inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.98] js-reason-option-delete";
+        delBtn.dataset.reasonOptionId = String(option.id);
+        delBtn.dataset.reasonOptionKey = option.key;
+        delBtn.dataset.reasonOptionKind = option.kind;
+        delBtn.dataset.deleteUrl = `/quote_reason_options/${option.id}`;
+        delBtn.textContent = "<%= j(t("quotes.view.form.delete_reason_option")) %>";
+
+        li.appendChild(labelSpan);
+        li.appendChild(delBtn);
+        return li;
+      };
+
+      const syncEmptyState = (modal, kind) => {
+        const list = modal.querySelector(`.js-reason-option-list[data-reason-kind='${kind}']`);
+        const empty = modal.querySelector(`.js-reason-option-empty[data-reason-kind='${kind}']`);
+        if (!list || !empty) return;
+        const hasItems = list.querySelectorAll(".sales-insight-dist-item").length > 0;
+        list.hidden = !hasItems;
+        empty.hidden = hasItems;
+      };
+
+      const submitCreateForm = async (panel) => {
+        const modal = panel.closest(".quote-reason-options-modal");
+        const csrf = document.querySelector("meta[name='csrf-token']")?.content || "";
+        const kind = panel.dataset.reasonKind;
+        const labelInput = panel.querySelector(".js-reason-option-label");
+        const keyInput = panel.querySelector(".js-reason-option-key");
+        const label = (labelInput?.value || "").trim();
+        const key = (keyInput?.value || "").trim();
+
+        if (!label) {
+          setFeedback(modal, "<%= j(t("quotes.view.form.save_failed")) %>", true);
+          labelInput?.focus();
+          return;
+        }
+
+        const payload = new URLSearchParams();
+        payload.set("quote_reason_option[kind]", kind);
+        payload.set("quote_reason_option[label]", label);
+        payload.set("quote_reason_option[key]", key);
+
+        setFeedback(modal, "<%= j(t("quotes.view.form.saving")) %>");
+
+        try {
+          const response = await fetch(modal.dataset.createUrl, {
+            method: "POST",
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-Token": csrf,
+              "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+            },
+            body: payload.toString()
+          });
+
+          const data = await response.json();
+          if (!response.ok) {
+            setFeedback(modal, data.message || "<%= j(t("quotes.view.form.save_failed")) %>", true);
+            return;
+          }
+
+          const createdKind = data.kind || kind;
+          reasonSelectsForKind(createdKind).forEach((select) => upsertReasonOptionIntoSelect(select, data.key, data.label));
+
+          const list = modal.querySelector(`.js-reason-option-list[data-reason-kind='${createdKind}']`);
+          if (list) {
+            list.appendChild(createReasonListItem(data));
+          }
+          syncEmptyState(modal, createdKind);
+
+          if (labelInput) labelInput.value = "";
+          if (keyInput) keyInput.value = "";
+          setFeedback(modal, "<%= j(t("quotes.view.form.reason_option_added")) %>");
+        } catch (_error) {
+          setFeedback(modal, "<%= j(t("quotes.view.form.network_error")) %>", true);
+        }
+      };
+
+      const deleteReasonOption = async (button) => {
+        const modal = button.closest(".quote-reason-options-modal");
+        const csrf = document.querySelector("meta[name='csrf-token']")?.content || "";
+        const kind = button.dataset.reasonOptionKind;
+        const key = button.dataset.reasonOptionKey || "";
+        const confirmed = window.confirm("<%= j(t("quotes.view.form.delete_reason_option_confirm")) %>");
+        if (!confirmed) return;
+
+        setFeedback(modal, "<%= j(t("quotes.view.form.saving")) %>");
+
+        try {
+          const response = await fetch(button.dataset.deleteUrl, {
+            method: "DELETE",
+            headers: {
+              "Accept": "application/json",
+              "X-CSRF-Token": csrf
+            }
+          });
+
+          if (!response.ok) {
+            setFeedback(modal, "<%= j(t("quotes.view.form.save_failed")) %>", true);
+            return;
+          }
+
+          button.closest(".sales-insight-dist-item")?.remove();
+          syncEmptyState(modal, kind);
+
+          reasonSelectsForKind(kind).forEach((select) => {
+            const current = Array.from(select.options || []).find((option) => option.value === key);
+            if (current) current.remove();
+          });
+          setFeedback(modal, "<%= j(t("quote_reason_options.flash.deleted", default: "Reason option deleted.")) %>");
+        } catch (_error) {
+          setFeedback(modal, "<%= j(t("quotes.view.form.network_error")) %>", true);
+        }
+      };
+
+      document.addEventListener("click", (event) => {
+        const openButton = event.target.closest(".js-reason-options-open");
+        if (openButton) {
+          event.preventDefault();
+          const modal = document.getElementById(openButton.dataset.reasonOptionsModalId);
+          if (!modal) return;
+          syncReasonKindSections(modal, resolvePreferredKind(openButton, modal));
+          modal.hidden = false;
+          return;
+        }
+
+        const closeButton = event.target.closest(".js-reason-options-close");
+        if (closeButton) {
+          event.preventDefault();
+          closeModal(closeButton.closest(".quote-reason-options-modal"));
+          return;
+        }
+
+        if (event.target.classList.contains("quote-reason-options-modal")) {
+          closeModal(event.target);
+          return;
+        }
+
+        const createButton = event.target.closest(".js-reason-option-create");
+        if (createButton) {
+          event.preventDefault();
+          const panel = createButton.closest(".js-reason-option-create-panel");
+          if (!panel) return;
+          submitCreateForm(panel);
+          return;
+        }
+
+        const deleteButton = event.target.closest(".js-reason-option-delete");
+        if (deleteButton) {
+          event.preventDefault();
+          deleteReasonOption(deleteButton);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        document.querySelectorAll(".quote-reason-options-modal").forEach((modal) => closeModal(modal));
+      });
+    })();
+  </script>
+<% end %>

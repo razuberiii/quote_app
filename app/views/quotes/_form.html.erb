@@ -76,7 +76,7 @@
         </div>
         <div>
           <%= f.label :currency %>
-          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD" ], {}, { class: ui_input_classes } %>
+          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD", "MXN", "BRL", "COP", "CLP", "PEN", "ARS" ], {}, { class: ui_input_classes } %>
         </div>
         <div>
           <%= f.label :issued_on, t("quotes.view.form.quote_date") %>
@@ -139,18 +139,18 @@
           <%= f.label :notes %>
           <%= f.text_area :notes, rows: 3, placeholder: t("quotes.view.form.internal_notes_placeholder"), class: ui_input_classes %>
         </div>
-        <div class="quote-conditional" data-show-when-status="won">
+        <div class="quote-conditional" data-show-when-status="won,accepted">
           <%= f.label :final_amount, t("quotes.view.form.final_amount") %>
           <%= f.number_field :final_amount, step: 0.01, class: ui_input_classes("js-final-amount") %>
         </div>
-        <div class="quote-conditional" data-show-when-status="won">
+        <div class="quote-conditional" data-show-when-status="won,accepted">
           <%= f.label :win_reason %>
           <%= f.select :win_reason,
-                       Quote.reason_options_for(:win).map { |reason| [reason.humanize, reason] },
+                       Quote.reason_option_pairs_for(:win, company: quote.company),
                        { include_blank: t("quotes.view.form.select_win_reason") },
-                       { class: ui_input_classes("js-win-reason") } %>
+                       { class: ui_input_classes("js-win-reason"), data: { reason_kind: "win" } } %>
         </div>
-        <div class="quote-conditional quote-conditional-detail" data-show-when-status="won" data-reason-detail-for="win">
+        <div class="quote-conditional quote-conditional-detail" data-show-when-status="won,accepted" data-reason-detail-for="win">
           <%= f.label :win_reason_detail, t("quotes.view.form.win_reason_details") %>
           <%= f.text_field :win_reason_detail,
                            placeholder: t("quotes.view.form.win_reason_details_placeholder"),
@@ -159,9 +159,14 @@
         <div class="quote-conditional" data-show-when-status="lost">
           <%= f.label :loss_reason %>
           <%= f.select :loss_reason,
-                       Quote.reason_options_for(:loss).map { |reason| [reason.humanize, reason] },
+                       Quote.reason_option_pairs_for(:loss, company: quote.company),
                        { include_blank: t("quotes.view.form.select_loss_reason") },
-                       { class: ui_input_classes("js-loss-reason") } %>
+                       { class: ui_input_classes("js-loss-reason"), data: { reason_kind: "loss" } } %>
+        </div>
+        <div class="quote-conditional quote-form-grid-span-2" data-show-when-status="won,accepted,lost">
+          <%= render "shared/quote_reason_options_modal",
+                     modal_id: "quote-reason-options-modal-form-#{quote.id || "new"}",
+                     current_status: quote.status %>
         </div>
         <div class="quote-conditional quote-conditional-detail" data-show-when-status="lost" data-reason-detail-for="loss">
           <%= f.label :loss_reason_detail, t("quotes.view.form.loss_reason_details") %>
@@ -443,6 +448,7 @@
       viewed: "<%= j(t('quotes.view.form.status_options.viewed')) %>",
       negotiating: "<%= j(t('quotes.view.form.status_options.negotiating')) %>",
       won: "<%= j(t('quotes.view.form.status_options.won')) %>",
+      accepted: "<%= j(t('quotes.view.form.status_options.won')) %>",
       lost: "<%= j(t('quotes.view.form.status_options.lost')) %>",
       expired: "<%= j(t('quotes.view.form.status_options.expired')) %>"
     };
@@ -452,6 +458,7 @@
       viewed: "app-status-badge app-status-badge--indigo",
       negotiating: "app-status-badge app-status-badge--amber",
       won: "app-status-badge app-status-badge--green",
+      accepted: "app-status-badge app-status-badge--green",
       lost: "app-status-badge app-status-badge--red",
       expired: "app-status-badge app-status-badge--red"
     };
@@ -806,7 +813,7 @@
 
     function applyStatusUI() {
       if (!statusInput) return;
-      const status = (statusInput.value || "draft").toLowerCase();
+      const status = (statusInput.value || "draft").toString().trim().toLowerCase();
       const label = statusLabels[status] || status;
       if (statusText) statusText.textContent = label;
       if (statusBadge) {
@@ -827,8 +834,10 @@
         });
       });
 
-      if (finalAmountInput) finalAmountInput.required = status === "won" && !finalAmountInput.disabled;
-      if (winReasonInput) winReasonInput.required = status === "won" && !winReasonInput.disabled;
+      const wonLike = status === "won" || status === "accepted";
+
+      if (finalAmountInput) finalAmountInput.required = wonLike && !finalAmountInput.disabled;
+      if (winReasonInput) winReasonInput.required = wonLike && !winReasonInput.disabled;
       if (lossReasonInput) lossReasonInput.required = status === "lost" && !lossReasonInput.disabled;
       if (stalledReasonInput) stalledReasonInput.required = false;
 
@@ -851,7 +860,7 @@
         }
       });
 
-      if (status === "won" && finalAmountInput && !String(finalAmountInput.value || "").trim()) {
+      if (wonLike && finalAmountInput && !String(finalAmountInput.value || "").trim()) {
         const totals = calculateTotals();
         finalAmountInput.value = totals.grandTotal.toFixed(2);
       }

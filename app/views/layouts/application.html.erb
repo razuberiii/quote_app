@@ -113,6 +113,8 @@
                 <%= link_to t("account.logout"), destroy_user_session_path, class: "app-dropdown-link account-dropdown-link", data: { turbo_method: :delete } %>
               </div>
             </div>
+            <%# Notification bell %>
+            <%= render "layouts/notification_bell" %>
             <div class="locale-nav-item">
               <%= render "layouts/locale_nav" %>
             </div>
@@ -465,16 +467,33 @@
             window.__accountMenuOutsideBound = true;
 
             document.addEventListener("click", (event) => {
-              const insideAccountMenu = event.target.closest(".account-menu");
-              if (insideAccountMenu) return;
-              clearCloseTimer();
-              closeAccountMenu();
+              if (event.target.closest(".account-menu")) return;
+              const _menu = document.querySelector(".account-menu");
+              const _dropdown = document.getElementById("account-dropdown");
+              if (!_menu || !_dropdown || _dropdown.hidden) return;
+              if (_menu.dataset.closeTimer) {
+                window.clearTimeout(Number(_menu.dataset.closeTimer));
+                _menu.dataset.closeTimer = "";
+              }
+              _menu.classList.remove("is-open");
+              _menu.dataset.pinned = "false";
+              _dropdown.hidden = true;
+              _menu.querySelector("[aria-controls='account-dropdown']")?.setAttribute("aria-expanded", "false");
             });
 
             document.addEventListener("keydown", (event) => {
               if (event.key !== "Escape") return;
-              clearCloseTimer();
-              closeAccountMenu();
+              const _menu = document.querySelector(".account-menu");
+              const _dropdown = document.getElementById("account-dropdown");
+              if (!_menu || !_dropdown || _dropdown.hidden) return;
+              if (_menu.dataset.closeTimer) {
+                window.clearTimeout(Number(_menu.dataset.closeTimer));
+                _menu.dataset.closeTimer = "";
+              }
+              _menu.classList.remove("is-open");
+              _menu.dataset.pinned = "false";
+              _dropdown.hidden = true;
+              _menu.querySelector("[aria-controls='account-dropdown']")?.setAttribute("aria-expanded", "false");
             });
           }
         };
@@ -486,8 +505,7 @@
           setupNavGroups();
           setupAccountMenu();
 
-          const container = document.querySelector(".navbar-container");
-          const toggle = document.querySelector(".navbar-toggle");
+          const container = document.querySelector(".navbar-container");          const toggle = document.querySelector(".navbar-toggle");
           if (container && toggle && toggle.dataset.bound !== "true") {
             toggle.dataset.bound = "true";
 
@@ -500,6 +518,35 @@
 
         onLoad();
         document.addEventListener("turbo:load", onLoad);
+
+        // Realtime notification badge polling (every 30 seconds)
+        <% if user_signed_in? %>
+        (() => {
+          if (window.__notifPollBound) return;
+          window.__notifPollBound = true;
+
+          const updateBadge = (count) => {
+            const badge = document.getElementById("notification-badge-count");
+            if (!badge) return;
+            badge.textContent = count > 9 ? "9+" : String(count);
+            badge.hidden = count === 0;
+          };
+
+          const pollUnreadCount = async () => {
+            try {
+              const resp = await fetch("<%= unread_count_notifications_path %>", {
+                headers: { "Accept": "application/json", "X-Requested-With": "XMLHttpRequest" },
+                credentials: "same-origin"
+              });
+              if (!resp.ok) return;
+              const { count } = await resp.json();
+              updateBadge(count);
+            } catch (_) {}
+          };
+
+          window.setInterval(pollUnreadCount, 30000);
+        })();
+        <% end %>
       })();
     </script>
   </body>

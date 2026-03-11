@@ -48,7 +48,10 @@
       <p><strong>Company:</strong> <%= @quote.customer.name.presence || "-" %></p>
       <p><strong>Primary Contact:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
       <p><strong>Email:</strong> <%= @quote.customer.email.presence || "-" %></p>
-      <p><strong>Phone:</strong> <%= @quote.customer.phone.presence || "-" %></p>
+      <p><strong>Phone:</strong> <%= @quote.customer.formatted_phone.presence || "-" %></p>
+      <% if @quote.customer.tax_id.present? %>
+        <p><strong>Tax ID:</strong> <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
+      <% end %>
       <p><strong>Address:</strong> <%= @quote.customer.address.presence || "-" %></p>
     </article>
 

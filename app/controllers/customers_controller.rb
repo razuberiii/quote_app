@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up]
+  before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp]
   before_action :set_customer_form_collections, only: %i[new create edit update]
 
   def index
@@ -106,16 +106,34 @@ class CustomersController < ApplicationController
     }
 
     latest_quote = @quote_cards.max_by { |card| card[:updated_at] || Time.at(0) }
+    assistant = FollowUpAssistantService.new(
+      customer: @customer,
+      url_options: follow_up_url_options
+    )
+    @follow_up_assistant_quote = assistant.relevant_quote
+    @follow_up_quote_signal = quote_signal_for(@follow_up_assistant_quote)
+    @follow_up_quote_view_status = follow_up_quote_view_status(@follow_up_assistant_quote)
+    @follow_up_quote_expiry_status = follow_up_quote_expiry_status(@follow_up_assistant_quote)
+    @suggested_follow_up_message = FollowUpAssistantService.new(
+      customer: @customer,
+      latest_quote: @follow_up_assistant_quote,
+      quote_view_status: @follow_up_quote_view_status,
+      quote_expiry_status: @follow_up_quote_expiry_status,
+      quote_signal: @follow_up_quote_signal,
+      url_options: follow_up_url_options
+    ).call
+    @customer_follow_up_events = @customer.customer_follow_up_events.includes(:user, :quote).recent_first.to_a
     @customer_summary = {
       total_quotes: @quote_cards.count,
       latest_quote_at: latest_quote&.dig(:updated_at),
       sales_stage: @customer.status_label,
       last_follow_up_at: @customer.last_follow_up_date
     }
+    @best_contact_time = CustomerEngagementAnalyticsService.new(@customer).best_contact_time
     @follow_up_tasks = build_follow_up_tasks(@customer, @quote_cards)
     @visible_follow_up_tasks = @follow_up_tasks.first(2)
     @hidden_follow_up_tasks = @follow_up_tasks.drop(2)
-    @timeline_events = build_customer_timeline(@customer, @quote_cards, all_customer_quotes)
+    @timeline_events = build_customer_timeline(@customer, @quote_cards, all_customer_quotes, @customer_follow_up_events)
     @high_signal_timeline_events = @timeline_events.select { |event| event[:category] == "high_signal" }
     @system_timeline_events = @timeline_events.select { |event| event[:category] == "system_activity" }
     @visible_high_signal_timeline_events = @high_signal_timeline_events.first(7)
@@ -174,7 +192,13 @@ class CustomersController < ApplicationController
   end
 
   def mark_follow_up
-    @customer.mark_followed_today!
+    @customer.mark_followed_today!(
+      user: current_user,
+      channel: "manual",
+      quote: requested_follow_up_quote,
+      note: nil,
+      metadata: follow_up_metadata(source: "mark_follow_up")
+    )
     redirect_to @customer, notice: t("customers.flash.follow_up_marked_today", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
   end
 
@@ -194,7 +218,165 @@ class CustomersController < ApplicationController
     end
   end
 
+  def log_follow_up
+    @customer.mark_followed_today!(
+      user: current_user,
+      channel: "manual",
+      quote: requested_follow_up_quote || latest_follow_up_quote,
+      note: follow_up_message.presence,
+      metadata: follow_up_metadata(source: "assistant_log")
+    )
+
+    redirect_to @customer, notice: t("follow_up.flash.logged", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
+  end
+
+  def send_follow_up_email
+    unless verify_turnstile_for_html!(
+      token: params[:cf_turnstile_response],
+      on_missing: -> { redirect_to @customer, alert: t("follow_up.flash.email_verification_required") },
+      on_failed: -> { redirect_to @customer, alert: t("follow_up.flash.email_verification_failed") }
+    )
+      return
+    end
+
+    quote = requested_follow_up_quote || latest_follow_up_quote
+    message = follow_up_message(quote)
+
+    if @customer.email.blank?
+      redirect_to @customer, alert: t("follow_up.flash.email_missing") and return
+    end
+
+    FollowUpMailer.with(customer: @customer, message: message, sender: current_user, quote: quote).follow_up_email.deliver_now
+    @customer.mark_followed_today!(
+      user: current_user,
+      channel: "email",
+      quote: quote,
+      note: message,
+      metadata: follow_up_metadata(source: "assistant_email", quote: quote)
+    )
+
+    redirect_to @customer, notice: t("follow_up.flash.email_sent", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
+  rescue StandardError => e
+    Rails.logger.error("Follow-up email failed: #{e.class} #{e.message}")
+    redirect_to @customer, alert: t("follow_up.flash.email_failed")
+  end
+
+  def send_follow_up_whatsapp
+    quote = requested_follow_up_quote || latest_follow_up_quote
+    message = follow_up_message(quote)
+    url = helpers.whatsapp_follow_up_link(@customer, message)
+
+    if url.blank?
+      respond_to do |format|
+        format.json { render json: { message: t("follow_up.flash.whatsapp_unavailable") }, status: :unprocessable_entity }
+        format.html { redirect_to @customer, alert: t("follow_up.flash.whatsapp_unavailable") }
+      end
+      return
+    end
+
+    @customer.mark_followed_today!(
+      user: current_user,
+      channel: "whatsapp",
+      quote: quote,
+      note: message,
+      metadata: follow_up_metadata(source: "assistant_whatsapp", quote: quote)
+    )
+
+    respond_to do |format|
+      format.json do
+        render json: {
+          url: url,
+          redirect_url: customer_path(@customer),
+          notice: t("follow_up.flash.whatsapp_logged", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
+        }
+      end
+      format.html { redirect_to url, allow_other_host: true }
+    end
+  rescue StandardError => e
+    Rails.logger.error("Follow-up WhatsApp failed: #{e.class} #{e.message}")
+    respond_to do |format|
+      format.json { render json: { message: t("follow_up.flash.whatsapp_failed") }, status: :internal_server_error }
+      format.html { redirect_to @customer, alert: t("follow_up.flash.whatsapp_failed") }
+    end
+  end
+
   private
+
+  def follow_up_params
+    params.fetch(:follow_up, {}).permit(:message, :quote_id)
+  end
+
+  def requested_follow_up_quote
+    return @requested_follow_up_quote if defined?(@requested_follow_up_quote)
+
+    quote_id = follow_up_params[:quote_id].presence
+    @requested_follow_up_quote = quote_id.present? ? @customer.quotes.not_archived.find_by(id: quote_id) : nil
+  end
+
+  def latest_follow_up_quote
+    return @latest_follow_up_quote if defined?(@latest_follow_up_quote)
+
+    quotes = @customer.quotes.includes(:quote_items, :quote_shares).order(:quote_no, :revision_number).to_a
+    @latest_follow_up_quote = active_quotes_collection(quotes).max_by { |quote| quote.updated_at || Time.at(0) }
+  end
+
+  def follow_up_message(quote = nil)
+    explicit_message = follow_up_params[:message].to_s.strip
+    return explicit_message if explicit_message.present?
+
+    quote ||= requested_follow_up_quote || latest_follow_up_quote
+    signal = quote_signal_for(quote)
+    FollowUpAssistantService.new(
+      customer: @customer,
+      latest_quote: quote,
+      quote_view_status: follow_up_quote_view_status(quote),
+      quote_expiry_status: follow_up_quote_expiry_status(quote),
+      quote_signal: signal,
+      url_options: follow_up_url_options
+    ).call
+  end
+
+  def follow_up_metadata(source:, quote: nil)
+    quote ||= requested_follow_up_quote || latest_follow_up_quote
+
+    {
+      source: source,
+      quote_no: quote&.quote_no,
+      quote_view_status: follow_up_quote_view_status(quote),
+      quote_expiry_status: follow_up_quote_expiry_status(quote),
+      quote_signal: quote_signal_for(quote)&.type
+    }.compact
+  end
+
+  def quote_signal_for(quote)
+    return nil if quote.blank?
+
+    @quote_signal_map ||= {}
+    @quote_signal_map[quote.id] ||= QuoteSignalService.new(quote).call
+  end
+
+  def follow_up_quote_view_status(quote)
+    return "unknown" if quote.blank?
+    return "viewed" if quote.viewed_at.present? || quote.workflow_state == "viewed"
+    return "not_viewed" if quote.sent_at.present? && quote.viewed_at.blank?
+
+    "generic"
+  end
+
+  def follow_up_quote_expiry_status(quote)
+    return "active" if quote.blank?
+    return "expired" if quote.workflow_state == "expired" || quote.expired_by_date?
+
+    "active"
+  end
+
+  def follow_up_url_options
+    {
+      host: request.host,
+      protocol: request.protocol.delete_suffix("://"),
+      port: request.optional_port
+    }
+  end
 
   def set_customer
     @customer = current_user.company.customers.find(params[:id])
@@ -207,6 +389,7 @@ class CustomersController < ApplicationController
       :address,
       :contact_name,
       :email,
+      :phone_country_code,
       :phone,
       :status,
       :customer_level,
@@ -218,7 +401,9 @@ class CustomersController < ApplicationController
       :next_follow_up_date,
       :last_follow_up_date,
       :notes,
-      :avatar
+      :avatar,
+      :tax_id,
+      :tax_id_type
     ]
     permitted_keys << :internal_owner_id if Customer.internal_owner_enabled?
     permitted = params.require(:customer).permit(*permitted_keys, customer_tag_ids: [], tag_priority_names: [])
@@ -709,7 +894,8 @@ class CustomersController < ApplicationController
         title: I18n.t("dashboard.logic.action.follow_up_due_today_title", name: customer.name),
         detail: I18n.t("dashboard.logic.action.follow_up_due_today_detail"),
         cta_label: I18n.t("dashboard.logic.action.open_customer"),
-        cta_path: customer_path(customer)
+        cta_path: customer_path(customer),
+        cta_method: :get
       }
     end
 
@@ -720,7 +906,8 @@ class CustomersController < ApplicationController
         title: I18n.t("dashboard.logic.action.overdue_follow_up_title", name: customer.name),
         detail: I18n.t("dashboard.logic.action.overdue_follow_up_detail", days: overdue_days),
         cta_label: I18n.t("dashboard.logic.action.open_customer"),
-        cta_path: customer_path(customer)
+        cta_path: customer_path(customer),
+        cta_method: :get
       }
     end
 
@@ -730,7 +917,8 @@ class CustomersController < ApplicationController
         title: I18n.t("dashboard.logic.action.high_value_stalled_title", name: customer.name),
         detail: I18n.t("dashboard.logic.action.high_value_stalled_detail"),
         cta_label: I18n.t("dashboard.logic.action.open_customer"),
-        cta_path: customer_path(customer)
+        cta_path: customer_path(customer),
+        cta_method: :get
       }
     end
 
@@ -740,7 +928,8 @@ class CustomersController < ApplicationController
         title: I18n.t("dashboard.logic.action.no_recent_follow_up_title", name: customer.name),
         detail: I18n.t("dashboard.logic.action.no_recent_follow_up_detail"),
         cta_label: I18n.t("dashboard.logic.action.open_customer"),
-        cta_path: customer_path(customer)
+        cta_path: customer_path(customer),
+        cta_method: :get
       }
     end
 
@@ -750,29 +939,57 @@ class CustomersController < ApplicationController
         title: I18n.t("dashboard.logic.action.no_follow_up_schedule_title", name: customer.name),
         detail: I18n.t("dashboard.logic.action.no_follow_up_schedule_detail"),
         cta_label: I18n.t("dashboard.logic.action.open_customer"),
-        cta_path: customer_path(customer)
+        cta_path: customer_path(customer),
+        cta_method: :get
       }
     end
 
     latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(customers))
-    stale_cutoff = 7.days.ago
     latest_quotes
-      .select { |quote| quote_display_status(quote) == "negotiating" && quote.updated_at.present? && quote.updated_at <= stale_cutoff }
+      .map { |quote| [ quote, quote_signal_for(quote) ] }
+      .select { |(_, signal)| signal.present? && %w[urgent risk watch].include?(signal.priority) }
+      .sort_by { |(quote, signal)| [ QuoteSignalService.priority_rank(signal.priority), -(quote.updated_at || Time.zone.at(0)).to_i ] }
       .first(4)
-      .each do |quote|
-        stale_days = (Date.current - quote.updated_at.to_date).to_i
-        quote_name = quote_display_name(quote)
+      .each do |quote, signal|
+        cta = action_center_quote_signal_cta(quote, signal)
         items << {
-          priority: "urgent",
-          title: I18n.t("dashboard.logic.action.negotiating_stalled_title", name: quote_name),
-          detail: I18n.t("dashboard.logic.action.negotiating_stalled_detail", days: stale_days),
-          cta_label: I18n.t("dashboard.logic.action.open_quote"),
-          cta_path: quote_path(quote)
+          source: "quote_signal",
+          quote_id: quote.id,
+          recommended_action: signal.recommended_action,
+          priority: signal.priority,
+          title: "#{signal.label} · #{quote_display_name(quote)}",
+          detail: DealRadarService.detail_for_signal(quote, signal),
+          cta_label: cta[:label],
+          cta_path: cta[:path],
+          cta_method: cta[:method]
         }
       end
 
-    order = { "urgent" => 0, "watch" => 1, "normal" => 2 }
+    order = { "urgent" => 0, "risk" => 1, "watch" => 2, "normal" => 3 }
     items.uniq { |item| item[:title] }.sort_by { |item| [ order.fetch(item[:priority], 9), item[:title] ] }.first(9)
+  end
+
+  def action_center_quote_signal_cta(quote, signal)
+    action = signal.recommended_action.to_s
+
+    case action
+    when "renew_quote"
+      { label: signal.cta_label, path: duplicate_quote_path(quote), method: :post }
+    when "prepare_revision"
+      if quote.can_create_new_revision?
+        { label: signal.cta_label, path: duplicate_quote_path(quote), method: :post }
+      else
+        { label: signal.cta_label, path: quote_path(quote), method: :get }
+      end
+    when "resend_reminder"
+      if quote.can_send_reminder?
+        { label: signal.cta_label, path: send_reminder_quote_path(quote), method: :post }
+      else
+        { label: I18n.t("dashboard.view.action_items.open"), path: quote_path(quote), method: :get }
+      end
+    else
+      { label: signal.cta_label, path: quote_path(quote), method: :get }
+    end
   end
 
   def build_decision_snapshot(customers, period)
@@ -887,20 +1104,36 @@ class CustomersController < ApplicationController
   end
 
   def recent_quote_signals(quote, status)
+    signal = quote_signal_for(quote)
     if status == "draft"
       [
         I18n.t("dashboard.logic.signal.draft_not_shared"),
         { label: I18n.t("dashboard.logic.signal.send_now"), path: edit_quote_path(quote), style: "is-watch" }
       ]
-    elsif status == "sent" && quote.viewed_at.blank? && quote.sent_at.present? && quote.sent_at <= 3.days.ago
+    elsif signal&.type == "not_viewed_7d"
+      [
+        I18n.t("signals.not_viewed"),
+        { label: I18n.t("actions.send_reminder"), path: quote_path(quote), style: "is-attention" }
+      ]
+    elsif signal&.type == "not_viewed_3d"
       [
         I18n.t("dashboard.logic.signal.sent_no_view_3d"),
-        { label: I18n.t("dashboard.logic.signal.check_quote"), path: quote_path(quote), style: "is-attention" }
+        { label: I18n.t("actions.send_reminder"), path: quote_path(quote), style: "is-watch" }
       ]
-    elsif status == "sent" && quote.viewed_at.blank?
+    elsif signal&.type == "expiring_soon"
       [
-        I18n.t("dashboard.logic.signal.sent_awaiting_view"),
-        { label: I18n.t("dashboard.logic.signal.check_signal"), path: quote_path(quote), style: "is-watch" }
+        I18n.t("signals.quote_expiring"),
+        { label: I18n.t("actions.renew_quote"), path: duplicate_quote_path(quote), style: "is-attention" }
+      ]
+    elsif signal&.type == "hot_engagement_no_follow_up"
+      [
+        I18n.t("signals.hot_engagement"),
+        { label: I18n.t("actions.follow_up"), path: quote_path(quote), style: "is-primary" }
+      ]
+    elsif signal&.type == "stalled_negotiation"
+      [
+        I18n.t("signals.stalled_negotiation"),
+        { label: I18n.t("actions.follow_up"), path: quote_path(quote), style: "is-watch" }
       ]
     elsif %w[viewed negotiating].include?(status)
       [
@@ -931,6 +1164,7 @@ class CustomersController < ApplicationController
   end
 
   def quote_push_signal(quote, status, customer)
+    signal = quote_signal_for(quote)
     if status == "draft"
       {
         priority: 0,
@@ -941,30 +1175,25 @@ class CustomersController < ApplicationController
         path: edit_quote_path(quote),
         method: :get
       }
-    elsif status == "sent" && quote.viewed_at.blank?
-      sent_days = quote.sent_at.present? ? (Date.current - quote.sent_at.to_date).to_i : 0
-      if sent_days >= 7
-        {
-          priority: 0,
-          state: "risk",
-          summary: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.summary"),
-          detail: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.detail"),
-          label: I18n.t("customers.logic.quote_push_signal.sent_no_view_over_7d.label"),
-          path: quote_path(quote),
-          method: :get
-        }
-      else
-        {
-          priority: 2,
-          state: "watch",
-          summary: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.summary"),
-          detail: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.detail"),
-          label: I18n.t("customers.logic.quote_push_signal.sent_waiting_first_view.label"),
-          path: quote_path(quote),
-          method: :get
-        }
-      end
-    elsif %w[viewed negotiating].include?(status) && viewed_without_follow_up?(quote, customer)
+    elsif signal&.type == "not_viewed_7d"
+      {
+        priority: 0,
+        state: "risk",
+        quote_signal: signal,
+        summary: I18n.t("signals.not_viewed"),
+        detail: I18n.t("signals.detail.not_viewed_7d", days: signal.metadata[:days_since_sent].to_i),
+        label: I18n.t("actions.send_reminder")
+      }
+    elsif signal&.type == "not_viewed_3d"
+      {
+        priority: 2,
+        state: "watch",
+        quote_signal: signal,
+        summary: I18n.t("signals.not_viewed"),
+        detail: I18n.t("signals.detail.not_viewed_3d", days: signal.metadata[:days_since_sent].to_i),
+        label: I18n.t("actions.send_reminder")
+      }
+    elsif signal&.type == "hot_engagement_no_follow_up" || (%w[viewed negotiating].include?(status) && viewed_without_follow_up?(quote, customer))
       {
         priority: 1,
         state: "watch",
@@ -974,15 +1203,14 @@ class CustomersController < ApplicationController
         path: schedule_follow_up_customer_path(customer, days: 3),
         method: :post
       }
-    elsif status == "expired"
+    elsif signal&.type == "expiring_soon" || status == "expired"
       {
         priority: 1,
         state: "risk",
+        quote_signal: signal,
         summary: I18n.t("customers.logic.quote_push_signal.expired.summary"),
         detail: I18n.t("customers.logic.quote_push_signal.expired.detail"),
-        label: I18n.t("customers.logic.quote_push_signal.expired.label"),
-        path: duplicate_quote_path(quote),
-        method: :post
+        label: I18n.t("customers.logic.quote_push_signal.expired.label")
       }
     else
       {
@@ -1313,7 +1541,7 @@ class CustomersController < ApplicationController
     tasks.sort_by { |task| [ priority_order.fetch(task[:priority], 4), task[:title] ] }.first(8)
   end
 
-  def build_customer_timeline(customer, quote_cards, all_quotes = [])
+  def build_customer_timeline(customer, quote_cards, all_quotes = [], follow_up_events = [])
     events = []
     status_lookup = quote_cards.index_by { |card| card[:quote].id }
 
@@ -1325,7 +1553,8 @@ class CustomersController < ApplicationController
       detail: I18n.t("customers.logic.timeline.customer_created_detail", name: customer.name)
     }
 
-    if customer.last_follow_up_date.present?
+    explicit_follow_up_dates = Array(follow_up_events).filter_map { |event| event.contacted_at&.to_date }.uniq
+    if customer.last_follow_up_date.present? && !explicit_follow_up_dates.include?(customer.last_follow_up_date)
       events << {
         at: customer.last_follow_up_date.in_time_zone.end_of_day,
         tone: "good",
@@ -1343,6 +1572,31 @@ class CustomersController < ApplicationController
         category: "system_activity",
         title: I18n.t("customers.logic.timeline.next_follow_up_scheduled_title"),
         detail: customer.next_follow_up_date.strftime("%Y-%m-%d")
+      }
+    end
+
+    Array(follow_up_events).each do |event|
+      actor = event.user&.full_name.presence || event.user&.email
+      detail_parts = []
+      detail_parts << I18n.t("follow_up.timeline.logged_by", user: actor) if actor.present?
+      detail_parts << I18n.t("follow_up.timeline.quote_reference", quote_name: quote_display_name(event.quote)) if event.quote.present?
+      detail_parts << event.note.to_s.truncate(160) if event.note.present?
+
+      tone = case event.channel
+      when "whatsapp", "email"
+        "good"
+      when "manual"
+        "today"
+      else
+        "normal"
+      end
+
+      events << {
+        at: event.contacted_at,
+        tone: tone,
+        category: "high_signal",
+        title: I18n.t("follow_up.timeline.event_title", channel: event.channel_label),
+        detail: detail_parts.reject(&:blank?).join(" • ").presence || I18n.t("follow_up.timeline.event_detail_fallback")
       }
     end
 

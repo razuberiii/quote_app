@@ -4,17 +4,19 @@ class Customer < ApplicationRecord
   CUSTOMER_LEVELS = %w[normal vip distributor key_account].freeze
   CUSTOMER_SOURCES = %w[alibaba exhibition google_seo referral old_customer other].freeze
   PAYMENT_TERMS_OPTIONS = %w[t_t l_c oa mixed].freeze
+  TAX_ID_TYPES = %w[VAT GST TIN RFC CNPJ CUIT NIT RUT OTHER].freeze
 
   belongs_to :company
   if column_names.include?("internal_owner_id")
     belongs_to :internal_owner, class_name: "User", optional: true
   end
   has_many :quotes, dependent: :destroy
+  has_many :customer_follow_up_events, -> { recent_first }, dependent: :destroy
   has_many :customer_taggings, -> { ordered }, dependent: :destroy
   has_many :customer_tags, through: :customer_taggings
   has_one_attached :avatar
 
-  before_validation :set_default_status, :set_default_customer_level
+  before_validation :normalize_phone_country_code, :set_default_status, :set_default_customer_level
 
   validates :name, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
@@ -35,11 +37,29 @@ class Customer < ApplicationRecord
     )
   }
 
-  def mark_followed_today!
-    update!(
-      last_follow_up_date: Date.today,
-      next_follow_up_date: Date.today + 3.days
-    )
+  def mark_followed_today!(user: nil, channel: "manual", quote: nil, note: nil, metadata: {})
+    return record_follow_up!(user:, channel:, quote:, note:, metadata:) if user.present?
+
+    persist_follow_up_dates!(Date.today)
+  end
+
+  def record_follow_up!(user:, channel: "manual", quote: nil, note: nil, contacted_at: Time.current, metadata: {})
+    touch_time = contacted_at || Time.current
+
+    transaction do
+      event = customer_follow_up_events.create!(
+        user: user,
+        quote: quote,
+        channel: channel,
+        contacted_at: touch_time,
+        note: note,
+        metadata: metadata.presence || {}
+      )
+
+      persist_follow_up_dates!(touch_time.to_date)
+
+      event
+    end
   end
 
   def follow_up_overdue?
@@ -100,7 +120,28 @@ class Customer < ApplicationRecord
     self.class.internal_owner_enabled?
   end
 
+  def formatted_phone
+    [ phone_country_code.to_s.strip.presence, phone.to_s.strip.presence ].compact.join(" ").presence
+  end
+
+  def whatsapp_phone
+    [ phone_country_code.to_s.gsub(/\D+/, "").presence, phone.to_s.gsub(/\D+/, "").presence ].compact.join.presence
+  end
+
+  def persist_follow_up_dates!(date)
+    update_columns(
+      last_follow_up_date: date,
+      next_follow_up_date: date + 3.days,
+      updated_at: Time.current
+    )
+  end
+
   private
+
+  def normalize_phone_country_code
+    normalized = phone_country_code.to_s.gsub(/\s+/, "").presence
+    self.phone_country_code = normalized.present? ? normalized.sub(/\A(?!\+)/, "+") : nil
+  end
 
   def set_default_status
     self.status = "new" if status.blank?

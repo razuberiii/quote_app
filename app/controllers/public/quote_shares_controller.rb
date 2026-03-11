@@ -31,6 +31,7 @@ module Public
         status: "won",
         updated_at: accepted_at
       )
+      Notification.create_quote_accepted_notification(@share.quote)
       redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.quotation_accepted"))
     end
 
@@ -50,6 +51,7 @@ module Public
         changes_request_message: client_message,
         updated_at: Time.current
       )
+      Notification.create_quote_revision_requested_notification(@share.quote)
       redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.revision_request_sent"))
     end
 

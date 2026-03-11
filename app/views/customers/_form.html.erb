@@ -1,7 +1,31 @@
 <%= form_with model: customer, html: { class: "customer-profile-form", multipart: true } do |f| %>
   <% status_options = Customer::SALES_STATUSES.map { |value| [t("customers.view.form.status_options.#{value}", default: value.humanize), value] } %>
+  <% common_country_calling_code_options = [
+    ["+1 USA/Canada", "+1"],
+    ["+33 France", "+33"],
+    ["+34 Spain", "+34"],
+    ["+44 UK", "+44"],
+    ["+49 Germany", "+49"],
+    ["+52 Mexico", "+52"],
+    ["+54 Argentina", "+54"],
+    ["+55 Brazil", "+55"],
+    ["+56 Chile", "+56"],
+    ["+57 Colombia", "+57"],
+    ["+60 Malaysia", "+60"],
+    ["+62 Indonesia", "+62"],
+    ["+65 Singapore", "+65"],
+    ["+66 Thailand", "+66"],
+    ["+81 Japan", "+81"],
+    ["+82 South Korea", "+82"],
+    ["+84 Vietnam", "+84"],
+    ["+86 China", "+86"],
+    ["+90 Turkey", "+90"],
+    ["+91 India", "+91"],
+    ["+971 UAE", "+971"]
+  ] %>
   <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
-    <% status_options.unshift([t("customers.view.form.legacy_status", status: customer.status.humanize), customer.status]) %>
+    <% legacy_status_label = t("customers.view.form.status_options.#{customer.status}", default: customer.status.humanize) %>
+    <% status_options.unshift([t("customers.view.form.legacy_status", status: legacy_status_label), customer.status]) %>
   <% end %>
 
   <% level_options = Customer::CUSTOMER_LEVELS.map { |value| [t("customers.view.form.level_options.#{value}", default: value.humanize), value] } %>
@@ -53,7 +77,6 @@
             <% if customer.avatar.attached? %>
               <label class="customer-avatar-remove"><%= check_box_tag "customer[remove_avatar]", "1", false %> <%= t("customers.view.form.remove_current_avatar") %></label>
             <% end %>
-            <p class="customer-field-hint"><%= t("customers.view.form.avatar_hint") %></p>
           </div>
         </div>
 
@@ -100,8 +123,27 @@
           <%= f.email_field :email, placeholder: t("customers.view.form.email"), class: ui_input_classes %>
         </div>
         <div>
+          <%= f.label :phone_country_code, t("customers.view.form.phone_country_code", default: "Country Code") %>
+          <%= select_tag :phone_country_code_preset,
+                         options_for_select(common_country_calling_code_options, customer.phone_country_code),
+                         include_blank: t("customers.view.form.select_phone_country_code", default: "Select common country code"),
+                         id: "customer_phone_country_code_preset",
+                         class: ui_input_classes,
+                         data: { phone_country_code_preset: true, target_input: "#customer_phone_country_code" } %>
+          <%= f.text_field :phone_country_code, placeholder: t("customers.view.form.phone_country_code_placeholder", default: "+81"), class: ui_input_classes %>
+        </div>
+        <div>
           <%= f.label :phone, t("customers.view.form.phone") %>
           <%= f.text_field :phone, placeholder: t("customers.view.form.phone"), class: ui_input_classes %>
+        </div>
+        <div>
+          <%= f.label :tax_id_type, t("customers.view.form.tax_id_type", default: "Tax ID Type") %>
+          <% tax_id_type_options = Customer::TAX_ID_TYPES.map { |v| [v, v] } %>
+          <%= f.select :tax_id_type, tax_id_type_options, { prompt: t("customers.view.form.select_tax_id_type", default: "Select type (optional)") }, { class: ui_input_classes } %>
+        </div>
+        <div>
+          <%= f.label :tax_id, t("customers.view.form.tax_id", default: "Tax ID") %>
+          <%= f.text_field :tax_id, placeholder: t("customers.view.form.tax_id_placeholder", default: "e.g. XAXX010101000"), class: ui_input_classes %>
         </div>
         <div>
           <%= f.label :payment_terms, t("customers.view.form.payment_terms") %>
@@ -251,6 +293,31 @@
     const tagRemoveLabel = "<%= j t("customers.view.form.remove") %>";
     const selectInternalOwnerLabel = "<%= j t("customers.view.form.select_internal_owner") %>";
     const chooseTeamOwnerLabel = "<%= j t("customers.view.form.choose_team_owner") %>";
+
+    const bindPhoneCountryCodePreset = () => {
+      document.querySelectorAll("[data-phone-country-code-preset]").forEach((presetSelect) => {
+        if (presetSelect.dataset.boundPhoneCode === "true") return;
+        presetSelect.dataset.boundPhoneCode = "true";
+
+        const targetSelector = presetSelect.dataset.targetInput;
+        const targetInput = targetSelector ? document.querySelector(targetSelector) : null;
+        if (!targetInput) return;
+
+        const syncPresetFromInput = () => {
+          const raw = (targetInput.value || "").trim();
+          const option = Array.from(presetSelect.options).find((opt) => opt.value === raw);
+          presetSelect.value = option ? raw : "";
+        };
+
+        presetSelect.addEventListener("change", () => {
+          if (!presetSelect.value) return;
+          targetInput.value = presetSelect.value;
+        });
+
+        targetInput.addEventListener("input", syncPresetFromInput);
+        syncPresetFromInput();
+      });
+    };
 
     const bindTagPriority = () => {
       document.querySelectorAll("[data-tag-priority]").forEach((priorityRoot) => {
@@ -486,8 +553,10 @@
     bindCustomTagBuilder();
     bindTagPriority();
     bindOwnerPicker();
+    bindPhoneCountryCodePreset();
     document.addEventListener("turbo:load", bindTagPriority);
     document.addEventListener("turbo:load", bindCustomTagBuilder);
     document.addEventListener("turbo:load", bindOwnerPicker);
+    document.addEventListener("turbo:load", bindPhoneCountryCodePreset);
   })();
 </script>

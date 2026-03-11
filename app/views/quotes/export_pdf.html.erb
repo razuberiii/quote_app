@@ -94,8 +94,11 @@
       <p class="pdf-party-name"><strong><%= @quote.customer.name %></strong></p>
       <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
       <p><%= @quote.customer.address.presence || "-" %></p>
-      <p><%= @quote.customer.phone.presence || "-" %></p>
+      <p><%= @quote.customer.formatted_phone.presence || "-" %></p>
       <p><%= @quote.customer.email.presence || "-" %></p>
+      <% if @quote.customer.tax_id.present? %>
+        <p>Tax ID: <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
+      <% end %>
     </div>
     <div class="pdf-clear"></div>
   </section>

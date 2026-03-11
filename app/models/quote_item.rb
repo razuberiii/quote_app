@@ -19,7 +19,9 @@ class QuoteItem < ApplicationRecord
   before_validation :calculate_amount
   after_commit :refresh_related_product_stats
 
-  scope :ordered, -> { order(created_at: :asc) }
+  scope :ordered,     -> { order(created_at: :asc) }
+  scope :with_product, -> { where.not(product_id: nil) }
+  scope :in_period,    ->(days) { joins(:quote).where(quotes: { created_at: days.days.ago..Time.current }) }
 
   def line_total
     amount.presence || (unit_price.to_d * quantity.to_i + addon_total).round(2)

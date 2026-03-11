@@ -625,13 +625,27 @@ a:hover {
     letter-spacing: 0.01em;
   }
 
-  .quote-items-responsive .quote-items-table td:nth-child(1)::before { content: "Product Name"; }
-  .quote-items-responsive .quote-items-table td:nth-child(2)::before { content: "Description"; }
-  .quote-items-responsive .quote-items-table td:nth-child(3)::before { content: "Specifications"; }
-  .quote-items-responsive .quote-items-table td:nth-child(4)::before { content: "Add-ons"; }
-  .quote-items-responsive .quote-items-table td:nth-child(5)::before { content: "Unit Price"; }
-  .quote-items-responsive .quote-items-table td:nth-child(6)::before { content: "Quantity"; }
-  .quote-items-responsive .quote-items-table td:nth-child(7)::before { content: "Action"; }
+  .quote-items-responsive .quote-items-table td:nth-child(1)::before {
+    content: "Product Name";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(2)::before {
+    content: "Description";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(3)::before {
+    content: "Specifications";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(4)::before {
+    content: "Add-ons";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(5)::before {
+    content: "Unit Price";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(6)::before {
+    content: "Quantity";
+  }
+  .quote-items-responsive .quote-items-table td:nth-child(7)::before {
+    content: "Action";
+  }
 
   .quote-items-responsive .quote-col-product,
   .quote-items-responsive .quote-col-desc,
@@ -882,6 +896,18 @@ a:hover {
   font-size: 0.86rem;
 }
 
+.output-lang-sync-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.output-lang-sync-row select {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+
 .template-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(220px, 1fr));
@@ -945,7 +971,10 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  transition: color 180ms ease-in-out, background-color 180ms ease-in-out, border-color 180ms ease-in-out;
+  transition:
+    color 180ms ease-in-out,
+    background-color 180ms ease-in-out,
+    border-color 180ms ease-in-out;
 }
 
 .template-preview-status.is-saved {
@@ -1004,7 +1033,11 @@ a:hover {
   font-size: 0.72rem;
   font-weight: 700;
   cursor: pointer;
-  transition: background-color 180ms ease-in-out, color 180ms ease-in-out, border-color 180ms ease-in-out, box-shadow 180ms ease-in-out;
+  transition:
+    background-color 180ms ease-in-out,
+    color 180ms ease-in-out,
+    border-color 180ms ease-in-out,
+    box-shadow 180ms ease-in-out;
 }
 
 .template-preview-viewport-switch button:hover {
@@ -1137,7 +1170,10 @@ a:hover {
   grid-template-columns: minmax(0, 1fr) 72px 90px;
   gap: 0.45rem;
   align-items: center;
-  transition: background-color 180ms ease-in-out, color 180ms ease-in-out, border-color 180ms ease-in-out;
+  transition:
+    background-color 180ms ease-in-out,
+    color 180ms ease-in-out,
+    border-color 180ms ease-in-out;
 }
 
 .template-preview-large .preview-table-head,
@@ -1215,7 +1251,9 @@ a:hover {
   background: var(--template-accent);
   font-size: 0.82rem;
   font-weight: 700;
-  transition: background-color 180ms ease-in-out, color 180ms ease-in-out;
+  transition:
+    background-color 180ms ease-in-out,
+    color 180ms ease-in-out;
 }
 
 .preview-meta {
@@ -1462,7 +1500,9 @@ a:hover {
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.28);
   opacity: 0;
   transform: translateY(8px);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
   z-index: 1800;
 }
 
@@ -1493,129 +1533,7 @@ a:hover {
     right: 0;
     max-width: none;
   }
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 .product-main-image {
   max-width: 280px;
@@ -1777,7 +1695,9 @@ a:hover {
   justify-content: center;
   text-decoration: none;
   opacity: 0;
-  transition: opacity 0.15s ease, transform 0.12s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.12s ease;
 }
 
 .product-gallery-item:hover .product-gallery-delete-icon {
@@ -1889,7 +1809,11 @@ a:hover {
   justify-content: center;
   gap: 0.35rem;
   padding: 0.35rem;
-  background: linear-gradient(to top, rgba(15, 23, 42, 0.58), rgba(15, 23, 42, 0.06));
+  background: linear-gradient(
+    to top,
+    rgba(15, 23, 42, 0.58),
+    rgba(15, 23, 42, 0.06)
+  );
   opacity: 0;
   transition: opacity 0.15s ease;
 }
@@ -2068,7 +1992,9 @@ a:hover {
   border-radius: 10px;
   border: 1px solid #e2e8f0;
   background: #f8fafc;
-  transition: transform 0.14s ease, box-shadow 0.14s ease;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.14s ease;
 }
 
 .product-show-gallery-thumb:hover {
@@ -2602,9 +2528,6 @@ a:hover {
   justify-content: center;
 }
 
-
-
-
 .member-profile-head {
   display: flex;
   align-items: center;
@@ -2671,4 +2594,3 @@ a:hover {
     height: 44px;
   }
 }
-

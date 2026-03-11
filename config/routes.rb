@@ -30,6 +30,16 @@ Rails.application.routes.draw do
   get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
   resources :contact_requests, only: [ :create ]
 
+  resources :notifications, only: [] do
+    collection do
+      patch :mark_all_read
+      get :unread_count
+    end
+    member do
+      get :mark_read
+    end
+  end
+
   # Public quote sharing
   namespace :public do
     resources :quote_shares, only: [ :show ], param: :token do
@@ -38,6 +48,7 @@ Rails.application.routes.draw do
         post :request_revision
       end
     end
+    resources :quote_view_events, only: :create
   end
 
   # Product management
@@ -65,11 +76,15 @@ Rails.application.routes.draw do
     end
   end
   resource :company_settings, only: [ :edit, :update ]
+  resources :quote_reason_options, only: [ :create, :destroy ]
 
   resources :customers do
     member do
       post :mark_follow_up
       post :schedule_follow_up
+      post :log_follow_up
+      post :send_follow_up_email
+      post :send_follow_up_whatsapp
     end
 
     resources :quotes, shallow: true do
@@ -80,6 +95,7 @@ Rails.application.routes.draw do
         post :reopen
         post :share
         post :send_reminder
+        patch :update_outcome_reason
         patch :update_template
         get "export/pdf", action: :export_pdf, as: :export_pdf
         get "export/xlsx", action: :export_xlsx, as: :export_xlsx

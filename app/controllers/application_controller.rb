@@ -6,7 +6,7 @@ class ApplicationController < ActionController::Base
   before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
   helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color,
-                :locale_nav_items, :current_locale_nav_item
+                :locale_nav_items, :current_locale_nav_item, :locale_switch_url
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
@@ -40,6 +40,32 @@ class ApplicationController < ActionController::Base
 
   def current_locale_nav_item
     locale_nav_items.find { |item| item[:locale].to_s == I18n.locale.to_s } || locale_nav_items.first
+  end
+
+  def locale_switch_url(target_locale)
+    locale = target_locale.to_s
+
+    if request.get?
+      return url_for(locale: locale)
+    end
+
+    referer = request.referer.to_s
+    if referer.present?
+      begin
+        uri = URI.parse(referer)
+        path = uri.path.presence || authenticated_root_path
+        referer_query = Rack::Utils.parse_nested_query(uri.query.to_s)
+        merged_query = referer_query.merge("locale" => locale)
+        query_string = merged_query.to_query
+        return query_string.present? ? "#{path}?#{query_string}" : path
+      rescue URI::InvalidURIError
+        # Fallback below.
+      end
+    end
+
+    authenticated_root_path(locale: locale)
+  rescue ActionController::UrlGenerationError
+    authenticated_root_path(locale: locale)
   end
 
   def ensure_email_verified!

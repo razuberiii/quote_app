@@ -1,0 +1,27 @@
+<% engagement_stats = quote_engagement_stats(@quote) %>
+
+<div class="quote-engagement-panel">
+  <div class="quote-engagement-panel__header">
+    <h4 class="quote-engagement-panel__title"><%= t("engagement.panel.title") %></h4>
+    <%= engagement_badge(@quote) %>
+  </div>
+
+  <div class="quote-engagement-panel__stats">
+    <div class="quote-engagement-panel__stat">
+      <span class="quote-engagement-panel__label"><%= t("engagement.panel.view_count") %></span>
+      <span class="quote-engagement-panel__value"><%= engagement_stats[:views] %></span>
+    </div>
+    <div class="quote-engagement-panel__stat">
+      <span class="quote-engagement-panel__label"><%= t("engagement.panel.revision_requests") %></span>
+      <span class="quote-engagement-panel__value"><%= engagement_stats[:revisions] %></span>
+    </div>
+    <div class="quote-engagement-panel__stat">
+      <span class="quote-engagement-panel__label"><%= t("engagement.panel.avg_view_time") %></span>
+      <span class="quote-engagement-panel__value"><%= engagement_stats[:avg_time] %></span>
+    </div>
+    <div class="quote-engagement-panel__stat">
+      <span class="quote-engagement-panel__label"><%= t("engagement.panel.score") %></span>
+      <span class="quote-engagement-panel__value"><%= t("engagement.points", count: engagement_stats[:score]) %></span>
+    </div>
+  </div>
+</div>

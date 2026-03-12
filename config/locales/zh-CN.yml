@@ -1317,6 +1317,7 @@ zh-CN:
       email_sent: "跟进邮件已发送，下次跟进安排在 %{date}"
       email_verification_required: "发送跟进邮件前请先完成机器人验证。"
       email_verification_failed: "机器人验证失败，请重试。"
+      email_cooldown: "刚刚已发送过跟进邮件，请在 %{minutes} 分钟后再试。"
       email_failed: "当前无法发送跟进邮件。"
       email_missing: "客户缺少邮箱地址。"
       whatsapp_logged: "已记录 WhatsApp 跟进，下次跟进安排在 %{date}"

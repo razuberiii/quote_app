@@ -1383,6 +1383,7 @@ en:
       email_sent: "Follow-up email sent. Next follow-up scheduled at %{date}"
       email_verification_required: "Please complete bot verification before sending follow-up email."
       email_verification_failed: "Bot verification failed. Please try again."
+      email_cooldown: "A follow-up email was sent recently. Please wait %{minutes} minute(s) before sending again."
       email_failed: "Unable to send follow-up email right now."
       email_missing: "Customer email is missing."
       whatsapp_logged: "WhatsApp follow-up logged. Next follow-up scheduled at %{date}"

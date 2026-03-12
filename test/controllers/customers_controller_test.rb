@@ -63,6 +63,35 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
+  test "send_follow_up_email blocks resend during cooldown" do
+    @customer.update!(email: "buyer@example.com")
+    @customer.customer_follow_up_events.create!(
+      user: @user,
+      channel: "email",
+      contacted_at: 2.minutes.ago,
+      note: "Recent follow-up"
+    )
+
+    ActionMailer::Base.deliveries.clear
+
+    previous_skip = ENV["SKIP_TURNSTILE_VERIFICATION"]
+    ENV["SKIP_TURNSTILE_VERIFICATION"] = "true"
+
+    assert_no_difference("CustomerFollowUpEvent.count") do
+      post send_follow_up_email_customer_url(@customer), params: { follow_up: { message: "Another follow-up" } }
+    end
+
+    assert_redirected_to customer_url(@customer)
+    assert_equal 0, ActionMailer::Base.deliveries.size
+    assert_equal I18n.t("follow_up.flash.email_cooldown", minutes: 8), flash[:alert]
+  ensure
+    if previous_skip.nil?
+      ENV.delete("SKIP_TURNSTILE_VERIFICATION")
+    else
+      ENV["SKIP_TURNSTILE_VERIFICATION"] = previous_skip
+    end
+  end
+
   test "send_follow_up_whatsapp returns a link and logs an event" do
     @customer.update!(phone_country_code: "+52", phone: "123456789")
 

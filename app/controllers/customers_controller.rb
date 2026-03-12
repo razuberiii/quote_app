@@ -231,6 +231,12 @@ class CustomersController < ApplicationController
   end
 
   def send_follow_up_email
+    cooldown_seconds = @customer.seconds_until_follow_up_email_allowed
+    if cooldown_seconds.positive?
+      minutes_left = (cooldown_seconds / 60.0).ceil
+      redirect_to @customer, alert: t("follow_up.flash.email_cooldown", minutes: minutes_left) and return
+    end
+
     unless verify_turnstile_for_html!(
       token: params[:cf_turnstile_response],
       on_missing: -> { redirect_to @customer, alert: t("follow_up.flash.email_verification_required") },

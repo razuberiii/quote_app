@@ -1,4 +1,6 @@
 class Customer < ApplicationRecord
+  FOLLOW_UP_EMAIL_COOLDOWN = 10.minutes
+
   SALES_STATUSES = %w[new contacted quoting negotiating won lost inactive].freeze
   LEGACY_STATUSES = %w[potential following closed paused].freeze
   CUSTOMER_LEVELS = %w[normal vip distributor key_account].freeze
@@ -84,6 +86,18 @@ class Customer < ApplicationRecord
     return "today" if follow_up_due_today?
     return "upcoming" if follow_up_upcoming?
     "normal"
+  end
+
+  def can_send_follow_up_email?(now: Time.current)
+    seconds_until_follow_up_email_allowed(now:) <= 0
+  end
+
+  def seconds_until_follow_up_email_allowed(now: Time.current)
+    last_email_at = customer_follow_up_events.where(channel: "email").maximum(:contacted_at)
+    return 0 if last_email_at.blank?
+
+    elapsed_seconds = (now - last_email_at).to_i
+    [ FOLLOW_UP_EMAIL_COOLDOWN.to_i - elapsed_seconds, 0 ].max
   end
 
   def status_label

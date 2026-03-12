@@ -1369,6 +1369,7 @@ es-419:
       email_sent: "Correo de seguimiento enviado. Próximo seguimiento programado para %{date}"
       email_verification_required: "Complete la verificación anti-bot antes de enviar el correo de seguimiento."
       email_verification_failed: "Falló la verificación anti-bot. Intente nuevamente."
+      email_cooldown: "Ya se envió un correo de seguimiento hace poco. Espere %{minutes} minuto(s) antes de volver a enviar."
       email_failed: "No se pudo enviar el correo de seguimiento en este momento."
       email_missing: "Falta el correo electrónico del cliente."
       whatsapp_logged: "Seguimiento por WhatsApp registrado. Próximo seguimiento programado para %{date}"

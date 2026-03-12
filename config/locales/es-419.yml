@@ -338,6 +338,15 @@ es-419:
       closing: Si necesitas cambios o una nueva revision, por favor avisanos.
       generic_item: Artículo
     view:
+      new:
+        quote_title: Crear borrador de cotización
+        quote_subtitle: Inicia un borrador y completa los precios antes de compartir con el cliente.
+        revision_title: Crear borrador de revisión
+        revision_subtitle: Basado en %{quote_no}, crea una nueva revisión en borrador y ajusta antes de volver a compartir.
+      edit:
+        title: Editar borrador de cotización
+        subtitle: Cotización %{quote_no} - Revisión V%{revision}
+        back_to_quote: Volver a la cotización
       decision_review:
         title: Revisión de decisión
         subtitle: Lectura en una pantalla sobre la disposición del comprador, el alcance del cambio y el siguiente paso.
@@ -418,14 +427,39 @@ es-419:
         toolbar:
           template: Plantilla
           search_template: Buscar plantilla
+          send_share: Enviar/Compartir
+          preview: Vista previa
+          preview_no_state_change: Solo vista previa. El estado de la cotización no cambia.
+          preview_pdf: Vista previa PDF
+          preview_excel: Vista previa Excel
+          preview_excel_download_hint: Algunos navegadores descargarán directamente el archivo de vista previa de Excel.
+          preview_public_link: Vista previa de enlace público
+          mark_sent: Ya la envié al cliente
           export: Exportar
           download_pdf: Descargar PDF
           download_excel: Descargar Excel
           edit: Editar
-          new_revision: Nueva revisión
-          reopen_quote: Reabrir cotización
+          new_revision: Revisión
+          mark_negotiating: Marcar en negociación
+          status_selector: "Estado: %{status}"
+          status_mark_action: "Marcar: %{status}"
+          status_option_negotiating: En negociación
+          status_option_won: Ganada
+          status_option_lost: Perdida
+          more_status: Más estados
+          more_actions: Más acciones
+          back_to_sent: Volver a enviada
+          mark_won: Marcar ganada
+          confirm_mark_won: Confirmar ganada
+          mark_won_hint: Úselo cuando el cliente confirmó por fuera del enlace público y no hizo clic en aceptar.
+          mark_lost: Marcar perdida
+          mark_lost_record: Registrar pérdida
+          confirm_mark_lost: Confirmar perdida
+          mark_lost_hint: Registre el motivo de pérdida para revisar después precio, posicionamiento y estrategia de reactivación.
+          reopen_quote: Reabrir
           reopen_confirm: Reabrir esta cotización permitirá editarla de nuevo y marcará la versión pública como obsoleta. Los clientes no podrán aceptarla hasta que se comparta una nueva versión.
-          copy_reprice: Copiar y recalcular precio
+          copy_reprice: Copiar/recotizar
+          quote_operations: Operaciones de cotización
           add_win_reason: Completar motivo de ganada
           add_loss_reason: Completar motivo de pérdida
           save_reason: Guardar motivo
@@ -441,6 +475,8 @@ es-419:
           loading_verification: Cargando verificación...
           verified_sending: Verificado. Enviando recordatorio...
           share_public_link: Compartir enlace público
+          open_public_link: Abrir enlace público
+          copy_open_public_link: Copiar / abrir enlace público
           copy_link: Copiar enlace
           open: Abierto
           delete_quote: Eliminar cotización
@@ -455,6 +491,8 @@ es-419:
           share_failed: Error al compartir
           link_copied: Enlace copiado.
           copy_failed_browser: Error al copiar en el navegador.
+          undo: Deshacer
+          undo_status_change_prefix: Estado actualizado
         history:
           title: Historial
           subtitle: Rastro de revisiones y acciones de archivo
@@ -468,6 +506,7 @@ es-419:
         updating: Actualizando...
         creating: Creando...
         current_status: Estado actual
+        status: Estado
         grand_total: Total general
         discount_rate: Tasa de descuento
         expiry: Vencimiento
@@ -486,6 +525,8 @@ es-419:
         quote_date: Fecha de cotización
         custom_title: Título de cotización personalizado (opcional)
         custom_title_placeholder: Proyecto Falcon - Paquete de equipos del segundo trimestre
+        status_locked_draft: El estado de la cotización no se edita directamente dentro del formulario.
+        status_locked_draft_hint: Use las acciones del detalle para moverla a enviada, en negociación, ganada o perdida.
         status_options:
           draft: Borrador
           sent: Enviado
@@ -561,6 +602,8 @@ es-419:
         quantity: Cantidad
         remove: Eliminar
         type_to_search_product: Escriba para buscar producto
+        no_specs: Sin especificaciones
+        no_add_ons: Sin complementos
         custom_specs: Especificaciones personalizadas
         edit_specs: Editar especificaciones
         close: Cerrar
@@ -583,8 +626,10 @@ es-419:
         addon_name_placeholder: p. ej. Embalaje
         remove_add_on: Eliminar complemento
         add_add_on: "+ Complemento"
+        reference_price_mismatch: "El precio de referencia está en %{product_currency} y no se autocompleta para %{quote_currency}. Ingrese manualmente el precio en la moneda de la cotización."
+        no_exact_match_saved_as_custom: No hubo coincidencia exacta de producto. Se guardó como artículo personalizado.
         remove_item: Eliminar artículo
-        add_item: "+ Añadir artículo"
+        add_item: Añadir artículo
         update_quote: Actualizar cotización
         create_quote: Crear cotización
     flash:
@@ -614,6 +659,17 @@ es-419:
       reminder_verification_failed: La verificación falló. Por favor, inténtelo de nuevo.
       reminder_sent: Correo electrónico de recordatorio enviado. El próximo recordatorio estará disponible en 12 horas a menos que la cotización sea vista primero.
       unable_send_reminder: No se pudo enviar el recordatorio en este momento.
+      mark_sent_not_available: Esta cotización no se puede marcar como enviada en este momento.
+      quote_marked_sent: La cotización se marcó como enviada. Puede continuar con el seguimiento del cliente.
+      mark_negotiating_not_available: Esta cotización no se puede marcar como en negociación en este momento.
+      quote_marked_negotiating: La cotización se marcó como en negociación.
+      mark_won_not_available: Esta cotización no se puede marcar como ganada en este momento.
+      quote_marked_won: La cotización se marcó como ganada.
+      mark_lost_not_available: Esta cotización no se puede marcar como perdida en este momento.
+      quote_marked_lost: La cotización se marcó como perdida.
+      outcome_mark_not_available: No se puede actualizar el resultado de esta cotización en este momento.
+      undo_status_change_expired: La ventana para deshacer expiró. Ajuste el estado manualmente.
+      status_change_undone: Se deshizo el último cambio de estado.
       reopen_not_available: Reabrir no está disponible para el estado actual de la cotización.
       quote_reopened: Cotización reabierta para edición.
       reason_updated: Motivo actualizado.
@@ -968,72 +1024,72 @@ es-419:
         internal_owner: Propietario interno
         estimated_annual_volume: Volumen anual estimado
         timezone: Zona horaria
-        tags: Tags
-        latest_customer_signal: Latest Customer Signal
-        next_follow_up: Next Follow-up
-        not_available: N/A
-        overdue_badge: OVERDUE
-        today_badge: TODAY
-        due_soon_badge: DUE SOON
-        notes: Notes
-        last_signal: Last signal
-        days_ago: "%{count}d ago"
-        not_scheduled: Not scheduled
-        days_overdue: "%{count}d overdue"
-        in_days: in %{count}d
-        quote_actions: Quote Actions
-        quote_actions_hint: Create, filter, and act on revisions from one account workspace.
-        new_quote: New Quote
-        delete_customer: Delete Customer
-        delete_customer_confirm: Delete customer %{name}? This removes the account record.
-        active_quotes: Active Quotes (%{count})
-        recent_quotes: Recent Quotes (10)
-        all_quotes: All Quotes (%{count})
-        quote_workspace_hint: Priority queue, search, and revision flow for this account.
-        active_mode_note: Showing top 5 by priority. Sorted by action priority.
-        active: Active
+        tags: Etiquetas
+        latest_customer_signal: Última señal del cliente
+        next_follow_up: Próximo seguimiento
+        not_available: N/D
+        overdue_badge: VENCIDO
+        today_badge: HOY
+        due_soon_badge: VENCE PRONTO
+        notes: Notas
+        last_signal: Última señal
+        days_ago: hace %{count}d
+        not_scheduled: No programado
+        days_overdue: con %{count}d de retraso
+        in_days: en %{count}d
+        quote_actions: Acciones de cotización
+        quote_actions_hint: Cree, filtre y actúe sobre las revisiones desde un espacio de trabajo de cuenta.
+        new_quote: Nueva cotización
+        delete_customer: Eliminar cliente
+        delete_customer_confirm: "¿Eliminar cliente %{name}? Esto eliminará el registro de la cuenta."
+        active_quotes: Cotizaciones activas (%{count})
+        recent_quotes: Cotizaciones recientes (10)
+        all_quotes: Todas las cotizaciones (%{count})
+        quote_workspace_hint: Cola de prioridad, búsqueda y flujo de revisión para esta cuenta.
+        active_mode_note: Mostrando los 5 principales por prioridad. Ordenado por prioridad de acción.
+        active: Activo
         quote_status:
-          draft: Draft
-          sent: Sent
-          viewed: Viewed
-          negotiating: Negotiating
-        won_amount: Won Amount
-        lost_amount: Lost Amount
-        show_all_currencies: Show all currencies
-        avg_discount: Avg Discount
+          draft: Borrador
+          sent: Enviado
+          viewed: Visto
+          negotiating: En negociación
+        won_amount: Monto Ganado
+        lost_amount: Monto Perdido
+        show_all_currencies: Mostrar todas las monedas
+        avg_discount: Desc. Promedio
         filters:
-          all: All
-          draft: Draft
-          sent: Sent
-          viewed: Viewed
-          negotiating: Negotiating
-          won: Won
-          lost: Lost
-          expired: Expired
-        recent_10: Recent (10)
-        search_quotes_placeholder: Search quote no, product, notes...
+          all: Todos
+          draft: Borrador
+          sent: Enviado
+          viewed: Visto
+          negotiating: En negociación
+          won: Ganado
+          lost: Perdido
+          expired: Expirado
+        recent_10: Recientes (10)
+        search_quotes_placeholder: Buscar número de cotización, producto, notas...
         sort:
-          priority: Priority Queue
-          newest: Newest
-          highest_amount: Highest Amount
-          status: Status
-        apply: Apply
-        view_all: View all %{count}
-        previous: Previous
-        page: Page
-        next: Next
-        no_quotes_title: No quotes in this view
-        no_quotes_body: Try a different status filter or create a new quote for this customer.
-        show_less: Show less
-        collapse_list: Collapse list
-        view_all_prefix: View all
-        hide_extra_tasks: Hide extra tasks
-        show_all_tasks_prefix: Show all tasks
-        hide_older_high_signals: Hide older high signals
-        show_older_high_signals_prefix: Show older high signals
-        hide_system_activity: Hide system activity
-        show_system_activity_prefix: Show system activity
-        latest_customer_behavior: Latest customer behavior
+          priority: Cola de Prioridad
+          newest: Más Reciente
+          highest_amount: Monto Más Alto
+          status: Estado
+        apply: Aplicar
+        view_all: Ver todos los %{count}
+        previous: Anterior
+        page: Página
+        next: Siguiente
+        no_quotes_title: No hay cotizaciones en esta vista
+        no_quotes_body: Pruebe un filtro de estado diferente o cree una nueva cotización para este cliente.
+        show_less: Mostrar menos
+        collapse_list: Contraer lista
+        view_all_prefix: Ver todo
+        hide_extra_tasks: Ocultar tareas adicionales
+        show_all_tasks_prefix: Mostrar todas las tareas
+        hide_older_high_signals: Ocultar señales de alta prioridad antiguas
+        show_older_high_signals_prefix: Mostrar señales de alta prioridad antiguas
+        hide_system_activity: Ocultar actividad del sistema
+        show_system_activity_prefix: Mostrar actividad del sistema
+        latest_customer_behavior: Último comportamiento del cliente
       comms:
         copy_message: Copiar mensaje de WhatsApp
         send_whatsapp: Enviar por WhatsApp
@@ -2106,6 +2162,9 @@ es-419:
       revision_not_actionable: Esta revisión ya no es procesable.
       quotation_accepted: Cotización aceptada. Gracias.
       revision_request_sent: Solicitud de revisión enviada.
+    preview_mode:
+      title: Modo de vista previa
+      body: Solo salida renderizada. Todas las acciones públicas están deshabilitadas en el modo de vista previa.
   landing:
     view:
       index:

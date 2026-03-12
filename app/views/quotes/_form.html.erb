@@ -91,11 +91,13 @@
           <%= f.text_field :custom_title, placeholder: t("quotes.view.form.custom_title_placeholder"), class: ui_input_classes %>
         </div>
         <div>
-          <%= f.label :status %>
-          <%= f.select :status,
-                       [[t("quotes.view.form.status_options.draft"), "draft"], [t("quotes.view.form.status_options.sent"), "sent"], [t("quotes.view.form.status_options.viewed"), "viewed"], [t("quotes.view.form.status_options.negotiating"), "negotiating"], [t("quotes.view.form.status_options.won"), "won"], [t("quotes.view.form.status_options.lost"), "lost"], [t("quotes.view.form.status_options.expired"), "expired"]],
-                       {},
-                       { class: ui_input_classes } %>
+          <%= f.label :status, t("quotes.view.form.status") %>
+          <%= f.hidden_field :status, value: quote.status.presence || "draft" %>
+          <div class="quote-status-lock-field">
+            <%= quote_status_badge(quote.status.presence || "draft") %>
+            <p class="quote-form-hint"><%= t("quotes.view.form.status_locked_draft") %></p>
+            <p class="quote-form-hint"><%= t("quotes.view.form.status_locked_draft_hint") %></p>
+          </div>
         </div>
       </div>
     </section>
@@ -382,7 +384,7 @@
         </div>
 
         <div class="quote-form-add-row">
-          <button type="button" class="<%= ui_button_classes(:secondary) %>" id="add-quote-item"><%= t("quotes.view.form.add_item") %></button>
+          <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="add-quote-item"><%= t("quotes.view.form.add_item") %></button>
         </div>
       </div>
     </section>
@@ -461,6 +463,27 @@
       accepted: "app-status-badge app-status-badge--green",
       lost: "app-status-badge app-status-badge--red",
       expired: "app-status-badge app-status-badge--red"
+    };
+
+    const uiText = {
+      noSpecs: "<%= j(t('quotes.view.form.no_specs')) %>",
+      noAddOns: "<%= j(t('quotes.view.form.no_add_ons')) %>",
+      customSpecs: "<%= j(t('quotes.view.form.custom_specs')) %>",
+      customAddOns: "<%= j(t('quotes.view.form.custom_add_ons')) %>",
+      typeToSearchProduct: "<%= j(t('quotes.view.form.type_to_search_product')) %>",
+      editSpecs: "<%= j(t('quotes.view.form.edit_specs')) %>",
+      specifications: "<%= j(t('quotes.view.form.specifications')) %>",
+      close: "<%= j(t('quotes.view.form.close')) %>",
+      specBulkPlaceholder: "<%= j(t('quotes.view.form.spec_bulk_placeholder')) %>",
+      applyText: "<%= j(t('quotes.view.form.apply_text')) %>",
+      addSpec: "<%= j(t('quotes.view.form.add_spec')) %>",
+      clearAll: "<%= j(t('quotes.view.form.clear_all')) %>",
+      editAddOns: "<%= j(t('quotes.view.form.edit_add_ons')) %>",
+      addOns: "<%= j(t('quotes.view.form.add_ons')) %>",
+      addonBulkPlaceholder: "<%= j(t('quotes.view.form.addon_bulk_placeholder')) %>",
+      addAddOn: "<%= j(t('quotes.view.form.add_add_on')) %>",
+      referencePriceMismatch: "<%= j(t('quotes.view.form.reference_price_mismatch')) %>",
+      noExactMatchSavedAsCustom: "<%= j(t('quotes.view.form.no_exact_match_saved_as_custom')) %>"
     };
 
     const currencySymbols = {
@@ -981,7 +1004,7 @@
         if (!specSummary) return;
         const lines = String(specsInput?.value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
         if (!lines.length) {
-          specSummary.innerHTML = '<span class="quote-kv-summary-empty">No specs</span>';
+          specSummary.innerHTML = `<span class="quote-kv-summary-empty">${escapeHtml(uiText.noSpecs)}</span>`;
           return;
         }
         specSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
@@ -991,7 +1014,7 @@
         if (!addonSummary) return;
         const lines = String(addonInput?.value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
         if (!lines.length) {
-          addonSummary.innerHTML = '<span class="quote-kv-summary-empty">No add-ons</span>';
+          addonSummary.innerHTML = `<span class="quote-kv-summary-empty">${escapeHtml(uiText.noAddOns)}</span>`;
           return;
         }
         addonSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
@@ -1128,14 +1151,14 @@
         }
         if (!descInput.value) descInput.value = selected.name;
 
-        fillSelect(specPresetSelect, selected.spec_presets || [], selected.default_spec_preset_id, "Custom specs");
-        fillSelect(addonPresetSelect, selected.addon_presets || [], selected.default_addon_preset_id, "Custom add-ons");
+        fillSelect(specPresetSelect, selected.spec_presets || [], selected.default_spec_preset_id, uiText.customSpecs);
+        fillSelect(addonPresetSelect, selected.addon_presets || [], selected.default_addon_preset_id, uiText.customAddOns);
         applySpecPreset(selected, specPresetSelect?.value || selected.default_spec_preset_id || selected.spec_presets?.[0]?.id || "", previousProductId);
         applyAddonPreset(selected, addonPresetSelect?.value || selected.default_addon_preset_id || selected.addon_presets?.[0]?.id || "", previousProductId);
 
         productNameInput.classList.add("is-matched");
         if (isCurrencyMismatch) {
-          setFeedback("warning", `Reference price is in ${productCurrency}. Quote currency is ${quoteCurrency}. Enter quote price manually.`);
+          setFeedback("warning", uiText.referencePriceMismatch.replace("%{product_currency}", productCurrency).replace("%{quote_currency}", quoteCurrency));
         } else {
           setFeedback("", "");
         }
@@ -1158,7 +1181,7 @@
             descInput.value = productNameInput.value.trim();
           }
           if (keyword) {
-            setFeedback("muted", "No exact match. This will be saved as a custom item.");
+            setFeedback("muted", uiText.noExactMatchSavedAsCustom);
           } else {
             setFeedback("", "");
           }
@@ -1595,7 +1618,7 @@
       tr.innerHTML = `
         <td class="quote-col-product">
           <div class="product-search">
-            <input type="text" class="js-product-name" placeholder="Type to search product">
+            <input type="text" class="js-product-name" placeholder="${escapeHtml(uiText.typeToSearchProduct)}">
             <div class="js-product-dropdown"></div>
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -1604,20 +1627,20 @@
         </td>
         <td class="quote-col-specs">
           <select class="js-spec-preset-select quote-inline-select" data-default-id="">
-            <option value="">Custom specs</option>
+            <option value="">${escapeHtml(uiText.customSpecs)}</option>
           </select>
           <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
           <div class="quote-kv-summary js-spec-summary"></div>
-          <button type="button" class="quote-kv-open js-open-spec-editor">Edit specs</button>
+          <button type="button" class="quote-kv-open js-open-spec-editor">${escapeHtml(uiText.editSpecs)}</button>
           <div class="quote-kv-editor js-spec-editor" data-kind="spec">
             <div class="quote-kv-editor-head">
-              <strong>Specifications</strong>
-              <button type="button" class="quote-kv-close js-kv-close">Close</button>
+              <strong>${escapeHtml(uiText.specifications)}</strong>
+              <button type="button" class="quote-kv-close js-kv-close">${escapeHtml(uiText.close)}</button>
             </div>
             <div class="quote-kv-bulk">
-              <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Power: 5kW&#10;Voltage: 220V"></textarea>
+              <textarea class="quote-kv-bulk-input js-spec-bulk-input" rows="3" placeholder="${escapeHtml(uiText.specBulkPlaceholder)}"></textarea>
               <div class="quote-kv-bulk-actions">
-                <button type="button" class="quote-kv-parse js-spec-bulk-apply">Apply text</button>
+                <button type="button" class="quote-kv-parse js-spec-bulk-apply">${escapeHtml(uiText.applyText)}</button>
                 <span class="quote-kv-bulk-check js-spec-bulk-check" aria-live="polite"></span>
               </div>
             </div>
@@ -1625,27 +1648,27 @@
               ${createSpecRow()}
             </div>
             <div class="quote-kv-actions">
-              <button type="button" class="quote-kv-add js-kv-add">+ Spec</button>
-              <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
+              <button type="button" class="quote-kv-add js-kv-add">${escapeHtml(uiText.addSpec)}</button>
+              <button type="button" class="quote-kv-clear js-kv-clear-all">${escapeHtml(uiText.clearAll)}</button>
             </div>
           </div>
         </td>
         <td class="quote-col-addons">
           <select class="js-addon-preset-select quote-inline-select" data-default-id="">
-            <option value="">Custom add-ons</option>
+            <option value="">${escapeHtml(uiText.customAddOns)}</option>
           </select>
           <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
           <div class="quote-kv-summary js-addon-summary"></div>
-          <button type="button" class="quote-kv-open js-open-addon-editor">Edit add-ons</button>
+          <button type="button" class="quote-kv-open js-open-addon-editor">${escapeHtml(uiText.editAddOns)}</button>
           <div class="quote-kv-editor js-addon-editor" data-kind="addon">
             <div class="quote-kv-editor-head">
-              <strong>Add-ons</strong>
-              <button type="button" class="quote-kv-close js-kv-close">Close</button>
+              <strong>${escapeHtml(uiText.addOns)}</strong>
+              <button type="button" class="quote-kv-close js-kv-close">${escapeHtml(uiText.close)}</button>
             </div>
             <div class="quote-kv-bulk">
-              <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="One line per item, e.g.&#10;Packaging: 30&#10;Installation = 120"></textarea>
+              <textarea class="quote-kv-bulk-input js-addon-bulk-input" rows="3" placeholder="${escapeHtml(uiText.addonBulkPlaceholder)}"></textarea>
               <div class="quote-kv-bulk-actions">
-                <button type="button" class="quote-kv-parse js-addon-bulk-apply">Apply text</button>
+                <button type="button" class="quote-kv-parse js-addon-bulk-apply">${escapeHtml(uiText.applyText)}</button>
                 <span class="quote-kv-bulk-check js-addon-bulk-check" aria-live="polite"></span>
               </div>
             </div>
@@ -1653,8 +1676,8 @@
               ${createAddonRow()}
             </div>
             <div class="quote-kv-actions">
-              <button type="button" class="quote-kv-add js-kv-add">+ Add-on</button>
-              <button type="button" class="quote-kv-clear js-kv-clear-all">Clear all</button>
+              <button type="button" class="quote-kv-add js-kv-add">${escapeHtml(uiText.addAddOn)}</button>
+              <button type="button" class="quote-kv-clear js-kv-clear-all">${escapeHtml(uiText.clearAll)}</button>
             </div>
           </div>
         </td>

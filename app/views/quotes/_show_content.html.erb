@@ -420,47 +420,175 @@
       </div>
     <% end %>
 
-    <details class="quote-toolbar-export">
-      <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary"><%= t("quotes.view.show.toolbar.export") %></summary>
+    <% latest_active_share = @quote.quote_shares.active.order(created_at: :desc).first %>
+    <% latest_active_share ||= @quote.quote_shares.order(created_at: :desc).first %>
+    <% existing_public_share_url = latest_active_share.present? ? public_quote_share_path(latest_active_share.token, doc: @document_kind) : nil %>
+    <% if workflow_state == "draft" %>
+      <details class="quote-toolbar-export js-preview-menu">
+        <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary"><%= t("quotes.view.show.toolbar.preview") %></summary>
+        <div class="quote-toolbar-export-menu">
+          <p class="quote-toolbar-export-hint"><%= t("quotes.view.show.toolbar.preview_no_state_change") %></p>
+          <%= link_to t("quotes.view.show.toolbar.preview_pdf"),
+                      export_pdf_quote_path(@quote, doc: @document_kind, document_kind: @document_kind, preview: 1),
+                      class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary",
+                      data: { turbo: false },
+                      target: "_blank",
+                      rel: "noopener" %>
+          <%= link_to t("quotes.view.show.toolbar.preview_excel"),
+                      export_xlsx_quote_path(@quote, doc: @document_kind, preview: 1),
+                      class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary",
+                      data: { turbo: false },
+                      target: "_blank",
+                      rel: "noopener" %>
+          <p class="quote-toolbar-export-hint"><%= t("quotes.view.show.toolbar.preview_excel_download_hint") %></p>
+          <%= link_to t("quotes.view.show.toolbar.preview_public_link"),
+                      public_preview_quote_path(@quote, doc: @document_kind),
+                      class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary",
+                      data: { turbo: false },
+                      target: "_blank",
+                      rel: "noopener" %>
+        </div>
+      </details>
+    <% end %>
+
+    <% send_share_label = @quote.can_share_publicly? ? t("quotes.view.show.toolbar.send_share") : t("quotes.view.show.toolbar.export") %>
+    <details class="quote-toolbar-export js-send-share-menu">
+      <summary class="<%= ui_button_classes(:primary) %> quote-btn quote-btn-primary"><%= send_share_label %></summary>
       <div class="quote-toolbar-export-menu">
+        <% if @quote.can_share_publicly? || existing_public_share_url.present? %>
+          <% wa_phone_raw = @quote.customer.whatsapp_phone %>
+          <% share_msg_template = quote_share_message_template(@quote, locale: @quote_document_locale) %>
+          <script>
+            window.__quoteShareCommsData = {
+              messageTemplate: <%= raw share_msg_template.to_json %>,
+              phone: <%= raw wa_phone_raw.to_json %>
+            };
+          </script>
+          <div class="share-link-group share-link-group-inline">
+            <% share_button_data = {} %>
+            <% share_button_data[:share_url] = share_quote_path(@quote, doc: @document_kind, format: :json) if @quote.can_share_publicly? %>
+            <% share_button_data[:existing_url] = existing_public_share_url if existing_public_share_url.present? %>
+            <%= button_tag type: "button",
+                           class: "quote-btn quote-btn-primary js-share-public-link",
+                           data: share_button_data do %>
+              <%= @quote.can_share_publicly? ? t("quotes.view.show.toolbar.share_public_link") : t("quotes.view.show.toolbar.copy_open_public_link") %>
+            <% end %>
+            <div class="share-link-panel" id="quote-share-panel" hidden>
+              <div class="share-link-panel-message" id="quote-share-message"></div>
+              <% if @quote.can_share_publicly? %>
+                <div class="share-link-panel-editor">
+                  <label class="share-link-panel-editor-label" for="quote-share-message-editor"><%= t("quotes.view.show.comms.editor_label", default: "Share Message") %></label>
+                  <textarea id="quote-share-message-editor" class="share-link-panel-editor-input" rows="5" placeholder="<%= t("quotes.view.show.comms.editor_placeholder", default: "You can edit this message before copying or sending.") %>"></textarea>
+                  <p class="share-link-panel-editor-hint"><%= t("quotes.view.show.comms.editor_hint", default: "Tip: personalize the greeting or payment details before sending.") %></p>
+                </div>
+              <% end %>
+              <div class="share-link-panel-actions">
+                <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
+                <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
+                <% if @quote.can_share_publicly? %>
+                  <button type="button" class="share-link-panel-btn" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
+                  <% if wa_phone_raw.present? %>
+                    <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
         <%= button_to t("quotes.view.show.toolbar.download_pdf"),
                       export_pdf_quote_path(@quote),
                       method: :get,
                       params: { doc: @document_kind, document_kind: @document_kind },
-                      form: { data: { turbo: false } },
+                      form: { data: { turbo: false }, onsubmit: "if (window.__markQuoteSentLocally) window.__markQuoteSentLocally();" },
                       class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-        <%= link_to t("quotes.view.show.toolbar.download_excel"), export_xlsx_quote_path(@quote, doc: @document_kind), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary", data: { turbo: false } %>
+        <%= link_to t("quotes.view.show.toolbar.download_excel"),
+                    export_xlsx_quote_path(@quote, doc: @document_kind),
+                    class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary",
+                    data: { turbo: false },
+                    onclick: "if (window.__markQuoteSentLocally) window.__markQuoteSentLocally();" %>
       </div>
     </details>
+
+    <% if @quote.can_create_new_revision? || @quote.can_reopen? || @quote.can_copy_and_reprice? %>
+      <div class="quote-toolbar-op-group" role="group" aria-label="<%= t("quotes.view.show.toolbar.quote_operations", default: "Quote operations") %>">
+        <% if @quote.can_create_new_revision? %>
+          <%= button_to t("quotes.view.show.toolbar.new_revision"),
+                        duplicate_quote_path(@quote),
+                        method: :post,
+                        form: { data: { turbo: false } },
+                        class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary quote-toolbar-op-btn" %>
+        <% end %>
+        <% if @quote.can_reopen? %>
+          <%= button_to t("quotes.view.show.toolbar.reopen_quote"),
+                        reopen_quote_path(@quote),
+                        method: :post,
+                        form: { data: { turbo_confirm: t("quotes.view.show.toolbar.reopen_confirm") } },
+                        class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary quote-toolbar-op-btn" %>
+        <% end %>
+        <% if @quote.can_copy_and_reprice? %>
+          <%= button_to t("quotes.view.show.toolbar.copy_reprice"),
+                        duplicate_and_reprice_quote_path(@quote),
+                        method: :post,
+                        form: { data: { turbo: false } },
+                        class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary quote-toolbar-op-btn" %>
+        <% end %>
+      </div>
+    <% end %>
   </div>
 
   <div class="quote-toolbar-right">
-    <div class="quote-toolbar-right-secondary">
-      <% if @quote.can_edit_revision? %>
-        <%= link_to t("quotes.view.show.toolbar.edit"), edit_quote_path(@quote), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-      <% end %>
-      <% if @quote.can_create_new_revision? %>
-        <%= button_to t("quotes.view.show.toolbar.new_revision"), duplicate_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-      <% end %>
-      <% if @quote.can_reopen? %>
-        <%= button_to t("quotes.view.show.toolbar.reopen_quote"),
-                      reopen_quote_path(@quote),
-                      method: :post,
-                      form: { data: { turbo_confirm: t("quotes.view.show.toolbar.reopen_confirm") } },
-                      class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-      <% end %>
-      <% if @quote.can_copy_and_reprice? %>
-        <%= button_to t("quotes.view.show.toolbar.copy_reprice"), duplicate_and_reprice_quote_path(@quote), method: :post, form: { data: { turbo: false } }, class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-      <% end %>
-      <% if @quote.can_switch_document? %>
-        <% if @document_kind == "pi" %>
-          <%= link_to t("quotes.view.show.toolbar.switch_to_quotation"), quote_path(@quote, doc: "quote", document_kind: "quote"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-        <% else %>
-          <%= link_to t("quotes.view.show.toolbar.switch_to_pi"), quote_path(@quote, doc: "pi", document_kind: "pi"), class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
-        <% end %>
-      <% end %>
-    </div>
     <div class="quote-toolbar-right-primary">
+      <% status_actions_visible = @quote.can_mark_negotiating? || @quote.can_mark_won? || @quote.can_mark_lost? || @quote.can_revert_to_sent? %>
+      <% if status_actions_visible %>
+        <% status_label = case @quote.workflow_state
+                         when "won", "accepted"
+                           t("quotes.view.show.toolbar.status_option_won")
+                         when "lost"
+                           t("quotes.view.show.toolbar.status_option_lost")
+                         when "negotiating"
+                           t("quotes.view.show.toolbar.status_option_negotiating")
+                         when "viewed"
+                           t("quotes.view.form.status_options.viewed")
+                         when "sent"
+                           t("quotes.view.form.status_options.sent")
+                         else
+                           t("quotes.view.form.status_options.draft")
+                         end %>
+        <details class="quote-toolbar-export quote-toolbar-status-control">
+          <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary"><%= t("quotes.view.show.toolbar.status_selector", status: status_label) %></summary>
+          <div class="quote-toolbar-export-menu quote-toolbar-export-menu--right">
+            <% if @quote.can_mark_negotiating? %>
+              <%= button_to t("quotes.view.show.toolbar.status_mark_action", status: t("quotes.view.show.toolbar.status_option_negotiating")),
+                            mark_negotiating_quote_path(@quote),
+                            method: :post,
+                            form: { data: { turbo: false } },
+                            class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+            <% end %>
+            <% if @quote.can_mark_won? %>
+              <button type="button"
+                      class="<%= "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary js-quote-stage-open" %>"
+                      data-stage-modal-id="quote-won-modal-<%= @quote.id %>">
+                <%= t("quotes.view.show.toolbar.status_mark_action", status: t("quotes.view.show.toolbar.status_option_won")) %>
+              </button>
+            <% end %>
+            <% if @quote.can_mark_lost? %>
+              <button type="button"
+                      class="<%= "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary js-quote-stage-open" %>"
+                      data-stage-modal-id="quote-lost-modal-<%= @quote.id %>">
+                <%= t("quotes.view.show.toolbar.status_mark_action", status: t("quotes.view.show.toolbar.status_option_lost")) %>
+              </button>
+            <% end %>
+            <% if @quote.can_revert_to_sent? %>
+              <%= button_to t("quotes.view.show.toolbar.back_to_sent"),
+                            revert_to_sent_quote_path(@quote),
+                            method: :post,
+                            form: { data: { turbo: false } },
+                            class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+            <% end %>
+          </div>
+        </details>
+      <% end %>
+
       <% if reason_missing %>
         <button type="button"
                 class="<%= "#{ui_button_classes(:primary)} quote-btn quote-btn-primary js-quote-reason-open" %>"
@@ -508,52 +636,46 @@
           </div>
         <% end %>
       <% end %>
-      <% if @quote.can_share_publicly? %>
-        <% wa_phone_raw = @quote.customer.whatsapp_phone %>
-        <%# Keep this copied share message aligned with the current template webview locale.
-            If QuoteTemplate::OUTPUT_LOCALES changes, update quotes.share_message.* too. %>
-        <% share_msg_template = quote_share_message_template(@quote, locale: @quote_document_locale) %>
-        <script>
-          window.__quoteShareCommsData = {
-            messageTemplate: <%= raw share_msg_template.to_json %>,
-            phone: <%= raw wa_phone_raw.to_json %>
-          };
-        </script>
-        <div class="share-link-group">
-          <button type="button"
-                  class="quote-btn quote-btn-primary js-share-public-link"
-                  data-share-url="<%= share_quote_path(@quote, doc: @document_kind, format: :json) %>">
-            <%= t("quotes.view.show.toolbar.share_public_link") %>
-          </button>
-          <div class="share-link-panel" id="quote-share-panel" hidden>
-            <div class="share-link-panel-message" id="quote-share-message"></div>
-            <div class="share-link-panel-editor">
-              <label class="share-link-panel-editor-label" for="quote-share-message-editor"><%= t("quotes.view.show.comms.editor_label", default: "Share Message") %></label>
-              <textarea id="quote-share-message-editor" class="share-link-panel-editor-input" rows="5" placeholder="<%= t("quotes.view.show.comms.editor_placeholder", default: "You can edit this message before copying or sending.") %>"></textarea>
-              <p class="share-link-panel-editor-hint"><%= t("quotes.view.show.comms.editor_hint", default: "Tip: personalize the greeting or payment details before sending.") %></p>
-            </div>
-            <div class="share-link-panel-actions">
-              <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
-              <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
-              <button type="button" class="share-link-panel-btn" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
-              <% if wa_phone_raw.present? %>
-                <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
-              <% end %>
-            </div>
-          </div>
-        </div>
-      <% end %>
       <% if @quote.can_delete_quote_family? %>
-        <%= button_to t("quotes.view.show.toolbar.delete_quote"),
-                      quote_path(@quote),
-                      method: :delete,
-                      form: { data: { turbo_confirm: t("quotes.view.show.toolbar.delete_confirm", quote_no: @quote.quote_no) },
-                              onsubmit: "if (!confirm('#{j(t("quotes.view.show.toolbar.delete_final_warning"))}')) return false; if (prompt('#{j(t("quotes.view.show.toolbar.delete_prompt"))}') !== 'DELETE') return false;" },
-                      class: "#{ui_button_classes(:danger)} quote-btn quote-btn-danger" %>
+        <details class="quote-toolbar-export quote-toolbar-more-actions">
+          <summary class="<%= ui_button_classes(:secondary) %> quote-btn quote-btn-secondary" aria-label="<%= t("quotes.view.show.toolbar.more_actions") %>">···</summary>
+          <div class="quote-toolbar-export-menu quote-toolbar-export-menu--right">
+            <% if @quote.can_edit_revision? %>
+              <%= link_to t("quotes.view.show.toolbar.edit"),
+                          edit_quote_path(@quote),
+                          class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+            <% end %>
+            <% if @quote.can_switch_document? %>
+              <% if @document_kind == "pi" %>
+                <%= link_to t("quotes.view.show.toolbar.switch_to_quotation"),
+                            quote_path(@quote, doc: "quote", document_kind: "quote"),
+                            class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+              <% else %>
+                <%= link_to t("quotes.view.show.toolbar.switch_to_pi"),
+                            quote_path(@quote, doc: "pi", document_kind: "pi"),
+                            class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
+              <% end %>
+            <% end %>
+            <%= button_to t("quotes.view.show.toolbar.delete_quote"),
+                          quote_path(@quote),
+                          method: :delete,
+                          form: { data: { turbo_confirm: t("quotes.view.show.toolbar.delete_confirm", quote_no: @quote.quote_no) },
+                                  onsubmit: "if (!confirm('#{j(t("quotes.view.show.toolbar.delete_final_warning"))}')) return false; if (prompt('#{j(t("quotes.view.show.toolbar.delete_prompt"))}') !== 'DELETE') return false;" },
+                          class: "#{ui_button_classes(:danger)} quote-btn quote-btn-danger" %>
+          </div>
+        </details>
       <% end %>
     </div>
   </div>
 </div>
+
+<% if flash[:status_undo_token].present? %>
+  <div id="quote-status-undo-data"
+       data-url="<%= undo_status_change_quote_path(@quote) %>"
+       data-token="<%= flash[:status_undo_token] %>"
+       data-expires-at="<%= flash[:status_undo_expires_at] %>"
+       hidden></div>
+<% end %>
 
 <% if reason_missing %>
   <% reason_modal_id = "quote-reason-modal-#{@quote.id}" %>
@@ -610,6 +732,90 @@
   </div>
 <% end %>
 
+<% if @quote.can_mark_won? %>
+  <% won_modal_id = "quote-won-modal-#{@quote.id}" %>
+  <div class="quote-turnstile-modal quote-stage-modal"
+       id="<%= won_modal_id %>"
+       data-open-by-default="<%= params[:outcome_modal].to_s == "won" ? "true" : "false" %>"
+       hidden>
+    <div class="quote-turnstile-modal__dialog quote-reason-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="<%= "#{won_modal_id}-title" %>">
+      <button type="button" class="quote-turnstile-modal__close js-quote-stage-close" aria-label="<%= t("quotes.view.show.toolbar.close_reason_modal") %>">×</button>
+      <h3 id="<%= "#{won_modal_id}-title" %>"><%= t("quotes.view.show.toolbar.mark_won") %></h3>
+      <p><%= t("quotes.view.show.toolbar.mark_won_hint") %></p>
+      <div class="quote-reason-actions" style="margin-bottom: .75rem;">
+        <%= render "shared/quote_reason_options_modal",
+                   modal_id: "quote-reason-options-modal-win-#{@quote.id}",
+                   current_status: "won" %>
+      </div>
+
+      <%= form_with model: @quote,
+                    url: mark_outcome_quote_path(@quote, target_status: "won"),
+                    method: :patch,
+                    local: true,
+                    html: { class: "quote-reason-form", data: { turbo: false } } do |f| %>
+        <div class="quote-reason-field">
+          <%= f.label :win_reason, t("quotes.view.form.select_win_reason") %>
+          <%= f.select :win_reason,
+                       Quote.reason_option_pairs_for(:win, company: @quote.company),
+                       { include_blank: t("quotes.view.form.select_win_reason") },
+                       { class: ui_input_classes("js-quote-reason-kind"), data: { reason_kind: "win" } } %>
+        </div>
+        <div class="quote-reason-field js-quote-reason-detail-wrap" hidden>
+          <%= f.label :win_reason_detail, t("quotes.view.form.win_reason_details") %>
+          <%= f.text_field :win_reason_detail, placeholder: t("quotes.view.form.win_reason_details_placeholder"), class: ui_input_classes %>
+        </div>
+        <div class="quote-reason-field">
+          <%= f.label :final_amount, t("quotes.view.form.final_amount") %>
+          <%= f.number_field :final_amount, step: 0.01, value: (@quote.final_amount.presence || @quote.grand_total), class: ui_input_classes %>
+        </div>
+        <div class="quote-reason-actions">
+          <%= f.submit t("quotes.view.show.toolbar.confirm_mark_won"), class: ui_button_classes(:primary) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if @quote.can_mark_lost? %>
+  <% lost_modal_id = "quote-lost-modal-#{@quote.id}" %>
+  <div class="quote-turnstile-modal quote-stage-modal"
+       id="<%= lost_modal_id %>"
+       data-open-by-default="<%= params[:outcome_modal].to_s == "lost" ? "true" : "false" %>"
+       hidden>
+    <div class="quote-turnstile-modal__dialog quote-reason-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="<%= "#{lost_modal_id}-title" %>">
+      <button type="button" class="quote-turnstile-modal__close js-quote-stage-close" aria-label="<%= t("quotes.view.show.toolbar.close_reason_modal") %>">×</button>
+      <h3 id="<%= "#{lost_modal_id}-title" %>"><%= t("quotes.view.show.toolbar.mark_lost") %></h3>
+      <p><%= t("quotes.view.show.toolbar.mark_lost_hint") %></p>
+      <div class="quote-reason-actions" style="margin-bottom: .75rem;">
+        <%= render "shared/quote_reason_options_modal",
+                   modal_id: "quote-reason-options-modal-lost-#{@quote.id}",
+                   current_status: "lost" %>
+      </div>
+
+      <%= form_with model: @quote,
+                    url: mark_outcome_quote_path(@quote, target_status: "lost"),
+                    method: :patch,
+                    local: true,
+                    html: { class: "quote-reason-form", data: { turbo: false } } do |f| %>
+        <div class="quote-reason-field">
+          <%= f.label :loss_reason, t("quotes.view.form.select_loss_reason") %>
+          <%= f.select :loss_reason,
+                       Quote.reason_option_pairs_for(:loss, company: @quote.company),
+                       { include_blank: t("quotes.view.form.select_loss_reason") },
+                       { class: ui_input_classes("js-quote-reason-kind"), data: { reason_kind: "loss" } } %>
+        </div>
+        <div class="quote-reason-field js-quote-reason-detail-wrap" hidden>
+          <%= f.label :loss_reason_detail, t("quotes.view.form.loss_reason_details") %>
+          <%= f.text_field :loss_reason_detail, placeholder: t("quotes.view.form.loss_reason_details_placeholder"), class: ui_input_classes %>
+        </div>
+        <div class="quote-reason-actions">
+          <%= f.submit t("quotes.view.show.toolbar.confirm_mark_lost"), class: ui_button_classes(:danger) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
 <section class="quote-history app-surface">
   <div class="app-section-heading">
     <h3><%= t("quotes.view.show.history.title") %></h3>
@@ -657,6 +863,7 @@
 <script>
   (() => {
     const button = document.querySelector(".js-share-public-link");
+    const shareMenu = button?.closest(".quote-toolbar-export");
     const panel = document.getElementById("quote-share-panel");
     const message = document.getElementById("quote-share-message");
     const copyButton = document.getElementById("quote-share-copy-btn");
@@ -670,6 +877,8 @@
 
     const csrf = document.querySelector("meta[name='csrf-token']")?.content;
     const commsData = window.__quoteShareCommsData || {};
+    const quoteId = "<%= @quote.id %>";
+    const draftStorageKey = `quote-share-draft:${quoteId}`;
     const sharePanelState = window.__quoteSharePanelState || {
       visible: false,
       message: "",
@@ -677,10 +886,66 @@
       currentShareUrl: "",
       openHref: "#",
       openHidden: true,
-      messageDraft: ""
+      messageDraft: "",
+      shareMenuOpen: false
     };
     window.__quoteSharePanelState = sharePanelState;
     let currentShareUrl = "";
+
+    const persistMessageDraft = () => {
+      if (!messageEditor) return;
+      try {
+        sessionStorage.setItem(draftStorageKey, messageEditor.value || "");
+      } catch (_) {
+        // Ignore storage failures in restricted browser modes.
+      }
+    };
+
+    const readPersistedMessageDraft = () => {
+      try {
+        return sessionStorage.getItem(draftStorageKey) || "";
+      } catch (_) {
+        return "";
+      }
+    };
+
+    const setTemporaryButtonLabel = (buttonEl, text) => {
+      if (!buttonEl || !text) return;
+      const original = buttonEl.dataset.defaultLabel || buttonEl.textContent || "";
+      buttonEl.dataset.defaultLabel = original;
+      buttonEl.textContent = text;
+      buttonEl.disabled = true;
+      window.setTimeout(() => {
+        buttonEl.textContent = original;
+        buttonEl.disabled = false;
+      }, 1200);
+    };
+
+    const markSentLocally = ({ refresh = true } = {}) => {
+      const statusBadge = document.querySelector(".quote-doc-header .app-status-badge");
+      if (statusBadge) {
+        statusBadge.className = "app-status-badge app-status-badge--blue";
+        statusBadge.textContent = "<%= j(t('quotes.view.form.status_options.sent')) %>";
+      }
+
+      document.querySelectorAll(".js-preview-menu").forEach((menu) => {
+        menu.hidden = true;
+        menu.removeAttribute("open");
+      });
+
+      if (refresh) {
+        // Trigger an immediate re-render so action buttons reflect sent state without waiting polling.
+        window.setTimeout(() => {
+          window.refreshQuoteState?.(true, true);
+        }, 120);
+
+        // Fallback refresh in case the first refresh races with file-share update timing.
+        window.setTimeout(() => {
+          window.refreshQuoteState?.(true, true);
+        }, 1400);
+      }
+    };
+    window.__markQuoteSentLocally = () => markSentLocally({ refresh: true });
 
     const syncPanelState = () => {
       sharePanelState.visible = !panel.hidden;
@@ -690,13 +955,31 @@
       sharePanelState.openHref = openLink.getAttribute("href") || "#";
       sharePanelState.openHidden = openLink.hidden;
       sharePanelState.messageDraft = messageEditor?.value || "";
+      sharePanelState.shareMenuOpen = !!shareMenu?.hasAttribute("open");
+      persistMessageDraft();
     };
 
     const showPanel = (text, isError = false) => {
+      if (shareMenu) shareMenu.setAttribute("open", "");
       message.textContent = text;
       panel.classList.toggle("is-error", isError);
       panel.hidden = false;
       syncPanelState();
+
+      // If panel extends beyond viewport, auto-scroll page so action buttons are visible.
+      window.requestAnimationFrame(() => {
+        const rect = panel.getBoundingClientRect();
+        const viewportBottom = window.innerHeight;
+        const margin = 16;
+
+        if (rect.bottom > viewportBottom - margin) {
+          const delta = rect.bottom - viewportBottom + margin;
+          window.scrollBy({ top: delta, behavior: "smooth" });
+        } else if (rect.top < margin) {
+          const delta = rect.top - margin;
+          window.scrollBy({ top: delta, behavior: "smooth" });
+        }
+      });
     };
 
     const hidePanel = () => {
@@ -753,7 +1036,25 @@
     button.addEventListener("click", async () => {
       button.disabled = true;
       try {
-        const response = await fetch(button.dataset.shareUrl, {
+        const existingUrl = button.dataset.existingUrl || "";
+        const shareUrl = button.dataset.shareUrl || "";
+        if (!shareUrl && existingUrl) {
+          currentShareUrl = existingUrl;
+          openLink.href = existingUrl;
+          openLink.hidden = false;
+          const copied = await copyText(existingUrl);
+          syncPanelState();
+          if (copied) {
+            showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_copied")) %>");
+            window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_copied")) %>", "success");
+          } else {
+            showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>");
+            window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>", "warn");
+          }
+          return;
+        }
+
+        const response = await fetch(shareUrl, {
           method: "POST",
           headers: {
             "Accept": "application/json",
@@ -769,10 +1070,12 @@
           throw new Error(payload.message || "<%= j(t("quotes.view.show.toolbar.unable_generate_public_link")) %>");
         }
 
+        markSentLocally({ refresh: false });
         const copied = await copyText(payload.url);
         currentShareUrl = payload.url;
         if (messageEditor) {
           messageEditor.value = buildDefaultMessage();
+          persistMessageDraft();
         }
         syncWhatsappHref();
         try {
@@ -798,7 +1101,11 @@
           showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>");
           window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>", "warn");
         }
-        window.setTimeout(() => window.refreshQuoteState?.(true), 120);
+
+        // Re-render action buttons immediately, then restore panel/menu state on load.
+        window.setTimeout(() => {
+          window.refreshQuoteState?.(true, true);
+        }, 280);
       } catch (error) {
         currentShareUrl = "";
         syncWhatsappHref();
@@ -816,6 +1123,9 @@
       if (!currentShareUrl) return;
       const copied = await copyText(currentShareUrl);
       showPanel(copied ? "<%= j(t("quotes.view.show.toolbar.link_copied")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", !copied);
+      if (copied) {
+        setTemporaryButtonLabel(copyButton, "<%= j(t("quotes.view.show.toolbar.link_copied")) %>");
+      }
       window.showAppToast?.(copied ? "<%= j(t("quotes.view.show.toolbar.link_copied")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", copied ? "success" : "error");
     });
 
@@ -823,6 +1133,9 @@
       if (!currentShareUrl) return;
       const copied = await copyText(buildMessage());
       showPanel(copied ? "<%= j(t("quotes.view.show.comms.message_copied", default: "Message copied!")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", !copied);
+      if (copied) {
+        setTemporaryButtonLabel(copyMessageButton, "<%= j(t("quotes.view.show.comms.message_copied", default: "Message copied!")) %>");
+      }
       window.showAppToast?.(copied ? "<%= j(t("quotes.view.show.comms.message_copied", default: "Message copied!")) %>" : "<%= j(t("quotes.view.show.toolbar.copy_failed_browser")) %>", copied ? "success" : "error");
     });
 
@@ -841,6 +1154,7 @@
     });
 
     messageEditor?.addEventListener("input", () => {
+      persistMessageDraft();
       syncPanelState();
       syncWhatsappHref();
     });
@@ -856,8 +1170,11 @@
     });
 
     currentShareUrl = sharePanelState.currentShareUrl || "";
+    if (sharePanelState.shareMenuOpen && shareMenu) {
+      shareMenu.setAttribute("open", "");
+    }
     if (messageEditor) {
-      messageEditor.value = sharePanelState.messageDraft || (currentShareUrl ? buildDefaultMessage() : "");
+      messageEditor.value = sharePanelState.messageDraft || readPersistedMessageDraft() || (currentShareUrl ? buildDefaultMessage() : "");
     }
     syncWhatsappHref();
     openLink.href = sharePanelState.openHref || "#";
@@ -926,8 +1243,78 @@
   })();
 
   (() => {
+    const undoData = document.getElementById("quote-status-undo-data");
+    if (!undoData) return;
+
+    const postUrl = undoData.dataset.url;
+    const token = undoData.dataset.token;
+    const expiresAtRaw = undoData.dataset.expiresAt;
+    if (!postUrl || !token || !expiresAtRaw) return;
+
+    const expiresAt = new Date(expiresAtRaw);
+    if (Number.isNaN(expiresAt.getTime()) || expiresAt.getTime() <= Date.now()) return;
+
+    const wrap = document.createElement("div");
+    wrap.className = "quote-status-undo";
+    const text = document.createElement("span");
+    text.className = "quote-status-undo-text";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "quote-status-undo-btn";
+    button.textContent = "<%= j(t("quotes.view.show.toolbar.undo")) %>";
+    wrap.append(text, button);
+    document.body.appendChild(wrap);
+
+    const updateCountdown = () => {
+      const left = Math.max(0, Math.ceil((expiresAt.getTime() - Date.now()) / 1000));
+      text.textContent = "<%= j(t("quotes.view.show.toolbar.undo_status_change_prefix")) %> (${left}s)";
+      if (left <= 0) {
+        wrap.remove();
+        return false;
+      }
+
+      return true;
+    };
+
+    if (!updateCountdown()) return;
+
+    const timer = window.setInterval(() => {
+      if (!updateCountdown()) {
+        window.clearInterval(timer);
+      }
+    }, 250);
+
+    button.addEventListener("click", () => {
+      button.disabled = true;
+      const form = document.createElement("form");
+      form.method = "post";
+      form.action = postUrl;
+
+      const csrfToken = document.querySelector("meta[name='csrf-token']")?.content;
+      if (csrfToken) {
+        const csrfInput = document.createElement("input");
+        csrfInput.type = "hidden";
+        csrfInput.name = "authenticity_token";
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+      }
+
+      const tokenInput = document.createElement("input");
+      tokenInput.type = "hidden";
+      tokenInput.name = "token";
+      tokenInput.value = token;
+      form.appendChild(tokenInput);
+
+      document.body.appendChild(form);
+      form.submit();
+    });
+  })();
+
+  (() => {
     const exportMenus = document.querySelectorAll(".quote-toolbar-export");
     if (!exportMenus.length) return;
+    const previewSummary = document.querySelector(".js-preview-menu > summary");
+    const sendShareSummary = document.querySelector(".js-send-share-menu > summary");
 
     const closeAll = () => {
       exportMenus.forEach((menu) => {
@@ -935,14 +1322,97 @@
       });
     };
 
+    exportMenus.forEach((menu) => {
+      menu.addEventListener("toggle", () => {
+        if (!menu.open) return;
+
+        exportMenus.forEach((other) => {
+          if (other === menu) return;
+          other.removeAttribute("open");
+        });
+      });
+    });
+
     document.addEventListener("click", (event) => {
       if (event.target.closest(".quote-toolbar-export")) return;
       closeAll();
     });
 
     document.addEventListener("keydown", (event) => {
-      if (event.key !== "Escape") return;
-      closeAll();
+      if (event.key === "Escape") {
+        closeAll();
+        return;
+      }
+
+      const isTyping = event.target && [ "INPUT", "TEXTAREA", "SELECT" ].includes(event.target.tagName);
+      if (isTyping) return;
+
+      if (event.altKey && event.key.toLowerCase() === "p" && previewSummary) {
+        event.preventDefault();
+        previewSummary.click();
+      }
+
+      if (event.altKey && event.key.toLowerCase() === "s" && sendShareSummary) {
+        event.preventDefault();
+        sendShareSummary.click();
+      }
+    });
+  })();
+
+  (() => {
+    const modals = document.querySelectorAll(".quote-stage-modal");
+    if (!modals.length) return;
+
+    const syncReasonDetail = (modal) => {
+      if (!modal) return;
+
+      const select = modal.querySelector(".js-quote-reason-kind");
+      const detailWrap = modal.querySelector(".js-quote-reason-detail-wrap");
+      if (!select || !detailWrap) return;
+
+      detailWrap.hidden = select.value !== "other";
+    };
+
+    const closeStageModal = (modal) => {
+      if (!modal) return;
+
+      modal.hidden = true;
+    };
+
+    modals.forEach((modal) => {
+      syncReasonDetail(modal);
+      if (modal.dataset.openByDefault === "true") {
+        modal.hidden = false;
+      }
+    });
+
+    document.addEventListener("change", (event) => {
+      const modal = event.target.closest(".quote-stage-modal");
+      if (!modal) return;
+      if (!event.target.matches(".js-quote-reason-kind")) return;
+      syncReasonDetail(modal);
+    });
+
+    document.addEventListener("click", (event) => {
+      const openButton = event.target.closest(".js-quote-stage-open");
+      if (openButton) {
+        const modal = document.getElementById(openButton.dataset.stageModalId);
+        if (!modal) return;
+        event.preventDefault();
+        modal.hidden = false;
+        syncReasonDetail(modal);
+        return;
+      }
+
+      const closeButton = event.target.closest(".js-quote-stage-close");
+      if (closeButton) {
+        closeStageModal(closeButton.closest(".quote-stage-modal"));
+        return;
+      }
+
+      if (event.target.classList.contains("quote-stage-modal")) {
+        closeStageModal(event.target);
+      }
     });
   })();
 </script>

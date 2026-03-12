@@ -5,6 +5,8 @@ class Customer < ApplicationRecord
   CUSTOMER_SOURCES = %w[alibaba exhibition google_seo referral old_customer other].freeze
   PAYMENT_TERMS_OPTIONS = %w[t_t l_c oa mixed].freeze
   TAX_ID_TYPES = %w[VAT GST TIN RFC CNPJ CUIT NIT RUT OTHER].freeze
+  AVATAR_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_AVATAR_SIZE = 5.megabytes
 
   belongs_to :company
   if column_names.include?("internal_owner_id")
@@ -26,6 +28,7 @@ class Customer < ApplicationRecord
   validates :estimated_annual_volume, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_blank: true
   validate :internal_owner_within_company
+  validate :avatar_constraints
 
   scope :search, ->(query) {
     return all if query.blank?
@@ -157,5 +160,16 @@ class Customer < ApplicationRecord
     return if internal_owner.blank? || internal_owner.company_id == company_id
 
     errors.add(:internal_owner, "must belong to the same company")
+  end
+
+  def avatar_constraints
+    return unless avatar.attached?
+
+    if !AVATAR_CONTENT_TYPES.include?(avatar.blob.content_type)
+      errors.add(:avatar, "must be PNG, JPG, WEBP, or GIF")
+    end
+    if avatar.blob.byte_size > MAX_AVATAR_SIZE
+      errors.add(:avatar, "must be smaller than #{MAX_AVATAR_SIZE / 1.megabyte}MB")
+    end
   end
 end

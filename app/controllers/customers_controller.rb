@@ -973,20 +973,8 @@ class CustomersController < ApplicationController
     action = signal.recommended_action.to_s
 
     case action
-    when "renew_quote"
-      { label: signal.cta_label, path: duplicate_quote_path(quote), method: :post }
-    when "prepare_revision"
-      if quote.can_create_new_revision?
-        { label: signal.cta_label, path: duplicate_quote_path(quote), method: :post }
-      else
-        { label: signal.cta_label, path: quote_path(quote), method: :get }
-      end
-    when "resend_reminder"
-      if quote.can_send_reminder?
-        { label: signal.cta_label, path: send_reminder_quote_path(quote), method: :post }
-      else
-        { label: I18n.t("dashboard.view.action_items.open"), path: quote_path(quote), method: :get }
-      end
+    when "renew_quote", "prepare_revision", "resend_reminder"
+      { label: signal.cta_label, path: quote_path(quote), method: :get }
     else
       { label: signal.cta_label, path: quote_path(quote), method: :get }
     end

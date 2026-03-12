@@ -6,6 +6,9 @@ class QuoteTemplate < ApplicationRecord
     "zh-CN" => "简体中文",
     "es-419" => "Espanol (LatAm)"
   }.freeze
+  IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif image/svg+xml].freeze
+  MAX_SIGNATURE_IMAGE_SIZE = 5.megabytes
+  MAX_WATERMARK_IMAGE_SIZE = 8.megabytes
   belongs_to :company
   has_many :quotes, foreign_key: :template_id, dependent: :nullify
   has_one_attached :watermark_image
@@ -35,6 +38,8 @@ class QuoteTemplate < ApplicationRecord
   validates :public_link_locale, inclusion: { in: OUTPUT_LOCALES.keys }
   validates :pdf_locale, inclusion: { in: OUTPUT_LOCALES.keys }
   validates :excel_locale, inclusion: { in: OUTPUT_LOCALES.keys }
+  validate :signature_image_constraints
+  validate :watermark_image_constraints
 
   BOOLEAN_FIELDS = %i[
     show_payment_term
@@ -211,5 +216,27 @@ class QuoteTemplate < ApplicationRecord
 
   def normalized_output_locale(value)
     OUTPUT_LOCALES.key?(value.to_s) ? value.to_s : "en"
+  end
+
+  def signature_image_constraints
+    return unless signature_image.attached?
+
+    if !IMAGE_CONTENT_TYPES.include?(signature_image.blob.content_type)
+      errors.add(:signature_image, "must be an image (PNG, JPG, WEBP, GIF, or SVG)")
+    end
+    if signature_image.blob.byte_size > MAX_SIGNATURE_IMAGE_SIZE
+      errors.add(:signature_image, "must be smaller than #{MAX_SIGNATURE_IMAGE_SIZE / 1.megabyte}MB")
+    end
+  end
+
+  def watermark_image_constraints
+    return unless watermark_image.attached?
+
+    if !IMAGE_CONTENT_TYPES.include?(watermark_image.blob.content_type)
+      errors.add(:watermark_image, "must be an image (PNG, JPG, WEBP, GIF, or SVG)")
+    end
+    if watermark_image.blob.byte_size > MAX_WATERMARK_IMAGE_SIZE
+      errors.add(:watermark_image, "must be smaller than #{MAX_WATERMARK_IMAGE_SIZE / 1.megabyte}MB")
+    end
   end
 end

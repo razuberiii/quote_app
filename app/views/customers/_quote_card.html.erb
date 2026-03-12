@@ -67,23 +67,8 @@
   </div>
 
   <div class="quote-card-actions" onclick="event.stopPropagation();">
-    <% if signal_cta&.method == :post %>
-      <%= button_to signal_cta.label,
-                    signal_cta.path,
-                    method: :post,
-                    form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" },
-                    class: ui_button_classes(:primary, "quote-action-primary") %>
-    <% elsif signal_cta.present? %>
-      <%= link_to signal_cta.label, signal_cta.path, class: ui_button_classes(:primary, "quote-action-primary") %>
-    <% elsif signal[:method] == :post %>
-      <%= button_to signal[:label],
-                    signal[:path],
-                    method: :post,
-                    form: { data: { turbo: false }, onsubmit: "event.stopPropagation();" },
-                    class: ui_button_classes(:primary, "quote-action-primary") %>
-    <% else %>
-      <%= link_to signal[:label], signal[:path], class: ui_button_classes(:primary, "quote-action-primary") %>
-    <% end %>
+    <% primary_label = signal_cta&.label || signal[:label] %>
+    <%= link_to primary_label, quote_path(card[:quote]), class: ui_button_classes(:primary, "quote-action-primary") %>
     <% if quote.can_edit_revision? %>
       <%= link_to t("quotes.view.show.toolbar.edit"), edit_quote_path(card[:quote]), class: ui_button_classes(:secondary, "quote-card-secondary-action") %>
     <% end %>

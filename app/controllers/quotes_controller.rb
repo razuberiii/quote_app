@@ -2,8 +2,8 @@ class QuotesController < ApplicationController
   require "base64"
 
   before_action :set_customer, only: %i[new create]
-  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive update_outcome_reason]
-  before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template]
+  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive update_outcome_reason mark_sent mark_negotiating mark_outcome revert_to_sent undo_status_change public_preview]
+  before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template public_preview]
   before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
   before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
   around_action :with_quote_output_locale, only: %i[export_pdf export_xlsx]
@@ -29,6 +29,7 @@ class QuotesController < ApplicationController
 
     @quote = @customer.quotes.new(quote_params)
     @quote.company = current_user.company
+    @quote.status = "draft"
     @quote.template ||= current_user.company.quote_template_or_default
 
     if @quote.save
@@ -120,7 +121,9 @@ class QuotesController < ApplicationController
     deletion_time = Time.current
     family_scope = current_user.company.quotes.not_archived.where(quote_no: @quote.quote_no)
     affected_product_ids = family_scope.joins(:quote_items).where.not(quote_items: { product_id: nil }).distinct.pluck("quote_items.product_id")
-    family_scope.update_all(status: "expired", deleted_at: deletion_time, updated_at: deletion_time)
+    delete_attrs = { status: "expired", updated_at: deletion_time }
+    delete_attrs[:deleted_at] = deletion_time if Quote.column_names.include?("deleted_at")
+    family_scope.update_all(delete_attrs)
     current_user.company.quote_shares.where(quote_id: family_scope.select(:id)).update_all(expires_at: deletion_time, updated_at: deletion_time)
     ProductIntelligenceRefresher.refresh_products(affected_product_ids)
 
@@ -177,10 +180,13 @@ class QuotesController < ApplicationController
       pdf_binary = quote_exporter(kind, @template).to_pdf.render
     end
 
+    mark_quote_as_sent_if_needed! unless params[:preview].present?
+
+    preview_mode = params[:preview].present?
     send_data pdf_binary,
-              filename: "#{kind}_#{@quote.quote_no}.pdf",
-              type: "application/pdf",
-              disposition: "attachment"
+          filename: "#{kind}_#{@quote.quote_no}#{preview_mode ? '_preview' : ''}.pdf",
+          type: "application/pdf",
+          disposition: (preview_mode ? "inline" : "attachment")
   rescue StandardError => e
     Rails.logger.error("Quote PDF export failed: #{e.class} #{e.message}; wkhtmltopdf=#{configured_wkhtmltopdf_path.inspect}")
     redirect_to quote_path(@quote), alert: t("quotes.flash.pdf_export_failed")
@@ -193,6 +199,16 @@ class QuotesController < ApplicationController
     payload = package.to_stream.read
     exporter.cleanup_tempfiles!
 
+    if params[:preview].present?
+      send_data payload,
+                filename: "#{kind}_#{@quote.quote_no}_preview.xlsx",
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                disposition: "inline"
+      return
+    end
+
+    mark_quote_as_sent_if_needed!
+
     send_data payload,
               filename: "#{kind}_#{@quote.quote_no}.xlsx",
               type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -200,6 +216,21 @@ class QuotesController < ApplicationController
   rescue StandardError
     exporter&.cleanup_tempfiles!
     raise
+  end
+
+  def public_preview
+    @document_kind = resolved_document_kind
+    @snapshot = QuoteSnapshotBuilder.new(@quote).as_json
+    @preview_mode = true
+    @status_message = nil
+    @has_newer_revision = false
+    @latest_share_url = nil
+    @share = Struct.new(:quote, :company, :token).new(@quote, @quote.company, "preview")
+
+    locale = (@template || @quote&.template || current_user.company.quote_template_or_default)&.output_locale_for(:webview) || I18n.locale
+    I18n.with_locale(locale) do
+      render "public/quote_shares/show", layout: "public"
+    end
   end
 
   def duplicate
@@ -223,7 +254,7 @@ class QuotesController < ApplicationController
     end
 
     revision = @quote.build_revision
-    revision.status = "draft" if revision.status.blank? || revision.status == "expired"
+    revision.status = "draft"
     revision.save!
     redirect_to edit_quote_path(revision), status: :see_other, notice: t("quotes.flash.revision_created_update_pricing", revision: revision.revision_number)
   rescue ActiveRecord::RecordInvalid => e
@@ -288,6 +319,131 @@ class QuotesController < ApplicationController
     redirect_to quote_path(@quote), status: :see_other, alert: t("quotes.flash.unable_send_reminder")
   end
 
+  def mark_sent
+    unless @quote.can_mark_sent?
+      redirect_to quote_path(@quote), alert: t("quotes.flash.mark_sent_not_available") and return
+    end
+
+    @quote.update!(
+      status: "sent",
+      sent_at: @quote.sent_at || Time.current,
+      accepted_at: nil,
+      win_reason: nil,
+      win_reason_detail: nil,
+      loss_reason: nil,
+      loss_reason_detail: nil
+    )
+    redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.quote_marked_sent")
+  end
+
+  def mark_negotiating
+    unless @quote.can_mark_negotiating?
+      redirect_to quote_path(@quote), alert: t("quotes.flash.mark_negotiating_not_available") and return
+    end
+
+    undo_token = cache_status_undo_snapshot!(@quote)
+
+    @quote.update!(
+      status: "negotiating",
+      accepted_at: nil,
+      win_reason: nil,
+      win_reason_detail: nil,
+      loss_reason: nil,
+      loss_reason_detail: nil
+    )
+    redirect_with_status_undo(@quote, undo_token, t("quotes.flash.quote_marked_negotiating"))
+  end
+
+  def mark_outcome
+    target_status = params[:target_status].to_s
+
+    case target_status
+    when "won"
+      unless @quote.can_mark_won?
+        redirect_to quote_path(@quote), alert: t("quotes.flash.mark_won_not_available") and return
+      end
+
+      undo_token = cache_status_undo_snapshot!(@quote)
+
+      @quote.update!(
+        mark_won_params.merge(
+          status: "won",
+          accepted_at: Time.current,
+          changes_requested_at: nil,
+          changes_request_message: nil,
+          request_reason: nil,
+          loss_reason: nil,
+          loss_reason_detail: nil,
+          stalled_reason: nil,
+          stalled_reason_detail: nil
+        )
+      )
+      redirect_with_status_undo(@quote, undo_token, t("quotes.flash.quote_marked_won"))
+    when "lost"
+      unless @quote.can_mark_lost?
+        redirect_to quote_path(@quote), alert: t("quotes.flash.mark_lost_not_available") and return
+      end
+
+      undo_token = cache_status_undo_snapshot!(@quote)
+
+      @quote.update!(
+        mark_lost_params.merge(
+          status: "lost",
+          accepted_at: nil,
+          changes_requested_at: nil,
+          changes_request_message: nil,
+          request_reason: nil,
+          win_reason: nil,
+          win_reason_detail: nil,
+          stalled_reason: nil,
+          stalled_reason_detail: nil,
+          final_amount: nil
+        )
+      )
+      redirect_with_status_undo(@quote, undo_token, t("quotes.flash.quote_marked_lost"))
+    else
+      redirect_to quote_path(@quote), alert: t("quotes.flash.outcome_mark_not_available")
+    end
+  rescue ActiveRecord::RecordInvalid
+    redirect_to quote_path(@quote, outcome_modal: target_status), alert: @quote.errors.full_messages.to_sentence
+  end
+
+  def revert_to_sent
+    unless @quote.can_revert_to_sent?
+      redirect_to quote_path(@quote), alert: t("quotes.flash.mark_sent_not_available") and return
+    end
+
+    undo_token = cache_status_undo_snapshot!(@quote)
+
+    @quote.update!(
+      status: "sent",
+      sent_at: @quote.sent_at || Time.current,
+      accepted_at: nil,
+      win_reason: nil,
+      win_reason_detail: nil,
+      loss_reason: nil,
+      loss_reason_detail: nil,
+      stalled_reason: nil,
+      stalled_reason_detail: nil
+    )
+
+    redirect_with_status_undo(@quote, undo_token, t("quotes.flash.quote_marked_sent"))
+  end
+
+  def undo_status_change
+    token = params[:token].to_s
+    payload = consume_status_undo_snapshot!(@quote, token)
+    unless payload
+      redirect_to quote_path(@quote), alert: t("quotes.flash.undo_status_change_expired") and return
+    end
+
+    attrs = payload.fetch("attrs", {}).slice(*status_undo_attribute_names)
+    attrs["updated_at"] = Time.current
+    @quote.update_columns(attrs)
+
+    redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.status_change_undone")
+  end
+
   def reopen
     unless @quote.can_reopen?
       redirect_to quote_path(@quote), alert: t("quotes.flash.reopen_not_available") and return
@@ -296,6 +452,12 @@ class QuotesController < ApplicationController
     @quote.update_columns(
       status: "draft",
       accepted_at: nil,
+      win_reason: nil,
+      win_reason_detail: nil,
+      loss_reason: nil,
+      loss_reason_detail: nil,
+      stalled_reason: nil,
+      stalled_reason_detail: nil,
       changes_requested_at: nil,
       changes_request_message: nil,
       reopened_at: Time.current,
@@ -370,6 +532,14 @@ class QuotesController < ApplicationController
     )
   end
 
+  def mark_won_params
+    params.require(:quote).permit(:win_reason, :win_reason_detail, :final_amount)
+  end
+
+  def mark_lost_params
+    params.require(:quote).permit(:loss_reason, :loss_reason_detail)
+  end
+
   def set_form_products
     @products = current_user.company.products.order(:name)
   end
@@ -390,6 +560,67 @@ class QuotesController < ApplicationController
     @quote_exporters ||= {}
     cache_key = "#{kind}-#{template&.id || 'default'}"
     @quote_exporters[cache_key] ||= ::QuoteExporter.new(@quote, template: template, document_kind: kind)
+  end
+
+  def mark_quote_as_sent_if_needed!
+    return unless @quote.can_mark_sent?
+
+    now = Time.current
+    @quote.update_columns(status: "sent", sent_at: (@quote.sent_at || now), updated_at: now)
+  end
+
+  def status_undo_attribute_names
+    @status_undo_attribute_names ||= %w[
+      status
+      sent_at
+      viewed_at
+      accepted_at
+      win_reason
+      win_reason_detail
+      loss_reason
+      loss_reason_detail
+      stalled_reason
+      stalled_reason_detail
+      final_amount
+      changes_requested_at
+      changes_request_message
+      request_reason
+      reopened_at
+      reminder_sent_at
+    ].select { |name| Quote.column_names.include?(name) }
+  end
+
+  def status_undo_cache_key(quote, token)
+    "quote-status-undo:#{current_user.id}:#{quote.id}:#{token}"
+  end
+
+  def cache_status_undo_snapshot!(quote)
+    token = SecureRandom.hex(12)
+    payload = {
+      "attrs" => quote.attributes.slice(*status_undo_attribute_names),
+      "captured_at" => Time.current.to_i
+    }
+    Rails.cache.write(status_undo_cache_key(quote, token), payload, expires_in: 10.seconds)
+    token
+  end
+
+  def consume_status_undo_snapshot!(quote, token)
+    return nil if token.blank?
+
+    key = status_undo_cache_key(quote, token)
+    payload = Rails.cache.read(key)
+    Rails.cache.delete(key)
+    payload
+  end
+
+  def redirect_with_status_undo(quote, token, notice)
+    redirect_to quote_path(quote),
+                status: :see_other,
+                notice: notice,
+                flash: {
+                  status_undo_token: token,
+                  status_undo_expires_at: (Time.current + 10.seconds).iso8601
+                }
   end
 
   def set_template

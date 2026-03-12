@@ -242,84 +242,89 @@
   <% end %>
 
   <section class="no-print quote-decision-section">
-    <h3>Ready to proceed?</h3>
-    <% if @has_newer_revision %>
-      <p class="quote-decision-status is-revision">
-        A newer revision is available.
-        <% if @latest_share_url.present? %>
-          <%= link_to "Open latest revision", @latest_share_url, class: "quote-back-link-inline" %>
-        <% else %>
-          Please ask your sales contact for the latest public link.
-        <% end %>
-      </p>
-    <% end %>
-    <% if @status_message.present? %>
-      <p class="quote-decision-note"><%= @status_message %></p>
-    <% end %>
-    <% if decision_state == "accepted" %>
-      <p class="quote-decision-status is-accepted">Quotation Accepted on <%= quote.accepted_at&.strftime("%Y-%m-%d %H:%M") %></p>
-    <% elsif decision_state == "changes_requested" %>
-      <p class="quote-decision-status is-revision">Revision Requested on <%= quote.changes_requested_at&.strftime("%Y-%m-%d %H:%M") %></p>
-      <% if quote.request_reason.present? %>
-        <p class="quote-decision-note">Reason: <%= quote.request_reason.humanize %></p>
-      <% end %>
-      <% if quote.changes_request_message.present? %>
-        <p class="quote-decision-note">Message: <%= quote.changes_request_message %></p>
-      <% end %>
-    <% elsif decision_state == "active" %>
-      <div class="quote-public-actions">
-        <button type="button" class="quote-decision-request-toggle js-open-accept-request">Accept Quotation</button>
-        <button type="button" class="quote-decision-request-toggle js-open-revision-request">Request Revision</button>
-      </div>
-      <div class="quote-revision-modal js-accept-modal" hidden>
-        <div class="quote-revision-modal-backdrop js-close-accept-request"></div>
-        <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accept-request-title">
-          <div class="quote-revision-modal-head">
-            <h4 id="accept-request-title">Confirm Acceptance</h4>
-            <button type="button" class="quote-revision-modal-close js-close-accept-request" aria-label="Close">x</button>
-          </div>
-          <p class="quote-revision-modal-hint">Please confirm that you want to accept this quotation.</p>
-          <%= form_with url: accept_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept" } do %>
-            <div class="quote-public-revision-form-actions">
-              <button type="submit">Confirm Acceptance</button>
-              <button type="button" class="quote-decision-cancel js-close-accept-request">Cancel</button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-      <div class="quote-revision-modal js-revision-modal" hidden>
-        <div class="quote-revision-modal-backdrop js-close-revision-request"></div>
-        <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="revision-request-title">
-          <div class="quote-revision-modal-head">
-            <h4 id="revision-request-title">Request Revision</h4>
-            <button type="button" class="quote-revision-modal-close js-close-revision-request" aria-label="Close">x</button>
-          </div>
-          <%= form_with url: request_revision_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-revision-form js-revision-request-form" } do |f| %>
-            <p class="quote-revision-modal-hint">Select a reason, then add optional details.</p>
-            <div class="quote-revision-reason-grid">
-              <% revision_reason_options.each_with_index do |(value, label), idx| %>
-                <% input_id = "revision_reason_#{idx}" %>
-                <label class="quote-revision-reason-option" for="<%= input_id %>">
-                  <%= radio_button_tag :request_reason, value, idx.zero?, id: input_id %>
-                  <span><%= label %></span>
-                </label>
-              <% end %>
-            </div>
-            <div class="quote-revision-custom">
-              <%= f.label :client_message, "Custom details (optional)" %>
-              <%= f.text_area :client_message, rows: 3, placeholder: "Describe specific changes if needed" %>
-            </div>
-            <div class="quote-public-revision-form-actions">
-              <button type="submit">Confirm Revision Request</button>
-              <button type="button" class="quote-decision-cancel js-close-revision-request">Cancel</button>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    <% elsif quote_reopened %>
-      <p class="quote-decision-status">Decision actions are disabled while this quote is being updated by the seller.</p>
+    <% if @preview_mode %>
+      <h3><%= t("public_quote_shares.preview_mode.title") %></h3>
+      <p class="quote-decision-status"><%= t("public_quote_shares.preview_mode.body") %></p>
     <% else %>
-      <p class="quote-decision-status">This revision is not currently open for public decision.</p>
+      <h3>Ready to proceed?</h3>
+      <% if @has_newer_revision %>
+        <p class="quote-decision-status is-revision">
+          A newer revision is available.
+          <% if @latest_share_url.present? %>
+            <%= link_to "Open latest revision", @latest_share_url, class: "quote-back-link-inline" %>
+          <% else %>
+            Please ask your sales contact for the latest public link.
+          <% end %>
+        </p>
+      <% end %>
+      <% if @status_message.present? %>
+        <p class="quote-decision-note"><%= @status_message %></p>
+      <% end %>
+      <% if decision_state == "accepted" %>
+        <p class="quote-decision-status is-accepted">Quotation Accepted on <%= quote.accepted_at&.strftime("%Y-%m-%d %H:%M") %></p>
+      <% elsif decision_state == "changes_requested" %>
+        <p class="quote-decision-status is-revision">Revision Requested on <%= quote.changes_requested_at&.strftime("%Y-%m-%d %H:%M") %></p>
+        <% if quote.request_reason.present? %>
+          <p class="quote-decision-note">Reason: <%= quote.request_reason.humanize %></p>
+        <% end %>
+        <% if quote.changes_request_message.present? %>
+          <p class="quote-decision-note">Message: <%= quote.changes_request_message %></p>
+        <% end %>
+      <% elsif decision_state == "active" %>
+        <div class="quote-public-actions">
+          <button type="button" class="quote-decision-request-toggle js-open-accept-request">Accept Quotation</button>
+          <button type="button" class="quote-decision-request-toggle js-open-revision-request">Request Revision</button>
+        </div>
+        <div class="quote-revision-modal js-accept-modal" hidden>
+          <div class="quote-revision-modal-backdrop js-close-accept-request"></div>
+          <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accept-request-title">
+            <div class="quote-revision-modal-head">
+              <h4 id="accept-request-title">Confirm Acceptance</h4>
+              <button type="button" class="quote-revision-modal-close js-close-accept-request" aria-label="Close">x</button>
+            </div>
+            <p class="quote-revision-modal-hint">Please confirm that you want to accept this quotation.</p>
+            <%= form_with url: accept_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept" } do %>
+              <div class="quote-public-revision-form-actions">
+                <button type="submit">Confirm Acceptance</button>
+                <button type="button" class="quote-decision-cancel js-close-accept-request">Cancel</button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="quote-revision-modal js-revision-modal" hidden>
+          <div class="quote-revision-modal-backdrop js-close-revision-request"></div>
+          <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="revision-request-title">
+            <div class="quote-revision-modal-head">
+              <h4 id="revision-request-title">Request Revision</h4>
+              <button type="button" class="quote-revision-modal-close js-close-revision-request" aria-label="Close">x</button>
+            </div>
+            <%= form_with url: request_revision_public_quote_share_path(@share.token), method: :post, local: true, html: { class: "quote-public-revision-form js-revision-request-form" } do |f| %>
+              <p class="quote-revision-modal-hint">Select a reason, then add optional details.</p>
+              <div class="quote-revision-reason-grid">
+                <% revision_reason_options.each_with_index do |(value, label), idx| %>
+                  <% input_id = "revision_reason_#{idx}" %>
+                  <label class="quote-revision-reason-option" for="<%= input_id %>">
+                    <%= radio_button_tag :request_reason, value, idx.zero?, id: input_id %>
+                    <span><%= label %></span>
+                  </label>
+                <% end %>
+              </div>
+              <div class="quote-revision-custom">
+                <%= f.label :client_message, "Custom details (optional)" %>
+                <%= f.text_area :client_message, rows: 3, placeholder: "Describe specific changes if needed" %>
+              </div>
+              <div class="quote-public-revision-form-actions">
+                <button type="submit">Confirm Revision Request</button>
+                <button type="button" class="quote-decision-cancel js-close-revision-request">Cancel</button>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% elsif quote_reopened %>
+        <p class="quote-decision-status">Decision actions are disabled while this quote is being updated by the seller.</p>
+      <% else %>
+        <p class="quote-decision-status">This revision is not currently open for public decision.</p>
+      <% end %>
     <% end %>
   </section>
   <% if @template.show_saas_branding %>
@@ -369,6 +374,7 @@
   })();
 </script>
 
+<% unless @preview_mode %>
 <%# Track buyer view duration %>
 <script>
   (() => {
@@ -413,3 +419,4 @@
     window.addEventListener("beforeunload", sendDuration);
   })();
 </script>
+<% end %>

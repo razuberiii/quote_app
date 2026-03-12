@@ -67,6 +67,10 @@ class ProductsController < ApplicationController
   def create
     @product = current_user.company.products.new(product_params)
 
+    unless validate_gallery_upload_selection(@product)
+      return render :new, status: :unprocessable_entity
+    end
+
     if @product.save
       attach_uploaded_gallery_images(@product)
       @product.ensure_display_image!
@@ -90,6 +94,10 @@ class ProductsController < ApplicationController
   end
 
   def update
+    unless validate_gallery_upload_selection(@product)
+      return render :edit, status: :unprocessable_entity
+    end
+
     if @product.update(product_params)
       attach_uploaded_gallery_images(@product)
       @product.ensure_display_image!
@@ -214,5 +222,38 @@ class ProductsController < ApplicationController
 
     # If there was no display image at all, default the first uploaded image as display.
     product.image.attach(blobs.first) unless had_display_image
+  end
+
+  def validate_gallery_upload_selection(product)
+    files = params.dig(:product, :gallery_images).to_a.reject(&:blank?)
+    return true if files.empty?
+
+    if files.size > Product::MAX_GALLERY_UPLOAD_PER_REQUEST
+      product.errors.add(:gallery_images, "can upload up to #{Product::MAX_GALLERY_UPLOAD_PER_REQUEST} images per request")
+      return false
+    end
+
+    existing_count = product.gallery_images.attachments.size
+    if existing_count + files.size > Product::MAX_GALLERY_IMAGES
+      product.errors.add(:gallery_images, "can have up to #{Product::MAX_GALLERY_IMAGES} images")
+      return false
+    end
+
+    files.each do |file|
+      content_type = file.content_type.to_s
+      byte_size = file.respond_to?(:size) ? file.size.to_i : 0
+
+      unless Product::IMAGE_CONTENT_TYPES.include?(content_type)
+        product.errors.add(:gallery_images, "must be PNG, JPG, WEBP, or GIF")
+        return false
+      end
+
+      if byte_size > Product::MAX_IMAGE_SIZE
+        product.errors.add(:gallery_images, "each image must be smaller than #{Product::MAX_IMAGE_SIZE / 1.megabyte}MB")
+        return false
+      end
+    end
+
+    true
   end
 end

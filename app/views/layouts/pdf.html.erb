@@ -4,6 +4,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
+      :root {
+        --doc-font: "Noto Sans", "Segoe UI", Arial, sans-serif;
+        --doc-page-padding-x: 1.35rem;
+        --doc-page-padding-top: 1.35rem;
+        --doc-page-padding-bottom: 1.6rem;
+      }
+
+      @page {
+        size: A4;
+        margin: 10mm;
+      }
+
       html, body {
         background: #ffffff !important;
       }
@@ -12,7 +24,7 @@
         margin: 0;
         padding: 0;
         color: #111827;
-        font-family: "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK TC", "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+        font-family: var(--doc-font), "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK TC", "PingFang SC", "Microsoft YaHei", sans-serif;
       }
 
       .public-quote-main {
@@ -28,11 +40,12 @@
     /* Dynamic colors applied to PDF */
     .pdf-render .quote-doc-kicker {
       color: <%= pdf_accent_color %> !important;
-      letter-spacing: 0.14em !important;
+      letter-spacing: 0.08em !important;
       font-weight: 700 !important;
-      font-size: 24px !important;
+      font-size: 0.75rem !important;
       margin: 0 !important;
       text-align: right !important;
+      text-transform: uppercase !important;
     }
     .pdf-render .quote-total-grand {
       margin-top: 0.06in !important;
@@ -55,7 +68,7 @@
       .pdf-render .quote-document {
         border: none !important;
         border-radius: 0 !important;
-        padding: 0.12in 0.14in 0.14in !important;
+        padding: var(--doc-page-padding-top) var(--doc-page-padding-x) var(--doc-page-padding-bottom) !important;
         box-shadow: none !important;
         background: #fff !important;
         color: #222 !important;
@@ -120,9 +133,9 @@
       }
 
       .pdf-render .quote-doc-header {
-        border-bottom: 1px solid #ddd !important;
-        padding-bottom: 0.1in !important;
-        margin-bottom: 0.2in !important;
+        border-bottom: 1px solid #edf2f7 !important;
+        padding-bottom: 0.85rem !important;
+        margin-bottom: 1rem !important;
       }
 
       .pdf-render .pdf-head-table {
@@ -166,20 +179,20 @@
       }
 
       .pdf-render .quote-doc-kicker {
-        letter-spacing: 0.14em !important;
+        letter-spacing: 0.08em !important;
         font-weight: 700 !important;
-        font-size: 23px !important;
+        font-size: 0.75rem !important;
         margin: 0 !important;
         text-align: right !important;
-        margin-bottom: 0.04in !important;
+        margin-bottom: 0.25rem !important;
       }
 
       .pdf-render .quote-doc-header h1 {
-        font-size: 15px !important;
+        font-size: 1.45rem !important;
         font-weight: 700 !important;
         margin: 0 !important;
-        letter-spacing: 0.03em !important;
-        text-transform: uppercase !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
         color: #222 !important;
         text-align: left !important;
       }
@@ -279,13 +292,13 @@
       }
 
       .pdf-render .quote-doc-table thead {
-        background: #ececec !important;
+        background: var(--doc-accent, #1f4e79) !important;
       }
 
       .pdf-render .quote-doc-table thead th {
         font-size: 11px !important;
         font-weight: 700 !important;
-        color: #222 !important;
+        color: var(--doc-on-accent, #ffffff) !important;
         border-bottom: 1px solid #ddd !important;
         padding: 0.064in 0.07in !important;
         text-align: left !important;
@@ -386,10 +399,10 @@
         float: right !important;
         width: 320px !important;
         max-width: 320px !important;
-        background: transparent !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
+        background: #f8fbff !important;
+        border: 1px solid #dce7f2 !important;
+        border-radius: 10px !important;
+        padding: 0.75rem 0.9rem !important;
         page-break-before: avoid !important;
         break-before: avoid-page !important;
         break-inside: avoid-page !important;
@@ -434,9 +447,9 @@
       }
 
       .pdf-render .quote-total-grand {
-        margin-top: 0.08in !important;
-        border-top: 1px solid #c7d3e0 !important;
-        padding: 0.075in 0 !important;
+        margin-top: 0.2rem !important;
+        border-top: 1px solid #9fb4c8 !important;
+        padding: 0.55rem 0 0 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
       }
@@ -450,7 +463,7 @@
 
       .pdf-render .quote-total-grand strong {
         color: #1f3650 !important;
-        font-size: 21px !important;
+        font-size: 1.2rem !important;
         font-weight: 800 !important;
       }
 

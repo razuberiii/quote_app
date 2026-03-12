@@ -2,6 +2,10 @@ class Product < ApplicationRecord
   require "cgi"
 
   PRICE_CURRENCIES = %w[USD EUR GBP CNY JPY AUD CAD SGD HKD MXN BRL COP CLP PEN ARS].freeze
+  IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_IMAGE_SIZE = 8.megabytes
+  MAX_GALLERY_IMAGES = 12
+  MAX_GALLERY_UPLOAD_PER_REQUEST = 6
 
   belongs_to :company
   has_many :quote_items, dependent: :nullify
@@ -29,6 +33,8 @@ class Product < ApplicationRecord
   validate :default_addons_must_be_valid
   validate :default_spec_preset_belongs_to_product
   validate :default_addon_preset_belongs_to_product
+  validate :image_must_be_valid
+  validate :gallery_images_constraints
 
   scope :by_company, ->(company_id) { where(company_id: company_id) }
 
@@ -194,5 +200,34 @@ class Product < ApplicationRecord
     return if default_addon_preset.company_id == company_id && bound_ids.include?(default_addon_preset_id)
 
     errors.add(:default_addon_preset, "must be one of the product's bound add-on presets")
+  end
+
+  def image_must_be_valid
+    return unless image.attached?
+
+    if !IMAGE_CONTENT_TYPES.include?(image.blob.content_type)
+      errors.add(:image, "must be PNG, JPG, WEBP, or GIF")
+    end
+    if image.blob.byte_size > MAX_IMAGE_SIZE
+      errors.add(:image, "must be smaller than #{MAX_IMAGE_SIZE / 1.megabyte}MB")
+    end
+  end
+
+  def gallery_images_constraints
+    return unless gallery_images.attached?
+
+    if gallery_images.attachments.size > MAX_GALLERY_IMAGES
+      errors.add(:gallery_images, "can have up to #{MAX_GALLERY_IMAGES} images")
+    end
+
+    gallery_images.each do |attachment|
+      blob = attachment.blob
+      if !IMAGE_CONTENT_TYPES.include?(blob.content_type)
+        errors.add(:gallery_images, "must be PNG, JPG, WEBP, or GIF")
+      end
+      if blob.byte_size > MAX_IMAGE_SIZE
+        errors.add(:gallery_images, "each image must be smaller than #{MAX_IMAGE_SIZE / 1.megabyte}MB")
+      end
+    end
   end
 end

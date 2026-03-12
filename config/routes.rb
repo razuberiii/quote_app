@@ -92,11 +92,17 @@ Rails.application.routes.draw do
         post :duplicate
         post :duplicate_and_reprice
         post :archive
+        post :mark_sent
+        post :mark_negotiating
+        post :revert_to_sent
+        post :undo_status_change
         post :reopen
         post :share
         post :send_reminder
+        patch :mark_outcome
         patch :update_outcome_reason
         patch :update_template
+        get :public_preview
         get "export/pdf", action: :export_pdf, as: :export_pdf
         get "export/xlsx", action: :export_xlsx, as: :export_xlsx
       end

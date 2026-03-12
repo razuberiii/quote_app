@@ -1,4 +1,6 @@
 class Rack::Attack
+  MAX_MULTIPART_BODY_BYTES = 20.megabytes
+
   # Allow any requests from health check endpoint
   safelist("allow health check") do |req|
     req.path == "/up" && req.request_method == "GET"
@@ -47,12 +49,63 @@ class Rack::Attack
     end
   end
 
+  # Throttle quote exports (PDF/XLSX) by IP; these endpoints are CPU/memory expensive.
+  throttle("quote exports by ip", limit: 20, period: 60) do |req|
+    if req.request_method == "GET" &&
+      (req.path.match?(%r{/quotes/\d+/export/(pdf|xlsx)\z}) || req.path.match?(%r{/quote/\d+/export_(pdf|excel)\z}))
+      req.ip
+    end
+  end
+
+  # Throttle follow-up/reminder mail sends by IP to reduce abuse and provider quota burn.
+  throttle("quote email sends by ip", limit: 20, period: 60) do |req|
+    if req.request_method == "POST" &&
+      (req.path.match?(%r{/customers/\d+/send_follow_up_email\z}) || req.path.match?(%r{/quotes/\d+/send_reminder\z}))
+      req.ip
+    end
+  end
+
+  # Throttle public quote action endpoints by IP.
+  throttle("public quote actions by ip", limit: 30, period: 60) do |req|
+    if req.request_method == "POST" && req.path.match?(%r{\A/public/quote_shares/[^/]+/(accept|request_revision)\z})
+      req.ip
+    end
+  end
+
+  # Throttle anonymous quote view-event ingestion by IP.
+  throttle("public quote view events by ip", limit: 240, period: 60) do |req|
+    if req.request_method == "POST" && req.path.match?(%r{\A/public/quote_view_events/[^/]+\z})
+      req.ip
+    end
+  end
+
+  # Throttle team invitation creates by IP.
+  throttle("team invitations by ip", limit: 20, period: 60) do |req|
+    if req.request_method == "POST" && req.path == "/team_invitations"
+      req.ip
+    end
+  end
+
   # Throttle all other mutating requests by IP (100 per minute)
   # Catches POST, PUT, PATCH, DELETE on paths not matched above
   throttle("requests by ip", limit: 100, period: 60) do |req|
     if [ "POST", "PUT", "PATCH", "DELETE" ].include?(req.request_method)
       req.ip
     end
+  end
+
+  # Throttle multipart uploads by IP to reduce storage-abuse blast radius.
+  throttle("multipart uploads by ip", limit: 20, period: 60) do |req|
+    if [ "POST", "PUT", "PATCH" ].include?(req.request_method) && req.media_type == "multipart/form-data"
+      req.ip
+    end
+  end
+
+  # Drop oversized multipart requests early to reduce disk/bandwidth pressure.
+  blocklist("oversized multipart body") do |req|
+    [ "POST", "PUT", "PATCH" ].include?(req.request_method) &&
+      req.media_type == "multipart/form-data" &&
+      req.content_length.to_i > MAX_MULTIPART_BODY_BYTES
   end
 
   # Custom response for throttled requests
@@ -65,6 +118,18 @@ class Rack::Attack
     body = {
       error: "Too many requests. Please try again later.",
       status: 429
+    }.to_json
+    [ status, headers, [ body ] ]
+  }
+
+  self.blocklisted_responder = lambda { |_env|
+    status  = 413
+    headers = {
+      "Content-Type" => "application/json"
+    }
+    body = {
+      error: "Payload too large.",
+      status: 413
     }.to_json
     [ status, headers, [ body ] ]
   }

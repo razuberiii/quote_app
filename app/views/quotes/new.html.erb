@@ -2,11 +2,11 @@
   <header class="app-page-header">
     <div class="app-page-header-main">
       <% if @quote.quote_no.present? %>
-        <h1>New Revision Draft</h1>
-        <p>Build the next revision for <strong><%= @quote.quote_no %></strong> with clearer pricing and grouped quote inputs.</p>
+        <h1><%= t("quotes.view.new.revision_title") %></h1>
+        <p><%= t("quotes.view.new.revision_subtitle", quote_no: @quote.quote_no) %></p>
       <% else %>
-        <h1>New Quote</h1>
-        <p>Create a structured quote draft with grouped details, products, pricing, and terms.</p>
+        <h1><%= t("quotes.view.new.quote_title") %></h1>
+        <p><%= t("quotes.view.new.quote_subtitle") %></p>
       <% end %>
     </div>
     <div class="app-page-header-actions">

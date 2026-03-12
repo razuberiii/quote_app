@@ -639,10 +639,10 @@
         if (emailModalSuccess) emailModalSuccess.hidden = true;
       };
 
-      const closeEmailModal = () => {
+      const closeEmailModal = ({ resetToken = true } = {}) => {
         if (!emailModal) return;
         emailModal.hidden = true;
-        resetEmailVerification();
+        if (resetToken) resetEmailVerification();
       };
 
       const submitEmailFollowUp = () => {
@@ -685,7 +685,7 @@
               emailModalWidget.hidden = true;
               emailModalSuccess.hidden = false;
               window.setTimeout(() => {
-                closeEmailModal();
+                closeEmailModal({ resetToken: false });
                 submitEmailFollowUp();
               }, 260);
             },

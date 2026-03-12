@@ -8,24 +8,7 @@ class QuoteSignalPresenter
   end
 
   def signal_cta(signal:, quote:)
-    case signal.recommended_action.to_s
-    when "renew_quote"
-      ActionCta.new(label: signal.cta_label, path: duplicate_quote_path(quote, locale_params), method: :post)
-    when "prepare_revision"
-      if quote.respond_to?(:can_create_new_revision?) && quote.can_create_new_revision?
-        ActionCta.new(label: signal.cta_label, path: duplicate_quote_path(quote, locale_params), method: :post)
-      else
-        ActionCta.new(label: signal.cta_label, path: quote_path(quote, locale_params), method: :get)
-      end
-    when "resend_reminder"
-      if quote.respond_to?(:can_send_reminder?) && quote.can_send_reminder?
-        ActionCta.new(label: signal.cta_label, path: send_reminder_quote_path(quote, locale_params), method: :post)
-      else
-        ActionCta.new(label: signal.cta_label, path: quote_path(quote, locale_params), method: :get)
-      end
-    else
-      ActionCta.new(label: signal.cta_label, path: quote_path(quote, locale_params), method: :get)
-    end
+    ActionCta.new(label: signal.cta_label, path: quote_path(quote, locale_params), method: :get)
   end
 
   def action_item_cta(item)

@@ -170,7 +170,7 @@ class Quote < ApplicationRecord
     return false if archived?
     return false unless latest_revision_for_quote_no?
 
-    %w[sent viewed negotiating accepted].include?(workflow_state) || status.to_s == "won"
+    %w[sent viewed negotiating accepted lost].include?(workflow_state)
   end
 
   def can_delete_revision?
@@ -225,6 +225,26 @@ class Quote < ApplicationRecord
     return false if reminder_sent_at.present? && reminder_sent_at > REMINDER_COOLDOWN.ago
 
     sent_at <= 48.hours.ago
+  end
+
+  def can_mark_sent?
+    !archived? && workflow_state == "draft" && latest_revision_for_quote_no?
+  end
+
+  def can_mark_negotiating?
+    !archived? && %w[sent viewed negotiating].include?(workflow_state) && latest_revision_for_quote_no?
+  end
+
+  def can_revert_to_sent?
+    !archived? && workflow_state == "negotiating" && latest_revision_for_quote_no?
+  end
+
+  def can_mark_won?
+    !archived? && %w[sent viewed negotiating expired].include?(workflow_state) && latest_revision_for_quote_no?
+  end
+
+  def can_mark_lost?
+    !archived? && %w[sent viewed negotiating expired].include?(workflow_state) && latest_revision_for_quote_no?
   end
 
   def no_expiry_date?
@@ -336,12 +356,12 @@ class Quote < ApplicationRecord
       status: status_for_new_revision,
       negotiated: negotiated,
       final_amount: final_amount,
-      win_reason: win_reason,
-      win_reason_detail: win_reason_detail,
-      loss_reason: loss_reason,
-      loss_reason_detail: loss_reason_detail,
-      stalled_reason: stalled_reason,
-      stalled_reason_detail: stalled_reason_detail,
+      win_reason: nil,
+      win_reason_detail: nil,
+      loss_reason: nil,
+      loss_reason_detail: nil,
+      stalled_reason: nil,
+      stalled_reason_detail: nil,
       custom_title: custom_title,
       spec_label: spec_label,
       addon_label: addon_label,
@@ -384,10 +404,7 @@ class Quote < ApplicationRecord
   private
 
   def status_for_new_revision
-    normalized_status = normalize_status_value(status)
-    return "draft" if %w[won lost expired].include?(normalized_status)
-
-    normalized_status.presence || "draft"
+    "draft"
   end
 
   def set_revision_number

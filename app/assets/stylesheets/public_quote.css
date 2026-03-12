@@ -507,6 +507,36 @@
   text-align: right;
 }
 
+@media (max-width: 768px) {
+  .public-quote-document .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+  }
+
+  .public-quote-document .quote-doc-table {
+    min-width: 640px;
+    table-layout: auto;
+  }
+
+  .public-quote-document .quote-doc-table th,
+  .public-quote-document .quote-doc-table td {
+    white-space: nowrap;
+  }
+
+  .public-quote-document .quote-doc-table td:nth-child(2),
+  .public-quote-document .quote-doc-table th:nth-child(2) {
+    white-space: normal;
+    min-width: 220px;
+  }
+
+  .public-quote-document .quote-item-desc-main,
+  .public-quote-document .quote-item-desc-sub {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+}
+
 @media print {
   .public-quote-document .quote-doc-table thead {
     display: table-header-group;
@@ -525,5 +555,3 @@
     color: #475569 !important;
   }
 }
-
-

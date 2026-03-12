@@ -2,6 +2,8 @@ class Company < ApplicationRecord
   DEFAULT_REMINDER_EMAIL_SUBJECT = "Reminder: %{quote_no} from %{company_name}".freeze
   DEFAULT_REMINDER_EMAIL_BODY = "This is a reminder that your quotation %{quote_no} from %{company_name} is still awaiting review.".freeze
   DEFAULT_REMINDER_EMAIL_CTA_LABEL = "Open quotation".freeze
+  LOGO_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif image/svg+xml].freeze
+  MAX_LOGO_SIZE = 5.megabytes
 
   validates :name, presence: true
   validates :brand_color, format: { with: /\A#[0-9A-Fa-f]{6}\z/ }, allow_blank: true
@@ -21,6 +23,7 @@ class Company < ApplicationRecord
   has_many :team_invitations, dependent: :destroy
   has_many :customer_tags, dependent: :destroy
   has_one_attached :logo
+  validate :logo_constraints
 
   after_create :ensure_quote_template!
   before_validation :apply_default_settings
@@ -119,5 +122,16 @@ class Company < ApplicationRecord
       company_name: name.to_s,
       customer_name: customer.contact_name.presence || customer.name.presence || "there"
     }
+  end
+
+  def logo_constraints
+    return unless logo.attached?
+
+    if !LOGO_CONTENT_TYPES.include?(logo.blob.content_type)
+      errors.add(:logo, "must be an image (PNG, JPG, WEBP, GIF, or SVG)")
+    end
+    if logo.blob.byte_size > MAX_LOGO_SIZE
+      errors.add(:logo, "must be smaller than #{MAX_LOGO_SIZE / 1.megabyte}MB")
+    end
   end
 end

@@ -23,7 +23,7 @@
     color: #222 !important;
   }
 </style>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>;">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>; --doc-accent: <%= doc_accent %>; --doc-on-accent: #ffffff; --doc-font: 'Noto Sans';">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
   <% end %>

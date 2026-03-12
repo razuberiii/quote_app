@@ -1,4 +1,6 @@
 class TeamInvitation < ApplicationRecord
+  MAX_ACTIVE_INVITATIONS_PER_COMPANY = 50
+
   belongs_to :company
   belongs_to :invited_by, class_name: "User"
 
@@ -6,6 +8,7 @@ class TeamInvitation < ApplicationRecord
 
   validates :email, presence: true
   validates :token, presence: true, uniqueness: true
+  validate :active_invitation_count_limit, on: :create
 
   before_validation :normalize_email
   before_validation :ensure_token
@@ -36,5 +39,13 @@ class TeamInvitation < ApplicationRecord
 
   def ensure_expiry
     self.expires_at ||= 7.days.from_now
+  end
+
+  def active_invitation_count_limit
+    return if company.blank?
+    active_count = company.team_invitations.active.where.not(id: id).count
+    return if active_count < MAX_ACTIVE_INVITATIONS_PER_COMPANY
+
+    errors.add(:base, "active invitation limit reached")
   end
 end

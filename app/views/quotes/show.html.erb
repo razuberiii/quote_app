@@ -32,7 +32,7 @@
       }, 1600);
     };
 
-    window.refreshQuoteState = async (force = false) => {};
+    window.refreshQuoteState = async (force = false, skipBlocking = false) => {};
 
     document.addEventListener("change", async (event) => {
       const select = event.target.closest(".js-template-select");
@@ -220,7 +220,13 @@
     const engagementDetailsSelector = ".quote-engagement-details";
     const storageKey = `quote:engagement-details:${window.location.pathname}`;
     const hasOpenBlockingModal = () => {
-      return Array.from(document.querySelectorAll(".quote-turnstile-modal, .quote-reason-options-modal")).some((modal) => !modal.hidden);
+      const blockingModalOpen = Array.from(document.querySelectorAll(".quote-turnstile-modal, .quote-reason-options-modal")).some((modal) => !modal.hidden);
+      if (blockingModalOpen) return true;
+
+      const sharePanelOpen = Array.from(document.querySelectorAll(".share-link-panel")).some((panel) => !panel.hidden);
+      if (sharePanelOpen) return true;
+
+      return Array.from(document.querySelectorAll(".quote-toolbar-export")).some((menu) => menu.hasAttribute("open"));
     };
 
     const readPersistedState = () => {
@@ -294,12 +300,12 @@
       return container.dataset.liveRefresh === "true";
     };
 
-    const refreshQuoteState = async (force = false) => {
+    const refreshQuoteState = async (force = false, skipBlocking = false) => {
       const container = getContainer();
       if (!container) return;
       if (!syncRefreshEligibility()) return;
       if (inFlight) return;
-      if (hasOpenBlockingModal()) return;
+      if (!skipBlocking && hasOpenBlockingModal()) return;
       if (!force && document.hidden) return;
 
       const now = Date.now();

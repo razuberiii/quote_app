@@ -6,6 +6,8 @@ class User < ApplicationRecord
 
   FREE_CUSTOMER_LIMIT = 5
   FREE_QUOTE_LIMIT = 20
+  AVATAR_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_AVATAR_SIZE = 5.megabytes
 
   enum :role, { user: 0, vip: 1, admin: 2 }, default: :user
   enum :company_role, { owner: 0, admin: 1, member: 2 }, default: :member, prefix: :company
@@ -19,6 +21,7 @@ class User < ApplicationRecord
   has_one_attached :avatar
   before_validation :ensure_company, on: :create
   before_validation :assign_company_role, on: :create
+  validate :avatar_constraints
 
   def can_create_customer?
     return true if company_unlimited_plan?
@@ -78,6 +81,17 @@ class User < ApplicationRecord
       company_role.presence || "member"
     else
       "owner"
+    end
+  end
+
+  def avatar_constraints
+    return unless avatar.attached?
+
+    if !AVATAR_CONTENT_TYPES.include?(avatar.blob.content_type)
+      errors.add(:avatar, "must be PNG, JPG, WEBP, or GIF")
+    end
+    if avatar.blob.byte_size > MAX_AVATAR_SIZE
+      errors.add(:avatar, "must be smaller than #{MAX_AVATAR_SIZE / 1.megabyte}MB")
     end
   end
 end

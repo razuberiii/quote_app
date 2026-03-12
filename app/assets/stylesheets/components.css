@@ -836,6 +836,66 @@
   box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
 }
 
+.quote-reason-options-grid {
+  align-items: start;
+}
+
+.quote-reason-options-modal .sales-insight-dist-item {
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.quote-reason-options-modal .quote-reason-field {
+  margin-bottom: 0.55rem;
+}
+
+.quote-reason-options-modal .quote-reason-field input,
+.quote-reason-options-modal .quote-reason-option-add-btn,
+.quote-reason-options-modal .js-reason-option-delete {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .quote-reason-options-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .quote-reason-options-modal .quote-reason-modal__dialog {
+    width: min(100%, 620px);
+    padding: 1.05rem 1rem 0.95rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .quote-reason-options-modal {
+    padding: 0.7rem;
+    align-items: end;
+  }
+
+  .quote-reason-options-modal .quote-reason-modal__dialog {
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 1rem 0.85rem 0.9rem;
+  }
+
+  .quote-reason-options-modal .sales-insight-dist-item {
+    grid-template-columns: 1fr !important;
+    align-items: stretch;
+  }
+
+  .quote-reason-options-modal .sales-insight-dist-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .quote-reason-options-modal .js-reason-option-delete {
+    justify-content: center;
+  }
+}
+
 .app-empty-state {
   display: grid;
   justify-items: start;
@@ -4918,6 +4978,12 @@ input[type="submit"].btn:hover {
   border-radius: 8px;
   padding: 0.45rem 0.55rem;
 }
+.quote-status-lock-field {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  padding-top: 0.15rem;
+}
 .quote-conditional[data-show-when-status] {
   display: none;
 }
@@ -4952,6 +5018,44 @@ input[type="submit"].btn:hover {
 }
 .quote-form-add-row {
   margin-top: 10px;
+}
+.quote-form-add-row .quote-add-item-btn {
+  min-height: 40px;
+  padding: 0.55rem 0.95rem;
+  border-radius: 12px;
+  border-color: #bfd2e8;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f9ff 100%);
+  color: #1b4f8a;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba(17, 52, 90, 0.08);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease;
+}
+.quote-form-add-row .quote-add-item-btn::before {
+  content: "+";
+  display: inline-block;
+  margin-right: 0.38rem;
+  font-weight: 800;
+}
+.quote-form-add-row .quote-add-item-btn:hover {
+  border-color: #8db3dc;
+  background: linear-gradient(180deg, #ffffff 0%, #e9f3ff 100%);
+  box-shadow: 0 4px 12px rgba(17, 52, 90, 0.14);
+  transform: translateY(-1px);
+}
+.quote-form-add-row .quote-add-item-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(17, 52, 90, 0.1);
+}
+@media (max-width: 640px) {
+  .quote-form-add-row .quote-add-item-btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 .landing-contact-submit-wrap .btn {
   width: 100%;
@@ -5020,7 +5124,7 @@ input[type="submit"].btn:hover {
   width: 100%;
 }
 .quote-toolbar-right-primary {
-  gap: var(--space-2);
+  gap: 0.55rem;
 }
 .quote-toolbar .button_to {
   margin: 0;
@@ -5107,6 +5211,42 @@ input[type="submit"].btn:hover {
   display: grid;
   gap: 0.35rem;
 }
+.quote-toolbar-export-hint {
+  margin: 0;
+  padding: 0.3rem 0.45rem 0.2rem;
+  color: #64748b;
+  font-size: 0.74rem;
+  line-height: 1.4;
+}
+.quote-toolbar-op-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 0;
+}
+.quote-toolbar-left > .quote-toolbar-op-group {
+  margin-left: 0.4rem;
+}
+.quote-toolbar-op-group .button_to {
+  margin: 0;
+}
+.quote-toolbar-op-btn {
+  border-radius: 13px;
+}
+.quote-toolbar-more-status .quote-toolbar-export-menu {
+  left: auto;
+  right: 0;
+}
+.quote-toolbar-status-control .quote-toolbar-export-menu,
+.quote-toolbar-more-actions .quote-toolbar-export-menu,
+.quote-toolbar-export-menu--right {
+  left: auto;
+  right: 0;
+}
+.quote-toolbar-status-control > summary.quote-btn {
+  min-width: 0;
+  justify-content: center;
+}
 .quote-toolbar-export-menu form {
   margin: 0;
   width: 100%;
@@ -5114,6 +5254,12 @@ input[type="submit"].btn:hover {
 .quote-toolbar-export-menu .quote-btn {
   width: 100%;
   justify-content: center;
+}
+.quote-toolbar-export-menu .share-link-group {
+  width: 100%;
+}
+.quote-toolbar-export-menu .share-link-group > .quote-btn {
+  width: 100%;
 }
 .quote-toolbar-export:not([open]) .quote-toolbar-export-menu {
   display: none;
@@ -5136,6 +5282,15 @@ input[type="submit"].btn:hover {
   min-width: 190px;
   height: 40px;
   border-radius: 10px;
+}
+.quote-toolbar-inline-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+.quote-toolbar-inline-actions form {
+  margin: 0;
 }
 .quote-toast {
   position: fixed;
@@ -5382,21 +5537,69 @@ input[type="submit"].btn,
   border-color: #ef4444;
   color: #991b1b;
 }
+.quote-btn-danger-soft {
+  background: #fff7f7;
+  border-color: #f5b1b1;
+  color: #b91c1c;
+}
+.quote-btn-danger-soft:hover {
+  background: #fff1f1;
+  border-color: #ef4444;
+  color: #991b1b;
+}
+.quote-btn-danger-strong {
+  background: #b91c1c;
+  border-color: #b91c1c;
+  color: #fff;
+  box-shadow: 0 6px 14px rgba(153, 27, 27, 0.16);
+}
+.quote-btn-danger-strong:hover {
+  background: #991b1b;
+  border-color: #991b1b;
+  color: #fff;
+}
 .quote-toolbar {
-  gap: 0.95rem;
+  gap: 0.75rem;
 }
 .quote-toolbar-left,
 .quote-toolbar-right,
 .quote-toolbar-right-secondary,
 .quote-toolbar-right-primary {
-  gap: 0.75rem;
+  gap: 0.55rem;
 }
 .quote-toolbar-right-primary {
-  gap: 0.95rem;
+  gap: 0.55rem;
 }
 .quote-toolbar-export > summary.quote-btn {
   min-height: 40px;
   height: 40px;
+}
+@media (min-width: 1024px) {
+  .quote-toolbar {
+    flex-wrap: nowrap;
+  }
+
+  .quote-toolbar-left {
+    flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: nowrap;
+  }
+
+  .quote-toolbar-right {
+    flex: 0 0 auto;
+    margin-left: auto;
+  }
+
+  .quote-toolbar-right-secondary,
+  .quote-toolbar-right-primary {
+    width: auto;
+    flex-wrap: nowrap;
+  }
+
+  .quote-toolbar-op-btn {
+    padding: 0 12px;
+    font-size: 0.84rem;
+  }
 }
 @media (max-width: 900px) {
   .dashboard-kpi-row {
@@ -5653,6 +5856,10 @@ input[type="submit"].btn,
   .quote-toolbar-right-primary {
     justify-content: flex-start;
     flex-wrap: wrap;
+  }
+
+  .quote-toolbar-left > .quote-toolbar-op-group {
+    margin-left: 0;
   }
 
   .quote-btn,
@@ -6409,12 +6616,17 @@ input[type="submit"].btn,
   left: 0;
   min-width: 288px;
   width: min(36rem, calc(100vw - 2rem));
+  max-height: min(72vh, 34rem);
   border: 1px solid #cbd5e1;
   border-radius: 12px;
   background: #f8fafc;
   padding: 0.7rem;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
   z-index: 2200;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  overflow: hidden;
 }
 
 .share-link-panel-message {
@@ -6427,7 +6639,8 @@ input[type="submit"].btn,
 }
 
 .share-link-panel-editor {
-  margin-top: 0.55rem;
+  margin-top: 0.2rem;
+  min-height: 0;
 }
 
 .share-link-panel-editor-label {
@@ -6448,7 +6661,9 @@ input[type="submit"].btn,
   line-height: 1.4;
   padding: 0.45rem 0.55rem;
   resize: vertical;
-  min-height: 5.4rem;
+  min-height: 5.1rem;
+  max-height: min(30vh, 12rem);
+  overflow-y: auto;
 }
 
 .share-link-panel-editor-input:focus {
@@ -6466,7 +6681,10 @@ input[type="submit"].btn,
 }
 
 .share-link-panel-actions {
-  margin-top: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  border-top: 1px solid #dbe5f1;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.6) 0%, #f8fafc 38%);
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.45rem;
@@ -6567,14 +6785,17 @@ input[type="submit"].btn,
 .follow-up-assistant-actions {
   margin-top: 0.1rem;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 0.5rem;
 }
 
 .follow-up-assistant-actions .app-ui-button {
   width: 100%;
-  min-height: 40px;
-  height: 40px;
+  min-height: 42px;
+  height: auto;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .follow-up-assistant-actions .app-ui-button:disabled {
@@ -6582,9 +6803,30 @@ input[type="submit"].btn,
   opacity: 0.55;
 }
 
+.customer-follow-up-assistant .quote-turnstile-modal__dialog {
+  width: min(100%, 460px);
+}
+
+.customer-follow-up-assistant .quote-turnstile-modal__widget {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.customer-follow-up-assistant .quote-turnstile-modal__widget > div {
+  margin-inline: auto;
+}
+
 @media (max-width: 640px) {
   .share-link-panel {
-    width: min(100vw - 1rem, 28rem);
+    position: fixed;
+    left: 0.5rem;
+    right: 0.5rem;
+    top: auto;
+    bottom: 0.5rem;
+    width: auto;
+    max-height: 78vh;
+    border-radius: 16px;
+    padding: 0.72rem;
   }
 
   .share-link-panel-actions {
@@ -6593,6 +6835,30 @@ input[type="submit"].btn,
 
   .follow-up-assistant-actions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .customer-follow-up-assistant .quote-turnstile-modal {
+    padding: 0.7rem;
+    align-items: end;
+  }
+
+  .customer-follow-up-assistant .quote-turnstile-modal__dialog {
+    width: 100%;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 1rem 0.85rem 0.9rem;
+  }
+
+  .customer-follow-up-assistant .quote-turnstile-modal__close {
+    width: 38px;
+    height: 38px;
+  }
+
+  .quote-status-undo {
+    left: 0.75rem;
+    right: 0.75rem;
+    justify-content: space-between;
   }
 }
 
@@ -6603,6 +6869,45 @@ input[type="submit"].btn,
 
 .share-link-panel.is-error .share-link-panel-message {
   color: #991b1b;
+}
+
+.quote-status-undo {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 2600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.56rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.42);
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 12px 22px rgba(2, 6, 23, 0.32);
+}
+
+.quote-status-undo-text {
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.quote-status-undo-btn {
+  border: 1px solid #bae6fd;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: 0.76rem;
+  font-weight: 700;
+  min-height: 30px;
+  padding: 0.2rem 0.62rem;
+  cursor: pointer;
+}
+
+.quote-status-undo-btn:disabled {
+  opacity: 0.65;
+  cursor: progress;
 }
 
 .product-price-intelligence-panel {

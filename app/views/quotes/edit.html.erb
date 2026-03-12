@@ -1,8 +1,8 @@
 <section class="app-page-shell">
   <header class="app-page-header">
     <div class="app-page-header-main">
-      <h1>Edit Quote</h1>
-      <p>Update quote <strong><%= @quote.quote_no %></strong> revision <strong>V<%= @quote.revision_number %></strong> without breaking the quote flow.</p>
+      <h1><%= t("quotes.view.edit.title") %></h1>
+      <p><%= t("quotes.view.edit.subtitle", quote_no: @quote.quote_no, revision: @quote.revision_number) %></p>
     </div>
     <div class="app-page-header-actions">
       <%= quote_status_badge(@quote.status.presence || "draft") %>
@@ -11,5 +11,5 @@
 
   <%= render "form", quote: @quote, form_model: @quote %>
 
-  <%= link_to "Back to Quote", @quote, class: "form-page-back-link form-page-back-link--quote" %>
+  <%= link_to t("quotes.view.edit.back_to_quote"), @quote, class: "form-page-back-link form-page-back-link--quote" %>
 </section>

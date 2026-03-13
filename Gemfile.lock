@@ -128,7 +128,7 @@ GEM
     dotenv (3.2.0)
     drb (2.2.3)
     ed25519 (1.4.0)
-    erb (6.0.1)
+    erb (6.0.2)
     erubi (1.13.1)
     et-orbi (1.4.0)
       tzinfo
@@ -187,7 +187,8 @@ GEM
     mini_magick (5.3.1)
       logger
     mini_mime (1.1.5)
-    minitest (6.0.1)
+    minitest (6.0.2)
+      drb (~> 2.0)
       prism (~> 1.5)
     msgpack (1.8.0)
     net-imap (0.6.2)
@@ -205,9 +206,9 @@ GEM
       net-protocol
     net-ssh (7.3.0)
     nio4r (2.7.5)
-    nokogiri (1.19.0-x64-mingw-ucrt)
+    nokogiri (1.19.1-x64-mingw-ucrt)
       racc (~> 1.4)
-    nokogiri (1.19.0-x86_64-linux-gnu)
+    nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
     orm_adapter (0.5.0)
     ostruct (0.6.3)
@@ -240,7 +241,7 @@ GEM
       nio4r (~> 2.0)
     raabro (1.4.0)
     racc (1.8.1)
-    rack (3.2.4)
+    rack (3.2.5)
     rack-attack (6.8.0)
       rack (>= 1.0, < 4)
     rack-session (2.1.1)
@@ -268,8 +269,8 @@ GEM
       activesupport (>= 5.0.0)
       minitest
       nokogiri (>= 1.6)
-    rails-html-sanitizer (1.6.2)
-      loofah (~> 2.21)
+    rails-html-sanitizer (1.7.0)
+      loofah (~> 2.25)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
     railties (8.1.2)
       actionpack (= 8.1.2)
@@ -385,11 +386,10 @@ GEM
     useragent (0.16.11)
     warden (1.2.9)
       rack (>= 2.0.9)
-    web-console (4.2.1)
-      actionview (>= 6.0.0)
-      activemodel (>= 6.0.0)
+    web-console (4.3.0)
+      actionview (>= 8.0.0)
       bindex (>= 0.4.0)
-      railties (>= 6.0.0)
+      railties (>= 8.0.0)
     websocket (1.2.11)
     websocket-driver (0.8.0)
       base64
@@ -400,7 +400,7 @@ GEM
       ostruct
     xpath (3.2.0)
       nokogiri (~> 1.8)
-    zeitwerk (2.7.4)
+    zeitwerk (2.7.5)
 
 PLATFORMS
   x64-mingw-ucrt

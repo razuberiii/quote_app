@@ -1,4 +1,4 @@
-<%= link_to "\u2190 #{t("quotes.view.show.back_to_customer")}", @quote.customer, class: "quote-back-link quote-back-link-top" %>
+﻿<%= link_to "\u2190 #{t("quotes.view.show.back_to_customer")}", @quote.customer, class: "quote-back-link quote-back-link-top" %>
 
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
@@ -458,6 +458,7 @@
         <% if @quote.can_share_publicly? || existing_public_share_url.present? %>
           <% wa_phone_raw = @quote.customer.whatsapp_phone %>
           <% share_msg_template = quote_share_message_template(@quote, locale: @quote_document_locale) %>
+          <% share_comms_available = @quote.can_share_publicly? || existing_public_share_url.present? %>
           <script>
             window.__quoteShareCommsData = {
               messageTemplate: <%= raw share_msg_template.to_json %>,
@@ -468,14 +469,15 @@
             <% share_button_data = {} %>
             <% share_button_data[:share_url] = share_quote_path(@quote, doc: @document_kind, format: :json) if @quote.can_share_publicly? %>
             <% share_button_data[:existing_url] = existing_public_share_url if existing_public_share_url.present? %>
+            <% share_button_data[:mark_sent_url] = mark_sent_quote_path(@quote) if @quote.can_mark_sent? %>
             <%= button_tag type: "button",
-                           class: "quote-btn quote-btn-primary js-share-public-link",
+                           class: "quote-btn quote-btn-primary js-share-public-link js-shortcut-share",
                            data: share_button_data do %>
               <%= @quote.can_share_publicly? ? t("quotes.view.show.toolbar.share_public_link") : t("quotes.view.show.toolbar.copy_open_public_link") %>
             <% end %>
             <div class="share-link-panel" id="quote-share-panel" hidden>
               <div class="share-link-panel-message" id="quote-share-message"></div>
-              <% if @quote.can_share_publicly? %>
+              <% if share_comms_available %>
                 <div class="share-link-panel-editor">
                   <label class="share-link-panel-editor-label" for="quote-share-message-editor"><%= t("quotes.view.show.comms.editor_label", default: "Share Message") %></label>
                   <textarea id="quote-share-message-editor" class="share-link-panel-editor-input" rows="5" placeholder="<%= t("quotes.view.show.comms.editor_placeholder", default: "You can edit this message before copying or sending.") %>"></textarea>
@@ -485,10 +487,12 @@
               <div class="share-link-panel-actions">
                 <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
                 <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
-                <% if @quote.can_share_publicly? %>
+                <% if share_comms_available %>
                   <button type="button" class="share-link-panel-btn" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
                   <% if wa_phone_raw.present? %>
                     <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
+                  <% else %>
+                    <span class="share-link-panel-btn is-disabled" title="<%= t("quotes.view.show.comms.no_phone_tooltip") %>"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></span>
                   <% end %>
                 <% end %>
               </div>
@@ -1033,16 +1037,44 @@
       whatsappButton.href = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(buildMessage())}`;
     };
 
+    const ensureMarkedSent = async () => {
+      const markSentUrl = button.dataset.markSentUrl || "";
+      if (!markSentUrl) return;
+
+      const response = await fetch(markSentUrl, {
+        method: "POST",
+        headers: {
+          "Accept": "text/vnd.turbo-stream.html, text/html, application/xhtml+xml",
+          "X-CSRF-Token": csrf || ""
+        },
+        credentials: "same-origin"
+      });
+
+      if (response.ok) {
+        markSentLocally({ refresh: false });
+      }
+    };
+
     button.addEventListener("click", async () => {
       button.disabled = true;
       try {
+        // Optimistic UI: reflect sent status immediately for keyboard shortcut flow.
+        markSentLocally({ refresh: false });
+
         const existingUrl = button.dataset.existingUrl || "";
         const shareUrl = button.dataset.shareUrl || "";
         if (!shareUrl && existingUrl) {
+          await ensureMarkedSent();
           currentShareUrl = existingUrl;
           openLink.href = existingUrl;
           openLink.hidden = false;
-          const copied = await copyText(existingUrl);
+          if (messageEditor) {
+            messageEditor.value = readPersistedMessageDraft() || buildDefaultMessage();
+            persistMessageDraft();
+          }
+          syncWhatsappHref();
+          const canAutoCopy = navigator.userActivation?.isActive ?? true;
+          const copied = canAutoCopy ? await copyText(existingUrl) : false;
           syncPanelState();
           if (copied) {
             showPanel("<%= j(t("quotes.view.show.toolbar.public_link_ready_copied")) %>");
@@ -1071,7 +1103,8 @@
         }
 
         markSentLocally({ refresh: false });
-        const copied = await copyText(payload.url);
+        const canAutoCopy = navigator.userActivation?.isActive ?? true;
+        const copied = canAutoCopy ? await copyText(payload.url) : false;
         currentShareUrl = payload.url;
         if (messageEditor) {
           messageEditor.value = buildDefaultMessage();
@@ -1107,6 +1140,11 @@
           window.refreshQuoteState?.(true, true);
         }, 280);
       } catch (error) {
+        // Roll back optimistic sent badge/state if share fails.
+        window.setTimeout(() => {
+          window.refreshQuoteState?.(true, true);
+        }, 60);
+
         currentShareUrl = "";
         syncWhatsappHref();
         openLink.href = "#";

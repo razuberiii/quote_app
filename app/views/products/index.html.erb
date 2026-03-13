@@ -5,8 +5,9 @@
       <p><%= t("products.view.index.subtitle") %></p>
     </div>
     <div class="app-page-header-actions">
-      <%= render "components/ui/button", href: new_product_path, variant: :primary, class: "page-primary-cta" do %>
-        <%= t("products.view.index.new_product") %>
+      <%= render "components/ui/button", href: new_product_path, variant: :primary, class: "page-primary-cta",
+                                         attrs: { data: { controller: "tooltip", tooltip_content_value: t("shortcuts.tooltips.new_product"), action: "mouseenter->tooltip#show mouseleave->tooltip#hide" } } do %>
+        <%= t("products.view.index.new_product") %><kbd class="app-shortcut-badge">Shift+P</kbd>
       <% end %>
     </div>
   </header>
@@ -25,6 +26,7 @@
                              placeholder: t("products.view.index.search_placeholder"),
                              value: @search_query,
                              class: "#{ui_input_classes} app-search-input" %>
+            <span class="app-search-shortcut-hint" aria-hidden="true">/</span>
           </div>
           <% if @search_query.present? %>
             <%= link_to t("products.view.index.clear_search"), products_path, class: "app-search-clear" %>

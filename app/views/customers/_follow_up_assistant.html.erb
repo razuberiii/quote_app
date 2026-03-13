@@ -1,10 +1,24 @@
 <section class="customer-follow-up-assistant app-surface">
+  <% follow_up_email_ready = local_assigns.fetch(:follow_up_email_ready, true) %>
+  <% follow_up_email_block_reason = local_assigns.fetch(:follow_up_email_block_reason, nil) %>
+
   <div class="app-section-heading">
     <div>
       <h3><%= t("follow_up.assistant.title") %></h3>
       <span class="app-subtle-note"><%= t("follow_up.assistant.subtitle") %></span>
     </div>
   </div>
+
+  <% unless follow_up_email_ready %>
+    <div class="app-inline-notice app-inline-notice--warn">
+      <p><%= follow_up_email_block_reason %></p>
+      <p>
+        <%= link_to t("follow_up.assistant.fix_profile"), edit_user_registration_path, class: "app-inline-notice-link" %>
+        ·
+        <%= link_to t("follow_up.assistant.fix_company"), edit_company_settings_path, class: "app-inline-notice-link" %>
+      </p>
+    </div>
+  <% end %>
 
   <%= form_with url: log_follow_up_customer_path(customer), method: :post, local: true, html: {
     class: "follow-up-assistant-form",
@@ -38,12 +52,25 @@
     <p class="follow-up-assistant-hint"><%= t("follow_up.assistant.hint") %></p>
     <p class="follow-up-assistant-feedback" data-follow-up-feedback hidden></p>
 
+    <% wa_btn_title = customer.whatsapp_phone.blank? ? t("follow_up.assistant.disabled_no_phone") : nil %>
+    <% email_btn_title = customer.email.blank? ? t("follow_up.assistant.disabled_no_email") : (!follow_up_email_ready ? t("follow_up.assistant.disabled_setup_incomplete") : nil) %>
     <div class="follow-up-assistant-actions">
-      <%= button_tag t("follow_up.actions.whatsapp"), type: "button", class: ui_button_classes(:secondary, "follow-up-assistant-btn"), data: { follow_up_whatsapp: true }, disabled: customer.whatsapp_phone.blank? %>
-      <%= button_tag t("follow_up.actions.email"), type: "button", class: ui_button_classes(:primary, "follow-up-assistant-btn"), data: { follow_up_email: true, email_action: send_follow_up_email_customer_path(customer), turnstile_modal_id: "follow-up-email-turnstile-modal-#{customer.id}" }, disabled: customer.email.blank? %>
+      <%= button_tag t("follow_up.actions.whatsapp"), type: "button", class: ui_button_classes(:secondary, "follow-up-assistant-btn"), title: wa_btn_title, data: { follow_up_whatsapp: true }, disabled: customer.whatsapp_phone.blank? %>
+      <%= button_tag t("follow_up.actions.email"), type: "button", class: ui_button_classes(:primary, "follow-up-assistant-btn"), title: email_btn_title, data: { follow_up_email: true, email_action: send_follow_up_email_customer_path(customer), turnstile_modal_id: "follow-up-email-turnstile-modal-#{customer.id}" }, disabled: customer.email.blank? || !follow_up_email_ready %>
       <%= button_tag t("follow_up.actions.copy"), type: "button", class: ui_button_classes(:secondary, "follow-up-assistant-btn"), data: { follow_up_copy: true } %>
       <%= button_tag t("follow_up.actions.log"), type: "submit", class: ui_button_classes(:secondary, "follow-up-assistant-btn") %>
     </div>
+    <% if customer.whatsapp_phone.blank? || customer.email.blank? %>
+      <p class="follow-up-assistant-missing-hints">
+        <% if customer.whatsapp_phone.blank? %>
+          <span><%= t("follow_up.assistant.no_whatsapp_number") %></span>
+        <% end %>
+        <% if customer.email.blank? %>
+          <span><%= t("follow_up.assistant.no_email") %></span>
+        <% end %>
+        <%= link_to t("follow_up.assistant.go_edit_customer"), edit_customer_path(customer), class: "follow-up-assistant-missing-link" %>
+      </p>
+    <% end %>
 
     <div class="quote-turnstile-modal"
          id="follow-up-email-turnstile-modal-<%= customer.id %>"

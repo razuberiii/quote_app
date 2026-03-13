@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   end
   get "demo", to: "landing#demo"
   get "dashboard", to: "dashboard#index"
+  patch "onboarding/dismiss", to: "onboarding#dismiss", as: :dismiss_onboarding
   get "sample-quote", to: "landing#sample_quote"
   get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
   get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
@@ -78,13 +79,20 @@ Rails.application.routes.draw do
   resource :company_settings, only: [ :edit, :update ]
   resources :quote_reason_options, only: [ :create, :destroy ]
 
+  get "command_palette/search", to: "command_palette#search", as: :command_palette_search
+
   resources :customers do
+    collection do
+      get :shortcut_candidates
+    end
+
     member do
       post :mark_follow_up
       post :schedule_follow_up
       post :log_follow_up
       post :send_follow_up_email
       post :send_follow_up_whatsapp
+      patch :reorder_tags
     end
 
     resources :quotes, shallow: true do

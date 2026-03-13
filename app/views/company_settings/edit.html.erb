@@ -23,6 +23,7 @@
 
       <div class="<%= 'settings-field-error' if @company.errors[:name].any? %>">
         <%= f.label :name, t("company_settings.view.edit.company_name") %>
+        <p class="team-members-hint"><%= t("company_settings.view.edit.company_name_hint") %></p>
         <%= f.text_field :name %>
       </div>
 

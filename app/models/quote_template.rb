@@ -182,7 +182,7 @@ class QuoteTemplate < ApplicationRecord
     self.show_tax = true if show_tax.nil?
     self.show_shipping = true if show_shipping.nil?
     self.show_closing_message = true if show_closing_message.nil?
-    self.show_saas_branding = false if show_saas_branding.nil?
+    self.show_saas_branding = true if show_saas_branding.nil?
     self.show_watermark = false if show_watermark.nil?
     self.excel_show_grid_lines = false if excel_show_grid_lines.nil?
     self.layout_density = "standard" if layout_density.blank?

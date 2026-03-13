@@ -23,6 +23,9 @@
     ["+91 India", "+91"],
     ["+971 UAE", "+971"]
   ] %>
+  <% if customer.phone_country_code.present? && common_country_calling_code_options.none? { |(_, value)| value == customer.phone_country_code } %>
+    common_country_calling_code_options.unshift([customer.phone_country_code, customer.phone_country_code])
+  <% end %>
   <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
     <% legacy_status_label = t("customers.view.form.status_options.#{customer.status}", default: customer.status.humanize) %>
     <% status_options.unshift([t("customers.view.form.legacy_status", status: legacy_status_label), customer.status]) %>
@@ -38,6 +41,7 @@
   <% selected_tags = customer.ordered_customer_tags %>
   <% selected_tag_ids = selected_tags.map(&:id) %>
   <% selected_tag_names = selected_tags.map(&:name) %>
+  <% selected_tagging_id_by_tag_id = customer.customer_taggings.index_by(&:customer_tag_id).transform_values(&:id) %>
   <% initial_custom_tags = Array(params.dig(:customer, :new_tag_names)).reject(&:blank?) %>
   <% initial_custom_tags += params.dig(:customer, :custom_tags_input).to_s.split(",") %>
   <% initial_custom_tags = initial_custom_tags.map { |tag| tag.to_s.strip }.reject(&:blank?).uniq %>
@@ -124,13 +128,10 @@
         </div>
         <div>
           <%= f.label :phone_country_code, t("customers.view.form.phone_country_code", default: "Country Code") %>
-          <%= select_tag :phone_country_code_preset,
-                         options_for_select(common_country_calling_code_options, customer.phone_country_code),
-                         include_blank: t("customers.view.form.select_phone_country_code", default: "Select common country code"),
-                         id: "customer_phone_country_code_preset",
-                         class: ui_input_classes,
-                         data: { phone_country_code_preset: true, target_input: "#customer_phone_country_code" } %>
-          <%= f.text_field :phone_country_code, placeholder: t("customers.view.form.phone_country_code_placeholder", default: "+81"), class: ui_input_classes %>
+          <%= f.select :phone_country_code,
+                       options_for_select(common_country_calling_code_options, customer.phone_country_code),
+                       { include_blank: t("customers.view.form.select_phone_country_code", default: "Select common country code") },
+                       { class: ui_input_classes, data: { searchable_select: true, search_placeholder: t("customers.view.form.select_phone_country_code", default: "Select common country code") } } %>
         </div>
         <div>
           <%= f.label :phone, t("customers.view.form.phone") %>
@@ -233,18 +234,13 @@
 
         <div class="customer-grid-span-2">
           <label><%= t("customers.view.form.tags") %></label>
-          <div class="customer-tag-priority" data-tag-priority>
-            <div class="customer-tag-priority-head">
-              <strong><%= t("customers.view.form.selected_priority") %></strong>
-              <span class="customer-field-hint"><%= t("customers.view.form.selected_priority_hint") %></span>
-            </div>
+          <p class="customer-field-hint customer-tag-cloud-hint"><%= t("customers.view.form.drag_priority_hint") %></p>
+          <div class="customer-tag-priority customer-tag-priority-hidden" data-tag-priority>
             <div class="customer-tag-priority-list" data-tag-priority-list>
               <% selected_tag_names.each do |tag_name| %>
-                <div class="customer-tag-priority-item" data-tag-priority-item data-tag-name="<%= tag_name %>">
+                <div class="customer-tag-priority-item" data-tag-priority-item data-tag-name="<%= tag_name %>" draggable="true">
                   <span class="customer-tag-priority-name"><%= tag_name %></span>
                   <div class="customer-tag-priority-actions">
-                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="up"><%= t("customers.view.form.up") %></button>
-                    <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn') %>" data-tag-move="down"><%= t("customers.view.form.down") %></button>
                     <button type="button" class="<%= ui_button_classes(:secondary, 'customer-tag-priority-btn customer-tag-priority-remove') %>" data-tag-remove><%= t("customers.view.form.remove") %></button>
                   </div>
                   <%= hidden_field_tag "customer[tag_priority_names][]", tag_name, data: { tag_priority_hidden: true } %>
@@ -252,11 +248,15 @@
               <% end %>
             </div>
           </div>
-          <div class="customer-tag-cloud">
+          <div class="customer-tag-cloud"
+               data-controller="sortable"
+               data-sortable-enabled-value="true"
+               data-sortable-url-value="<%= customer.persisted? ? reorder_tags_customer_path(customer) : "" %>">
             <% (@available_tags || []).each do |tag| %>
-              <label class="customer-tag-chip" data-tag-chip>
+              <label class="customer-tag-chip <%= "is-selected" if selected_tag_ids.include?(tag.id) %>" data-tag-chip data-id="<%= selected_tagging_id_by_tag_id[tag.id] %>">
                 <%= check_box_tag "customer[customer_tag_ids][]", tag.id, selected_tag_ids.include?(tag.id), id: "customer_tag_#{tag.id}" %>
                 <span data-tag-name="<%= tag.name %>"><%= tag.name %></span>
+                <button type="button" class="customer-tag-delete-btn" data-tag-delete aria-label="<%= t("customers.view.form.remove") %>">×</button>
               </label>
             <% end %>
           </div>
@@ -288,8 +288,6 @@
 
 <script>
   (() => {
-    const tagMoveUpLabel = "<%= j t("customers.view.form.up") %>";
-    const tagMoveDownLabel = "<%= j t("customers.view.form.down") %>";
     const tagRemoveLabel = "<%= j t("customers.view.form.remove") %>";
     const selectInternalOwnerLabel = "<%= j t("customers.view.form.select_internal_owner") %>";
     const chooseTeamOwnerLabel = "<%= j t("customers.view.form.choose_team_owner") %>";
@@ -333,11 +331,10 @@
           wrapper.className = "customer-tag-priority-item";
           wrapper.dataset.tagPriorityItem = "true";
           wrapper.dataset.tagName = name;
+          wrapper.draggable = true;
           wrapper.innerHTML = `
             <span class="customer-tag-priority-name"></span>
             <div class="customer-tag-priority-actions">
-              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">${tagMoveUpLabel}</button>
-              <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">${tagMoveDownLabel}</button>
               <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>${tagRemoveLabel}</button>
             </div>
           `;
@@ -373,6 +370,47 @@
           });
         };
 
+        const getDropAfterElement = (container, y) => {
+          const candidates = [ ...container.querySelectorAll("[data-tag-priority-item]:not(.is-dragging)") ];
+          return candidates.reduce((closest, child) => {
+            const rect = child.getBoundingClientRect();
+            const offset = y - rect.top - rect.height / 2;
+            if (offset < 0 && offset > closest.offset) {
+              return { offset, element: child };
+            }
+            return closest;
+          }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+        };
+
+        list.addEventListener("dragstart", (event) => {
+          const item = event.target.closest("[data-tag-priority-item]");
+          if (!item) return;
+          item.classList.add("is-dragging");
+          if (event.dataTransfer) {
+            event.dataTransfer.effectAllowed = "move";
+            event.dataTransfer.setData("text/plain", item.dataset.tagName || "");
+          }
+        });
+
+        list.addEventListener("dragend", (event) => {
+          const item = event.target.closest("[data-tag-priority-item]");
+          if (!item) return;
+          item.classList.remove("is-dragging");
+        });
+
+        list.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          const dragging = list.querySelector("[data-tag-priority-item].is-dragging");
+          if (!dragging) return;
+
+          const afterElement = getDropAfterElement(list, event.clientY);
+          if (!afterElement) {
+            list.appendChild(dragging);
+          } else {
+            list.insertBefore(dragging, afterElement);
+          }
+        });
+
         form.querySelectorAll("[data-tag-chip] input[type='checkbox']").forEach((input) => {
           const name = input.parentElement?.querySelector("[data-tag-name]")?.dataset.tagName;
           if (!name) return;
@@ -405,23 +443,82 @@
             }
             return;
           }
-
-          if (event.target.closest("[data-tag-move='up']")) {
-            const prev = item.previousElementSibling;
-            if (prev) list.insertBefore(item, prev);
-            return;
-          }
-
-          if (event.target.closest("[data-tag-move='down']")) {
-            const next = item.nextElementSibling;
-            if (next) list.insertBefore(next, item);
-          }
         });
 
         list.querySelectorAll("[data-tag-priority-item]").forEach((item) => {
           const checkbox = findCheckboxByName(item.dataset.tagName);
           if (checkbox) checkbox.checked = true;
         });
+      });
+    };
+
+    const bindTagChipPrioritySort = () => {
+      document.querySelectorAll(".customer-grid-span-2").forEach((section) => {
+        const cloud = section.querySelector(".customer-tag-cloud");
+        const priorityList = section.querySelector("[data-tag-priority-list]");
+        if (!cloud || !priorityList || cloud.dataset.boundTagSort === "true") return;
+        cloud.dataset.boundTagSort = "true";
+
+        const syncPriorityOrderFromCloud = () => {
+          const selectedNames = Array.from(cloud.querySelectorAll("[data-tag-chip]"))
+            .map((chip) => {
+              const input = chip.querySelector("input[type='checkbox']");
+              const name = chip.querySelector("[data-tag-name]")?.dataset.tagName;
+              if (!input?.checked || !name) return null;
+              return name;
+            })
+            .filter(Boolean);
+
+          selectedNames.forEach((name) => {
+            const item = Array.from(priorityList.querySelectorAll("[data-tag-priority-item]"))
+              .find((node) => node.dataset.tagName === name);
+            if (item) priorityList.appendChild(item);
+          });
+        };
+
+        const syncChipState = (chip) => {
+          const input = chip.querySelector("input[type='checkbox']");
+          const selected = !!input?.checked;
+          chip.classList.toggle("is-selected", selected);
+        };
+
+        const refreshChipStates = () => {
+          cloud.querySelectorAll("[data-tag-chip]").forEach((chip) => syncChipState(chip));
+          syncPriorityOrderFromCloud();
+        };
+
+        cloud.addEventListener("change", (event) => {
+          const input = event.target.closest("input[type='checkbox']");
+          if (!input) return;
+          const chip = input.closest("[data-tag-chip]");
+          if (chip) syncChipState(chip);
+          syncPriorityOrderFromCloud();
+        });
+
+        cloud.addEventListener("click", (event) => {
+          const removeBtn = event.target.closest("[data-tag-delete]");
+          if (!removeBtn) return;
+          event.preventDefault();
+          event.stopPropagation();
+
+          const chip = removeBtn.closest("[data-tag-chip]");
+          const input = chip?.querySelector("input[type='checkbox']");
+          if (!chip || !input) return;
+
+          if (input.checked) {
+            input.checked = false;
+            input.dispatchEvent(new Event("change", { bubbles: true }));
+          }
+
+          chip.remove();
+          syncPriorityOrderFromCloud();
+        });
+
+        cloud.addEventListener("sortable:reordered", () => {
+          syncPriorityOrderFromCloud();
+        });
+
+        refreshChipStates();
       });
     };
 
@@ -469,11 +566,10 @@
               item.className = "customer-tag-priority-item";
               item.dataset.tagPriorityItem = "true";
               item.dataset.tagName = value;
+              item.draggable = true;
               item.innerHTML = `
                 <span class="customer-tag-priority-name"></span>
                 <div class="customer-tag-priority-actions">
-                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="up">${tagMoveUpLabel}</button>
-                  <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn" data-tag-move="down">${tagMoveDownLabel}</button>
                   <button type="button" class="app-ui-button app-ui-button--secondary customer-tag-priority-btn customer-tag-priority-remove" data-tag-remove>${tagRemoveLabel}</button>
                 </div>
               `;
@@ -552,10 +648,12 @@
 
     bindCustomTagBuilder();
     bindTagPriority();
+    bindTagChipPrioritySort();
     bindOwnerPicker();
     bindPhoneCountryCodePreset();
     document.addEventListener("turbo:load", bindTagPriority);
     document.addEventListener("turbo:load", bindCustomTagBuilder);
+    document.addEventListener("turbo:load", bindTagChipPrioritySort);
     document.addEventListener("turbo:load", bindOwnerPicker);
     document.addEventListener("turbo:load", bindPhoneCountryCodePreset);
   })();

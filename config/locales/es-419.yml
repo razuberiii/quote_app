@@ -104,29 +104,66 @@ es-419:
   datetime:
     ago: hace %{time}
   dashboard:
+    onboarding:
+      quick_start:
+        title: "Inicio rapido"
+        subtitle: "Envia tu primera cotizacion en minutos."
+        progress: "%{count}/%{total} pasos completados"
+        shortcut_hint: "Atajos:"
+        shortcut_help: ver atajos
+        shortcut_palette: abrir paleta de comandos
+        dismiss: "Cerrar"
+        done: "Listo"
+        waiting: "Esperando actividad del comprador"
+        steps:
+          customer:
+            label: "Agrega tu primer cliente"
+            detail: "Los clientes son las empresas a las que envias cotizaciones."
+            action: "Crear cliente"
+          product:
+            label: "Agrega un producto"
+            detail: "Los productos te ayudan a cotizar mas rapido."
+            action: "Agregar producto"
+          quote:
+            label: "Crea tu primera cotizacion"
+            detail: "Crea la primera cotizacion desde una cuenta de cliente."
+            action: "Crear cotizacion"
+          shared:
+            label: "Comparte la cotizacion"
+            detail: "Genera un enlace publico y envialo al comprador."
+            action: "Abrir clientes"
+          viewed:
+            label: "El comprador vio la cotizacion"
+            detail: "Este paso se completa cuando se registra actividad del comprador."
+      quick_create:
+        title: "Creacion rapida"
+        subtitle: "Comienza el siguiente paso con un clic."
+        new_customer: "Nuevo cliente"
+        new_product: "Nuevo producto"
+        new_quote: "Nueva cotizacion"
     view:
       index:
         title: Panel de control
-        subtitle: Rastree el impulso del pipeline, la presión de seguimiento y la actividad de cotizaciones desde una vista operativa.
+        subtitle: Siga el estado del pipeline, el trabajo de seguimiento y la actividad de cotizaciones en un solo lugar.
         kpi_period: Período de KPI
         weekly: Semanal
         monthly: Mensual
-        operating_snapshot: Instantánea operativa
+        operating_snapshot: Resumen operativo
         operating_snapshot_caption: Presión inmediata, señales de ventas actuales y el ritmo de este período.
         overdue_followups: seguimiento(s) vencido(s)
         due_today: vence hoy
         high_value_stalled: estancado(s) de alto valor
         accepted: aceptado(s)
         revision_requests: solicitud(es) de revisión
-        negotiating_stale: negociando 7d+
-        no_immediate_risk: No hay señales de riesgo inmediatas.
+        negotiating_stale: en negociación por más de 7 días
+        no_immediate_risk: No hay señales inmediatas de seguimiento.
         action_required: Acción requerida (%{count})
         action_overview: Resumen de acciones (%{count})
-        risk_customers: "%{count} cliente(s) en riesgo"
+        risk_customers: "%{count} cliente(s) requieren seguimiento"
         stalled_negotiations: "%{count} negociación(es) estancada(s)"
-        no_customer_or_decision_risk: No hay riesgo inmediato de cliente o decisión
+        no_customer_or_decision_risk: No hay presión inmediata de seguimiento o decisión
         handle_overdue_first: Maneje primero las cuentas vencidas y estancadas.
-        jump_to_action_items: "Abrir elementos accionables (%{count})"
+        jump_to_action_items: "Ver tareas pendientes (%{count})"
         sales_signals: Señales de ventas
         this_month: Este mes
         this_week: Esta semana
@@ -135,7 +172,7 @@ es-419:
         pressure_signals: Señales de presión
         reopened: Reabierto
         attention_signal: Señal de atención
-        public_actionable: Accionable público
+        public_actionable: En espera de acción del cliente
         awaiting_client_decision: Esperando decisión del cliente
         open_deals: Negocios abiertos
         quotes_this_period: Cotizaciones de este %{period}
@@ -163,10 +200,10 @@ es-419:
         next_move: Siguiente paso
         total: Total
         no_quotes_yet: Aún no hay cotizaciones
-        no_quotes_yet_body: Cree la primera cotización para empezar a hacer seguimiento del impulso del negocio, la interacción y los recordatorios.
+        no_quotes_yet_body: Cree su primera cotización para empezar a seguir el avance, la interacción y los recordatorios.
         new_quote: Nueva cotización
         deal_overview: Resumen del negocio
-        deal_overview_caption: Impulso, combinación de productos y calidad del ciclo en la cartera activa.
+        deal_overview_caption: Avance, combinación de productos y calidad del ciclo en los negocios activos.
         top_product: Producto principal
         last_30_days_quotes: últimos 30 días • %{count} cotizaciones
         average_quote_cycle: Ciclo promedio de cotización
@@ -227,11 +264,11 @@ es-419:
         follow_up_normal: seguimiento normal
         open: "%{count} abiertas"
         won: "%{count} ganadas"
-        showing_top_accounts: Mostrando las %{count} principales cuentas por impulso de cotización activa.
+        showing_top_accounts: Mostrando las %{count} cuentas con mayor actividad de cotizaciones.
         customer_portfolio_empty: Los datos de la cartera de clientes aparecerán una vez que las cotizaciones estén activas.
     logic:
       action_items:
-        quote_viewed: El comprador vio %{reference}. Haga seguimiento mientras el impulso es favorable.
+        quote_viewed: El comprador vio %{reference}. Dé seguimiento mientras el interés sigue alto.
         quote_not_viewed: "%{reference} no ha sido visto durante 3 días después de ser enviado."
         quote_expiring: "%{reference} está cerca de vencer."
         revision_requested: El comprador solicitó cambios en %{reference}.
@@ -239,18 +276,18 @@ es-419:
       export_mix_zero: Cotización 0% / PI 0%
       export_mix: Cotización %{quotation}% / PI %{pi}%
       follow_up_interval: "Intervalo de seguimiento: %{state}"
-      unknown_customer: Cliente desconocido
+      unknown_customer: Cliente sin identificar
       default_currency: USD
-      operational_risk: Riesgo Operacional
+      operational_risk: Presión de seguimiento
       accounts: "%{count} cuenta(s)"
       follow_up_pressure_attention: La presión de seguimiento necesita atención.
-      no_urgent_account_risk: Sin riesgo urgente de cuenta.
-      momentum: Impulso
+      no_urgent_account_risk: Sin presión urgente de seguimiento.
+      momentum: Avance
       active_quotes_touched: Cotizaciones activas tocadas en los últimos 7 días.
       no_active_quotes_yet: Aún no hay cotizaciones activas.
       observed_engagement: Compromiso Observado
-      quotes_with_view_evidence: Cotizaciones con evidencia de vista real del comprador.
-      no_viewable_quote_evidence: Aún no hay evidencia de cotización visible.
+      quotes_with_view_evidence: Cotizaciones con vistas registradas del comprador.
+      no_viewable_quote_evidence: Aún no hay vistas registradas del comprador.
       period_month: mes
       period_week: semana
       trend_vs_last_period: "%{value}% vs última %{period}"
@@ -265,7 +302,7 @@ es-419:
       next_action:
         send_reminder: Enviar recordatorio
         create_revision: Crear revisión
-        push_to_close: Impulsar al cierre
+        push_to_close: Avanzar el negocio
         follow_up_now: Hacer seguimiento ahora
         review: Revisar
       signal:
@@ -373,6 +410,11 @@ es-419:
         unit: Unidad %{value}
         total_updated: Total actualizado
       show:
+        created_banner:
+          title: "Cotizacion creada con exito."
+          subtitle: "Siguiente paso: compartela con tu comprador."
+          action: "Copiar enlace"
+          link_copied: "Enlace copiado, listo para pegar."
         back_to_customer: Volver al cliente
         superseded_notice: Hay una revisión más reciente disponible para este hilo de cotización.
         view_latest_version: Ver la última V%{revision}
@@ -392,7 +434,7 @@ es-419:
         urgency_expired: Venció hace %{count} día(s)
         urgency_expiring: Vence en %{count} día(s)
         urgency_valid: Válido por %{count} día(s) más
-        momentum: Impulso
+        momentum: Avance
         engagement: Compromiso
         engagement_hot_signal: Interés alto • %{count} vista(s)%{duration_suffix}
         engagement_warm_signal: Interés activo • %{count} vista(s)%{duration_suffix}
@@ -418,6 +460,7 @@ es-419:
           whatsapp_ready: WhatsApp listo
           copy_link: Copiar enlace publico
           send_whatsapp: Enviar por WhatsApp
+          no_phone_tooltip: "Sin número de teléfono — WhatsApp no disponible"
           copy_message: Copiar mensaje para compartir
           whatsapp_opened: WhatsApp abierto.
           message_copied: Mensaje para compartir copiado.
@@ -862,7 +905,7 @@ es-419:
         clear: Borrar
         all_customers: Todos los Clientes
         high_value: Alto Valor
-        at_risk: En Riesgo
+        at_risk: Requiere seguimiento
         clear_follow_up_filter: Borrar Filtro de Seguimiento
         today: Hoy
         soon_7_days: Pronto (7 días)
@@ -877,7 +920,7 @@ es-419:
         empty_filtered_title: No hay clientes en esta vista
         empty_filtered_body: Pruebe un filtro o término de búsqueda diferente para encontrar las cuentas que necesita.
         empty_title: Aún no hay clientes
-        empty_body: Cree su primer cliente para empezar a rastrear seguimientos, cotizaciones y el impulso de la cuenta.
+        empty_body: Cree su primer cliente para empezar a rastrear seguimientos, cotizaciones y el avance de la cuenta.
         create_customer: Crear Cliente
         table:
           name: Nombre
@@ -944,6 +987,7 @@ es-419:
         tags: Etiquetas
         selected_priority: Prioridad seleccionada
         selected_priority_hint: De arriba a abajo = mayor prioridad para este cliente.
+        drag_priority_hint: Arrastra para ajustar la prioridad; las etiquetas seleccionadas se mostrarán encima del cliente.
         up: Arriba
         down: Abajo
         remove: Eliminar
@@ -1000,6 +1044,11 @@ es-419:
         next_tasks: Próximas Tareas
         next_tasks_hint: Seguimientos operativos y trabajo pendiente.
         use_follow_up_controls: Use los controles de Acción de Seguimiento anteriores
+        task_priority:
+          urgent: "URGENTE"
+          today: "HOY"
+          upcoming: "PRÓXIMO"
+          normal: "NORMAL"
         show_all_tasks: Mostrar todas las tareas (%{count})
         no_immediate_tasks: No hay tareas inmediatas.
         customer_timeline: Cronología del cliente
@@ -1188,9 +1237,12 @@ es-419:
           detail: Revisar los detalles de la cotización cuando sea necesario.
           label: Revisar
       engagement_state:
-        at_risk: En Riesgo
+        unassessed: No evaluado
         active: Activo
-        cooling: En enfriamiento
+        cooling: Requiere seguimiento
+        at_risk: Seguimiento prioritario
+        dormant: Inactivo
+        archived: Archivado
       operating_signals:
         risk:
           label: Riesgo Operacional
@@ -1203,7 +1255,7 @@ es-419:
           controlled: Controlado
           controlled_detail: El tiempo de seguimiento está actualmente bajo control.
         momentum:
-          label: Impulso
+          label: Avance
           no_quotes: Sin cotizaciones
           no_quotes_detail: Aún no hay actividad de cotizaciones para evaluar.
           moving: En movimiento
@@ -1213,7 +1265,7 @@ es-419:
           stalled: Estancado
           stalled_detail: No hay cotizaciones significativas ni movimiento del comprador en más de 21 días.
         engagement:
-          label: Compromiso Observado
+          label: Interacción registrada
           observed: Observado
           observed_detail: "%{count} vista(s) del comprador registrada(s) en cotizaciones compartidas."
           indirect: Indirecto
@@ -1326,6 +1378,18 @@ es-419:
       suggested_message: "Borrador sugerido"
       placeholder: "Escriba el mensaje de seguimiento que piensa enviar"
       hint: "Guardar aquí registrará este borrador en el seguimiento; el botón superior solo actualiza el estado."
+      email_blocked_hint: "Antes de enviar el correo, complete: %{missing}."
+      fix_profile: "Actualizar perfil"
+      fix_company: "Actualizar empresa"
+      no_whatsapp_number: "Este cliente no tiene número de teléfono registrado"
+      no_email: "Este cliente no tiene correo electrónico registrado"
+      disabled_no_phone: "Agrega un número de teléfono al perfil del cliente"
+      disabled_no_email: "Agrega un correo electrónico al perfil del cliente"
+      disabled_setup_incomplete: "Completa primero tu nombre de remitente y la configuración de empresa"
+      go_edit_customer: "Actualizar perfil del cliente"
+      missing_fields:
+        sender_name: "tu nombre"
+        company_name: "nombre de la empresa"
       latest_quote: "Última cotización"
       no_quote: "Aún no hay cotización"
       quote_signal: "Señal de la cotización"
@@ -1367,6 +1431,7 @@ es-419:
     flash:
       logged: "Seguimiento registrado. Próximo seguimiento programado para %{date}"
       email_sent: "Correo de seguimiento enviado. Próximo seguimiento programado para %{date}"
+      email_setup_incomplete: "Antes de enviar el correo, complete: %{missing}."
       email_verification_required: "Complete la verificación anti-bot antes de enviar el correo de seguimiento."
       email_verification_failed: "Falló la verificación anti-bot. Intente nuevamente."
       email_cooldown: "Ya se envió un correo de seguimiento hace poco. Espere %{minutes} minuto(s) antes de volver a enviar."
@@ -1935,6 +2000,7 @@ es-419:
         profile_hint: Estos ajustes se aplican a todo el espacio de trabajo de su empresa.
         section_company_basic: 1) Información básica de la empresa
         company_name: Nombre de la empresa
+        company_name_hint: Se mostrará en los correos de seguimiento enviados a tus clientes.
         legal_name: Nombre legal
         registration_number: Número de registro
         registration_details: Detalles de registro
@@ -2099,6 +2165,7 @@ es-419:
           upload_avatar: Subir avatar
           remove_current_avatar: Eliminar avatar actual
           display_name: Nombre visible
+          display_name_hint: Se mostrará como nombre del remitente en los correos de seguimiento a clientes.
           display_name_placeholder: Cómo tus compañeros de equipo y clientes ven tu nombre
           contact_number: Número de contacto
           job_title: Puesto de trabajo
@@ -2590,3 +2657,50 @@ es-419:
         cta:
           title: Mejore la Ejecución de Cotizaciones y el Impulso del Negocio
           body: Adopte un CRM de cotizaciones basado en flujo de trabajo para equipos de exportación y ejecute un control de revisiones más sólido, visibilidad del comprador y ejecución de seguimiento en un solo sistema.
+  shortcuts:
+    title: Atajos de teclado
+    close: Cerrar
+    discoverability: Presiona ? para ver los atajos
+    groups:
+      global: Global
+      customer_page: Página del cliente
+      quote_page: Página de la cotización
+      lists: Listas
+    items:
+      command_palette: Abrir paleta de comandos
+      new_customer: Crear cliente
+      new_product: Crear producto
+      new_quote: Iniciar cotización (elige cliente)
+      follow_up_customer: Abrir seguimiento del cliente actual
+      new_quote_for_current_customer: Crear cotización para el cliente actual
+      share_quote: Compartir la cotización actual
+      send_reminder: Enviar recordatorio de la cotización actual
+      move_list_selection: Moverse entre filas de la lista
+      open_selected_row: Abrir la fila seleccionada
+      search: Enfocar búsqueda
+      help: Mostrar esta ayuda
+    palette:
+      title: Paleta de comandos
+      placeholder: Buscar clientes, cotizaciones, productos...
+      no_results: No hay resultados coincidentes
+      groups:
+        actions: Acciones rápidas
+        customers: Clientes
+        products: Productos
+        quotes: Cotizaciones
+      actions:
+        create_customer: Crear cliente
+        create_product: Crear producto
+        create_quote: Crear cotización
+    quote_picker:
+      title: Crear cotización
+      subtitle: Las cotizaciones se crean bajo un cliente. Elige uno para continuar.
+      search_placeholder: Buscar cliente
+      empty: No se encontraron clientes
+    tooltips:
+      new_customer: "Crear cliente\nAtajo: Shift + C"
+      new_product: "Crear producto\nAtajo: Shift + P"
+      new_quote: "Crear cotización\nAtajo: Shift + Q"
+    clipboard:
+      copied: "¡Copiado!"
+      copy_failed: Error al copiar

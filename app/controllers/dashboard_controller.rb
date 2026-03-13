@@ -1,8 +1,14 @@
 class DashboardController < CustomersController
   def index
     Quote.expire_overdue_for_company!(current_user.company_id)
+    @onboarding = build_onboarding_progress
+    @onboarding_complete = @onboarding.values.all?
+    @show_onboarding = !current_user.dismissed_onboarding? && !@onboarding_complete
+    @quick_create_quote_path = resolve_quick_create_quote_path
+
     scope = current_user.company.customers.includes(:customer_tags, quotes: [ :quote_items, :template ])
     all_customers = scope.to_a
+    @engagement_states = all_customers.index_with(&:effective_engagement_state)
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
     @customer_metrics = build_customer_metrics(all_customers)
@@ -13,9 +19,9 @@ class DashboardController < CustomersController
       no_schedule: all_customers.count { |customer| customer.next_follow_up_date.blank? }
     }
 
-    @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period)
+    @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period, @engagement_states)
     @decision_snapshot = build_decision_snapshot(all_customers, @kpi_period)
-    @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics)
+    @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics, @engagement_states)
     @action_center = build_action_center(all_customers, @customer_metrics)
     @primary_action = @action_center.first
     @secondary_actions = @action_center.drop(1)
@@ -23,9 +29,9 @@ class DashboardController < CustomersController
     @system_action_items = filter_system_action_items(@generated_action_items)
     @action_required_summary = {
       total: @system_action_items.count,
-      risk_customers: @risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value],
+      risk_customers: @risk_snapshot[:needs_follow_up],
       decision_alerts: @decision_snapshot[:negotiating_stale_count],
-      has_risk: (@risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value]).positive? || @decision_snapshot[:negotiating_stale_count].positive?
+      has_risk: @risk_snapshot[:needs_follow_up].positive? || @decision_snapshot[:negotiating_stale_count].positive?
     }
     @deal_overview = build_deal_overview(all_customers)
     @dashboard_health_snapshot = build_dashboard_health_snapshot(all_customers)
@@ -60,5 +66,24 @@ class DashboardController < CustomersController
   def filter_system_action_items(items)
     strong_action_types = %w[win_reason_missing loss_reason_missing revision_requested]
     Array(items).select { |item| strong_action_types.include?(item.action_type.to_s) }
+  end
+
+  def build_onboarding_progress
+    company = current_user.company
+
+    {
+      customer: company.customers.exists?,
+      product: company.products.exists?,
+      quote: company.quotes.exists?,
+      shared: company.quote_shares.exists?,
+      viewed: QuoteViewEvent.joins(:quote_share).where(quote_shares: { company_id: company.id }).exists?
+    }
+  end
+
+  def resolve_quick_create_quote_path
+    customers = current_user.company.customers.select(:id).limit(2).to_a
+    return new_customer_quote_path(customers.first) if customers.one?
+
+    customers_path
   end
 end

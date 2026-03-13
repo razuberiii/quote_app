@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_11_195000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -145,10 +145,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_195000) do
     t.string "customer_level", default: "normal", null: false
     t.string "customer_source"
     t.string "email"
+    t.string "engagement_state", default: "unassessed", null: false
     t.decimal "estimated_annual_volume", precision: 15, scale: 2
     t.bigint "internal_owner_id"
     t.date "last_follow_up_date"
     t.string "main_product_interest"
+    t.boolean "manual_engagement_override", default: false, null: false
     t.string "name"
     t.date "next_follow_up_date"
     t.text "notes"
@@ -161,7 +163,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_195000) do
     t.string "timezone"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_customers_on_company_id"
+    t.index ["engagement_state"], name: "index_customers_on_engagement_state"
     t.index ["internal_owner_id"], name: "index_customers_on_internal_owner_id"
+    t.index ["manual_engagement_override"], name: "index_customers_on_manual_engagement_override"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -436,6 +440,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_11_195000) do
     t.integer "company_role", default: 2, null: false
     t.string "contact_phone"
     t.datetime "created_at", null: false
+    t.boolean "dismissed_onboarding", default: false, null: false
     t.string "email", default: "", null: false
     t.datetime "email_change_sent_at"
     t.string "email_change_token"

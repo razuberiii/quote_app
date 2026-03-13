@@ -32,6 +32,7 @@
 
     <div>
       <%= f.label :full_name, t("users.registrations.view.edit.display_name") %>
+      <p class="team-members-hint"><%= t("users.registrations.view.edit.display_name_hint") %></p>
       <%= f.text_field :full_name, placeholder: t("users.registrations.view.edit.display_name_placeholder") %>
     </div>
 
@@ -48,9 +49,9 @@
     <div>
       <%= f.label :time_zone, t("users.registrations.view.edit.time_zone") %>
       <%= f.select :time_zone,
-                   time_zone_options_for_select(resource.time_zone.presence || "UTC"),
-                   {},
-                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone" } } %>
+                   time_zone_options_for_select,
+                   { selected: resource.time_zone.presence || "UTC" },
+                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone", browser_timezone_fallback: resource.time_zone.blank? } } %>
     </div>
 
     <div>

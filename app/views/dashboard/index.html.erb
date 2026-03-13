@@ -13,6 +13,11 @@
   </header>
 
   <div class="sales-dashboard-content app-section-stack">
+    <% if @show_onboarding %>
+      <%= render "quick_start_checklist" %>
+      <%= render "quick_create" %>
+    <% end %>
+
     <section class="app-toolbar-surface app-toolbar-surface--compact">
       <div class="app-section-heading">
         <div>
@@ -21,14 +26,14 @@
         </div>
       </div>
       <div class="dashboard-alert-strip">
-      <% if @risk_snapshot[:overdue].positive? %>
-        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:overdue] %></strong> <%= t("dashboard.view.index.overdue_followups") %></span>
+      <% if @risk_snapshot[:at_risk].positive? %>
+        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:at_risk] %></strong> <%= t("customers.logic.engagement_state.at_risk") %></span>
       <% end %>
-      <% if @risk_snapshot[:due_today].positive? %>
-        <span class="dashboard-alert-pill is-today"><strong><%= @risk_snapshot[:due_today] %></strong> <%= t("dashboard.view.index.due_today") %></span>
+      <% if @follow_up_counts[:today].positive? %>
+        <span class="dashboard-alert-pill is-today"><strong><%= @follow_up_counts[:today] %></strong> <%= t("dashboard.view.index.due_today") %></span>
       <% end %>
-      <% if @risk_snapshot[:stalled_high_value].positive? %>
-        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:stalled_high_value] %></strong> <%= t("dashboard.view.index.high_value_stalled") %></span>
+      <% if @risk_snapshot[:cooling].positive? %>
+        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:cooling] %></strong> <%= t("customers.logic.engagement_state.cooling") %></span>
       <% end %>
       <% if @decision_snapshot[:accepted_count].positive? %>
         <span class="dashboard-alert-pill is-good"><strong><%= @decision_snapshot[:accepted_count] %></strong> <%= t("dashboard.view.index.accepted") %></span>
@@ -39,7 +44,7 @@
       <% if @decision_snapshot[:negotiating_stale_count].positive? %>
         <span class="dashboard-alert-pill is-danger"><strong><%= @decision_snapshot[:negotiating_stale_count] %></strong> <%= t("dashboard.view.index.negotiating_stale") %></span>
       <% end %>
-      <% if @risk_snapshot.values.all?(&:zero?) && @decision_snapshot[:negotiating_stale_count].zero? %>
+      <% if @risk_snapshot[:at_risk].zero? && @follow_up_counts[:today].zero? && @risk_snapshot[:cooling].zero? && @decision_snapshot[:negotiating_stale_count].zero? %>
         <span class="dashboard-alert-pill is-good"><%= t("dashboard.view.index.no_immediate_risk") %></span>
       <% end %>
       </div>

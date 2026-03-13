@@ -722,16 +722,16 @@ main > section.app-page-shell:first-child {
     margin-top: 0.35rem;
     width: 100%;
     box-shadow: none;
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
+    border-color: #dbe3ee;
+    background: #fff;
   }
 
   .account-dropdown a {
-    color: #fff;
+    color: #334155;
   }
 
   .account-dropdown a:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: #f1f5f9;
   }
 
   .navbar-brand-wrap {

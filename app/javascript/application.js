@@ -1,9 +1,10 @@
 // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
-import "@hotwired/turbo-rails"
-import "controllers"
+import "@hotwired/turbo-rails";
+import "controllers";
 
 const CLICKABLE_CONTAINER_SELECTOR = "[data-clickable-href]";
-const INTERACTIVE_SELECTOR = "a, button, input, select, textarea, label, summary, details, [role='button'], [data-no-row-nav]";
+const INTERACTIVE_SELECTOR =
+  "a, button, input, select, textarea, label, summary, details, [role='button'], [data-no-row-nav]";
 
 const isInteractiveClick = (event, container) => {
   const interactiveNode = event.target.closest(INTERACTIVE_SELECTOR);
@@ -20,7 +21,8 @@ const hasActiveTextSelectionIn = (container) => {
   if (!window.getSelection) return false;
 
   const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed)
+    return false;
   if (!selection.toString().trim()) return false;
 
   const { anchorNode, focusNode } = selection;
@@ -35,7 +37,8 @@ if (!window.__clickableContainerNavBound) {
   document.addEventListener("click", (event) => {
     const container = event.target.closest(CLICKABLE_CONTAINER_SELECTOR);
     if (!container || event.defaultPrevented) return;
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+      return;
     if (isInteractiveClick(event, container)) return;
     if (hasActiveTextSelectionIn(container)) return;
     navigateToContainerHref(container);
@@ -53,24 +56,28 @@ if (!window.__clickableContainerNavBound) {
 }
 
 const bindLiveImagePreview = () => {
-  document.querySelectorAll("input[type='file'][data-live-preview-target]").forEach((input) => {
-    if (input.dataset.boundPreview === "true") return;
-    input.dataset.boundPreview = "true";
+  document
+    .querySelectorAll("input[type='file'][data-live-preview-target]")
+    .forEach((input) => {
+      if (input.dataset.boundPreview === "true") return;
+      input.dataset.boundPreview = "true";
 
-    const target = document.querySelector(input.dataset.livePreviewTarget);
-    const fallback = input.dataset.livePreviewFallback ? document.querySelector(input.dataset.livePreviewFallback) : null;
-    if (!target) return;
+      const target = document.querySelector(input.dataset.livePreviewTarget);
+      const fallback = input.dataset.livePreviewFallback
+        ? document.querySelector(input.dataset.livePreviewFallback)
+        : null;
+      if (!target) return;
 
-    input.addEventListener("change", () => {
-      const file = input.files && input.files[0];
-      if (!file || !file.type.startsWith("image/")) return;
+      input.addEventListener("change", () => {
+        const file = input.files && input.files[0];
+        if (!file || !file.type.startsWith("image/")) return;
 
-      const objectUrl = URL.createObjectURL(file);
-      target.src = objectUrl;
-      target.hidden = false;
-      if (fallback) fallback.hidden = true;
+        const objectUrl = URL.createObjectURL(file);
+        target.src = objectUrl;
+        target.hidden = false;
+        if (fallback) fallback.hidden = true;
+      });
     });
-  });
 };
 
 bindLiveImagePreview();
@@ -120,7 +127,9 @@ const bindSearchableSelects = () => {
     if (!countryCode || countryCode.length !== 2) return "🌐";
     return countryCode
       .toUpperCase()
-      .replace(/./g, (char) => String.fromCodePoint(127397 + char.charCodeAt(0)));
+      .replace(/./g, (char) =>
+        String.fromCodePoint(127397 + char.charCodeAt(0)),
+      );
   };
 
   const flagForTimezone = (countryCode) => {
@@ -202,183 +211,217 @@ const bindSearchableSelects = () => {
     "+974": "Asia/Qatar",
     "+975": "Asia/Thimphu",
     "+977": "Asia/Kathmandu",
-    "+998": "Asia/Tashkent"
+    "+998": "Asia/Tashkent",
   };
 
-  document.querySelectorAll("select[data-searchable-select='true']").forEach((select) => {
-    if (select.dataset.searchableBound === "true") return;
-    select.dataset.searchableBound = "true";
+  document
+    .querySelectorAll("select[data-searchable-select='true']")
+    .forEach((select) => {
+      if (select.dataset.searchableBound === "true") return;
+      select.dataset.searchableBound = "true";
 
-    const options = Array.from(select.options)
-      .filter((option) => option.value !== "")
-      .map((option) => ({
-        text: option.textContent,
-        value: option.value,
-        country: option.dataset.country || "",
-        countryName: option.dataset.countryName || "",
-        city: option.dataset.city || "",
-        gmt: option.dataset.gmt || ""
-      }));
+      const options = Array.from(select.options)
+        .filter((option) => option.value !== "")
+        .map((option) => ({
+          text: option.textContent,
+          value: option.value,
+          tzIdentifier: option.dataset.tzIdentifier || "",
+          country: option.dataset.country || "",
+          countryName: option.dataset.countryName || "",
+          city: option.dataset.city || "",
+          gmt: option.dataset.gmt || "",
+        }));
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "relative";
+      const wrapper = document.createElement("div");
+      wrapper.className = "relative";
 
-    const input = document.createElement("input");
-    input.type = "text";
-    input.autocomplete = "off";
-    input.placeholder = select.dataset.searchPlaceholder || "Search";
-    input.className = "w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
+      const input = document.createElement("input");
+      input.type = "text";
+      input.autocomplete = "off";
+      input.placeholder = select.dataset.searchPlaceholder || "Search";
+      input.className =
+        "w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
 
-    const list = document.createElement("div");
-    list.className = "absolute z-20 hidden max-h-72 w-full overflow-y-auto rounded-b-md border border-t-0 border-slate-200 bg-white shadow-lg";
+      const list = document.createElement("div");
+      list.className =
+        "absolute z-20 hidden max-h-72 w-full overflow-y-auto rounded-b-md border border-t-0 border-slate-200 bg-white shadow-lg";
 
-    const findOptionByValue = (value) => options.find((option) => option.value === value);
-    const selectedOption = findOptionByValue(select.value);
-    if (selectedOption) input.value = selectedOption.text;
+      const findOptionByValue = (value) =>
+        options.find((option) => option.value === value);
+      const selectedOption = findOptionByValue(select.value);
+      if (selectedOption) input.value = selectedOption.text;
 
-    const closeList = () => {
-      list.classList.add("hidden");
-    };
+      const applyBrowserTimezoneSuggestion = () => {
+        if (select.dataset.searchableKind !== searchableKindTimezone) return;
+        if (select.dataset.browserTimezoneFallback !== "true") return;
+        if (input.dataset.manualChanged === "true") return;
+        if (select.value && select.value !== "UTC") return;
 
-    const renderList = (keyword = "") => {
-      const term = String(keyword).trim().toLowerCase();
-      const filtered = options
-        .filter((option) => {
-          if (!term) return true;
+        const browserTimezone =
+          Intl.DateTimeFormat?.().resolvedOptions?.().timeZone;
+        if (!browserTimezone) return;
 
-          const haystack = [
-            option.text,
-            option.value,
-            option.city,
-            option.country,
-            option.countryName,
-            option.gmt
-          ]
-            .join(" ")
-            .toLowerCase();
+        const browserOption =
+          findOptionByValue(browserTimezone) ||
+          options.find((option) => option.tzIdentifier === browserTimezone);
+        if (!browserOption) return;
 
-          return haystack.includes(term);
-        })
-        .slice(0, 80);
+        select.value = browserOption.value;
+        input.value = browserOption.text;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      };
 
-      list.innerHTML = "";
-      filtered.forEach((option) => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "block w-full border-b border-slate-100 px-3 py-2.5 text-left text-sm transition-colors hover:bg-gray-100";
+      const closeList = () => {
+        list.classList.add("hidden");
+      };
 
-        if (select.dataset.searchableKind === searchableKindTimezone) {
-          const city = option.city || option.text.replace(/\s+\(GMT[+-]\d{2}:\d{2}\)$/, "").trim();
-          const offset = option.gmt || (option.text.match(/\((GMT[+-]\d{2}:\d{2})\)$/)?.[1] || "");
-          const flag = flagForTimezone(option.country);
+      const renderList = (keyword = "") => {
+        const term = String(keyword).trim().toLowerCase();
+        const filtered = options
+          .filter((option) => {
+            if (!term) return true;
 
-          const row = document.createElement("span");
-          row.className = "flex items-center justify-between gap-3";
+            const haystack = [
+              option.text,
+              option.value,
+              option.city,
+              option.country,
+              option.countryName,
+              option.gmt,
+            ]
+              .join(" ")
+              .toLowerCase();
 
-          const left = document.createElement("span");
-          left.className = "flex items-center gap-2 text-slate-800";
+            return haystack.includes(term);
+          })
+          .slice(0, 80);
 
-          const flagNode = document.createElement("span");
-          flagNode.className = "text-base leading-none";
-          flagNode.textContent = flag;
+        list.innerHTML = "";
+        filtered.forEach((option) => {
+          const item = document.createElement("button");
+          item.type = "button";
+          item.className =
+            "block w-full border-b border-slate-100 px-3 py-2.5 text-left text-sm transition-colors hover:bg-gray-100";
 
-          const cityNode = document.createElement("span");
-          cityNode.className = "truncate";
-          cityNode.textContent = city;
+          if (select.dataset.searchableKind === searchableKindTimezone) {
+            const city =
+              option.city ||
+              option.text.replace(/\s+\(GMT[+-]\d{2}:\d{2}\)$/, "").trim();
+            const offset =
+              option.gmt ||
+              option.text.match(/\((GMT[+-]\d{2}:\d{2})\)$/)?.[1] ||
+              "";
+            const flag = flagForTimezone(option.country);
 
-          const offsetNode = document.createElement("span");
-          offsetNode.className = "text-xs font-medium text-slate-500";
-          offsetNode.textContent = offset;
+            const row = document.createElement("span");
+            row.className = "flex items-center justify-between gap-3";
 
-          left.appendChild(flagNode);
-          left.appendChild(cityNode);
-          row.appendChild(left);
-          row.appendChild(offsetNode);
-          item.appendChild(row);
-        } else {
-          item.textContent = option.text;
+            const left = document.createElement("span");
+            left.className = "flex items-center gap-2 text-slate-800";
+
+            const flagNode = document.createElement("span");
+            flagNode.className = "text-base leading-none";
+            flagNode.textContent = flag;
+
+            const cityNode = document.createElement("span");
+            cityNode.className = "truncate";
+            cityNode.textContent = city;
+
+            const offsetNode = document.createElement("span");
+            offsetNode.className = "text-xs font-medium text-slate-500";
+            offsetNode.textContent = offset;
+
+            left.appendChild(flagNode);
+            left.appendChild(cityNode);
+            row.appendChild(left);
+            row.appendChild(offsetNode);
+            item.appendChild(row);
+          } else {
+            item.textContent = option.text;
+          }
+
+          item.addEventListener("click", () => {
+            select.value = option.value;
+            input.value = option.text;
+            input.dataset.manualChanged = "true";
+            closeList();
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+          list.appendChild(item);
+        });
+
+        if (!filtered.length) {
+          const empty = document.createElement("div");
+          empty.className = "px-3 py-2 text-sm text-slate-500";
+          empty.textContent = "No matching timezone";
+          list.appendChild(empty);
         }
 
-        item.addEventListener("click", () => {
-          select.value = option.value;
-          input.value = option.text;
-          input.dataset.manualChanged = "true";
+        if (list.firstChild && list.firstChild.classList) {
+          list.firstChild.classList.remove("border-t");
+        }
+
+        list.classList.remove("hidden");
+      };
+
+      input.addEventListener("focus", () => renderList(input.value));
+      input.addEventListener("input", () => renderList(input.value));
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeList();
+      });
+      input.addEventListener("blur", () => {
+        window.setTimeout(() => {
+          const exact = options.find((option) => option.text === input.value);
+          if (exact) {
+            select.value = exact.value;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          } else {
+            const current = findOptionByValue(select.value);
+            input.value = current ? current.text : "";
+          }
           closeList();
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-        });
-        list.appendChild(item);
+        }, 120);
       });
 
-      if (!filtered.length) {
-        const empty = document.createElement("div");
-        empty.className = "px-3 py-2 text-sm text-slate-500";
-        empty.textContent = "No matching timezone";
-        list.appendChild(empty);
-      }
+      document.addEventListener("click", (event) => {
+        if (!wrapper.contains(event.target)) closeList();
+      });
 
-      if (list.firstChild && list.firstChild.classList) {
-        list.firstChild.classList.remove("border-t");
-      }
+      select.classList.add("hidden");
+      select.parentNode.insertBefore(wrapper, select);
+      wrapper.appendChild(input);
+      wrapper.appendChild(list);
 
-      list.classList.remove("hidden");
-    };
+      const phoneSelector = select.dataset.phoneField;
+      if (phoneSelector) {
+        const phoneInput = document.querySelector(phoneSelector);
+        if (phoneInput) {
+          const applyPhoneSuggestion = () => {
+            if (input.dataset.manualChanged === "true") return;
 
-    input.addEventListener("focus", () => renderList(input.value));
-    input.addEventListener("input", () => renderList(input.value));
-    input.addEventListener("keydown", (event) => {
-      if (event.key === "Escape") closeList();
-    });
-    input.addEventListener("blur", () => {
-      window.setTimeout(() => {
-        const exact = options.find((option) => option.text === input.value);
-        if (exact) {
-          select.value = exact.value;
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-        } else {
-          const current = findOptionByValue(select.value);
-          input.value = current ? current.text : "";
+            const raw = String(phoneInput.value || "").trim();
+            const prefix = Object.keys(phonePrefixToTimezone)
+              .sort((a, b) => b.length - a.length)
+              .find((key) => raw.startsWith(key));
+            if (!prefix) return;
+            if (select.value && select.value !== "UTC") return;
+
+            const suggestedValue = phonePrefixToTimezone[prefix];
+            const suggestedOption = findOptionByValue(suggestedValue);
+            if (!suggestedOption) return;
+
+            select.value = suggestedValue;
+            input.value = suggestedOption.text;
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          };
+
+          phoneInput.addEventListener("blur", applyPhoneSuggestion);
+          phoneInput.addEventListener("change", applyPhoneSuggestion);
         }
-        closeList();
-      }, 120);
-    });
-
-    document.addEventListener("click", (event) => {
-      if (!wrapper.contains(event.target)) closeList();
-    });
-
-    select.classList.add("hidden");
-    select.parentNode.insertBefore(wrapper, select);
-    wrapper.appendChild(input);
-    wrapper.appendChild(list);
-
-    const phoneSelector = select.dataset.phoneField;
-    if (phoneSelector) {
-      const phoneInput = document.querySelector(phoneSelector);
-      if (phoneInput) {
-        const applyPhoneSuggestion = () => {
-          if (input.dataset.manualChanged === "true") return;
-
-          const raw = String(phoneInput.value || "").trim();
-          const prefix = Object.keys(phonePrefixToTimezone)
-            .sort((a, b) => b.length - a.length)
-            .find((key) => raw.startsWith(key));
-          if (!prefix) return;
-          if (select.value && select.value !== "UTC") return;
-
-          const suggestedValue = phonePrefixToTimezone[prefix];
-          const suggestedOption = findOptionByValue(suggestedValue);
-          if (!suggestedOption) return;
-
-          select.value = suggestedValue;
-          input.value = suggestedOption.text;
-          select.dispatchEvent(new Event("change", { bubbles: true }));
-        };
-
-        phoneInput.addEventListener("blur", applyPhoneSuggestion);
-        phoneInput.addEventListener("change", applyPhoneSuggestion);
       }
-    }
-  });
+
+      applyBrowserTimezoneSuggestion();
+    });
 };
 
 bindSearchableSelects();
@@ -386,7 +429,8 @@ document.addEventListener("turbo:load", bindSearchableSelects);
 
 const getProductLightboxElements = () => {
   const lightbox = document.querySelector("[data-product-lightbox]");
-  const previewImage = lightbox && lightbox.querySelector("[data-product-lightbox-image]");
+  const previewImage =
+    lightbox && lightbox.querySelector("[data-product-lightbox-image]");
   if (!lightbox || !previewImage) return null;
   return { lightbox, previewImage };
 };
@@ -420,7 +464,10 @@ if (!window.__productLightboxListenersBound) {
   document.addEventListener("click", (event) => {
     const trigger = event.target.closest("[data-product-lightbox-trigger]");
     if (trigger) {
-      openProductLightbox(trigger.dataset.fullSrc, trigger.dataset.alt || "Product image");
+      openProductLightbox(
+        trigger.dataset.fullSrc,
+        trigger.dataset.alt || "Product image",
+      );
       return;
     }
 

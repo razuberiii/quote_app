@@ -33,7 +33,7 @@ class QuotesController < ApplicationController
     @quote.template ||= current_user.company.quote_template_or_default
 
     if @quote.save
-      redirect_to @quote, status: :see_other
+      redirect_to quote_path(@quote, created: "1"), status: :see_other
     else
       ensure_quote_item_row
       render :new, status: :unprocessable_entity
@@ -42,6 +42,7 @@ class QuotesController < ApplicationController
 
   def show
     request.format = :html if request.format.turbo_stream? && params[:format] != "turbo_stream"
+    @just_created = params[:created] == "1"
 
     @document_kind = resolved_document_kind
     set_superseded_context
@@ -276,6 +277,7 @@ class QuotesController < ApplicationController
       url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
     ).call
     share_url = publish_result.url
+    mark_quote_as_sent_if_needed!
 
     respond_to do |format|
       format.json { render json: { url: share_url, token: publish_result.share.token } }

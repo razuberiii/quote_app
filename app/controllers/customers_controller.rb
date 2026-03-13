@@ -1,16 +1,17 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp]
+  before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp reorder_tags]
   before_action :set_customer_form_collections, only: %i[new create edit update]
 
   def index
     Quote.expire_overdue_for_company!(current_user.company_id)
     scope = current_user.company.customers.search(params[:query]).includes(:customer_tags, quotes: [ :quote_items, :template ])
     all_customers = scope.to_a
+    @engagement_states = all_customers.index_with(&:effective_engagement_state)
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
     @customer_metrics = build_customer_metrics(all_customers)
     @list_filter = params[:list_filter].presence_in(%w[all high_value at_risk]) || "all"
-    filtered_customers = apply_list_filter(all_customers, @customer_metrics, @list_filter)
+    filtered_customers = apply_list_filter(all_customers, @customer_metrics, @list_filter, @engagement_states)
     @follow_up_filter = params[:follow_up_filter].presence_in(%w[all today upcoming overdue no_schedule]) || "all"
     filtered_customers = apply_follow_up_filter(filtered_customers, @follow_up_filter)
 
@@ -27,22 +28,37 @@ class CustomersController < ApplicationController
       no_schedule: all_customers.count { |customer| customer.next_follow_up_date.blank? }
     }
 
-    @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period)
+    @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period, @engagement_states)
     @decision_snapshot = build_decision_snapshot(all_customers, @kpi_period)
-    @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics)
+    @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics, @engagement_states)
     @action_center = build_action_center(all_customers, @customer_metrics)
     @primary_action = @action_center.first
     @secondary_actions = @action_center.drop(1)
     @action_required_summary = {
       total: @action_center.count { |item| %w[urgent watch].include?(item[:priority]) },
-      risk_customers: @risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value],
+      risk_customers: @risk_snapshot[:needs_follow_up],
       decision_alerts: @decision_snapshot[:negotiating_stale_count],
-      has_risk: (@risk_snapshot[:overdue] + @risk_snapshot[:stalled_high_value]).positive? || @decision_snapshot[:negotiating_stale_count].positive?
+      has_risk: @risk_snapshot[:needs_follow_up].positive? || @decision_snapshot[:negotiating_stale_count].positive?
     }
     @deal_overview = build_deal_overview(all_customers)
     @dashboard_health_snapshot = build_dashboard_health_snapshot(all_customers)
     @recent_quotes = build_recent_quotes(all_customers)
     @customer_row_signals = build_customer_row_signals(@customers, @customer_metrics)
+  end
+
+  def shortcut_candidates
+    query = params[:query].to_s.strip
+    customers = current_user.company.customers.search(query).order(updated_at: :desc).limit(8)
+
+    render json: {
+      customers: customers.map do |customer|
+        {
+          id: customer.id,
+          name: customer.name,
+          quote_path: new_customer_quote_path(customer)
+        }
+      end
+    }
   end
 
   def show
@@ -144,6 +160,14 @@ class CustomersController < ApplicationController
     @days_until_follow_up = @customer.next_follow_up_date.present? ? (@customer.next_follow_up_date - Date.current).to_i : nil
     @follow_up_text = follow_up_text_for(@customer)
     @follow_up_primary_action = follow_up_primary_action_for(@customer)
+    @follow_up_email_setup_missing = follow_up_email_setup_missing(@customer, current_user)
+    @follow_up_email_ready = @follow_up_email_setup_missing.empty?
+    @follow_up_email_block_reason =
+      if @follow_up_email_ready
+        nil
+      else
+        t("follow_up.assistant.email_blocked_hint", missing: follow_up_email_missing_labels(@follow_up_email_setup_missing).join(follow_up_email_missing_joiner))
+      end
     @customer_operating_signals = build_customer_operating_signals(@customer, @quote_cards, @latest_customer_signal_at)
   end
 
@@ -231,6 +255,11 @@ class CustomersController < ApplicationController
   end
 
   def send_follow_up_email
+    missing_setup = follow_up_email_setup_missing(@customer, current_user)
+    if missing_setup.any?
+      redirect_to @customer, alert: t("follow_up.flash.email_setup_incomplete", missing: follow_up_email_missing_labels(missing_setup).join(follow_up_email_missing_joiner)) and return
+    end
+
     cooldown_seconds = @customer.seconds_until_follow_up_email_allowed
     if cooldown_seconds.positive?
       minutes_left = (cooldown_seconds / 60.0).ceil
@@ -265,6 +294,26 @@ class CustomersController < ApplicationController
   rescue StandardError => e
     Rails.logger.error("Follow-up email failed: #{e.class} #{e.message}")
     redirect_to @customer, alert: t("follow_up.flash.email_failed")
+  end
+
+  def reorder_tags
+    ids = Array(params[:ids]).map(&:to_i).uniq
+    if ids.empty?
+      render json: { ok: false, error: "ids_required" }, status: :unprocessable_entity and return
+    end
+
+    customer_taggings = @customer.customer_taggings.where(id: ids).index_by(&:id)
+    if customer_taggings.size != ids.size
+      render json: { ok: false, error: "invalid_ids" }, status: :unprocessable_entity and return
+    end
+
+    CustomerTagging.transaction do
+      ids.each_with_index do |id, index|
+        customer_taggings[id].update_columns(position: index + 1, updated_at: Time.current)
+      end
+    end
+
+    render json: { ok: true }
   end
 
   def send_follow_up_whatsapp
@@ -324,6 +373,30 @@ class CustomersController < ApplicationController
 
     quotes = @customer.quotes.includes(:quote_items, :quote_shares).order(:quote_no, :revision_number).to_a
     @latest_follow_up_quote = active_quotes_collection(quotes).max_by { |quote| quote.updated_at || Time.at(0) }
+  end
+
+  def follow_up_email_setup_missing(customer, sender)
+    missing = []
+    missing << :sender_name if sender&.full_name.to_s.strip.blank?
+    missing << :company_name if follow_up_company_name_unset?(customer&.company&.name.to_s)
+    missing
+  end
+
+  def follow_up_email_missing_labels(missing)
+    Array(missing).map { |item| t("follow_up.assistant.missing_fields.#{item}") }
+  end
+
+  def follow_up_email_missing_joiner
+    I18n.locale.to_s.start_with?("zh") ? "、" : ", "
+  end
+
+  def follow_up_company_name_unset?(name)
+    normalized = name.to_s.strip
+    return true if normalized.blank?
+    return true if normalized.casecmp?("My Company")
+    return true if normalized.match?(/\A.+@.+\s*'s\s+Company\z/i)
+
+    false
   end
 
   def follow_up_message(quote = nil)
@@ -406,6 +479,8 @@ class CustomersController < ApplicationController
       :timezone,
       :next_follow_up_date,
       :last_follow_up_date,
+      :engagement_state,
+      :manual_engagement_override,
       :notes,
       :avatar,
       :tax_id,
@@ -556,7 +631,7 @@ class CustomersController < ApplicationController
     end
   end
 
-  def apply_list_filter(customers, metrics, filter)
+  def apply_list_filter(customers, metrics, filter, engagement_states = nil)
     case filter
     when "high_value"
       return [] if customers.empty?
@@ -565,7 +640,7 @@ class CustomersController < ApplicationController
       ranked = customers.sort_by { |customer| metrics.fetch(customer)[:total_quote_amount].to_d }.reverse
       ranked.first(top_n)
     when "at_risk"
-      customers.select(&:follow_up_overdue?)
+      customers.select { |customer| %w[cooling at_risk].include?(resolved_engagement_state(customer, engagement_states)) }
     else
       customers
     end
@@ -622,7 +697,7 @@ class CustomersController < ApplicationController
     customers.flat_map { |customer| active_quotes_collection(customer.quotes) }
   end
 
-  def build_dashboard_stats(customers, follow_up_counts, period)
+  def build_dashboard_stats(customers, follow_up_counts, period, engagement_states = nil)
     all_quotes = active_quotes_from_customers(customers)
     today = Date.current
     reference_date = period == "month" ? today.prev_month : today - 7.days
@@ -641,8 +716,12 @@ class CustomersController < ApplicationController
       created_on.present? && created_on >= last_period_start && created_on < this_period_start
     end
 
-    pending_follow_ups_now = follow_up_counts[:today] + follow_up_counts[:upcoming] + follow_up_counts[:overdue]
-    pending_follow_ups_previous = customers.count { |customer| pending_follow_up_for_reference?(customer, reference_date, period) }
+    pending_follow_ups_now = customers.count do |customer|
+      %w[cooling at_risk].include?(resolved_engagement_state(customer, engagement_states))
+    end
+    pending_follow_ups_previous = customers.count do |customer|
+      %w[cooling at_risk].include?(engagement_state_for_reference(customer, reference_date))
+    end
 
     {
       open_deals: build_kpi_value(open_deals_now, open_deals_previous, period, kind: :open_deals),
@@ -819,6 +898,47 @@ class CustomersController < ApplicationController
     next_date <= reference_date + window
   end
 
+  def engagement_state_for_reference(customer, reference_date)
+    return customer.engagement_state if customer.respond_to?(:manual_engagement_override?) && customer.manual_engagement_override?
+    return "archived" if customer.engagement_state.to_s == "archived"
+
+    reference_time = reference_date.in_time_zone.end_of_day
+    quote_relation = customer.quotes.not_archived.where("quotes.created_at <= ?", reference_time)
+    follow_up_relation = customer.customer_follow_up_events.where("contacted_at <= ?", reference_time)
+    share_relation = QuoteShare.joins(:quote).where(quotes: { customer_id: customer.id }).where("quote_shares.created_at <= ?", reference_time)
+
+    latest_quote_created_at = quote_relation.maximum(:created_at)
+    latest_follow_up_at = follow_up_relation.maximum(:contacted_at)
+    latest_quote_viewed_at = quote_relation.maximum(:viewed_at)
+    latest_share_last_viewed_at = share_relation.where("last_viewed_at IS NOT NULL AND last_viewed_at <= ?", reference_time).maximum(:last_viewed_at)
+    latest_share_first_viewed_at = share_relation.where("first_viewed_at IS NOT NULL AND first_viewed_at <= ?", reference_time).maximum(:first_viewed_at)
+
+    activity_at = [
+      latest_quote_created_at,
+      latest_follow_up_at,
+      latest_quote_viewed_at,
+      latest_share_last_viewed_at,
+      latest_share_first_viewed_at
+    ].compact.max
+
+    has_quotes = quote_relation.exists?
+    has_follow_ups = follow_up_relation.exists?
+    has_views = latest_quote_viewed_at.present? || latest_share_last_viewed_at.present? || latest_share_first_viewed_at.present?
+    return "unassessed" if !has_quotes && !has_follow_ups && !has_views
+
+    return "active" if activity_at.present? && activity_at >= 14.days.ago(reference_time)
+    return "dormant" if activity_at.present? && activity_at < 90.days.ago(reference_time)
+
+    has_open_quotes = quote_relation.where(status: Quote::OPEN_STATUSES).exists?
+    if has_open_quotes && activity_at.present? && activity_at < 60.days.ago(reference_time)
+      return "at_risk"
+    end
+
+    return "cooling" if activity_at.present? && activity_at < 30.days.ago(reference_time)
+
+    "active"
+  end
+
   def build_kpi_value(current_value, previous_value, period, kind:)
     change = percent_change(current_value, previous_value)
     period_label = period == "month" ? I18n.t("dashboard.logic.period_month") : I18n.t("dashboard.logic.period_week")
@@ -875,19 +995,18 @@ class CustomersController < ApplicationController
     change.positive? ? "is-down" : "is-up"
   end
 
-  def build_risk_snapshot(customers, metrics)
-    stalled_high_value = customers.count do |customer|
-      high_value_customer?(customer, metrics) && stalled_customer?(customer)
-    end
-    long_no_follow = customers.count do |customer|
-      customer.last_follow_up_date.blank? || customer.last_follow_up_date < Date.current - 14.days
+  def build_risk_snapshot(customers, metrics, engagement_states = nil)
+    state_counts = customers.each_with_object(Hash.new(0)) do |customer, memo|
+      memo[resolved_engagement_state(customer, engagement_states)] += 1
     end
 
     {
-      overdue: customers.count(&:follow_up_overdue?),
-      due_today: customers.count(&:follow_up_due_today?),
-      stalled_high_value: stalled_high_value,
-      no_recent_follow_up: long_no_follow
+      at_risk: state_counts["at_risk"],
+      needs_follow_up: state_counts["cooling"] + state_counts["at_risk"],
+      cooling: state_counts["cooling"],
+      dormant: state_counts["dormant"],
+      unassessed: state_counts["unassessed"],
+      archived: state_counts["archived"]
     }
   end
 
@@ -1295,15 +1414,27 @@ class CustomersController < ApplicationController
   end
 
   def customer_engagement_state(customer, latest_signal_at)
-    if customer.follow_up_overdue?
-      { label: I18n.t("customers.logic.engagement_state.at_risk"), css: "is-risk" }
-    elsif latest_signal_at.present? && latest_signal_at.to_date >= Date.current - 7.days
-      { label: I18n.t("customers.logic.engagement_state.active"), css: "is-active" }
-    elsif latest_signal_at.present? && latest_signal_at.to_date >= Date.current - 21.days
-      { label: I18n.t("customers.logic.engagement_state.cooling"), css: "is-cooling" }
-    else
-      { label: I18n.t("customers.logic.engagement_state.at_risk"), css: "is-risk" }
-    end
+    state = resolved_engagement_state(customer)
+    color =
+      case state
+      when "active" then :green
+      when "cooling" then :amber
+      when "at_risk" then :red
+      else :slate
+      end
+
+    {
+      state: state,
+      label: I18n.t("customers.logic.engagement_state.#{state}"),
+      css: "is-#{state.tr('_', '-')}",
+      color: color
+    }
+  end
+
+  def resolved_engagement_state(customer, engagement_states = nil)
+    return engagement_states.fetch(customer) if engagement_states&.key?(customer)
+
+    customer.effective_engagement_state
   end
 
   def build_customer_operating_signals(customer, quote_cards, latest_signal_at)

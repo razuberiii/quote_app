@@ -53,18 +53,21 @@ module ApplicationHelper
   def time_zone_options_for_select
     country_index = time_zone_country_index
 
-    ActiveSupport::TimeZone.all.map do |zone|
-      offset = zone.formatted_offset
-      clean_name = zone.tzinfo.name.split("/").last.tr("_", " ")
-      zone_identifier = zone.tzinfo.name
-      country_code = country_index[zone_identifier].to_s.upcase
-      country_name = country_name_from_code(country_code)
-      [
-        "#{clean_name} (GMT#{offset})",
-        zone.name,
-        { data: { country: country_code, country_name: country_name, city: clean_name, gmt: "GMT#{offset}" } }
-      ]
-    end
+    ActiveSupport::TimeZone.all
+      .group_by { |zone| zone.tzinfo.name }
+      .map do |zone_identifier, zones|
+        clean_name = zone_identifier.split("/").last.tr("_", " ")
+        zone = zones.find { |z| z.name == clean_name } || zones.first
+        offset = zone.formatted_offset
+        country_code = country_index[zone_identifier].to_s.upcase
+        country_name = country_name_from_code(country_code)
+
+        [
+          "#{clean_name} (GMT#{offset})",
+          zone.name,
+          { data: { country: country_code, country_name: country_name, city: clean_name, gmt: "GMT#{offset}", tz_identifier: zone_identifier } }
+        ]
+      end
   end
 
   def time_zone_country_index

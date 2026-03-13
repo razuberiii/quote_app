@@ -152,7 +152,7 @@ class QuoteTemplatesController < ApplicationController
       show_tax: true,
       show_shipping: true,
       show_closing_message: true,
-      show_saas_branding: false,
+      show_saas_branding: true,
       excel_show_grid_lines: false,
       closing_message: QuoteTemplate::DEFAULT_CLOSING_MESSAGE,
       show_currency: true,

@@ -5,8 +5,9 @@
       <p><%= t("customers.view.index.subtitle") %></p>
     </div>
     <div class="app-page-header-actions">
-      <%= render "components/ui/button", href: new_customer_path, variant: :primary, class: "page-primary-cta" do %>
-        <%= t("customers.view.index.new_customer") %>
+      <%= render "components/ui/button", href: new_customer_path, variant: :primary, class: "page-primary-cta",
+                                         attrs: { data: { controller: "tooltip", tooltip_content_value: t("shortcuts.tooltips.new_customer"), action: "mouseenter->tooltip#show mouseleave->tooltip#hide" } } do %>
+        <%= t("customers.view.index.new_customer") %><kbd class="app-shortcut-badge">Shift+C</kbd>
       <% end %>
     </div>
   </header>
@@ -26,6 +27,7 @@
                              placeholder: t("customers.view.index.search_placeholder"),
                              value: @search_query,
                              class: "#{ui_input_classes} app-search-input" %>
+            <span class="app-search-shortcut-hint" aria-hidden="true">/</span>
           </div>
           <% if @search_query.present? %>
             <%= link_to t("customers.view.index.clear"), customers_path(kpi_period: @kpi_period), class: "app-search-clear" %>

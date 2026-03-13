@@ -897,15 +897,20 @@ a:hover {
 }
 
 .output-lang-sync-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) auto;
   align-items: center;
   gap: 8px;
   margin-top: 8px;
 }
 
 .output-lang-sync-row select {
-  flex: 0 0 auto;
   min-width: 140px;
+}
+
+.output-lang-sync-btn {
+  min-height: 40px;
+  white-space: nowrap;
 }
 
 .template-form-grid {

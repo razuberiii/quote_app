@@ -1,7 +1,22 @@
 <section class="app-page-shell">
+  <% if @just_created %>
+    <div class="quote-created-banner js-quote-created-banner">
+      <div class="quote-created-banner-body">
+        <div class="quote-created-banner-text">
+          <p class="quote-created-banner-title"><%= t("quotes.view.show.created_banner.title") %></p>
+          <p class="quote-created-banner-subtitle"><%= t("quotes.view.show.created_banner.subtitle") %></p>
+        </div>
+        <button type="button"
+                class="<%= ui_button_classes(:primary, "quote-created-banner-btn js-banner-share-btn") %>"
+                data-share-url="<%= share_quote_path(@quote, format: :json) %>">
+          <%= t("quotes.view.show.created_banner.action") %>
+        </button>
+      </div>
+    </div>
+  <% end %>
   <% live_refresh_enabled = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
   <div id="quote-page-content"
-       data-refresh-url="<%= quote_path(@quote, request.query_parameters.merge(format: :turbo_stream)) %>"
+       data-refresh-url="<%= quote_path(@quote, request.query_parameters.except("created").merge(format: :turbo_stream)) %>"
        data-live-refresh="<%= live_refresh_enabled %>">
     <%= render "show_content" %>
   </div>
@@ -104,6 +119,80 @@
       event.preventDefault();
       const copied = await copyText(button.dataset.copyText || "");
       showToast(copied ? "Change summary copied" : "Copy failed on browser", !copied);
+    });
+
+    // Strip ?created param from address bar so back-navigation doesn't re-show banner
+    if (new URLSearchParams(location.search).has("created")) {
+      const _u = new URL(location.href);
+      _u.searchParams.delete("created");
+      history.replaceState(null, "", _u.pathname + (_u.search || ""));
+    }
+  })();
+
+  (() => {
+    if (window.__quoteBannerShareBound) return;
+    window.__quoteBannerShareBound = true;
+
+    const csrf = () => document.querySelector("meta[name='csrf-token']")?.content;
+
+    const copyToClipboard = async (text) => {
+      try {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_) {}
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        Object.assign(ta.style, { position: "fixed", top: "-9999px", left: "-9999px" });
+        document.body.appendChild(ta);
+        ta.focus(); ta.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        return !!ok;
+      } catch (_) { return false; }
+    };
+
+    document.addEventListener("click", async (event) => {
+      const btn = event.target.closest(".js-banner-share-btn");
+      if (!btn || btn.dataset.busy === "true") return;
+      event.preventDefault();
+
+      const shareUrl = btn.dataset.shareUrl;
+      if (!shareUrl) return;
+
+      btn.dataset.busy = "true";
+      const orig = btn.textContent.trim();
+
+      try {
+        const resp = await fetch(shareUrl, {
+          method: "POST",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "X-CSRF-Token": csrf() || ""
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({})
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.url) throw new Error(data.message || "Share failed");
+
+        const copied = await copyToClipboard(data.url);
+        window.showAppToast?.(
+          copied
+            ? "<%= j(t('quotes.view.show.created_banner.link_copied')) %>"
+            : "<%= j(t('quotes.view.show.toolbar.public_link_ready_manual')) %>",
+          copied ? "success" : "warn"
+        );
+        const banner = document.querySelector(".js-quote-created-banner");
+        if (banner) banner.remove();
+      } catch (err) {
+        window.showAppToast?.(err.message || "Share failed", "error");
+        btn.dataset.busy = "false";
+        btn.textContent = orig;
+      }
     });
   })();
 

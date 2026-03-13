@@ -62,7 +62,7 @@
       <article class="quote-edit-summary-card app-surface">
         <span class="summary-label"><%= t("customers.view.show.engagement") %></span>
         <strong><%= @customer_engagement[:label] %></strong>
-        <%= status_badge(@customer_engagement[:label], @customer_engagement[:css].to_s.include?("risk") ? :red : (@customer_engagement[:css].to_s.include?("cooling") ? :amber : :green), "customer-engagement-badge #{@customer_engagement[:css]}") %>
+        <%= status_badge(@customer_engagement[:label], @customer_engagement[:color], "customer-engagement-badge #{@customer_engagement[:css]}") %>
       </article>
     </section>
 
@@ -132,9 +132,9 @@
       </div>
       <div class="customer-follow-up-callout-actions">
         <% if @follow_up_primary_action[:method] == :post %>
-          <%= button_to @follow_up_primary_action[:label], @follow_up_primary_action[:path], method: :post, class: ui_button_classes(:primary, "customer-inline-cta") %>
+          <%= button_to @follow_up_primary_action[:label], @follow_up_primary_action[:path], method: :post, class: ui_button_classes(:primary, "customer-inline-cta js-shortcut-follow-up") %>
         <% else %>
-          <%= link_to @follow_up_primary_action[:label], @follow_up_primary_action[:path], class: ui_button_classes(:primary, "customer-inline-cta") %>
+          <%= link_to @follow_up_primary_action[:label], @follow_up_primary_action[:path], class: ui_button_classes(:primary, "customer-inline-cta js-shortcut-follow-up") %>
         <% end %>
       </div>
     </section>
@@ -149,7 +149,7 @@
           <% @visible_follow_up_tasks.each do |task| %>
             <article class="customer-task-card is-<%= task[:priority] %>">
               <div class="customer-task-meta">
-                <span class="customer-task-priority"><%= task[:priority].upcase %></span>
+                <span class="customer-task-priority"><%= t("customers.view.show.task_priority.#{task[:priority]}", default: task[:priority].upcase) %></span>
                 <h4><%= task[:title] %></h4>
                 <p><%= task[:detail] %></p>
               </div>
@@ -181,7 +181,7 @@
             <% @hidden_follow_up_tasks.each do |task| %>
               <article class="customer-task-card is-<%= task[:priority] %>">
                 <div class="customer-task-meta">
-                  <span class="customer-task-priority"><%= task[:priority].upcase %></span>
+                  <span class="customer-task-priority"><%= t("customers.view.show.task_priority.#{task[:priority]}", default: task[:priority].upcase) %></span>
                   <h4><%= task[:title] %></h4>
                   <p><%= task[:detail] %></p>
                 </div>
@@ -210,6 +210,8 @@
                follow_up_quote: @follow_up_assistant_quote,
                message: @suggested_follow_up_message,
                best_contact_time: @best_contact_time,
+               follow_up_email_ready: @follow_up_email_ready,
+               follow_up_email_block_reason: @follow_up_email_block_reason,
                quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
 
     <section class="customer-timeline app-surface">
@@ -302,7 +304,7 @@
           <p class="app-section-caption"><%= t("customers.view.show.quote_actions_hint") %></p>
         </div>
         <div class="actions customer-quote-actions">
-          <%= link_to t("customers.view.show.new_quote"), new_customer_quote_path(@customer), class: ui_button_classes(:primary, "customer-new-quote-cta") %>
+          <%= link_to t("customers.view.show.new_quote"), new_customer_quote_path(@customer), class: ui_button_classes(:primary, "customer-new-quote-cta js-shortcut-new-quote-current-customer") %>
           <%= button_to t("customers.view.show.delete_customer"),
                         customer_path(@customer),
                         method: :delete,

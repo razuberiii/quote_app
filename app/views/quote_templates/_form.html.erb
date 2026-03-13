@@ -127,32 +127,29 @@
           <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
           <p><%= t("quote_templates.view.form.output_language_hint") %></p>
           <div class="output-lang-sync-row">
-            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select>
+            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select aria-label="<%= t("quote_templates.view.form.apply_all_locales") %>">
               <% quote_template.output_locale_options.each do |label, value| %>
                 <option value="<%= value %>"><%= label %></option>
               <% end %>
             </select>
-            <button type="button" class="btn btn-sm btn-secondary" data-output-lang-sync-btn>
-              <%= t("quote_templates.view.form.apply_all_locales") %>
-            </button>
           </div>
         </header>
         <div class="template-form-grid">
           <div>
             <%= f.label :webview_locale, t("quote_templates.view.form.output_language_webview") %>
-            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { template_preview_target: "webview-locale" } %>
+            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { template_preview_target: "webview-locale", output_lang_target: true } %>
           </div>
           <div>
             <%= f.label :public_link_locale, t("quote_templates.view.form.public_link_locale") %>
-            <%= f.select :public_link_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+            <%= f.select :public_link_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
           </div>
           <div>
             <%= f.label :pdf_locale, t("quote_templates.view.form.pdf_locale") %>
-            <%= f.select :pdf_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+            <%= f.select :pdf_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
           </div>
           <div>
             <%= f.label :excel_locale, t("quote_templates.view.form.excel_locale") %>
-            <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes %>
+            <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
           </div>
         </div>
       </section>
@@ -959,19 +956,23 @@
     updateWatermarkModeUI();
     updatePreview();
 
-    // Sync-all locale button
-    const syncBtn = form.querySelector("[data-output-lang-sync-btn]");
+    // Sync-all locale select (no button): selecting a language applies to all output channels.
     const syncSelect = form.querySelector("[data-output-lang-sync-select]");
-    if (syncBtn && syncSelect) {
-      syncBtn.addEventListener("click", () => {
-        const locale = syncSelect.value;
-        ["webview_locale", "public_link_locale", "pdf_locale", "excel_locale"].forEach((name) => {
-          const field = qs(`[name='quote_template[${name}]']`);
-          if (field) {
-            field.value = locale;
-            field.dispatchEvent(new Event("change", { bubbles: true }));
-          }
-        });
+    const syncTargets = Array.from(form.querySelectorAll("[data-output-lang-target]"));
+    const applyLocaleToAll = (locale) => {
+      if (!locale) return;
+      syncTargets.forEach((field) => {
+        if (!field) return;
+        field.value = locale;
+        field.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    };
+    if (syncSelect && syncTargets[0] && syncTargets[0].value) {
+      syncSelect.value = syncTargets[0].value;
+    }
+    if (syncSelect) {
+      syncSelect.addEventListener("change", () => {
+        applyLocaleToAll(syncSelect.value);
       });
     }
   })();

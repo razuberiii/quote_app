@@ -1,5 +1,7 @@
 class Customer < ApplicationRecord
   FOLLOW_UP_EMAIL_COOLDOWN = 10.minutes
+  ENGAGEMENT_STATES = %w[unassessed active cooling at_risk dormant archived].freeze
+  FOLLOW_UP_REQUIRED_STATES = %w[cooling at_risk].freeze
 
   SALES_STATUSES = %w[new contacted quoting negotiating won lost inactive].freeze
   LEGACY_STATUSES = %w[potential following closed paused].freeze
@@ -20,7 +22,7 @@ class Customer < ApplicationRecord
   has_many :customer_tags, through: :customer_taggings
   has_one_attached :avatar
 
-  before_validation :normalize_phone_country_code, :set_default_status, :set_default_customer_level
+  before_validation :normalize_phone_country_code, :set_default_status, :set_default_customer_level, :set_default_engagement_state
 
   validates :name, presence: true
   validates :email, format: { with: URI::MailTo::EMAIL_REGEXP }, allow_blank: true
@@ -29,6 +31,8 @@ class Customer < ApplicationRecord
   validates :payment_terms, inclusion: { in: PAYMENT_TERMS_OPTIONS }, allow_blank: true
   validates :estimated_annual_volume, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
   validates :timezone, inclusion: { in: ActiveSupport::TimeZone.all.map(&:name) }, allow_blank: true
+  validates :engagement_state, inclusion: { in: ENGAGEMENT_STATES }, if: -> { self.class.column_names.include?("engagement_state") }
+  validates :manual_engagement_override, inclusion: { in: [ true, false ] }, if: -> { self.class.column_names.include?("manual_engagement_override") }
   validate :internal_owner_within_company
   validate :avatar_constraints
 
@@ -86,6 +90,57 @@ class Customer < ApplicationRecord
     return "today" if follow_up_due_today?
     return "upcoming" if follow_up_upcoming?
     "normal"
+  end
+
+  def manual_engagement_override?
+    return false unless self.class.column_names.include?("manual_engagement_override")
+
+    !!manual_engagement_override
+  end
+
+  def quote_view_events_relation
+    QuoteViewEvent
+      .joins(quote_share: :quote)
+      .where(quotes: { customer_id: id })
+  end
+
+  def last_activity_at
+    [
+      quotes.not_archived.maximum(:created_at),
+      latest_quote_view_signal_at,
+      customer_follow_up_events.maximum(:contacted_at)
+    ].compact.max
+  end
+
+  def computed_engagement_state(now: Time.current)
+    return "unassessed" if unassessed_for_engagement?
+
+    activity_at = last_activity_at
+    return "active" if activity_at.present? && activity_at >= 14.days.ago(now)
+    return "dormant" if activity_at.present? && activity_at < 90.days.ago(now)
+    if open_quotes_for_engagement? && activity_at.present? && activity_at < 60.days.ago(now)
+      return "at_risk"
+    end
+    return "cooling" if activity_at.present? && activity_at < 30.days.ago(now)
+
+    "active"
+  end
+
+  def effective_engagement_state(now: Time.current)
+    return "archived" if engagement_state.to_s == "archived"
+    return engagement_state if manual_engagement_override? && engagement_state.present?
+
+    computed_engagement_state(now: now)
+  end
+
+  def refresh_engagement_state!(now: Time.current)
+    return if manual_engagement_override?
+    return unless self.class.column_names.include?("engagement_state")
+
+    resolved = computed_engagement_state(now: now)
+    return if engagement_state.to_s == resolved
+
+    update_columns(engagement_state: resolved, updated_at: Time.current)
   end
 
   def can_send_follow_up_email?(now: Time.current)
@@ -166,6 +221,40 @@ class Customer < ApplicationRecord
 
   def set_default_customer_level
     self.customer_level = "normal" if customer_level.blank?
+  end
+
+  def set_default_engagement_state
+    return unless self.class.column_names.include?("engagement_state")
+
+    self.engagement_state = "unassessed" if engagement_state.blank?
+  end
+
+  def unassessed_for_engagement?
+    return false if quotes.not_archived.exists?
+    return false if customer_follow_up_events.exists?
+
+    latest_quote_view_signal_at.blank?
+  end
+
+  def open_quotes_for_engagement?
+    quotes.not_archived.where(status: Quote::OPEN_STATUSES).exists?
+  end
+
+  def latest_quote_view_signal_at
+    last_share_view = QuoteShare
+      .joins(:quote)
+      .where(quotes: { customer_id: id })
+      .maximum(:last_viewed_at)
+    first_share_view = QuoteShare
+      .joins(:quote)
+      .where(quotes: { customer_id: id })
+      .maximum(:first_viewed_at)
+
+    [
+      quotes.not_archived.maximum(:viewed_at),
+      last_share_view,
+      first_share_view
+    ].compact.max
   end
 
   def internal_owner_within_company

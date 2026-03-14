@@ -55,7 +55,7 @@ RUN apt-get update -qq && \
 ENV RAILS_ENV="production" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
-    BUNDLE_WITHOUT="development" \
+    BUNDLE_WITHOUT="development:test" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
     QUOTE_PDF_FONT_PATH="/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf" \
     WKHTMLTOPDF_PATH="/usr/bin/wkhtmltopdf"
@@ -72,7 +72,9 @@ RUN apt-get update -qq && \
 COPY vendor/* ./vendor/
 COPY Gemfile Gemfile.lock ./
 
-RUN bundle install && \
+RUN bundle config set --local retry 5 && \
+    bundle config set --local timeout 30 && \
+    bundle install --jobs 1 && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     # -j 1 disable parallel compilation to avoid a QEMU bug: https://github.com/rails/bootsnap/issues/495
     bundle exec bootsnap precompile -j 1 --gemfile

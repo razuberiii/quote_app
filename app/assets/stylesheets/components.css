@@ -4975,7 +4975,6 @@ kbd.app-shortcut-badge {
 
 .dashboard-task-item strong,
 .dashboard-task-item p {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 100%;

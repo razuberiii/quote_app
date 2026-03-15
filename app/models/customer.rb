@@ -101,7 +101,10 @@ class Customer < ApplicationRecord
   end
 
   def follow_up_reminders_enabled?
-    !%w[lost inactive].include?(status_css)
+    return false if effective_sales_status == "paused"
+    return false unless active_quotes_for_follow_up?
+
+    true
   end
 
   def manual_engagement_override?
@@ -169,12 +172,44 @@ class Customer < ApplicationRecord
 
   def status_label
     normalized = status_css
-    I18n.t("customers.status_labels.#{normalized}", default: status.to_s.humanize.presence || I18n.t("customers.status_labels.new", default: "New"))
+    I18n.t("customers.status_labels.#{normalized}", default: normalized.to_s.humanize.presence || I18n.t("customers.status_labels.new", default: "New"))
   end
 
   def status_css
+    effective_sales_status
+  end
+
+  def effective_sales_status
+    return "paused" if raw_status_css == "paused"
+
+    primary = primary_open_quote_for_status
+    quote = primary || latest_quote_for_status
+    return "new" if quote.blank?
+
+    resolved = quote_display_status_for_customer(quote)
+    case resolved
+    when "negotiating", "viewed"
+      "negotiating"
+    when "sent", "draft", "pending"
+      "quoting"
+    when "won"
+      "won"
+    when "lost", "expired"
+      "lost"
+    else
+      "new"
+    end
+  end
+
+  def raw_status_css
     normalized = status.to_s.parameterize(separator: "_")
     normalized.presence || "new"
+  end
+
+  def active_quotes_for_follow_up?
+    active_quotes_for_status.any? do |quote|
+      Quote::OPEN_STATUSES.include?(quote.status.to_s.downcase)
+    end
   end
 
   def avatar_initial
@@ -249,7 +284,57 @@ class Customer < ApplicationRecord
   end
 
   def open_quotes_for_engagement?
-    quotes.not_archived.where(status: Quote::OPEN_STATUSES).exists?
+    active_quotes_for_follow_up?
+  end
+
+  def primary_open_quote_for_status
+    open_quotes = active_quotes_for_status.select do |quote|
+      Quote::OPEN_STATUSES.include?(quote.status.to_s.downcase)
+    end
+    return nil if open_quotes.empty?
+
+    open_quotes.max_by do |quote|
+      status_rank = case quote_display_status_for_customer(quote)
+                    when "negotiating"
+                      3
+                    when "viewed"
+                      2
+                    when "sent"
+                      1
+                    when "draft", "pending"
+                      0
+                    else
+                      0
+                    end
+      timestamp = quote.updated_at || quote.sent_at || quote.created_at || Time.zone.at(0)
+      [ status_rank, timestamp ]
+    end
+  end
+
+  def latest_quote_for_status
+    active_quotes_for_status.max_by { |quote| quote.updated_at || Time.zone.at(0) }
+  end
+
+  def quote_display_status_for_customer(quote)
+    raw_status = quote.status.to_s.downcase
+    raw_status = "draft" if raw_status == "pending"
+    return "won" if quote.accepted_at.present?
+
+    raw_status = "negotiating" if raw_status == "negotiating" || quote.changes_requested_at.present?
+    return "expired" if Quote::OPEN_STATUSES.include?(raw_status) && quote.valid_until.present? && quote.valid_until < Date.current
+
+    raw_status.presence || "draft"
+  end
+
+  def active_quotes_for_status
+    if association(:quotes).loaded?
+      quotes.to_a.reject do |quote|
+        (quote.respond_to?(:archived?) && quote.archived?) ||
+          (quote.respond_to?(:deleted?) && quote.deleted?)
+      end
+    else
+      quotes.not_archived.to_a
+    end
   end
 
   def latest_quote_view_signal_at

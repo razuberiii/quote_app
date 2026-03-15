@@ -559,10 +559,10 @@ zh-CN:
           copy_open_public_link: 复制或打开分享链接
           copy_link: 复制链接
           open: 打开
-          delete_quote: 删除报价线程
-          delete_confirm: 确定删除报价线程 %{quote_no}（含全部修订），并让所有分享链接失效吗？此操作不可撤销。
+          delete_quote: 删除报价
+          delete_confirm: 确定删除报价 %{quote_no}（含全部修订），并让所有分享链接失效吗？此操作不可撤销。
           delete_final_warning: 最终警告：这会让分享链接失效，并删除整条报价历史。
-          delete_prompt: 输入 DELETE 以确认删除报价线程
+          delete_prompt: 输入 DELETE 以确认删除报价
           unable_generate_public_link: 无法生成分享链接
           public_link_ready: 分享链接已就绪。
           public_link_ready_copied: 分享链接已就绪，已复制到剪贴板。
@@ -1008,6 +1008,7 @@ zh-CN:
         status: 状态
         select_status: 选择状态
         status_hint: 设为“已丢失”或“不活跃”后，这个客户将不再触发跟进逾期提醒。
+        status_auto_hint: 状态会基于最新活跃报价自动联动，“暂停合作”的客户将不再触发提醒。
         legacy_status: "%{status}（历史值）"
         customer_level: 客户等级
         primary_contact: 主要联系人
@@ -1086,6 +1087,8 @@ zh-CN:
       show:
         subtitle: 在一个地方查看客户状态、报价活动和下一步动作。
         back_to_customers: 返回客户列表
+        pause_customer: 暂停合作
+        resume_customer: 恢复合作
         no_email: 无邮箱
         edit_customer: 编辑客户
         total_quotes: 报价总数
@@ -1148,10 +1151,11 @@ zh-CN:
         delete_customer: 删除客户
         delete_customer_confirm: 确认删除客户 %{name}？这会移除该账户记录。
         active_quotes: 活跃报价（%{count}）
-        recent_quotes: 最近报价（10）
+        recent_quotes: 最近报价（%{count}）
         all_quotes: 全部报价（%{count}）
         quote_workspace_hint: 在这里管理该客户的重点事项、报价与修订进展。
         active_mode_note: 仅显示优先级最高的 5 条。
+        recent_mode_note: 显示最近 %{count} 条报价。
         active: 活跃
         quote_status:
           draft: 草稿
@@ -1338,10 +1342,12 @@ zh-CN:
         due_today: 今日需跟进。
         upcoming: 跟进已安排在近期。
         not_scheduled: 尚未安排跟进日期。
+        no_active_quote: 当前没有活跃报价，暂停跟进提醒。
       follow_up_primary_action:
         mark_followed_today: 只更新跟进状态
         schedule_plus_7d: 安排 +7 天
         adjust_follow_up: 调整下次跟进
+        create_quote: 新建报价
       row_signal:
         follow_today: 今日跟进
         overdue_follow_up: 跟进逾期
@@ -1353,6 +1359,8 @@ zh-CN:
         due_soon: 即将到期
         set_schedule: 设置计划
         no_urgent_risk: 无紧急风险
+        no_active_quote: 暂无活跃报价
+        no_active_quote_detail: 当前没有进行中的报价单。
       follow_up_tasks:
         open_quote: 查看报价
         set_next_follow_up_date:
@@ -1422,6 +1430,8 @@ zh-CN:
       follow_up_marked_today: 今日已标记跟进。下次跟进已安排在 %{date}
       unsupported_follow_up_interval: 不支持的跟进间隔。
       next_follow_up_scheduled: 下次跟进已安排在 %{date}（%{label}）。
+      paused: 已暂停该客户合作。
+      resumed: 已恢复客户合作。
   follow_up:
     message:
       quote_link_intro: 你可以在这里查看这份报价：
@@ -2660,6 +2670,7 @@ zh-CN:
         kicker: 报价记录
         title: QT-2026-0240
         same_record_note: 查看、修订和跟进继续留在同一条报价记录里。
+        meta_line: "%{version} · %{buyer} · %{status}"
         buyer_active: 买家活跃中
         timeline_label: 最新进展
         buyer: 买家：Pacific Trading Group

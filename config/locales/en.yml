@@ -560,9 +560,9 @@ en:
           copy_link: Copy link
           open: Open
           delete_quote: Delete quote
-          delete_confirm: Delete quote thread %{quote_no}, including all revisions, and expire any shared links? This cannot be undone.
+          delete_confirm: Delete quote %{quote_no} and all revisions, and expire any shared links? This cannot be undone.
           delete_final_warning: "Final warning: this will expire shared links and remove the full quote history."
-          delete_prompt: Type DELETE to confirm quote deletion
+          delete_prompt: Type DELETE to confirm deleting the quote
           unable_generate_public_link: Unable to generate public link
           public_link_ready: Public link ready.
           public_link_ready_copied: Public link ready. Copied to clipboard.
@@ -1008,6 +1008,7 @@ en:
         status: Status
         select_status: Select Status
         status_hint: If status is set to Lost or Inactive, this customer will no longer trigger overdue follow-up reminders.
+        status_auto_hint: Status is linked to the latest active quote. Paused accounts stay excluded from reminders.
         legacy_status: "%{status} (legacy)"
         customer_level: Customer Level
         primary_contact: Primary Contact
@@ -1086,6 +1087,8 @@ en:
       show:
         subtitle: Track account health, quote activity, and next steps in one workspace.
         back_to_customers: Back to Customers
+        pause_customer: Pause account
+        resume_customer: Resume account
         no_email: No email
         edit_customer: Edit Customer
         total_quotes: Total Quotes
@@ -1149,10 +1152,11 @@ en:
         delete_customer: Delete Customer
         delete_customer_confirm: Delete customer %{name}? This removes the account record.
         active_quotes: Active Quotes (%{count})
-        recent_quotes: Recent Quotes (10)
+        recent_quotes: Recent Quotes (%{count})
         all_quotes: All Quotes (%{count})
         quote_workspace_hint: Manage priority tasks, search, and revisions for this account.
         active_mode_note: Showing the top 5 by priority.
+        recent_mode_note: Showing the most recent %{count} quotes.
         active: Active
         quote_status:
           draft: Draft
@@ -1338,10 +1342,12 @@ en:
         due_today: Follow-up due today.
         upcoming: Follow-up scheduled soon.
         not_scheduled: No follow-up date scheduled.
+        no_active_quote: No active quotes. Follow-up reminders are paused.
       follow_up_primary_action:
         mark_followed_today: Update Follow-up Status
         schedule_plus_7d: Schedule +7d
         adjust_follow_up: Adjust Next Follow-up
+        create_quote: Create a new quote
       row_signal:
         follow_today: Follow today
         overdue_follow_up: Overdue follow-up
@@ -1353,6 +1359,8 @@ en:
         due_soon: Due soon
         set_schedule: Set schedule
         no_urgent_risk: No urgent risk
+        no_active_quote: No active quote
+        no_active_quote_detail: No open quotes are active for this account.
       follow_up_tasks:
         open_quote: View Quote
         set_next_follow_up_date:
@@ -1422,6 +1430,8 @@ en:
       follow_up_marked_today: Follow-up marked for today. Next follow-up scheduled at %{date}
       unsupported_follow_up_interval: Unsupported follow-up interval.
       next_follow_up_scheduled: Next follow-up scheduled for %{date} (%{label}).
+      paused: Customer paused.
+      resumed: Customer reactivated.
   follow_up:
     message:
       quote_link_intro: "You can view the quote here:"
@@ -2568,6 +2578,7 @@ en:
         kicker: Quote record
         title: QT-2026-0240
         same_record_note: Views, revisions, and follow-up continue on this same quotation record.
+        meta_line: "%{version} · %{buyer} · %{status}"
         buyer_active: Buyer active
         timeline_label: Latest update
         buyer: "Buyer: Pacific Trading Group"

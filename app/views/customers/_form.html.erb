@@ -1,5 +1,4 @@
 <%= form_with model: customer, html: { class: "customer-profile-form", multipart: true } do |f| %>
-  <% status_options = Customer::SALES_STATUSES.map { |value| [t("customers.view.form.status_options.#{value}", default: value.humanize), value] } %>
   <% common_country_calling_code_options = [
     ["+1 USA/Canada", "+1"],
     ["+33 France", "+33"],
@@ -26,11 +25,6 @@
   <% if customer.phone_country_code.present? && common_country_calling_code_options.none? { |(_, value)| value == customer.phone_country_code } %>
     common_country_calling_code_options.unshift([customer.phone_country_code, customer.phone_country_code])
   <% end %>
-  <% if customer.status.present? && !Customer::SALES_STATUSES.include?(customer.status) %>
-    <% legacy_status_label = t("customers.view.form.status_options.#{customer.status}", default: customer.status.humanize) %>
-    <% status_options.unshift([t("customers.view.form.legacy_status", status: legacy_status_label), customer.status]) %>
-  <% end %>
-
   <% level_options = Customer::CUSTOMER_LEVELS.map { |value| [t("customers.view.form.level_options.#{value}", default: value.humanize), value] } %>
   <% source_options = Customer::CUSTOMER_SOURCES.map { |value| [t("customers.view.form.source_options.#{value}", default: value.humanize), value] } %>
   <% payment_options = Customer::PAYMENT_TERMS_OPTIONS.map { |value| [t("customers.view.form.payment_options.#{value}", default: value.upcase.gsub("_", "/")), value] } %>
@@ -105,12 +99,9 @@
             <div>
               <%= f.label :status, t("customers.view.form.status") %>
               <div class="customer-status-select-wrap">
-                <%= f.select :status, status_options, { prompt: t("customers.view.form.select_status") }, { class: ui_input_classes } %>
-                <% if customer.status.present? %>
-                  <%= customer_status_badge(customer) %>
-                <% end %>
+                <%= customer_status_badge(customer) %>
               </div>
-              <p class="customer-field-hint"><%= t("customers.view.form.status_hint") %></p>
+              <p class="customer-field-hint"><%= t("customers.view.form.status_auto_hint") %></p>
             </div>
             <div>
               <%= f.label :customer_level, t("customers.view.form.customer_level") %>

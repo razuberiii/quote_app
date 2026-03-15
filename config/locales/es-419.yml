@@ -573,9 +573,9 @@ es-419:
           copy_link: Copiar enlace
           open: Abrir
           delete_quote: Eliminar cotización
-          delete_confirm: ¿Eliminar el hilo de cotización %{quote_no}, incluidas todas las revisiones, y caducar cualquier enlace público? Esta acción no se puede deshacer.
-          delete_final_warning: "Advertencia final: esto caducará los enlaces públicos y eliminará el hilo completo de la cotización."
-          delete_prompt: Escribe ELIMINAR para confirmar que quieres borrar el hilo de cotización.
+          delete_confirm: ¿Eliminar la cotización %{quote_no} con todas sus revisiones y caducar cualquier enlace público? Esta acción no se puede deshacer.
+          delete_final_warning: "Advertencia final: esto caducará los enlaces públicos y eliminará todo el historial de la cotización."
+          delete_prompt: Escribe ELIMINAR para confirmar la eliminación de la cotización.
           unable_generate_public_link: No se puede generar el enlace público
           public_link_ready: Enlace público listo.
           public_link_ready_copied: Enlace público listo. Copiado al portapapeles.
@@ -1008,6 +1008,7 @@ es-419:
         status: Estado
         select_status: Seleccionar estado
         status_hint: Si el estado se cambia a Perdido o Inactivo, este cliente ya no activará recordatorios de seguimiento vencido.
+        status_auto_hint: El estado se vincula a la cotización activa más reciente. Las cuentas en pausa no activan recordatorios.
         legacy_status: "%{status} (heredado)"
         customer_level: Nivel de cliente
         primary_contact: Contacto principal
@@ -1086,6 +1087,8 @@ es-419:
       show:
         subtitle: Vea el estado del cliente, la actividad de cotización y los próximos pasos en un solo lugar.
         back_to_customers: Volver a clientes
+        pause_customer: Pausar cuenta
+        resume_customer: Reanudar cuenta
         no_email: Sin correo electrónico
         edit_customer: Editar Cliente
         total_quotes: Total de cotizaciones
@@ -1149,10 +1152,11 @@ es-419:
         delete_customer: Eliminar cliente
         delete_customer_confirm: ¿Eliminar cliente %{name}? Esto eliminará el registro de la cuenta.
         active_quotes: Cotizaciones activas (%{count})
-        recent_quotes: Cotizaciones recientes (10)
+        recent_quotes: Cotizaciones recientes (%{count})
         all_quotes: Todas las cotizaciones (%{count})
         quote_workspace_hint: Gestiona prioridades, búsquedas y revisiones para esta cuenta.
         active_mode_note: Mostrando los 5 principales por prioridad. Ordenado por prioridad de acción.
+        recent_mode_note: Mostrando las %{count} cotizaciones más recientes.
         active: Activo
         quote_status:
           draft: Borrador
@@ -1338,10 +1342,12 @@ es-419:
         due_today: Toca dar seguimiento a hoy.
         upcoming: Seguimiento programado pronto.
         not_scheduled: No hay fecha de seguimiento programada.
+        no_active_quote: No hay cotizaciones activas. Los recordatorios están en pausa.
       follow_up_primary_action:
         mark_followed_today: Actualizar estado de seguimiento
         schedule_plus_7d: Programar +7d
         adjust_follow_up: Ajustar próximo seguimiento
+        create_quote: Crear nueva cotización
       row_signal:
         follow_today: Seguir hoy
         overdue_follow_up: Seguimiento atrasado
@@ -1353,6 +1359,8 @@ es-419:
         due_soon: Vence pronto
         set_schedule: Establecer cronograma
         no_urgent_risk: Sin riesgo urgente
+        no_active_quote: Sin cotización activa
+        no_active_quote_detail: No hay cotizaciones en curso para esta cuenta.
       follow_up_tasks:
         open_quote: Ver cotización
         set_next_follow_up_date:
@@ -1422,6 +1430,8 @@ es-419:
       follow_up_marked_today: Seguimiento marcado para hoy. Próximo seguimiento programado para las %{date}
       unsupported_follow_up_interval: Intervalo de seguimiento no compatible.
       next_follow_up_scheduled: Próximo seguimiento programado para el %{date} (%{label}).
+      paused: Cuenta pausada.
+      resumed: Cuenta reactivada.
   follow_up:
     message:
       quote_link_intro: "Puedes ver la cotización aquí:"
@@ -2660,6 +2670,7 @@ es-419:
         kicker: Registro de cotización
         title: QT-2026-0240
         same_record_note: Las vistas, revisiones y el seguimiento siguen dentro del mismo registro de cotización.
+        meta_line: "%{version} · %{buyer} · %{status}"
         buyer_active: Comprador activo
         timeline_label: Última actualización
         buyer: "Comprador: Pacific Trading Group"

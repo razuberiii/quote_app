@@ -16,7 +16,7 @@ class DashboardController < CustomersController
       today: all_customers.count(&:follow_up_due_today?),
       upcoming: all_customers.count(&:follow_up_upcoming?),
       overdue: all_customers.count(&:follow_up_overdue?),
-      no_schedule: all_customers.count { |customer| customer.next_follow_up_date.blank? }
+      no_schedule: all_customers.count { |customer| customer.follow_up_reminders_enabled? && customer.next_follow_up_date.blank? }
     }
 
     @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period, @engagement_states)

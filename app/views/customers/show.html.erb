@@ -39,9 +39,16 @@
             <% end %>
           </div>
         </div>
-        <%= render "components/ui/button", href: edit_customer_path(@customer), variant: :secondary, class: "customer-edit-cta" do %>
-          <%= t("customers.view.show.edit_customer") %>
-        <% end %>
+        <div class="customer-profile-actions">
+          <%= render "components/ui/button", href: edit_customer_path(@customer), variant: :secondary, class: "customer-edit-cta" do %>
+            <%= t("customers.view.show.edit_customer") %>
+          <% end %>
+          <% if @customer.raw_status_css == "paused" %>
+            <%= button_to t("customers.view.show.resume_customer"), resume_customer_path(@customer), method: :patch, class: ui_button_classes(:secondary) %>
+          <% else %>
+            <%= button_to t("customers.view.show.pause_customer"), pause_customer_path(@customer), method: :patch, class: ui_button_classes(:danger) %>
+          <% end %>
+        </div>
       </div>
     <% end %>
 
@@ -318,7 +325,7 @@
           <% if @quote_view == "active" %>
             <%= t("customers.view.show.active_quotes", count: @active_quote_cards.size) %>
           <% elsif @quote_view == "recent" %>
-            <%= t("customers.view.show.recent_quotes") %>
+            <%= t("customers.view.show.recent_quotes", count: @recent_quote_cards.size) %>
           <% else %>
             <%= t("customers.view.show.all_quotes", count: @all_quote_cards.size) %>
           <% end %>
@@ -335,6 +342,8 @@
           <span>• <%= @active_quote_breakdown["viewed"] %> <%= t("customers.view.show.quote_status.viewed") %></span>
           <span>• <%= @active_quote_breakdown["negotiating"] %> <%= t("customers.view.show.quote_status.negotiating") %></span>
         </p>
+      <% elsif @quote_view == "recent" %>
+        <p class="quotes-mode-note"><%= t("customers.view.show.recent_mode_note", count: 10) %></p>
       <% end %>
 
       <div class="quote-summary-grid customer-quote-summary-grid">
@@ -390,7 +399,7 @@
         <%= link_to t("customers.view.show.active_quotes", count: @active_quote_cards.size),
                     customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: "active"),
                     class: "app-filter-pill #{@quote_view == 'active' ? 'is-active' : ''}" %>
-        <%= link_to t("customers.view.show.recent_10"),
+        <%= link_to t("customers.view.show.recent_quotes", count: @recent_quote_cards.size),
                     customer_path(@customer, quote_status: @quote_status_filter, quote_query: @quote_query.presence, quote_sort: @quote_sort, quote_view: "recent"),
                     class: "app-filter-pill #{@quote_view == 'recent' ? 'is-active' : ''}" %>
         <%= link_to t("customers.view.show.filters.all"),

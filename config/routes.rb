@@ -93,6 +93,8 @@ Rails.application.routes.draw do
     end
 
     member do
+      patch :pause
+      patch :resume
       post :mark_follow_up
       post :schedule_follow_up
       post :log_follow_up

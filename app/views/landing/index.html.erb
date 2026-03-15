@@ -1,8 +1,8 @@
 <% flow_steps = t("landing.homepage.flow_showcase.steps") %>
 
 <section id="product-story" class="app-page-shell marketing-page-shell">
-  <div class="app-section-stack">
-    <section class="marketing-hero-grid" data-controller="marketing-switcher" data-marketing-switcher-selected-value="<%= flow_steps.first[:key] %>">
+  <div class="app-section-stack" data-controller="marketing-switcher" data-marketing-switcher-selected-value="<%= flow_steps.first[:key] %>">
+    <section class="marketing-hero-grid">
       <div class="app-section-stack marketing-hero-copy">
         <div class="app-section-stack">
           <p class="marketing-eyebrow-chip"><%= t("landing.homepage.hero.kicker") %></p>
@@ -28,37 +28,6 @@
 
           <p class="app-subtle-note"><%= t("landing.homepage.hero.cta_support") %></p>
         </div>
-
-        <div class="app-section-stack gap-4">
-          <div class="app-section-stack gap-2">
-            <p class="marketing-section-kicker"><%= t("landing.homepage.flow_showcase.kicker") %></p>
-            <h2 class="marketing-section-title marketing-section-title--quiet max-w-none"><%= t("landing.homepage.flow_showcase.title") %></h2>
-            <p class="marketing-section-body marketing-section-body--compact"><%= t("landing.homepage.flow_showcase.body") %></p>
-          </div>
-
-          <div class="marketing-switcher__nav marketing-switcher__nav--story" role="tablist" aria-label="<%= t("landing.homepage.flow_showcase.aria_label") %>">
-            <% flow_steps.each_with_index do |step, index| %>
-              <button
-                id="homepage-flow-tab-<%= step[:key] %>"
-                type="button"
-                role="tab"
-                class="marketing-switcher__tab <%= 'is-active' if index.zero? %>"
-                aria-controls="homepage-flow-panel-<%= step[:key] %>"
-                aria-selected="<%= index.zero? %>"
-                tabindex="<%= index.zero? ? 0 : -1 %>"
-                data-active="<%= index.zero? %>"
-                data-action="click->marketing-switcher#select keydown->marketing-switcher#keydown"
-                data-marketing-switcher-target="tab"
-                data-state-key="<%= step[:key] %>">
-                <span class="marketing-switcher__tab-step"><%= step[:step] %></span>
-                <span class="marketing-switcher__tab-copy">
-                  <strong><%= step[:title] %></strong>
-                  <span><%= step[:body] %></span>
-                </span>
-              </button>
-            <% end %>
-          </div>
-        </div>
       </div>
 
       <%= render "components/ui/card", class: "app-surface marketing-hero-card marketing-hero-shell marketing-hero-shell--record", attrs: { "data-marketing-hero-sequence": true } do %>
@@ -79,12 +48,11 @@
                   <p class="marketing-section-kicker"><%= t("landing.homepage.hero_mockup.kicker") %></p>
                   <h2 class="marketing-record-mockup__title"><%= t("landing.homepage.hero_mockup.title") %></h2>
                   <div class="marketing-record-mockup__meta">
-                    <span class="marketing-record-mockup__meta-item"><%= step[:version_badge] %></span>
-                    <span class="marketing-record-mockup__meta-item"><%= t("landing.homepage.hero_mockup.buyer") %></span>
-                    <span class="marketing-record-mockup__meta-item"><%= step[:badge] %></span>
+                    <p class="marketing-record-mockup__meta-line">
+                      <%= t("landing.homepage.hero_mockup.meta_line", version: step[:version_badge], buyer: t("landing.homepage.hero_mockup.buyer"), status: step[:badge]) %>
+                    </p>
                   </div>
                 </div>
-                <span class="dashboard-alert-pill <%= step[:badge_tone] %>"><%= step[:badge] %></span>
               </header>
 
               <div class="marketing-record-mockup__main">
@@ -142,9 +110,42 @@
       <% end %>
     </section>
 
+    <section class="marketing-editorial-section marketing-editorial-section--flow">
+      <div class="app-section-stack gap-4">
+        <div class="app-section-stack gap-2">
+          <p class="marketing-section-kicker"><%= t("landing.homepage.flow_showcase.kicker") %></p>
+          <h2 class="marketing-section-title marketing-section-title--quiet max-w-3xl"><%= t("landing.homepage.flow_showcase.title") %></h2>
+          <p class="marketing-section-body marketing-section-body--compact max-w-3xl"><%= t("landing.homepage.flow_showcase.body") %></p>
+        </div>
+
+        <div class="marketing-switcher__nav marketing-switcher__nav--inline marketing-switcher__nav--subtle" role="tablist" aria-label="<%= t("landing.homepage.flow_showcase.aria_label") %>">
+          <% flow_steps.each_with_index do |step, index| %>
+            <button
+              id="homepage-flow-tab-<%= step[:key] %>"
+              type="button"
+              role="tab"
+              class="marketing-switcher__tab marketing-switcher__tab--inline marketing-switcher__tab--subtle <%= 'is-active' if index.zero? %>"
+              aria-controls="homepage-flow-panel-<%= step[:key] %>"
+              aria-selected="<%= index.zero? %>"
+              tabindex="<%= index.zero? ? 0 : -1 %>"
+              data-active="<%= index.zero? %>"
+              data-action="click->marketing-switcher#select keydown->marketing-switcher#keydown"
+              data-marketing-switcher-target="tab"
+              data-state-key="<%= step[:key] %>">
+              <span class="marketing-switcher__tab-step"><%= step[:step] %></span>
+              <span class="marketing-switcher__tab-copy">
+                <strong><%= step[:title] %></strong>
+                <span><%= step[:body] %></span>
+              </span>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </section>
+
     <section class="marketing-editorial-section marketing-editorial-section--bridge">
       <div class="app-section-stack gap-6">
-        <h2 class="marketing-section-title marketing-section-title--supporting max-w-4xl"><%= t("landing.homepage.why.title") %></h2>
+        <h2 class="marketing-section-title marketing-section-title--quiet max-w-4xl"><%= t("landing.homepage.why.title") %></h2>
 
         <div class="marketing-compare-band">
           <article class="marketing-compare-band__column is-before">

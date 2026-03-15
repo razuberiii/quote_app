@@ -6435,6 +6435,9 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-switcher__nav--inline {
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
+.marketing-root .marketing-switcher__nav--subtle {
+  gap: 0.45rem;
+}
 .marketing-root .marketing-switcher__nav--rail {
   align-content: start;
 }
@@ -6492,6 +6495,37 @@ kbd.app-shortcut-badge {
 }
 .marketing-root .marketing-switcher__tab--inline {
   grid-template-columns: minmax(0, 1fr);
+}
+.marketing-root .marketing-switcher__tab--subtle {
+  padding: 0.65rem 0.75rem;
+  border-radius: 16px;
+  border-color: rgba(221, 229, 238, 0.88);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: none;
+}
+.marketing-root .marketing-switcher__tab--subtle:hover,
+.marketing-root .marketing-switcher__tab--subtle:focus-visible {
+  border-color: rgba(178, 192, 208, 0.9);
+  box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
+}
+.marketing-root .marketing-switcher__tab--subtle.is-active {
+  border-color: rgba(152, 170, 190, 0.9);
+  background: rgba(248, 251, 255, 0.95);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.06);
+}
+.marketing-root .marketing-switcher__tab--subtle .marketing-switcher__tab-step {
+  min-height: 1.6rem;
+  min-width: 2rem;
+  padding: 0 0.5rem;
+  background: rgba(226, 232, 240, 0.7);
+  color: #526377;
+  font-size: 0.68rem;
+}
+.marketing-root .marketing-switcher__tab--subtle .marketing-switcher__tab-copy strong {
+  font-size: 0.92rem;
+}
+.marketing-root .marketing-switcher__tab--subtle .marketing-switcher__tab-copy span {
+  font-size: 0.82rem;
 }
 .marketing-root .marketing-switcher__tab-step {
   display: inline-flex;
@@ -6644,9 +6678,14 @@ kbd.app-shortcut-badge {
   letter-spacing: -0.04em;
 }
 .marketing-root .marketing-record-mockup__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
+  display: block;
+  margin-top: 0.15rem;
+}
+.marketing-root .marketing-record-mockup__meta-line {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  line-height: 1.6;
 }
 .marketing-root .marketing-record-mockup__meta-item {
   display: inline-flex;
@@ -6688,10 +6727,12 @@ kbd.app-shortcut-badge {
   gap: 0.28rem;
   padding: 0.9rem 1rem;
   border-radius: 18px;
-  background: rgba(248, 250, 252, 0.94);
+  border: 1px solid rgba(226, 232, 240, 0.72);
+  background: rgba(248, 250, 252, 0.82);
 }
 .marketing-root .marketing-record-mockup__summary-row.is-changed {
-  background: rgba(254, 249, 195, 0.58);
+  border-color: rgba(226, 232, 240, 0.92);
+  background: rgba(254, 249, 195, 0.32);
 }
 .marketing-root .marketing-record-mockup__summary-row strong {
   font-size: 1.08rem;
@@ -6702,7 +6743,8 @@ kbd.app-shortcut-badge {
   gap: 0.7rem;
   padding: 1rem 1.05rem;
   border-radius: 22px;
-  background: rgba(239, 246, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  background: rgba(248, 250, 252, 0.9);
 }
 .marketing-root .marketing-record-mockup__update-head,
 .marketing-root .marketing-record-mockup__update-note-head {
@@ -6724,22 +6766,33 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-record-mockup__update-note {
   display: grid;
   gap: 0.3rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(191, 219, 254, 0.72);
+  padding-top: 0.5rem;
+  border-top: 1px dashed rgba(203, 213, 225, 0.7);
 }
 .marketing-root .marketing-record-mockup__update-note .app-subtle-note {
   margin: 0;
+  font-size: 0.82rem;
 }
 .marketing-root .marketing-record-mockup__footer {
   display: grid;
   gap: 0.8rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(203, 213, 225, 0.7);
 }
 .marketing-root .marketing-record-mockup__aux {
   min-width: 0;
-  padding: 1rem 1.05rem;
-  border-radius: 22px;
-  background: rgba(247, 250, 252, 0.92);
+  padding: 0.2rem 0;
+  border-radius: 0;
+  background: transparent;
+}
+.marketing-root .marketing-record-mockup__aux .app-stat-value {
+  margin-top: 0.3rem;
+  font-size: 1.1rem;
+}
+.marketing-root .marketing-record-mockup__aux .app-subtle-note {
+  margin-top: 0.2rem;
+  font-size: 0.82rem;
 }
 .marketing-root .marketing-story-header {
   display: grid;
@@ -6847,7 +6900,10 @@ kbd.app-shortcut-badge {
   gap: 1.2rem;
 }
 .marketing-root .marketing-editorial-section--bridge {
-  margin-top: -0.6rem;
+  margin-top: 0.2rem;
+}
+.marketing-root .marketing-editorial-section--flow {
+  padding-top: 0.2rem;
 }
 .marketing-root .marketing-editorial-section--light,
 .marketing-root .marketing-editorial-section--faq {
@@ -6863,20 +6919,20 @@ kbd.app-shortcut-badge {
   display: grid;
   gap: 1px;
   overflow: hidden;
-  border: 1px solid rgba(218, 228, 238, 0.9);
+  border: 1px solid rgba(213, 224, 236, 0.9);
   border-radius: 30px;
-  background: rgba(218, 228, 238, 0.75);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.05);
+  background: rgba(226, 234, 244, 0.55);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.04);
 }
 .marketing-root .marketing-compare-band__column {
-  padding: 1.65rem 1.55rem;
-  background: rgba(255, 255, 255, 0.86);
+  padding: 1.4rem 1.45rem;
+  background: rgba(255, 255, 255, 0.92);
 }
 .marketing-root .marketing-compare-band__column.is-before {
-  background: rgba(255, 247, 247, 0.9);
+  background: rgba(248, 250, 252, 0.96);
 }
 .marketing-root .marketing-compare-band__column.is-after {
-  background: rgba(244, 252, 247, 0.92);
+  background: rgba(244, 248, 252, 0.96);
 }
 .marketing-root .marketing-fit-list {
   display: grid;
@@ -7454,9 +7510,11 @@ kbd.app-shortcut-badge {
   .marketing-root .marketing-record-mockup__footer {
     grid-template-columns: minmax(0, 1fr);
   }
-  .marketing-root .marketing-record-mockup__main,
-  .marketing-root .marketing-record-mockup__aux {
+  .marketing-root .marketing-record-mockup__main {
     padding: 1rem;
+  }
+  .marketing-root .marketing-record-mockup__aux {
+    padding: 0.35rem 0;
   }
   .marketing-root .marketing-record-mockup__summary-row {
     padding: 0.82rem 0.92rem;

@@ -1,5 +1,5 @@
 class CustomersController < ApplicationController
-  before_action :set_customer, only: %i[show edit update destroy mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp reorder_tags]
+  before_action :set_customer, only: %i[show edit update destroy pause resume mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp reorder_tags]
   before_action :set_customer_form_collections, only: %i[new create edit update]
 
   def index
@@ -25,7 +25,7 @@ class CustomersController < ApplicationController
       today: all_customers.count(&:follow_up_due_today?),
       upcoming: all_customers.count(&:follow_up_upcoming?),
       overdue: all_customers.count(&:follow_up_overdue?),
-      no_schedule: all_customers.count { |customer| customer.next_follow_up_date.blank? }
+      no_schedule: all_customers.count { |customer| customer.follow_up_reminders_enabled? && customer.next_follow_up_date.blank? }
     }
 
     @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period, @engagement_states)
@@ -224,6 +224,16 @@ class CustomersController < ApplicationController
       metadata: follow_up_metadata(source: "mark_follow_up")
     )
     redirect_to @customer, notice: t("customers.flash.follow_up_marked_today", date: @customer.next_follow_up_date.strftime("%Y-%m-%d"))
+  end
+
+  def pause
+    @customer.update_columns(status: "paused", updated_at: Time.current)
+    redirect_to @customer, notice: t("customers.flash.paused")
+  end
+
+  def resume
+    @customer.update_columns(status: "new", updated_at: Time.current)
+    redirect_to @customer, notice: t("customers.flash.resumed")
   end
 
   def schedule_follow_up
@@ -470,7 +480,6 @@ class CustomersController < ApplicationController
       :email,
       :phone_country_code,
       :phone,
-      :status,
       :customer_level,
       :customer_source,
       :payment_terms,
@@ -655,7 +664,7 @@ class CustomersController < ApplicationController
     when "overdue"
       customers.select(&:follow_up_overdue?)
     when "no_schedule"
-      customers.select { |customer| customer.next_follow_up_date.blank? }
+      customers.select { |customer| customer.follow_up_reminders_enabled? && customer.next_follow_up_date.blank? }
     else
       customers
     end
@@ -808,7 +817,7 @@ class CustomersController < ApplicationController
     risk_customers = customers.count do |customer|
       customer.follow_up_overdue? ||
         customer.follow_up_due_today? ||
-        (customer.next_follow_up_date.blank? && active_quotes_collection(customer.quotes).any?)
+        (customer.follow_up_reminders_enabled? && customer.next_follow_up_date.blank?)
     end
 
     [
@@ -1036,7 +1045,7 @@ class CustomersController < ApplicationController
       }
     end
 
-    customers.select { |customer| high_value_customer?(customer, metrics) && stalled_customer?(customer) }.first(3).each do |customer|
+    customers.select { |customer| customer.follow_up_reminders_enabled? && high_value_customer?(customer, metrics) && stalled_customer?(customer) }.first(3).each do |customer|
       items << {
         priority: "urgent",
         title: I18n.t("dashboard.logic.action.high_value_stalled_title", name: customer.name),
@@ -1047,7 +1056,7 @@ class CustomersController < ApplicationController
       }
     end
 
-    customers.select { |customer| customer.last_follow_up_date.blank? || customer.last_follow_up_date < Date.current - 14.days }.first(3).each do |customer|
+    customers.select { |customer| customer.follow_up_reminders_enabled? && (customer.last_follow_up_date.blank? || customer.last_follow_up_date < Date.current - 14.days) }.first(3).each do |customer|
       items << {
         priority: "watch",
         title: I18n.t("dashboard.logic.action.no_recent_follow_up_title", name: customer.name),
@@ -1058,7 +1067,7 @@ class CustomersController < ApplicationController
       }
     end
 
-    customers.select { |customer| customer.next_follow_up_date.blank? }.first(2).each do |customer|
+    customers.select { |customer| customer.follow_up_reminders_enabled? && customer.next_follow_up_date.blank? }.first(2).each do |customer|
       items << {
         priority: "normal",
         title: I18n.t("dashboard.logic.action.no_follow_up_schedule_title", name: customer.name),
@@ -1533,6 +1542,8 @@ class CustomersController < ApplicationController
   end
 
   def follow_up_text_for(customer)
+    return I18n.t("customers.logic.follow_up_text.no_active_quote") unless customer.follow_up_reminders_enabled?
+
     if customer.follow_up_overdue?
       I18n.t("customers.logic.follow_up_text.overdue")
     elsif customer.follow_up_due_today?
@@ -1545,6 +1556,10 @@ class CustomersController < ApplicationController
   end
 
   def follow_up_primary_action_for(customer)
+    unless customer.follow_up_reminders_enabled?
+      return { label: I18n.t("customers.logic.follow_up_primary_action.create_quote"), path: new_customer_quote_path(customer), method: :get }
+    end
+
     if customer.follow_up_overdue? || customer.follow_up_due_today?
       { label: I18n.t("customers.logic.follow_up_primary_action.mark_followed_today"), path: mark_follow_up_customer_path(customer), method: :post }
     elsif customer.next_follow_up_date.blank?
@@ -1558,7 +1573,9 @@ class CustomersController < ApplicationController
     customers.each_with_object({}) do |customer, hash|
       metrics_data = metrics.fetch(customer)
       signal =
-        if customer.follow_up_overdue?
+        if !customer.follow_up_reminders_enabled?
+          { label: I18n.t("customers.logic.row_signal.no_active_quote"), klass: "is-muted", row_risk: "risk-low", reason: I18n.t("customers.logic.row_signal.no_active_quote_detail") }
+        elsif customer.follow_up_overdue?
           { label: I18n.t("customers.logic.row_signal.follow_today"), klass: "is-danger", row_risk: "risk-high", reason: I18n.t("customers.logic.row_signal.overdue_follow_up") }
         elsif customer.follow_up_due_today?
           { label: I18n.t("customers.logic.row_signal.contact_now"), klass: "is-today", row_risk: "risk-medium", reason: I18n.t("customers.logic.row_signal.due_today") }
@@ -1586,6 +1603,8 @@ class CustomersController < ApplicationController
   def build_follow_up_tasks(customer, quote_cards)
     tasks = []
     today = Date.current
+
+    return tasks unless customer.follow_up_reminders_enabled?
 
     if customer.next_follow_up_date.blank?
       tasks << {

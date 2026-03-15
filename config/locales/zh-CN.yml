@@ -1,2594 +1,3435 @@
 zh-CN:
   app:
-    brand_name: "Rubusoo"
+    brand_name: Rubusoo
   notifications:
-    title: "通知"
-    mark_all_read: "全部标记已读"
-    empty: "暂无新通知"
-    open_link: "查看"
+    title: 通知
+    mark_all_read: 全部标记已读
+    empty: 暂无新通知
+    open_link: 查看
     time_ago: "%{time}前"
-    aria_label: "通知（%{count} 条未读）"
+    aria_label: 通知（%{count} 条未读）
     messages:
-      quote_viewed: "买家已查看 %{quote_no}（%{customer_name}）"
-      quote_accepted: "买家已接受 %{quote_no}（%{customer_name}）"
-      quote_revision_requested: "买家对 %{quote_no} 提出了修订请求（%{customer_name}）"
+      quote_viewed: 买家已查看 %{quote_no}（%{customer_name}）
+      quote_accepted: 买家已接受 %{quote_no}（%{customer_name}）
+      quote_revision_requested: 买家已就 %{quote_no} 提出修订请求（%{customer_name}）
   engagement:
-    hot: "热门"
-    warm: "温热"
-    cold: "冷淡"
+    hot: 高意向
+    warm: 有意向
+    cold: 低意向
     points: "%{count} 分"
     panel:
-      title: "互动详情"
-      view_count: "总查看次数"
-      revision_requests: "修订请求"
-      avg_view_time: "平均查看时长"
-      score: "互动评分"
-      not_available: "暂无"
+      title: 互动详情
+      view_count: 总查看次数
+      revision_requests: 修订请求
+      avg_view_time: 平均查看时长
+      score: 互动评分
+      not_available: 暂无
   action_items:
     follow_up_due:
-      label: "%{reference} 已到跟进时间。"
-      cta: "打开客户"
+      label: "%{reference} 到了该跟进的时候。"
+      cta: 查看客户
     win_reason_missing:
       label: "%{reference} 已赢单但缺少赢单原因。"
-      cta: "补充原因"
+      cta: 补充原因
     loss_reason_missing:
-      label: "%{reference} 已输单但缺少输单原因。"
-      cta: "补充原因"
+      label: "%{reference} 已丢单但缺少丢单原因。"
+      cta: 补充原因
   signals:
-    default: "常规跟进"
-    revision_requested: "客户请求修订"
-    expiring_soon: "报价即将到期"
-    quote_expiring: "报价即将到期"
-    hot_engagement: "高热度互动"
-    hot_engagement_no_follow_up: "高热度互动但未跟进"
-    viewed_no_follow_up: "已查看但未跟进"
-    not_viewed: "报价未被查看"
-    not_viewed_3d: "发送后 3 天仍未查看"
-    not_viewed_7d: "发送后 7 天仍未查看"
-    stalled_negotiation: "谈判停滞"
+    default: 常规跟进
+    revision_requested: 客户请求修订
+    expiring_soon: 报价即将到期
+    quote_expiring: 报价即将到期
+    hot_engagement: 高意向
+    hot_engagement_no_follow_up: 高意向但未跟进
+    viewed_no_follow_up: 已查看但未跟进
+    not_viewed: 报价未被查看
+    not_viewed_3d: 发送后 3 天仍未查看
+    not_viewed_7d: 发送后 7 天仍未查看
+    stalled_negotiation: 谈判停滞
     detail:
-      default: "请检查报价动态并推进商机。"
-      revision_requested: "客户请求了修改，请尽快准备修订版。"
-      expiring_soon: "报价将在 %{days} 天内到期。"
-      hot_engagement_no_follow_up: "客户已查看该报价 %{count} 次，但近期没有跟进记录。"
-      viewed_no_follow_up: "客户已查看该报价 %{count} 次，建议趁热跟进。"
-      not_viewed_3d: "报价已发送 %{days} 天，仍未被查看。"
-      not_viewed_7d: "报价已发送 %{days} 天，仍未被查看。"
-      stalled_negotiation: "谈判已停滞 %{days} 天。"
+      default: 请检查报价活动并推进商机。
+      revision_requested: 客户提出了修改需求，请尽快准备修订版。
+      expiring_soon: 报价将在 %{days} 天内到期。
+      hot_engagement_no_follow_up: 客户已查看该报价 %{count} 次，但近期没有跟进记录。
+      viewed_no_follow_up: 客户已查看该报价 %{count} 次，建议趁热跟进。
+      not_viewed_3d: 报价已发送 %{days} 天，仍未被查看。
+      not_viewed_7d: 报价已发送 %{days} 天，仍未被查看。
+      stalled_negotiation: 谈判已停滞 %{days} 天。
   actions:
-    follow_up: "立即跟进"
-    follow_up_now: "马上跟进"
-    renew_quote: "更新报价"
-    send_reminder: "发送提醒"
-    resend_reminder: "再次提醒"
-    prepare_revision: "准备修订版"
+    follow_up: 立即跟进
+    follow_up_now: 马上跟进
+    renew_quote: 更新报价
+    send_reminder: 发送提醒
+    resend_reminder: 再次提醒
+    prepare_revision: 准备修订版
   price_intelligence:
-    average_price: "平均报价"
+    average_price: 平均报价
     based_on_count:
-      one: "1 个报价"
+      one: 1 个报价
       other: "%{count} 个报价"
-    recent_quotes: "近期报价"
-    quote_no: "报价编号"
-    unit_price: "单价"
-    qty: "数量"
-    date: "日期"
+    recent_quotes: 近期报价
+    quote_no: 报价编号
+    unit_price: 单价
+    qty: 数量
+    date: 日期
   nav:
-    home: "首页"
-    dashboard: "仪表盘"
-    customers: "客户"
-    products: "产品"
-    product_presets: "预设"
-    presets: "预设"
-    template: "模板"
-    team: "团队"
-    admin: "管理后台"
-    start_free: "免费开始"
-    login: "登录"
+    home: 首页
+    dashboard: 工作台
+    customers: 客户
+    products: 产品
+    product_presets: 预设
+    presets: 预设
+    template: 模板
+    team: 团队
+    admin: 管理后台
+    start_free: 免费开始
+    login: 登录
   account:
-    menu: "账户"
-    settings: "设置"
-    workspace: "工作区"
-    account_settings: "账户设置"
-    company_settings: "公司设置"
-    team_management: "团队管理"
-    template_settings: "模板设置"
+    menu: 账户
+    settings: 设置
+    workspace: 工作台
+    account_settings: 账户设置
+    company_settings: 公司设置
+    team_management: 团队管理
+    template_settings: 模板设置
     my_invitations:
-      one: "我的邀请（%{count}）"
-      other: "我的邀请（%{count}）"
-    logout: "退出登录"
+      one: 我的邀请（%{count}）
+      other: 我的邀请（%{count}）
+    logout: 退出登录
   locale:
-    switcher: "语言"
-    switcher_short: "语言"
-    switcher_label: "语言切换"
+    switcher: 语言
+    switcher_short: 语言
+    switcher_label: 语言切换
   datetime:
     ago: "%{time}前"
     distance_in_words:
-      half_a_minute: "半分钟"
+      half_a_minute: 半分钟
       less_than_x_seconds:
-        one: "不到1秒"
-        other: "不到%{count}秒"
+        one: 不到1秒
+        other: 不到%{count}秒
       x_seconds:
-        one: "1秒"
+        one: 1秒
         other: "%{count}秒"
       less_than_x_minutes:
-        one: "不到1分钟"
-        other: "不到%{count}分钟"
+        one: 不到1分钟
+        other: 不到%{count}分钟
       x_minutes:
-        one: "1分钟"
+        one: 1分钟
         other: "%{count}分钟"
       about_x_hours:
-        one: "约1小时"
-        other: "约%{count}小时"
+        one: 约1小时
+        other: 约%{count}小时
       x_days:
-        one: "1天"
+        one: 1天
         other: "%{count}天"
       about_x_months:
-        one: "约1个月"
-        other: "约%{count}个月"
+        one: 约1个月
+        other: 约%{count}个月
       x_months:
-        one: "1个月"
+        one: 1个月
         other: "%{count}个月"
       about_x_years:
-        one: "约1年"
-        other: "约%{count}年"
+        one: 约1年
+        other: 约%{count}年
       over_x_years:
-        one: "超过1年"
-        other: "超过%{count}年"
+        one: 超过1年
+        other: 超过%{count}年
       almost_x_years:
-        one: "将近1年"
-        other: "将近%{count}年"
+        one: 将近1年
+        other: 将近%{count}年
   dashboard:
     onboarding:
       quick_start:
-        title: "快速开始"
-        subtitle: "几分钟内发出你的第一份报价。"
-        progress: "已完成 %{count}/%{total} 步"
-        shortcut_hint: "快捷方式："
-        shortcut_help: "查看快捷键"
-        shortcut_palette: "打开命令面板"
-        dismiss: "关闭"
-        done: "已完成"
-        waiting: "等待买家查看"
+        title: 快速开始
+        subtitle: 几分钟内发出你的第一份报价。
+        progress: 已完成 %{count}/%{total} 步
+        shortcut_hint: 快捷方式：
+        shortcut_help: 查看快捷键
+        shortcut_palette: 打开命令面板
+        dismiss: 关闭
+        done: 已完成
+        waiting: 等待买家查看
         steps:
+          account_profile:
+            label: 完善账户资料
+            detail: 先补齐头像、显示名称、电话和时区，再对外发送报价。
+            action: 打开账户设置
+          company_profile:
+            label: 完善公司资料
+            detail: 设置公司 Logo、电话和品牌色，让公开报价更专业。
+            action: 打开公司设置
           customer:
-            label: "添加第一个客户"
-            detail: "客户就是你要发送报价的公司。"
-            action: "创建客户"
+            label: 添加第一个客户
+            detail: 客户就是你要发送报价的公司。
+            action: 创建客户
           product:
-            label: "添加产品"
-            detail: "先维护常用产品，报价会更快。"
-            action: "添加产品"
+            label: 添加产品
+            detail: 先维护常用产品，报价会更快。
+            action: 添加产品
           quote:
-            label: "创建第一份报价"
-            detail: "从客户账户里创建第一份报价。"
-            action: "创建报价"
+            label: 创建第一份报价
+            detail: 从客户账户里创建第一份报价。
+            action: 创建报价
           shared:
-            label: "分享报价"
-            detail: "生成公开链接并发送给买家。"
-            action: "打开客户列表"
+            label: 分享报价
+            detail: 生成分享链接并发送给买家。
+            action: 查看客户列表
           viewed:
-            label: "买家已查看报价"
-            detail: "当系统记录到买家访问后，此步骤自动完成。"
+            label: 买家已查看报价
+            detail: 当系统记录到买家访问后，此步骤自动完成。
       quick_create:
-        title: "快速创建"
-        subtitle: "一步直达下一步操作。"
-        new_customer: "新建客户"
-        new_product: "新建产品"
-        new_quote: "新建报价"
+        title: 快速创建
+        subtitle: 一步直达下一步操作。
+        new_customer: 新建客户
+        new_product: 新建产品
+        new_quote: 新建报价
     view:
       index:
-        title: "仪表盘"
-        subtitle: "在一个页面里查看商机进展、跟进工作量和报价活动。"
-        kpi_period: "KPI 周期"
-        weekly: "每周"
-        monthly: "每月"
-        operating_snapshot: "运营快照"
-        operating_snapshot_caption: "当前需要关注的事项，以及本周期的关键销售信号。"
-        overdue_followups: "逾期跟进"
-        due_today: "今日到期"
-        high_value_stalled: "高价值停滞"
-        accepted: "已接受"
-        revision_requests: "要求修订"
-        negotiating_stale: "谈判超过 7 天"
-        no_immediate_risk: "当前无紧急跟进信号。"
-        action_required: "需处理事项（%{count}）"
-        action_overview: "处理概览（%{count}）"
+        title: 工作台
+        subtitle: 在一个页面里查看商机进展、跟进情况和报价活动。
+        kpi_period: KPI 周期
+        weekly: 每周
+        monthly: 每月
+        operating_snapshot: 重点事项
+        operating_snapshot_caption: 当前最需要关注的事项与本周期的重要动态。
+        overdue_followups: 逾期跟进
+        due_today: 今日到期
+        high_value_stalled: 高价值停滞
+        accepted: 已接受
+        revision_requests: 要求修订
+        negotiating_stale: 谈判超过 7 天
+        no_immediate_risk: 当前没有紧急跟进风险。
+        action_required: 待处理事项（%{count}）
+        action_overview: 优先级概览（%{count}）
         risk_customers: "%{count} 个客户需要跟进"
         stalled_negotiations: "%{count} 个停滞谈判"
-        no_customer_or_decision_risk: "当前无跟进或决策压力"
-        handle_overdue_first: "优先处理逾期和停滞账户。"
-        jump_to_action_items: "查看可处理事项（%{count}）"
-        sales_signals: "销售态势"
-        this_month: "本月"
-        this_week: "本周"
-        outcome_signals: "结果信号"
-        revision_requested: "已请求修订"
-        pressure_signals: "跟进压力"
-        reopened: "已重开"
-        attention_signal: "关注信号"
-        public_actionable: "等待客户动作"
-        awaiting_client_decision: "等待客户决策"
-        open_deals: "进行中商机"
-        quotes_this_period: "本%{period}报价"
-        period_month: "月"
-        period_week: "周"
-        pending_followups: "待跟进"
-        today_focus: "今日重点"
-        top_priority: "最高优先级"
-        secondary: "次级"
-        show_more: "显示更多（%{count}）"
-        show_less: "收起"
-        no_high_priority_actions: "今天没有高优先级事项。"
-        deal_radar: "商机雷达"
+        no_customer_or_decision_risk: 当前无跟进或决策压力
+        handle_overdue_first: 优先处理逾期和停滞的客户。
+        jump_to_action_items: 查看待处理事项（%{count}）
+        sales_signals: 销售信号
+        this_month: 本月
+        this_week: 本周
+        outcome_signals: 结果信号
+        revision_requested: 已请求修订
+        pressure_signals: 跟进重点
+        reopened: 已重开
+        attention_signal: 重点信号
+        public_actionable: 待客户处理
+        awaiting_client_decision: 等待客户决策
+        open_deals: 活跃商机
+        quotes_this_period: 本%{period}报价
+        period_month: 月
+        period_week: 周
+        pending_followups: 待跟进
+        today_focus: 今日重点
+        top_priority: 最高优先级
+        secondary: 次级
+        show_more: 显示更多（%{count}）
+        show_less: 收起
+        no_high_priority_actions: 今天没有高优先级事项。
+        deal_radar: 商机看板
         deal_radar_count:
-          one: "%{count} 条活跃信号"
-          other: "%{count} 条活跃信号"
-        deal_radar_empty: "当前没有紧急商机信号。"
-        view_quote: "查看报价"
-        recent_quotes: "最新报价"
-        recent_quotes_caption: "展示活跃账户中最近 6 条报价。"
-        quote: "报价"
-        buyer: "客户"
-        status: "状态"
-        engagement: "互动"
-        next_move: "下一步"
-        total: "总额"
-        no_quotes_yet: "暂无报价"
-        no_quotes_yet_body: "创建第一条报价后，即可开始跟踪进展、互动和提醒。"
-        new_quote: "新建报价"
-        deal_overview: "商机概览"
-        deal_overview_caption: "活跃商机的进展、产品结构和周期质量。"
-        top_product: "热门产品"
-        last_30_days_quotes: "最近 30 天 • %{count} 条报价"
-        average_quote_cycle: "平均报价周期"
+          one: "%{count} 个活跃商机"
+          other: "%{count} 个活跃商机"
+        deal_radar_empty: 当前没有紧急商机动态。
+        view_quote: 查看报价
+        recent_quotes: 最新报价
+        recent_quotes_caption: 展示活跃客户中最近 6 条报价。
+        quote: 报价
+        buyer: 买家
+        status: 状态
+        engagement: 互动
+        next_move: 建议动作
+        total: 总额
+        no_quotes_yet: 暂无报价
+        no_quotes_yet_body: 创建第一条报价后，即可开始跟踪动态、互动和提醒。
+        new_quote: 创建报价
+        deal_overview: 商机概览
+        deal_overview_caption: 活跃商机的进展、产品结构与报价周期健康度。
+        top_product: 重点产品
+        last_30_days_quotes: 最近 30 天 • %{count} 条报价
+        average_quote_cycle: 平均报价周期
         closed_deals: "%{count} 个已关闭商机"
         days_value: "%{count} 天"
-        revision_rate: "修订率"
-        active_quotes: "活跃报价"
-        document_mix: "文档结构"
-        quotation_vs_pi: "Quotation 与 PI"
-        top_quoted_products: "报价最多的产品"
-        top_quoted_products_caption: "基于每个产品的独立报价数。"
-        product: "产品"
-        quoted: "被报价次数"
-        won: "赢单数"
-        last_quoted: "最近报价"
-        open_product: "打开产品 %{name}"
-        no_product_activity: "暂无产品活跃数据"
-        no_product_activity_body: "当产品开始出现在有效报价中后，这里会显示统计。"
-        reminder_queue: "提醒队列"
-        reminder_queue_caption: "发送后 48 小时仍未查看的报价。"
-        sent: "发送时间"
-        count: "次数"
-        quotation: "报价单"
-        open_quote: "打开报价 %{no}"
-        no_reminders_pending: "暂无待提醒报价"
-        no_reminders_pending_body: "当已发送报价长时间未读时，会显示在此供跟进。"
+        revision_rate: 修订率
+        active_quotes: 活跃报价
+        document_mix: 文档结构
+        quotation_vs_pi: 报价单与 PI
+        top_quoted_products: 报价最多的产品
+        top_quoted_products_caption: 基于每个产品的独立报价数。
+        product: 产品
+        quoted: 被报价次数
+        won: 赢单数
+        last_quoted: 最近报价
+        open_product: 查看产品 %{name}
+        no_product_activity: 暂无产品活跃数据
+        no_product_activity_body: 当产品开始出现在活跃报价中后，这里会显示统计数据。
+        reminder_queue: 提醒队列
+        reminder_queue_caption: 发送后 48 小时仍未查看的报价。
+        sent: 发送时间
+        count: 次数
+        quotation: 报价单
+        open_quote: 查看报价 %{no}
+        no_reminders_pending: 暂无待提醒报价
+        no_reminders_pending_body: 当已发送报价长时间未读时，会显示在此供你跟进。
       quote_funnel:
-        title: "报价漏斗"
-        caption: "当前报价线程数量与转化率。"
-        sent: "已发送"
-        viewed: "已查看"
-        revisions: "修订"
-        accepted: "已接受"
-        lost: "已丢单"
+        title: 报价漏斗
+        caption: 当前报价线程数量与转化率。
+        sent: 已发送
+        viewed: 已查看
+        revisions: 修订
+        accepted: 已接受
+        lost: 已丢单
       action_items:
-        title: "需处理事项"
-        system_title: "系统待办"
-        system_note: "这里只保留系统要求尽快处理的事项，经营建议已收口到今日重点。"
+        title: 需要处理
+        system_title: 设置清单
+        system_note: 这里只显示与设置相关的事项。销售建议会归类到“今日重点”。
         open_items: "%{count} 个未处理事项"
-        open: "打开"
-        mark_handled: "标记已处理"
-        more_open_items_in_queue: "队列中还有 %{count} 个未处理事项。"
-        no_unresolved: "当前没有未处理事项，报价流程状态良好。"
+        open: 打开
+        mark_handled: 标记为已处理
+        more_open_items_in_queue: 队列中还有 %{count} 个未处理事项。
+        no_unresolved: 当前没有未处理事项，报价流程状态良好。
       performance_reports:
-        sales_ownership: "销售归属"
-        sales_ownership_caption: "按内部负责人查看客户负载与报价结果。"
+        sales_ownership: 负责人负载
+        sales_ownership_caption: 按内部负责人查看客户负载和报价结果。
         accounts: "%{count} 个账户"
-        open_won: "%{open} 进行中 • %{won} 已赢单"
+        open_won: "%{open} 活跃中 • %{won} 已赢单"
         threads: "%{count} 条线程"
-        win_rate: "赢单率 %{rate}%"
+        win_rate: 赢单率 %{rate}%
         overdue: "%{count} 个逾期"
-        latest: "最近"
-        showing_top_owners: "按当前报价负载与结果，仅展示前 %{count} 位负责人。"
-        assign_internal_owners: "先为客户分配内部负责人，这里才会显示归属负载。"
-        customer_portfolio: "客户组合"
-        customer_portfolio_caption: "按进行中与赢单报价线程排序的活跃客户。"
-        follow_up_overdue: "跟进逾期"
-        follow_up_normal: "跟进正常"
+        latest: 最近
+        showing_top_owners: 按当前报价负载与结果，仅展示前 %{count} 位负责人。
+        assign_internal_owners: 先为客户分配内部负责人，这里才会显示归属负载。
+        customer_portfolio: 客户组合
+        customer_portfolio_caption: 按活跃中和赢单报价线程排序的核心客户。
+        follow_up_overdue: 跟进逾期
+        follow_up_normal: 跟进正常
         open: "%{count} 进行中"
         won: "%{count} 已赢单"
-        showing_top_accounts: "按活跃报价表现展示前 %{count} 个客户。"
-        customer_portfolio_empty: "报价活跃后，这里会显示客户组合数据。"
+        showing_top_accounts: 按活跃报价表现展示前 %{count} 个客户。
+        customer_portfolio_empty: 报价活跃后，这里会显示客户组合数据。
     logic:
       action_items:
-        quote_viewed: "买家已查看 %{reference}。请趁热跟进。"
+        quote_viewed: 买家已查看 %{reference}。请趁热跟进。
         quote_not_viewed: "%{reference} 发送后 3 天仍未查看。"
         quote_expiring: "%{reference} 即将到期。"
-        revision_requested: "买家对 %{reference} 提出了修改请求。"
-      not_enough_data: "暂无数据"
-      export_mix_zero: "Quotation 0% / PI 0%"
-      export_mix: "Quotation %{quotation}% / PI %{pi}%"
-      follow_up_interval: "跟进间隔：%{state}"
-      unknown_customer: "未识别客户"
-      default_currency: "USD"
-      operational_risk: "跟进压力"
+        revision_requested: 买家对 %{reference} 提出了修改请求。
+      not_enough_data: 暂无足够数据
+      export_mix_zero: 报价单 0% / PI 0%
+      export_mix: 报价单 %{quotation}% / PI %{pi}%
+      follow_up_interval: 跟进间隔：%{state}
+      unknown_customer: 未识别客户
+      default_currency: USD
+      operational_risk: 跟进风险
       accounts: "%{count} 个账户"
-      follow_up_pressure_attention: "跟进压力需要关注。"
-      no_urgent_account_risk: "当前无紧急跟进压力。"
-      momentum: "进展"
-      active_quotes_touched: "过去 7 天有动作的活跃报价。"
-      no_active_quotes_yet: "暂无活跃报价。"
-      observed_engagement: "已记录互动"
-      quotes_with_view_evidence: "有客户查看记录的报价。"
-      no_viewable_quote_evidence: "暂无客户查看记录。"
-      period_month: "月"
-      period_week: "周"
+      follow_up_pressure_attention: 跟进量较高。
+      no_urgent_account_risk: 当前无紧急跟进压力。
+      momentum: 进展
+      active_quotes_touched: 过去 7 天有动作的活跃报价。
+      no_active_quotes_yet: 暂无活跃报价。
+      observed_engagement: 已记录互动
+      quotes_with_view_evidence: 有客户查看记录的报价。
+      no_viewable_quote_evidence: 暂无客户查看记录。
+      period_month: 月
+      period_week: 周
       trend_vs_last_period: "%{value}% 对比上%{period}"
       health:
-        risk: "风险"
-        watch: "关注"
-        stable: "稳定"
+        risk: 风险
+        watch: 关注
+        stable: 稳定
       health_band:
-        within: "处于健康区间"
-        below: "低于目标"
-        above: "高于理想区间"
+        within: 处于健康区间
+        below: 低于目标
+        above: 高于理想区间
       next_action:
-        send_reminder: "发送提醒"
-        create_revision: "创建修订"
-        push_to_close: "推进成交"
-        follow_up_now: "立即跟进"
-        review: "查看"
+        send_reminder: 发送提醒
+        create_revision: 创建修订
+        push_to_close: 推进成交
+        follow_up_now: 立即跟进
+        review: 查看
       signal:
-        draft_not_shared: "草稿，尚未发送"
-        send_now: "立即发送"
-        sent_no_view_3d: "已发送，3 天未查看"
-        check_quote: "查看报价"
-        sent_awaiting_view: "已发送，等待查看"
-        check_signal: "查看信号"
-        viewed_in_negotiation: "已查看，谈判中"
-        viewed: "已查看"
-        follow_up_today: "今日跟进"
-        decision_recorded: "已记录决策"
-        review: "查看"
-        closed_lost: "已丢单"
-        expired: "已过期"
-        create_revision: "创建修订"
-        no_active_signal: "暂无活跃信号"
+        draft_not_shared: 草稿，尚未发送
+        send_now: 立即发送
+        sent_no_view_3d: 已发送，3 天未查看
+        check_quote: 查看报价
+        sent_awaiting_view: 已发送，等待查看
+        check_signal: 查看信号
+        viewed_in_negotiation: 已查看，谈判中
+        viewed: 已查看
+        follow_up_today: 今日跟进
+        decision_recorded: 已记录决策
+        review: 查看
+        closed_lost: 已丢单
+        expired: 已过期
+        create_revision: 创建修订
+        no_active_signal: 暂无活跃信号
       action:
         follow_up_due_today_title: "%{name}：今日需跟进"
-        follow_up_due_today_detail: "请立即联系并更新下次跟进日期。"
+        follow_up_due_today_detail: 请立即联系并更新下次跟进日期。
         overdue_follow_up_title: "%{name}：跟进逾期"
-        overdue_follow_up_detail: "已逾期 %{days} 天，存在失活高风险。"
+        overdue_follow_up_detail: 已逾期 %{days} 天，流失风险较高。
         high_value_stalled_title: "%{name}：高价值但停滞"
-        high_value_stalled_detail: "报价金额较高且近期无进展，请尽快重新激活。"
+        high_value_stalled_detail: 报价金额较高且近期无进展，建议尽快重新激活。
         no_recent_follow_up_title: "%{name}：近期无跟进"
-        no_recent_follow_up_detail: "14 天以上未跟进，请加入今日触达计划。"
+        no_recent_follow_up_detail: 14 天以上未跟进，请加入今日跟进计划。
         no_follow_up_schedule_title: "%{name}：未设置跟进计划"
-        no_follow_up_schedule_detail: "请设置下一次触达，避免商机下滑。"
+        no_follow_up_schedule_detail: 请设置下一次跟进，避免错过推进时机。
         negotiating_stalled_title: "%{name}：谈判停滞"
         negotiating_stalled_detail: "%{days} 天未更新，请推进下一版修订或确认决策。"
-        open_customer: "打开客户"
-        open_quote: "打开报价"
+        open_customer: 查看客户
+        open_quote: 查看报价
+    performance_reports:
+      sales_ownership_caption: 按内部负责人查看客户负载与报价结果。
+      showing_top_owners: 按当前报价负载和结果，仅展示前 %{count} 位负责人。
+      assign_internal_owners: 先为客户分配内部负责人，这里才会显示归属负载。
+      customer_portfolio_caption: 按活跃中与赢单报价线程排序的客户。
+      showing_top_accounts: 按活跃报价表现展示前 %{count} 个客户。
   flash:
-    not_authorized: "无权限访问。"
-    verify_email: "请先验证邮箱后再继续。请检查邮件中的验证链接。"
-    action_item_resolved: "事项已标记为已处理。"
+    not_authorized: 无权限访问。
+    verify_email: 请先验证邮箱后再继续。请检查邮件中的验证链接。
+    action_item_resolved: 事项已标记为已处理。
   settings:
-    company: "公司"
-    signed_in_as: "当前登录"
-    company_role: "公司角色"
-    navigation_label: "设置导航"
-    account: "账户"
-    invitations: "邀请"
-    team: "团队"
-    template: "模板"
+    company: 公司
+    signed_in_as: 当前登录
+    company_role: 公司角色
+    navigation_label: 设置导航
+    account: 账户
+    invitations: 邀请
+    team: 团队
+    template: 模板
   quotes:
+    errors:
+      valid_until_on_or_after_today: 不能早于今天
     change_summary:
-      header: "修订更新摘要："
+      header: 修订更新摘要：
       quantity_updated: "- %{product} 数量更新：%{before} -> %{after}"
       unit_price_updated: "- %{product} 单价更新：%{before} -> %{after}"
       added_item: "- 新增条目：%{product}"
       removed_item: "- 移除条目：%{product}"
       commercial_updated: "- %{label} 已更新：%{before} -> %{after}"
-      total_updated: "总额更新：%{before} -> %{after}"
+      total_updated: 总额更新：%{before} -> %{after}
     share_message:
       greeting: "%{customer_name}，您好："
-      intro: "请查收我们为您准备的报价单。"
-      quote_line: "报价单号：%{quote_no}"
-      quote_date_line: "报价日期：%{quote_date}"
-      valid_until_line: "有效期至：%{valid_until}"
-      payment_term_line: "付款条款：%{payment_term}"
-      total_line: "总额：%{total}"
-      items_title: "产品概览："
+      intro: 请查收我们为您准备的报价单。
+      quote_line: 报价单号：%{quote_no}
+      quote_date_line: 报价日期：%{quote_date}
+      valid_until_line: 有效期至：%{valid_until}
+      payment_term_line: 付款条款：%{payment_term}
+      total_line: 总额：%{total}
+      items_title: 产品一览：
       item_line: "- %{product} x %{quantity}（%{unit_price}）"
       extra_items_line: "- 以及其余 %{count} 个条目"
-      review_here: "您可以通过以下链接查看："
-      revision_changes_title: "本次修订变更："
-      revision_note: "这是该报价单的更新修订版本。"
-      closing: "如果您需要调整内容或新修订版本，请随时告知我们。"
-      generic_item: "条目"
+      review_here: 您可以通过以下链接查看：
+      revision_changes_title: 本次修订变更：
+      revision_note: 这是该报价单的更新修订版本。
+      closing: 如果您需要调整内容或新修订版本，请随时告知我们。
+      generic_item: 条目
     view:
       new:
-        quote_title: "新建报价草稿"
-        quote_subtitle: "先建立草稿并补全价格，再对外分享给客户。"
-        revision_title: "新建修订草稿"
-        revision_subtitle: "基于 %{quote_no} 创建新修订草稿，调整后再分享。"
+        quote_title: 新建报价草稿
+        quote_subtitle: 先建立草稿并补全价格，再分享给客户。
+        revision_title: 新建修订草稿
+        revision_subtitle: 基于 %{quote_no} 创建新的修订草稿，调整后再重新分享。
       edit:
-        title: "编辑报价草稿"
-        subtitle: "报价 %{quote_no} - 修订 V%{revision}"
-        back_to_quote: "返回报价详情"
+        title: 编辑报价草稿
+        subtitle: 报价 %{quote_no} · 修订 V%{revision}
+        back_to_quote: 返回报价详情
       decision_review:
-        title: "决策评估"
-        subtitle: "在一个屏幕内查看买家意愿、变更范围和下一步动作。"
-        recommended_move: "建议动作"
-        buyer_readiness: "买家意愿"
-        revision_scope: "修订范围"
-        review_notes: "评估备注"
+        title: 决策评估
+        subtitle: 快速查看买家意向、修订范围和建议的下一步。
+        recommended_move: 建议动作
+        buyer_readiness: 买家意向
+        revision_scope: 修订范围
+        review_notes: 备注
       decision_timeline:
-        title: "决策时间线"
-        subtitle: "该版本的关键决策和互动节点。"
-        show_older_events: "显示更早事件（%{count}）"
+        title: 决策时间线
+        subtitle: 该修订版本的关键决策与互动节点。
+        show_older_events: 显示更早事件（%{count}）
       revision_diff:
-        title: "修订对比"
-        compare_versions: "V%{current} 对比 V%{previous}。"
-        copy_change_summary: "复制变更摘要"
-        empty: "这两个修订版本之间未检测到商务或条目级变更。"
-        modified: "已修改"
-        added: "已新增"
-        removed: "已移除"
-        commercial_terms: "商务条款"
-        qty_change: "数量 %{before} -> %{after}"
-        unit_change: "单价 %{before} -> %{after}"
-        qty: "数量 %{value}"
-        unit: "单价 %{value}"
-        total_updated: "总额更新"
+        title: 修订对比
+        compare_versions: 对比 V%{current} 与 V%{previous}。
+        copy_change_summary: 复制变更摘要
+        empty: 这两个修订版本之间未检测到商务或条目级变更。
+        modified: 已修改
+        added: 已新增
+        removed: 已移除
+        commercial_terms: 商务条款
+        qty_change: 数量 %{before} -> %{after}
+        unit_change: 单价 %{before} -> %{after}
+        qty: 数量 %{value}
+        unit: 单价 %{value}
+        total_updated: 总额更新
       show:
         created_banner:
-          title: "报价创建成功。"
-          subtitle: "下一步：把它分享给你的买家。"
-          action: "复制分享链接"
-          link_copied: "链接已复制，粘贴给买家即可。"
-        back_to_customer: "返回客户"
-        superseded_notice: "该报价线程已有更新版本可用。"
-        view_latest_version: "查看最新 V%{revision}"
-        reopened_notice: "该报价已重开，当前可作为草稿继续编辑。"
-        next_action_lost: "该版本已丢单。复盘原因，条件变化后再重启跟进。"
-        next_action_accepted: "买家已接受。请进入交接与履约准备。"
-        next_action_fill_win_reason: "该报价已赢单但未填写原因。请先补充，便于后续复盘。"
-        next_action_fill_loss_reason: "该报价已输单但未填写原因。请先补充，便于后续复盘。"
-        next_action_draft: "草稿进行中。请尽快完善并发送，启动买家互动。"
-        next_action_expired: "报价已过期。创建修订版以重新开启沟通。"
-        next_action_viewed: "买家已查看该报价。建议趁热跟进。"
-        next_action_engaged: "买家在该报价上停留较久。建议围绕价格或条款做定向跟进。"
-        next_action_hot: "已出现高意向信号。建议今天内联系，确认卡点。"
-        next_action_not_viewed: "已分享但尚未查看。可考虑发送提醒。"
-        next_action_revision_requested: "买家已提出 %{count} 次修改请求。请优先推进修订跟进。"
-        urgency_no_expiry: "未设置有效期"
-        urgency_expired: "已过期 %{count} 天"
+          title: 报价创建成功。
+          subtitle: 下一步：把它分享给你的买家。
+          action: 复制分享链接
+          link_copied: 链接已复制，粘贴给买家即可。
+        back_to_customer: 返回客户
+        superseded_notice: 该报价线程已有更新版本可用。
+        view_latest_version: 查看最新 V%{revision}
+        reopened_notice: 该报价已重开，当前可作为草稿继续编辑。
+        next_action_lost: 该版本已丢单。复盘原因，条件变化后再重启跟进。
+        next_action_accepted: 买家已接受报价。请进入交接与履约准备。
+        next_action_fill_win_reason: 该报价已赢单但未填写原因。请先补充，便于后续分析。
+        next_action_fill_loss_reason: 该报价已丢单但未填写原因。请先补充，便于后续分析。
+        next_action_draft: 该草稿仍在编辑中。请尽快完善并分享，启动买家沟通。
+        next_action_expired: 报价已过期。创建修订版以重新开启沟通。
+        next_action_viewed: 买家已查看该报价，建议趁热跟进。
+        next_action_engaged: 买家在该报价上停留较久，建议围绕价格或条款继续跟进。
+        next_action_hot: 已出现高意向信号，建议今天联系并确认卡点。
+        next_action_not_viewed: 已分享但尚未查看，可考虑发送提醒。
+        next_action_revision_requested: 买家已提出 %{count} 次修改请求，请优先推进修订。
+        urgency_no_expiry: 未设置有效期
+        urgency_expired: 已过期 %{count} 天
         urgency_expiring: "%{count} 天后到期"
-        urgency_valid: "还有 %{count} 天有效"
-        momentum: "进展"
-        engagement: "互动"
-        engagement_hot_signal: "高意向 • 已查看 %{count} 次%{duration_suffix}"
-        engagement_warm_signal: "有意向 • 已查看 %{count} 次%{duration_suffix}"
+        urgency_valid: 还有 %{count} 天有效
+        momentum: 商机进展
+        engagement: 互动
+        engagement_hot_signal: 高意向 • 已查看 %{count} 次%{duration_suffix}
+        engagement_warm_signal: 有意向 • 已查看 %{count} 次%{duration_suffix}
         engagement_time_suffix: " • 平均停留 %{duration}"
-        viewed_count: "累计查看 %{count} 次"
-        not_viewed_yet: "尚未查看"
-        next_action: "下一步动作"
-        current_focus: "当前关注"
-        engagement_details: "互动详情"
-        unknown: "未知"
-        time_zone: "时区"
-        sent: "发送时间"
-        last_shared: "最近分享"
-        first_viewed: "首次查看"
-        last_viewed: "最近查看"
-        total_views: "总查看次数"
-        top_countries: "主要国家"
-        top_ips: "主要 IP"
-        recent_accesses: "最近访问"
+        viewed_count: 累计查看 %{count} 次
+        not_viewed_yet: 尚未查看
+        next_action: 下一步动作
+        current_focus: 当前优先事项
+        engagement_details: 互动详情
+        unknown: 未知
+        time_zone: 时区
+        sent: 发送时间
+        last_shared: 最近分享
+        first_viewed: 首次查看
+        last_viewed: 最近查看
+        total_views: 总查看次数
+        top_countries: 主要国家
+        top_ips: 主要 IP
+        recent_accesses: 最近访问
         toolbar:
-          template: "模板"
-          search_template: "搜索模板"
-          send_share: "发送/分享"
-          preview: "预览"
-          preview_no_state_change: "仅预览，不会改变报价状态。"
-          preview_pdf: "PDF 预览"
-          preview_excel: "Excel 预览"
-          preview_excel_download_hint: "部分浏览器会直接下载 Excel 预览文件。"
-          preview_public_link: "公共链接预览"
-          mark_sent: "我已发给客户"
-          export: "导出"
-          download_pdf: "下载 PDF"
-          download_excel: "下载 Excel"
-          edit: "编辑"
-          new_revision: "新建修订"
-          mark_negotiating: "标记交涉中"
+          template: 模板
+          search_template: 搜索模板
+          send_share: 发送 / 分享
+          preview: 预览
+          preview_no_state_change: 仅预览，不会改变报价状态。
+          preview_pdf: PDF 预览
+          preview_excel: Excel 预览
+          preview_excel_download_hint: 部分浏览器会直接下载 Excel 预览文件。
+          preview_public_link: 预览分享链接
+          mark_sent: 我已发送
+          export: 导出
+          download_pdf: 下载 PDF
+          download_excel: 下载 Excel
+          edit: 编辑
+          new_revision: 新建修订
+          mark_negotiating: 标记为谈判中
           status_selector: "状态: %{status}"
-          status_mark_action: "标记：%{status}"
-          status_option_negotiating: "交涉中"
-          status_option_won: "赢单"
-          status_option_lost: "输单"
-          more_status: "更多状态"
-          more_actions: "更多操作"
-          back_to_sent: "回退为已发送"
-          mark_won: "标记赢单"
-          confirm_mark_won: "确认赢单"
-          mark_won_hint: "适用于客户线下确认下单、但没有点公共链接接受的场景。"
-          mark_lost: "标记输单"
-          mark_lost_record: "记录输单"
-          confirm_mark_lost: "确认输单"
-          mark_lost_hint: "记录输单原因，便于后续复盘、定价优化和客户再激活。"
-          reopen_quote: "重开报价"
-          reopen_confirm: "重开后该报价将恢复可编辑，并把当前公开版本标记为过时。客户在分享新版本前无法接受。"
-          copy_reprice: "复制并重定价"
-          quote_operations: "报价操作"
-          add_win_reason: "补赢单原因"
-          add_loss_reason: "补输单原因"
-          save_reason: "保存原因"
-          close_reason_modal: "关闭原因弹窗"
-          fill_win_reason_hint: "请补充赢单原因，便于后续统计可复用的成功模式。"
-          fill_loss_reason_hint: "请补充输单原因，便于团队优化定价、策略与跟进节奏。"
-          switch_to_quotation: "切换为报价单"
-          switch_to_pi: "切换为形式发票"
-          send_reminder: "发送提醒"
-          close_verification: "关闭验证"
-          verify_before_reminder: "发送提醒前请先验证"
-          verify_before_reminder_hint: "请先完成与注册和联系发送相同的安全验证，随后系统会发送提醒邮件。"
-          loading_verification: "验证加载中..."
-          verified_sending: "验证通过，正在发送提醒..."
-          share_public_link: "分享公开链接"
-          open_public_link: "查看公开链接"
-          copy_open_public_link: "复制/打开公开链接"
-          copy_link: "复制链接"
-          open: "打开"
-          delete_quote: "删除报价"
-          delete_confirm: "确定删除整个报价线程 %{quote_no}（含全部修订），并使所有公开链接失效吗？此操作不可撤销。"
-          delete_final_warning: "最终警告：这将使公开链接失效并删除整个报价线程。"
-          delete_prompt: "输入 DELETE 以确认删除报价线程"
-          unable_generate_public_link: "无法生成公开链接"
-          public_link_ready: "公开链接已就绪。"
-          public_link_ready_copied: "公开链接已就绪，已复制到剪贴板。"
-          public_link_ready_manual: "公开链接已就绪，请手动复制。"
-          public_link_copied: "公开链接已复制。"
-          share_failed: "分享失败"
-          link_copied: "链接已复制。"
-          copy_failed_browser: "当前浏览器复制失败。"
-          undo: "撤销"
-          undo_status_change_prefix: "状态已更新"
+          status_mark_action: 标记：%{status}
+          status_option_negotiating: 谈判中
+          status_option_won: 赢单
+          status_option_lost: 丢单
+          more_status: 更多状态
+          more_actions: 更多操作
+          back_to_sent: 恢复为已发送
+          mark_won: 标记赢单
+          confirm_mark_won: 确认赢单
+          mark_won_hint: 当客户已在线下确认、但未在分享链接中点击“接受”时，可使用此项。
+          mark_lost: 标记丢单
+          mark_lost_record: 记录丢单
+          confirm_mark_lost: 确认丢单
+          mark_lost_hint: 记录丢单原因，方便后续复盘价格、定位和再激活机会。
+          reopen_quote: 重开报价
+          reopen_confirm: 重开后该报价将恢复可编辑，并把当前公开版本标记为过时。客户在分享新版本前无法接受。
+          copy_reprice: 复制后改价
+          quote_operations: 报价操作
+          add_win_reason: 补赢单原因
+          add_loss_reason: 补丢单原因
+          save_reason: 保存原因
+          close_reason_modal: 关闭原因弹窗
+          fill_win_reason_hint: 请补充赢单原因，便于后续识别可复用的成功模式。
+          fill_loss_reason_hint: 请补充丢单原因，便于团队优化定价、策略和跟进节奏。
+          switch_to_quotation: 切换为报价单
+          switch_to_pi: 切换为形式发票
+          send_reminder: 发送提醒
+          close_verification: 关闭验证
+          verify_before_reminder: 发送提醒前先完成验证
+          verify_before_reminder_hint: 请先完成与注册和发送联系表单相同的安全验证，随后系统会发送提醒邮件。
+          loading_verification: 验证加载中...
+          verified_sending: 验证通过，正在发送提醒...
+          share_public_link: 分享链接
+          open_public_link: 打开分享链接
+          copy_open_public_link: 复制或打开分享链接
+          copy_link: 复制链接
+          open: 打开
+          delete_quote: 删除报价线程
+          delete_confirm: 确定删除报价线程 %{quote_no}（含全部修订），并让所有分享链接失效吗？此操作不可撤销。
+          delete_final_warning: 最终警告：这会让分享链接失效，并删除整条报价历史。
+          delete_prompt: 输入 DELETE 以确认删除报价线程
+          unable_generate_public_link: 无法生成分享链接
+          public_link_ready: 分享链接已就绪。
+          public_link_ready_copied: 分享链接已就绪，已复制到剪贴板。
+          public_link_ready_manual: 分享链接已就绪，请手动复制。
+          public_link_copied: 分享链接已复制。
+          share_failed: 分享失败
+          link_copied: 链接已复制。
+          copy_failed_browser: 当前浏览器复制失败。
+          undo: 撤销
+          undo_status_change_prefix: 状态已更新
+          search_quote: 搜索报价
         comms:
-          copy_message: "复制分享文案"
-          send_whatsapp: "通过 WhatsApp 发送"
-          no_phone_tooltip: "客户未填写手机号，无法发送 WhatsApp"
-          whatsapp_opened: "已打开 WhatsApp。"
-          message_copied: "分享文案已复制。"
-          editor_label: "分享文案"
-          editor_placeholder: "复制或发送前，可先按客户场景修改文案。"
-          editor_hint: "提示：可补充产品说明、本次修订重点或下一步动作。"
+          copy_message: 复制分享消息
+          send_whatsapp: 通过 WhatsApp 发送
+          no_phone_tooltip: 客户未填写手机号，无法发送 WhatsApp
+          whatsapp_opened: 已打开 WhatsApp。
+          message_copied: 分享文案已复制。
+          editor_label: 分享文案
+          editor_placeholder: 复制或发送前，可先按客户场景修改文案。
+          editor_hint: 建议：按这个客户补充产品、修订变化或下一步安排。
+          subtitle: 复用分享链接供客户在线查看，或直接发送可用的 WhatsApp 消息。
+          copy_link: 复制分享链接
+          title: 分享给客户
+          whatsapp_ready: WhatsApp 可发送
         history:
-          title: "历史记录"
-          subtitle: "修订轨迹与归档操作"
-          revisions_count: "个修订版本"
-          current_updated: "当前更新时间"
-          current: "当前"
-          latest: "最新"
-          archive_revision: "归档 V%{revision}"
-          archive_confirm: "确定从历史中归档修订版 V%{revision} 吗？"
+          title: 历史记录
+          subtitle: 修订轨迹与归档操作
+          revisions_count: 个修订版本
+          current_updated: 当前更新时间
+          current: 当前
+          latest: 最新
+          archive_revision: 归档 V%{revision}
+          archive_confirm: 确定从历史中归档修订版 V%{revision} 吗？
       form:
-        updating: "更新中..."
-        creating: "创建中..."
-        current_status: "当前状态"
-        status: "状态"
-        grand_total: "总计"
-        discount_rate: "折扣率"
-        expiry: "有效期"
-        no_date: "未设置日期"
-        expired: "已过期"
-        days_left: "剩余 %{count} 天"
-        viewed: "已查看"
-        yes: "是"
-        no: "否"
-        error_summary: "有 %{count} 个错误导致报价无法保存："
-        complete_required_fields: "保存前请先完成必填字段。"
-        basic_information: "基础信息"
-        basic_information_hint: "在添加报价行前，先设置文档标识、模板、币种和有效期。"
-        template: "模板"
-        search_template: "搜索模板"
-        quote_date: "报价日期"
-        custom_title: "自定义报价标题（可选）"
-        custom_title_placeholder: "Project Falcon - Q2 设备方案"
-        status_locked_draft: "报价状态不在表单内直接修改。"
-        status_locked_draft_hint: "请回到详情页，通过发送、交涉中、赢单或输单动作推进状态。"
+        updating: 更新中...
+        creating: 创建中...
+        current_status: 当前状态
+        status: 状态
+        grand_total: 总计
+        discount_rate: 折扣率
+        expiry: 有效期
+        no_date: 未设置日期
+        expired: 已过期
+        days_left: 剩余 %{count} 天
+        viewed: 已查看
+        true: 是
+        false: 否
+        error_summary: 有 %{count} 个错误导致报价无法保存：
+        complete_required_fields: 保存前请先完成必填字段。
+        basic_information: 基础信息
+        basic_information_hint: 在添加报价行前，先设置文档标识、模板、币种和有效期。
+        template: 模板
+        search_template: 搜索模板
+        quote_date: 报价日期
+        custom_title: 自定义报价标题（可选）
+        custom_title_placeholder: Project Falcon - Q2 设备方案
+        status_locked_draft: 报价状态不在表单内直接修改。
+        status_locked_draft_hint: 请返回详情页，通过已发送、谈判中、赢单或丢单等动作推进状态。
         status_options:
-          draft: "草稿"
-          sent: "已发送"
-          viewed: "已查看"
-          negotiating: "谈判中"
-          won: "已赢单"
-          lost: "已丢单"
-          expired: "已过期"
-        business_terms: "商务条款"
-        business_terms_hint: "记录买家真正会关注的商务条款。"
-        payment_term_placeholder: "预付 30%，发货前付清 70%"
-        trade_terms: "贸易术语"
-        trade_terms_placeholder: "FOB / CIF / EXW"
-        delivery_notes_placeholder: "交付 / 出口说明"
-        terms: "条款"
-        terms_placeholder: "付款条款、有效期说明等"
-        legal_disclaimer_placeholder: "可选法律声明"
-        internal_information: "内部信息"
-        internal_information_hint: "将内部备注和成交后信息与对客报价内容分离。"
-        internal_notes_placeholder: "内部备注（公开视图不会显示）"
-        final_amount: "最终成交金额"
-        select_win_reason: "选择赢单原因"
-        win_reason_details: "赢单原因详情"
-        win_reason_details_placeholder: "描述具体赢单原因"
-        select_loss_reason: "选择丢单原因"
-        loss_reason_details: "丢单原因详情"
-        loss_reason_details_placeholder: "描述具体丢单原因"
-        manage_reason_dictionary: "维护理由字典"
-        close_reason_dictionary: "关闭理由字典弹窗"
-        reason_dictionary_title: "赢单/输单理由字典"
-        reason_dictionary_hint: "在这里维护标准理由；新增后会立即出现在当前页面下拉选项中。"
-        delete_reason_option: "删除"
-        no_custom_reason_options: "当前没有自定义理由，系统将使用默认理由。"
-        new_reason_label: "新理由名称"
-        new_reason_key: "内部编码（可留空）"
-        reason_key_placeholder: "留空自动生成"
-        reason_key_hint: "仅用于系统内部统计和多语言，不影响页面显示的理由名称；留空会自动生成。"
-        add_reason_option: "新增理由"
-        saving: "保存中..."
-        save_failed: "保存失败，请检查输入。"
-        reason_option_added: "已新增并选中该理由。"
-        network_error: "网络异常，请稍后重试。"
-        delete_reason_option_confirm: "确认删除该理由？"
-        stalled_reason: "停滞 / 压力原因"
-        select_stalled_reason: "选择停滞原因"
-        pressure_reason_details: "压力原因详情"
-        pressure_reason_details_placeholder: "描述具体阻碍或压力来源"
-        totals_inputs: "金额输入"
-        settlement_currency: "结算币种"
-        tax_vat: "税费 / VAT"
-        shipping_handling: "运费 / 处理费"
-        discount: "折扣"
-        remove_discount: "移除折扣"
-        add_discount: "+ 添加折扣"
-        totals: "合计"
-        subtotal: "小计"
-        addons_total: "附加项合计"
-        shipping: "运费"
-        original_total: "原总价"
-        you_save: "节省金额"
-        quote_items: "报价项"
-        quote_items_hint: "可搜索产品、切换预设并编辑规格或附加项，且不丢失报价上下文。"
-        quote_item_hint_1: "输入产品名称进行搜索和自动匹配。若未找到，可继续输入并作为自定义项提交。"
-        quote_item_hint_2: "产品默认价格仅供参考。最终报价应按当前报价币种填写。"
-        quote_item_hint_3: "若产品参考币种与报价币种不同，将不会自动填充单价。"
-        quote_item_hint_4: "规格和附加项可从产品预设加载、切换预设，或按行粘贴文本。"
-        currency_mismatch_warning: "币种不一致警告：单价自动填充将被禁用，需手动输入。"
-        pricing_attention_needed: "保存前请先处理价格相关问题。"
-        product_name: "产品名称"
-        specifications: "规格"
-        add_ons: "附加项"
-        unit_price: "单价"
-        quantity: "数量"
-        remove: "移除"
-        type_to_search_product: "输入以搜索产品"
-        no_specs: "暂无规格"
-        no_add_ons: "暂无附加项"
-        custom_specs: "自定义规格"
-        edit_specs: "编辑规格"
-        close: "关闭"
-        spec_bulk_placeholder: "每行一项，例如：\n功率: 5kW\n电压: 220V"
-        apply_text: "应用文本"
-        spec_key_placeholder: "例如：功率"
-        spec_value_placeholder: "例如：5kW"
-        remove_specification: "移除规格"
-        add_spec: "+ 规格"
-        clear_all: "清空"
-        custom_add_ons: "自定义附加项"
-        edit_add_ons: "编辑附加项"
-        addon_bulk_placeholder: "每行一项，例如：\n包装: 30\n安装 = 120"
-        addon_name_placeholder: "例如：包装"
-        remove_add_on: "移除附加项"
-        add_add_on: "+ 附加项"
-        reference_price_mismatch: "参考价币种为 %{product_currency}，不会自动带入 %{quote_currency}。请手动输入当前报价币种的单价。"
-        no_exact_match_saved_as_custom: "未找到完全匹配产品，已按自定义项目保存。"
-        remove_item: "移除项目"
-        add_item: "添加项目"
-        update_quote: "更新报价"
-        create_quote: "创建报价"
+          draft: 草稿
+          sent: 已发送
+          viewed: 已查看
+          negotiating: 谈判中
+          won: 已赢单
+          lost: 已丢单
+          expired: 已过期
+        business_terms: 商务条款
+        business_terms_hint: 记录买家真正会关注的商务条款。
+        payment_term_placeholder: 预付 30%，发货前付清 70%
+        trade_terms: 贸易术语
+        trade_terms_placeholder: FOB / CIF / EXW
+        delivery_notes_placeholder: 交付 / 出口说明
+        terms: 条款
+        terms_placeholder: 付款条款、有效期说明等
+        legal_disclaimer_placeholder: 可选法律声明
+        internal_information: 内部信息
+        internal_information_hint: 将内部备注和成交后信息与对客报价内容分离。
+        internal_notes_placeholder: 内部备注（公开视图不会显示）
+        final_amount: 最终成交金额
+        select_win_reason: 选择赢单原因
+        win_reason_details: 赢单原因详情
+        win_reason_details_placeholder: 描述具体赢单原因
+        select_loss_reason: 选择丢单原因
+        loss_reason_details: 丢单原因详情
+        loss_reason_details_placeholder: 描述具体丢单原因
+        manage_reason_dictionary: 维护理由字典
+        close_reason_dictionary: 关闭理由字典弹窗
+        reason_dictionary_title: 赢单/丢单理由字典
+        reason_dictionary_hint: 在这里维护标准理由；新增后会立即出现在当前页面下拉选项中。
+        delete_reason_option: 删除
+        no_custom_reason_options: 当前没有自定义理由，系统将使用默认理由。
+        new_reason_label: 新理由名称
+        new_reason_key: 内部编码（可留空）
+        reason_key_placeholder: 留空自动生成
+        reason_key_hint: 仅用于系统内部统计和多语言，不影响页面显示的理由名称；留空会自动生成。
+        add_reason_option: 新增理由
+        saving: 保存中...
+        save_failed: 保存失败，请检查输入。
+        reason_option_added: 已新增并选中该理由。
+        network_error: 网络异常，请稍后重试。
+        delete_reason_option_confirm: 确认删除该理由？
+        stalled_reason: 停滞 / 压力原因
+        select_stalled_reason: 选择停滞原因
+        pressure_reason_details: 风险原因详情
+        pressure_reason_details_placeholder: 描述具体阻碍或风险来源
+        totals_inputs: 金额输入
+        settlement_currency: 结算币种
+        tax_vat: 税费 / VAT
+        shipping_handling: 运费 / 处理费
+        discount: 折扣
+        remove_discount: 移除折扣
+        add_discount: + 添加折扣
+        totals: 合计
+        subtotal: 小计
+        addons_total: 附加项合计
+        shipping: 运费
+        original_total: 原总价
+        you_save: 节省金额
+        quote_items: 报价项
+        quote_items_hint: 可搜索产品、切换预设并编辑规格或附加项，且不丢失报价上下文。
+        quote_item_hint_1: 输入产品名称进行搜索和自动匹配。若未找到，可继续输入并作为自定义项提交。
+        quote_item_hint_2: 产品默认价格仅供参考。最终报价应按当前报价币种填写。
+        quote_item_hint_3: 若产品参考币种与报价币种不同，将不会自动填充单价。
+        quote_item_hint_4: 规格和附加项可从产品预设加载、切换为其他预设，或按行粘贴文本。
+        currency_mismatch_warning: 币种不一致警告：单价自动填充将被禁用，需手动输入。
+        pricing_attention_needed: 保存前请先处理价格相关问题。
+        product_name: 产品名称
+        specifications: 规格
+        add_ons: 附加项
+        unit_price: 单价
+        quantity: 数量
+        remove: 移除
+        type_to_search_product: 输入以搜索产品
+        no_specs: 暂无规格
+        no_add_ons: 暂无附加项
+        custom_specs: 自定义规格
+        edit_specs: 编辑规格
+        close: 关闭
+        spec_bulk_placeholder: "每行一项，例如：
+
+          功率: 5kW
+
+          电压: 220V"
+        apply_text: 应用文本
+        spec_key_placeholder: 例如：功率
+        spec_value_placeholder: 例如：5kW
+        remove_specification: 移除规格
+        add_spec: + 规格
+        clear_all: 清空
+        custom_add_ons: 自定义附加项
+        edit_add_ons: 编辑附加项
+        addon_bulk_placeholder: "每行一项，例如：
+
+          包装: 30
+
+          安装 = 120"
+        addon_name_placeholder: 例如：包装
+        remove_add_on: 移除附加项
+        add_add_on: + 附加项
+        reference_price_mismatch: 参考价币种为 %{product_currency}，不会自动带入 %{quote_currency}。请手动输入当前报价币种的单价。
+        no_exact_match_saved_as_custom: 未找到完全匹配产品，已按自定义项目保存。
+        remove_item: 移除项目
+        add_item: 添加项目
+        update_quote: 更新报价
+        create_quote: 创建报价
     flash:
-      free_plan_limit_reached: "免费套餐额度已达上限：公司报价已使用 %{used}/%{limit}。"
-      revision_read_only: "当前状态下该版本为只读。"
-      template_change_not_allowed: "当前状态下无法更换模板。"
-      no_template_available: "当前没有可用模板，请先创建报价模板。"
-      template_updated: "模板已更新"
-      template_not_found: "未找到模板，已回退到当前模板。"
-      delete_latest_revision_only: "只有最新且有效的版本可以删除整条报价线程。"
-      quote_thread_deleted: "报价线程 %{quote_no} 已删除，公开链接现已失效。"
-      archive_not_ready: "归档功能尚未就绪，请先在服务器执行数据库迁移。"
-      archive_non_latest_only: "仅支持归档非最新版本。"
-      revision_archived: "版本 V%{revision} 已从历史记录归档。"
-      pdf_export_failed: "服务器端 PDF 导出失败，请确认已安装并配置 wkhtmltopdf。"
-      new_revision_not_available: "当前报价状态不可创建新版本。"
-      revision_draft_created: "已基于报价 %{quote_no} 创建草稿版本，请编辑并保存以生成新版本。"
-      revision_schema_mismatch: "版本创建失败：数据库结构不匹配，请先在服务器执行迁移。"
-      copy_reprice_not_available: "当前报价状态不可使用“复制并重定价”。"
-      revision_created_update_pricing: "已创建版本 V%{revision}，请更新价格并分享。"
-      unable_create_revision: "无法创建版本：%{errors}"
-      sharing_disabled: "当前报价状态不支持分享。"
-      unable_create_public_share_link: "无法创建公开分享链接：%{errors}"
-      unable_create_public_share_link_now: "暂时无法创建公开分享链接，请稍后重试。"
-      reminder_not_available: "当前报价暂不可发送提醒。"
-      reminder_verification_required: "发送提醒前请先完成验证。"
-      reminder_verification_failed: "验证失败，请重试。"
-      reminder_sent: "提醒邮件已发送；若报价未被查看，下一次提醒将在 12 小时后可用。"
-      unable_send_reminder: "暂时无法发送提醒，请稍后重试。"
-      mark_sent_not_available: "当前报价暂不可标记为已发送。"
-      quote_marked_sent: "已记录为已发送，可继续跟进客户反馈。"
-      mark_negotiating_not_available: "当前报价暂不可标记为交涉中。"
-      quote_marked_negotiating: "已记录为交涉中。"
-      mark_won_not_available: "当前报价暂不可标记为赢单。"
-      quote_marked_won: "已标记为赢单。"
-      mark_lost_not_available: "当前报价暂不可标记为输单。"
-      quote_marked_lost: "已标记为输单。"
-      outcome_mark_not_available: "当前报价暂不可更新结果状态。"
-      undo_status_change_expired: "撤销窗口已过期，请手动调整状态。"
-      status_change_undone: "已撤销最近一次状态变更。"
-      reopen_not_available: "当前报价状态不可重新打开。"
-      quote_reopened: "报价已重新打开，可继续编辑。"
-      reason_updated: "成交原因已更新。"
-      reason_update_not_available: "仅赢单或输单状态支持补充原因。"
+      free_plan_limit_reached: 免费套餐额度已达上限：公司报价已使用 %{used}/%{limit}。
+      revision_read_only: 当前状态下该版本为只读。
+      template_change_not_allowed: 当前状态下无法更换模板。
+      no_template_available: 当前没有可用模板，请先创建报价模板。
+      template_updated: 模板已更新
+      template_not_found: 未找到模板，已回退到当前模板。
+      delete_latest_revision_only: 只有最新且有效的版本可以删除整条报价线程。
+      quote_thread_deleted: 报价 %{quote_no} 已删除，共享链接现已显示为过期。
+      archive_not_ready: 归档功能尚未就绪，请先在服务器执行数据库迁移。
+      archive_non_latest_only: 仅支持归档非最新版本。
+      revision_archived: 版本 V%{revision} 已从历史记录归档。
+      pdf_export_failed: 服务器端 PDF 导出失败，请确认已安装并配置 wkhtmltopdf。
+      new_revision_not_available: 当前报价状态不可创建新版本。
+      revision_draft_created: 已基于报价 %{quote_no} 创建草稿版本，请编辑并保存以生成新版本。
+      revision_schema_mismatch: 版本创建失败：数据库结构不匹配，请先在服务器执行迁移。
+      copy_reprice_not_available: 当前报价状态不可使用“复制后改价”。
+      revision_created_update_pricing: 已创建版本 V%{revision}，请更新价格并分享。
+      unable_create_revision: 无法创建版本：%{errors}
+      sharing_disabled: 当前报价状态不支持分享。
+      unable_create_public_share_link: 无法创建公开分享链接：%{errors}
+      unable_create_public_share_link_now: 暂时无法创建公开分享链接，请稍后重试。
+      reminder_not_available: 当前报价暂不可发送提醒。
+      reminder_verification_required: 发送提醒前请先完成验证。
+      reminder_verification_failed: 验证失败，请重试。
+      reminder_sent: 提醒邮件已发送；若报价未被查看，下一次提醒将在 12 小时后可用。
+      unable_send_reminder: 暂时无法发送提醒，请稍后重试。
+      mark_sent_not_available: 当前报价暂不可标记为已发送。
+      quote_marked_sent: 已记录为已发送，可继续跟进客户反馈。
+      mark_negotiating_not_available: 当前报价暂时无法标记为谈判中。
+      quote_marked_negotiating: 已标记为谈判中。
+      mark_won_not_available: 当前报价暂不可标记为赢单。
+      quote_marked_won: 已标记为赢单。
+      mark_lost_not_available: 当前报价暂不可标记为丢单。
+      quote_marked_lost: 已标记为丢单。
+      outcome_mark_not_available: 当前报价暂不可更新结果状态。
+      undo_status_change_expired: 撤销窗口已过期，请手动调整状态。
+      status_change_undone: 已撤销最近一次状态变更。
+      reopen_not_available: 当前报价状态不可重新打开。
+      quote_reopened: 报价已重新打开，可继续编辑。
+      reason_updated: 成交原因已更新。
+      reason_update_not_available: 仅赢单或丢单状态支持补充原因。
     logic:
       decision_review:
         recommended_move:
           move_to_fulfillment:
-            label: "转入履约"
-            detail: "买家已接受该版本，建议从销售推进切换到交付交接。"
+            label: 转入履约
+            detail: 买家已接受该版本，建议从销售推进切换到交付交接。
           move_to_handoff:
-            label: "转入交接"
-            detail: "该版本已在内部标记为赢单，请协调交付、单证或客户导入。"
+            label: 转入交接
+            detail: 该版本已在内部标记为赢单，请协调交付、单证或客户导入。
           reopen_if_interest_returns:
-            label: "有兴趣再重开"
-            detail: "该版本已标记丢单，若买家重新激活再创建新版本。"
+            label: 有兴趣再重开
+            detail: 该版本已标记丢单，若买家重新激活再创建新版本。
           update_and_reshare:
-            label: "更新并重新分享"
-            detail: "该报价已回到草稿，请完成编辑并生成新的公开链接。"
+            label: 更新并重新分享
+            detail: 该报价已回到草稿，请完成编辑并生成新的分享链接。
           prepare_next_revision:
-            label: "准备下一版修订"
-            detail: "客户已提出修改需求，请结合请求上下文尽快产出下一版本。"
+            label: 准备下一版修订
+            detail: 客户已提出修改需求，请结合请求上下文尽快产出下一版本。
           share_public_link:
-            label: "先分享公开链接"
-            detail: "还没有公开链接活动，先生成分享链接再推进买家反馈。"
+            label: 先分享链接
+            detail: 还没有分享链接活动，先生成分享链接再推进买家反馈。
           send_reminder:
-            label: "发送提醒"
-            detail: "报价已分享但未被查看，建议尽快提醒买家避免线程变冷。"
+            label: 发送提醒
+            detail: 报价已分享但未被查看，建议尽快提醒买家避免线程变冷。
           close_before_expiry:
-            label: "到期前推进决策"
-            detail: "买家已有互动且有效期紧张，建议今天推动决策或发送修订版。"
+            label: 到期前推进决策
+            detail: 买家已有互动且有效期紧张，建议今天推动决策或发送修订版。
           follow_up_while_warm:
-            label: "趁热跟进"
-            detail: "已有买家行为，建议确认时间点、价格匹配和下一个决策节点。"
+            label: 趁热跟进
+            detail: 已有买家行为，建议确认时间点、价格匹配和下一个决策节点。
         buyer_readiness:
           committed:
-            value: "已承诺"
-            detail: "已在报价流程中确认接受。"
+            value: 已承诺
+            detail: 已在报价流程中确认接受。
           won:
-            value: "已赢单"
-            detail: "已在内部标记赢单。"
+            value: 已赢单
+            detail: 已在内部标记赢单。
           engaged:
-            value: "已参与"
-            detail: "买家提出了修改，而不是沉默。"
+            value: 已参与
+            detail: 买家提出了修改，而不是沉默。
           warm:
-            value: "较活跃"
-            detail: "公开链接已记录 %{count} 次查看。"
+            value: 较活跃
+            detail: 分享链接已记录 %{count} 次查看。
           interested:
-            value: "有兴趣"
-            detail: "买家至少查看过一次报价。"
+            value: 有兴趣
+            detail: 买家至少查看过一次报价。
           cold:
-            value: "偏冷"
-            detail: "已对外分享，但尚无查看记录。"
+            value: 偏冷
+            detail: 已对外分享，但尚无查看记录。
           not_started:
-            value: "未开始"
-            detail: "尚无公开分享或买家互动。"
+            value: 未开始
+            detail: 尚无公开分享或买家互动。
         revision_scope:
           no_compare:
-            value: "无法对比"
-            detail: "该版本没有可对比的上一版本。"
+            value: 无法对比
+            detail: 该版本没有可对比的上一版本。
           no_change:
-            value: "无变更"
-            detail: "当前版本与上一版本在商业层面一致。"
+            value: 无变更
+            detail: 当前版本与上一版本在商业层面一致。
           changed:
             value: "%{item_count} 项目 / %{term_count} 条款"
-            detail: "相对上一版本检测到 %{item_count} 处项目级变更和 %{commercial_count} 处商业条款变更。"
+            detail: 相对上一版本检测到 %{item_count} 处项目级变更和 %{commercial_count} 处商业条款变更。
         review_notes:
           accepted_on: "%{date} 已接受。"
           marked_won_on: "%{date} 已标记赢单。"
           marked_lost_on: "%{date} 已标记丢单。"
           revision_requested_on: "%{date} 发起了修订请求。"
           first_viewed_on: "%{date} 首次查看。"
-          shared_times: "已分享 %{count} 次。"
-          valid_until: "有效期至 %{date}。"
+          shared_times: 已分享 %{count} 次。
+          valid_until: 有效期至 %{date}。
           revision_reopened_on: "%{date} 版本已重开。"
       decision_timeline:
         recap:
           outcome:
-            label: "结果"
+            label: 结果
           buyer_signal:
-            label: "买家信号"
-            viewed: "已查看"
-            no_view_yet: "尚未查看"
+            label: 买家信号
+            viewed: 已查看
+            no_view_yet: 尚未查看
           share_status:
-            label: "分享状态"
+            label: 分享状态
             links: "%{count} 个链接"
-            not_shared: "未分享"
-            last_shared: "最近分享于 %{time}。"
-            generate_link: "生成公开链接以启动买家互动。"
+            not_shared: 未分享
+            last_shared: 最近分享于 %{time}。
+            generate_link: 生成分享链接以启动买家互动。
           pressure:
-            label: "压力"
+            label: 压力
         events:
           created:
-            label: "已创建"
-            detail: "报价版本已生成。"
+            label: 已创建
+            detail: 报价版本已生成。
           shared:
-            label: "已分享"
-            detail: "公开报价链接已生成并可发送。"
+            label: 已分享
+            detail: 公开报价链接已生成并可发送。
           reshared:
-            label: "已重新分享"
-            detail: "重开后已生成新的公开报价链接。"
+            label: 已重新分享
+            detail: 重开后已生成新的公开报价链接。
           viewed:
-            label: "已查看"
-            detail: "买家首次打开了该报价。"
+            label: 已查看
+            detail: 买家首次打开了该报价。
           revision_requested:
-            label: "请求修订"
+            label: 请求修订
           reopened:
-            label: "已重开"
-            detail: "报价已回到草稿以便继续编辑。"
+            label: 已重开
+            detail: 报价已回到草稿以便继续编辑。
           lost:
-            label: "已丢单"
-            detail: "买家未继续推进该版本。"
+            label: 已丢单
+            detail: 买家未继续推进该版本。
           won:
-            label: "已赢单"
-            detail: "报价已标记为商业赢单。"
+            label: 已赢单
+            detail: 报价已标记为商业赢单。
           accepted:
-            label: "已接受"
-            detail: "买家已确认该报价。"
+            label: 已接受
+            detail: 买家已确认该报价。
           expired:
-            label: "已过期"
-            detail: "有效期结束且未达成关闭。"
+            label: 已过期
+            detail: 有效期结束且未达成关闭。
         revision_request:
-          default_detail: "买家请求更新。"
+          default_detail: 买家请求更新。
         outcome:
-          accepted: "已接受"
-          won: "已赢单"
-          lost: "已丢单"
-          revision_requested: "请求修订"
-          expired: "已过期"
-          reopened: "已重开"
+          accepted: 已接受
+          won: 已赢单
+          lost: 已丢单
+          revision_requested: 请求修订
+          expired: 已过期
+          reopened: 已重开
         outcome_detail:
-          accepted: "买家已接受该版本。"
-          won: "报价已标记为商业赢单。"
-          lost: "买家选择不继续该版本。"
-          expired: "有效期结束，未形成决策。"
-          reopened: "报价已回到草稿待重新处理。"
-          waiting: "该版本仍在等待买家动作。"
+          accepted: 买家已接受该版本。
+          won: 报价已标记为商业赢单。
+          lost: 买家选择不继续该版本。
+          expired: 有效期结束，未形成决策。
+          reopened: 报价已回到草稿待重新处理。
+          waiting: 该版本仍在等待买家动作。
         buyer_signal:
-          no_view: "尚无买家查看记录。"
-          first_seen: "首次查看于 %{time}。"
-          last_activity: "最近活动 %{time}（共 %{count} 次查看）。"
-          single_view: "仅记录到一次查看。"
+          no_view: 尚无买家查看记录。
+          first_seen: 首次查看于 %{time}。
+          last_activity: 最近活动 %{time}（共 %{count} 次查看）。
+          single_view: 仅记录到一次查看。
         pressure:
-          closed_won: "已赢单关闭"
-          reengage_later: "后续再激活"
-          expired: "已过期"
-          needs_reshare: "需重新分享"
-          needs_revision: "需修订"
-          days_left: "剩余 %{count} 天"
-          stable: "稳定"
+          closed_won: 已赢单关闭
+          reengage_later: 后续再激活
+          expired: 已过期
+          needs_reshare: 需重新分享
+          needs_revision: 需修订
+          days_left: 剩余 %{count} 天
+          stable: 稳定
         pressure_detail:
-          closed_won: "请关注交接、履约和续单节奏。"
-          reengage_later: "若买家回流，再创建新版本推进。"
-          expired: "请以新修订版本跟进或关闭线程。"
-          needs_reshare: "请为重开版本生成新的公开链接。"
-          needs_revision: "买家已对该版本提出修改要求。"
-          days_left: "请在有效期结束前采取动作。"
-          stable: "当前无明显到期或修订压力。"
+          closed_won: 请关注交接、履约和续单节奏。
+          reengage_later: 若买家回流，再创建新版本推进。
+          expired: 请以新修订版本跟进或关闭线程。
+          needs_reshare: 请为重开版本生成新的分享链接。
+          needs_revision: 买家已对该版本提出修改要求。
+          days_left: 请在有效期结束前采取动作。
+          stable: 当前无明显到期或修订压力。
   customers:
     status_labels:
-      new: "新客户"
-      potential: "潜在"
-      contacted: "已联系"
-      quoting: "报价中"
-      negotiating: "谈判中"
-      following: "跟进中"
-      won: "已赢单"
-      closed: "已关闭"
-      lost: "已丢单"
-      paused: "暂停"
-      inactive: "不活跃"
+      new: 新客户
+      potential: 潜在
+      contacted: 已联系
+      quoting: 报价中
+      negotiating: 谈判中
+      following: 跟进中
+      won: 已赢单
+      closed: 已关闭
+      lost: 已丢单
+      paused: 暂停
+      inactive: 不活跃
     view:
       quote_card:
-        next_action: "下一步动作"
-        win_reason: "赢单原因：%{reason}"
-        loss_reason: "丢单原因：%{reason}"
-        pressure: "压力：%{reason}"
-        expired_on: "已于 %{date} 过期"
-        total: "总额"
-        updated: "更新时间"
-        valid_until: "有效期至"
+        next_action: 下一步动作
+        win_reason: 赢单原因：%{reason}
+        loss_reason: 丢单原因：%{reason}
+        pressure: 压力：%{reason}
+        expired_on: 已于 %{date} 过期
+        total: 总额
+        updated: 更新时间
+        valid_until: 有效期至
         valid_until_expired: "%{date}（已过期）"
         valid_until_days_left: "%{date}（剩余 %{count} 天）"
-        original: "原价"
+        original: 原价
       index:
-        title: "客户"
-        subtitle: "统一管理账户健康、跟进工作量和商务进展。"
-        new_customer: "+ 新建客户"
-        search_placeholder: "搜索客户..."
-        clear: "清除"
-        all_customers: "全部客户"
-        high_value: "高价值"
-        at_risk: "需跟进"
-        clear_follow_up_filter: "清除跟进筛选"
-        today: "今天"
-        soon_7_days: "即将到期（7天内）"
-        overdue: "已逾期"
-        no_schedule: "未安排"
-        accounts: "客户账户"
-        accounts_caption: "在一个视图中按跟进压力、金额和下一步动作展示商业账户。"
-        search_found: "找到 %{count} 个匹配“%{query}”的客户"
-        overdue_badge: "逾期"
-        today_badge: "今天"
-        soon_badge: "即将"
-        empty_filtered_title: "当前视图没有客户"
-        empty_filtered_body: "尝试更换筛选条件或搜索词。"
-        empty_title: "还没有客户"
-        empty_body: "创建第一个客户，开始跟踪跟进、报价和账户进展。"
-        create_customer: "创建客户"
+        title: 客户
+        subtitle: 在一个列表中查看客户状态、跟进风险和商机进展。
+        new_customer: + 新建客户
+        search_placeholder: 搜索客户...
+        clear: 清除
+        all_customers: 全部客户
+        high_value: 高价值
+        at_risk: 需跟进
+        clear_follow_up_filter: 清除跟进筛选
+        today: 今天
+        soon_7_days: 即将到期（7天内）
+        overdue: 已逾期
+        no_schedule: 未安排
+        accounts: 客户账户
+        accounts_caption: 在一个视图中按跟进优先级、金额和建议动作查看客户。
+        search_found: 找到 %{count} 个匹配“%{query}”的客户
+        overdue_badge: 逾期
+        today_badge: 今天
+        soon_badge: 即将
+        empty_filtered_title: 当前视图没有客户
+        empty_filtered_body: 尝试更换筛选条件或搜索词。
+        empty_title: 还没有客户
+        empty_body: 创建第一个客户，开始跟踪跟进、报价和账户进展。
+        create_customer: 创建客户
+        open_customer_aria: 查看客户 %{name}
+        more_details: 查看详情
         table:
-          name: "名称"
-          country: "国家"
-          contact: "联系人"
-          email: "邮箱"
-          status: "状态"
-          total_quote_amount: "报价总额"
-          total_won_amount: "赢单总额"
-          win_rate: "赢单率"
-          last_follow_up: "最近跟进"
-          next_follow_up: "下次跟进"
-          next_action: "下一步动作"
-        win_rate_progress_aria: "赢单率进度"
+          name: 名称
+          country: 国家
+          contact: 联系人
+          email: 邮箱
+          status: 状态
+          total_quote_amount: 报价总额
+          total_won_amount: 赢单总额
+          win_rate: 赢单率
+          last_follow_up: 最近跟进
+          next_follow_up: 下次跟进
+          next_action: 下一步动作
+        win_rate_progress_aria: 赢单率进度
       new:
-        title: "新建客户"
-        create_customer: "创建客户"
-        back_to_customers: "返回客户列表"
+        title: 新建客户
+        create_customer: 创建客户
+        back_to_customers: 返回客户列表
       form:
-        error_summary: "有 %{count} 个错误导致客户无法保存："
-        company_information: "公司信息"
-        company_information_hint: "定义账户身份、状态和档案细节，便于团队后续协作。"
+        error_summary: 有 %{count} 个错误导致客户无法保存：
+        company_information: 公司信息
+        company_information_hint: 定义账户身份、状态和档案细节，便于团队后续协作。
         customer_avatar_alt: "%{name} 头像"
-        avatar: "头像"
-        remove_current_avatar: "移除当前头像"
-        avatar_hint: "若未上传图片，将使用客户名称首字母作为头像。"
-        company_name: "公司名称"
-        country: "国家"
-        status: "状态"
-        select_status: "选择状态"
+        avatar: 头像
+        upload_avatar: 上传头像
+        remove_current_avatar: 移除当前头像
+        avatar_hint: 若未上传图片，将使用客户名称首字母作为头像。
+        company_name: 公司名称
+        country: 国家
+        status: 状态
+        select_status: 选择状态
+        status_hint: 设为“已丢失”或“不活跃”后，这个客户将不再触发跟进逾期提醒。
         legacy_status: "%{status}（历史值）"
-        customer_level: "客户等级"
-        primary_contact: "主要联系人"
-        primary_contact_hint: "让沟通信息与商务归属一目了然。"
-        primary_contact_name: "主要联系人姓名"
-        email: "邮箱"
-        phone_country_code: "国家区号"
-        select_phone_country_code: "选择常用国家区号"
+        customer_level: 客户等级
+        primary_contact: 主要联系人
+        primary_contact_hint: 让沟通信息与商务归属一目了然。
+        primary_contact_name: 主要联系人姓名
+        email: 邮箱
+        phone_country_code: 国家区号
+        select_phone_country_code: 选择常用国家区号
         phone_country_code_placeholder: "+81"
-        phone: "电话"
-        payment_terms: "付款条款"
-        select_payment_terms: "选择付款条款"
-        source: "来源"
-        select_source: "选择来源"
-        main_product_interest: "主要产品兴趣"
-        main_product_interest_placeholder: "主要产品 / 类目"
-        internal_owner: "内部负责人"
-        owner_avatar_alt: "负责人头像"
-        select_internal_owner: "选择内部负责人"
-        choose_team_owner: "从团队成员中选择"
-        owner_hint: "可通过模板开关在报价中展示负责人（默认：开启）。"
-        follow_up_date: "跟进日期"
-        additional_information: "补充信息"
-        additional_information_hint: "记录补充背景、标签和备注，不干扰核心档案。"
-        address: "地址"
-        estimated_annual_volume: "预计年采购额"
-        timezone: "时区"
-        select_timezone: "选择时区"
-        search_timezone_placeholder: "搜索城市、国家或 GMT 偏移"
-        tags: "标签"
-        selected_priority: "已选优先级"
-        selected_priority_hint: "从上到下表示该客户标签优先级更高。"
-        drag_priority_hint: "拖拽调整优先级，选中的标签会展示在客户上方。"
-        up: "上移"
-        down: "下移"
-        remove: "移除"
-        add_custom_tag_placeholder: "输入自定义标签并按 Enter"
-        add: "添加"
-        tags_hint: "预设标签可在公司范围复用。自定义标签会保存以便后续复用。"
-        notes: "备注"
+        phone: 电话
+        payment_terms: 付款条款
+        select_payment_terms: 选择付款条款
+        source: 来源
+        select_source: 选择来源
+        main_product_interest: 主要关注产品
+        main_product_interest_placeholder: 主要产品 / 类目
+        internal_owner: 内部负责人
+        owner_avatar_alt: 负责人头像
+        select_internal_owner: 选择内部负责人
+        choose_team_owner: 从团队成员中选择
+        owner_hint: 可通过模板开关在报价中展示负责人（默认：开启）。
+        follow_up_date: 跟进日期
+        additional_information: 补充信息
+        additional_information_hint: 记录补充背景、标签和备注，不干扰核心档案。
+        address: 地址
+        estimated_annual_volume: 预计年采购额
+        timezone: 时区
+        select_timezone: 选择时区
+        search_timezone_placeholder: 搜索城市、国家或 GMT 偏移
+        tags: 标签
+        selected_priority: 已选优先级
+        selected_priority_hint: 从上到下表示该客户标签优先级更高。
+        drag_priority_hint: 拖拽调整优先级，选中的标签会展示在客户上方。
+        up: 上移
+        down: 下移
+        remove: 移除
+        add_custom_tag_placeholder: 输入自定义标签并按 Enter
+        add: 添加
+        tags_hint: 预设标签可在公司范围复用。自定义标签会保存以便后续复用。
+        notes: 备注
         status_options:
-          new: "新建"
-          contacted: "已联系"
-          quoting: "报价中"
-          negotiating: "谈判中"
-          won: "已成交"
-          lost: "已丢失"
-          inactive: "不活跃"
-          potential: "潜在客户"
-          following: "持续跟进"
-          closed: "已关闭"
-          paused: "已暂停"
+          new: 新建
+          contacted: 已联系
+          quoting: 报价中
+          negotiating: 谈判中
+          won: 已成交
+          lost: 已丢失
+          inactive: 不活跃
+          potential: 潜在客户
+          following: 持续跟进
+          closed: 已关闭
+          paused: 已暂停
         level_options:
-          normal: "普通"
-          vip: "VIP"
-          key_account: "重点客户"
+          normal: 普通
+          vip: VIP
+          key_account: 重点客户
         source_options:
-          referral: "转介绍"
-          website: "官网"
-          exhibition: "展会"
-          social_media: "社交媒体"
-          other: "其他"
+          referral: 转介绍
+          website: 官网
+          exhibition: 展会
+          social_media: 社交媒体
+          other: 其他
         payment_options:
-          t_t: "电汇 T/T"
-          l_c: "信用证 L/C"
-          o_a: "赊销 O/A"
-          cash: "现金"
+          t_t: 电汇 T/T
+          l_c: 信用证 L/C
+          o_a: 赊销 O/A
+          cash: 现金
+        select_tax_id_type: 选择税号类型（可选）
+        tax_id: 税号
+        tax_id_placeholder: 例如 XAXX010101000
+        tax_id_type: 税号类型
       edit:
-        title: "编辑客户：%{name}"
-        update_customer: "更新客户"
-        back_to_customer: "返回客户"
+        title: 编辑客户：%{name}
+        update_customer: 更新客户
+        back_to_customer: 返回客户
       show:
-        subtitle: "在一个工作台中跟踪客户健康度、报价活动与执行信号。"
-        back_to_customers: "返回客户列表"
-        no_email: "无邮箱"
-        edit_customer: "编辑客户"
-        total_quotes: "报价总数"
-        latest_quote: "最近报价"
-        no_quote_yet: "暂无报价"
-        sales_stage: "销售阶段"
-        engagement: "参与度"
-        operating_signals: "运营信号"
-        operating_signals_hint: "基于跟进节奏、报价活动和浏览行为。"
-        company_contact_details: "公司与联系人详情"
-        no_customer_behavior: "暂无客户行为"
-        follow_up_action: "跟进行动"
-        next_tasks: "下一步任务"
-        next_tasks_hint: "运营跟进与待处理事项。"
-        use_follow_up_controls: "请使用上方跟进行动按钮"
+        subtitle: 在一个地方查看客户状态、报价活动和下一步动作。
+        back_to_customers: 返回客户列表
+        no_email: 无邮箱
+        edit_customer: 编辑客户
+        total_quotes: 报价总数
+        latest_quote: 最近报价
+        no_quote_yet: 暂无报价
+        sales_stage: 销售阶段
+        engagement: 参与度
+        operating_signals: 客户信号
+        operating_signals_hint: 基于跟进节奏、报价活动和客户互动情况。
+        company_contact_details: 公司与联系人详情
+        no_customer_behavior: 暂无客户行为
+        follow_up_action: 跟进行动
+        next_tasks: 下一步
+        next_tasks_hint: 跟进事项和待办内容。
+        use_follow_up_controls: 请使用上方跟进行动按钮
         task_priority:
-          urgent: "紧急"
-          today: "今日"
-          upcoming: "即将到来"
-          normal: "普通"
-        show_all_tasks: "显示全部任务（%{count}）"
-        no_immediate_tasks: "暂无紧急任务。"
-        customer_timeline: "客户时间线"
-        customer_timeline_hint: "高信号事件与系统事件统一展示。"
-        high_signal: "高信号"
-        show_older_high_signals: "显示更早高信号（%{count}）"
-        no_customer_behavior_signals: "暂无客户行为信号。"
-        show_system_activity: "显示系统活动（%{count}）"
-        system_activity: "系统活动"
-        no_timeline_events: "暂无时间线事件。"
-        company_name: "公司名称"
-        country: "国家"
-        customer_level: "客户等级"
-        status: "状态"
-        primary_contact_name: "主要联系人姓名"
-        email: "邮箱"
-        phone: "电话"
-        address: "地址"
-        payment_terms: "付款条款"
-        main_product_interest: "主要产品兴趣"
-        internal_owner: "内部负责人"
-        estimated_annual_volume: "预计年采购额"
-        timezone: "时区"
-        tags: "标签"
-        latest_customer_signal: "最近客户信号"
-        next_follow_up: "下次跟进"
-        not_available: "暂无"
-        overdue_badge: "逾期"
-        today_badge: "今天"
-        due_soon_badge: "即将到期"
-        notes: "备注"
-        last_signal: "最近信号"
+          urgent: 紧急
+          today: 今日
+          upcoming: 即将到来
+          normal: 普通
+        show_all_tasks: 显示全部任务（%{count}）
+        no_immediate_tasks: 暂无紧急任务。
+        customer_timeline: 客户时间轴
+        customer_timeline_hint: 在同一时间线中查看关键客户事件与系统事件。
+        high_signal: 关键客户信号
+        show_older_high_signals: 显示更早客户动态（%{count}）
+        no_customer_behavior_signals: 暂无客户信号
+        show_system_activity: 显示系统记录（%{count}）
+        system_activity: 系统记录
+        no_timeline_events: 暂无时间线事件。
+        company_name: 公司名称
+        country: 国家
+        customer_level: 客户等级
+        status: 状态
+        primary_contact_name: 主要联系人姓名
+        email: 邮箱
+        phone: 电话
+        address: 地址
+        payment_terms: 付款条款
+        main_product_interest: 主要关注产品
+        internal_owner: 内部负责人
+        estimated_annual_volume: 预计年采购额
+        timezone: 时区
+        tags: 标签
+        latest_customer_signal: 最近客户动态
+        next_follow_up: 下次跟进
+        not_available: 暂无
+        overdue_badge: 逾期
+        today_badge: 今天
+        due_soon_badge: 即将到期
+        notes: 备注
+        last_signal: 最近记录
         days_ago: "%{count} 天前"
-        not_scheduled: "未安排"
-        days_overdue: "逾期 %{count} 天"
+        not_scheduled: 未安排
+        days_overdue: 逾期 %{count} 天
         in_days: "%{count} 天后"
-        quote_actions: "报价操作"
-        quote_actions_hint: "在同一账户工作台创建、筛选并处理版本。"
-        new_quote: "新建报价"
-        delete_customer: "删除客户"
-        delete_customer_confirm: "确认删除客户 %{name}？这会移除该账户记录。"
-        active_quotes: "活跃报价（%{count}）"
-        recent_quotes: "最近报价（10）"
-        all_quotes: "全部报价（%{count}）"
-        quote_workspace_hint: "该账户的优先级队列、搜索与版本流转。"
-        active_mode_note: "仅显示按优先级排序的前 5 条。"
-        active: "活跃"
+        quote_actions: 报价操作
+        quote_actions_hint: 在同一客户视图中创建、筛选并管理报价版本。
+        new_quote: 新建报价
+        delete_customer: 删除客户
+        delete_customer_confirm: 确认删除客户 %{name}？这会移除该账户记录。
+        active_quotes: 活跃报价（%{count}）
+        recent_quotes: 最近报价（10）
+        all_quotes: 全部报价（%{count}）
+        quote_workspace_hint: 在这里管理该客户的重点事项、报价与修订进展。
+        active_mode_note: 仅显示优先级最高的 5 条。
+        active: 活跃
         quote_status:
-          draft: "草稿"
-          sent: "已发送"
-          viewed: "已查看"
-          negotiating: "谈判中"
-        won_amount: "赢单金额"
-        lost_amount: "丢单金额"
-        show_all_currencies: "显示全部币种"
-        avg_discount: "平均折扣"
+          draft: 草稿
+          sent: 已发送
+          viewed: 已查看
+          negotiating: 谈判中
+        won_amount: 赢单金额
+        lost_amount: 丢单金额
+        show_all_currencies: 显示全部币种
+        avg_discount: 平均折扣
         filters:
-          all: "全部"
-          draft: "草稿"
-          sent: "已发送"
-          viewed: "已查看"
-          negotiating: "谈判中"
-          won: "赢单"
-          lost: "丢单"
-          expired: "已过期"
-        recent_10: "最近（10）"
-        search_quotes_placeholder: "搜索报价号、产品、备注..."
+          all: 全部
+          draft: 草稿
+          sent: 已发送
+          viewed: 已查看
+          negotiating: 谈判中
+          won: 赢单
+          lost: 丢单
+          expired: 已过期
+        recent_10: 最近（10）
+        search_quotes_placeholder: 搜索报价编号、产品或备注……
         sort:
-          priority: "优先级队列"
-          newest: "最新"
-          highest_amount: "金额最高"
-          status: "状态"
-        apply: "应用"
-        view_all: "查看全部 %{count}"
-        previous: "上一页"
-        page: "第"
-        next: "下一页"
-        no_quotes_title: "当前视图没有报价"
-        no_quotes_body: "尝试切换状态筛选，或为该客户创建新报价。"
-        show_less: "收起"
-        collapse_list: "折叠列表"
-        view_all_prefix: "查看全部"
-        hide_extra_tasks: "隐藏额外任务"
-        show_all_tasks_prefix: "显示全部任务"
-        hide_older_high_signals: "隐藏更早高信号"
-        show_older_high_signals_prefix: "显示更早高信号"
-        hide_system_activity: "隐藏系统活动"
-        show_system_activity_prefix: "显示系统活动"
-        latest_customer_behavior: "最近客户行为"
+          priority: 优先级
+          newest: 最新
+          highest_amount: 金额最高
+          status: 状态
+        apply: 应用
+        view_all: 查看全部 %{count}
+        previous: 上一页
+        page: 第
+        next: 下一页
+        no_quotes_title: 当前视图下暂无报价
+        no_quotes_body: 可尝试切换状态筛选，或为该客户新建报价。
+        show_less: 收起
+        collapse_list: 折叠列表
+        view_all_prefix: 查看全部
+        hide_extra_tasks: 隐藏额外任务
+        show_all_tasks_prefix: 显示全部任务
+        hide_older_high_signals: 隐藏更早客户动态
+        show_older_high_signals_prefix: 显示更早客户动态
+        hide_system_activity: 隐藏系统记录
+        show_system_activity_prefix: 显示系统活动
+        latest_customer_behavior: 最近客户动态
+        tax_id: 税号
+        show_earlier_key_activity: 显示更早的关键动态
+        hide_earlier_key_activity: 隐藏更早的关键动态
+      comms:
+        active: 活跃
+        active_mode_note: 按优先级展示前 5 条，排序依据为操作优先级。
+        active_quotes: 活跃报价（%{count}）
+        all_quotes: 全部报价（%{count}）
+        apply: 应用
+        avg_discount: 平均折扣
+        collapse_list: 收起列表
+        copy_message: 复制 WhatsApp 消息
+        days_ago: "%{count} 天前"
+        days_overdue: 逾期 %{count} 天
+        delete_customer: 删除客户
+        delete_customer_confirm: 删除客户 %{name}？这会移除该账户记录。
+        due_soon_badge: 即将到期
+        filters:
+          all: 全部
+          draft: 草稿
+          expired: 已过期
+          lost: 已丢单
+          negotiating: 谈判中
+          sent: 已发送
+          viewed: 已查看
+          won: 已赢单
+        hide_extra_tasks: 隐藏更多任务
+        hide_older_high_signals: 隐藏更早客户动态
+        hide_system_activity: 隐藏系统动态
+        in_days: "%{count} 天后"
+        last_signal: 最近记录
+        latest_customer_behavior: 最近客户动态
+        latest_customer_signal: 最近客户动态
+        lost_amount: 丢单金额
+        message_copied: 消息已复制。
+        new_quote: 新建报价
+        next: 下一页
+        next_follow_up: 下次跟进
+        no_quotes_body: 创建报价并分享给买家。
+        no_quotes_title: 准备好发送第一份报价了吗？
+        not_available: 暂无
+        not_scheduled: 未安排
+        notes: 备注
+        overdue_badge: 已逾期
+        page: 页
+        previous: 上一页
+        quote_actions: 报价操作
+        quote_actions_hint: 在同一客户视图中创建、筛选并处理修订版本。
+        quote_status:
+          draft: 草稿
+          negotiating: 谈判中
+          sent: 已发送
+          viewed: 已查看
+        quote_workspace_hint: 在这里管理该客户的重点事项、报价与修订进展。
+        recent_10: 最近（10）
+        recent_quotes: 最近报价（10）
+        search_quotes_placeholder: 搜索报价编号、产品、备注……
+        send_whatsapp: 通过 WhatsApp 发送
+        show_all_currencies: 显示全部币种
+        show_all_tasks_prefix: 显示全部任务
+        show_less: 收起
+        show_older_high_signals_prefix: 显示更早客户动态
+        show_system_activity_prefix: 显示系统动态
+        sort:
+          highest_amount: 金额最高
+          newest: 最新
+          priority: 优先级
+          status: 状态
+        tags: 标签
+        today_badge: 今天
+        view_all: 查看全部 %{count}
+        view_all_prefix: 查看全部
+        whatsapp_opened: 已打开 WhatsApp。
+        won_amount: 赢单金额
     logic:
       quote_push_signal:
         draft:
-          summary: "草稿未发送"
-          detail: "请完成并发送该报价。"
-          label: "完成并发送"
+          summary: 草稿未发送
+          detail: 请完成并发送该报价。
+          label: 完成并发送
         sent_no_view_over_7d:
-          summary: "已发送 7 天以上未查看"
-          detail: "先复核报价内容，再决定是否发送提醒。"
-          label: "查看报价"
+          summary: 已发送 7 天以上未查看
+          detail: 先复核报价内容，再决定是否发送提醒。
+          label: 查看报价
         sent_waiting_first_view:
-          summary: "已发送，等待首次查看"
-          detail: "持续关注客户信号。"
-          label: "查看状态"
+          summary: 已发送，等待首次查看
+          detail: 持续关注客户动态。
+          label: 查看状态
         viewed_no_follow_up:
-          summary: "已查看，尚未跟进"
-          detail: "现在安排下一次触达。"
-          label: "安排跟进"
+          summary: 已查看，尚未跟进
+          detail: 现在安排下一次触达。
+          label: 安排跟进
         expired:
-          summary: "报价已过期"
-          detail: "创建修订版以重新开启沟通。"
-          label: "创建修订"
+          summary: 报价已过期
+          detail: 创建修订版以重新开启沟通。
+          label: 创建修订
         no_immediate_action:
-          summary: "暂无紧急动作"
-          detail: "按需查看报价详情。"
-          label: "查看"
+          summary: 暂无紧急动作
+          detail: 按需查看报价详情。
+          label: 查看
       engagement_state:
-        unassessed: "未评估"
-        active: "活跃"
-        cooling: "需跟进"
-        at_risk: "优先跟进"
-        dormant: "沉淀"
-        archived: "已归档"
+        unassessed: 未评估
+        active: 活跃
+        cooling: 需跟进
+        at_risk: 优先跟进
+        dormant: 沉淀
+        archived: 已归档
       operating_signals:
         risk:
-          label: "运营风险"
-          high: "高"
-          high_detail: "跟进已逾期，需要立即处理。"
-          watch: "关注"
-          watch_detail: "今天需要跟进。"
-          unscheduled: "未安排"
-          unscheduled_detail: "客户处于活跃状态，但未设置下次跟进日期。"
-          controlled: "可控"
-          controlled_detail: "当前跟进节奏处于可控状态。"
+          label: 跟进状态
+          high: 高
+          high_detail: 跟进已逾期，需要立即处理。
+          watch: 关注
+          watch_detail: 今天需要跟进。
+          unscheduled: 未安排
+          unscheduled_detail: 客户处于活跃状态，但未设置下次跟进日期。
+          controlled: 可控
+          controlled_detail: 当前跟进节奏处于可控状态。
         momentum:
-          label: "进展"
-          no_quotes: "暂无报价"
-          no_quotes_detail: "暂无报价活动可供评估。"
-          moving: "推进中"
-          moving_detail: "过去 7 天内有报价或买家活动。"
-          cooling: "降温"
-          cooling_detail: "仍有活动，但节奏在放缓。"
-          stalled: "停滞"
-          stalled_detail: "21 天以上无明显报价或买家进展。"
+          label: 商机进展
+          no_quotes: 暂无报价
+          no_quotes_detail: 暂无报价活动可供评估。
+          moving: 推进中
+          moving_detail: 过去 7 天内有报价或买家活动。
+          cooling: 降温
+          cooling_detail: 仍有活动，但节奏在放缓。
+          stalled: 停滞
+          stalled_detail: 21 天以上无明显报价或买家进展。
         engagement:
-          label: "已记录互动"
-          observed: "已观测"
-          observed_detail: "共享报价中记录到 %{count} 次买家查看。"
-          indirect: "间接"
-          indirect_detail: "时间线有客户信号，但没有直接的报价查看记录。"
-          low_visibility: "可见度低"
-          low_visibility_detail: "报价已在线，但尚无买家查看证据。"
-          not_available: "不适用"
-          not_available_detail: "该客户当前没有可用的在线报价信号。"
+          label: 客户互动
+          observed: 已观测
+          observed_detail: 共享报价中已记录 %{count} 次客户查看。
+          indirect: 间接
+          indirect_detail: 时间线中有客户活动，但还没有直接查看报价的记录。
+          low_visibility: 可见度低
+          low_visibility_detail: 报价已发出，但暂时还没有客户查看记录。
+          not_available: 不适用
+          not_available_detail: 该客户当前没有可用的在线报价信号。
       follow_up_text:
-        overdue: "跟进已逾期，需立即处理。"
-        due_today: "今日需跟进。"
-        upcoming: "跟进已安排在近期。"
-        not_scheduled: "尚未安排跟进日期。"
+        overdue: 跟进已逾期，需立即处理。
+        due_today: 今日需跟进。
+        upcoming: 跟进已安排在近期。
+        not_scheduled: 尚未安排跟进日期。
       follow_up_primary_action:
-        mark_followed_today: "只更新跟进状态"
-        schedule_plus_7d: "安排 +7 天"
-        adjust_follow_up: "调整下次跟进"
+        mark_followed_today: 只更新跟进状态
+        schedule_plus_7d: 安排 +7 天
+        adjust_follow_up: 调整下次跟进
       row_signal:
-        follow_today: "今日跟进"
-        overdue_follow_up: "跟进逾期"
-        contact_now: "立即联系"
-        due_today: "今日到期"
-        re_engage: "重新激活"
-        high_value_stalled: "高价值但停滞"
-        prepare_quote: "准备报价"
-        due_soon: "即将到期"
-        set_schedule: "设置计划"
-        no_urgent_risk: "无紧急风险"
+        follow_today: 今日跟进
+        overdue_follow_up: 跟进逾期
+        contact_now: 立即联系
+        due_today: 今日到期
+        re_engage: 重新激活
+        high_value_stalled: 高价值但停滞
+        prepare_quote: 准备报价
+        due_soon: 即将到期
+        set_schedule: 设置计划
+        no_urgent_risk: 无紧急风险
       follow_up_tasks:
-        open_quote: "打开报价"
+        open_quote: 查看报价
         set_next_follow_up_date:
-          title: "设置下次跟进日期"
-          detail: "该客户尚未安排跟进日期。"
+          title: 设置下次跟进日期
+          detail: 该客户尚未安排跟进日期。
         follow_up_overdue:
-          title: "跟进逾期"
-          detail: "已逾期 %{days} 天，请立即联系客户。"
+          title: 跟进逾期
+          detail: 已逾期 %{days} 天，请立即联系客户。
         follow_up_due_today:
-          title: "今日需跟进"
-          detail: "请联系客户并更新下一步动作。"
+          title: 今日需跟进
+          detail: 请联系客户并更新下一步动作。
         upcoming_follow_up:
-          title: "即将跟进"
-          detail: "已安排在 %{date}（%{days} 天后）。"
+          title: 即将跟进
+          detail: 已安排在 %{date}（%{days} 天后）。
         quote_expired:
           title: "%{quote_name} 已过期"
-          detail: "已于 %{date} 过期，可考虑发送修订版。"
+          detail: 已于 %{date} 过期，可考虑发送修订版。
         quote_expiring_soon:
           title: "%{quote_name} 即将到期"
           detail: "%{days} 天后到期，请在到期前跟进。"
         quote_not_viewed_yet:
           title: "%{quote_name} 尚未查看"
-          detail: "发送时间：%{sent_at}，可考虑发送提醒。"
+          detail: 发送时间：%{sent_at}，可考虑发送提醒。
       timeline:
-        customer_created_title: "客户已创建"
+        customer_created_title: 客户已创建
         customer_created_detail: "%{name} 已加入你的工作区。"
-        follow_up_completed_title: "跟进已完成"
-        follow_up_completed_detail: "最近一次跟进记录于 %{date}。"
-        next_follow_up_scheduled_title: "已安排下次跟进"
+        follow_up_completed_title: 跟进已完成
+        follow_up_completed_detail: 最近一次跟进记录于 %{date}。
+        next_follow_up_scheduled_title: 已安排下次跟进
         quote_created_title: "%{quote_name} 已创建"
-        revision_detail: "修订版本 V%{revision}。"
+        revision_detail: 修订版本 V%{revision}。
         quote_updated_title: "%{quote_name} 已更新"
-        latest_status_detail: "最新状态：%{status}。"
+        latest_status_detail: 最新状态：%{status}。
         quote_sent_title: "%{quote_name} 已发送"
-        quote_sent_detail: "已发送给客户。"
+        quote_sent_detail: 已发送给客户。
         quote_viewed_title: "%{quote_name} 已查看"
-        quote_viewed_detail: "客户已打开。"
+        quote_viewed_detail: 客户已打开。
         quote_revision_requested_title: "%{quote_name} 请求修订"
-        client_request_detail: "客户请求：%{message}"
-        customer_requested_updates: "客户请求更新该修订版本。"
+        client_request_detail: 客户请求：%{message}
+        customer_requested_updates: 客户请求更新该修订版本。
         quote_accepted_title: "%{quote_name} 已接受"
-        accepted_via_public_link: "通过公开链接接受。"
+        accepted_via_public_link: 通过分享链接接受。
         quote_reopened_title: "%{quote_name} 已重开"
-        quote_reopened_detail: "已重开并可编辑。"
+        quote_reopened_detail: 已重开并可编辑。
         quote_won_title: "%{quote_name} 赢单"
-        marked_won_internally: "内部已标记为赢单。"
-        marked_lost_reason: "已标记丢单。原因：%{reason}"
-        expired_pressure_reason: "已过期。压力原因：%{reason}"
-        final_status_changed: "最终状态已变更为 %{status}。"
+        marked_won_internally: 内部已标记为赢单。
+        marked_lost_reason: 已标记丢单。原因：%{reason}
+        expired_pressure_reason: 已过期。原因：%{reason}
+        final_status_changed: 最终状态已变更为 %{status}。
         quote_status_title: "%{quote_name} %{status}"
         win_reason_captured_title: "%{quote_name} 已记录赢单原因"
         reminder_sent_title: "%{quote_name} 已发送提醒"
-        reminder_sent_detail: "在买家未查看后已发送提醒邮件。"
-        public_links_shared: "公开链接已分享（%{count}）"
-        public_link_shared: "公开链接已分享"
-        public_link_generated: "该报价已生成公开链接。"
-        public_link_first_viewed: "公开链接首次被查看"
-        viewed_via_public_link: "通过公开链接查看。"
-        public_link_activity: "公开链接活跃度"
-        viewed_times_via_public_link: "通过公开链接查看 %{count} 次。"
+        reminder_sent_detail: 在买家未查看后已发送提醒邮件。
+        public_links_shared: 分享链接已分享（%{count}）
+        public_link_shared: 分享链接已分享
+        public_link_generated: 该报价已生成分享链接。
+        public_link_first_viewed: 分享链接首次被查看
+        viewed_via_public_link: 通过分享链接查看。
+        public_link_activity: 分享链接活跃度
+        viewed_times_via_public_link: 通过分享链接查看 %{count} 次。
         quote_archived_title: "%{quote_name} 已归档"
-        revision_archived_detail: "修订版本 V%{revision} 已从可见历史中归档。"
+        revision_archived_detail: 修订版本 V%{revision} 已从可见历史中归档。
         quote_deleted_title: "%{quote_name} 已删除"
-        quote_deleted_detail: "报价线程已删除，公开链接已失效。"
+        quote_deleted_detail: 报价已删除，共享链接已过期。
     flash:
-      free_plan_limit_reached: "免费套餐额度已达上限：客户已使用 %{used}/%{limit}。"
-      follow_up_marked_today: "今日已标记跟进。下次跟进已安排在 %{date}"
-      unsupported_follow_up_interval: "不支持的跟进间隔。"
-      next_follow_up_scheduled: "下次跟进已安排在 %{date}（%{label}）。"
+      free_plan_limit_reached: 免费套餐额度已达上限：客户已使用 %{used}/%{limit}。
+      follow_up_marked_today: 今日已标记跟进。下次跟进已安排在 %{date}
+      unsupported_follow_up_interval: 不支持的跟进间隔。
+      next_follow_up_scheduled: 下次跟进已安排在 %{date}（%{label}）。
   follow_up:
     message:
-      quote_link_intro: "你可以在这里查看这份报价："
-      quote_link_label: "报价链接："
+      quote_link_intro: 你可以在这里查看这份报价：
+      quote_link_label: 报价链接：
     assistant:
-      title: "跟进建议"
-      subtitle: "根据最近报价和跟进状态，先整理一版可直接发送的内容。"
-      verify_before_email: "发送邮件前验证"
-      verify_before_email_hint: "请先完成机器人验证，验证通过后将自动发送跟进邮件。"
-      loading_verification: "正在加载验证..."
-      verified_sending: "验证通过，正在发送邮件..."
-      close_verification: "关闭验证"
-      suggested_message: "建议文案"
-      placeholder: "输入准备发给客户的跟进内容"
-      hint: "这里会把下面这段内容保存到跟进记录；上方按钮只更新跟进状态。"
-      email_blocked_hint: "发送邮件前请先完善：%{missing}。"
-      fix_profile: "去完善个人资料"
-      fix_company: "去完善公司设置"
-      no_whatsapp_number: "该客户未填写手机号"
-      no_email: "该客户未填写邮箱"
-      disabled_no_phone: "请在客户资料中填写手机号"
-      disabled_no_email: "请在客户资料中填写邮箱"
-      disabled_setup_incomplete: "请先完善发件人姓名或公司名称"
-      go_edit_customer: "去完善客户资料"
+      title: 跟进建议
+      subtitle: 根据最近报价和跟进状态，先整理一版可直接发送的内容。
+      verify_before_email: 发送邮件前验证
+      verify_before_email_hint: 请先完成机器人验证，验证通过后将自动发送跟进邮件。
+      loading_verification: 正在加载验证...
+      verified_sending: 验证通过，正在发送邮件...
+      close_verification: 关闭验证
+      suggested_message: 建议文案
+      placeholder: 输入准备发给客户的跟进内容
+      hint: 这里会把下面这段内容保存到跟进记录；上方按钮只更新跟进状态。
+      email_blocked_hint: 发送邮件前请先完善：%{missing}。
+      fix_profile: 去完善个人资料
+      fix_company: 去完善公司设置
+      no_whatsapp_number: 该客户未填写手机号
+      no_email: 该客户未填写邮箱
+      disabled_no_phone: 请在客户资料中填写手机号
+      disabled_no_email: 请在客户资料中填写邮箱
+      disabled_setup_incomplete: 请先完善发件人姓名或公司名称
+      go_edit_customer: 去完善客户资料
       missing_fields:
-        sender_name: "你的姓名"
-        company_name: "公司名称"
-      latest_quote: "最近报价"
-      no_quote: "暂无报价"
-      quote_signal: "报价信号"
+        sender_name: 你的姓名
+        company_name: 公司名称
+      latest_quote: 最近报价
+      no_quote: 暂无报价
+      quote_signal: 报价信号
       signal_labels:
-        not_viewed: "尚未查看"
-        viewed: "已经查看"
-        expired: "最近过期"
-        revision_requested: "请求修订"
-        expiring_soon: "即将到期"
-        hot_engagement_no_follow_up: "高热度互动"
-        viewed_no_follow_up: "已查看但未跟进"
-        not_viewed_3d: "3 天未查看"
-        not_viewed_7d: "7 天未查看"
-        stalled_negotiation: "谈判停滞"
-        generic: "常规跟进"
+        not_viewed: 尚未查看
+        viewed: 已经查看
+        expired: 最近过期
+        revision_requested: 请求修订
+        expiring_soon: 即将到期
+        hot_engagement_no_follow_up: 高意向
+        viewed_no_follow_up: 已查看但未跟进
+        not_viewed_3d: 3 天未查看
+        not_viewed_7d: 7 天未查看
+        stalled_negotiation: 谈判停滞
+        generic: 常规跟进
       messages:
         not_viewed: "%{name}，您好，想确认一下您是否有时间查看我发出的报价单。"
         viewed: "%{name}，您好，我看到您已经查看了报价单。如需调整任何内容，请随时告诉我。"
         expired: "%{name}，您好，这份报价最近已过期。如有需要我可以马上为您更新。"
         hot_engagement_no_follow_up: "%{name}，您好，我看到您刚刚查看了报价单。如需任何调整，请随时告诉我。"
         expiring_soon: "%{name}，您好，这份报价即将到期。如有需要我可以马上帮您更新。"
-        generic: "%{name}，您好，跟进一下当前进展，看看您这边是否还需要我提供其他支持。"
+        generic: "%{name}，您好。现就当前报价进展与您确认，如需补充资料，请随时告知。"
     actions:
-      whatsapp: "通过 WhatsApp 发送"
-      email: "发送邮件"
-      copy: "复制消息"
-      log: "保存这条内容并记录"
+      whatsapp: 通过 WhatsApp 发送
+      email: 发送邮件
+      copy: 复制消息
+      log: 保存这条内容并记录
     channels:
-      manual: "手动"
-      whatsapp: "WhatsApp"
-      email: "邮件"
-      call: "电话"
-      linkedin: "LinkedIn"
+      manual: 手动
+      whatsapp: WhatsApp
+      email: 邮件
+      call: 电话
+      linkedin: LinkedIn
     timeline:
-      event_title: "通过 %{channel} 跟进"
-      logged_by: "记录人：%{user}"
-      quote_reference: "关联报价：%{quote_name}"
-      event_detail_fallback: "已记录跟进。"
+      event_title: 通过 %{channel} 跟进
+      logged_by: 记录人：%{user}
+      quote_reference: 关联报价：%{quote_name}
+      event_detail_fallback: 已记录跟进。
     flash:
-      logged: "已记录跟进，下次跟进安排在 %{date}"
-      email_sent: "跟进邮件已发送，下次跟进安排在 %{date}"
-      email_setup_incomplete: "发送邮件前请先完善：%{missing}。"
-      email_verification_required: "发送跟进邮件前请先完成机器人验证。"
-      email_verification_failed: "机器人验证失败，请重试。"
-      email_cooldown: "刚刚已发送过跟进邮件，请在 %{minutes} 分钟后再试。"
-      email_failed: "当前无法发送跟进邮件。"
-      email_missing: "客户缺少邮箱地址。"
-      whatsapp_logged: "已记录 WhatsApp 跟进，下次跟进安排在 %{date}"
-      whatsapp_failed: "当前无法打开 WhatsApp 跟进。"
-      whatsapp_unavailable: "客户没有可用的 WhatsApp 号码。"
-      message_copied: "跟进消息已复制。"
-      copy_failed: "当前浏览器无法复制跟进消息。"
+      logged: 已记录跟进，下次跟进安排在 %{date}
+      email_sent: 跟进邮件已发送，下次跟进安排在 %{date}
+      email_setup_incomplete: 发送邮件前请先完善：%{missing}。
+      email_verification_required: 发送跟进邮件前请先完成机器人验证。
+      email_verification_failed: 机器人验证失败，请重试。
+      email_cooldown: 刚刚已发送过跟进邮件，请在 %{minutes} 分钟后再试。
+      email_failed: 当前无法发送跟进邮件。
+      email_missing: 客户缺少邮箱地址。
+      whatsapp_logged: 已记录 WhatsApp 跟进，下次跟进安排在 %{date}
+      whatsapp_failed: 当前无法打开 WhatsApp 跟进。
+      whatsapp_unavailable: 客户没有可用的 WhatsApp 号码。
+      message_copied: 跟进消息已复制。
+      copy_failed: 当前浏览器无法复制跟进消息。
     mailer:
-      subject: "来自 %{company_name} 的跟进"
+      subject: 来自 %{company_name} 的跟进
       greeting: "%{name}，您好："
       signature: "%{company_name} 的 %{sender} 敬上"
   analytics:
     sales_insights:
-      title: "销售洞察"
-      subtitle: "基于报价与客户互动数据的分析概览。"
+      title: 销售洞察
+      subtitle: 基于报价与客户互动数据的分析摘要。
     customer_engagement:
-      title: "客户互动"
-      best_contact_time: "最佳联系时段"
-      no_data: "暂无浏览数据。"
-      total_views: "总浏览次数"
+      title: 客户互动
+      best_contact_time: 最佳联系时段
+      no_data: 暂无浏览数据。
+      total_views: 总浏览次数
     product_intelligence:
-      title: "产品智能"
-      quotes_30d: "报价次数（近30天）"
-      wins: "成交"
-      win_rate: "成交率"
-      avg_price: "均价"
-      no_data: "暂无产品报价数据。"
+      title: 产品智能
+      quotes_30d: 报价次数（近30天）
+      wins: 成交
+      win_rate: 成交率
+      avg_price: 均价
+      no_data: 暂无产品报价数据。
     win_loss_distribution:
-      title: "赢单 / 输单原因"
-      wins_title: "赢单原因"
-      losses_title: "输单原因"
-      other_details: "其他备注"
-      other_unstructured: "其他备注（未归类）"
-      no_wins: "暂无赢单记录。"
-      no_losses: "暂无输单记录。"
+      title: 赢单 / 丢单原因
+      wins_title: 赢单原因
+      losses_title: 丢单原因
+      other_details: 其他备注
+      other_unstructured: 其他备注（未归类）
+      no_wins: 暂无赢单记录。
+      no_losses: 暂无丢单记录。
     revision_depth:
-      title: "版本深度"
-      revision: "第 %{n} 版"
-      total: "总计"
-      wins: "成交"
-      win_rate: "成交率"
-      no_data: "已结案数据不足。"
+      title: 版本深度
+      revision: 第 %{n} 版
+      total: 总计
+      wins: 成交
+      win_rate: 成交率
+      no_data: 已结案数据不足。
     channel_usage:
-      title: "跟进渠道"
-      channel: "渠道"
-      total: "总计"
-      reply_rate: "回复率"
-      reply_rate_pending: "—"
-      no_data: "暂无跟进记录。"
+      title: 跟进渠道
+      channel: 渠道
+      total: 总计
+      reply_rate: 回复率
+      reply_rate_pending: —
+      no_data: 暂无跟进记录。
       channels:
-        manual: "手动"
-        whatsapp: "WhatsApp"
-        email: "邮件"
-        phone: "电话"
-        call: "电话"
-        wechat: "微信"
-        linkedin: "LinkedIn"
+        manual: 手动
+        whatsapp: WhatsApp
+        email: 邮件
+        phone: 电话
+        call: 电话
+        wechat: 微信
+        linkedin: LinkedIn
     reason_labels:
       win:
-        unspecified: "未填写"
-        price_accepted: "价格接受"
-        preferred_terms: "条款更优"
-        fast_response: "响应迅速"
-        technical_fit: "技术匹配"
-        buyer_relationship: "客户关系"
-        sample_approved: "样品通过"
-        other: "其他"
+        unspecified: 未填写
+        price_accepted: 价格接受
+        preferred_terms: 条款更优
+        fast_response: 响应迅速
+        technical_fit: 技术匹配
+        buyer_relationship: 客户关系
+        sample_approved: 样品通过
+        other: 其他
       loss:
-        unspecified: "未填写"
-        price_too_high: "价格过高"
-        competitor_selected: "选择了竞争对手"
-        budget_frozen: "预算冻结"
-        timeline_missed: "时间节点错过"
-        no_response: "无回应"
-        internal_hold: "内部搁置"
-        other: "其他"
+        unspecified: 未填写
+        price_too_high: 价格过高
+        competitor_selected: 选择了竞争对手
+        budget_frozen: 预算冻结
+        timeline_missed: 时间节点错过
+        no_response: 无回应
+        internal_hold: 内部搁置
+        other: 其他
     customer_silent:
-      title: "沉默客户"
-      label: "客户已沉默"
-      detail: "最近一次浏览报价是 %{days} 天前，此后无任何跟进。"
-      no_silent: "未检测到沉默客户。"
+      title: 沉默客户
+      label: 客户已沉默
+      detail: 最近一次浏览报价是 %{days} 天前，此后无任何跟进。
+      no_silent: 未检测到沉默客户。
   products:
     view:
       index:
-        title: "产品"
-        subtitle: "让产品目录更紧凑、更易检索，随时可用于报价，减少反复查找。"
-        new_product: "+ 新建产品"
-        search_placeholder: "搜索产品..."
-        clear_search: "清除"
-        catalog_title: "产品目录"
-        catalog_caption: "可复用产品可直接用于报价、预设以及版本频繁变动的销售流程。"
-        search_results_html: '找到 <strong>%{count}</strong> 个产品，匹配 "<strong>%{query}</strong>"'
+        title: 产品
+        subtitle: 让产品目录更紧凑、易查找，随时可用于报价，减少重复查找。
+        new_product: + 新建产品
+        search_placeholder: 搜索产品...
+        clear_search: 清除
+        catalog_title: 产品目录
+        catalog_caption: 可复用产品可直接用于报价、预设以及修订频繁的销售流程。
+        search_results_html: 找到 <strong>%{count}</strong> 个产品，匹配 "<strong>%{query}</strong>"
         table:
-          image: "图片"
-          name: "名称"
-          sku: "SKU"
-          reference_price: "参考价格"
-          quoted: "被报价次数"
-          last_used: "最近使用"
-        open_product_aria: "打开产品 %{name}"
-        never: "从未"
-        open_actions_aria: "打开操作菜单"
+          image: 图片
+          name: 名称
+          sku: SKU
+          reference_price: 参考价格
+          quoted: 被报价次数
+          last_used: 最近使用
+        open_product_aria: 查看产品 %{name}
+        never: 从未
+        open_actions_aria: 打开操作菜单
         actions:
-          view: "查看"
-          edit: "编辑"
-          delete: "删除"
-          delete_confirm: "确定删除这个产品吗？"
-        empty_title: "还没有产品"
-        empty_body: "先创建第一个产品，建立可复用的报价目录、预设与导出基础。"
-        empty_action: "创建产品"
+          view: 查看
+          edit: 编辑
+          delete: 删除
+          delete_confirm: 确定删除这个产品吗？
+        empty_title: 还没有产品
+        empty_body: 先创建第一个产品，建立可复用的报价目录、预设与导出基础。
+        empty_action: 创建产品
+        add_more_images: 添加更多图片
+        basic_info: 基本信息
+        basic_info_hint: 定义买家和销售一眼就能识别的产品核心信息。
+        bound_addon_presets: 已绑定的附加项预设
+        bound_spec_presets: 已绑定的规格预设
+        category: 类别
+        category_placeholder: 泵 / 配件 / 备件
+        comms: null
+        configurator_presets: 配置器预设
+        configurator_presets_hint: 为此产品绑定可复用的规格和附加项预设。默认预设会自动填充报价条目，销售团队仍可在报价中替换预设或直接编辑行内容。
+        cost_price: 成本价（仅内部）
+        cost_price_hint: 仅供内部使用，不会显示在报价中。
+        default_addon_preset: 默认附加项预设
+        default_spec_preset: 默认规格预设
+        delete_image: 删除图片
+        delete_image_confirm: 删除这张图片？
+        delete_selected: 删除所选项
+        delete_selected_confirm: 删除已选择的 %{count} 张图片？
+        description: 描述
+        description_hint: 添加简短的业务背景，避免销售每次都要重新解释这个产品。
+        gallery: 图库
+        gallery_image_alt: 图库图片
+        lead_time: 交期
+        lead_time_placeholder: 例如 15-20 天
+        main: 主图
+        manage_addon_presets: 管理附加项预设
+        manage_spec_presets: 管理规格预设
+        no_addon_presets: 还没有附加项预设。请先创建，再将其绑定到此产品。
+        no_default_preset: 未设置默认预设
+        no_image_hint: 还没有图片。请上传后建立图库。
+        no_spec_presets: 还没有规格预设。请先创建，再将其绑定到此产品。
+        pricing_business: 价格与商务
+        pricing_business_hint: 将参考价、币种和商务限制放在一起维护。
+        product_description: 产品描述
+        product_name: 产品名称
+        reference_price: 参考价
+        reference_price_currency: 参考价币种
+        remove_file: 移除文件
+        select_all: 全选
+        select_image: 选择图片
+        selected_count: 已选择 %{count} 项
+        set_as_main: 设为主图
+        set_as_main_image: 设为主图片
+        sku_placeholder: SKU/产品编码
+        unit: 单位
+        unit_placeholder: 件 / 套 / kg / 箱
+        upload_images: 上传图片
       form:
-        product_media: "产品媒体"
-        product_media_hint: "保持清晰的图片集合，让产品随时可用于报价与分享。"
-        main_image: "主图"
-        main_product_image_alt: "产品主图"
-        no_image_hint: "暂无图片。请上传图片以建立图库。"
-        upload_images: "上传图片"
-        add_more_images: "继续添加图片"
-        gallery: "图库"
-        select_all: "全选"
-        delete_selected: "删除所选"
-        selected_count: "已选择 %{count} 张"
-        select_image: "选择图片"
-        gallery_image_alt: "图库图片"
-        set_as_main_image: "设为主图"
-        delete_image_confirm: "确定删除这张图片吗？"
-        delete_image: "删除图片"
-        main: "主图"
-        basic_info: "基础信息"
-        basic_info_hint: "定义买家和销售都能快速识别的核心信息。"
-        product_name: "产品名称"
-        sku_placeholder: "SKU/产品编码"
-        category: "分类"
-        category_placeholder: "泵 / 管件 / 备件"
-        unit: "单位"
-        unit_placeholder: "件 / 套 / kg / 箱"
-        pricing_business: "价格与商务"
-        pricing_business_hint: "将参考价格、币种和商务限制统一管理。"
-        reference_price: "参考价格"
-        reference_price_currency: "参考价格币种"
-        cost_price: "成本价（仅内部）"
-        cost_price_hint: "仅内部可见，不会显示在报价输出中。"
-        lead_time: "交期"
-        lead_time_placeholder: "例如：15-20 天"
-        description: "产品描述"
-        description_hint: "补充简要业务背景，减少销售反复解释。"
-        product_description: "产品描述"
-        configurator_presets: "配置预设"
-        configurator_presets_hint: "为产品绑定可复用的规格和附加项预设。所选默认预设会自动带入报价行，销售仍可在报价中切换或编辑。"
-        bound_spec_presets: "已绑定规格预设"
-        manage_spec_presets: "管理规格预设"
-        default_spec_preset: "默认规格预设"
-        no_default_preset: "无默认预设"
-        no_spec_presets: "暂无规格预设。请先创建，再绑定到该产品。"
-        bound_addon_presets: "已绑定附加项预设"
-        manage_addon_presets: "管理附加项预设"
-        default_addon_preset: "默认附加项预设"
-        no_addon_presets: "暂无附加项预设。请先创建，再绑定到该产品。"
-        delete_selected_confirm: "确定删除已选择的 %{count} 张图片吗？"
-        set_as_main: "设为主图"
-        remove_file: "移除文件"
+        product_media: 产品媒体
+        product_media_hint: 保持清晰的图片集合，让产品随时可用于报价与分享。
+        main_image: 主图
+        main_product_image_alt: 产品主图
+        no_image_hint: 暂无图片。请上传图片以建立图库。
+        upload_images: 上传图片
+        add_more_images: 继续添加图片
+        no_files_selected: 未选择文件
+        files_selected: 已选择 %{count} 个文件
+        gallery: 图库
+        select_all: 全选
+        delete_selected: 删除所选
+        selected_count: 已选择 %{count} 张
+        select_image: 选择图片
+        gallery_image_alt: 图库图片
+        set_as_main_image: 设为主图
+        delete_image_confirm: 确定删除这张图片吗？
+        delete_image: 删除图片
+        main: 主图
+        basic_info: 基础信息
+        basic_info_hint: 定义买家和销售都能快速识别的核心信息。
+        product_name: 产品名称
+        sku_placeholder: SKU/产品编码
+        category: 分类
+        category_placeholder: 泵 / 管件 / 备件
+        unit: 单位
+        unit_placeholder: 件 / 套 / kg / 箱
+        pricing_business: 价格与商务
+        pricing_business_hint: 将参考价格、币种和商务限制统一管理。
+        reference_price: 参考价格
+        reference_price_currency: 参考价格币种
+        cost_price: 成本价（仅内部）
+        cost_price_hint: 仅内部可见，不会显示在报价输出中。
+        lead_time: 交期
+        lead_time_placeholder: 例如：15-20 天
+        description: 产品描述
+        description_hint: 补充简要业务背景，减少销售反复解释。
+        product_description: 产品描述
+        configurator_presets: 配置预设
+        configurator_presets_hint: 为产品绑定可复用的规格和附加项预设。默认预设会自动带入报价行，销售仍可在报价中切换预设或编辑内容。
+        bound_spec_presets: 已绑定规格预设
+        manage_spec_presets: 管理规格预设
+        default_spec_preset: 默认规格预设
+        no_default_preset: 无默认预设
+        no_spec_presets: 暂无规格预设。请先创建，再绑定到该产品。
+        bound_addon_presets: 已绑定附加项预设
+        manage_addon_presets: 管理附加项预设
+        default_addon_preset: 默认附加项预设
+        no_addon_presets: 暂无附加项预设。请先创建，再绑定到该产品。
+        delete_selected_confirm: 确定删除已选择的 %{count} 张图片吗？
+        set_as_main: 设为主图
+        remove_file: 移除文件
       show:
-        overview: "概览"
-        quoted_count: "被引用 %{count} 次"
-        last_used_at: "最近使用 %{time}"
-        last_used_never: "最近使用 从未"
-        reference_price: "参考价格"
-        cost_price: "成本价"
-        not_shared: "不展示"
-        internal_only: "仅内部"
-        configurator: "配置器"
-        specifications: "规格"
-        add_ons: "附加项"
-        default_preset: "默认预设：%{name}"
-        using_inline_default_specs: "使用内联默认规格值"
-        using_inline_default_addons: "使用内联默认附加项值"
-        default: "默认"
-        bound_specs: "已绑定 %{count} 个规格项"
-        bound_addons: "已绑定 %{count} 个附加项"
-        more_count: "另有 %{count} 项"
-        no_configuration: "尚未添加配置内容。"
+        overview: 概览
+        quoted_count: 被引用 %{count} 次
+        last_used_at: 最近使用 %{time}
+        last_used_never: 最近使用 从未
+        reference_price: 参考价格
+        cost_price: 成本价
+        not_shared: 不展示
+        internal_only: 仅内部
+        configurator: 配置器
+        specifications: 规格
+        add_ons: 附加项
+        default_preset: 默认预设：%{name}
+        using_inline_default_specs: 使用内联默认规格值
+        using_inline_default_addons: 使用内联默认附加项值
+        default: 默认
+        bound_specs: 已绑定 %{count} 个规格项
+        bound_addons: 已绑定 %{count} 个附加项
+        more_count: 另有 %{count} 项
+        no_configuration: 尚未添加配置内容。
         main_image_alt: "%{name} 主图"
-        main_image_label: "产品主图"
+        main_image_label: 产品主图
         gallery_image_alt: "%{name} 图库图片"
-        gallery_image_label: "产品图库图片"
-        image_preview: "图片预览"
-        close_image_preview: "关闭图片预览"
-        back_to_products: "返回产品列表"
+        gallery_image_label: 产品图库图片
+        image_preview: 图片预览
+        close_image_preview: 关闭图片预览
+        back_to_products: 返回产品列表
         meta:
-          moq: "最小起订量"
-          lead_time: "交期"
-          category: "分类"
-          unit: "单位"
-          sku: "SKU"
+          moq: 最小起订量
+          lead_time: 交期
+          category: 分类
+          unit: 单位
+          sku: SKU
         actions:
-          edit: "编辑"
-          delete: "删除"
-          delete_confirm: "确定删除这个产品吗？"
+          edit: 编辑
+          delete: 删除
+          delete_confirm: 确定删除这个产品吗？
       edit:
-        title: "编辑产品"
-        subtitle_html: "更新 <strong>%{name}</strong> 的价格、媒体、描述与默认预设绑定。"
-        submit_label: "更新产品"
-        back_to_product: "返回产品"
+        title: 编辑产品
+        subtitle_html: 更新 <strong>%{name}</strong> 的价格、媒体、描述与默认预设绑定。
+        submit_label: 更新产品
+        back_to_product: 返回产品
       new:
-        title: "新建产品"
-        subtitle: "添加一个包含价格、媒体和可复用预设绑定的目录产品。"
-        submit_label: "创建产品"
-        back_to_products: "返回产品列表"
+        title: 新建产品
+        subtitle: 添加一个包含价格、媒体和可复用预设绑定的目录产品。
+        submit_label: 创建产品
+        back_to_products: 返回产品列表
     flash:
-      created: "产品创建成功"
-      updated: "产品更新成功"
-      deleted: "产品删除成功"
-      image_not_found: "未找到图片"
-      display_image_updated: "展示图已更新"
-      display_image_removed: "展示图已移除"
-      gallery_image_removed: "图库图片已移除"
-      no_images_selected: "未选择任何图片"
-      images_removed: "已移除 %{count} 张图片"
+      created: 产品创建成功
+      updated: 产品更新成功
+      deleted: 产品删除成功
+      image_not_found: 未找到图片
+      display_image_updated: 展示图已更新
+      display_image_removed: 展示图已移除
+      gallery_image_removed: 图库图片已移除
+      no_images_selected: 未选择任何图片
+      images_removed: 已移除 %{count} 张图片
   addon_presets:
     view:
       form:
-        preset_name: "预设名称"
-        name_placeholder: "出口套装 / 高级服务"
-        addons_text: "附加项文本"
-        entries_placeholder: "延保服务: 50\n安装套件: 120"
+        preset_name: 预设名称
+        name_placeholder: 出口套装 / 高级服务
+        addons_text: 附加项文本
+        entries_placeholder: "延保服务: 50
+
+          安装套件: 120"
         hint_html: "每行一项，使用 <code>名称: 价格</code> 格式。"
-        update: "更新附加项预设"
-        create: "创建附加项预设"
+        update: 更新附加项预设
+        create: 创建附加项预设
       index:
-        title: "附加项预设"
-        back_to_product_presets: "返回产品预设"
-        create_title: "创建附加项预设"
-        library_title: "预设库"
-        name: "名称"
-        addons: "附加项"
-        edit: "编辑"
-        delete: "删除"
-        delete_confirm: "确定删除这个附加项预设吗？"
-        empty: "暂无附加项预设。"
+        title: 附加项预设
+        back_to_product_presets: 返回产品预设
+        create_title: 创建附加项预设
+        library_title: 预设库
+        name: 名称
+        addons: 附加项
+        edit: 编辑
+        delete: 删除
+        delete_confirm: 确定删除这个附加项预设吗？
+        empty: 暂无附加项预设。
       edit:
-        title: "编辑附加项预设"
-        back: "返回附加项预设"
+        title: 编辑附加项预设
+        back: 返回附加项预设
     flash:
-      created: "附加项预设已创建。"
-      updated: "附加项预设已更新。"
-      deleted: "附加项预设已删除。"
+      created: 附加项预设已创建。
+      updated: 附加项预设已更新。
+      deleted: 附加项预设已删除。
   spec_presets:
     view:
       form:
-        preset_name: "预设名称"
-        name_placeholder: "电机 220V / 出口标准"
-        specifications_text: "规格文本"
-        entries_placeholder: "电压: 220V\n频率: 50Hz\n材质: SS304"
+        preset_name: 预设名称
+        name_placeholder: 电机 220V / 出口标准
+        specifications_text: 规格文本
+        entries_placeholder: "电压: 220V
+
+          频率: 50Hz
+
+          材质: SS304"
         hint_html: "每行一项，可使用 <code>名称: 值</code>、<code>名称=值</code> 或中文冒号。"
-        update: "更新规格预设"
-        create: "创建规格预设"
+        update: 更新规格预设
+        create: 创建规格预设
       index:
-        title: "规格预设"
-        back_to_product_presets: "返回产品预设"
-        create_title: "创建规格预设"
-        library_title: "预设库"
-        name: "名称"
-        specs: "规格"
-        edit: "编辑"
-        delete: "删除"
-        delete_confirm: "确定删除这个规格预设吗？"
-        empty: "暂无规格预设。"
+        title: 规格预设
+        back_to_product_presets: 返回产品预设
+        create_title: 创建规格预设
+        library_title: 预设库
+        name: 名称
+        specs: 规格
+        edit: 编辑
+        delete: 删除
+        delete_confirm: 确定删除这个规格预设吗？
+        empty: 暂无规格预设。
       edit:
-        title: "编辑规格预设"
-        back: "返回规格预设"
+        title: 编辑规格预设
+        back: 返回规格预设
     flash:
-      created: "规格预设已创建。"
-      updated: "规格预设已更新。"
-      deleted: "规格预设已删除。"
+      created: 规格预设已创建。
+      updated: 规格预设已更新。
+      deleted: 规格预设已删除。
   product_presets:
     view:
       index:
-        title: "产品预设"
-        subtitle: "在这里管理可复用的规格和附加项库，并将其绑定为产品默认值。"
-        spec_title: "规格预设"
-        spec_caption: "用于电压、材质、尺寸等报价字段的可复用规格组合。"
-        manage_specs: "管理规格"
-        new_spec_preset: "新建规格预设"
+        title: 产品预设
+        subtitle: 在这里管理可复用的规格和附加项库，并将其绑定为产品默认值。
+        spec_title: 规格预设
+        spec_caption: 用于电压、材质、尺寸等报价字段的可复用规格组合。
+        manage_specs: 管理规格
+        new_spec_preset: 新建规格预设
         spec_count: "%{count} 条规格"
-        no_spec_presets: "暂无规格预设。"
-        addon_title: "附加项预设"
-        addon_caption: "可复用的费用组合，如质保、安装包、包装或服务选项。"
-        manage_addons: "管理附加项"
-        new_addon_preset: "新建附加项预设"
+        no_spec_presets: 暂无规格预设。
+        addon_title: 附加项预设
+        addon_caption: 可复用的费用组合，如质保、安装包、包装或服务选项。
+        manage_addons: 管理附加项
+        new_addon_preset: 新建附加项预设
         addon_count: "%{count} 条附加项"
-        no_addon_presets: "暂无附加项预设。"
+        no_addon_presets: 暂无附加项预设。
   quote_templates:
     flash:
-      created: "模板已创建"
-      updated: "模板已更新"
-      deleted: "模板已删除"
-      default_updated: "默认模板已更新"
+      created: 模板已创建
+      updated: 模板已更新
+      deleted: 模板已删除
+      default_updated: 默认模板已更新
     view:
       index:
-        title: "模板"
-        subtitle: "为报价单和 PI 文档构建可复用的品牌预设。"
-        new_template: "新建模板"
-        default_preset: "默认预设"
-        accent: "主题色"
-        used_in_quotes: "已用于 %{count} 条报价"
-        edit: "编辑"
-        set_default: "设为默认"
-        delete: "删除"
-        delete_confirm: "确定删除这个模板吗？"
+        title: 模板
+        subtitle: 为报价单和 PI 文档构建可复用的品牌预设。
+        new_template: 新建模板
+        default_preset: 默认预设
+        accent: 主题色
+        used_in_quotes: 已用于 %{count} 条报价
+        edit: 编辑
+        set_default: 设为默认
+        delete: 删除
+        delete_confirm: 确定删除这个模板吗？
       edit:
-        title: "编辑品牌预设"
-        subtitle: "在一个集中的设计中心调整视觉风格、结构和标签。"
+        title: 编辑品牌预设
+        subtitle: 在一个集中的设计中心调整视觉风格、结构和标签。
       form:
-        error_summary: "有 %{count} 个错误导致模板无法保存："
-        preset_name: "预设名称"
-        preset_name_placeholder: "现代 B2B 报价模板"
-        preset_slug: "预设 slug"
-        preset_slug_placeholder: "根据名称自动生成"
-        default_document_view: "默认文档视图"
+        error_summary: 有 %{count} 个错误导致模板无法保存：
+        preset_name: 预设名称
+        preset_name_placeholder: 现代 B2B 报价模板
+        preset_slug: 预设标识
+        preset_slug_placeholder: 根据名称自动生成
+        default_document_view: 默认文档视图
         document_kind:
-          quotation: "报价单"
-          proforma_invoice: "形式发票（PI）"
-        visual_style: "视觉风格"
-        visual_style_hint: "控制你的报价文档视觉风格。"
-        back: "返回"
-        output_language_title: "输出语言"
-        output_language_hint: "可按输出通道单独设置语言，默认英语。"
-        apply_all_locales: "全部应用"
-        webview_locale: "Webview"
-        public_link_locale: "公开链接"
-        pdf_locale: "PDF"
-        excel_locale: "Excel"
-        output_language_webview: "Webview"
-        output_language_public_link: "公开链接"
-        output_language_pdf: "PDF"
-        output_language_excel: "Excel"
-        layout_type: "布局类型"
-        layout_density: "布局密度"
+          quotation: 报价单
+          proforma_invoice: 形式发票（PI）
+        visual_style: 视觉风格
+        visual_style_hint: 控制你的报价文档视觉风格。
+        back: 返回
+        output_language_title: 输出语言
+        output_language_hint: 可按输出通道单独设置语言，默认英语。
+        apply_all_locales: 全部应用
+        webview_locale: 网页
+        public_link_locale: 分享链接
+        pdf_locale: PDF
+        excel_locale: Excel
+        output_language_webview: 网页
+        output_language_public_link: 分享链接
+        output_language_pdf: PDF
+        output_language_excel: Excel
+        layout_type: 布局类型
+        layout_density: 布局密度
         layout_density_options:
-          compact: "紧凑"
-          standard: "标准"
-          spacious: "宽松"
-        accent_color: "强调色"
-        font_family: "字体"
-        logo_position: "Logo 位置"
+          compact: 紧凑
+          standard: 标准
+          spacious: 宽松
+        accent_color: 强调色
+        font_family: 字体
+        logo_position: Logo 位置
         logo_position_options:
-          right: "右上"
-          left: "左上"
-          center: "居中"
-        document_structure: "文档结构"
-        document_structure_hint: "决定报价输出默认展示哪些区块。"
-        show_logo: "显示 Logo"
-        show_tax: "显示税费行"
-        show_shipping: "显示运费行"
-        show_payment_term: "显示付款条款"
-        show_sales_owner: "显示销售负责人"
-        show_notes: "显示备注区块"
-        show_signature_block: "显示签名区块"
-        show_product_images: "显示产品图片"
-        show_valid_until: "显示有效期"
-        show_terms_section: "显示条款区块"
-        show_currency: "显示币种符号/代码"
-        show_closing_message: "显示结尾文案"
-        show_watermark: "显示水印"
-        show_saas_branding: "显示 Rubusoo 页脚（默认关闭白标）"
-        show_excel_gridlines: "显示 Excel 网格线"
-        signature_name: "授权签名姓名（可选）"
-        signature_name_placeholder: "例如：Amy Chen"
-        signature_name_hint: "用于签名区底部文案。留空可隐藏“授权人”。"
-        signature_image: "销售签名图片"
-        choose_file: "选择文件"
-        no_file_selected: "未选择文件"
-        signature_image_hint: "该图片将显示在客户可见的签名区。"
-        remove_existing_signature_image: "移除已有签名图片"
-        watermark_text: "水印文字"
-        watermark_text_placeholder: "CONFIDENTIAL（留空则使用公司名）"
-        watermark_text_hint: "若上传水印图片，则优先使用图片并隐藏文字水印。"
-        watermark_image: "水印图片"
-        watermark_image_hint: "水印会显示在报价内容后方。"
-        remove_existing_watermark_image: "移除已有水印图片"
-        watermark_intensity: "水印强度（%）"
-        watermark_intensity_hint: "建议范围：8-16，数值越大越深。"
-        number_format: "数字与格式"
-        number_format_hint: "为所有导出报价文档设置金额可读性标准。"
-        decimal_places: "小数位"
-        thousand_separator: "千分位分隔符"
-        currency_display: "币种显示方式"
-        advanced_settings: "高级设置"
-        labels_text: "标签与文案"
-        labels_text_hint: "用于表头标签、文档标题和页脚文案的高级设置。"
-        description_label: "描述标签"
-        spec_label: "规格标签"
-        spec_placeholder: "规格"
-        addon_label: "附加项标签"
-        addon_placeholder: "附加项"
-        qty_label: "数量标签"
-        unit_price_label: "单价标签"
-        line_total_label: "行合计标签"
-        quotation_title: "报价标题"
-        quotation_title_placeholder: "报价单"
-        quotation_number_label: "报价编号标签"
+          right: 右上
+          left: 左上
+          center: 居中
+        document_structure: 文档结构
+        document_structure_hint: 决定报价输出默认展示哪些区块。
+        show_logo: 显示 Logo
+        show_tax: 显示税费行
+        show_shipping: 显示运费行
+        show_payment_term: 显示付款条款
+        show_sales_owner: 显示销售负责人
+        show_notes: 显示备注区块
+        show_signature_block: 显示签名区块
+        show_product_images: 显示产品图片
+        show_valid_until: 显示有效期
+        show_terms_section: 显示条款区块
+        show_currency: 显示币种符号/代码
+        show_closing_message: 显示结尾文案
+        show_watermark: 显示水印
+        show_saas_branding: 显示 Rubusoo 页脚（默认关闭白标）
+        show_excel_gridlines: 显示 Excel 网格线
+        signature_name: 授权签名姓名（可选）
+        signature_name_placeholder: 例如：Amy Chen
+        signature_name_hint: 用于签名区底部文案。留空可隐藏“授权人”。
+        signature_image: 销售签名图片
+        choose_file: 选择文件
+        no_file_selected: 未选择文件
+        signature_image_hint: 该图片将显示在客户可见的签名区。
+        remove_existing_signature_image: 移除已有签名图片
+        watermark_text: 水印文字
+        watermark_text_placeholder: CONFIDENTIAL（留空则使用公司名）
+        watermark_text_hint: 若上传水印图片，则优先使用图片并隐藏文字水印。
+        watermark_image: 水印图片
+        watermark_image_hint: 水印会显示在报价内容后方。
+        remove_existing_watermark_image: 移除已有水印图片
+        watermark_intensity: 水印强度（%）
+        watermark_intensity_hint: 建议范围：8-16，数值越大越深。
+        number_format: 数字与格式
+        number_format_hint: 为所有导出报价文档设置金额可读性标准。
+        decimal_places: 小数位
+        thousand_separator: 千分位分隔符
+        currency_display: 币种显示方式
+        advanced_settings: 高级设置
+        labels_text: 标签与文案
+        labels_text_hint: 用于表头标签、文档标题和页脚文案的高级设置。
+        description_label: 描述标签
+        spec_label: 规格标签
+        spec_placeholder: 规格
+        addon_label: 附加项标签
+        addon_placeholder: 附加项
+        qty_label: 数量标签
+        unit_price_label: 单价标签
+        line_total_label: 行合计标签
+        quotation_title: 报价标题
+        quotation_title_placeholder: 报价单
+        quotation_number_label: 报价编号标签
         quotation_number_placeholder: "报价 #"
-        pi_title: "PI 标题"
-        pi_title_placeholder: "形式发票"
-        pi_number_label: "PI 编号标签"
+        pi_title: PI 标题
+        pi_title_placeholder: 形式发票
+        pi_number_label: PI 编号标签
         pi_number_placeholder: "PI #"
-        quotation_footer_note: "报价页脚备注"
-        pi_footer_note: "PI 页脚备注"
-        fallback_footer_text: "兜底页脚文案"
-        closing_message: "总计下方结尾文案"
-        closing_message_hint: "可选。即使开关开启，留空也会完全隐藏该文案。"
-        live_preview: "实时预览"
-        live_preview_hint: "使用类报价内容进行实时渲染。"
-        preview_saved: "已保存"
-        preview_scenario: "场景"
-        preview_scenario_standard: "标准"
-        preview_scenario_long: "长文本"
-        preview_scenario_spec_heavy: "规格密集"
-        viewport_desktop: "桌面"
-        viewport_tablet: "平板"
-        viewport_mobile: "手机"
-        watermark_image_preview_alt: "水印图片预览"
-        signature_preview_alt: "签名预览"
-        set_as_default: "设为默认模板"
-        logo_placeholder: "LOGO"
-        default_footer_note: "感谢你的信任与支持。"
+        quotation_footer_note: 报价页脚备注
+        pi_footer_note: PI 页脚备注
+        fallback_footer_text: 兜底页脚文案
+        closing_message: 总计下方结尾文案
+        closing_message_hint: 可选。即使开关开启，留空也会完全隐藏该文案。
+        live_preview: 实时预览
+        live_preview_hint: 使用类报价内容进行实时渲染。
+        preview_saved: 已保存
+        preview_scenario: 场景
+        preview_scenario_standard: 标准
+        preview_scenario_long: 长文本
+        preview_scenario_spec_heavy: 规格密集
+        viewport_desktop: 桌面
+        viewport_tablet: 平板
+        viewport_mobile: 手机
+        watermark_image_preview_alt: 水印图片预览
+        signature_preview_alt: 签名预览
+        set_as_default: 设为默认模板
+        logo_placeholder: LOGO
+        default_footer_note: 感谢你的信任与支持。
   quote_document:
     titles:
-      quotation: "报价单"
-      pi: "形式发票"
+      quotation: 报价单
+      pi: 形式发票
     sheet:
-      quote: "报价单"
-      pi: "形式发票"
+      quote: 报价单
+      pi: 形式发票
     sections:
-      terms_and_conditions: "条款与条件"
-      company_credentials: "公司资质"
-      footer: "页脚"
-      signature: "签名"
+      terms_and_conditions: 条款与条件
+      company_credentials: 公司资质
+      footer: 页脚
+      signature: 签名
     labels:
-      watermark: "水印"
+      watermark: 水印
       quote_number: "报价 #"
-      pi_number: "PI #"
-      valid_until: "有效期至"
-      currency: "币种"
-      trade_terms: "贸易术语"
-      status: "状态"
-      win_reason: "赢单原因"
-      loss_reason: "丢单原因"
-      stalled_reason: "停滞原因"
-      accepted_at: "接受时间"
-      revision_requested: "请求修订时间"
-      request_reason: "请求原因"
-      client_request: "客户请求"
-      reopened_at: "重开时间"
-      sales_owner: "销售负责人"
-      seller: "卖方"
-      buyer: "买方"
-      company: "公司"
-      primary_contact: "主要联系人"
-      email: "邮箱"
-      phone: "电话"
-      address: "地址"
-      quote_info: "报价信息"
-      title: "标题"
-      contact: "联系人"
-      items: "项目"
-      description: "描述"
-      qty: "数量"
-      unit_price: "单价"
-      line_total: "行合计"
-      "no": "序号"
-      image: "图片"
-      download: "下载"
-      quote_date: "报价日期"
-      pi_date: "PI 日期"
-      subtotal: "小计"
-      tax_vat: "税费 / 增值税"
-      shipping: "运费"
-      discount: "折扣"
-      original_total: "原价总计"
-      you_save: "节省"
-      grand_total: "总计"
-      payment_terms: "付款条款"
-      terms: "条款"
-      legal_disclaimer: "法律声明"
-      delivery_notes: "交付说明"
-      notes: "备注"
-      authorized_by: "授权人"
-      sales_signature: "销售签名"
-      spec: "规格"
-      addon: "附加项"
-      item: "项目"
+      pi_number: PI 编号
+      valid_until: 有效期至
+      currency: 币种
+      trade_terms: 贸易术语
+      status: 状态
+      win_reason: 赢单原因
+      loss_reason: 丢单原因
+      stalled_reason: 停滞原因
+      accepted_at: 接受时间
+      revision_requested: 请求修订时间
+      request_reason: 请求原因
+      client_request: 客户请求
+      reopened_at: 重开时间
+      sales_owner: 销售负责人
+      seller: 卖方
+      buyer: 买方
+      company: 公司
+      primary_contact: 主要联系人
+      email: 邮箱
+      phone: 电话
+      address: 地址
+      quote_info: 报价信息
+      title: 标题
+      contact: 联系人
+      items: 项目
+      description: 描述
+      qty: 数量
+      unit_price: 单价
+      line_total: 行合计
+      "no": 序号
+      image: 图片
+      download: 下载
+      quote_date: 报价日期
+      pi_date: PI 日期
+      subtotal: 小计
+      tax_vat: 税费 / 增值税
+      shipping: 运费
+      discount: 折扣
+      original_total: 原价总计
+      you_save: 节省
+      grand_total: 总计
+      payment_terms: 付款条款
+      terms: 条款
+      legal_disclaimer: 法律声明
+      delivery_notes: 交付说明
+      notes: 备注
+      authorized_by: 授权人
+      sales_signature: 销售签名
+      spec: 规格
+      addon: 附加项
+      item: 项目
+      accepted_by: 接受人
+      accepted_on: 接受日期
+      company_credentials: 公司资质
+      issued_by: 签发人
+      tax_id: 税号
+      total: 总计
+    notes:
+      you_save: 你节省了
   company_documents:
     flash:
-      uploaded: "公司文档已上传。"
-      removed: "公司文档已移除。"
+      uploaded: 公司文档已上传。
+      removed: 公司文档已移除。
   company_settings:
     view:
       edit:
-        header_title: "公司设置"
-        could_not_save: "设置保存失败"
-        company_profile: "公司资料"
-        profile_hint: "这些设置会应用到你的整个公司工作区。"
-        section_company_basic: "1）公司基础信息"
-        company_name: "公司名称"
-        company_name_hint: "会出现在发给客户的跟进邮件中。"
-        legal_name: "法定名称"
-        registration_number: "注册号"
-        registration_details: "注册信息"
-        company_email: "公司邮箱"
-        company_phone: "公司电话"
-        company_address: "公司地址"
-        website: "网站"
-        website_placeholder: "example.com 或 https://example.com"
-        section_default_business: "2）默认商务参数"
-        default_currency: "默认币种"
-        default_validity_days: "默认有效天数"
-        default_trade_terms: "默认贸易术语"
-        default_trade_terms_placeholder: "EXW / FOB / CIF"
-        default_payment_terms: "默认付款条款"
-        default_payment_terms_placeholder: "净30天 / 50%预付款"
-        default_tax_rate: "默认税率（%）"
-        brand_primary_color: "品牌主色"
-        section_branding_behavior: "3）品牌与默认模板行为"
-        company_logo_alt: "公司 Logo"
-        upload_company_logo: "上传公司 Logo"
-        remove_current_logo: "移除当前 Logo"
-        show_logo_default: "默认显示 Logo"
-        show_images_default: "默认显示图片"
-        show_terms_default: "默认显示条款区块"
-        show_notes_default: "默认显示备注"
-        show_payment_terms_default: "默认显示付款条款"
-        show_sales_owner_default: "默认显示销售负责人"
-        section_reminder_email: "4）提醒邮件"
-        reminder_hint_html: "用于销售点击“发送提醒”时。任意字段留空则使用默认提醒文案。可用变量：quote_no、company_name、customer_name。"
-        reminder_email_subject: "提醒邮件主题"
-        reminder_email_body: "提醒邮件正文"
-        reminder_button_label: "提醒按钮文案"
-        save_company_settings: "保存公司设置"
+        header_title: 公司设置
+        could_not_save: 设置保存失败
+        company_profile: 公司资料
+        profile_hint: 这些设置会应用到你的整个公司工作区。
+        section_company_basic: 1）公司基础信息
+        company_name: 公司名称
+        company_name_hint: 会出现在发给客户的跟进邮件中。
+        legal_name: 法定名称
+        registration_number: 注册号
+        registration_details: 注册信息
+        company_email: 公司邮箱
+        company_phone: 公司电话
+        company_address: 公司地址
+        website: 网站
+        website_placeholder: example.com 或 https://example.com
+        section_default_business: 2）默认商务参数
+        default_currency: 默认币种
+        default_validity_days: 默认有效天数
+        default_trade_terms: 默认贸易术语
+        default_trade_terms_placeholder: EXW / FOB / CIF
+        default_payment_terms: 默认付款条款
+        default_payment_terms_placeholder: 净30天 / 50%预付款
+        default_tax_rate: 默认税率（%）
+        brand_primary_color: 品牌主色
+        section_branding_behavior: 3）品牌与默认模板行为
+        company_logo_alt: 公司 Logo
+        upload_company_logo: 上传公司 Logo
+        remove_current_logo: 移除当前 Logo
+        show_logo_default: 默认显示 Logo
+        show_images_default: 默认显示图片
+        show_terms_default: 默认显示条款区块
+        show_notes_default: 默认显示备注
+        show_payment_terms_default: 默认显示付款条款
+        show_sales_owner_default: 默认显示销售负责人
+        section_reminder_email: 4）提醒邮件
+        reminder_hint_html: 用于销售点击“发送提醒”时。任意字段留空则使用默认提醒文案。可用变量：quote_no、company_name、customer_name。
+        reminder_email_subject: 提醒邮件主题
+        reminder_email_body: 提醒邮件正文
+        reminder_button_label: 提醒按钮文案
+        credentials_title: 公司资质文件
+        credentials_hint: 这些文件会在公开报价中显示为下载链接，并在 PDF 导出中作为附件列表展示。
+        upload_credential_document: 上传资质文件
+        credential_document_title: 文件标题
+        credential_document_title_placeholder: 可选，默认使用文件名。
+        credential_document_type: 文件类型
+        credential_file: 文件
+        upload_document: 上传文件
+        current_credentials: 当前资质文件
+        credential_table_title: 标题
+        credential_table_type: 类型
+        credential_table_file: 文件
+        delete_document: 删除
+        delete_document_confirm: 确定删除这个文件吗？
+        no_credentials_uploaded: 还没有上传任何资质文件。
+        credential_types:
+          certificate: 证书
+          company_profile: 公司简介
+          product_brochure: 产品手册
+        save_company_settings: 保存公司设置
     flash:
-      updated: "公司设置已更新。"
-      check_highlighted_fields: "请检查高亮字段。"
+      updated: 公司设置已更新。
+      check_highlighted_fields: 请检查高亮字段。
   contact_requests:
     flash:
-      bot_verification_required: "需要完成人机验证，请完成 CAPTCHA。"
-      bot_verification_failed: "人机验证失败，请重试。"
-      received: "感谢留言！我们已收到你的消息，会通过邮件回复。"
-      send_failed: "消息发送失败，请稍后重试，或直接给我们发邮件。"
+      bot_verification_required: 需要完成人机验证，请完成 CAPTCHA。
+      bot_verification_failed: 人机验证失败，请重试。
+      received: 感谢留言！我们已收到你的消息，会通过邮件回复。
+      send_failed: 消息发送失败，请稍后重试，或直接给我们发邮件。
   email_verifications:
     flash:
-      verified_success: "邮箱验证成功！现在可以登录。"
-      generic_sent: "如果该邮箱对应账户存在，验证邮件已发送。"
-      already_verified: "该邮箱已验证，请直接登录。"
-      wait_before_request: "请等待 %{seconds} 秒后再请求"
-      sent_to: "验证邮件已发送至 %{email}"
-      failed_send: "发送验证邮件失败"
-      error_occurred: "发生错误"
-      bot_verification_required: "需要完成人机验证"
-      bot_verification_failed: "人机验证失败，请重试。"
+      verified_success: 邮箱验证成功！现在可以登录。
+      generic_sent: 如果该邮箱对应账户存在，验证邮件已发送。
+      already_verified: 该邮箱已验证，请直接登录。
+      wait_before_request: 请等待 %{seconds} 秒后再请求
+      sent_to: 验证邮件已发送至 %{email}
+      failed_send: 发送验证邮件失败
+      error_occurred: 发生错误
+      bot_verification_required: 需要完成人机验证
+      bot_verification_failed: 人机验证失败，请重试。
   team_members:
     view:
       index:
-        header_title: "团队管理"
-        overview_title: "公司团队概览"
-        total_members: "成员总数"
-        pending_invitations: "待处理邀请"
-        your_permission: "你的权限"
-        invite_title: "邀请成员"
-        invite_hint: "成员需先有账号，邀请会出现在对方账号中。"
-        email: "邮箱"
-        company_role: "公司角色"
-        member_role: "成员"
-        admin_role: "管理员"
-        create_invitation: "创建邀请"
-        pending_section: "待处理邀请"
-        current_team: "当前团队"
-        pending: "待处理"
-        active: "活跃"
-        revoke: "撤销"
-        revoke_confirm: "确定撤销给 %{email} 的邀请吗？"
-        no_pending: "暂无待处理邀请。"
-        view_profile: "查看资料"
-        owner_protected: "Owner（受保护）"
-        self_role_locked: "你自己（角色不可改）"
-        update: "更新"
-        remove_from_team: "移出团队"
-        remove_confirm: "将 %{email} 从 %{company} 移出？其账号会保留。"
+        header_title: 团队管理
+        overview_title: 公司团队概览
+        total_members: 成员总数
+        pending_invitations: 待处理邀请
+        your_permission: 你的权限
+        invite_title: 邀请成员
+        invite_hint: 成员需先有账号，邀请会出现在对方账号中。
+        email: 邮箱
+        company_role: 公司角色
+        member_role: 成员
+        admin_role: 管理员
+        create_invitation: 创建邀请
+        pending_section: 待处理邀请
+        current_team: 当前团队
+        pending: 待处理
+        active: 活跃
+        revoke: 撤销
+        revoke_confirm: 确定撤销给 %{email} 的邀请吗？
+        no_pending: 暂无待处理邀请。
+        view_profile: 查看资料
+        owner_protected: 所有者（受保护）
+        self_role_locked: 你自己（角色不可改）
+        update: 更新
+        remove_from_team: 移出团队
+        remove_confirm: 将 %{email} 从 %{company} 移出？其账号会保留。
         roles:
-          member: "成员"
-          admin: "管理员"
-          owner: "所有者"
+          member: 成员
+          admin: 管理员
+          owner: 所有者
         pending_table:
-          email: "邮箱"
-          role: "角色"
-          status: "状态"
-          expires: "过期时间"
-          actions: "操作"
+          email: 邮箱
+          role: 角色
+          status: 状态
+          expires: 过期时间
+          actions: 操作
         members_table:
-          avatar: "头像"
-          email: "邮箱"
-          company_role: "公司角色"
-          status: "状态"
-          actions: "操作"
+          avatar: 头像
+          email: 邮箱
+          company_role: 公司角色
+          status: 状态
+          actions: 操作
       show:
-        header_title: "团队成员资料"
-        avatar_alt: "头像"
-        company_role: "公司角色"
-        company: "公司"
-        joined: "加入时间"
-        back: "返回团队"
+        header_title: 团队成员资料
+        avatar_alt: 头像
+        company_role: 公司角色
+        company: 公司
+        joined: 加入时间
+        back: 返回团队
     flash:
-      only_admin_member: "此页面仅可分配 admin/member 角色。"
-      owner_role_cannot_change: "无法在此处修改 owner 角色。"
-      cannot_change_own_role: "你不能修改自己的角色。"
-      member_role_updated: "成员角色已更新。"
-      owner_cannot_removed: "Owner 不能被移除。"
-      cannot_remove_self: "你不能移除自己。"
-      removed_from_team: "已从团队移除：%{email}。账号已保留。"
+      only_admin_member: 此页面仅可分配管理员/成员角色。
+      owner_role_cannot_change: 无法在此处修改所有者角色。
+      cannot_change_own_role: 你不能修改自己的角色。
+      member_role_updated: 成员角色已更新。
+      owner_cannot_removed: 所有者不能被移除。
+      cannot_remove_self: 你不能移除自己。
+      removed_from_team: 已从团队移除：%{email}。账号已保留。
   team_invitations:
     view:
       index:
-        header_title: "我的邀请"
-        hint: "邀请属于账号级通知，接受后会切换到对应公司工作区。"
-        company: "公司"
-        role: "角色"
-        invited_by: "邀请人"
-        status: "状态"
-        expires: "过期时间"
-        action: "操作"
-        pending: "待处理"
-        accept: "接受"
-        empty: "暂无待处理邀请。"
+        header_title: 我的邀请
+        hint: 邀请属于账号级通知，接受后会切换到对应公司工作区。
+        company: 公司
+        role: 角色
+        invited_by: 邀请人
+        status: 状态
+        expires: 过期时间
+        action: 操作
+        pending: 待处理
+        accept: 接受
+        empty: 暂无待处理邀请。
     flash:
-      email_already_member: "该邮箱已经是你公司成员。"
-      no_account_found: "该邮箱未找到账户，请先让对方注册。"
-      pending_invitation_exists: "该邮箱已存在待处理邀请。"
-      invitation_created: "已为 %{email} 创建邀请。"
-      invitation_revoked: "邀请已撤销。"
-      joined_company: "你已加入 %{company}。"
-      unable_accept: "无法接受邀请：%{message}"
+      email_already_member: 该邮箱已经是你公司成员。
+      no_account_found: 该邮箱未找到账户，请先让对方注册。
+      pending_invitation_exists: 该邮箱已存在待处理邀请。
+      invitation_created: 已为 %{email} 创建邀请。
+      invitation_revoked: 邀请已撤销。
+      joined_company: 你已加入 %{company}。
+      unable_accept: 无法接受邀请：%{message}
   admin:
     users:
       flash:
-        role_updated: "角色已更新。"
+        role_updated: 角色已更新。
   users:
     registrations:
       view:
         new:
-          title: "注册"
-          verification_error: "验证错误"
-          error_summary: "有 %{count} 个错误导致注册失败："
-          email: "邮箱"
-          password: "密码"
-          minimum_password: "（至少 %{count} 个字符）"
-          password_confirmation: "确认密码"
-          create_account: "创建账户"
-          creating_account: "账户创建中..."
-          log_in: "登录"
-          security_verification: "安全验证"
-          complete_verification: "请先完成验证再继续"
-          loading_verification: "正在加载验证..."
-          verified_submitting: "✓ 验证通过，正在提交..."
+          title: 注册
+          verification_error: 验证错误
+          error_summary: 有 %{count} 个错误导致注册失败：
+          email: 邮箱
+          password: 密码
+          minimum_password: （至少 %{count} 个字符）
+          password_confirmation: 确认密码
+          create_account: 创建账户
+          creating_account: 账户创建中...
+          log_in: 登录
+          security_verification: 安全验证
+          complete_verification: 请先完成验证再继续
+          loading_verification: 正在加载验证...
+          verified_submitting: ✓ 验证通过，正在提交...
         edit:
-          header_title: "账户设置"
-          personal_profile: "个人资料"
-          profile_hint: "管理你的工作身份信息。仅修改资料时无需进行安全验证。"
-          avatar_alt: "头像"
-          upload_avatar: "上传头像"
-          remove_current_avatar: "移除当前头像"
-          display_name: "显示名称"
-          display_name_hint: "会作为发件人姓名出现在发给客户的跟进邮件中。"
-          display_name_placeholder: "团队成员和客户看到的名称"
-          contact_number: "联系电话"
-          job_title: "职位"
-          job_title_placeholder: "销售经理 / 创始人"
-          time_zone: "时区"
-          search_timezone_placeholder: "搜索城市、国家或 GMT 偏移"
-          language: "语言"
-          update_profile: "更新资料"
-          security_settings: "安全设置"
-          security_settings_hint: "在这里修改邮箱或密码。安全更新需要当前密码。"
-          email_address: "邮箱地址"
-          change_email: "更改邮箱"
-          email_verify_hint: "新邮箱生效前需要先完成验证。"
-          new_password_optional: "新密码（可选）"
-          confirm_new_password: "确认新密码"
-          current_password_required: "当前密码（安全修改必填）"
-          update_security_settings: "更新安全设置"
-          company_invitations: "公司邀请"
-          pending_invitations: "你当前有 %{count} 条待处理的公司邀请。"
-          open_invitations: "查看邀请"
-          change_email_address: "更改邮箱地址"
-          change_email_address_hint: "我们会向你的新邮箱发送验证链接。你需要点击该链接才能完成变更。"
-          new_email_address: "新邮箱地址"
-          new_email_placeholder: "your-new-email@example.com"
-          current_password: "当前密码"
-          current_password_placeholder: "输入你的密码以确认"
-          password_verify_hint: "出于安全考虑，我们需要验证你的密码。"
-          send_verification_email: "发送验证邮件"
-          cancel: "取消"
+          header_title: 账户设置
+          personal_profile: 个人资料
+          profile_hint: 管理你的工作身份信息。仅修改资料时无需进行安全验证。
+          avatar_alt: 头像
+          upload_avatar: 上传头像
+          remove_current_avatar: 移除当前头像
+          display_name: 显示名称
+          display_name_hint: 会作为发件人姓名出现在发给客户的跟进邮件中。
+          display_name_placeholder: 团队成员和客户看到的名称
+          contact_number: 联系电话
+          job_title: 职位
+          job_title_placeholder: 销售经理 / 创始人
+          time_zone: 时区
+          search_timezone_placeholder: 搜索城市、国家或 GMT 偏移
+          language: 语言
+          update_profile: 更新资料
+          security_settings: 安全设置
+          security_settings_hint: 在这里修改邮箱或密码。安全更新需要当前密码。
+          email_address: 邮箱地址
+          change_email: 更改邮箱
+          email_verify_hint: 新邮箱生效前需要先完成验证。
+          new_password_optional: 新密码（可选）
+          confirm_new_password: 确认新密码
+          current_password_required: 当前密码（安全修改必填）
+          update_security_settings: 更新安全设置
+          company_invitations: 公司邀请
+          pending_invitations: 你当前有 %{count} 条待处理的公司邀请。
+          open_invitations: 打开邀请
+          change_email_address: 更改邮箱地址
+          change_email_address_hint: 我们会向你的新邮箱发送验证链接。你需要点击该链接才能完成变更。
+          new_email_address: 新邮箱地址
+          new_email_placeholder: your-new-email@example.com
+          current_password: 当前密码
+          current_password_placeholder: 输入你的密码以确认
+          password_verify_hint: 出于安全考虑，我们需要验证你的密码。
+          send_verification_email: 发送验证邮件
+          cancel: 取消
     sessions:
       view:
         new:
-          title: "登录"
-          email: "邮箱"
-          password: "密码"
-          remember_me: "记住我"
-          submit: "登录"
-          sign_up: "注册"
+          title: 登录
+          email: 邮箱
+          password: 密码
+          remember_me: 记住我
+          submit: 登录
+          sign_up: 注册
       flash:
-        verify_email_before_login: "登录前请先验证邮箱。"
+        verify_email_before_login: 登录前请先验证邮箱。
   devise:
     registrations:
-      updated: "账户资料更新成功。"
-      updated_but_not_signed_in: "账户资料已更新成功，但因密码已变更，请重新登录。"
+      updated: 账户资料更新成功。
+      updated_but_not_signed_in: 账户资料已更新成功，但因密码已变更，请重新登录。
     sessions:
-      signed_in: "登录成功。"
+      signed_in: 登录成功。
       user:
-        signed_in: "登录成功。"
+        signed_in: 登录成功。
   email_changes:
     flash:
-      invalid_password: "密码错误"
-      invalid_email_format: "邮箱格式无效"
-      current_email: "这是你当前使用的邮箱"
-      email_in_use: "邮箱已被使用"
-      verification_sent: "验证邮件已发送至 %{email}，请查收邮件完成邮箱变更确认。"
-      failed_send: "发送验证邮件失败"
-      error_occurred: "发生错误，请重试。"
-      bot_verification_required: "需要完成人机验证"
-      bot_verification_failed: "人机验证失败，请重试。"
+      invalid_password: 密码错误
+      invalid_email_format: 邮箱格式无效
+      current_email: 这是你当前使用的邮箱
+      email_in_use: 邮箱已被使用
+      verification_sent: 验证邮件已发送至 %{email}，请查收邮件完成邮箱变更确认。
+      failed_send: 发送验证邮件失败
+      error_occurred: 发生错误，请重试。
+      bot_verification_required: 需要完成人机验证
+      bot_verification_failed: 人机验证失败，请重试。
   public_quote_shares:
     flash:
-      revision_not_actionable: "该版本当前不可操作。"
-      quotation_accepted: "报价已接受，感谢确认。"
-      revision_request_sent: "修订请求已发送。"
+      revision_not_actionable: 该版本当前不可操作。
+      quotation_accepted: 报价已接受，感谢确认。
+      revision_request_sent: 修订请求已发送。
     preview_mode:
-      title: "预览模式"
-      body: "仅渲染展示。预览模式下不会触发任何公开动作。"
+      title: 预览模式
+      body: 仅渲染展示。预览模式下不会触发任何公开动作。
   landing:
+    shared:
+      brand: Rubusoo
+      navigation:
+        product: 产品
+        resources: 资源
+        contact: 联系
+        log_in: 登录
+        start_free: 免费开始
+        toggle: 切换导航
+      footer:
+        tagline: Rubusoo 为出口团队集中管理报价修订、买家动态与后续跟进。
+        homepage: 首页
+        demo: 演示
+        sample_quote: 示例报价
+        resources: 资源
+        contact: 联系
     view:
-      index:
-        meta_title: "外贸报价软件｜面向 B2B 出口团队 | Rubusoo"
-        meta_description: "面向 B2B 出口团队的外贸报价软件。管理报价版本、分享在线客户链接并导出专业 PDF/Excel 文档。"
-        hero_kicker: "专为 B2B 销售与出口团队打造"
-        hero_title: "面向 B2B 出口团队的外贸报价软件"
-        hero_subtitle: "在一个更清晰的工作流中管理版本、客户可见性和可导出的报价输出。"
-        start_for_free: "免费开始"
-        view_demo: "查看演示"
-        see_live_example: "查看在线示例"
-        proof_1: "内置版本控制"
-        proof_2: "客户可访问的在线报价链接"
-        proof_3: "专业 PDF / Excel 输出"
-        artifact:
-          eyebrow_left: "示例报价流程"
-          eyebrow_right: "修订安全"
-          headline: "Northforge Supply / QX-2026-118"
-          subline: "买家仅看到最新版本"
-          card1:
-            label: "版本控制"
-            title: "V3 已批准发送"
-            body: "历史版本完整保留，可随时回溯。"
-          card2:
-            label: "买家访问"
-            title: "公开报价链接"
-            body: "用一个浏览器链接替代来回附件。"
-          card3:
-            label: "输出"
-            title: "PDF / Excel 导出"
-            body: "保留审批流程并方便财务交接。"
-        story:
-          kicker: "为什么团队会切换"
-          title: "当流程只在文件里流转，外贸报价就会失控"
-          lead: "多数团队并不需要沉重的 ERP 报价模块，而是需要一个稳定空间来创建、修订、分享和跟进报价，同时不丢失版本控制。"
-          before_title: "之前"
-          before_body: "报价在表格、邮件附件和聊天记录中来回流转。"
-          after_title: "之后"
-          after_body: "Rubusoo 将最新报价、修订历史、买家链接和导出结果统一在一个工作层。"
-          why_title: "为什么重要"
-          why_body: "版本更清晰，响应更快，内部跟进更干净。"
-        capabilities:
-          kicker: "核心能力"
-          title: "不是宣传页，而是可落地的报价产品流程"
-          subtitle: "下面每一项都对应应用内已存在的功能。"
-          card1:
-            title: "报价版本控制"
-            body: "每次修订都可追踪，历史不丢失，价格变动清晰可见。"
-          card2:
-            title: "买家公开报价链接"
-            body: "买家可在任意设备查看在线报价，无需登录、低摩擦。"
-          card3:
-            title: "报价 CRM 流程"
-            body: "从模板快速生成，灵活调整，自信发送。"
-          card4:
-            title: "报价导出 PDF/Excel"
-            body: "一键导出，兼顾买家体验与财务/审批要求。"
-        comparison:
-          kicker: "变化在哪里"
-          title: "更好的报价执行层"
-          subtitle: "不是一体化 ERP，也不是另一个文件夹，而是专注报价执行的系统。"
-          left_title: "表格报价"
-          left_body: "起步快，但一旦修订、审批和买家更新叠加就容易失控。"
-          center_title: "Rubusoo 流程"
-          center_body: "一条报价时间线，一个买家链接，一条干净的内部导出交接路径。"
-          right_title: "重型 ERP 报价"
-          right_body: "纸面能力强，但对一线外贸报价节奏常常过慢且僵硬。"
-        workflow:
-          kicker: "工作流"
-          title: "一份报价如何在系统中真实流转"
-          subtitle: "流程刻意保持简洁：创建、发送、修订、导出、跟进。"
-          step1_title: "先建产品与客户"
-          step1_body: "把可复用目录数据和客户资料放在同一处。"
-          step2_title: "从模板创建"
-          step2_body: "快速组合价格、条款和文档结构，不必每次重建。"
-          step3_title: "分享或导出"
-          step3_body: "需要清晰沟通就发在线链接，需要文件流程就导出 PDF/Excel。"
-          step4_title: "带历史修订"
-          step4_body: "销售与买家推进过程中，所有版本都可见。"
-        dual:
-          kicker: "交易双方都受益"
-          title: "内部执行更干净，买家体验更简单"
-          team_title: "对你的团队"
-          team_1: "修订历史始终绑定在同一份报价上。"
-          team_2: "产品、预设、模板可跨交易复用。"
-          team_3: "跟进动作与同一客户和报价上下文绑定。"
-          buyer_title: "对买家"
-          buyer_1: "一个在线报价链接，替代混乱附件链。"
-          buyer_2: "仍可输出专业 PDF/Excel 文件。"
-          buyer_3: "展示更清晰，沟通摩擦更低。"
-        explainer:
-          title: "什么是外贸报价软件？"
-          intro: "面向出口销售团队的实用说明。"
-          summary: "外贸报价软件帮助 B2B 出口团队更好地管理修订、提升买家可见性，并在不引入重型 ERP 的前提下提升跟进效率。"
-          key_1: "将碎片化表格和附件整合为一条结构化报价流程。"
-          key_2: "支持版本控制与买家在线查看链接。"
-          key_3: "以专业 PDF/Excel 输出支撑外贸管理落地。"
-          read_full: "查看完整说明"
-          need_title: "为什么出口团队需要它"
-          need_p1: "外贸报价软件是国际销售中从线索沟通到买家确认之间的执行层。"
-          need_p2: "对 B2B 出口团队来说，报价不只是做文档，而是版本管理、买家沟通与跟进控制。"
-          breaks_title: "为什么表格报价会在规模化后失效"
-          breaks_p1: "很多团队起步依赖表格、邮件和附件，早期可用，但量上来后很快出现版本混乱。"
-          breaks_1: "报价跨成员流转时缺少唯一真源。"
-          breaks_2: "修订历史分散在不同文件和消息里。"
-          breaks_3: "买家常对着旧附件比对，而非最新报价。"
-          crm_title: "实用型 Quotation CRM 应该做什么"
-          crm_p1: "Excel 适合分析，但不适合在线外贸报价管理；ERP 治理深，但很多团队觉得对一线节奏过重。"
-          crm_p2: "团队需要平衡型流程：日常谈判够快，内部执行够稳。"
-          crm_1: "清晰追踪修订并保留所有版本。"
-          crm_2: "共享一个买家在线链接，减少沟通歧义。"
-          crm_3: "无需额外手工即可导出专业 PDF/Excel。"
-          crm_p3: "Rubusoo 正是为这个缺口而生，帮助出口团队在报价全生命周期获得更清晰沟通、更少错误和更强跟进纪律。"
-        faq:
-          title: "常见问题"
-          q1: "小型销售团队也能用吗？"
-          a1: "可以。为精简团队设计，配置轻、流程快，上线即有专业输出。"
-          q2: "买家查看报价链接需要账号吗？"
-          a2: "不需要。点击链接即可在浏览器查看和打印。"
-          q3: "还能导出给财务审批吗？"
-          a3: "可以。PDF 与 Excel 导出可保留你现有财务和审批流程。"
-          q4: "需要改价时会怎样？"
-          a4: "修订可即时生效，历史版本完整保留，买家始终看到最新版本。"
-        contact:
-          title: "联系我们"
-          subtitle: "告诉我们你的团队规模和当前报价流程。"
-          hint: "为需要清晰版本控制和买家可见性的团队打造。"
-          name: "姓名"
-          email: "邮箱"
-          company: "公司"
-          message: "留言"
-          message_placeholder: "请描述你的报价流程、团队配置和上线计划。"
-          send_message: "发送消息"
-          sending: "发送中..."
-          or: "或"
-          email_directly: "直接发邮件给我们"
-          security_verification: "安全验证"
-          complete_verification: "请完成验证后继续"
-          loading_verification: "正在加载验证..."
-          verified_submitting: "验证通过，正在提交..."
-        related_resources: "相关资源"
-        related_resource_1: "外贸报价软件"
-        related_resource_2: "出口团队 Quotation CRM"
-        footer_copyright: "© %{year} Rubusoo. 保留所有权利。"
-        footer_privacy: "隐私政策"
-        footer_terms: "服务条款"
+      contact:
+        meta_title: 联系 Rubusoo
+        meta_description: 与 Rubusoo 沟通你的报价流程，评估结构化报价管理是否适合你的出口团队。
+        hero:
+          kicker: 联系
+          title: 与 Rubusoo 沟通你的报价流程
+          body: 把你现在的报价方式、常见问题和正在用的工具告诉我们，我们会给你一个实际可落地的建议。
+          subtitle: 评估 Rubusoo 是否适合你的出口销售流程、修订频率与跟进要求。
+        form:
+          name: 姓名
+          email: 邮箱
+          company: 公司
+          team_size: 团队规模
+          team_size_placeholder: 例如 5-20 人
+          inquiry_type: 咨询类型
+          message: 留言
+          message_placeholder: 告诉我们你现在的报价流程、常见问题，以及正在使用的工具。
+          website: 网站
+          submit: 发送消息
+          sending: 发送中...
+          demo_cta: 查看演示工作台
+        turnstile:
+          close: 关闭验证
+          title: 发送前请完成验证
+          body: 请先完成安全验证，再提交这条消息。
+          loading: 正在加载验证...
+          success: 验证完成，正在发送...
       demo:
-        meta_title: "Rubusoo 演示 | 报价管道与工作台"
-        meta_description: "查看 Rubusoo 演示工作台，了解团队如何创建报价、跟踪修订并更快推进成交。"
-        kicker: "DEMO WORKSPACE"
-        title: "以产品化形态查看报价流程"
-        subtitle: "不是幻灯片，而是 Rubusoo 用于组织队列、信号和报价上下文的简化视图。"
-        note: "本页所有名称和数字均为产品展示用虚构示例。"
-        proof_1: "报价队列可见"
-        proof_2: "修订感知流程"
-        proof_3: "买家可直接消费的输出"
-        open_deals: "进行中商机：%{count}"
-        quotes_this_week: "本周报价：%{count}"
-        pending_follow_ups: "待跟进：%{count}"
-        queue_kicker: "队列"
-        recent_quotes: "最近报价"
-        sorted_by_urgency: "按紧急程度排序"
+        meta_title: Rubusoo 演示 | 报价管理工作台
+        meta_description: 查看 Rubusoo 演示工作台，了解报价修订、买家动态与发送后的后续跟进。
+        kicker: 演示工作台
+        title: Rubusoo 演示工作台
+        subtitle: 这个简化 demo 用于展示报价发送后，修订、买家动态、待跟进事项与状态变化如何被统一管理。
+        page_is_label: 本页是什么：
+        page_is_body: 销售团队内部使用的工作台预览。
+        buyer_view_label: 买家端视图：
+        buyer_view_prefix: 打开
+        sample_quote_page: 示例报价页
+        note: 本页中的名称和数字均为演示示例，仅用于展示产品。
+        proof_1: 一眼看清报价队列
+        proof_2: 修订继续留在原报价上
+        proof_3: 买家可读的输出依然保留
+        open_deals: 活跃商机：%{count}
+        quotes_this_week: 本周报价：%{count}
+        pending_follow_ups: 待跟进：%{count}
+        queue_kicker: 队列
+        recent_quotes: 最近报价
+        sorted_by_urgency: 按紧急程度排序
+        queue_summary: 把谈判中、已查看和待处理的报价集中到一个队列中。
         table:
-          quote_no: "报价编号"
-          buyer: "买家"
-          status: "状态"
-          total: "总额"
+          quote: 报价
+          quote_no: 报价编号
+          buyer: 买家
+          status: 状态
+          total: 总额
         status:
-          pending: "待处理"
-          revised: "已修订"
-          won: "已成交"
-        signals_kicker: "信号"
-        deal_overview: "商机概览"
-        one_account_workspace: "单账号工作区"
-        top_product: "主力产品："
-        average_quote_cycle: "平均报价周期："
-        revision_rate: "修订率："
-        export_mix: "导出占比："
-        start_free_trial: "开始免费试用"
-        open_sample_quote: "打开示例报价"
+          pending: 待处理
+          revised: 已修订
+          won: 已成交
+        signals_kicker: 活动
+        deal_overview: 商机概览
+        one_account_workspace: 单客户工作台
+        top_product: 主力产品：
+        average_quote_cycle: 平均报价周期：
+        revision_rate: 修订率：
+        export_mix: 导出占比：
+        start_free_trial: 开始免费试用
+        open_sample_quote: 打开示例报价
       sample_quote:
-        meta_title: "Rubusoo 示例报价 | 公开报价示例"
-        meta_description: "查看 Rubusoo 公开报价示例，包含买卖方信息、明细行和付款条款。"
-        kicker: "公开报价示例"
-        title: "面向买家的示例报价"
-        subtitle: "本页展示 Rubusoo 可发布的浏览器报价体验。这是静态示例，不是实时谈判记录。"
-        view_demo_workspace: "查看演示工作台"
-        start_for_free: "免费开始"
+        meta_title: Rubusoo 示例报价 | 公开报价示例
+        meta_description: 查看 Rubusoo 公开报价示例，包含买卖方信息、明细行和付款条款。
+        kicker: 公开报价示例
+        title: 示例在线报价
+        subtitle: 本页展示 Rubusoo 发布的在线报价示例，为静态样例，并非实时谈判页面。
+        preview_label: 买家浏览体验预览：
+        preview_body: 这就是买家打开后看到的页面。
+        preview_supporting: 买家可以在这里查看条款、接受报价或请求修订，不再陷入附件往返。
+        buyer_can_accept: 买家可接受报价
+        buyer_can_request_revision: 买家可请求修订
+        pdf_excel_available: 仍可导出 PDF/Excel
+        view_demo_workspace: 查看演示工作台
+        start_for_free: 免费开始
+        buyer_actions: 买家操作
+        accept_quote: 接受报价
+        request_revision: 请求修订
+        preview_mode_note: 预览模式：这些操作按钮仅用于展示布局。
         pi_number: "PI # %{number}"
-        delivery_days: "20 个工作日"
-        validity: "有效期"
-        delivery: "交付"
-        print: "打印"
+        delivery_days: 20 个工作日
+        validity: 有效期
+        delivery: 交付
+        print: 打印
+    homepage:
+      meta_title: Rubusoo | 面向出口团队的报价管理软件
+      meta_description: Rubusoo 为出口团队提供结构化报价管理，覆盖首次发送、修订、买家响应与后续跟进。
+      workflow_steps:
+        - number: "01"
+          title: 创建结构化报价
+          body: 把产品、规格、价格和贸易条款放在同一条报价记录里。
+          emphasis: false
+        - number: "02"
+          title: 修订不再混乱
+          body: 让版本脉络始终清晰，而不是反复制造断开的文件。
+          emphasis: true
+        - number: "03"
+          title: 分享一个在线报价
+          body: 发送始终反映最新版本的买家浏览链接。
+          emphasis: true
+        - number: "04"
+          title: 基于真实信号跟进
+          body: 用查看和修订信号来判断什么时候跟进。
+          emphasis: false
+      capability_cards:
+        - title: 版本控制
+          body: 将每个版本保留在同一条报价版本链中，让当前版本始终一目了然。
+        - title: 买家报价链接
+          body: 用一个报价页面替代来回附件，让买家直接查看和响应。
+        - title: 客户时间线
+          body: 把查看、修订请求和跟进时机都挂在同一条报价记录上。
+        - title: PDF / Excel 导出
+          body: 继续导出流程所需文件，但不把文件重新变成系统真源。
+      context_cards:
+        - title: 发送后 18 分钟即被查看
+          body: 买家活动会记录在客户时间轴上，并绑定到对应报价。
+        - title: V2 版本上请求修订
+          body: 变更请求回到同一条报价线程，而不是散落在邮件碎片里。
+        - title: 今天该提醒
+          body: 销售能直接看到下一步跟进动作以及对应信号和时机。
+      trust_evidence:
+        - source: 报价详情
+          signal: V3 在 2 小时前成为当前版本
+          decision: 销售从最新版本回复，而不是翻旧文件。
+          cta: 查看演示工作台
+        - source: 买家报价页
+          signal: 买家可以直接在页面接受报价或请求修订
+          decision: 客户响应直接回到报价记录。
+          cta: 查看示例报价
+        - source: 客户时间轴
+          signal: 查看、修订和提醒事件都有时间戳
+          decision: 团队知道现在该联系谁。
+          cta: 查看客户上下文
+      hero:
+        kicker: 面向出口团队的报价管理软件
+        title: 让报价修订、买家反馈和销售跟进，落在同一条记录里
+        body: Rubusoo 把报价版本、买家查看、修改请求和后续动作统一放在一起，不用再靠 Excel、PDF 和邮件来回翻最新版本。
+        helper: 适合经常发报价、改价和跟进客户的出口团队
+        cta_primary: 免费开始
+        cta_demo: 查看演示工作台
+        cta_sample: 查看示例报价
+        cta_support: 无需注册，先看完整流程
+      flow_showcase:
+        kicker: 报价发出后仍在同一条记录里
+        title: 看看发送之后，流程如何继续留在同一条报价记录里
+        body: 买家查看、请求修改和销售跟进，都会继续留在这条报价记录里，不会再散到新的文件和邮件里。
+        aria_label: 报价推进步骤
+        steps:
+          - key: sent
+            step: "01"
+            title: 发送报价
+            body: 报价一发出去，版本和前后情况就已经留在同一条记录里。
+            quote_title: QT-2026-0240 / 修订版 2
+            badge: 已发送
+            badge_tone: is-good
+            version_badge: 当前版本 V2
+            summary_label: 报价摘要
+            summary_rows:
+              - label: 单价
+                value: USD 4.80
+                changed: false
+              - label: 数量
+                value: 12,000 件
+                changed: false
+              - label: 交货条款
+                value: FOB Qingdao
+                changed: false
+              - label: 有效期
+                value: 14 天
+                changed: false
+            timeline:
+              - title: 报价已发送
+                body: 买家拿到的是一条在线报价链接，并且已经关联 Revision 2。
+                time: 刚刚
+                emphasis: true
+              - title: 文件仍可导出
+                body: PDF 和 Excel 继续可用，但主记录已经留在系统里。
+                time: 就绪
+                emphasis: false
+            activity:
+              label: 买家活动
+              value: 等待首次查看
+              body: 后续查看、修订和接受动作都会继续回到这条报价记录里。
+            next_action:
+              label: 下一步动作
+              value: 等待首次响应
+              body: 销售不需要准备第二套记录，只要继续看这条报价即可。
+          - key: viewed
+            step: "02"
+            title: 买家查看
+            body: 买家查看会直接变成团队里看得见的动态，跟进前先知道客户有没有看、什么时候看的。
+            quote_title: QT-2026-0240 / 修订版 2
+            badge: 买家活跃中
+            badge_tone: is-good
+            version_badge: 当前版本 V2
+            summary_label: 买家动态
+            summary_rows:
+              - label: 首次查看
+                value: 发送后 18 分钟
+                changed: true
+              - label: 最近查看
+                value: Los Angeles
+                changed: true
+              - label: 报价版本
+                value: Revision 2
+                changed: false
+              - label: 文件输出
+                value: PDF 可用
+                changed: false
+            timeline:
+              - title: 买家已查看报价
+                body: 买家打开的是同一条在线报价，而不是附件副本。
+                time: 18 分钟前
+                emphasis: true
+              - title: 跟进上下文已更新
+                body: 销售在跟进前就知道是谁看过、什么时候看过。
+                time: 现在
+                emphasis: false
+            activity:
+              label: 买家活动
+              value: 6 次查看
+              body: 查看情况直接回到这条报价记录里，销售跟进时不用再猜。
+            next_action:
+              label: 下一步动作
+              value: 可以跟进
+              body: 销售可以根据客户查看情况和当前版本来跟进，而不是靠邮件猜测。
+          - key: revision
+            step: "03"
+            title: 请求修改
+            body: 买家提修改时，要求直接回到原报价记录，不会再分散成新的文件链。
+            quote_title: QT-2026-0240 / 请求修订中
+            badge: 请求修订
+            badge_tone: is-neutral
+            version_badge: 正在更新到 V3
+            summary_label: 修改要求
+            summary_rows:
+              - label: 单价
+                value: 请求调整
+                changed: true
+              - label: 数量
+                value: 15,000 件
+                changed: true
+              - label: 交货条款
+                value: 调整为 CFR LA
+                changed: true
+              - label: 有效期
+                value: 保持不变
+                changed: false
+            timeline:
+              - title: 买家请求修改
+                body: 价格和条款调整回到了同一条报价记录，而不是 Excel 附件。
+                time: 2 小时前
+                emphasis: true
+              - title: 请求仍然关联 V2
+                body: 团队知道买家是基于哪一版提出修改要求。
+                time: 已记录
+                emphasis: false
+            activity:
+              label: 买家活动
+              value: 已收到修订请求
+              body: 修改要求会继续留在版本记录里，后续修订直接接着做。
+            next_action:
+              label: 下一步动作
+              value: 准备 Revision 3
+              body: 销售直接在同一条报价版本链里改价格和条款，而不是另起文件。
+          - key: follow_up
+            step: "04"
+            title: 销售跟进
+            body: Revision 3 成为当前版本后，销售能一眼看到改了什么、接下来该做什么。
+            quote_title: QT-2026-0240 / 修订版 3
+            badge: 可以跟进
+            badge_tone: is-good
+            version_badge: 当前版本 V3
+            summary_label: 当前版本
+            summary_rows:
+              - label: 单价
+                value: USD 4.65
+                changed: true
+              - label: 数量
+                value: 15,000 件
+                changed: true
+              - label: 交货条款
+                value: CFR Los Angeles
+                changed: true
+              - label: 有效期
+                value: 10 天
+                changed: true
+            timeline:
+              - title: Revision 3 已发布
+                body: 最新版本成为当前版本，但整个报价历史没有断开。
+                time: 2 小时前
+                emphasis: true
+              - title: 跟进动作已绑定
+                body: 下一步动作会继续显示在这条报价记录里，前后情况也都还在。
+                time: 已就绪
+                emphasis: false
+            activity:
+              label: 买家活动
+              value: 买家当前看到 V3
+              body: 团队和买家都围绕同一个当前版本继续沟通，不会再对错版本。
+            next_action:
+              label: 下一步动作
+              value: 确认修订条款
+              body: 销售在当前版本、修订历史和买家动态都清楚的前提下继续推进。
+      hero_metrics:
+        primary_value:
+          label: 核心价值
+          value: 版本控制
+          body: 在整个谈判过程中保持报价历史清晰可追溯。
+        buyer_clarity:
+          label: 买家端清晰度
+          value: 在线报价链接
+          body: 分享一份买家浏览页，而不是继续发送新文件。
+        after_send:
+          label: 发送之后
+          value: 最新进展
+          body: 把查看、修订和下一步动作放在同一处。
+      hero_mockup:
+        kicker: 报价记录
+        title: QT-2026-0240
+        same_record_note: 查看、修订和跟进继续留在同一条报价记录里。
+        buyer_active: 买家活跃中
+        timeline_label: 最新进展
+        buyer: 买家：Pacific Trading Group
+        latest_version: 最新版本 V3
+        timeline:
+          current:
+            title: V3 当前版本
+            body: 单价已更新，交货术语调整为 FOB Qingdao。
+            time: 2 小时前
+          previous:
+            title: V2 上一版本
+            body: 买家请求更新运费并调整数量组合。
+            time: 昨天
+        activity:
+          label: 买家活动
+          value: 6 次查看
+          body: 发送后 18 分钟首次查看，最近一次来自 Los Angeles。
+        next_action:
+          label: 下一步动作
+          value: 可以跟进
+          body: 销售在回复前已经看清客户最近的查看情况和修改来龙去脉。
+        buyer_actions:
+          label: 买家动作
+          accept: 接受报价
+          request_revision: 请求修订
+        outputs:
+          label: 输出
+          live_quote: 在线报价链接
+          live_quote_note: 当前真源
+          pdf_export: PDF 导出
+          pdf_note: 买家可用
+          excel_export: Excel 导出
+          excel_note: 内部交接
+      why:
+        title: 报价一旦进入修订阶段，附件和邮件线程就会越来越乱
+        before:
+          title: 以前
+          items:
+            - V2 发出去后，不知道客户看的是不是最新版
+            - 修改意见散落在邮件和附件里
+            - 销售自己记下一步，团队很难同步
+        after:
+          title: 现在
+          items:
+            - 买家始终查看当前版本
+            - 请求修改回到同一条报价记录
+            - 查看、修订和跟进都有时间线
+      workflow:
+        kicker: 工作方式
+        title: 即使谈判越来越复杂，报价系统也不会散掉。
+      capabilities:
+        kicker: 核心能力
+        kicker_title: 专门解决报价工作最容易断掉的地方。
+      signature:
+        kicker: 标志能力
+        title: 让团队和买家都能读懂的版本控制。
+        body: 清晰呈现当前版本，将买家需求保留在报价记录内，并从同一来源输出所需文件。
+        panels:
+          latest:
+            label: 最新版本明确
+            body: 当前修订版清晰可见，不会埋在旧文件堆里。
+          response:
+            label: 客户响应始终挂接
+            body: 修订请求与接受动作都保留在报价记录内。
+          exports:
+            label: 导出仍然可用
+            body: PDF 和 Excel 继续可用，但不会重新取代系统本身。
+      customer_context:
+        kicker: 客户上下文
+        title: 报价活动关联到客户记录
+        body: 在同一视图中查看发送、查看、修订与提醒，确保后续动作基于最新商务上下文。
+        cta_demo: 查看演示工作台
+        cta_sample: 查看示例报价
+        card_kicker: 客户时间轴
+      fit:
+        title: 适合这样的出口团队
+        items:
+          - 经常发报价、改价、追客户
+          - 买家反馈经常回在邮件和附件里
+          - 团队需要知道当前版本和下一步动作
+      faq:
+        title: 常见问题
+        items:
+          - question: "买家需要登录吗？"
+            answer: "不需要。公开示例中的买家页面可以直接查看，实际产品也可以按场景配置访问方式。"
+          - question: "还能导出 PDF / Excel 吗？"
+            answer: "可以。PDF 和 Excel 仍然可导出，但它们不再承担版本协作和后续跟进的主记录角色。"
+          - question: "这会替代 ERP 吗？"
+            answer: "不会。ERP 继续负责订单、财务、库存等内部流程，Rubusoo 负责报价发出后的查看、修订和推进。"
+          - question: "什么样的团队更适合使用？"
+            answer: "更适合那些经常改价、需要反复确认版本、并且要持续跟进买家反馈的出口团队。"
+      proof:
+        kicker: 证明快照
+        title: 这些都是产品里的真实状态，不是空泛的功能词。
+        changes_label: 它改变的是：
+      resources:
+        kicker: 资源
+        title: 按主题继续查看相关资料
+        body: 按使用场景查看精简资料，再结合产品界面理解具体做法。
+        cta_browse: 浏览资源
+        cta_revision: 报价版本控制
+        cta_vs_excel: 对比 Excel
+      final_cta:
+        kicker: 下一步
+        title: 先查看产品，再进入对应页面。
+        body: 首页用于了解整体方案，demo 用于查看内部工作台，示例报价用于查看客户侧展示。
+        cta_demo: 查看演示工作台
+        cta_sample: 查看示例报价
+        cta_contact: 联系我们
   seo:
     view:
+      shared:
+        continue_reading:
+          kicker: 继续阅读
+          title: 继续了解相关场景
+          body: 继续查看相关能力页面、对比页面，或直接进入产品演示。
+          related_topics: 相关主题
+          compare_next: 延伸阅读
+          next_step: 下一步
+        links:
+          quote_revision_control: 报价版本控制
+          buyer_facing_quotation_link: 在线共享报价
+          foreign_trade_quotation_software: 外贸报价软件
+          quotation_software_vs_excel: 报价软件 vs Excel
+          quotation_software_vs_erp: 报价软件 vs ERP
+          quotation_crm_for_export_teams: 面向出口团队的报价 CRM
+          open_demo_workspace: 查看演示工作台
+          view_sample_quote: 查看示例报价
+      resources:
+        meta:
+          title: 资源 | Rubusoo
+          description: 浏览 Rubusoo 关于报价版本控制、共享报价链接和出口团队报价流程的资源页面。
+        hero:
+          kicker: 资源
+          title: 围绕修订、买家响应与跟进的资料
+          body: 从发送后最容易失控的环节开始：修订、买家反馈、文件交接与后续跟进。
+        cards:
+          foreign_trade_quotation_software:
+            title: 外贸报价软件
+            body: 从创建、发送到修订和导出，把一条报价记录持续保留在系统里
+          quotation_crm_for_export_teams:
+            title: 面向出口团队的报价 CRM
+            body: 把查看、修订和下一步动作放到客户记录里，而不是散落在邮件里
+          quote_revision_control:
+            title: 报价版本控制
+            body: 让团队和买家都知道当前看的是哪一版
+          buyer_facing_quotation_link:
+            title: 在线共享报价
+            body: 买家在线查看、接受报价或请求修改，不再依赖附件往返
+          quotation_software_vs_excel:
+            title: 报价软件 vs Excel
+            body: 为什么报价一进入修订和协作阶段，Excel 就会开始吃力
+          quotation_software_vs_erp:
+            title: 报价软件 vs ERP
+            body: ERP 管业务底盘，报价软件管发送后的推进与协作
+        read_page: 阅读页面
+        final_cta:
+          kicker: 下一步
+          title: 先查看产品，再进入对应资料。
+          body: 首页用于了解整体方案，demo 用于查看内部工作台，示例报价用于查看客户侧展示。
+          cta_homepage: 首页
+          cta_demo: 查看演示工作台
+          cta_sample: 查看示例报价
+      quote_revision_control:
+        meta:
+          title: 报价修订管理 | 清晰版本记录 | Rubusoo
+          description: 用一条结构化报价记录为团队与客户保持清晰的版本历史。
+        hero:
+          kicker: 报价版本控制
+          title: 以清晰版本记录管理报价修订
+          body: 最新版本更明确，买家变更留在报价记录内，减少发送过程中的版本混乱。
+          cta_demo: 查看演示工作台
+          cta_sample: 查看示例报价
+        cards:
+          current_version:
+            label: 始终知道当前版本
+            body: 即使买家来回多轮修改，最新报价也一眼可见。
+          feedback:
+            label: 买家反馈留在报价记录内
+            body: 修订请求与确认动作都保留在同一条报价记录中。
+          exports:
+            label: 导出文件继续可用
+            body: PDF 和 Excel 仍然从同一个结构化报价来源导出。
+        comparison:
+          before:
+            title: 以前
+            body: 团队不断复制文件，最后很难知道买家正在看的是哪一版。
+          with_rubusoo:
+            title: 用 Rubusoo
+            body: 每次修订都保留在同一条报价版本链中，推进过程和上下文都清晰可见。
+          result:
+            title: 结果
+            body: 谈判推进更快、版本错误更少、后续跟进判断更清晰。
+        version_switcher:
+          aria_label: 报价版本
+          versions:
+            - key: v1
+              label: V1
+              date: 首次发送
+              panel_kicker: 版本记录
+              title: 首次报价已发出
+              badge: 已发送
+              badge_tone: is-neutral
+              current: false
+              fields:
+                - label: 单价
+                  value: USD 4.90
+                  changed: false
+                - label: 数量
+                  value: 10,000 件
+                  changed: false
+                - label: 交货条款
+                  value: FOB Qingdao
+                  changed: false
+                - label: 有效期
+                  value: 14 天
+                  changed: false
+              timeline:
+                - title: 报价已创建
+                  body: 产品、价格和条款先落在第一条报价记录里。
+                  time: 3 月 2 日
+                  emphasis: true
+                - title: 版本基线已建立
+                  body: 后续修订都会从这条记录继续往下走。
+                  time: 已记录
+                  emphasis: false
+            - key: v2
+              label: V2
+              date: 买家请求修改
+              panel_kicker: 修订记录
+              title: 买家修改要求关联在 V2 上
+              badge: 请求修订
+              badge_tone: is-neutral
+              current: false
+              fields:
+                - label: 单价
+                  value: USD 4.80
+                  changed: true
+                - label: 数量
+                  value: 12,000 件
+                  changed: true
+                - label: 交货条款
+                  value: FOB Qingdao
+                  changed: false
+                - label: 有效期
+                  value: 12 天
+                  changed: true
+              timeline:
+                - title: 买家提出更新
+                  body: 价格和数量调整直接回到同一条报价记录。
+                  time: 3 月 4 日
+                  emphasis: true
+                - title: 修订仍然连着 V1
+                  body: 团队仍然可以看清楚哪些字段是从上一版变过来的。
+                  time: 已同步
+                  emphasis: false
+            - key: v3
+              label: V3
+              date: 当前版本
+              panel_kicker: 当前版本
+              title: Revision 3 已成为当前版本
+              badge: 当前版本
+              badge_tone: is-good
+              current: true
+              fields:
+                - label: 单价
+                  value: USD 4.65
+                  changed: true
+                - label: 数量
+                  value: 15,000 件
+                  changed: true
+                - label: 交货条款
+                  value: CFR Los Angeles
+                  changed: true
+                - label: 有效期
+                  value: 10 天
+                  changed: true
+              timeline:
+                - title: Revision 3 已发布
+                  body: 最新版本被标记为当前版本，团队和买家都围绕这一版继续推进。
+                  time: 3 月 6 日
+                  emphasis: true
+                - title: 跟进继续留在这里
+                  body: 买家请求、字段变化和下一步动作都没有离开这条记录。
+                  time: 已就绪
+                  emphasis: false
+      buyer_facing_quotation_link:
+        meta:
+          title: 在线共享报价 | Rubusoo
+          description: 通过一个在线报价页面让客户直接查看、接受或提出修订，无需来回传附件。
+        hero:
+          kicker: 在线共享报价
+          title: 用在线报价替代附件往返
+          body: 买家查看、接受和请求修改都在同一页面完成，不再靠邮件线程确认哪一版。
+        cards:
+          action:
+            label: 买家动作就在报价页上发生
+            body: 买家可以在查看报价的同一个页面接受报价或请求修订。
+          visibility:
+            label: 最新版本始终清楚
+            body: 买家打开的是一个在线报价页，而不是猜哪份文件才是当前版本。
+          thread:
+            label: 反馈回到同一条报价记录
+            body: 客户反馈直接回到报价本身，而不是散落在邮件往来里。
+        actions:
+          - kicker: 第一步
+            title: 打开当前报价
+            body: 买家进入的是同一个在线报价页，不需要再确认当前附件到底是哪一版。
+          - kicker: 第二步
+            title: 在页面里直接接受
+            body: 查看和接受发生在同一个页面，不用再跳回邮件线程。
+          - kicker: 第三步
+            title: 原地请求修改
+            body: 修改要求直接回到同一条报价记录，而不是再开一轮附件往返。
+        switcher:
+          kicker: 买家动作会同步到团队这边
+          title: 看看买家动作如何直接变成团队里的状态
+          body: 在买家页面和团队记录之间切换，就能看到在线报价如何让两边始终对得上。
+          aria_label: 报价视角切换
+        perspectives:
+          - key: buyer
+            label: 买家视角
+            summary: 在同一页面查看、接受或请求修改。
+            panel_kicker: 买家页面
+            title: 买家在同一个在线报价页面上完成动作
+            body: 买家不需要通过邮件确认版本，而是直接在已经打开的报价页面上查看和操作。
+            chips:
+              - 查看当前版本
+              - 接受报价
+              - 请求修改
+            record_kicker: 页面里可见
+            record_rows:
+              - label: 报价状态
+                value: 当前版本可见
+                emphasis: true
+              - label: 买家动作
+                value: 页面内查看
+                emphasis: false
+              - label: 文件输出
+                value: PDF 可导出
+                emphasis: false
+          - key: team
+            label: 团队视角
+            summary: 买家动作会回到内部记录，变成状态和下一步动作。
+            panel_kicker: 团队记录
+            title: 买家动作直接变成团队接下来要做的事
+            body: 无论买家是请求修改还是接受报价，这些动作都会直接更新内部记录，而不是埋在邮箱里。
+            chips:
+              - 请求修订
+              - 买家已查看
+              - 可以跟进
+            record_kicker: 记录已更新
+            record_rows:
+              - label: 报价状态
+                value: 请求修订
+                emphasis: true
+              - label: 买家活动
+                value: 发送后 18 分钟查看
+                emphasis: false
+              - label: 下一步动作
+                value: 准备 Revision 3
+                emphasis: true
+        preview:
+          sample:
+            kicker: 客户视图
+            title: 买家端页面示例
+            body: 结构化在线报价比邮件附件更适合审阅、确认与修订请求。
+            cta: 查看示例报价
+          internal:
+            kicker: 团队视图
+            title: 客户响应后的内部处理视图
+            body: Rubusoo 让响应、修订和下一步动作始终挂在同一个报价记录上。
+            cta: 查看演示工作台
+      quotation_software_vs_excel:
+        meta:
+          title: 报价软件 vs Excel | 发送后真正开始拉开差距的地方 | Rubusoo
+          description: 当客户开始响应后，对比 Excel 报价与结构化报价软件的实际差异。
+        hero:
+          kicker: 报价软件 vs Excel
+          title: 一旦报价进入协作和修订阶段，Excel 就会开始吃力
+          body: 真正的差异出现在发送之后：修订、买家响应与后续跟进，需要一条始终清楚的报价记录，而不是新的表格文件。
+        table:
+          headers:
+            criteria: 维度
+            excel: Excel / 附件
+            rubusoo: Rubusoo
+          rows:
+            revision:
+              criteria: 报价修订
+              excel: 手工复制文件并重新发送
+              rubusoo: 在同一条报价版本链中进行结构化修订管理
+            buyer_response:
+              criteria: 买家反馈
+              excel: 反馈回到邮件和文件线程里
+              rubusoo: 买家可以直接在报价页接受或请求修订
+            visibility:
+              criteria: 发送后可见性
+              excel: 最新版本很容易丢失
+              rubusoo: 团队和买家都能清楚看到当前报价
+            export:
+              criteria: 文件连续性
+              excel: 文件本身就是系统
+              rubusoo: PDF 和 Excel 仍可从同一个报价来源导出
+        cards:
+          buyer_flow:
+            title: 查看客户视图
+            body: 查看单一在线报价页如何替代附件往返与零散买家回复。
+            cta: 查看示例报价
+          internal_workflow:
+            title: 查看团队视图
+            body: 打开工作台视图，查看修订状态、买家动态与建议动作如何集中呈现。
+            cta: 查看演示工作台
       foreign_trade_quotation_software:
         meta:
-          title: "外贸报价软件 | 出口报价管理系统 | Rubusoo"
-          description: "面向 B2B 出口团队的外贸报价软件。无需沉重 ERP，也能实现结构化报价管理。"
+          title: 外贸报价软件 | 出口报价管理系统 | Rubusoo
+          description: 面向 B2B 出口团队的报价软件，支持修订控制、买家可见性与后续跟进管理。
         hero:
-          kicker: "出口报价执行"
-          title: "面向 B2B 出口团队的外贸报价软件"
-          summary: "外贸报价软件为出口团队提供可控、统一的报价流程。"
-          paragraph_1: "用结构化修订控制、买家可见性和快速导出替代零散 Excel 与附件链路。"
-          paragraph_2: "Rubusoo 是为追求执行效率、又不想引入重型 ERP 的 B2B 出口团队打造的报价工具。"
-          proof_1: "报价修订清晰可见"
-          proof_2: "买家链接始终最新"
-          proof_3: "持续支持 PDF / Excel 导出"
-          start_free: "免费开始"
-          live_example: "查看在线示例"
+          kicker: 外贸报价管理
+          title: 面向 B2B 出口团队的外贸报价软件
+          body: 把产品、价格和条款放进一条报价记录。买家改动继续留在原处，PDF 和 Excel 仍然可导出。
+          cta_demo: 查看演示工作台
+          cta_sample: 查看示例报价
+        cards:
+          revision:
+            label: 清晰的版本控制
+            body: 每次修订都保留在同一条报价记录中，团队始终可以明确当前版本。
+          buyer:
+            label: 买家看到的永远是最新版
+            body: 发一个在线报价链接，买家打开就是当前版本，不会再看错文件。
+          exports:
+            label: 需要时继续导出 PDF 与 Excel
+            body: 导出文件依然可用，但不再承担报价推进的主要管理职责。
+        workflow:
+          step_1:
+            title: 先把产品、价格和条款放进一份报价
+            body: 将产品、价格、规格与贸易条款整理在同一条报价记录中，后续修订无需重新开始。
+          step_2:
+            title: 买家要改，就在原报价上继续修
+            body: 价格调整、规格修改与客户要求都保留在报价记录内，而不是生成新的文件链。
+          step_3:
+            title: 在线分享报价，文件也照常导出
+            body: 买家在线查看最新报价，团队需要归档或发送文件时，PDF 和 Excel 依然可用。
+        next:
+          kicker: 相关主题
+          title: 继续查看报价发送后最相关的管理主题。
+          cta_revision: 报价版本控制
+          cta_buyer: 买家端报价链接
+          cta_vs_excel: 报价软件 vs Excel
         signals:
           primary_gain:
-            label: "核心收益"
-            title: "一个最新报价视图"
-            detail: "减少买家、销售与内部审批之间的版本混乱。"
+            label: 核心收益
+            title: 一个最新报价视图
+            detail: 减少买家、销售与内部审批之间的版本混乱。
           workflow:
-            label: "工作流"
-            title: "修订、分享、导出"
-            detail: "需要清晰时用在线链接，需要文件时继续使用 PDF / Excel 输出。"
+            label: 报价管理
+            title: 修订、分享、导出
+            detail: 需要清晰时用在线链接，需要文件时继续使用 PDF / Excel 输出。
           fit:
-            label: "适配团队"
-            title: "适合精简出口团队"
-            detail: "聚焦报价执行，不夸大为全能 ERP 替代。"
+            label: 适配团队
+            title: 适合精简出口团队
+            detail: 聚焦报价执行，不夸大为全能 ERP 替代。
         toc:
-          title: "本页目录"
-          introduction: "介绍"
-          spreadsheet_problems: "表格报价的问题"
-          erp_shortfalls: "ERP 报价模块为何不够好用"
-          comparison_table: "Excel vs ERP vs Rubusoo"
-          team_needs: "出口团队真正需要什么"
-          rubusoo_solves: "Rubusoo 如何解决"
-          faq: "常见问题"
+          title: 本页目录
+          introduction: 介绍
+          spreadsheet_problems: 表格报价的问题
+          erp_shortfalls: ERP 报价模块为何不够好用
+          comparison_table: Excel vs ERP vs Rubusoo
+          team_needs: 出口团队真正需要什么
+          rubusoo_solves: Rubusoo 如何解决
+          faq: 常见问题
+      quotation_software_vs_erp:
+        meta:
+          title: 报价软件 vs ERP | 报价流程该放在哪里 | Rubusoo
+          description: 看看 ERP 的边界在哪里，以及出口团队在处理修订、买家反馈和后续跟进时，为什么还需要一套真正适合报价推进的系统。
+        hero:
+          kicker: 报价软件 vs ERP
+          title: ERP 管业务底盘，报价软件管报价推进
+          body: ERP 适合订单、财务、库存和内部流程；Rubusoo 负责报价发出去之后的查看、修订与跟进。
+        panels:
+          erp:
+            kicker: ERP
+            title: 适合管内部业务记录
+            body: 订单、采购、库存、财务和审批都适合放在 ERP 里，但频繁修订和买家来回沟通并不是它最顺手的场景。
+          rubusoo:
+            kicker: Rubusoo
+            title: 适合管报价还在推进的阶段
+            body: 把当前版本、在线报价页、买家改动请求和跟进行动放在同一条报价记录里。
+          model:
+            kicker: 更合理的分工
+            title: 两套系统各做自己最擅长的事
+            body: ERP 继续负责后端业务，Rubusoo 负责订单定下来之前那段最容易散乱的报价过程。
+        fit:
+          workflow_layer:
+            label: 适合的用法
+            body: 在内部业务系统和买家谈判之间，加上一层清晰的报价执行系统。
+          keep_using_erp:
+            label: ERP 继续负责
+            body: 订单、财务、库存以及更广义的经营记录。
+        cta_foreign_trade: 外贸报价软件
+        cta_vs_excel: 报价软件 vs Excel
         spreadsheet_problems:
-          title: "表格报价的问题"
-          summary: "当交易量和修订频率上升时，表格报价会迅速失效。"
-          paragraph: "报价更新分散在文件、聊天和邮件附件中，直接拖慢执行速度。"
-          item_1: "多个报价文件在团队内流转，版本混乱增加。"
-          item_2: "手工更新拖慢买家响应。"
-          item_3: "附件链路中的修订控制困难。"
-          item_4: "公式与复制错误带来利润与信任风险。"
-          item_5: "最新报价不可见时，买家可见性下降。"
-          closing: "因此很多团队开始采用外贸报价软件，替代表格化报价。"
+          title: 表格报价的问题
+          summary: 当交易量和修订频率上升时，表格报价会迅速失效。
+          paragraph: 报价更新分散在文件、聊天和邮件附件中，直接拖慢执行速度。
+          item_1: 多个报价文件在团队内流转，版本混乱增加。
+          item_2: 手工更新拖慢客户响应。
+          item_3: 附件链路中的修订控制困难。
+          item_4: 公式与复制错误带来利润与信任风险。
+          item_5: 最新报价不可见时，客户查看情况下降。
+          closing: 因此很多团队开始采用外贸报价软件，替代表格化报价。
         erp_shortfalls:
-          title: "ERP 报价模块为何不够好用"
-          summary: "ERP 模块通常对一线出口报价执行来说过重。"
-          paragraph: "许多团队首先需要快速报价周转，其次才是更深的企业治理能力。"
-          item_1: "ERP 流程往往不够灵活，难以适配高频修订。"
-          item_2: "实施与定制成本会拖慢销售落地。"
-          item_3: "在复杂治理之前，团队更需要实用的报价速度。"
-          closing_prefix: "对 B2B 出口团队来说，轻量报价工具通常是更合适的执行层，尤其当它结合"
-          closing_link: "流程化 Quotation CRM 模型"
+          title: ERP 报价模块为何不够好用
+          summary: ERP 模块通常对一线出口报价执行来说过重。
+          paragraph: 许多团队首先需要快速报价周转，其次才是更深的企业治理能力。
+          item_1: ERP 流程往往不够灵活，难以适配高频修订。
+          item_2: 实施与定制成本会拖慢销售落地。
+          item_3: 在复杂治理之前，团队更需要实用的报价速度。
+          closing_prefix: 对 B2B 出口团队来说，轻量报价工具通常是更合适的执行层，尤其当它结合
+          closing_link: 报价管理 CRM 模型
         comparison:
-          title: "Excel vs ERP vs Rubusoo"
-          subtitle: "围绕版本控制、买家可见性和导出就绪度的快速对比。"
+          title: Excel vs ERP vs Rubusoo
+          subtitle: 围绕版本控制、客户查看情况和导出就绪度的快速对比。
           headers:
-            criteria: "维度"
-            excel: "Excel"
-            erp: "ERP 报价模块"
-            rubusoo: "Rubusoo"
+            criteria: 维度
+            excel: Excel
+            erp: ERP 报价模块
+            rubusoo: Rubusoo
           row_1:
-            criteria: "报价修订控制"
-            excel: "手工+文件方式"
-            erp: "结构化但复杂"
-            rubusoo: "内置报价修订控制"
+            criteria: 报价修订控制
+            excel: 手工+文件方式
+            erp: 结构化但复杂
+            rubusoo: 内置报价修订控制
           row_2:
-            criteria: "买家可见性"
-            excel: "附件混淆风险高"
-            erp: "可实现但配置重"
-            rubusoo: "单一在线买家链接"
+            criteria: 客户查看情况
+            excel: 附件混淆风险高
+            erp: 可实现但配置重
+            rubusoo: 单一在线买家链接
           row_3:
-            criteria: "落地速度"
-            excel: "起步快，治理弱"
-            erp: "上线与培训慢"
-            rubusoo: "轻量且实用"
+            criteria: 落地速度
+            excel: 起步快，治理弱
+            erp: 上线与培训慢
+            rubusoo: 轻量且实用
           row_4:
-            criteria: "出口就绪"
-            excel: "需手工排版"
-            erp: "依赖配置"
-            rubusoo: "PDF/Excel 即可导出"
+            criteria: 出口就绪
+            excel: 需手工排版
+            erp: 依赖配置
+            rubusoo: PDF/Excel 即可导出
           row_5:
-            criteria: "B2B 出口团队适配"
-            excel: "规模化受限"
-            erp: "能力强但过重"
-            rubusoo: "聚焦外贸报价管理"
+            criteria: B2B 出口团队适配
+            excel: 规模化受限
+            erp: 能力强但过重
+            rubusoo: 聚焦外贸报价管理
         mini_panel:
-          simple_title: "保持简单的部分"
-          simple_body: "仍可输出 PDF / Excel，无需强迫每位客户都走在线链接流程。"
-          cleaner_title: "变得更清晰的部分"
-          cleaner_body: "修订、买家可见性和跟进不再散落在文件与消息中。"
+          simple_title: 保持简单的部分
+          simple_body: 仍可输出 PDF / Excel，无需强迫每位客户都走在线链接流程。
+          cleaner_title: 变得更清晰的部分
+          cleaner_body: 修订、客户查看情况和跟进不再散落在文件与消息中。
         team_needs:
-          title: "出口团队真正需要什么"
-          summary: "出口团队需要报价执行纪律，而不是文件管理负担。"
-          paragraph: "实用型外贸报价流程应在同一工作台内兼顾速度与控制。"
-          item_1: "可追溯、可见历史的修订控制。"
-          item_2: "始终展示最新批准版本的买家链接。"
-          item_3: "适配跨境谈判节奏的快速编辑能力。"
-          item_4: "用于审批与执行的 PDF/Excel 导出。"
-          closing: "当这些能力在同一流程中协同，团队推进更快。"
+          title: 出口团队真正需要什么
+          summary: 出口团队需要更清晰的报价协作，而不是更多文件管理负担。
+          paragraph: 实用的外贸报价软件应在同一工作台中兼顾效率、控制与修订清晰度。
+          item_1: 可追溯、可见历史的修订控制。
+          item_2: 始终展示最新批准版本的买家链接。
+          item_3: 适配跨境谈判节奏的快速编辑能力。
+          item_4: 用于审批与执行的 PDF/Excel 导出。
+          closing: 当这些要求集中在同一套报价系统中，团队执行会更稳定。
         rubusoo_solves:
-          title: "Rubusoo 如何解决"
-          summary: "Rubusoo 将出口报价变为可重复执行系统。"
-          paragraph: "它将日常报价问题映射为清晰操作控制，而不引入流程膨胀。"
-          item_1_label: "版本混乱"
-          item_1_detail: "结构化修订控制让历史清晰可见。"
-          item_2_label: "买家不确定"
-          item_2_detail: "在线报价链接提升可见性且无需登录。"
-          item_3_label: "更新缓慢"
-          item_3_detail: "更快编辑支持高频修订。"
-          item_4_label: "手工导出成本"
-          item_4_detail: "PDF/Excel 导出保持快速一致。"
-          closing: "让 B2B 出口团队获得更干净执行、更快周转和更可预测交付。"
+          title: Rubusoo 如何解决
+          summary: Rubusoo 让出口报价流程更清晰、更容易复制。
+          paragraph: 它以更受控的方式处理日常报价问题，减少额外人工协调。
+          item_1_label: 版本混乱
+          item_1_detail: 结构化修订控制让历史清晰可见。
+          item_2_label: 买家不确定
+          item_2_detail: 在线报价链接提升可见性且无需登录。
+          item_3_label: 更新缓慢
+          item_3_detail: 更快编辑支持高频修订。
+          item_4_label: 手工导出成本
+          item_4_detail: PDF/Excel 导出保持快速一致。
+          closing: 这使 B2B 出口团队获得更强的报价控制力、更清晰的客户协同与更稳定的执行质量。
         faq:
-          title: "常见问题"
-          q1: "小型出口团队是否能快速采用外贸报价软件？"
-          a1: "可以。Rubusoo 作为轻量工具，适合精简团队快速上手。"
-          q2: "Rubusoo 是否可替代 Excel 外贸报价？"
-          a2: "可以。它用结构化修订和更清晰的买家更新替代文件式追踪。"
-          q3: "是否支持无需登录的买家链接？"
-          a3: "支持。买家可直接通过链接查看最新报价。"
-          q4: "还能导出 PDF 和 Excel 吗？"
-          a4: "支持。Rubusoo 同时支持在线链接与文件导出流程。"
+          title: 常见问题
+          q1: 小型出口团队是否能快速采用外贸报价软件？
+          a1: 可以。Rubusoo 作为轻量工具，适合精简团队快速上手。
+          q2: Rubusoo 是否可替代 Excel 外贸报价？
+          a2: 可以。它用结构化修订和更清晰的买家更新替代文件式追踪。
+          q3: Rubusoo 支持无需登录即可查看的在线报价吗？
+          a3: 支持。买家可直接通过链接查看最新报价。
+          q4: 还能导出 PDF 和 Excel 吗？
+          a4: 支持。Rubusoo 同时支持在线链接与文件导出流程。
         cta:
-          title: "采用团队会每天使用的外贸报价工具"
-          body: "用外贸报价软件替代表格报价，以更快落地、清晰修订和更快买家响应推进业务。"
+          title: 采用团队会每天使用的外贸报价工具
+          body: 用面向出口业务的报价软件替代表格报价，建立更受控的修订管理、客户可见性与后续跟进流程。
       quotation_crm_for_export_teams:
         meta:
-          title: "出口团队 Quotation CRM | B2B 报价流程 | Rubusoo"
-          description: "为出口销售团队设计的 Quotation CRM，在一个系统内管理修订、买家可见性和跟进流程。"
+          title: 出口团队报价 CRM | B2B 报价流程 | Rubusoo
+          description: 面向出口销售团队的报价 CRM，支持修订控制、客户可见性，以及与报价进展关联的跟进管理。
         hero:
-          kicker: "流程化 QUOTATION CRM"
-          title: "面向出口团队的 Quotation CRM"
-          summary: "出口团队需要的是执行型 CRM，而不只是报价记录存储。"
-          paragraph_1: "Rubusoo 将报价修订控制、买家链接和跟进流程整合到同一执行层。"
-          paragraph_2: "团队响应更快、版本更清晰，并在跨境周期中保持商机动能。"
-          proof_1: "修订感知的 CRM 流程"
-          proof_2: "买家可访问的报价"
-          proof_3: "跟进动作绑定报价状态"
-          start_free: "免费开始"
-          view_demo: "查看演示"
+          kicker: 报价管理 CRM
+          title: 面向出口团队的报价 CRM
+          body: 把报价修订、买家查看和后续跟进放在同一条客户记录里，让销售知道客户走到了哪一步。
+          cta_demo: 查看演示工作台
+          cta_resources: 查看资源页
+          summary: 面向出口团队的报价 CRM 应服务于报价执行、客户跟进与商机推进，而不只是记录存档。
+          paragraph_1: Rubusoo 将报价修订控制、在线报价共享与跟进管理整合为一套出口销售工作方式。
+          paragraph_2: 团队可以更清晰地维护版本、把握响应时机，并以更强控制力管理跨境销售周期。
+          proof_1: 围绕修订设计的 CRM 流程
+          proof_2: 买家可访问的报价
+          proof_3: 跟进动作关联报价状态
+          start_free: 免费开始
+          view_demo: 查看演示
         signals:
+          timeline:
+            label: 客户时间线
+            body: 发送后 18 分钟即被查看，销售能直接从查看记录接着跟进。
+          activity:
+            label: 客户时间线
+            body: V2 版本上请求修订，销售不用再翻附件或聊天记录。
+          execution:
+            label: 客户时间线
+            body: 今天该提醒谁、下一步该做什么，都能直接看见。
           crm_role:
-            label: "CRM 角色"
-            title: "执行，而非仅存储"
-            detail: "报价状态、修订和下一动作处于同一上下文。"
+            label: CRM 角色
+            title: 执行，而非仅存储
+            detail: 报价状态、修订和下一步动作都能在同一处看到。
           buyer_clarity:
-            label: "买家清晰度"
-            title: "一个最新报价视图"
-            detail: "使用直链替代完全依赖附件。"
+            label: 买家清晰度
+            title: 一个最新报价视图
+            detail: 使用直链替代完全依赖附件。
           team_rhythm:
-            label: "团队节奏"
-            title: "跟进绑定状态"
-            detail: "销售动作与报价生命周期真实状态保持同步。"
+            label: 团队节奏
+            title: 跟进绑定状态
+            detail: 销售动作与报价生命周期真实状态保持同步。
         toc:
-          title: "本页目录"
-          workflow_matters: "为什么流程在出口报价中重要"
-          revision_control: "报价修订控制作为核心层"
-          buyer_visibility: "买家报价链接与可见性"
-          follow_up_workflow: "出口销售跟进流程"
-          rubusoo_positioning: "Rubusoo 作为流程化 Quotation CRM"
-          faq: "常见问题"
+          title: 本页目录
+          workflow_matters: 为什么清晰流程对出口报价很重要
+          revision_control: 报价修订控制作为核心层
+          buyer_visibility: 买家报价链接与可见性
+          follow_up_workflow: 出口销售跟进流程
+          rubusoo_positioning: Rubusoo 作为报价管理 CRM
+          faq: 常见问题
         workflow_matters:
-          title: "为什么流程在出口报价中重要"
-          summary: "没有流程结构，报价执行质量会下降。"
-          paragraph: "出口团队每天都在处理修订、澄清和跟进，碎片化协作会拖慢决策与转化。"
-          item_1: "让修订在清晰时间线上组织。"
-          item_2: "让买家始终看到一个当前版本。"
-          item_3: "让跟进动作直接绑定报价状态。"
-          item_4: "提升销售与管理之间执行一致性。"
+          title: 为什么流程在出口报价中重要
+          summary: 没有流程结构，报价执行质量会下降。
+          paragraph: 出口团队每天都要处理修订、澄清与跟进。这些工作一旦分散，决策效率和转化质量都会下降。
+          item_1: 以清晰顺序管理报价修订
+          item_2: 通过单一当前版本保持客户可见性
+          item_3: 让跟进动作直接绑定报价状态。
+          item_4: 在销售与管理之间维持一致执行
         revision_control:
-          title: "报价修订控制：核心执行层"
-          summary: "修订控制是出口 Quotation CRM 的骨架。"
-          paragraph: "谈判中价格与条款高频变化，每次变化都需要可见性、责任归属和清晰沟通。"
-          item_1: "按上下文追踪每次修订，而非仅看文件名。"
-          item_2: "让内部评审和买家反馈对齐到同一时间线。"
-          item_3: "减少谈判中的价格与版本错误。"
-          item_4: "从文档更新升级为可控执行。"
-          closing: "这就是出口团队 Quotation CRM 的实用执行层。"
+          title: 报价修订控制：核心执行层
+          summary: 修订控制是出口报价管理的核心能力。
+          paragraph: 谈判中价格与条款高频变化，每次变化都需要可见性、责任归属和清晰沟通。
+          item_1: 按上下文追踪每次修订，而非仅看文件名。
+          item_2: 让内部评审和买家反馈对齐到同一时间线。
+          item_3: 减少谈判中的价格与版本错误。
+          item_4: 从文档更新升级为可控执行。
+          closing: 这构成了出口团队报价管理的实际运作基础。
         buyer_visibility:
-          title: "买家报价链接提升可见性与信任"
-          summary: "买家直链可立即消除版本歧义。"
-          paragraph: "附件更新常让买家不确定当前版本，在线链接可在修订中保持一致可见。"
-          item_1: "降低“最终版本是哪一份”的混淆。"
-          item_2: "缩短跨时区反馈周期。"
-          item_3: "以一致展示提升信任。"
+          title: 在线共享报价能提升清晰度和信任感
+          summary: 共享报价链接可以从一开始就减少版本混乱。
+          paragraph: 附件式更新难以确认当前状态。单一在线报价链接可以在每次修订中持续呈现当前版本。
+          item_1: 降低“最终版本是哪一份”的混淆。
+          item_2: 缩短跨时区反馈周期。
+          item_3: 以一致展示提升信任。
         follow_up_workflow:
-          title: "出口销售的跟进流程"
-          summary: "商机动能取决于与报价状态绑定的跟进纪律。"
-          paragraph: "流程化 Quotation CRM 应将提醒和下一动作直接连接到实时报价进度。"
-          item_1: "按报价阶段分配下一动作责任。"
-          item_2: "按修订事件设置提醒节奏。"
-          item_3: "清晰跟踪已发出、待处理和已更新状态。"
-          item_4: "为管理者提供更清晰执行信号。"
+          title: 出口销售的跟进流程
+          summary: 商机推进取决于与报价状态绑定的持续跟进。
+          paragraph: 报价管理系统应将提醒与下一步动作直接关联到实时报价进度。
+          item_1: 按报价阶段分配下一动作责任。
+        fit:
+          connected:
+            title: 更适合每天都在修订、发送和跟进报价的出口团队。
+            body: 即使买家反复修改，销售也能清楚知道当前版本是哪一版，并继续在同一条记录里推进。
+          outcome:
+            title: 买家衔接更顺，后续跟进也更快。
+            body: 发送之后更清楚，买家反馈直接回到报价本身，PDF 和 Excel 继续能导出，但团队不会再靠文件找记录。
+        related:
+          kicker: 继续阅读
+          title: 继续看和报价修订、买家查看与出口跟进直接相关的页面。
+          cta_vs_erp: 报价软件 vs ERP
+          cta_vs_excel: 报价软件 vs Excel
+          cta_foreign_trade: 外贸报价软件
+          item_2: 按修订事件设置提醒节奏。
+          item_3: 清晰跟踪已发出、待处理和已更新状态。
+          item_4: 为管理者提供更清晰执行信号。
         rubusoo_positioning:
-          title: "Rubusoo：流程化出口 Quotation CRM"
-          summary: "Rubusoo 将报价工作转化为可控执行系统。"
-          paragraph_prefix: "它为出口 Quotation CRM 场景而建，在强调修订速度和跟进质量的同时，仍与"
-          paragraph_link: "外贸报价软件基础能力"
-          item_1_label: "出口 Quotation CRM"
-          item_1_detail: "面向跨境销售执行打造。"
-          item_2_label: "报价修订控制"
-          item_2_detail: "可见时间线让团队协作更清晰。"
-          item_3_label: "买家报价链接"
-          item_3_detail: "低摩擦获取最新版本可见性。"
-          item_4_label: "出口销售跟进流程"
-          item_4_detail: "动作与报价状态保持联动。"
-          closing: "执行质量提升后，团队可在更少协作摩擦下更快成交。"
+          title: Rubusoo：流程化出口报价 CRM
+          summary: Rubusoo 将报价工作转化为可控执行系统。
+          paragraph_prefix: 它面向出口报价管理场景，在强调修订效率和跟进质量的同时，仍与
+          paragraph_link: 外贸报价软件基础能力
+          item_1_label: 出口报价 CRM
+          item_1_detail: 面向跨境销售执行打造。
+          item_2_label: 报价修订控制
+          item_2_detail: 可见时间线让团队协作更清晰。
+          item_3_label: 在线报价链接
+          item_3_detail: 低摩擦获取最新版本可见性。
+          item_4_label: 出口销售跟进流程
+          item_4_detail: 动作与报价状态保持联动。
+          closing: 更高的执行质量意味着更强的过程控制与更少的内部协作摩擦。
         mini_panel:
-          claim_title: "本页明确主张"
-          claim_body: "Rubusoo 能围绕报价组织修订、买家可见性和跟进流程。"
-          non_claim_title: "本页不做夸大"
-          non_claim_body: "如果团队主要通过 PDF 与邮件协作，本页不声称能完整量化每次买家互动。"
+          claim_title: 本页明确主张
+          claim_body: Rubusoo 围绕每条报价记录管理修订、客户可见性与后续跟进。
+          non_claim_title: 本页不做夸大
+          non_claim_body: 如果团队主要通过 PDF 与邮件协作，本页不声称能完整量化每次买家互动。
         faq:
-          title: "常见问题"
-          q1: "出口团队的 Quotation CRM 与普通 CRM 有何不同？"
-          a1: "它聚焦报价执行：修订、买家可见性和与进度绑定的跟进。"
-          q2: "Rubusoo 是否支持谈判中的修订控制？"
-          a2: "支持。修订在清晰流程中追踪，团队可更稳地处理买家变更。"
-          q3: "买家能通过链接查看报价吗？"
-          a3: "可以。买家可直接访问最新报价，提升清晰度并缩短反馈。"
-          q4: "支持出口团队的跟进流程吗？"
-          a4: "支持。跟进动作与报价状态联动，提升执行节奏和商机动能。"
+          title: 常见问题
+          q1: 出口团队的报价 CRM 与普通 CRM 有何不同？
+          a1: 它聚焦报价执行：修订、客户查看情况和与进度绑定的跟进。
+          q2: Rubusoo 是否支持谈判中的修订控制？
+          a2: 支持。修订在清晰流程中追踪，团队可更稳地处理买家变更。
+          q3: 买家能通过链接查看报价吗？
+          a3: 可以。买家可直接访问最新报价，提升清晰度并缩短反馈。
+          q4: 支持出口团队的跟进流程吗？
+          a4: 支持。跟进行动与报价状态关联，团队可据此把握响应时机。
         cta:
-          title: "提升报价执行与商机动能"
-          body: "采用面向出口团队的流程化 Quotation CRM，在一个系统内强化修订、买家可见性与跟进执行。"
+          title: 提升报价跟进质量和商机推进
+          body: 采用面向出口团队的报价管理 CRM，在一个系统内强化修订、客户查看情况与跟进执行。
   shortcuts:
-    title: "键盘快捷键"
-    close: "关闭"
-    discoverability: "按 ? 查看快捷键"
+    title: 键盘快捷键
+    close: 关闭
+    discoverability: 按 ? 查看快捷键
     groups:
-      global: "全局"
-      customer_page: "客户页"
-      quote_page: "报价页"
-      lists: "列表页"
+      global: 全局
+      customer_page: 客户页
+      quote_page: 报价页
+      lists: 列表页
     items:
-      command_palette: "打开命令面板"
-      new_customer: "新建客户"
-      new_product: "新建产品"
-      new_quote: "开始创建报价（先选客户）"
-      follow_up_customer: "打开当前客户的跟进行动"
-      new_quote_for_current_customer: "为当前客户创建报价"
-      share_quote: "分享当前报价"
-      send_reminder: "发送当前报价的提醒"
-      move_list_selection: "在列表行之间移动"
-      open_selected_row: "打开当前选中行"
-      search: "聚焦搜索框"
-      help: "显示此帮助"
+      command_palette: 打开命令面板
+      new_customer: 新建客户
+      new_product: 新建产品
+      new_quote: 开始创建报价（先选客户）
+      follow_up_customer: 打开当前客户的跟进行动
+      new_quote_for_current_customer: 为当前客户创建报价
+      share_quote: 分享当前报价
+      send_reminder: 发送当前报价的提醒
+      move_list_selection: 在列表行之间移动
+      open_selected_row: 打开当前选中行
+      search: 聚焦搜索框
+      help: 显示帮助
     palette:
-      title: "命令面板"
-      placeholder: "搜索客户、报价、产品..."
-      no_results: "没有匹配结果"
+      title: 命令面板
+      placeholder: 搜索客户、报价、产品...
+      no_results: 没有匹配结果
       groups:
-        actions: "快捷操作"
-        customers: "客户"
-        products: "产品"
-        quotes: "报价"
+        actions: 快捷操作
+        customers: 客户
+        products: 产品
+        quotes: 报价
       actions:
-        create_customer: "新建客户"
-        create_product: "新建产品"
-        create_quote: "新建报价"
+        create_customer: 新建客户
+        create_product: 新建产品
+        create_quote: 新建报价
     quote_picker:
-      title: "创建报价"
-      subtitle: "报价必须归属到客户，请先选择客户。"
-      search_placeholder: "搜索客户"
-      empty: "未找到客户"
+      title: 创建报价
+      subtitle: 报价必须归属到客户，请先选择客户。
+      search_placeholder: 搜索客户
+      empty: 未找到客户
     tooltips:
-      new_customer: "新建客户\n快捷键：Shift + C"
-      new_product: "新建产品\n快捷键：Shift + P"
-      new_quote: "创建报价\n快捷键：Shift + Q"
+      new_customer: "新建客户
+
+        快捷键：Shift + C"
+      new_product: "新建产品
+
+        快捷键：Shift + P"
+      new_quote: "创建报价
+
+        快捷键：Shift + Q"
     clipboard:
-      copied: "已复制！"
-      copy_failed: "复制失败"
+      copied: 已复制！
+      copy_failed: 复制失败
+  application:
+    avatar_alt: 头像
+    breadcrumb_aria: 面包屑导航

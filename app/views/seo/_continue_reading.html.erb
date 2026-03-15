@@ -1,0 +1,47 @@
+<%
+  related_links = Array(local_assigns[:related_topics]).compact.first(3)
+  related_links << local_assigns[:comparison_link] if local_assigns[:comparison_link].present? && related_links.size < 3
+%>
+
+<section class="marketing-related-editorial">
+  <div class="marketing-related-editorial__grid">
+    <div class="marketing-related-editorial__intro">
+      <%= render "components/ui/section_header",
+        kicker: local_assigns[:kicker].presence || t("seo.view.shared.continue_reading.kicker"),
+        title: local_assigns[:title].presence || t("seo.view.shared.continue_reading.title"),
+        body: local_assigns[:body].presence || t("seo.view.shared.continue_reading.body"),
+        title_class: "marketing-section-title--supporting max-w-none",
+        body_class: "marketing-section-body--compact" %>
+    </div>
+
+    <div class="marketing-related-editorial__body">
+      <% if related_links.present? %>
+        <div class="marketing-related-editorial__group">
+          <p class="marketing-related-editorial__label"><%= t("seo.view.shared.continue_reading.related_topics") %></p>
+          <div class="marketing-related-editorial__path">
+            <% related_links.each_with_index do |item, index| %>
+              <%= link_to item[:path], class: "marketing-related-editorial__path-link" do %>
+                <span class="marketing-related-editorial__path-index"><%= format("%02d", index + 1) %></span>
+                <span class="marketing-related-editorial__link-copy"><%= item[:label] %></span>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <% if local_assigns[:cta].present? %>
+        <div class="marketing-related-editorial__group marketing-related-editorial__group--cta">
+          <p class="marketing-related-editorial__label"><%= t("seo.view.shared.continue_reading.next_step") %></p>
+          <div class="marketing-related-editorial__cta">
+            <%= render "components/ui/button",
+              href: local_assigns[:cta][:path],
+              variant: :secondary,
+              attrs: (local_assigns[:cta][:target] ? { target: local_assigns[:cta][:target] } : {}) do %>
+              <%= local_assigns[:cta][:label] %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

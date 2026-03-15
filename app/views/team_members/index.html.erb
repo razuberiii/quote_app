@@ -21,16 +21,16 @@
 <section class="team-members-panel">
   <h2><%= t("team_members.view.index.invite_title") %></h2>
   <p class="team-members-hint"><%= t("team_members.view.index.invite_hint") %></p>
-  <%= form_with model: @new_invitation, url: team_invitations_path, local: true do |f| %>
-    <div>
+  <%= form_with model: @new_invitation, url: team_invitations_path, local: true, html: { class: "team-invite-form" } do |f| %>
+    <div class="team-invite-field">
       <%= f.label :email, t("team_members.view.index.email") %>
-      <%= f.email_field :email, required: true %>
+      <%= f.email_field :email, required: true, class: ui_input_classes %>
     </div>
-    <div>
+    <div class="team-invite-field">
       <%= f.label :company_role, t("team_members.view.index.company_role") %>
-      <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]] %>
+      <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, class: ui_input_classes %>
     </div>
-    <%= f.submit t("team_members.view.index.create_invitation"), class: "btn btn-primary" %>
+    <%= f.submit t("team_members.view.index.create_invitation"), class: "btn btn-primary team-invite-submit" %>
   <% end %>
 </section>
 
@@ -114,7 +114,7 @@
               <% else %>
                 <div class="team-actions">
                   <%= form_with model: member, url: team_member_path(member), method: :patch, local: true, class: "inline-form" do |f| %>
-                    <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, {} %>
+                    <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, class: ui_input_classes %>
                     <%= f.submit t("team_members.view.index.update"), class: "btn btn-secondary" %>
                   <% end %>
                   <% unless member == current_user %>

@@ -1,0 +1,117 @@
+<% versions = t("seo.view.quote_revision_control.version_switcher.versions") %>
+
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell", attrs: { "data-controller": "marketing-switcher", "data-marketing-switcher-selected-value": versions.last[:key] } do %>
+    <div class="marketing-story-header marketing-story-header--wide">
+      <div class="marketing-section-heading">
+        <p class="marketing-section-kicker"><%= t("seo.view.quote_revision_control.hero.kicker") %></p>
+        <h1 class="marketing-section-title max-w-none"><%= t("seo.view.quote_revision_control.hero.title") %></h1>
+        <p class="marketing-section-body"><%= t("seo.view.quote_revision_control.hero.body") %></p>
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: sample_quote_path, variant: :primary, attrs: { target: "_blank" } do %>
+            <%= t("seo.view.quote_revision_control.hero.cta_sample") %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <section class="marketing-showcase-frame marketing-showcase-frame--split marketing-showcase-frame--version">
+      <div class="marketing-switcher__nav marketing-switcher__nav--compact marketing-switcher__nav--rail marketing-switcher__nav--interactive" role="tablist" aria-label="<%= t('seo.view.quote_revision_control.version_switcher.aria_label') %>">
+          <% versions.each_with_index do |version, index| %>
+            <button
+              id="quote-version-tab-<%= version[:key] %>"
+              type="button"
+              role="tab"
+              class="marketing-switcher__tab marketing-switcher__tab--compact <%= 'is-active' if index == versions.size - 1 %>"
+              aria-controls="quote-version-panel-<%= version[:key] %>"
+              aria-selected="<%= index == versions.size - 1 %>"
+              tabindex="<%= index == versions.size - 1 ? 0 : -1 %>"
+              data-active="<%= index == versions.size - 1 %>"
+              data-action="click->marketing-switcher#select keydown->marketing-switcher#keydown"
+              data-marketing-switcher-target="tab"
+              data-state-key="<%= version[:key] %>">
+              <span class="marketing-switcher__tab-copy">
+                <strong><%= version[:label] %></strong>
+                <span><%= version[:date] %></span>
+              </span>
+              <% if version[:current] %>
+                <span class="dashboard-alert-pill is-good"><%= version[:badge] %></span>
+              <% end %>
+            </button>
+          <% end %>
+      </div>
+
+      <div class="marketing-showcase-frame__panel">
+        <% versions.each_with_index do |version, index| %>
+          <section
+            id="quote-version-panel-<%= version[:key] %>"
+            class="marketing-switcher__panel <%= 'is-active' if index == versions.size - 1 %>"
+            role="tabpanel"
+            aria-labelledby="quote-version-tab-<%= version[:key] %>"
+            <%= "hidden" unless index == versions.size - 1 %>
+            data-marketing-switcher-target="panel"
+            data-state-key="<%= version[:key] %>">
+            <article class="marketing-version-canvas">
+              <div class="app-section-heading border-b border-slate-200 pb-3">
+                <div>
+                  <p class="marketing-section-kicker"><%= version[:panel_kicker] %></p>
+                  <h2 class="text-2xl font-semibold tracking-tight text-slate-950"><%= version[:title] %></h2>
+                </div>
+                <span class="dashboard-alert-pill <%= version[:badge_tone] %>"><%= version[:badge] %></span>
+              </div>
+
+              <div class="mt-4 grid gap-4 md:grid-cols-[minmax(0,1.05fr)_minmax(220px,0.95fr)]">
+                <div class="space-y-2">
+                  <% version[:fields].each do |field| %>
+                    <div class="marketing-summary-row <%= 'is-changed' if field[:changed] %>">
+                      <span class="text-slate-600"><%= field[:label] %></span>
+                      <span class="font-semibold text-slate-950"><%= field[:value] %></span>
+                    </div>
+                  <% end %>
+                </div>
+
+                <div class="space-y-2">
+                  <% version[:timeline].each do |event| %>
+                    <div class="marketing-timeline-row <%= 'is-emphasized' if event[:emphasis] %>">
+                      <div class="flex items-start justify-between gap-3">
+                        <div>
+                          <strong class="block text-slate-950"><%= event[:title] %></strong>
+                          <p class="mt-1 text-slate-600"><%= event[:body] %></p>
+                        </div>
+                        <span class="app-subtle-note shrink-0"><%= event[:time] %></span>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </article>
+          </section>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <section class="marketing-note-strip marketing-note-strip--summary">
+    <article class="marketing-note-strip__item">
+      <h2 class="text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quote_revision_control.comparison.before.title") %></h2>
+      <p class="app-section-caption"><%= t("seo.view.quote_revision_control.comparison.before.body") %></p>
+    </article>
+    <article class="marketing-note-strip__item marketing-note-strip__item--featured">
+      <h2 class="text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quote_revision_control.comparison.with_rubusoo.title") %></h2>
+      <p class="app-section-caption"><%= t("seo.view.quote_revision_control.comparison.with_rubusoo.body") %></p>
+    </article>
+    <article class="marketing-note-strip__item">
+      <h2 class="text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quote_revision_control.comparison.result.title") %></h2>
+      <p class="app-section-caption"><%= t("seo.view.quote_revision_control.comparison.result.body") %></p>
+    </article>
+  </section>
+
+  <%= render "seo/continue_reading",
+    related_topics: [
+      { label: t("seo.view.shared.links.buyer_facing_quotation_link"), path: buyer_facing_quotation_link_path },
+      { label: t("seo.view.shared.links.foreign_trade_quotation_software"), path: foreign_trade_quotation_software_path }
+    ],
+    comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path },
+    cta: { label: t("seo.view.shared.links.view_sample_quote"), path: sample_quote_path, target: "_blank" } %>
+</section>
+

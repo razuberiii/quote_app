@@ -93,6 +93,35 @@ class ActionItemGeneratorTest < ActiveSupport::TestCase
     assert_equal customer, due_item.reference.customer
   end
 
+  test "does not create follow_up_due action item for lost or inactive customers" do
+    user = users(:one)
+    company = user.company
+    customer = customers(:one)
+    customer.update!(status: "lost", next_follow_up_date: Date.current)
+
+    Quote.create!(
+      company: company,
+      customer: customer,
+      quote_no: "QT-NO-DUE-#{SecureRandom.hex(4).upcase}",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      sent_at: 2.days.ago,
+      issued_on: Date.current,
+      quote_items_attributes: [
+        {
+          description: "Lost item",
+          unit_price: 100,
+          quantity: 1
+        }
+      ]
+    )
+
+    items = ActionItemGenerator.new(user: user).call
+
+    assert_nil items.find { |item| item.action_type == "follow_up_due" && item.reference.customer == customer }
+  end
+
   test "creates win_reason_missing action item for won quote without reason" do
     user = users(:one)
     company = user.company

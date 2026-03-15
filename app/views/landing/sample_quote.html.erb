@@ -1,18 +1,36 @@
-<% content_for :title, t("landing.view.sample_quote.meta_title") %>
-<% content_for :meta_description, t("landing.view.sample_quote.meta_description") %>
-<% content_for :canonical_url, sample_quote_url %>
+<%= render "components/ui/card", class: "no-print mb-5 app-surface marketing-section-card" do %>
+  <div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+    <div class="max-w-2xl">
+      <%= render "components/ui/section_header",
+        kicker: t("landing.view.sample_quote.kicker"),
+        title: t("landing.view.sample_quote.title"),
+        body: t("landing.view.sample_quote.subtitle"),
+        title_class: "mt-2 text-2xl font-semibold tracking-[-0.03em] text-slate-950",
+        body_class: "mt-3 text-sm leading-7 text-slate-600" %>
+      <div class="mt-3 app-stat-card text-sm leading-7 text-slate-700">
+        <p class="m-0"><strong class="text-slate-950"><%= t("landing.view.sample_quote.preview_label") %></strong> <%= t("landing.view.sample_quote.preview_body") %></p>
+        <p class="m-0 mt-1"><%= t("landing.view.sample_quote.preview_supporting") %></p>
+      </div>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.sample_quote.buyer_can_accept") %></span>
+        <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.sample_quote.buyer_can_request_revision") %></span>
+        <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.sample_quote.pdf_excel_available") %></span>
+      </div>
+    </div>
 
-<section class="marketing-section marketing-sample-intro no-print">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.sample_quote.kicker") %></p>
-    <h2><%= t("landing.view.sample_quote.title") %></h2>
-    <p><%= t("landing.view.sample_quote.subtitle") %></p>
+    <div class="flex flex-wrap gap-3">
+      <%= render "components/ui/button", href: demo_path, variant: :primary do %>
+        <%= t("landing.view.sample_quote.view_demo_workspace") %>
+      <% end %>
+      <%= render "components/ui/button", href: new_user_registration_path, variant: :secondary do %>
+        <%= t("landing.view.sample_quote.start_for_free") %>
+      <% end %>
+      <%= render "components/ui/button", href: contact_path, variant: :ghost do %>
+        <%= t("landing.shared.navigation.contact") %>
+      <% end %>
+    </div>
   </div>
-  <div class="marketing-cta-row">
-    <%= link_to t("landing.view.sample_quote.view_demo_workspace"), demo_path, class: "btn btn-primary marketing-cta-primary" %>
-    <%= link_to t("landing.view.sample_quote.start_for_free"), new_user_registration_path, class: "btn btn-secondary marketing-cta-secondary" %>
-  </div>
-</section>
+<% end %>
 
 <article class="quote-document public-quote-document public-quote-themed public-layout-classic" style="--doc-accent: #1F4E79; --doc-on-accent: <%= contrast_text_color('#1F4E79') %>; --doc-font: 'Noto Sans';">
   <header class="quote-doc-header">
@@ -21,6 +39,15 @@
       <h1><%= t("landing.view.sample_quote.pi_number", number: @sample_quote[:quote_no]) %></h1>
     </div>
   </header>
+
+  <div class="no-print mb-4 app-stat-card app-panel-muted">
+    <span class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500"><%= t("landing.view.sample_quote.buyer_actions") %></span>
+    <div class="mt-2 flex flex-wrap items-center gap-3">
+      <button type="button" class="<%= ui_button_classes(:primary) %>" disabled aria-disabled="true"><%= t("landing.view.sample_quote.accept_quote") %></button>
+      <button type="button" class="<%= ui_button_classes(:secondary) %>" disabled aria-disabled="true"><%= t("landing.view.sample_quote.request_revision") %></button>
+      <span class="text-xs text-slate-500"><%= t("landing.view.sample_quote.preview_mode_note") %></span>
+    </div>
+  </div>
 
   <section class="quote-meta-grid">
     <article class="quote-meta-card">

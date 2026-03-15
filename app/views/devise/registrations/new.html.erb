@@ -1,58 +1,71 @@
-<section class="auth-page">
-  <div class="auth-card">
-    <h1><%= t("users.registrations.view.new.title") %></h1>
-
-    <% if @validation_error.present? %>
-      <div class="error-messages">
-        <h2><%= t("users.registrations.view.new.verification_error") %></h2>
-        <ul>
-          <li><%= @validation_error %></li>
-        </ul>
-      </div>
-    <% end %>
-
-    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "signup-form" }) do |f| %>
-      <% if resource.errors.any? %>
-        <div class="error-messages">
-          <h2><%= t("users.registrations.view.new.error_summary", count: resource.errors.count) %></h2>
-          <ul>
-            <% resource.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
-        </div>
-      <% end %>
-
-      <div>
-        <%= f.label :email, t("users.registrations.view.new.email") %>
-        <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-      </div>
-
-      <div>
-        <%= f.label :password, t("users.registrations.view.new.password") %>
-        <% if @minimum_password_length %>
-          <small><%= t("users.registrations.view.new.minimum_password", count: @minimum_password_length) %></small>
-        <% end %>
-        <%= f.password_field :password, autocomplete: "new-password" %>
-      </div>
-
-      <div>
-        <%= f.label :password_confirmation, t("users.registrations.view.new.password_confirmation") %>
-        <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-      </div>
-
-      <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-        <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
-      <% end %>
-
-      <div>
-        <%= f.submit t("users.registrations.view.new.create_account"), class: "btn btn-primary", id: "signup-submit-btn" %>
-      </div>
-    <% end %>
-
-    <div class="auth-links">
-      <%= link_to t("users.registrations.view.new.log_in"), new_session_path(resource_name) %>
+<section class="marketing-content-shell marketing-auth-shell">
+  <div class="marketing-auth-grid">
+    <div class="marketing-auth-intro">
+      <p class="app-section-caption uppercase tracking-[0.16em]"><%= t("users.registrations.view.new.title") %></p>
+      <h1 class="marketing-auth-title"><%= t("users.registrations.view.new.title") %></h1>
+      <p class="marketing-auth-body">Create your workspace and start building quotes with structured revisions, buyer links, and follow-up context.</p>
     </div>
+
+    <%= render "components/ui/card", class: "app-surface marketing-auth-card" do %>
+      <div class="app-section-stack gap-5">
+        <div class="app-section-stack gap-2">
+          <h2 class="marketing-auth-card-title"><%= t("users.registrations.view.new.title") %></h2>
+          <p class="app-subtle-note">Set up your account to open the internal workspace.</p>
+        </div>
+
+        <% if @validation_error.present? %>
+          <div class="error-messages auth-error-messages">
+            <h2><%= t("users.registrations.view.new.verification_error") %></h2>
+            <ul>
+              <li><%= @validation_error %></li>
+            </ul>
+          </div>
+        <% end %>
+
+        <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "signup-form", class: "app-form-stack" }) do |f| %>
+          <% if resource.errors.any? %>
+            <div class="error-messages auth-error-messages">
+              <h2><%= t("users.registrations.view.new.error_summary", count: resource.errors.count) %></h2>
+              <ul>
+                <% resource.errors.full_messages.each do |message| %>
+                  <li><%= message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div>
+            <%= f.label :email, t("users.registrations.view.new.email") %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", class: ui_input_classes %>
+          </div>
+
+          <div>
+            <%= f.label :password, t("users.registrations.view.new.password") %>
+            <% if @minimum_password_length %>
+              <small><%= t("users.registrations.view.new.minimum_password", count: @minimum_password_length) %></small>
+            <% end %>
+            <%= f.password_field :password, autocomplete: "new-password", class: ui_input_classes %>
+          </div>
+
+          <div>
+            <%= f.label :password_confirmation, t("users.registrations.view.new.password_confirmation") %>
+            <%= f.password_field :password_confirmation, autocomplete: "new-password", class: ui_input_classes %>
+          </div>
+
+          <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
+            <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response" %>
+          <% end %>
+
+          <div>
+            <%= f.submit t("users.registrations.view.new.create_account"), class: "btn btn-primary auth-submit-button", id: "signup-submit-btn" %>
+          </div>
+        <% end %>
+
+        <div class="auth-links">
+          <%= link_to t("users.registrations.view.new.log_in"), new_session_path(resource_name) %>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- Verification Modal -->

@@ -1,6 +1,6 @@
 <% form_key = product.new_record? ? "new" : "edit" %>
 
-<%= form_with model: product do |f| %>
+<%= form_with model: product, html: { multipart: true } do |f| %>
   <div class="product-edit-layout">
     <aside class="product-edit-media">
       <section class="quote-form-section product-edit-panel product-edit-panel--media">
@@ -21,8 +21,22 @@
         </div>
 
         <div class="product-upload-panel">
-          <%= f.label :gallery_images, product.new_record? ? t("products.view.form.upload_images") : t("products.view.form.add_more_images") %>
-          <%= f.file_field :gallery_images, accept: "image/*", multiple: true, id: "product_gallery_images_#{form_key}", data: { has_display: product.display_image.present? } %>
+          <%= f.file_field :gallery_images,
+                           accept: "image/*",
+                           multiple: true,
+                           id: "product_gallery_images_#{form_key}",
+                           class: "product-gallery-file-input",
+                           data: { has_display: product.display_image.present? } %>
+          <div class="product-upload-actions">
+            <button type="button"
+                    class="<%= ui_button_classes(:secondary) %>"
+                    onclick="document.getElementById('product_gallery_images_<%= form_key %>').click();">
+              <%= product.new_record? ? t("products.view.form.upload_images") : t("products.view.form.add_more_images") %>
+            </button>
+            <span class="product-upload-file-meta" id="product_gallery_file_meta_<%= form_key %>">
+              <%= t("products.view.form.no_files_selected") %>
+            </span>
+          </div>
           <%= hidden_field_tag "product[primary_uploaded_image_index]", "", id: "product_primary_uploaded_image_index_#{form_key}" %>
           <div id="product_gallery_preview_<%= form_key %>" class="product-upload-preview" hidden></div>
         </div>
@@ -317,18 +331,44 @@
     const input = document.getElementById("product_gallery_images_<%= form_key %>");
     const preview = document.getElementById("product_gallery_preview_<%= form_key %>");
     const hidden = document.getElementById("product_primary_uploaded_image_index_<%= form_key %>");
+    const fileMeta = document.getElementById("product_gallery_file_meta_<%= form_key %>");
+    const noFilesText = "<%= j t("products.view.form.no_files_selected") %>";
+    const filesSelectedText = "<%= j t("products.view.form.files_selected", count: "%{count}") %>";
+    const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
+    const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
+    const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
     if (!input || !preview || !hidden || input.dataset.previewBound === "true") return;
     input.dataset.previewBound = "true";
     hidden.value = "";
     const hasDisplayImage = input.dataset.hasDisplay === "true";
+    const supportsDataTransfer = typeof DataTransfer !== "undefined";
 
     let stagedFiles = [];
 
     const syncInputFiles = () => {
+      if (!supportsDataTransfer) return false;
       const dt = new DataTransfer();
       stagedFiles.forEach((file) => dt.items.add(file));
       input.files = dt.files;
+      return true;
     };
+
+    const updateFileMeta = () => {
+      if (!fileMeta) return;
+      if (!stagedFiles.length) {
+        fileMeta.textContent = noFilesText;
+        return;
+      }
+      fileMeta.textContent = filesSelectedText.replace("%{count}", String(stagedFiles.length));
+    };
+
+    const form = input.closest("form");
+    if (form && form.dataset.gallerySyncBound !== "true") {
+      form.dataset.gallerySyncBound = "true";
+      form.addEventListener("submit", () => {
+        syncInputFiles();
+      });
+    }
 
     const markSelected = (index) => {
       hidden.value = String(index);
@@ -348,6 +388,7 @@
       if (!stagedFiles.length) {
         hidden.value = "";
         preview.hidden = true;
+        updateFileMeta();
         return;
       }
 
@@ -373,8 +414,12 @@
         remove.className = "product-upload-preview-remove";
         remove.textContent = "×";
         remove.title = removeFileLabel;
+        if (!supportsDataTransfer) {
+          remove.hidden = true;
+        }
         remove.addEventListener("click", (event) => {
           event.stopPropagation();
+          if (!supportsDataTransfer) return;
           const current = selectedIndex();
           if (current !== null) {
             if (current === index) {
@@ -410,24 +455,31 @@
         markSelected(0);
       }
       preview.hidden = false;
+      updateFileMeta();
     };
 
     input.addEventListener("change", () => {
       const newlyPicked = Array.from(input.files || []).filter((file) => file.type.startsWith("image/"));
       if (!newlyPicked.length) return;
 
-      const signature = (file) => `${file.name}__${file.size}__${file.lastModified}`;
-      const existingSignatures = new Set(stagedFiles.map(signature));
-      newlyPicked.forEach((file) => {
-        const key = signature(file);
-        if (!existingSignatures.has(key)) {
-          stagedFiles.push(file);
-          existingSignatures.add(key);
-        }
-      });
+      if (supportsDataTransfer) {
+        const signature = (file) => `${file.name}__${file.size}__${file.lastModified}`;
+        const existingSignatures = new Set(stagedFiles.map(signature));
+        newlyPicked.forEach((file) => {
+          const key = signature(file);
+          if (!existingSignatures.has(key)) {
+            stagedFiles.push(file);
+            existingSignatures.add(key);
+          }
+        });
+        syncInputFiles();
+      } else {
+        stagedFiles = newlyPicked;
+      }
 
-      syncInputFiles();
       renderPreview();
     });
+
+    updateFileMeta();
   })();
 </script>

@@ -1,490 +1,203 @@
-<% content_for :title, t("landing.view.index.meta_title") %>
-<% content_for :meta_description, t("landing.view.index.meta_description") %>
-<% content_for :canonical_url, "https://www.rubusoo.com/" %>
-<% content_for :head do %>
-  <script type="application/ld+json">
-    <%= raw({
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Rubusoo",
-      "url": root_url,
-      "logo": "#{request.base_url}/icon.png"
-    }.to_json) %>
-  </script>
-  <script type="application/ld+json">
-    <%= raw({
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Rubusoo",
-      "url": root_url
-    }.to_json) %>
-  </script>
-<% end %>
+<% flow_steps = t("landing.homepage.flow_showcase.steps") %>
 
-<section class="marketing-hero marketing-hero-split">
-  <div class="marketing-hero-bg"></div>
-  <div class="marketing-hero-content">
-    <p class="marketing-kicker"><%= t("landing.view.index.hero_kicker") %></p>
-    <h1><%= t("landing.view.index.hero_title") %></h1>
-    <p class="marketing-subtitle">
-      <%= t("landing.view.index.hero_subtitle") %>
-    </p>
-    <div class="marketing-cta-row">
-      <%= link_to t("landing.view.index.start_for_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-      <%= link_to t("landing.view.index.view_demo"), @demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
-      <%= link_to t("landing.view.index.see_live_example"), @sample_quote_path, class: "marketing-sample-link", target: "_blank" %>
-    </div>
-    <div class="marketing-proof-strip">
-      <span><%= t("landing.view.index.proof_1") %></span>
-      <span><%= t("landing.view.index.proof_2") %></span>
-      <span><%= t("landing.view.index.proof_3") %></span>
-    </div>
-  </div>
-
-  <aside class="marketing-hero-aside">
-    <div class="marketing-artifact-window">
-      <div class="marketing-artifact-eyebrow">
-        <span><%= t("landing.view.index.artifact.eyebrow_left") %></span>
-        <span><%= t("landing.view.index.artifact.eyebrow_right") %></span>
-      </div>
-      <div class="marketing-artifact-head">
-        <strong><%= t("landing.view.index.artifact.headline") %></strong>
-        <span><%= t("landing.view.index.artifact.subline") %></span>
-      </div>
-      <div class="marketing-artifact-stack">
-        <article class="marketing-artifact-card is-accent">
-          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card1.label") %></span>
-          <strong><%= t("landing.view.index.artifact.card1.title") %></strong>
-          <p><%= t("landing.view.index.artifact.card1.body") %></p>
-        </article>
-        <article class="marketing-artifact-card">
-          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card2.label") %></span>
-          <strong><%= t("landing.view.index.artifact.card2.title") %></strong>
-          <p><%= t("landing.view.index.artifact.card2.body") %></p>
-        </article>
-        <article class="marketing-artifact-card">
-          <span class="marketing-artifact-label"><%= t("landing.view.index.artifact.card3.label") %></span>
-          <strong><%= t("landing.view.index.artifact.card3.title") %></strong>
-          <p><%= t("landing.view.index.artifact.card3.body") %></p>
-        </article>
-      </div>
-    </div>
-  </aside>
-</section>
-
-<section class="marketing-section marketing-story-section">
-  <div class="marketing-story-grid">
-    <div>
-      <div class="marketing-section-head">
-        <p class="marketing-kicker"><%= t("landing.view.index.story.kicker") %></p>
-        <h2><%= t("landing.view.index.story.title") %></h2>
-      </div>
-      <p class="marketing-story-lead">
-        <%= t("landing.view.index.story.lead") %>
-      </p>
-    </div>
-    <div class="marketing-story-list">
-      <article>
-        <strong><%= t("landing.view.index.story.before_title") %></strong>
-        <p><%= t("landing.view.index.story.before_body") %></p>
-      </article>
-      <article>
-        <strong><%= t("landing.view.index.story.after_title") %></strong>
-        <p><%= t("landing.view.index.story.after_body") %></p>
-      </article>
-      <article>
-        <strong><%= t("landing.view.index.story.why_title") %></strong>
-        <p><%= t("landing.view.index.story.why_body") %></p>
-      </article>
-    </div>
-  </div>
-</section>
-
-<section class="marketing-section">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.index.capabilities.kicker") %></p>
-    <h2><%= t("landing.view.index.capabilities.title") %></h2>
-    <p><%= t("landing.view.index.capabilities.subtitle") %></p>
-  </div>
-  <div class="marketing-grid marketing-grid-4">
-    <article class="marketing-feature">
-      <div class="marketing-icon">V</div>
-      <h3><%= t("landing.view.index.capabilities.card1.title") %></h3>
-      <p><%= t("landing.view.index.capabilities.card1.body") %></p>
-    </article>
-    <article class="marketing-feature">
-      <div class="marketing-icon">L</div>
-      <h3><%= t("landing.view.index.capabilities.card2.title") %></h3>
-      <p><%= t("landing.view.index.capabilities.card2.body") %></p>
-    </article>
-    <article class="marketing-feature">
-      <div class="marketing-icon">Q</div>
-      <h3><%= t("landing.view.index.capabilities.card3.title") %></h3>
-      <p><%= t("landing.view.index.capabilities.card3.body") %></p>
-    </article>
-    <article class="marketing-feature">
-      <div class="marketing-icon">E</div>
-      <h3><%= t("landing.view.index.capabilities.card4.title") %></h3>
-      <p><%= t("landing.view.index.capabilities.card4.body") %></p>
-    </article>
-  </div>
-</section>
-
-<section class="marketing-section marketing-soft marketing-comparison-section">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.index.comparison.kicker") %></p>
-    <h2><%= t("landing.view.index.comparison.title") %></h2>
-    <p><%= t("landing.view.index.comparison.subtitle") %></p>
-  </div>
-  <div class="marketing-comparison-grid">
-    <article class="marketing-advantage">
-      <h3><%= t("landing.view.index.comparison.left_title") %></h3>
-      <p><%= t("landing.view.index.comparison.left_body") %></p>
-    </article>
-    <article class="marketing-advantage is-emphasis">
-      <h3><%= t("landing.view.index.comparison.center_title") %></h3>
-      <p><%= t("landing.view.index.comparison.center_body") %></p>
-    </article>
-    <article class="marketing-advantage">
-      <h3><%= t("landing.view.index.comparison.right_title") %></h3>
-      <p><%= t("landing.view.index.comparison.right_body") %></p>
-    </article>
-  </div>
-</section>
-
-<section class="marketing-section">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.index.workflow.kicker") %></p>
-    <h2><%= t("landing.view.index.workflow.title") %></h2>
-    <p><%= t("landing.view.index.workflow.subtitle") %></p>
-  </div>
-  <div class="marketing-steps">
-    <article class="marketing-step">
-      <span>1</span>
-      <h3><%= t("landing.view.index.workflow.step1_title") %></h3>
-      <p><%= t("landing.view.index.workflow.step1_body") %></p>
-    </article>
-    <article class="marketing-step">
-      <span>2</span>
-      <h3><%= t("landing.view.index.workflow.step2_title") %></h3>
-      <p><%= t("landing.view.index.workflow.step2_body") %></p>
-    </article>
-    <article class="marketing-step">
-      <span>3</span>
-      <h3><%= t("landing.view.index.workflow.step3_title") %></h3>
-      <p><%= t("landing.view.index.workflow.step3_body") %></p>
-    </article>
-    <article class="marketing-step">
-      <span>4</span>
-      <h3><%= t("landing.view.index.workflow.step4_title") %></h3>
-      <p><%= t("landing.view.index.workflow.step4_body") %></p>
-    </article>
-  </div>
-</section>
-
-<section class="marketing-section marketing-proof-layout">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.index.dual.kicker") %></p>
-    <h2><%= t("landing.view.index.dual.title") %></h2>
-  </div>
-  <div class="marketing-dual-grid">
-    <article class="marketing-proof-panel">
-      <h3><%= t("landing.view.index.dual.team_title") %></h3>
-      <ul class="marketing-proof-list">
-        <li><%= t("landing.view.index.dual.team_1") %></li>
-        <li><%= t("landing.view.index.dual.team_2") %></li>
-        <li><%= t("landing.view.index.dual.team_3") %></li>
-      </ul>
-    </article>
-    <article class="marketing-proof-panel">
-      <h3><%= t("landing.view.index.dual.buyer_title") %></h3>
-      <ul class="marketing-proof-list">
-        <li><%= t("landing.view.index.dual.buyer_1") %></li>
-        <li><%= t("landing.view.index.dual.buyer_2") %></li>
-        <li><%= t("landing.view.index.dual.buyer_3") %></li>
-      </ul>
-    </article>
-  </div>
-</section>
-
-<section class="marketing-section marketing-explainer" id="what-is-quotation-software">
-  <div class="marketing-section-head">
-    <h2><%= t("landing.view.index.explainer.title") %></h2>
-    <p class="marketing-section-intro"><%= t("landing.view.index.explainer.intro") %></p>
-  </div>
-  <p class="marketing-explainer-summary">
-    <%= t("landing.view.index.explainer.summary") %>
-  </p>
-  <ul class="marketing-explainer-keypoints">
-    <li><%= t("landing.view.index.explainer.key_1") %></li>
-    <li><%= t("landing.view.index.explainer.key_2") %></li>
-    <li><%= t("landing.view.index.explainer.key_3") %></li>
-  </ul>
-
-  <details class="marketing-explainer-details">
-    <summary><%= t("landing.view.index.explainer.read_full") %></summary>
-
-    <h3><%= t("landing.view.index.explainer.need_title") %></h3>
-    <p>
-      <%= t("landing.view.index.explainer.need_p1") %>
-    </p>
-    <p>
-      <%= t("landing.view.index.explainer.need_p2") %>
-    </p>
-
-    <h3><%= t("landing.view.index.explainer.breaks_title") %></h3>
-    <p>
-      <%= t("landing.view.index.explainer.breaks_p1") %>
-    </p>
-    <ul>
-      <li><%= t("landing.view.index.explainer.breaks_1") %></li>
-      <li><%= t("landing.view.index.explainer.breaks_2") %></li>
-      <li><%= t("landing.view.index.explainer.breaks_3") %></li>
-    </ul>
-
-    <h3><%= t("landing.view.index.explainer.crm_title") %></h3>
-    <p>
-      <%= t("landing.view.index.explainer.crm_p1") %>
-    </p>
-    <p>
-      <%= t("landing.view.index.explainer.crm_p2") %>
-    </p>
-    <ul>
-      <li><%= t("landing.view.index.explainer.crm_1") %></li>
-      <li><%= t("landing.view.index.explainer.crm_2") %></li>
-      <li><%= t("landing.view.index.explainer.crm_3") %></li>
-    </ul>
-    <p>
-      <%= t("landing.view.index.explainer.crm_p3") %>
-    </p>
-  </details>
-</section>
-
-<section class="marketing-section marketing-faq">
-  <div class="marketing-section-head">
-    <h2><%= t("landing.view.index.faq.title") %></h2>
-  </div>
-  <details>
-    <summary><%= t("landing.view.index.faq.q1") %></summary>
-    <p><%= t("landing.view.index.faq.a1") %></p>
-  </details>
-  <details>
-    <summary><%= t("landing.view.index.faq.q2") %></summary>
-    <p><%= t("landing.view.index.faq.a2") %></p>
-  </details>
-  <details>
-    <summary><%= t("landing.view.index.faq.q3") %></summary>
-    <p><%= t("landing.view.index.faq.a3") %></p>
-  </details>
-  <details>
-    <summary><%= t("landing.view.index.faq.q4") %></summary>
-    <p><%= t("landing.view.index.faq.a4") %></p>
-  </details>
-</section>
-
-<% contact_email = @contact_email || ContactMailer.contact_email_for_environment %>
-<section class="marketing-section marketing-contact" id="contact-us">
-  <div class="marketing-section-head">
-    <h2><%= t("landing.view.index.contact.title") %></h2>
-    <p><%= t("landing.view.index.contact.subtitle") %></p>
-    <p style="margin-top: 12px; font-size: 0.95em; color: #666;"><%= t("landing.view.index.contact.hint") %></p>
-  </div>
-
-  <%= form_with model: (@contact_request || ContactRequest.new), url: contact_requests_path, local: true, class: "marketing-contact-form", id: "contact-form" do |f| %>
-    <%= f.hidden_field :website, value: "", autocomplete: "off" %>
-    <div class="marketing-contact-grid">
-      <div>
-        <%= f.label :name, t("landing.view.index.contact.name") %>
-        <%= f.text_field :name, required: true %>
-      </div>
-      <div>
-        <%= f.label :email, t("landing.view.index.contact.email") %>
-        <%= f.email_field :email, required: true %>
-      </div>
-      <div>
-        <%= f.label :company, t("landing.view.index.contact.company") %>
-        <%= f.text_field :company, required: true %>
-      </div>
-      <div class="marketing-contact-message-wrap">
-        <%= f.label :message, t("landing.view.index.contact.message") %>
-        <%= f.text_area :message, rows: 5, required: true, placeholder: t("landing.view.index.contact.message_placeholder") %>
-      </div>
-    </div>
-    
-    <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-      <%= f.hidden_field :cf_turnstile_response, value: "", id: "cf_turnstile_response_contact" %>
-    <% end %>
-
-    <div class="marketing-contact-actions">
-      <%= f.submit t("landing.view.index.contact.send_message"), class: "btn btn-primary", id: "contact-submit-btn" %>
-      <span><%= t("landing.view.index.contact.or") %> <%= mail_to contact_email, t("landing.view.index.contact.email_directly"), subject: "Rubusoo Inquiry" %></span>
-    </div>
-  <% end %>
-
-  <!-- Verification Modal -->
-  <% unless ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>
-    <div id="verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
-      <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-        <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;"><%= t("landing.view.index.contact.security_verification") %></h3>
-        <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;"><%= t("landing.view.index.contact.complete_verification") %></p>
-        
-        <div id="turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-          <p><%= t("landing.view.index.contact.loading_verification") %></p>
+<section id="product-story" class="app-page-shell marketing-page-shell">
+  <div class="app-section-stack">
+    <section class="marketing-hero-grid" data-controller="marketing-switcher" data-marketing-switcher-selected-value="<%= flow_steps.first[:key] %>">
+      <div class="app-section-stack marketing-hero-copy">
+        <div class="app-section-stack">
+          <p class="marketing-eyebrow-chip"><%= t("landing.homepage.hero.kicker") %></p>
+          <div class="app-section-stack gap-4">
+            <h1 class="marketing-hero-title"><%= t("landing.homepage.hero.title") %></h1>
+            <p class="marketing-hero-body"><%= t("landing.homepage.hero.body") %></p>
+            <p class="app-subtle-note"><%= t("landing.homepage.hero.helper") %></p>
+          </div>
         </div>
-        
-        <div id="turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
-          <div class="cf-turnstile"></div>
+
+        <div class="marketing-hero-cta-group">
+          <div class="flex flex-wrap gap-3">
+            <%= render "components/ui/button", href: demo_path, variant: :primary do %>
+              <%= t("landing.homepage.hero.cta_demo") %>
+            <% end %>
+            <%= render "components/ui/button", href: sample_quote_path, variant: :secondary, attrs: { target: "_blank" } do %>
+              <%= t("landing.homepage.hero.cta_sample") %>
+            <% end %>
+            <%= render "components/ui/button", href: new_user_registration_path, variant: :ghost do %>
+              <%= t("landing.homepage.hero.cta_primary") %>
+            <% end %>
+          </div>
+
+          <p class="app-subtle-note"><%= t("landing.homepage.hero.cta_support") %></p>
         </div>
-        
-        <div id="turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-          <p style="color: #28a745; font-size: 16px; margin: 0;">✓ <%= t("landing.view.index.contact.verified_submitting") %></p>
+
+        <div class="app-section-stack gap-4">
+          <div class="app-section-stack gap-2">
+            <p class="marketing-section-kicker"><%= t("landing.homepage.flow_showcase.kicker") %></p>
+            <h2 class="marketing-section-title marketing-section-title--quiet max-w-none"><%= t("landing.homepage.flow_showcase.title") %></h2>
+            <p class="marketing-section-body marketing-section-body--compact"><%= t("landing.homepage.flow_showcase.body") %></p>
+          </div>
+
+          <div class="marketing-switcher__nav marketing-switcher__nav--story" role="tablist" aria-label="<%= t("landing.homepage.flow_showcase.aria_label") %>">
+            <% flow_steps.each_with_index do |step, index| %>
+              <button
+                id="homepage-flow-tab-<%= step[:key] %>"
+                type="button"
+                role="tab"
+                class="marketing-switcher__tab <%= 'is-active' if index.zero? %>"
+                aria-controls="homepage-flow-panel-<%= step[:key] %>"
+                aria-selected="<%= index.zero? %>"
+                tabindex="<%= index.zero? ? 0 : -1 %>"
+                data-active="<%= index.zero? %>"
+                data-action="click->marketing-switcher#select keydown->marketing-switcher#keydown"
+                data-marketing-switcher-target="tab"
+                data-state-key="<%= step[:key] %>">
+                <span class="marketing-switcher__tab-step"><%= step[:step] %></span>
+                <span class="marketing-switcher__tab-copy">
+                  <strong><%= step[:title] %></strong>
+                  <span><%= step[:body] %></span>
+                </span>
+              </button>
+            <% end %>
+          </div>
         </div>
       </div>
-    </div>
-  <% end %>
 
-  <script>
-    function initializeContactForm() {
-      const contactForm = document.getElementById('contact-form');
-      const submitBtn = document.getElementById('contact-submit-btn');
-      const modal = document.getElementById('verification-modal');
-      const turnstileResponse = document.getElementById('cf_turnstile_response_contact');
-      const loadingDiv = document.getElementById('turnstile-loading');
-      const containerDiv = document.getElementById('turnstile-container');
-      const successDiv = document.getElementById('turnstile-success');
-      
-      // Make sure all elements exist
-      if (!contactForm || !submitBtn || !modal || !turnstileResponse) {
-        return;
-      }
+      <%= render "components/ui/card", class: "app-surface marketing-hero-card marketing-hero-shell marketing-hero-shell--record", attrs: { "data-marketing-hero-sequence": true } do %>
+        <% flow_steps.each_with_index do |step, index| %>
+          <% primary_event = step[:timeline].first %>
+          <% secondary_event = step[:timeline].second %>
+          <section
+            id="homepage-flow-panel-<%= step[:key] %>"
+            class="marketing-switcher__panel <%= 'is-active' if index.zero? %>"
+            role="tabpanel"
+            aria-labelledby="homepage-flow-tab-<%= step[:key] %>"
+            <%= "hidden" unless index.zero? %>
+            data-marketing-switcher-target="panel"
+            data-state-key="<%= step[:key] %>">
+            <article class="marketing-record-mockup">
+              <header class="marketing-record-mockup__header">
+                <div class="marketing-record-mockup__identity">
+                  <p class="marketing-section-kicker"><%= t("landing.homepage.hero_mockup.kicker") %></p>
+                  <h2 class="marketing-record-mockup__title"><%= t("landing.homepage.hero_mockup.title") %></h2>
+                  <div class="marketing-record-mockup__meta">
+                    <span class="marketing-record-mockup__meta-item"><%= step[:version_badge] %></span>
+                    <span class="marketing-record-mockup__meta-item"><%= t("landing.homepage.hero_mockup.buyer") %></span>
+                    <span class="marketing-record-mockup__meta-item"><%= step[:badge] %></span>
+                  </div>
+                </div>
+                <span class="dashboard-alert-pill <%= step[:badge_tone] %>"><%= step[:badge] %></span>
+              </header>
 
-      // Clear any old token and state
-      turnstileResponse.value = '';
-      let verificationComplete = false;
-      let isSubmitting = false;
+              <div class="marketing-record-mockup__main">
+                <div class="marketing-record-mockup__main-head">
+                  <div>
+                    <p class="app-stat-label"><%= step[:summary_label] %></p>
+                    <p class="app-subtle-note mt-2"><%= t("landing.homepage.hero_mockup.same_record_note") %></p>
+                  </div>
+                </div>
 
-      // Prevent form submission if already submitting
-      contactForm.addEventListener('submit', function(e) {
-        if (isSubmitting) {
-          e.preventDefault();
-          return false;
-        }
-      });
+                <div class="marketing-record-mockup__summary-grid">
+                  <% step[:summary_rows].each do |row| %>
+                    <article class="marketing-record-mockup__summary-row <%= 'is-changed' if row[:changed] %>">
+                      <span class="text-slate-600"><%= row[:label] %></span>
+                      <strong class="text-slate-950"><%= row[:value] %></strong>
+                    </article>
+                  <% end %>
+                </div>
 
-      submitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        
-        // Prevent double-submission
-        if (isSubmitting) {
-          return;
-        }
-        
-        // If verification already complete and we have a fresh token, submit immediately
-        if (verificationComplete && turnstileResponse.value) {
-          isSubmitting = true;
-          submitBtn.disabled = true;
-          submitBtn.textContent = '<%= j t("landing.view.index.contact.sending") %>';
-          contactForm.submit();
-          return;
-        }
+                <div class="marketing-record-mockup__update">
+                  <div class="marketing-record-mockup__update-head">
+                    <p class="app-stat-label"><%= t("landing.homepage.hero_mockup.timeline_label") %></p>
+                    <span class="app-subtle-note"><%= primary_event[:time] %></span>
+                  </div>
+                  <strong class="marketing-record-mockup__update-title"><%= primary_event[:title] %></strong>
+                  <p class="marketing-record-mockup__update-body"><%= primary_event[:body] %></p>
 
-        // Reset and show modal
-        verificationComplete = false;
-        turnstileResponse.value = ''; // Clear any old token
-        submitBtn.disabled = true; // CRITICAL: Disable button immediately when opening modal
-        modal.style.display = 'flex';
-        loadingDiv.style.display = 'block';
-        containerDiv.style.display = 'none';
-        successDiv.style.display = 'none';
-        
-        // Wait for Turnstile API to load, then render
-        setTimeout(renderTurnstile, 300);
-      });
+                  <% if secondary_event.present? %>
+                    <div class="marketing-record-mockup__update-note">
+                      <div class="marketing-record-mockup__update-note-head">
+                        <span class="text-slate-950 font-medium"><%= secondary_event[:title] %></span>
+                        <span class="app-subtle-note"><%= secondary_event[:time] %></span>
+                      </div>
+                      <p class="app-subtle-note"><%= secondary_event[:body] %></p>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
 
-      function renderTurnstile() {
-        if (typeof turnstile === 'undefined') {
-          // API not loaded yet, retry
-          setTimeout(renderTurnstile, 200);
-          return;
-        }
+              <div class="marketing-record-mockup__footer">
+                <article class="marketing-record-mockup__aux">
+                  <span class="app-stat-label"><%= step[:activity][:label] %></span>
+                  <strong class="app-stat-value"><%= step[:activity][:value] %></strong>
+                  <p class="app-subtle-note mt-2"><%= step[:activity][:body] %></p>
+                </article>
+                <article class="marketing-record-mockup__aux">
+                  <span class="app-stat-label"><%= step[:next_action][:label] %></span>
+                  <strong class="app-stat-value"><%= step[:next_action][:value] %></strong>
+                  <p class="app-subtle-note mt-2"><%= step[:next_action][:body] %></p>
+                </article>
+              </div>
+            </article>
+          </section>
+        <% end %>
+      <% end %>
+    </section>
 
-        // Hide loading, show container
-        loadingDiv.style.display = 'none';
-        containerDiv.style.display = 'block';
+    <section class="marketing-editorial-section marketing-editorial-section--bridge">
+      <div class="app-section-stack gap-6">
+        <h2 class="marketing-section-title marketing-section-title--supporting max-w-4xl"><%= t("landing.homepage.why.title") %></h2>
 
-        const widget = containerDiv.querySelector('.cf-turnstile');
-        
-        // Clear any previous render
-        if (widget.dataset.rendered === 'true') {
-          widget.innerHTML = '';
-          widget.removeAttribute('data-rendered');
-        }
+        <div class="marketing-compare-band">
+          <article class="marketing-compare-band__column is-before">
+            <h3 class="text-2xl font-semibold tracking-tight text-slate-950"><%= t("landing.homepage.why.before.title") %></h3>
+            <ul class="marketing-checklist mt-4">
+              <% t("landing.homepage.why.before.items").each do |item| %>
+                <li><%= item %></li>
+              <% end %>
+            </ul>
+          </article>
 
-        turnstile.render(widget, {
-          sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
-          theme: 'light',
-          callback: function(token) {
-            turnstileResponse.value = token;
-            verificationComplete = true;
-            
-            // Show success message
-            containerDiv.style.display = 'none';
-            successDiv.style.display = 'block';
-            
-            // Auto-submit after 1 second
-            setTimeout(() => {
-              isSubmitting = true;
-              modal.style.display = 'none';
-              contactForm.submit();
-            }, 1000);
-          }
-        });
-        widget.dataset.rendered = 'true';
-      }
+          <article class="marketing-compare-band__column is-after">
+            <h3 class="text-2xl font-semibold tracking-tight text-slate-950"><%= t("landing.homepage.why.after.title") %></h3>
+            <ul class="marketing-checklist mt-4">
+              <% t("landing.homepage.why.after.items").each do |item| %>
+                <li><%= item %></li>
+              <% end %>
+            </ul>
+          </article>
+        </div>
+      </div>
+    </section>
 
-      // Close modal on background click (only if verification isn't complete)
-      modal.addEventListener('click', function(e) {
-        if (e.target === modal && !verificationComplete) {
-          modal.style.display = 'none';
-          turnstileResponse.value = ''; // Clear incomplete verification
-          submitBtn.disabled = false; // Re-enable button
-          submitBtn.textContent = '<%= j t("landing.view.index.contact.send_message") %>';
-        }
-      });
+    <section class="marketing-editorial-section marketing-editorial-section--light marketing-editorial-section--fit">
+      <div class="app-section-stack gap-6">
+        <h2 class="marketing-section-title marketing-section-title--supporting max-w-3xl"><%= t("landing.homepage.fit.title") %></h2>
 
-      // Restore button state on form reset
-      contactForm.addEventListener('reset', function() {
-        submitBtn.disabled = false;
-        submitBtn.textContent = '<%= j t("landing.view.index.contact.send_message") %>';
-        turnstileResponse.value = '';
-        verificationComplete = false;
-        isSubmitting = false;
-      });
-    }
+        <ul class="marketing-fit-list" role="list">
+          <% t("landing.homepage.fit.items").each do |item| %>
+            <li class="marketing-fit-list__item">
+              <p class="app-section-caption"><%= item %></p>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </section>
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', initializeContactForm);
-    // Re-initialize on Turbo navigation
-    document.addEventListener('turbo:load', initializeContactForm);
-  </script>
+    <section class="marketing-editorial-section marketing-editorial-section--faq marketing-editorial-section--faq-shell">
+      <div class="app-section-stack gap-6">
+        <h2 class="marketing-section-title marketing-section-title--supporting max-w-3xl"><%= t("landing.homepage.faq.title") %></h2>
+
+        <div class="marketing-faq-grid">
+          <% t("landing.homepage.faq.items").each do |item| %>
+            <details class="marketing-faq-item group">
+              <summary class="marketing-faq-item__summary">
+                <span><%= item[:question] %></span>
+                <span class="marketing-faq-item__icon app-subtle-note shrink-0">+</span>
+              </summary>
+              <p class="marketing-faq-item__body"><%= item[:answer] %></p>
+            </details>
+          <% end %>
+        </div>
+      </div>
+    </section>
+  </div>
 </section>
-
-<section class="marketing-section marketing-related-inline">
-  <div class="marketing-section-head">
-    <h2><%= t("landing.view.index.related_resources") %></h2>
-  </div>
-  <div class="marketing-footer-links">
-    <%= link_to t("landing.view.index.related_resource_1"), foreign_trade_quotation_software_path %>
-    <%= link_to t("landing.view.index.related_resource_2"), quotation_crm_for_export_teams_path %>
-  </div>
-</section>
-
-<footer class="marketing-footer">
-  <p><%= t("landing.view.index.footer_copyright", year: Time.current.year) %></p>
-  <div class="marketing-footer-links">
-    <a href="#"><%= t("landing.view.index.footer_privacy") %></a>
-    <a href="#"><%= t("landing.view.index.footer_terms") %></a>
-    <a href="#">LinkedIn</a>
-    <a href="#">X</a>
-  </div>
-</footer>

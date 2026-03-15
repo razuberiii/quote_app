@@ -52,7 +52,8 @@ class CommandPaletteController < ApplicationController
       end,
       quotes: quotes.map do |quote|
         {
-          label: quote.quote_no,
+          label: quote.title,
+          sublabel: quote.quote_no,
           meta: quote.customer&.name,
           path: quote_path(quote)
         }

@@ -77,7 +77,15 @@
           </div>
           <div class="customer-avatar-fields">
             <%= f.label :avatar, t("customers.view.form.avatar") %>
-            <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#customer_avatar_preview_img", live_preview_fallback: "#customer_avatar_preview_fallback" } %>
+            <%= f.file_field :avatar,
+                             id: "customer_avatar_upload",
+                             accept: "image/*",
+                             class: "account-avatar-file-input",
+                             data: { live_preview_target: "#customer_avatar_preview_img", live_preview_fallback: "#customer_avatar_preview_fallback" } %>
+            <label for="customer_avatar_upload" class="<%= ui_button_classes(:secondary) %>">
+              <%= t("customers.view.form.upload_avatar") %>
+            </label>
+            <p class="quote-form-hint"><%= t("customers.view.form.avatar_hint") %></p>
             <% if customer.avatar.attached? %>
               <label class="customer-avatar-remove"><%= check_box_tag "customer[remove_avatar]", "1", false %> <%= t("customers.view.form.remove_current_avatar") %></label>
             <% end %>
@@ -102,6 +110,7 @@
                   <%= customer_status_badge(customer) %>
                 <% end %>
               </div>
+              <p class="customer-field-hint"><%= t("customers.view.form.status_hint") %></p>
             </div>
             <div>
               <%= f.label :customer_level, t("customers.view.form.customer_level") %>

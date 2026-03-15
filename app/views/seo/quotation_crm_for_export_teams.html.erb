@@ -1,178 +1,54 @@
-<% content_for :title, t("seo.view.quotation_crm_for_export_teams.meta.title") %>
-<% content_for :meta_description, t("seo.view.quotation_crm_for_export_teams.meta.description") %>
-<% content_for :canonical_url, "https://www.rubusoo.com/quotation-crm-for-export-teams" %>
-
-<div class="seo-page-shell">
-<section class="marketing-section seo-hero-block" id="introduction">
-  <div class="seo-hero-grid">
-    <div class="marketing-section-head">
-      <p class="marketing-kicker"><%= t("seo.view.quotation_crm_for_export_teams.hero.kicker") %></p>
-      <h1><%= t("seo.view.quotation_crm_for_export_teams.hero.title") %></h1>
-      <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.hero.summary") %></strong></p>
-      <p><%= t("seo.view.quotation_crm_for_export_teams.hero.paragraph_1") %></p>
-      <p><%= t("seo.view.quotation_crm_for_export_teams.hero.paragraph_2") %></p>
-      <div class="marketing-proof-strip">
-        <span><%= t("seo.view.quotation_crm_for_export_teams.hero.proof_1") %></span>
-        <span><%= t("seo.view.quotation_crm_for_export_teams.hero.proof_2") %></span>
-        <span><%= t("seo.view.quotation_crm_for_export_teams.hero.proof_3") %></span>
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell marketing-hero-shell--crm" do %>
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:items-start">
+      <div class="marketing-section-heading">
+        <p class="marketing-section-kicker"><%= t("seo.view.quotation_crm_for_export_teams.hero.kicker") %></p>
+        <h1 class="marketing-section-title max-w-none"><%= t("seo.view.quotation_crm_for_export_teams.hero.title") %></h1>
+        <p class="marketing-section-body">
+          <%= t("seo.view.quotation_crm_for_export_teams.hero.body") %>
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: demo_path, variant: :primary do %>
+            <%= t("seo.view.quotation_crm_for_export_teams.hero.cta_demo") %>
+          <% end %>
+        </div>
       </div>
-      <div class="marketing-cta-row seo-hero-actions">
-        <%= link_to t("seo.view.quotation_crm_for_export_teams.hero.start_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-        <%= link_to t("seo.view.quotation_crm_for_export_teams.hero.view_demo"), demo_path, class: "btn btn-secondary marketing-cta-secondary" %>
-      </div>
+
+      <article class="marketing-static-timeline marketing-static-timeline--spotlight">
+        <p class="marketing-section-kicker"><%= t("seo.view.quotation_crm_for_export_teams.signals.timeline.label") %></p>
+        <div class="marketing-static-timeline__lede">
+          <p class="marketing-static-timeline__lead-copy"><%= t("seo.view.quotation_crm_for_export_teams.signals.timeline.body") %></p>
+        </div>
+        <div class="marketing-static-timeline__items">
+          <div class="marketing-static-timeline__item">
+            <p class="app-subtle-note"><%= t("seo.view.quotation_crm_for_export_teams.signals.activity.body") %></p>
+          </div>
+          <div class="marketing-static-timeline__item is-accented">
+            <p class="app-stat-label"><%= t("seo.view.quotation_crm_for_export_teams.signals.execution.label") %></p>
+            <p class="app-subtle-note mt-2"><%= t("seo.view.quotation_crm_for_export_teams.signals.execution.body") %></p>
+          </div>
+        </div>
+      </article>
     </div>
-    <aside class="seo-hero-artifact">
-      <article class="seo-signal-card is-strong">
-        <span class="seo-signal-label"><%= t("seo.view.quotation_crm_for_export_teams.signals.crm_role.label") %></span>
-        <strong><%= t("seo.view.quotation_crm_for_export_teams.signals.crm_role.title") %></strong>
-        <p><%= t("seo.view.quotation_crm_for_export_teams.signals.crm_role.detail") %></p>
-      </article>
-      <article class="seo-signal-card">
-        <span class="seo-signal-label"><%= t("seo.view.quotation_crm_for_export_teams.signals.buyer_clarity.label") %></span>
-        <strong><%= t("seo.view.quotation_crm_for_export_teams.signals.buyer_clarity.title") %></strong>
-        <p><%= t("seo.view.quotation_crm_for_export_teams.signals.buyer_clarity.detail") %></p>
-      </article>
-      <article class="seo-signal-card">
-        <span class="seo-signal-label"><%= t("seo.view.quotation_crm_for_export_teams.signals.team_rhythm.label") %></span>
-        <strong><%= t("seo.view.quotation_crm_for_export_teams.signals.team_rhythm.title") %></strong>
-        <p><%= t("seo.view.quotation_crm_for_export_teams.signals.team_rhythm.detail") %></p>
-      </article>
-    </aside>
-  </div>
+  <% end %>
+
+  <section class="marketing-editorial-band marketing-editorial-band--notes">
+    <article class="marketing-annotation-block">
+      <h2 class="text-2xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quotation_crm_for_export_teams.fit.connected.title") %></h2>
+      <p class="app-section-caption mt-2"><%= t("seo.view.quotation_crm_for_export_teams.fit.connected.body") %></p>
+    </article>
+    <article class="marketing-annotation-block">
+      <h2 class="text-2xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quotation_crm_for_export_teams.fit.outcome.title") %></h2>
+      <p class="app-section-caption mt-2"><%= t("seo.view.quotation_crm_for_export_teams.fit.outcome.body") %></p>
+    </article>
+  </section>
+
+  <%= render "seo/continue_reading",
+    related_topics: [
+      { label: t("seo.view.shared.links.foreign_trade_quotation_software"), path: foreign_trade_quotation_software_path },
+      { label: t("seo.view.shared.links.quote_revision_control"), path: quote_revision_control_path }
+    ],
+    comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_erp"), path: quotation_software_vs_erp_path },
+    cta: { label: t("seo.view.shared.links.open_demo_workspace"), path: demo_path } %>
 </section>
 
-<section class="marketing-section seo-page-toc">
-  <div class="seo-page-toc-bar">
-    <div class="seo-page-toc-head">
-      <h2><%= t("seo.view.quotation_crm_for_export_teams.toc.title") %></h2>
-    </div>
-    <ul>
-      <li><a href="#workflow-matters"><%= t("seo.view.quotation_crm_for_export_teams.toc.workflow_matters") %></a></li>
-      <li><a href="#revision-control"><%= t("seo.view.quotation_crm_for_export_teams.toc.revision_control") %></a></li>
-      <li><a href="#buyer-visibility"><%= t("seo.view.quotation_crm_for_export_teams.toc.buyer_visibility") %></a></li>
-      <li><a href="#follow-up-workflow"><%= t("seo.view.quotation_crm_for_export_teams.toc.follow_up_workflow") %></a></li>
-      <li><a href="#rubusoo-positioning"><%= t("seo.view.quotation_crm_for_export_teams.toc.rubusoo_positioning") %></a></li>
-      <li><a href="#faq"><%= t("seo.view.quotation_crm_for_export_teams.toc.faq") %></a></li>
-    </ul>
-  </div>
-</section>
-
-<section class="marketing-section marketing-soft" id="workflow-matters">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.summary") %></strong></p>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.item_1") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.item_2") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.item_3") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.workflow_matters.item_4") %></li>
-  </ul>
-</section>
-
-<section class="marketing-section" id="revision-control">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.revision_control.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.revision_control.summary") %></strong></p>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.revision_control.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.revision_control.item_1") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.revision_control.item_2") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.revision_control.item_3") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.revision_control.item_4") %></li>
-  </ul>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.revision_control.closing") %></p>
-</section>
-
-<section class="marketing-section marketing-soft" id="buyer-visibility">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.summary") %></strong></p>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.item_1") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.item_2") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.buyer_visibility.item_3") %></li>
-  </ul>
-</section>
-
-<section class="marketing-section" id="follow-up-workflow">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.summary") %></strong></p>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.item_1") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.item_2") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.item_3") %></li>
-    <li><%= t("seo.view.quotation_crm_for_export_teams.follow_up_workflow.item_4") %></li>
-  </ul>
-</section>
-
-<section class="marketing-section marketing-soft" id="rubusoo-positioning">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.summary") %></strong></p>
-  <p>
-    <%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.paragraph_prefix") %>
-    <%= link_to t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.paragraph_link"), foreign_trade_quotation_software_path %>.
-  </p>
-  <ul>
-    <li><strong><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_1_label") %>:</strong> <%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_1_detail") %></li>
-    <li><strong><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_2_label") %>:</strong> <%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_2_detail") %></li>
-    <li><strong><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_3_label") %>:</strong> <%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_3_detail") %></li>
-    <li><strong><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_4_label") %>:</strong> <%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.item_4_detail") %></li>
-  </ul>
-  <p><%= t("seo.view.quotation_crm_for_export_teams.rubusoo_positioning.closing") %></p>
-</section>
-
-<section class="marketing-section seo-mini-grid">
-  <article class="seo-mini-panel">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.mini_panel.claim_title") %></h2>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.mini_panel.claim_body") %></p>
-  </article>
-  <article class="seo-mini-panel">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.mini_panel.non_claim_title") %></h2>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.mini_panel.non_claim_body") %></p>
-  </article>
-</section>
-
-<section class="marketing-section marketing-faq" id="faq">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.faq.title") %></h2>
-  </div>
-  <details>
-    <summary><%= t("seo.view.quotation_crm_for_export_teams.faq.q1") %></summary>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.faq.a1") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.quotation_crm_for_export_teams.faq.q2") %></summary>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.faq.a2") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.quotation_crm_for_export_teams.faq.q3") %></summary>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.faq.a3") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.quotation_crm_for_export_teams.faq.q4") %></summary>
-    <p><%= t("seo.view.quotation_crm_for_export_teams.faq.a4") %></p>
-  </details>
-</section>
-
-<section class="marketing-section seo-cta-block">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.quotation_crm_for_export_teams.cta.title") %></h2>
-    <p>
-      <%= t("seo.view.quotation_crm_for_export_teams.cta.body") %>
-    </p>
-  </div>
-  <div class="marketing-cta-row">
-    <%= link_to t("seo.view.quotation_crm_for_export_teams.hero.start_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-  </div>
-</section>
-</div>

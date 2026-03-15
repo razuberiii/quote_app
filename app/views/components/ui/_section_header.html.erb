@@ -1,0 +1,19 @@
+<%
+  section_class = ["marketing-section-heading", local_assigns[:class]].compact.join(" ")
+  kicker_class = ["marketing-section-kicker", local_assigns[:kicker_class]].compact.join(" ")
+  title_class = ["marketing-section-title", local_assigns[:title_class]].compact.join(" ")
+  body_class = ["marketing-section-body", local_assigns[:body_class]].compact.join(" ")
+  title_tag = (local_assigns[:tag] || :h2).to_sym
+%>
+
+<div class="<%= section_class %>">
+  <% if local_assigns[:kicker].present? %>
+    <p class="<%= kicker_class %>"><%= local_assigns[:kicker] %></p>
+  <% end %>
+
+  <%= content_tag(title_tag, local_assigns[:title], class: title_class) %>
+
+  <% if local_assigns[:body].present? %>
+    <p class="<%= body_class %>"><%= local_assigns[:body] %></p>
+  <% end %>
+</div>

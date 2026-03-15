@@ -1,3 +1,5 @@
-<div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 hover:shadow-md transition-shadow duration-200 <%= local_assigns[:class] %>">
+<% card_attrs = local_assigns[:attrs].presence || {} %>
+
+<div class="bg-white rounded-xl border border-slate-200/60 shadow-sm p-6 hover:shadow-md transition-shadow duration-200 <%= local_assigns[:class] %>" <%= tag.attributes(card_attrs) if card_attrs.present? %>>
   <%= yield %>
 </div>

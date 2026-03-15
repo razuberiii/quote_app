@@ -1,36 +1,49 @@
 <% content_for :meta_robots, "noindex,follow" %>
 
-<section class="auth-page">
-  <div class="auth-card">
-    <h1><%= t("users.sessions.view.new.title") %></h1>
+<section class="marketing-content-shell marketing-auth-shell">
+  <div class="marketing-auth-grid">
+    <div class="marketing-auth-intro">
+      <p class="app-section-caption uppercase tracking-[0.16em]"><%= t("users.sessions.view.new.title") %></p>
+      <h1 class="marketing-auth-title"><%= t("users.sessions.view.new.title") %></h1>
+      <p class="marketing-auth-body">Sign in to continue managing quotes, customers, and buyer activity in one workspace.</p>
+    </div>
 
-    <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
-      <div>
-        <%= f.label :email, t("users.sessions.view.new.email") %>
-        <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
-      </div>
-
-      <div>
-        <%= f.label :password, t("users.sessions.view.new.password") %>
-        <%= f.password_field :password, autocomplete: "current-password" %>
-      </div>
-
-      <% if devise_mapping.rememberable? %>
-        <div class="auth-remember">
-          <%= f.check_box :remember_me %>
-          <%= f.label :remember_me, t("users.sessions.view.new.remember_me") %>
+    <%= render "components/ui/card", class: "app-surface marketing-auth-card" do %>
+      <div class="app-section-stack gap-5">
+        <div class="app-section-stack gap-2">
+          <h2 class="marketing-auth-card-title"><%= t("users.sessions.view.new.title") %></h2>
+          <p class="app-subtle-note">Use your Rubusoo account to open the workspace.</p>
         </div>
-      <% end %>
 
-      <div>
-        <%= f.submit t("users.sessions.view.new.submit"), class: "btn btn-primary" %>
+        <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "app-form-stack" }) do |f| %>
+          <div>
+            <%= f.label :email, t("users.sessions.view.new.email") %>
+            <%= f.email_field :email, autofocus: true, autocomplete: "email", class: ui_input_classes %>
+          </div>
+
+          <div>
+            <%= f.label :password, t("users.sessions.view.new.password") %>
+            <%= f.password_field :password, autocomplete: "current-password", class: ui_input_classes %>
+          </div>
+
+          <% if devise_mapping.rememberable? %>
+            <div class="auth-remember">
+              <%= f.check_box :remember_me %>
+              <%= f.label :remember_me, t("users.sessions.view.new.remember_me") %>
+            </div>
+          <% end %>
+
+          <div>
+            <%= f.submit t("users.sessions.view.new.submit"), class: "btn btn-primary auth-submit-button" %>
+          </div>
+        <% end %>
+
+        <div class="auth-links">
+          <% if devise_mapping.registerable? %>
+            <%= link_to t("users.sessions.view.new.sign_up"), new_registration_path(resource_name) %>
+          <% end %>
+        </div>
       </div>
     <% end %>
-
-    <div class="auth-links">
-      <% if devise_mapping.registerable? %>
-        <%= link_to t("users.sessions.view.new.sign_up"), new_registration_path(resource_name) %>
-      <% end %>
-    </div>
   </div>
 </section>

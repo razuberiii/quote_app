@@ -3,47 +3,45 @@
 <section class="team-members-panel">
   <h2><%= t("users.registrations.view.edit.personal_profile") %></h2>
   <p class="team-members-hint"><%= t("users.registrations.view.edit.profile_hint") %></p>
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_profile", method: :put, multipart: true, data: { turbo: false, dirty_guard: true } }) do |f| %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_profile", method: :put, multipart: true, class: "app-form-stack", data: { turbo: false, dirty_guard: true } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div class="account-avatar-row">
-      <div class="account-avatar-preview">
-        <% has_avatar = resource.avatar.attached? && resource.avatar.blob&.persisted? %>
+      <% has_avatar = resource.avatar.attached? && resource.avatar.blob&.persisted? %>
+      <label class="account-avatar-preview account-avatar-preview-trigger" for="user_avatar_upload">
         <% if has_avatar %>
           <%= image_tag resource.avatar, alt: t("users.registrations.view.edit.avatar_alt"), id: "user_avatar_preview_img" %>
         <% else %>
           <%= tag.img id: "user_avatar_preview_img", alt: t("users.registrations.view.edit.avatar_alt"), hidden: true %>
         <% end %>
         <span id="user_avatar_preview_fallback" <%= "hidden" if has_avatar %>><%= resource.email.to_s.first.to_s.upcase %></span>
-      </div>
+      </label>
       <div class="account-avatar-actions">
-        <%= f.label :avatar, t("users.registrations.view.edit.upload_avatar") %>
-        <%= f.file_field :avatar, accept: "image/*", data: { live_preview_target: "#user_avatar_preview_img", live_preview_fallback: "#user_avatar_preview_fallback" } %>
-        <% if resource.avatar.attached? %>
-          <%= button_tag t("users.registrations.view.edit.remove_current_avatar"),
-                         type: "submit",
-                         name: "user[remove_avatar]",
-                         value: "1",
-                         class: "btn btn-secondary account-remove-avatar-btn",
-                         data: { turbo: false } %>
-        <% end %>
+        <%= f.file_field :avatar,
+                         id: "user_avatar_upload",
+                         accept: "image/*",
+                         class: "account-avatar-file-input",
+                         data: { live_preview_target: "#user_avatar_preview_img", live_preview_fallback: "#user_avatar_preview_fallback" } %>
+        <label for="user_avatar_upload" class="<%= ui_button_classes(:secondary) %>">
+          <%= t("users.registrations.view.edit.upload_avatar") %>
+        </label>
       </div>
     </div>
 
     <div>
       <%= f.label :full_name, t("users.registrations.view.edit.display_name") %>
       <p class="team-members-hint"><%= t("users.registrations.view.edit.display_name_hint") %></p>
-      <%= f.text_field :full_name, placeholder: t("users.registrations.view.edit.display_name_placeholder") %>
+      <%= f.text_field :full_name, placeholder: t("users.registrations.view.edit.display_name_placeholder"), class: ui_input_classes %>
     </div>
 
     <div>
       <%= f.label :contact_phone, t("users.registrations.view.edit.contact_number") %>
-      <%= f.text_field :contact_phone, placeholder: "+1 ..." %>
+      <%= f.text_field :contact_phone, placeholder: "+1 ...", class: ui_input_classes %>
     </div>
 
     <div>
       <%= f.label :job_title, t("users.registrations.view.edit.job_title") %>
-      <%= f.text_field :job_title, placeholder: t("users.registrations.view.edit.job_title_placeholder") %>
+      <%= f.text_field :job_title, placeholder: t("users.registrations.view.edit.job_title_placeholder"), class: ui_input_classes %>
     </div>
 
     <div>
@@ -51,12 +49,7 @@
       <%= f.select :time_zone,
                    time_zone_options_for_select,
                    { selected: resource.time_zone.presence || "UTC" },
-                   { id: "user_time_zone_select", data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone", browser_timezone_fallback: resource.time_zone.blank? } } %>
-    </div>
-
-    <div>
-      <%= f.label :language, t("users.registrations.view.edit.language") %>
-      <%= f.select :language, options_for_select([["English", "en"], ["简体中文", "zh-CN"], ["Espanol (LatAm)", "es-419"]], resource.language.presence || "en") %>
+                   { id: "user_time_zone_select", class: ui_input_classes, data: { searchable_select: true, searchable_kind: "timezone", search_placeholder: t("users.registrations.view.edit.search_timezone_placeholder"), phone_field: "#user_contact_phone", browser_timezone_fallback: resource.time_zone.blank? } } %>
     </div>
 
     <%= f.hidden_field :email, value: resource.email %>
@@ -85,22 +78,22 @@
   </div>
 
   <!-- Password Change Form -->
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_security", method: :put, data: { turbo: false, dirty_guard: true } }) do |f| %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_security", method: :put, class: "app-form-stack", data: { turbo: false, dirty_guard: true } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
     <div>
       <%= f.label :password, t("users.registrations.view.edit.new_password_optional") %>
-      <%= f.password_field :password, autocomplete: "new-password" %>
+      <%= f.password_field :password, autocomplete: "new-password", class: ui_input_classes %>
     </div>
 
     <div>
       <%= f.label :password_confirmation, t("users.registrations.view.edit.confirm_new_password") %>
-      <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
+      <%= f.password_field :password_confirmation, autocomplete: "new-password", class: ui_input_classes %>
     </div>
 
     <div>
       <%= f.label :current_password, t("users.registrations.view.edit.current_password_required") %>
-      <%= f.password_field :current_password, autocomplete: "current-password" %>
+      <%= f.password_field :current_password, autocomplete: "current-password", class: ui_input_classes %>
     </div>
 
     <%= f.submit t("users.registrations.view.edit.update_security_settings"), class: "btn btn-primary" %>

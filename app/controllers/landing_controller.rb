@@ -1,15 +1,15 @@
 class LandingController < ApplicationController
   skip_before_action :authenticate_user!
-  layout "public", only: [ :sample_quote ]
+  layout "public_marketing", only: [ :index, :demo, :sample_quote, :contact ]
+  before_action :set_public_paths
+  before_action :set_seo_page, only: [ :index, :demo, :sample_quote, :contact ]
 
   def index
-    @contact_request ||= ContactRequest.new
-    @contact_email = ContactMailer.contact_email_for_environment
-    @demo_path = demo_path
-    @sample_quote_path = sample_quote_path
   end
 
   def demo; end
+
+  def contact; end
 
   def sample_quote
     @sample_quote = {
@@ -46,5 +46,26 @@ class LandingController < ApplicationController
         notes: "Packing: Export plywood case. Port of loading: Qingdao."
       }
     }
+  end
+
+  private
+
+  def set_seo_page
+    page_key = {
+      "index" => :homepage,
+      "demo" => :demo,
+      "contact" => :contact,
+      "sample_quote" => :sample_quote
+    }.fetch(action_name)
+
+    @seo_page = SeoPageRegistry.fetch(page_key)
+  end
+
+  def set_public_paths
+    @contact_request ||= ContactRequest.new
+    @contact_email = ContactMailer.contact_email_for_environment
+    @demo_path = demo_path
+    @sample_quote_path = sample_quote_path
+    @resources_path = resources_path
   end
 end

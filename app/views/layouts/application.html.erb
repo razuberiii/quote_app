@@ -24,25 +24,16 @@
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
 
-    <%# Styling load order: Tailwind tokens/utilities first, shared component layer next, legacy styles last only for pages not yet migrated. Do not add new app UI rules to legacy_* stylesheets. %>
+    <%# Canonical CSS path: tailwind + components only. Do not add new global stylesheets for feature/page work. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "layout", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "legacy_core", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "legacy_landing", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
-    <% if controller_path.start_with?("landing") || controller_path.start_with?("seo") %>
-      <%= stylesheet_link_tag "marketing", "data-turbo-track": "reload" %>
-    <% end %>
-    <% if controller_path.start_with?("seo") %>
-      <%= stylesheet_link_tag "seo", "data-turbo-track": "reload" %>
-    <% end %>
     <%= javascript_importmap_tags %>
 
     <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </head>
 
-  <body<% if user_signed_in? %>
+  <body class="app-root"<% if user_signed_in? %>
     style="--brand-primary: <%= ui_brand_color %>; --brand-on-primary: <%= ui_brand_text_color %>;"
     data-controller="shortcuts"
     data-shortcuts-new-customer-url-value="<%= new_customer_path %>"
@@ -61,7 +52,7 @@
         <% if user_signed_in? %>
           <% products_nav_active = ["products", "product_presets", "addon_presets", "spec_presets"].include?(controller_path) %>
           <% account_nav_active = ["users/registrations", "company_settings", "team_invitations", "email_changes"].include?(controller_path) %>
-          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Toggle navigation">
+          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
             <span></span>
             <span></span>
             <span></span>
@@ -99,7 +90,7 @@
                       aria-controls="account-dropdown">
                 <span class="account-avatar">
                   <% if current_user.avatar.attached? %>
-                    <%= image_tag current_user.avatar, alt: "Avatar", class: "account-avatar-img" %>
+                    <%= image_tag current_user.avatar, alt: t("application.avatar_alt"), class: "account-avatar-img" %>
                   <% else %>
                     <%= current_user.email.to_s.first.to_s.upcase %>
                   <% end %>
@@ -127,7 +118,7 @@
             </div>
           </div>
         <% else %>
-          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" aria-label="Toggle navigation">
+          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
             <span></span>
             <span></span>
             <span></span>
@@ -145,7 +136,7 @@
     <main>
       <% breadcrumbs = app_breadcrumb_items %>
       <% if breadcrumbs.any? %>
-        <nav class="app-breadcrumb" aria-label="Breadcrumb">
+        <nav class="app-breadcrumb" aria-label="<%= t('application.breadcrumb_aria') %>">
           <ol class="app-breadcrumb-list">
             <% breadcrumbs.each_with_index do |item, index| %>
               <% is_last = index == breadcrumbs.length - 1 %>
@@ -256,7 +247,7 @@
     </div>
     <% end %>
     <footer class="global-app-footer">
-      <span class="app-version-pill">v0.91 Beta</span>
+      <span class="app-version-pill">v0.94 Beta</span>
       <% if user_signed_in? %>
         <span class="app-shortcuts-footnote"><%= t("shortcuts.discoverability") %></span>
       <% end %>
@@ -338,37 +329,6 @@
             if (!hasDirtyForm()) return;
             if (window.confirm("You have unsaved changes. Leave this page?")) return;
             event.preventDefault();
-          });
-        };
-
-        const setupRevealAnimations = () => {
-          const targets = document.querySelectorAll(
-            ".marketing-hero, .marketing-section, .seo-page-shell .marketing-soft, .seo-page-toc"
-          );
-          if (targets.length === 0) return;
-
-          targets.forEach((element) => {
-            if (element.dataset.revealReady === "true") return;
-            element.dataset.revealReady = "true";
-            element.classList.add("reveal-on-scroll");
-          });
-
-          if (!("IntersectionObserver" in window)) {
-            targets.forEach((element) => element.classList.add("is-visible"));
-            return;
-          }
-
-          const observer = new IntersectionObserver((entries, activeObserver) => {
-            entries.forEach((entry) => {
-              if (!entry.isIntersecting) return;
-              entry.target.classList.add("is-visible");
-              activeObserver.unobserve(entry.target);
-            });
-          }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
-
-          targets.forEach((element) => {
-            if (element.classList.contains("is-visible")) return;
-            observer.observe(element);
           });
         };
 
@@ -593,12 +553,88 @@
           }
         };
 
+        const setupNotificationBell = () => {
+          const bellDropdown = document.querySelector(".notification-bell-dropdown");
+          if (!bellDropdown) return;
+
+          const closeBell = () => {
+            bellDropdown.removeAttribute("open");
+          };
+
+          if (bellDropdown.dataset.bound !== "true") {
+            bellDropdown.dataset.bound = "true";
+
+            bellDropdown.querySelectorAll("a").forEach((link) => {
+              if (link.dataset.bellBound === "true") return;
+              link.dataset.bellBound = "true";
+              link.addEventListener("click", () => {
+                closeBell();
+              });
+            });
+          }
+
+          if (window.__notificationBellOutsideBound !== true) {
+            window.__notificationBellOutsideBound = true;
+
+            document.addEventListener("click", (event) => {
+              if (event.target.closest(".notification-bell-container")) return;
+              document.querySelectorAll(".notification-bell-dropdown[open]").forEach((menu) => {
+                menu.removeAttribute("open");
+              });
+            });
+
+            document.addEventListener("keydown", (event) => {
+              if (event.key !== "Escape") return;
+              document.querySelectorAll(".notification-bell-dropdown[open]").forEach((menu) => {
+                menu.removeAttribute("open");
+              });
+            });
+          }
+        };
+
+        const setupLocaleNavDropdown = () => {
+          const localeDropdowns = document.querySelectorAll(".locale-nav-dropdown");
+          if (!localeDropdowns.length) return;
+
+          localeDropdowns.forEach((dropdown) => {
+            if (dropdown.dataset.bound === "true") return;
+            dropdown.dataset.bound = "true";
+
+            dropdown.querySelectorAll(".locale-nav-link").forEach((link) => {
+              if (link.dataset.localeBound === "true") return;
+              link.dataset.localeBound = "true";
+              link.addEventListener("click", () => {
+                dropdown.removeAttribute("open");
+              });
+            });
+          });
+
+          if (window.__localeDropdownOutsideBound !== true) {
+            window.__localeDropdownOutsideBound = true;
+
+            document.addEventListener("click", (event) => {
+              if (event.target.closest(".locale-nav")) return;
+              document.querySelectorAll(".locale-nav-dropdown[open]").forEach((menu) => {
+                menu.removeAttribute("open");
+              });
+            });
+
+            document.addEventListener("keydown", (event) => {
+              if (event.key !== "Escape") return;
+              document.querySelectorAll(".locale-nav-dropdown[open]").forEach((menu) => {
+                menu.removeAttribute("open");
+              });
+            });
+          }
+        };
+
         const onLoad = () => {
           setupToastApi();
           setupDirtyGuards();
-          setupRevealAnimations();
           setupNavGroups();
           setupAccountMenu();
+          setupNotificationBell();
+          setupLocaleNavDropdown();
 
           const container = document.querySelector(".navbar-container");          const toggle = document.querySelector(".navbar-toggle");
           if (container && toggle && toggle.dataset.bound !== "true") {

@@ -1,0 +1,78 @@
+<%
+  resource_cards = [
+    {
+      title: t("seo.view.resources.cards.foreign_trade_quotation_software.title"),
+      body: t("seo.view.resources.cards.foreign_trade_quotation_software.body"),
+      path: foreign_trade_quotation_software_path
+    },
+    {
+      title: t("seo.view.resources.cards.quotation_crm_for_export_teams.title"),
+      body: t("seo.view.resources.cards.quotation_crm_for_export_teams.body"),
+      path: quotation_crm_for_export_teams_path
+    },
+    {
+      title: t("seo.view.resources.cards.quote_revision_control.title"),
+      body: t("seo.view.resources.cards.quote_revision_control.body"),
+      path: quote_revision_control_path
+    },
+    {
+      title: t("seo.view.resources.cards.buyer_facing_quotation_link.title"),
+      body: t("seo.view.resources.cards.buyer_facing_quotation_link.body"),
+      path: buyer_facing_quotation_link_path
+    },
+    {
+      title: t("seo.view.resources.cards.quotation_software_vs_excel.title"),
+      body: t("seo.view.resources.cards.quotation_software_vs_excel.body"),
+      path: quotation_software_vs_excel_path
+    },
+    {
+      title: t("seo.view.resources.cards.quotation_software_vs_erp.title"),
+      body: t("seo.view.resources.cards.quotation_software_vs_erp.body"),
+      path: quotation_software_vs_erp_path
+    }
+  ]
+%>
+
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell" do %>
+    <div class="marketing-section-heading">
+      <p class="marketing-section-kicker"><%= t("seo.view.resources.hero.kicker") %></p>
+      <h1 class="marketing-section-title max-w-none"><%= t("seo.view.resources.hero.title") %></h1>
+      <p class="marketing-section-body">
+        <%= t("seo.view.resources.hero.body") %>
+      </p>
+    </div>
+  <% end %>
+
+  <div class="marketing-resource-grid">
+    <% resource_cards.each do |card| %>
+      <%= link_to card[:path], class: "marketing-resource-link" do %>
+        <div class="app-section-stack gap-3 h-full">
+          <p class="marketing-resource-link__eyebrow"><%= t("seo.view.resources.read_page") %></p>
+          <h2 class="text-2xl font-semibold tracking-tight text-slate-950"><%= card[:title] %></h2>
+          <p class="app-section-caption"><%= card[:body] %></p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <%= render "components/ui/card", class: "app-surface marketing-dark-card border-slate-950 text-white marketing-hero-shell marketing-cta-band" do %>
+    <div class="app-section-heading marketing-cta-band__content">
+      <div class="app-section-stack gap-3 max-w-2xl">
+        <p class="marketing-section-kicker text-slate-400"><%= t("seo.view.resources.final_cta.kicker") %></p>
+        <h2 class="marketing-section-title max-w-none text-white"><%= t("seo.view.resources.final_cta.title") %></h2>
+        <p class="text-sm leading-7 text-slate-300">
+          <%= t("seo.view.resources.final_cta.body") %>
+        </p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <%= render "components/ui/button", href: demo_path, variant: :secondary do %>
+          <%= t("seo.view.resources.final_cta.cta_demo") %>
+        <% end %>
+        <%= render "components/ui/button", href: sample_quote_path, variant: :secondary, attrs: { target: "_blank" } do %>
+          <%= t("seo.view.resources.final_cta.cta_sample") %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</section>

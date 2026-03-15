@@ -6,6 +6,8 @@ class FollowUpDueNotificationJob < ApplicationJob
       .where(next_follow_up_date: Date.current)
       .includes(:company)
       .find_each do |customer|
+        next unless customer.follow_up_reminders_enabled?
+
         reference_quote = latest_actionable_quote(customer)
         next if reference_quote.blank?
 

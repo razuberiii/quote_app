@@ -1,219 +1,60 @@
-<% content_for :title, t("seo.view.foreign_trade_quotation_software.meta.title") %>
-<% content_for :meta_description, t("seo.view.foreign_trade_quotation_software.meta.description") %>
-<% content_for :canonical_url, "https://www.rubusoo.com/foreign-trade-quotation-software" %>
-
-<div class="seo-page-shell">
-<section class="marketing-section seo-hero-block" id="introduction">
-  <div class="seo-hero-grid">
-    <div class="marketing-section-head">
-      <p class="marketing-kicker"><%= t("seo.view.foreign_trade_quotation_software.hero.kicker") %></p>
-      <h1><%= t("seo.view.foreign_trade_quotation_software.hero.title") %></h1>
-      <p class="seo-summary"><strong><%= t("seo.view.foreign_trade_quotation_software.hero.summary") %></strong></p>
-      <p><%= t("seo.view.foreign_trade_quotation_software.hero.paragraph_1") %></p>
-      <p><%= t("seo.view.foreign_trade_quotation_software.hero.paragraph_2") %></p>
-      <div class="marketing-proof-strip">
-        <span><%= t("seo.view.foreign_trade_quotation_software.hero.proof_1") %></span>
-        <span><%= t("seo.view.foreign_trade_quotation_software.hero.proof_2") %></span>
-        <span><%= t("seo.view.foreign_trade_quotation_software.hero.proof_3") %></span>
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell" do %>
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:items-start">
+      <div class="marketing-section-heading">
+        <p class="marketing-section-kicker"><%= t("seo.view.foreign_trade_quotation_software.hero.kicker") %></p>
+        <h1 class="marketing-section-title max-w-none"><%= t("seo.view.foreign_trade_quotation_software.hero.title") %></h1>
+        <p class="marketing-section-body"><%= t("seo.view.foreign_trade_quotation_software.hero.body") %></p>
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: demo_path, variant: :primary do %>
+            <%= t("seo.view.foreign_trade_quotation_software.hero.cta_demo") %>
+          <% end %>
+          <%= render "components/ui/button", href: sample_quote_path, variant: :secondary, attrs: { target: "_blank" } do %>
+            <%= t("seo.view.foreign_trade_quotation_software.hero.cta_sample") %>
+          <% end %>
+        </div>
       </div>
-      <div class="marketing-cta-row seo-hero-actions">
-        <%= link_to t("seo.view.foreign_trade_quotation_software.hero.start_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-        <%= link_to t("seo.view.foreign_trade_quotation_software.hero.live_example"), sample_quote_path, class: "btn btn-secondary marketing-cta-secondary", target: "_blank" %>
-      </div>
+      <aside class="marketing-overview-panel">
+        <article class="marketing-overview-panel__row">
+          <p class="app-stat-label"><%= t("seo.view.foreign_trade_quotation_software.cards.revision.label") %></p>
+          <p class="app-subtle-note mt-2"><%= t("seo.view.foreign_trade_quotation_software.cards.revision.body") %></p>
+        </article>
+        <article class="marketing-overview-panel__row">
+          <p class="app-stat-label"><%= t("seo.view.foreign_trade_quotation_software.cards.buyer.label") %></p>
+          <p class="app-subtle-note mt-2"><%= t("seo.view.foreign_trade_quotation_software.cards.buyer.body") %></p>
+        </article>
+        <article class="marketing-overview-panel__row">
+          <p class="app-stat-label"><%= t("seo.view.foreign_trade_quotation_software.cards.exports.label") %></p>
+          <p class="app-subtle-note mt-2"><%= t("seo.view.foreign_trade_quotation_software.cards.exports.body") %></p>
+        </article>
+      </aside>
     </div>
-    <aside class="seo-hero-artifact">
-      <article class="seo-signal-card is-strong">
-        <span class="seo-signal-label"><%= t("seo.view.foreign_trade_quotation_software.signals.primary_gain.label") %></span>
-        <strong><%= t("seo.view.foreign_trade_quotation_software.signals.primary_gain.title") %></strong>
-        <p><%= t("seo.view.foreign_trade_quotation_software.signals.primary_gain.detail") %></p>
-      </article>
-      <article class="seo-signal-card">
-        <span class="seo-signal-label"><%= t("seo.view.foreign_trade_quotation_software.signals.workflow.label") %></span>
-        <strong><%= t("seo.view.foreign_trade_quotation_software.signals.workflow.title") %></strong>
-        <p><%= t("seo.view.foreign_trade_quotation_software.signals.workflow.detail") %></p>
-      </article>
-      <article class="seo-signal-card">
-        <span class="seo-signal-label"><%= t("seo.view.foreign_trade_quotation_software.signals.fit.label") %></span>
-        <strong><%= t("seo.view.foreign_trade_quotation_software.signals.fit.title") %></strong>
-        <p><%= t("seo.view.foreign_trade_quotation_software.signals.fit.detail") %></p>
-      </article>
-    </aside>
-  </div>
+  <% end %>
+
+  <section class="marketing-flow-band">
+    <%= render "components/ui/card", class: "app-surface marketing-workflow-card" do %>
+      <span class="marketing-workflow-step">01</span>
+      <h2 class="mt-3 text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_1.title") %></h2>
+      <p class="app-section-caption mt-2"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_1.body") %></p>
+    <% end %>
+    <%= render "components/ui/card", class: "app-surface marketing-workflow-card" do %>
+      <span class="marketing-workflow-step">02</span>
+      <h2 class="mt-3 text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_2.title") %></h2>
+      <p class="app-section-caption mt-2"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_2.body") %></p>
+    <% end %>
+    <%= render "components/ui/card", class: "app-surface marketing-workflow-card" do %>
+      <span class="marketing-workflow-step">03</span>
+      <h2 class="mt-3 text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_3.title") %></h2>
+      <p class="app-section-caption mt-2"><%= t("seo.view.foreign_trade_quotation_software.workflow.step_3.body") %></p>
+    <% end %>
+  </section>
+
+  <%= render "seo/continue_reading",
+    related_topics: [
+      { label: t("seo.view.shared.links.quote_revision_control"), path: quote_revision_control_path },
+      { label: t("seo.view.shared.links.buyer_facing_quotation_link"), path: buyer_facing_quotation_link_path }
+    ],
+    comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path },
+    cta: { label: t("seo.view.shared.links.open_demo_workspace"), path: demo_path } %>
 </section>
 
-<section class="marketing-section seo-page-toc">
-  <div class="seo-page-toc-bar">
-    <div class="seo-page-toc-head">
-      <h2><%= t("seo.view.foreign_trade_quotation_software.toc.title") %></h2>
-    </div>
-    <ul>
-      <li><a href="#introduction"><%= t("seo.view.foreign_trade_quotation_software.toc.introduction") %></a></li>
-      <li><a href="#spreadsheet-problems"><%= t("seo.view.foreign_trade_quotation_software.toc.spreadsheet_problems") %></a></li>
-      <li><a href="#erp-shortfalls"><%= t("seo.view.foreign_trade_quotation_software.toc.erp_shortfalls") %></a></li>
-      <li><a href="#comparison-table"><%= t("seo.view.foreign_trade_quotation_software.toc.comparison_table") %></a></li>
-      <li><a href="#team-needs"><%= t("seo.view.foreign_trade_quotation_software.toc.team_needs") %></a></li>
-      <li><a href="#rubusoo-solves"><%= t("seo.view.foreign_trade_quotation_software.toc.rubusoo_solves") %></a></li>
-      <li><a href="#faq"><%= t("seo.view.foreign_trade_quotation_software.toc.faq") %></a></li>
-    </ul>
-  </div>
-</section>
-
-<section class="marketing-section marketing-soft" id="spreadsheet-problems">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.summary") %></strong></p>
-  <p><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.item_1") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.item_2") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.item_3") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.item_4") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.item_5") %></li>
-  </ul>
-  <p><%= t("seo.view.foreign_trade_quotation_software.spreadsheet_problems.closing") %></p>
-</section>
-
-<section class="marketing-section" id="erp-shortfalls">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.summary") %></strong></p>
-  <p><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.item_1") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.item_2") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.item_3") %></li>
-  </ul>
-  <p>
-    <%= t("seo.view.foreign_trade_quotation_software.erp_shortfalls.closing_prefix") %>
-    <%= link_to t("seo.view.foreign_trade_quotation_software.erp_shortfalls.closing_link"), quotation_crm_for_export_teams_path %>.
-  </p>
-</section>
-
-<section class="marketing-section" id="comparison-table">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.comparison.title") %></h2>
-    <p><%= t("seo.view.foreign_trade_quotation_software.comparison.subtitle") %></p>
-  </div>
-  <div class="table-responsive">
-    <table class="demo-table">
-      <thead>
-        <tr>
-          <th><%= t("seo.view.foreign_trade_quotation_software.comparison.headers.criteria") %></th>
-          <th><%= t("seo.view.foreign_trade_quotation_software.comparison.headers.excel") %></th>
-          <th><%= t("seo.view.foreign_trade_quotation_software.comparison.headers.erp") %></th>
-          <th><%= t("seo.view.foreign_trade_quotation_software.comparison.headers.rubusoo") %></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_1.criteria") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_1.excel") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_1.erp") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_1.rubusoo") %></td>
-        </tr>
-        <tr>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_2.criteria") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_2.excel") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_2.erp") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_2.rubusoo") %></td>
-        </tr>
-        <tr>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_3.criteria") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_3.excel") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_3.erp") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_3.rubusoo") %></td>
-        </tr>
-        <tr>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_4.criteria") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_4.excel") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_4.erp") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_4.rubusoo") %></td>
-        </tr>
-        <tr>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_5.criteria") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_5.excel") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_5.erp") %></td>
-          <td><%= t("seo.view.foreign_trade_quotation_software.comparison.row_5.rubusoo") %></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<section class="marketing-section seo-mini-grid">
-  <article class="seo-mini-panel">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.mini_panel.simple_title") %></h2>
-    <p><%= t("seo.view.foreign_trade_quotation_software.mini_panel.simple_body") %></p>
-  </article>
-  <article class="seo-mini-panel">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.mini_panel.cleaner_title") %></h2>
-    <p><%= t("seo.view.foreign_trade_quotation_software.mini_panel.cleaner_body") %></p>
-  </article>
-</section>
-
-<section class="marketing-section marketing-soft" id="team-needs">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.team_needs.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.foreign_trade_quotation_software.team_needs.summary") %></strong></p>
-  <p><%= t("seo.view.foreign_trade_quotation_software.team_needs.paragraph") %></p>
-  <ul>
-    <li><%= t("seo.view.foreign_trade_quotation_software.team_needs.item_1") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.team_needs.item_2") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.team_needs.item_3") %></li>
-    <li><%= t("seo.view.foreign_trade_quotation_software.team_needs.item_4") %></li>
-  </ul>
-  <p><%= t("seo.view.foreign_trade_quotation_software.team_needs.closing") %></p>
-</section>
-
-<section class="marketing-section" id="rubusoo-solves">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.title") %></h2>
-  </div>
-  <p class="seo-summary"><strong><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.summary") %></strong></p>
-  <p><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.paragraph") %></p>
-  <ul>
-    <li><strong><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_1_label") %>:</strong> <%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_1_detail") %></li>
-    <li><strong><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_2_label") %>:</strong> <%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_2_detail") %></li>
-    <li><strong><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_3_label") %>:</strong> <%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_3_detail") %></li>
-    <li><strong><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_4_label") %>:</strong> <%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.item_4_detail") %></li>
-  </ul>
-  <p><%= t("seo.view.foreign_trade_quotation_software.rubusoo_solves.closing") %></p>
-</section>
-
-<section class="marketing-section marketing-faq" id="faq">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.faq.title") %></h2>
-  </div>
-  <details>
-    <summary><%= t("seo.view.foreign_trade_quotation_software.faq.q1") %></summary>
-    <p><%= t("seo.view.foreign_trade_quotation_software.faq.a1") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.foreign_trade_quotation_software.faq.q2") %></summary>
-    <p><%= t("seo.view.foreign_trade_quotation_software.faq.a2") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.foreign_trade_quotation_software.faq.q3") %></summary>
-    <p><%= t("seo.view.foreign_trade_quotation_software.faq.a3") %></p>
-  </details>
-  <details>
-    <summary><%= t("seo.view.foreign_trade_quotation_software.faq.q4") %></summary>
-    <p><%= t("seo.view.foreign_trade_quotation_software.faq.a4") %></p>
-  </details>
-</section>
-
-<section class="marketing-section seo-cta-block">
-  <div class="marketing-section-head">
-    <h2><%= t("seo.view.foreign_trade_quotation_software.cta.title") %></h2>
-    <p>
-      <%= t("seo.view.foreign_trade_quotation_software.cta.body") %>
-    </p>
-  </div>
-  <div class="marketing-cta-row">
-    <%= link_to t("seo.view.foreign_trade_quotation_software.hero.start_free"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-  </div>
-</section>
- </div>

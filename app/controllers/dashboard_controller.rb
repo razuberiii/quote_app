@@ -72,12 +72,31 @@ class DashboardController < CustomersController
     company = current_user.company
 
     {
+      account_profile: account_profile_complete?,
+      company_profile: company_profile_complete?,
       customer: company.customers.exists?,
       product: company.products.exists?,
       quote: company.quotes.exists?,
       shared: company.quote_shares.exists?,
       viewed: QuoteViewEvent.joins(:quote_share).where(quote_shares: { company_id: company.id }).exists?
     }
+  end
+
+  def account_profile_complete?
+    current_user.full_name.to_s.strip.present? &&
+      current_user.contact_phone.to_s.strip.present? &&
+      current_user.time_zone.to_s.strip.present? &&
+      current_user.avatar.attached?
+  end
+
+  def company_profile_complete?
+    return true unless current_user.can_manage_templates?
+
+    company = current_user.company
+    company.name.to_s.strip.present? &&
+      company.phone.to_s.strip.present? &&
+      company.brand_color.to_s.strip.present? &&
+      company.logo.attached?
   end
 
   def resolve_quick_create_quote_path

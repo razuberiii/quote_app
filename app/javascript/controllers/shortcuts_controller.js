@@ -179,10 +179,13 @@ export default class extends Controller {
       group.items.forEach((item) => {
         const index = this.paletteItems.length;
         this.paletteItems.push(item);
+        const labelHtml = item.sublabel
+          ? `<span class=\"app-command-label-main\">${item.label || ""}</span><span class=\"app-command-label-sub\">${item.sublabel || ""}</span>`
+          : `<span class=\"app-command-label-main\">${item.label || ""}</span>`;
         const metaHtml = item.meta
           ? `<span class=\"app-command-meta\">${item.meta}</span>`
           : "";
-        html += `<li><button type=\"button\" class=\"app-command-item\" data-palette-index=\"${index}\" data-action=\"click->shortcuts#activatePaletteItem\"><span class=\"app-command-label\">${item.label || ""}</span>${metaHtml}</button></li>`;
+        html += `<li><button type=\"button\" class=\"app-command-item\" data-palette-index=\"${index}\" data-action=\"click->shortcuts#activatePaletteItem\"><span class=\"app-command-label\">${labelHtml}</span>${metaHtml}</button></li>`;
       });
       html += "</ul></section>";
     });

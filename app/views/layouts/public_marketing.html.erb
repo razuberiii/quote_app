@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= seo_title(t("landing.shared.brand")) %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="<%= seo_description %>">
+    <meta name="robots" content="<%= seo_robots %>">
+    <% canonical_url = seo_canonical_url %>
+    <% if canonical_url.present? %>
+      <link rel="canonical" href="<%= canonical_url %>">
+    <% end %>
+    <link rel="icon" href="<%= favicon_href %>" type="image/png">
+    <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
+    <link rel="apple-touch-icon" href="<%= favicon_href %>">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= yield :head %>
+
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="app-root marketing-root flex min-h-screen flex-col bg-[linear-gradient(180deg,#f5f7fb_0%,#eef2f7_100%)] text-slate-950">
+    <div class="relative isolate flex min-h-screen flex-1 flex-col overflow-hidden">
+      <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top_right,rgba(15,23,42,0.14),transparent_38%),radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_32%)]"></div>
+
+      <nav class="navbar">
+        <div class="navbar-container">
+          <div class="navbar-brand-wrap">
+            <h1><%= link_to t("landing.shared.brand"), root_path %></h1>
+          </div>
+
+          <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-marketing-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          <ul class="navbar-menu navbar-menu-public" id="public-marketing-navigation">
+            <li><%= link_to t("landing.shared.navigation.product"), root_path(anchor: "product-story") %></li>
+            <li><%= link_to t("landing.shared.navigation.resources"), resources_path %></li>
+            <li><%= link_to t("landing.shared.navigation.contact"), contact_path %></li>
+          </ul>
+
+          <div class="navbar-controls">
+            <div class="locale-nav-item">
+              <%= render "layouts/locale_nav" %>
+            </div>
+            <%= link_to t("landing.shared.navigation.log_in"), new_user_session_path, class: "app-nav-link" %>
+            <%= link_to t("landing.shared.navigation.start_free"), new_user_registration_path, class: "app-nav-link navbar-cta-link" %>
+          </div>
+        </div>
+      </nav>
+
+      <main class="marketing-content-shell public-marketing-main flex-1 pb-16">
+        <% if notice.present? %>
+          <div class="mb-6 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"><%= notice %></div>
+        <% end %>
+        <% if alert.present? %>
+          <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900"><%= alert %></div>
+        <% end %>
+
+        <%= yield %>
+      </main>
+
+      <footer class="public-marketing-footer">
+        <div class="marketing-content-shell py-4">
+          <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+            <p class="m-0 text-sm text-slate-600">
+              <%= t("landing.shared.footer.tagline") %>
+            </p>
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <%= link_to t("landing.shared.footer.homepage"), root_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+              <%= link_to t("landing.shared.footer.demo"), demo_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+              <%= link_to t("landing.shared.footer.sample_quote"), sample_quote_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+              <%= link_to t("landing.shared.footer.resources"), resources_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+              <%= link_to t("landing.shared.footer.contact"), contact_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script>
+      (() => {
+        const marketingMotionAllowed = () => !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        const setupMarketingNavbar = () => {
+          const container = document.querySelector(".navbar-container");
+          const toggle = document.querySelector(".navbar-toggle");
+          if (!container || !toggle || toggle.dataset.bound === "true") return;
+
+          toggle.dataset.bound = "true";
+          toggle.addEventListener("click", function () {
+            const open = container.classList.toggle("menu-open");
+            toggle.setAttribute("aria-expanded", open ? "true" : "false");
+          });
+        };
+
+        const setupMarketingHeroEmphasis = () => {
+          if (!marketingMotionAllowed()) return;
+
+          const hero = document.querySelector("[data-marketing-hero-sequence]");
+          if (!hero || hero.dataset.sequenceBound === "true") return;
+          hero.dataset.sequenceBound = "true";
+
+          const targets = Array.from(hero.querySelectorAll(".marketing-mockup-emphasis-target"))
+            .sort((a, b) => Number(a.dataset.marketingEmphasisStep || 0) - Number(b.dataset.marketingEmphasisStep || 0));
+          if (!targets.length) return;
+
+          const runSequence = () => {
+            targets.forEach((target, index) => {
+              window.setTimeout(() => {
+                target.classList.add("is-emphasized");
+                window.setTimeout(() => target.classList.remove("is-emphasized"), 900);
+              }, 320 + (index * 820));
+            });
+          };
+
+          window.setTimeout(runSequence, 260);
+        };
+
+        const setupMarketingReveal = () => {
+          const items = Array.from(document.querySelectorAll("[data-marketing-reveal]"));
+          if (!items.length) return;
+
+          if (!marketingMotionAllowed()) {
+            items.forEach((item) => item.classList.add("is-visible"));
+            return;
+          }
+
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting) return;
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            });
+          }, {
+            rootMargin: "0px 0px -8% 0px",
+            threshold: 0.18
+          });
+
+          items.forEach((item, index) => {
+            if (item.dataset.revealBound === "true") return;
+            item.dataset.revealBound = "true";
+            item.style.setProperty("--marketing-reveal-delay", `${Math.min(index * 70, 180)}ms`);
+            observer.observe(item);
+          });
+        };
+
+        const initMarketingUi = () => {
+          setupMarketingNavbar();
+          setupMarketingHeroEmphasis();
+          setupMarketingReveal();
+        };
+
+        document.addEventListener("turbo:load", initMarketingUi);
+        document.addEventListener("DOMContentLoaded", initMarketingUi);
+      })();
+    </script>
+  </body>
+</html>

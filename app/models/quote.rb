@@ -88,6 +88,7 @@ class Quote < ApplicationRecord
   validate :reason_values_are_allowed
   validate :monetary_values_fit_storage_precision
   validate :grand_total_fits_storage_precision
+  validate :valid_until_cannot_be_in_the_past
 
   scope :latest_versions, -> {
   select("DISTINCT ON (quote_no) *")
@@ -201,7 +202,7 @@ class Quote < ApplicationRecord
   end
 
   def can_copy_and_reprice?
-    !archived? && %w[sent viewed negotiating accepted lost expired].include?(workflow_state) && latest_revision_for_quote_no?
+    !archived? && %w[sent viewed negotiating accepted lost].include?(workflow_state) && latest_revision_for_quote_no?
   end
 
   def can_share_publicly?
@@ -350,7 +351,7 @@ class Quote < ApplicationRecord
       template_id: template_id,
       quote_no: quote_no,
       currency: currency,
-      valid_until: valid_until,
+      valid_until: revision_valid_until,
       issued_on: issued_on,
       payment_term: payment_term,
       status: status_for_new_revision,
@@ -405,6 +406,12 @@ class Quote < ApplicationRecord
 
   def status_for_new_revision
     "draft"
+  end
+
+  def revision_valid_until
+    return nil if valid_until.present? && valid_until < Date.current
+
+    valid_until
   end
 
   def set_revision_number
@@ -537,6 +544,13 @@ class Quote < ApplicationRecord
     return if grand_total <= MAX_DECIMAL_15_4
 
     errors.add(:base, "Grand total is too large. Reduce unit prices, quantities, or add-ons.")
+  end
+
+  def valid_until_cannot_be_in_the_past
+    return if valid_until.blank?
+    return unless valid_until < Date.current
+
+    errors.add(:valid_until, I18n.t("quotes.errors.valid_until_on_or_after_today"))
   end
 
   def reason_values_are_allowed

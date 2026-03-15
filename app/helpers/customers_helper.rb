@@ -7,7 +7,16 @@ module CustomersHelper
       else
         "is-neutral"
       end
-    indicator = current_sort == key ? (current_direction == "desc" ? "↓" : "↑") : "↕"
+    indicator_svg =
+      if current_sort == key
+        if current_direction == "desc"
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10m0 0 3-3m-3 3-3-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        else
+          '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 13V3m0 0 3 3M8 3 5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+        end
+      else
+        '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2v12m0-12 2.5 2.5M8 2 5.5 4.5M8 14l2.5-2.5M8 14l-2.5-2.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      end
 
     link_to(
       customers_path(query:, list_filter:, follow_up_filter:, kpi_period:, sort: key, direction: next_direction),
@@ -15,7 +24,7 @@ module CustomersHelper
     ) do
       safe_join([
         content_tag(:span, label, class: "sort-label"),
-        content_tag(:span, indicator, class: "sort-indicator #{indicator_class}", aria: { hidden: true })
+        content_tag(:span, indicator_svg.html_safe, class: "sort-indicator customer-sort-link-icon #{indicator_class}", aria: { hidden: true })
       ])
     end
   end

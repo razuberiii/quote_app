@@ -72,24 +72,36 @@ class Customer < ApplicationRecord
   end
 
   def follow_up_overdue?
+    return false unless follow_up_reminders_enabled?
+
     next_follow_up_date.present? && next_follow_up_date < Date.today
   end
 
   def follow_up_due_today?
+    return false unless follow_up_reminders_enabled?
+
     next_follow_up_date.present? && next_follow_up_date == Date.today
   end
 
   def follow_up_upcoming?
+    return false unless follow_up_reminders_enabled?
+
     next_follow_up_date.present? &&
       next_follow_up_date > Date.today &&
       next_follow_up_date <= Date.today + 7.days
   end
 
   def follow_up_status
+    return "normal" unless follow_up_reminders_enabled?
+
     return "overdue" if follow_up_overdue?
     return "today" if follow_up_due_today?
     return "upcoming" if follow_up_upcoming?
     "normal"
+  end
+
+  def follow_up_reminders_enabled?
+    !%w[lost inactive].include?(status_css)
   end
 
   def manual_engagement_override?

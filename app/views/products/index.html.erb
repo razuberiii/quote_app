@@ -1,4 +1,4 @@
-<section class="app-page-shell">
+<section class="app-page-shell app-page-shell--products">
   <header class="app-page-header">
     <div class="app-page-header-main">
       <h1><%= t("products.view.index.title") %></h1>
@@ -46,60 +46,122 @@
         <% if @search_query.present? %>
           <p class="search-info"><%= t("products.view.index.search_results_html", count: @products.count, query: @search_query) %></p>
         <% end %>
-        <div class="table-responsive">
+
+        <div class="table-responsive products-table-desktop">
           <%= render "components/ui/table", class: "customers-table products-table saas-table app-table-surface", table_class: "customers-table products-table saas-table app-data-table" do %>
-      <thead>
-        <tr>
-          <th><%= t("products.view.index.table.image") %></th>
-          <th><%= t("products.view.index.table.name") %></th>
-          <th><%= t("products.view.index.table.sku") %></th>
-          <th><%= t("products.view.index.table.reference_price") %></th>
-          <th><%= t("products.view.index.table.quoted") %></th>
-          <th><%= t("products.view.index.table.last_used") %></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @products.each do |product| %>
-          <% stats = @product_quote_stats[product.id] || { quote_count: 0, last_used_at: nil } %>
-          <tr data-clickable-href="<%= product_path(product) %>" tabindex="0" aria-label="<%= t("products.view.index.open_product_aria", name: product.name) %>">
-            <td>
-              <% if product.display_image.present? %>
-                <%= image_tag product.display_image, style: "width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" %>
-              <% else %>
-                -
+            <thead>
+              <tr>
+                <th><%= t("products.view.index.table.image") %></th>
+                <th><%= t("products.view.index.table.name") %></th>
+                <th><%= t("products.view.index.table.sku") %></th>
+                <th><%= t("products.view.index.table.reference_price") %></th>
+                <th><%= t("products.view.index.table.quoted") %></th>
+                <th><%= t("products.view.index.table.last_used") %></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @products.each do |product| %>
+                <% stats = @product_quote_stats[product.id] || { quote_count: 0, last_used_at: nil } %>
+                <tr data-clickable-href="<%= product_path(product) %>" tabindex="0" aria-label="<%= t("products.view.index.open_product_aria", name: product.name) %>">
+                  <td>
+                    <% if product.display_image.present? %>
+                      <%= image_tag product.display_image, style: "width: 56px; height: 56px; object-fit: cover; border-radius: 8px;" %>
+                    <% else %>
+                      -
+                    <% end %>
+                  </td>
+                  <td>
+                    <strong><%= link_to product.name, product_path(product), class: "product-library-name-link" %></strong>
+                  </td>
+                  <td><span class="product-sku"><%= product.sku %></span></td>
+                  <td><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
+                  <td><span class="next-action-pill is-muted"><%= stats[:quote_count] %></span></td>
+                  <td>
+                    <% if stats[:last_used_at].present? %>
+                      <%= stats[:last_used_at].strftime("%Y-%m-%d %H:%M") %>
+                    <% else %>
+                      <span class="dashboard-engagement-pill is-subtle"><%= t("products.view.index.never") %></span>
+                    <% end %>
+                  </td>
+                  <td class="product-row-actions">
+                    <details class="product-row-menu">
+                      <summary class="product-row-menu-trigger" aria-label="<%= t("products.view.index.open_actions_aria") %>">•••</summary>
+                      <div class="product-row-menu-content">
+                        <%= link_to t("products.view.index.actions.view"), product_path(product), class: "product-row-menu-item" %>
+                        <%= link_to t("products.view.index.actions.edit"), edit_product_path(product), class: "product-row-menu-item" %>
+                        <%= link_to t("products.view.index.actions.delete"),
+                                    product_path(product),
+                                    method: :delete,
+                                    data: { turbo_confirm: t("products.view.index.actions.delete_confirm") },
+                                    class: "product-row-menu-item is-danger" %>
+                      </div>
+                    </details>
+                  </td>
+                </tr>
               <% end %>
-            </td>
-            <td>
-              <strong><%= link_to product.name, product_path(product), class: "product-library-name-link" %></strong>
-            </td>
-            <td><span class="product-sku"><%= product.sku %></span></td>
-            <td><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
-            <td><span class="next-action-pill is-muted"><%= stats[:quote_count] %></span></td>
-            <td>
-              <% if stats[:last_used_at].present? %>
-                <%= stats[:last_used_at].strftime("%Y-%m-%d %H:%M") %>
-              <% else %>
-                <span class="dashboard-engagement-pill is-subtle"><%= t("products.view.index.never") %></span>
-              <% end %>
-            </td>
-            <td class="product-row-actions">
-              <details class="product-row-menu">
-                <summary class="product-row-menu-trigger" aria-label="<%= t("products.view.index.open_actions_aria") %>">•••</summary>
-                <div class="product-row-menu-content">
-                  <%= link_to t("products.view.index.actions.view"), product_path(product), class: "product-row-menu-item" %>
-                  <%= link_to t("products.view.index.actions.edit"), edit_product_path(product), class: "product-row-menu-item" %>
-                  <%= link_to t("products.view.index.actions.delete"),
-                              product_path(product),
-                              method: :delete,
-                              data: { turbo_confirm: t("products.view.index.actions.delete_confirm") },
-                              class: "product-row-menu-item is-danger" %>
+            </tbody>
+          <% end %>
+        </div>
+
+        <div class="products-mobile-list">
+          <% @products.each do |product| %>
+            <% stats = @product_quote_stats[product.id] || { quote_count: 0, last_used_at: nil } %>
+            <article class="dashboard-mobile-item products-mobile-card"
+                     data-clickable-href="<%= product_path(product) %>"
+                     tabindex="0"
+                     aria-label="<%= t("products.view.index.open_product_aria", name: product.name) %>">
+              <div class="products-mobile-head">
+                <div class="products-mobile-media" aria-hidden="true">
+                  <% if product.display_image.present? %>
+                    <%= image_tag product.display_image, class: "products-mobile-image" %>
+                  <% else %>
+                    <span class="products-mobile-image products-mobile-image--placeholder">-</span>
+                  <% end %>
                 </div>
-              </details>
-            </td>
-          </tr>
-        <% end %>
-      </tbody>
+
+                <div class="products-mobile-title-wrap">
+                  <strong><%= link_to product.name, product_path(product), class: "product-library-name-link" %></strong>
+                  <% if product.sku.present? %>
+                    <span class="product-sku"><%= product.sku %></span>
+                  <% end %>
+                </div>
+
+                <details class="product-row-menu product-row-menu--mobile">
+                  <summary class="product-row-menu-trigger" aria-label="<%= t("products.view.index.open_actions_aria") %>">•••</summary>
+                  <div class="product-row-menu-content">
+                    <%= link_to t("products.view.index.actions.view"), product_path(product), class: "product-row-menu-item" %>
+                    <%= link_to t("products.view.index.actions.edit"), edit_product_path(product), class: "product-row-menu-item" %>
+                    <%= link_to t("products.view.index.actions.delete"),
+                                product_path(product),
+                                method: :delete,
+                                data: { turbo_confirm: t("products.view.index.actions.delete_confirm") },
+                                class: "product-row-menu-item is-danger" %>
+                  </div>
+                </details>
+              </div>
+
+              <div class="dashboard-mobile-row">
+                <span><%= t("products.view.index.table.reference_price") %></span>
+                <strong><%= number_with_precision(product.default_price, precision: 2) %> <%= product.price_currency %></strong>
+              </div>
+
+              <div class="dashboard-mobile-row">
+                <span><%= t("products.view.index.table.quoted") %></span>
+                <strong><span class="next-action-pill is-muted"><%= stats[:quote_count] %></span></strong>
+              </div>
+
+              <div class="dashboard-mobile-row">
+                <span><%= t("products.view.index.table.last_used") %></span>
+                <strong>
+                  <% if stats[:last_used_at].present? %>
+                    <%= stats[:last_used_at].strftime("%Y-%m-%d %H:%M") %>
+                  <% else %>
+                    <span class="dashboard-engagement-pill is-subtle"><%= t("products.view.index.never") %></span>
+                  <% end %>
+                </strong>
+              </div>
+            </article>
           <% end %>
         </div>
       </section>
@@ -108,9 +170,9 @@
         title: t("products.view.index.empty_title"),
         body: t("products.view.index.empty_body"),
         action_label: t("products.view.index.empty_action"),
-            action_path: new_product_path,
-            icon: :products
-          ) %>
+        action_path: new_product_path,
+        icon: :products
+      ) %>
     <% end %>
   </div>
 </section>

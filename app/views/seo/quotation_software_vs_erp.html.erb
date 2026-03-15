@@ -1,0 +1,46 @@
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell marketing-hero-shell--boundary" do %>
+    <div class="grid gap-8 lg:grid-cols-[minmax(0,0.94fr)_minmax(0,1.06fr)] lg:items-start">
+      <div class="marketing-section-heading">
+        <p class="marketing-section-kicker"><%= t("seo.view.quotation_software_vs_erp.hero.kicker") %></p>
+        <h1 class="marketing-section-title max-w-none"><%= t("seo.view.quotation_software_vs_erp.hero.title") %></h1>
+        <p class="marketing-section-body">
+          <%= t("seo.view.quotation_software_vs_erp.hero.body") %>
+        </p>
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: demo_path, variant: :primary do %>
+            <%= t("seo.view.shared.links.open_demo_workspace") %>
+          <% end %>
+        </div>
+      </div>
+
+      <section class="marketing-boundary-panel marketing-boundary-panel--spotlight">
+        <div class="marketing-boundary-panel__summary">
+          <p class="marketing-section-kicker"><%= t("seo.view.quotation_software_vs_erp.panels.model.kicker") %></p>
+          <p class="app-section-caption"><%= t("seo.view.quotation_software_vs_erp.panels.model.body") %></p>
+        </div>
+        <div class="marketing-boundary-panel__columns">
+          <article class="marketing-boundary-panel__column">
+            <p class="marketing-section-kicker"><%= t("seo.view.quotation_software_vs_erp.panels.erp.kicker") %></p>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quotation_software_vs_erp.panels.erp.title") %></h2>
+            <p class="app-section-caption"><%= t("seo.view.quotation_software_vs_erp.panels.erp.body") %></p>
+          </article>
+          <article class="marketing-boundary-panel__column">
+            <p class="marketing-section-kicker"><%= t("seo.view.quotation_software_vs_erp.panels.rubusoo.kicker") %></p>
+            <h2 class="text-xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.quotation_software_vs_erp.panels.rubusoo.title") %></h2>
+            <p class="app-section-caption"><%= t("seo.view.quotation_software_vs_erp.panels.rubusoo.body") %></p>
+          </article>
+        </div>
+      </section>
+    </div>
+  <% end %>
+
+  <%= render "seo/continue_reading",
+    related_topics: [
+      { label: t("seo.view.shared.links.quotation_crm_for_export_teams"), path: quotation_crm_for_export_teams_path },
+      { label: t("seo.view.shared.links.foreign_trade_quotation_software"), path: foreign_trade_quotation_software_path }
+    ],
+    comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path },
+    cta: { label: t("seo.view.shared.links.open_demo_workspace"), path: demo_path } %>
+</section>
+

@@ -1,4 +1,4 @@
-<section class="app-page-shell">
+<section class="app-page-shell app-page-shell--workspace app-page-shell--customers">
   <header class="app-page-header">
     <div class="app-page-header-main">
       <h1><%= t("customers.view.index.title") %></h1>
@@ -99,14 +99,11 @@
     <thead>
       <tr>
         <th><%= t("customers.view.index.table.name") %></th>
-        <th><%= t("customers.view.index.table.country") %></th>
-        <th><%= t("customers.view.index.table.contact") %></th>
         <th><%= t("customers.view.index.table.email") %></th>
         <th><%= t("customers.view.index.table.status") %></th>
         <th><%= customer_sort_link(t("customers.view.index.table.total_quote_amount"), "total_quote_amount", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
         <th><%= customer_sort_link(t("customers.view.index.table.total_won_amount"), "total_won_amount", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
         <th><%= customer_sort_link(t("customers.view.index.table.win_rate"), "win_rate", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
-        <th><%= t("customers.view.index.table.last_follow_up") %></th>
         <th><%= customer_sort_link(t("customers.view.index.table.next_follow_up"), "next_follow_up", current_sort: @sort_key, current_direction: @sort_direction, query: @search_query, list_filter: @list_filter, follow_up_filter: @follow_up_filter, kpi_period: @kpi_period) %></th>
         <th><%= t("customers.view.index.table.next_action") %></th>
       </tr>
@@ -123,13 +120,13 @@
             class="customer-row follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>"
             data-clickable-href="<%= customer_path(customer) %>"
             tabindex="0"
-            aria-label="Open customer <%= customer.name %>"
+            aria-label="<%= t('customers.view.index.open_customer_aria', name: customer.name) %>"
           >
             <td data-label="<%= t('customers.view.index.table.name') %>">
               <div class="customer-list-name-cell">
                 <span class="customer-list-avatar" aria-hidden="true">
                   <% if customer.avatar.attached? && customer.avatar.blob&.persisted? %>
-                    <%= image_tag customer.avatar, alt: "#{customer.name} avatar" %>
+                    <%= image_tag customer.avatar, alt: t('customers.view.form.customer_avatar_alt', name: customer.name) %>
                   <% else %>
                     <span><%= customer.avatar_initial %></span>
                   <% end %>
@@ -149,8 +146,6 @@
                 </div>
               </div>
             </td>
-            <td data-label="<%= t('customers.view.index.table.country') %>"><%= customer.country %></td>
-            <td data-label="<%= t('customers.view.index.table.contact') %>"><%= customer.contact_name %></td>
             <td data-label="<%= t('customers.view.index.table.email') %>"><%= customer.email %></td>
             <td data-label="<%= t('customers.view.index.table.status') %>"><%= customer_status_badge(customer) %></td>
             <td data-label="<%= t('customers.view.index.table.total_quote_amount') %>" class="text-right customer-money-cell"><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
@@ -161,7 +156,6 @@
                 <div class="mini-progress-fill" style="width: <%= [metrics[:win_rate].to_f.round, 100].min %>%"></div>
               </div>
             </td>
-            <td data-label="<%= t('customers.view.index.table.last_follow_up') %>" class="customer-date-cell"><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></td>
             <td data-label="<%= t('customers.view.index.table.next_follow_up') %>" class="customer-date-cell">
               <%= customer.next_follow_up_date&.strftime('%Y-%m-%d') || "—" %>
               <% if customer.follow_up_overdue? %>
@@ -182,7 +176,7 @@
         <% end %>
       <% else %>
         <tr>
-          <td colspan="11" class="customers-empty-row">
+          <td colspan="8" class="customers-empty-row">
             <% if @has_any_customers %>
               <%= ui_empty_state(
                     title: t("customers.view.index.empty_filtered_title"),
@@ -217,14 +211,14 @@
         class="customer-mobile-card follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>"
         data-clickable-href="<%= customer_path(customer) %>"
         tabindex="0"
-        aria-label="Open customer <%= customer.name %>"
+        aria-label="<%= t('customers.view.index.open_customer_aria', name: customer.name) %>"
       >
         <div class="customer-mobile-head">
           <div class="customer-mobile-title-wrap">
             <div class="customer-list-name-cell customer-list-name-cell-mobile">
               <span class="customer-list-avatar" aria-hidden="true">
                 <% if customer.avatar.attached? && customer.avatar.blob&.persisted? %>
-                  <%= image_tag customer.avatar, alt: "#{customer.name} avatar" %>
+                  <%= image_tag customer.avatar, alt: t('customers.view.form.customer_avatar_alt', name: customer.name) %>
                 <% else %>
                   <span><%= customer.avatar_initial %></span>
                 <% end %>
@@ -246,55 +240,47 @@
             <%= customer_status_badge(customer) %>
           </div>
           <div class="customer-mobile-next">
-            <span class="customer-mobile-next-label">Next Follow-up</span>
+            <span class="customer-mobile-next-label"><%= t('customers.view.index.table.next_follow_up') %></span>
             <strong><%= customer.next_follow_up_date&.strftime('%Y-%m-%d') || "—" %></strong>
             <% if customer.follow_up_overdue? %>
-              <span class="overdue-badge">OVERDUE</span>
+              <span class="overdue-badge"><%= t('customers.view.index.overdue_badge') %></span>
             <% elsif customer.follow_up_due_today? %>
-              <span class="today-badge">TODAY</span>
+              <span class="today-badge"><%= t('customers.view.index.today_badge') %></span>
             <% elsif customer.follow_up_upcoming? %>
-              <span class="upcoming-badge">SOON</span>
+              <span class="upcoming-badge"><%= t('customers.view.index.soon_badge') %></span>
             <% end %>
           </div>
         </div>
 
         <div class="customer-mobile-metrics">
           <div class="customer-mobile-metric">
-            <span>Total Quote</span>
+            <span><%= t('customers.view.index.table.total_quote_amount') %></span>
             <strong class="customer-money-cell"><%= number_to_currency(metrics[:total_quote_amount]) %></strong>
           </div>
           <div class="customer-mobile-metric">
-            <span>Total Won</span>
+            <span><%= t('customers.view.index.table.total_won_amount') %></span>
             <strong class="customer-money-cell"><%= number_to_currency(metrics[:total_won_amount]) %></strong>
           </div>
           <div class="customer-mobile-metric">
-            <span>Win Rate</span>
+            <span><%= t('customers.view.index.table.win_rate') %></span>
             <strong><%= metrics[:win_rate] %>%</strong>
           </div>
           <div class="customer-mobile-metric">
-            <span>Last Follow-up</span>
+            <span><%= t('customers.view.index.table.last_follow_up') %></span>
             <strong><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></strong>
           </div>
           <div class="customer-mobile-metric">
-            <span>Next Action</span>
+            <span><%= t('customers.view.index.table.next_action') %></span>
             <strong><span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span></strong>
             <small class="customer-mobile-signal-reason"><%= row_signal[:reason] %></small>
           </div>
         </div>
 
         <details class="customer-mobile-details">
-          <summary>More details</summary>
+          <summary><%= t('customers.view.index.more_details') %></summary>
           <div class="customer-mobile-details-grid">
-            <div class="customer-mobile-detail-item">
-              <span>Country</span>
-              <strong><%= customer.country.presence || "—" %></strong>
-            </div>
-            <div class="customer-mobile-detail-item">
-              <span>Contact</span>
-              <strong><%= customer.contact_name.presence || "—" %></strong>
-            </div>
             <div class="customer-mobile-detail-item customer-mobile-detail-item-wide">
-              <span>Email</span>
+              <span><%= t('customers.view.index.table.email') %></span>
               <strong><%= customer.email.presence || "—" %></strong>
             </div>
           </div>
@@ -305,15 +291,15 @@
     <div class="customers-empty-row">
       <% if @has_any_customers %>
         <%= ui_empty_state(
-              title: "No customers in this view",
-              body: "Try a different filter or search term to surface the accounts you need.",
+              title: t("customers.view.index.empty_filtered_title"),
+              body: t("customers.view.index.empty_filtered_body"),
               icon: :customers
             ) %>
       <% else %>
         <%= ui_empty_state(
-              title: "No customers yet",
-              body: "Create your first customer to start tracking follow-ups, quotes, and account momentum.",
-              action_label: "Create Customer",
+              title: t("customers.view.index.empty_title"),
+              body: t("customers.view.index.empty_body"),
+              action_label: t("customers.view.index.create_customer"),
               action_path: new_customer_path,
               icon: :customers
             ) %>

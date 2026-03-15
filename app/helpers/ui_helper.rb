@@ -55,17 +55,25 @@ module UiHelper
 
   def ui_input_classes(extra_classes = nil)
     [
-      "rounded-lg border-slate-200 focus:ring-indigo-500 focus:border-indigo-500",
+      "app-ui-input",
       extra_classes
     ].compact.join(" ")
   end
 
   def ui_nav_link(label, path, icon: nil)
     normalized_path = path.to_s
+    normalized_path = normalized_path.split("?").first
+    normalized_path = "/" if normalized_path.blank?
+
+    request_path = request.path.to_s
+    locale_prefix = "/#{I18n.locale}"
+    request_path = request_path.sub(/\A#{Regexp.escape(locale_prefix)}(?=\/|$)/, "")
+    request_path = "/" if request_path.blank?
+
     is_active = if normalized_path == dashboard_path
       current_page?(path)
     else
-      request.path == normalized_path || request.path.start_with?("#{normalized_path}/")
+      request_path == normalized_path || request_path.start_with?("#{normalized_path}/")
     end
     content_tag :li do
       link_to path, class: [ "app-nav-link", ("is-active" if is_active) ].compact.join(" ") do

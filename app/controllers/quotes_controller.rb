@@ -451,9 +451,14 @@ class QuotesController < ApplicationController
       redirect_to quote_path(@quote), alert: t("quotes.flash.reopen_not_available") and return
     end
 
-    @quote.update_columns(
+    reopen_attrs = {
       status: "draft",
+      valid_until: (@quote.valid_until.present? && @quote.valid_until < Date.current ? nil : @quote.valid_until),
+      viewed_at: nil,
+      reminder_sent_at: nil,
       accepted_at: nil,
+      won_at: nil,
+      lost_at: nil,
       win_reason: nil,
       win_reason_detail: nil,
       loss_reason: nil,
@@ -464,7 +469,11 @@ class QuotesController < ApplicationController
       changes_request_message: nil,
       reopened_at: Time.current,
       updated_at: Time.current
-    )
+    }
+    reopen_attrs.delete(:won_at) unless Quote.column_names.include?("won_at")
+    reopen_attrs.delete(:lost_at) unless Quote.column_names.include?("lost_at")
+
+    @quote.update_columns(reopen_attrs)
     redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.quote_reopened")
   end
 

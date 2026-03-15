@@ -388,6 +388,9 @@ const bindSearchableSelects = () => {
       });
 
       select.classList.add("hidden");
+      select.setAttribute("aria-hidden", "true");
+      select.tabIndex = -1;
+      select.style.display = "none";
       select.parentNode.insertBefore(wrapper, select);
       wrapper.appendChild(input);
       wrapper.appendChild(list);

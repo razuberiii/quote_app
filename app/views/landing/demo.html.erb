@@ -1,72 +1,108 @@
-<% content_for :title, t("landing.view.demo.meta_title") %>
-<% content_for :meta_description, t("landing.view.demo.meta_description") %>
-<% content_for :canonical_url, demo_url %>
-
-<section class="marketing-section demo-page">
-  <div class="marketing-section-head">
-    <p class="marketing-kicker"><%= t("landing.view.demo.kicker") %></p>
-    <h1><%= t("landing.view.demo.title") %></h1>
-    <p><%= t("landing.view.demo.subtitle") %></p>
-    <p class="demo-note"><%= t("landing.view.demo.note") %></p>
+<section class="app-page-shell marketing-page-shell">
+<%= render "components/ui/card", class: "app-surface marketing-section-card" do %>
+  <div class="max-w-3xl">
+    <%= render "components/ui/section_header",
+      kicker: t("landing.view.demo.kicker"),
+      title: t("landing.view.demo.title"),
+      body: t("landing.view.demo.subtitle"),
+      tag: :h1,
+      title_class: "mt-3 text-4xl font-semibold tracking-[-0.04em] text-slate-950 sm:text-5xl",
+      body_class: "mt-4 text-lg leading-8 text-slate-600" %>
   </div>
 
-  <div class="marketing-proof-strip">
-    <span><%= t("landing.view.demo.proof_1") %></span>
-    <span><%= t("landing.view.demo.proof_2") %></span>
-    <span><%= t("landing.view.demo.proof_3") %></span>
+  <div class="mt-4 app-stat-card">
+    <p class="m-0 text-sm leading-6 text-slate-700">
+      <strong class="text-slate-950"><%= t("landing.view.demo.page_is_label") %></strong> <%= t("landing.view.demo.page_is_body") %>
+    </p>
+    <p class="m-0 mt-1 text-sm leading-6 text-slate-700">
+      <strong class="text-slate-950"><%= t("landing.view.demo.buyer_view_label") %></strong> <%= t("landing.view.demo.buyer_view_prefix") %> <%= link_to t("landing.view.demo.sample_quote_page"), sample_quote_path, class: "font-semibold text-slate-900 no-underline hover:text-slate-700", target: "_blank" %>.
+    </p>
   </div>
 
-  <div class="demo-toolbar">
-    <span class="demo-pill"><%= t("landing.view.demo.open_deals", count: 14) %></span>
-    <span class="demo-pill"><%= t("landing.view.demo.quotes_this_week", count: 27) %></span>
-    <span class="demo-pill"><%= t("landing.view.demo.pending_follow_ups", count: 9) %></span>
+  <div class="mt-6 flex flex-wrap gap-3">
+    <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.demo.open_deals", count: 14) %></span>
+    <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.demo.quotes_this_week", count: 27) %></span>
+    <span class="app-status-badge app-status-badge--blue"><%= t("landing.view.demo.pending_follow_ups", count: 9) %></span>
   </div>
 
-  <div class="demo-layout">
-    <article class="demo-card">
-      <div class="demo-card-head">
-        <div>
-          <span class="demo-card-kicker"><%= t("landing.view.demo.queue_kicker") %></span>
-          <h2><%= t("landing.view.demo.recent_quotes") %></h2>
+  <div class="app-page-split mt-8">
+    <div class="app-page-split-main min-w-0 mt-1.5">
+      <%= render "components/ui/section_header",
+        class: "pb-4",
+        kicker: t("landing.view.demo.recent_quotes"),
+        title: t("landing.view.demo.sorted_by_urgency"),
+        body: t("landing.view.demo.queue_summary"),
+        title_class: "mt-2 text-xl font-semibold tracking-tight text-slate-950",
+        body_class: "mt-2 text-sm leading-5 text-slate-500" %>
+
+      <div class="overflow-hidden rounded-[1.4rem] border border-slate-200 bg-white">
+        <table class="min-w-full divide-y divide-slate-200 text-left text-sm">
+          <thead class="bg-slate-950 text-white">
+            <tr>
+              <th class="px-4 py-3 font-semibold"><%= t("landing.view.demo.table.quote") %></th>
+              <th class="px-4 py-3 font-semibold"><%= t("landing.view.demo.table.buyer") %></th>
+              <th class="px-4 py-3 font-semibold"><%= t("landing.view.demo.table.status") %></th>
+              <th class="px-4 py-3 font-semibold"><%= t("landing.view.demo.table.total") %></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-slate-700">
+            <tr>
+              <td class="px-4 py-3 font-medium text-slate-950">QX-2026-118</td>
+              <td class="px-4 py-3">Northforge Supply</td>
+              <td class="px-4 py-3"><span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700"><%= t("landing.view.demo.status.pending") %></span></td>
+              <td class="px-4 py-3">USD 2,400.00</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-slate-950">QX-2026-116</td>
+              <td class="px-4 py-3">Red Mesa Imports</td>
+              <td class="px-4 py-3"><span class="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-sky-700"><%= t("landing.view.demo.status.revised") %></span></td>
+              <td class="px-4 py-3">USD 18,750.00</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-slate-950">QX-2026-115</td>
+              <td class="px-4 py-3">Polar Gate Systems</td>
+              <td class="px-4 py-3"><span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-emerald-700"><%= t("landing.view.demo.status.won") %></span></td>
+              <td class="px-4 py-3">USD 9,120.00</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-3 font-medium text-slate-950">QX-2026-113</td>
+              <td class="px-4 py-3">Blue Current Motion</td>
+              <td class="px-4 py-3"><span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-amber-700"><%= t("landing.view.demo.status.pending") %></span></td>
+              <td class="px-4 py-3">USD 6,840.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <%= render "components/ui/card", class: "app-surface app-page-split-side min-w-0 marketing-dark-card border-slate-950 text-white" do %>
+      <div class="app-section-stack gap-4 px-4 pb-1 pt-5 sm:px-5">
+        <%= render "components/ui/section_header",
+          class: "border-b border-white/10 pb-4",
+          kicker: t("landing.view.demo.signals_kicker"),
+          title: t("landing.view.demo.deal_overview"),
+          body: t("landing.view.demo.one_account_workspace"),
+          kicker_class: "inline-block pl-1 text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-slate-400 leading-none",
+          title_class: "m-0 mt-2 text-3xl font-semibold tracking-tight text-white",
+          body_class: "m-0 mt-2 text-sm leading-6 text-slate-200" %>
+
+        <ul class="m-0 grid gap-3 p-0 text-sm leading-6 text-slate-100 list-none">
+          <li class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words"><strong class="text-white"><%= t("landing.view.demo.top_product") %></strong> Hydraulic Pump HZ-240</li>
+          <li class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words"><strong class="text-white"><%= t("landing.view.demo.average_quote_cycle") %></strong> 3.8 days</li>
+          <li class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words"><strong class="text-white"><%= t("landing.view.demo.revision_rate") %></strong> 41%</li>
+          <li class="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 break-words"><strong class="text-white"><%= t("landing.view.demo.export_mix") %></strong> 62% PI / 38% quotation</li>
+        </ul>
+
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: new_user_registration_path, variant: :secondary do %>
+            <%= t("landing.view.demo.start_free_trial") %>
+          <% end %>
+          <%= render "components/ui/button", href: sample_quote_path, variant: :secondary, class: "app-ui-button--on-dark", attrs: { target: "_blank" } do %>
+            <%= t("landing.view.demo.open_sample_quote") %>
+          <% end %>
         </div>
-        <span class="demo-card-meta"><%= t("landing.view.demo.sorted_by_urgency") %></span>
       </div>
-      <table class="demo-table">
-        <thead>
-          <tr>
-            <th><%= t("landing.view.demo.table.quote_no") %></th>
-            <th><%= t("landing.view.demo.table.buyer") %></th>
-            <th><%= t("landing.view.demo.table.status") %></th>
-            <th><%= t("landing.view.demo.table.total") %></th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>QX-2026-118</td><td>Northforge Supply</td><td><%= t("landing.view.demo.status.pending") %></td><td>USD 2,400.00</td></tr>
-          <tr><td>QX-2026-116</td><td>Red Mesa Imports</td><td><%= t("landing.view.demo.status.revised") %></td><td>USD 18,750.00</td></tr>
-          <tr><td>QX-2026-115</td><td>Polar Gate Systems</td><td><%= t("landing.view.demo.status.won") %></td><td>USD 9,120.00</td></tr>
-          <tr><td>QX-2026-113</td><td>Blue Current Motion</td><td><%= t("landing.view.demo.status.pending") %></td><td>USD 6,840.00</td></tr>
-        </tbody>
-      </table>
-    </article>
-
-    <article class="demo-card demo-card-dark">
-      <div class="demo-card-head">
-        <div>
-          <span class="demo-card-kicker"><%= t("landing.view.demo.signals_kicker") %></span>
-          <h2><%= t("landing.view.demo.deal_overview") %></h2>
-        </div>
-        <span class="demo-card-meta"><%= t("landing.view.demo.one_account_workspace") %></span>
-      </div>
-      <ul class="demo-list">
-        <li><strong><%= t("landing.view.demo.top_product") %></strong> Hydraulic Pump HZ-240</li>
-        <li><strong><%= t("landing.view.demo.average_quote_cycle") %></strong> 3.8 days</li>
-        <li><strong><%= t("landing.view.demo.revision_rate") %></strong> 41%</li>
-        <li><strong><%= t("landing.view.demo.export_mix") %></strong> 62% PI / 38% Quotation</li>
-      </ul>
-      <div class="demo-actions">
-        <%= link_to t("landing.view.demo.start_free_trial"), new_user_registration_path, class: "btn btn-primary marketing-cta-primary" %>
-        <%= link_to t("landing.view.demo.open_sample_quote"), sample_quote_path, class: "btn btn-secondary marketing-cta-secondary", target: "_blank" %>
-      </div>
-    </article>
+    <% end %>
   </div>
+<% end %>
 </section>

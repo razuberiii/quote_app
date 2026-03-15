@@ -35,4 +35,21 @@ class CustomerTest < ActiveSupport::TestCase
     assert_equal Date.current, customer.last_follow_up_date
     assert_equal Date.current + 3.days, customer.next_follow_up_date
   end
+
+  test "lost and inactive customers do not report follow up reminders" do
+    customer = customers(:one)
+    customer.update!(status: "lost", next_follow_up_date: Date.yesterday)
+
+    assert_not customer.follow_up_reminders_enabled?
+    assert_not customer.follow_up_overdue?
+    assert_not customer.follow_up_due_today?
+    assert_not customer.follow_up_upcoming?
+    assert_equal "normal", customer.follow_up_status
+
+    customer.update!(status: "inactive", next_follow_up_date: Date.current + 2.days)
+
+    assert_not customer.follow_up_reminders_enabled?
+    assert_not customer.follow_up_upcoming?
+    assert_equal "normal", customer.follow_up_status
+  end
 end

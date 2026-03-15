@@ -4,12 +4,11 @@
 <% grand_total_value = quote.grand_total.to_d %>
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
-<% was_viewed = quote.viewed_at.present? %>
 <% submit_loading_label = quote.persisted? ? t("quotes.view.form.updating") : t("quotes.view.form.creating") %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
 <% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specs: p.effective_default_specs, default_addons: p.effective_default_addons, spec_presets: p.available_spec_preset_payloads, addon_presets: p.available_addon_preset_payloads, default_spec_preset_id: p.default_spec_preset_id, default_addon_preset_id: p.default_addon_preset_id } }.to_json %>
 
-<div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-viewed="<%= was_viewed %>" data-has-errors="<%= quote.errors.any? %>">
+<div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-has-errors="<%= quote.errors.any? %>">
   <section class="quote-edit-summary app-stat-grid quote-edit-summary--workspace">
     <article class="quote-edit-summary-card">
       <span class="summary-label"><%= t("quotes.view.form.current_status") %></span>
@@ -35,10 +34,6 @@
           <%= t("quotes.view.form.days_left", count: days_left_value) %>
         <% end %>
       </strong>
-    </article>
-    <article class="quote-edit-summary-card">
-      <span class="summary-label"><%= t("quotes.view.form.viewed") %></span>
-      <strong id="quote-summary-viewed"><%= was_viewed ? t("quotes.view.form.yes") : t("quotes.view.form.no") %></strong>
     </article>
   </section>
 
@@ -84,7 +79,7 @@
         </div>
         <div>
           <%= f.label :valid_until %>
-          <%= f.date_field :valid_until, class: ui_input_classes %>
+          <%= f.date_field :valid_until, class: ui_input_classes, min: Date.current.to_s %>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :custom_title, t("quotes.view.form.custom_title") %>
@@ -282,7 +277,7 @@
                 <tr class="quote-item-row">
                   <td class="quote-col-product">
                     <div class="product-search">
-                      <input type="text" class="js-product-name" value="<%= product_name %>" placeholder="<%= t("quotes.view.form.type_to_search_product") %>">
+                      <input type="text" class="js-product-name <%= ui_input_classes %>" value="<%= product_name %>" placeholder="<%= t("quotes.view.form.type_to_search_product") %>">
                       <div class="js-product-dropdown"></div>
                     </div>
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -297,10 +292,10 @@
                         <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_spec_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
                       <% end %>
                     </select>
-                    <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V" %>
+                    <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V", hidden: true %>
                     <div class="quote-kv-summary js-spec-summary"></div>
                     <button type="button" class="quote-kv-open js-open-spec-editor"><%= t("quotes.view.form.edit_specs") %></button>
-                    <div class="quote-kv-editor js-spec-editor" data-kind="spec">
+                    <div class="quote-kv-editor js-spec-editor" data-kind="spec" hidden>
                       <div class="quote-kv-editor-head">
                         <strong><%= t("quotes.view.form.specifications") %></strong>
                         <button type="button" class="quote-kv-close js-kv-close"><%= t("quotes.view.form.close") %></button>
@@ -336,10 +331,10 @@
                         <option value="<%= preset[:id] %>" <%= "selected" if item.product&.default_addon_preset_id.to_s == preset[:id].to_s %>><%= preset[:name] %></option>
                       <% end %>
                     </select>
-                    <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120" %>
+                    <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120", hidden: true %>
                     <div class="quote-kv-summary js-addon-summary"></div>
                     <button type="button" class="quote-kv-open js-open-addon-editor"><%= t("quotes.view.form.edit_add_ons") %></button>
-                    <div class="quote-kv-editor js-addon-editor" data-kind="addon">
+                    <div class="quote-kv-editor js-addon-editor" data-kind="addon" hidden>
                       <div class="quote-kv-editor-head">
                         <strong><%= t("quotes.view.form.add_ons") %></strong>
                         <button type="button" class="quote-kv-close js-kv-close"><%= t("quotes.view.form.close") %></button>
@@ -552,6 +547,10 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(text) {
+      return escapeHtml(text).replace(/`/g, "&#96;");
     }
 
     function normalizeSpecificationText(text) {
@@ -907,7 +906,7 @@
       }
 
       dropdown.innerHTML = items.map((p) =>
-        `<button type="button" class="js-product-option" role="option" aria-selected="false" data-id="${p.id}" data-name="${p.name}" data-price="${p.price}">${p.name}</button>`
+        `<button type="button" class="js-product-option" role="option" aria-selected="false" data-id="${escapeAttr(p.id)}" data-name="${escapeAttr(p.name)}" data-price="${escapeAttr(p.price)}">${escapeHtml(p.name)}</button>`
       ).join("");
     }
 
@@ -990,13 +989,18 @@
       function closeEditor(editor) {
         if (!editor) return;
         editor.classList.remove("is-open");
+        editor.hidden = true;
       }
 
       function openEditor(editor) {
         if (!editor) return;
         document.querySelectorAll(".quote-kv-editor.is-open").forEach((el) => {
-          if (el !== editor) el.classList.remove("is-open");
+          if (el !== editor) {
+            el.classList.remove("is-open");
+            el.hidden = true;
+          }
         });
+        editor.hidden = false;
         editor.classList.add("is-open");
       }
 
@@ -1618,7 +1622,7 @@
       tr.innerHTML = `
         <td class="quote-col-product">
           <div class="product-search">
-            <input type="text" class="js-product-name" placeholder="${escapeHtml(uiText.typeToSearchProduct)}">
+            <input type="text" class="js-product-name app-ui-input" placeholder="${escapeHtml(uiText.typeToSearchProduct)}">
             <div class="js-product-dropdown"></div>
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
@@ -1626,13 +1630,13 @@
           <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description">
         </td>
         <td class="quote-col-specs">
-          <select class="js-spec-preset-select quote-inline-select" data-default-id="">
+          <select class="js-spec-preset-select quote-inline-select app-ui-input" data-default-id="">
             <option value="">${escapeHtml(uiText.customSpecs)}</option>
           </select>
-          <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V"></textarea>
+          <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V" hidden></textarea>
           <div class="quote-kv-summary js-spec-summary"></div>
           <button type="button" class="quote-kv-open js-open-spec-editor">${escapeHtml(uiText.editSpecs)}</button>
-          <div class="quote-kv-editor js-spec-editor" data-kind="spec">
+          <div class="quote-kv-editor js-spec-editor" data-kind="spec" hidden>
             <div class="quote-kv-editor-head">
               <strong>${escapeHtml(uiText.specifications)}</strong>
               <button type="button" class="quote-kv-close js-kv-close">${escapeHtml(uiText.close)}</button>
@@ -1654,13 +1658,13 @@
           </div>
         </td>
         <td class="quote-col-addons">
-          <select class="js-addon-preset-select quote-inline-select" data-default-id="">
+          <select class="js-addon-preset-select quote-inline-select app-ui-input" data-default-id="">
             <option value="">${escapeHtml(uiText.customAddOns)}</option>
           </select>
-          <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120"></textarea>
+          <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120" hidden></textarea>
           <div class="quote-kv-summary js-addon-summary"></div>
           <button type="button" class="quote-kv-open js-open-addon-editor">${escapeHtml(uiText.editAddOns)}</button>
-          <div class="quote-kv-editor js-addon-editor" data-kind="addon">
+          <div class="quote-kv-editor js-addon-editor" data-kind="addon" hidden>
             <div class="quote-kv-editor-head">
               <strong>${escapeHtml(uiText.addOns)}</strong>
               <button type="button" class="quote-kv-close js-kv-close">${escapeHtml(uiText.close)}</button>
@@ -1682,10 +1686,10 @@
           </div>
         </td>
         <td class="quote-col-price">
-          <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price" placeholder="0.00">
+          <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price app-ui-input" placeholder="0.00">
         </td>
         <td class="quote-col-qty">
-          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]" class="js-quantity">
+          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]" class="js-quantity app-ui-input">
         </td>
         <td class="quote-col-remove">
           <input type="hidden" name="quote[quote_items_attributes][${index}][_destroy]" value="0" class="js-destroy-flag">
@@ -1707,6 +1711,16 @@
       input.addEventListener("input", updateTotalsUI);
       input.addEventListener("change", updateTotalsUI);
     });
+
+    if (body) {
+      const totalsWatchSelector = ".js-unit-price, .js-quantity, .js-addon-charges, .js-addon-amount, .js-discount-input, .js-tax-input, .js-shipping-input";
+      body.addEventListener("input", (event) => {
+        if (event.target && event.target.matches(totalsWatchSelector)) updateTotalsUI();
+      });
+      body.addEventListener("change", (event) => {
+        if (event.target && event.target.matches(totalsWatchSelector)) updateTotalsUI();
+      });
+    }
 
     if (addDiscountBtn) {
       addDiscountBtn.addEventListener("click", () => {

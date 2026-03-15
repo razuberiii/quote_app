@@ -1,6 +1,20 @@
 <%= render "components/ui/card", class: "dashboard-panel app-surface dashboard-onboarding-card" do %>
   <% steps = [
     {
+      key: :account_profile,
+      label: t("dashboard.onboarding.quick_start.steps.account_profile.label"),
+      detail: t("dashboard.onboarding.quick_start.steps.account_profile.detail"),
+      action_label: t("dashboard.onboarding.quick_start.steps.account_profile.action"),
+      action_path: edit_user_registration_path
+    },
+    {
+      key: :company_profile,
+      label: t("dashboard.onboarding.quick_start.steps.company_profile.label"),
+      detail: t("dashboard.onboarding.quick_start.steps.company_profile.detail"),
+      action_label: t("dashboard.onboarding.quick_start.steps.company_profile.action"),
+      action_path: edit_company_settings_path
+    },
+    {
       key: :customer,
       label: t("dashboard.onboarding.quick_start.steps.customer.label"),
       detail: t("dashboard.onboarding.quick_start.steps.customer.detail"),
@@ -35,7 +49,7 @@
       action_label: nil,
       action_path: nil
     }
-  ] %>
+  ].tap { |items| items.delete_if { |step| step[:key] == :company_profile && !current_user.can_manage_templates? } } %>
   <% completed_count = steps.count { |step| @onboarding[step[:key]] } %>
 
   <div class="dashboard-onboarding-head">

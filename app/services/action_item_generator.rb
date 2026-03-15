@@ -31,13 +31,16 @@ class ActionItemGenerator
   def build_candidate_map
     current_quotes.each_with_object({}) do |quote, map|
       outcome_reason_candidate_for(quote).each do |attrs|
-        map[candidate_key(attrs[:action_type], attrs[:reference])] = attrs
+        key = candidate_key(attrs[:action_type], attrs[:reference])
+        map[key] = attrs if key.present?
       end
       candidate_for_quote(quote).each do |attrs|
-        map[candidate_key(attrs[:action_type], attrs[:reference])] = attrs
+        key = candidate_key(attrs[:action_type], attrs[:reference])
+        map[key] = attrs if key.present?
       end
       follow_up_due_candidate_for(quote).each do |attrs|
-        map[candidate_key(attrs[:action_type], attrs[:reference])] = attrs
+        key = candidate_key(attrs[:action_type], attrs[:reference])
+        map[key] = attrs if key.present?
       end
     end
   end
@@ -78,6 +81,8 @@ class ActionItemGenerator
   end
 
   def candidate_key(action_type, reference)
+    return if reference.blank?
+
     "#{action_type}:#{reference.class.name}:#{reference.id}"
   end
 
@@ -91,7 +96,13 @@ class ActionItemGenerator
 
   def resolve_stale_items(active_keys)
     @user.action_items.unresolved.includes(:reference).find_each do |item|
-      next if active_keys.include?(candidate_key(item.action_type, item.reference))
+      key = candidate_key(item.action_type, item.reference)
+      if key.blank?
+        item.update_columns(resolved_at: Time.current, updated_at: Time.current)
+        next
+      end
+
+      next if active_keys.include?(key)
 
       item.update_columns(resolved_at: Time.current, updated_at: Time.current)
     end

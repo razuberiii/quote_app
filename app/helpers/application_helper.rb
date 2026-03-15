@@ -1,16 +1,23 @@
 module ApplicationHelper
   def seo_title(default = "Rubusoo")
-    content_for?(:title) ? content_for(:title) : default
+    return content_for(:title) if content_for?(:title)
+    return t(@seo_page.title_key) if @seo_page&.title_key.present?
+
+    default
   end
 
   def seo_description
     return content_for(:meta_description) if content_for?(:meta_description)
+    return t(@seo_page.description_key) if @seo_page&.description_key.present?
 
     "Rubusoo helps B2B sales teams manage quote revisions, share live quote links, and export professional PDF/Excel documents."
   end
 
   def seo_canonical_url
     return content_for(:canonical_url) if content_for?(:canonical_url)
+    if @seo_page&.path_helper.present? && respond_to?(@seo_page.path_helper)
+      return public_send(@seo_page.path_helper)
+    end
     return unless request.present?
 
     "#{request.base_url}#{request.path}"
@@ -18,6 +25,7 @@ module ApplicationHelper
 
   def seo_robots
     return content_for(:meta_robots) if content_for?(:meta_robots)
+    return "noindex,follow" if @seo_page && !@seo_page.index?
     return "noindex,nofollow" if user_signed_in?
     return "noindex,nofollow" if devise_controller?
     return "noindex,nofollow" if controller_path == "email_verifications"

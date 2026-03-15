@@ -14,9 +14,8 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
+    <%# Canonical CSS path for public quote: tailwind + components + public_quote only. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "layout", "data-turbo-track": "reload" %>
-    <%= stylesheet_link_tag "legacy_core", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "public_quote", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>

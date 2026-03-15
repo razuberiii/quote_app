@@ -1,0 +1,87 @@
+default: &default
+  homepage:
+    path_helper: root_url
+    title_key: landing.homepage.meta_title
+    description_key: landing.homepage.meta_description
+    changefreq: daily
+    priority: "1.0"
+    index: true
+  demo:
+    path_helper: demo_url
+    title_key: landing.view.demo.meta_title
+    description_key: landing.view.demo.meta_description
+    changefreq: weekly
+    priority: "0.8"
+    index: true
+  contact:
+    path_helper: contact_url
+    title_key: landing.view.contact.meta_title
+    description_key: landing.view.contact.meta_description
+    changefreq: monthly
+    priority: "0.6"
+    index: true
+  sample_quote:
+    path_helper: sample_quote_url
+    title_key: landing.view.sample_quote.meta_title
+    description_key: landing.view.sample_quote.meta_description
+    changefreq: weekly
+    priority: "0.7"
+    index: true
+  foreign_trade_quotation_software:
+    path_helper: foreign_trade_quotation_software_url
+    title_key: seo.view.foreign_trade_quotation_software.meta.title
+    description_key: seo.view.foreign_trade_quotation_software.meta.description
+    changefreq: weekly
+    priority: "0.9"
+    index: true
+  quotation_crm_for_export_teams:
+    path_helper: quotation_crm_for_export_teams_url
+    title_key: seo.view.quotation_crm_for_export_teams.meta.title
+    description_key: seo.view.quotation_crm_for_export_teams.meta.description
+    changefreq: weekly
+    priority: "0.9"
+    index: true
+  quote_revision_control:
+    path_helper: quote_revision_control_url
+    title_key: seo.view.quote_revision_control.meta.title
+    description_key: seo.view.quote_revision_control.meta.description
+    changefreq: weekly
+    priority: "0.85"
+    index: true
+  buyer_facing_quotation_link:
+    path_helper: buyer_facing_quotation_link_url
+    title_key: seo.view.buyer_facing_quotation_link.meta.title
+    description_key: seo.view.buyer_facing_quotation_link.meta.description
+    changefreq: weekly
+    priority: "0.85"
+    index: true
+  quotation_software_vs_excel:
+    path_helper: quotation_software_vs_excel_url
+    title_key: seo.view.quotation_software_vs_excel.meta.title
+    description_key: seo.view.quotation_software_vs_excel.meta.description
+    changefreq: weekly
+    priority: "0.8"
+    index: true
+  quotation_software_vs_erp:
+    path_helper: quotation_software_vs_erp_url
+    title_key: seo.view.quotation_software_vs_erp.meta.title
+    description_key: seo.view.quotation_software_vs_erp.meta.description
+    changefreq: weekly
+    priority: "0.8"
+    index: true
+  resources:
+    path_helper: resources_url
+    title_key: seo.view.resources.meta.title
+    description_key: seo.view.resources.meta.description
+    changefreq: weekly
+    priority: "0.75"
+    index: true
+
+development:
+  <<: *default
+
+test:
+  <<: *default
+
+production:
+  <<: *default

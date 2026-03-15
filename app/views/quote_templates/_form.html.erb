@@ -361,16 +361,37 @@
           </div>
           <div class="preview-table-row">
             <span>
-              <span data-template-preview-item-desc-1>Pump body SS304</span>
-              <small class="preview-item-extra"><span data-template-preview-spec-label><%= quote_template.spec_label.presence || t("quote_document.labels.spec") %></span>: <span data-template-preview-item-spec-1>316L / IP55</span></small>
-              <small class="preview-item-extra is-addon"><span data-template-preview-addon-label><%= quote_template.addon_label.presence || t("quote_document.labels.addon") %></span>: <span data-template-preview-item-addon-1>Wooden Case (+$35)</span></small>
+              <span class="preview-item-content">
+                <span class="preview-item-media" data-template-preview-images data-visible="<%= quote_template.show_images? %>"></span>
+                <span>
+                  <span data-template-preview-item-desc-1>Pump body SS304</span>
+                  <small class="preview-item-extra"><span data-template-preview-spec-label><%= quote_template.spec_label.presence || t("quote_document.labels.spec") %></span>: <span data-template-preview-item-spec-1>316L / IP55</span></small>
+                  <small class="preview-item-extra is-addon"><span data-template-preview-addon-label><%= quote_template.addon_label.presence || t("quote_document.labels.addon") %></span>: <span data-template-preview-item-addon-1>Wooden Case (+$35)</span></small>
+                </span>
+              </span>
             </span>
             <span data-template-preview-item-qty-1>2</span>
             <span data-template-preview-amount data-template-preview-item-unit-1 data-raw-amount="900"></span>
             <span data-template-preview-amount data-template-preview-item-line-1 data-raw-amount="1800"></span>
           </div>
-          <div class="preview-table-row"><span data-template-preview-item-desc-2>Motor 5.5kW</span><span data-template-preview-item-qty-2>1</span><span data-template-preview-amount data-template-preview-item-unit-2 data-raw-amount="620"></span><span data-template-preview-amount data-template-preview-item-line-2 data-raw-amount="620"></span></div>
-          <div class="preview-table-row"><span data-template-preview-item-desc-3>Installation kit</span><span data-template-preview-item-qty-3>3</span><span data-template-preview-amount data-template-preview-item-unit-3 data-raw-amount="130"></span><span data-template-preview-amount data-template-preview-item-line-3 data-raw-amount="390"></span></div>
+          <div class="preview-table-row">
+            <span class="preview-item-content">
+              <span class="preview-item-media" data-template-preview-images data-visible="<%= quote_template.show_images? %>"></span>
+              <span data-template-preview-item-desc-2>Motor 5.5kW</span>
+            </span>
+            <span data-template-preview-item-qty-2>1</span>
+            <span data-template-preview-amount data-template-preview-item-unit-2 data-raw-amount="620"></span>
+            <span data-template-preview-amount data-template-preview-item-line-2 data-raw-amount="620"></span>
+          </div>
+          <div class="preview-table-row">
+            <span class="preview-item-content">
+              <span class="preview-item-media" data-template-preview-images data-visible="<%= quote_template.show_images? %>"></span>
+              <span data-template-preview-item-desc-3>Installation kit</span>
+            </span>
+            <span data-template-preview-item-qty-3>3</span>
+            <span data-template-preview-amount data-template-preview-item-unit-3 data-raw-amount="130"></span>
+            <span data-template-preview-amount data-template-preview-item-line-3 data-raw-amount="390"></span>
+          </div>
         </div>
         <div class="preview-summary">
           <p><span data-preview-i18n-label="subtotal"><%= t("quote_document.labels.subtotal") %></span><strong data-template-preview-amount data-template-preview-subtotal data-raw-amount="2810"></strong></p>
@@ -391,9 +412,6 @@
         </div>
         <div class="preview-terms" data-template-preview-terms data-visible="<%= quote_template.show_terms_section? %>">
           <strong><%= t("quote_document.labels.terms") %>:</strong> FOB Shanghai | Lead time 20 days.
-        </div>
-        <div class="preview-image-strip" data-template-preview-images data-visible="<%= quote_template.show_images? %>">
-          <span></span><span></span><span></span>
         </div>
         <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || t("quote_templates.view.form.default_footer_note") %></p>
         <p class="preview-saas-footnote" data-template-preview-saas-branding data-visible="<%= quote_template.show_saas_branding? %>"><%= quote_template.saas_branding_footer_text %></p>
@@ -491,16 +509,18 @@
     })();
 
     const showNode = (selector, visible) => {
-      const node = qsp(selector);
-      if (!node) return;
-      const changed = node.hidden === visible;
-      node.hidden = !visible;
-      if (changed) {
-        node.classList.remove("is-preview-flash");
-        window.requestAnimationFrame(() => {
-          node.classList.add("is-preview-flash");
-        });
-      }
+      const nodes = preview.querySelectorAll(selector);
+      if (!nodes.length) return;
+      nodes.forEach((node) => {
+        const changed = node.hidden === visible;
+        node.hidden = !visible;
+        if (changed) {
+          node.classList.remove("is-preview-flash");
+          window.requestAnimationFrame(() => {
+            node.classList.add("is-preview-flash");
+          });
+        }
+      });
     };
 
     const formatNumber = (value, decimals, separator) => {

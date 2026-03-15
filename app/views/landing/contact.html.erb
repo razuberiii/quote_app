@@ -1,0 +1,187 @@
+<% content_for :head do %>
+  <script>
+    function initContactTurnstileFlow() {
+      var form = document.getElementById("contact-request-form");
+      var sendBtn = document.getElementById("contact-send-btn");
+      var tokenInput = document.getElementById("contact_request_cf_turnstile_response");
+      var modal = document.getElementById("contact-turnstile-modal");
+      var closeBtn = document.getElementById("contact-turnstile-close");
+      var loading = document.getElementById("contact-turnstile-loading");
+      var widgetWrap = document.getElementById("contact-turnstile-widget");
+      var success = document.getElementById("contact-turnstile-success");
+
+      if (!form || !sendBtn || !tokenInput || !modal || !closeBtn || !loading || !widgetWrap || !success) return;
+      if (form.dataset.turnstileBound === "true") return;
+      form.dataset.turnstileBound = "true";
+
+      tokenInput.value = "";
+      var isSubmitting = false;
+      var verificationComplete = false;
+      var widgetRendered = false;
+      var skipVerification = "<%= ENV["SKIP_TURNSTILE_VERIFICATION"] == "true" %>" === "true";
+
+      function resetModalState() {
+        loading.hidden = false;
+        widgetWrap.hidden = true;
+        success.hidden = true;
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        tokenInput.value = "";
+        verificationComplete = false;
+        if (!isSubmitting) sendBtn.disabled = false;
+      }
+
+      function submitContact() {
+        if (isSubmitting) return;
+        isSubmitting = true;
+        sendBtn.disabled = true;
+        sendBtn.textContent = "<%= j t("landing.view.contact.form.sending") %>";
+        form.requestSubmit();
+      }
+
+      function renderWidget() {
+        if (typeof turnstile === "undefined") {
+          setTimeout(renderWidget, 160);
+          return;
+        }
+
+        loading.hidden = true;
+        widgetWrap.hidden = false;
+
+        var existing = widgetWrap.querySelector(".cf-turnstile");
+        if (!existing) {
+          var div = document.createElement("div");
+          div.className = "cf-turnstile";
+          widgetWrap.appendChild(div);
+          existing = div;
+        }
+
+        if (widgetRendered) return;
+
+        turnstile.render(existing, {
+          sitekey: "<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>",
+          theme: "light",
+          callback: function(token) {
+            tokenInput.value = token;
+            verificationComplete = true;
+            widgetWrap.hidden = true;
+            success.hidden = false;
+            setTimeout(function() {
+              modal.hidden = true;
+              submitContact();
+            }, 350);
+          },
+          "expired-callback": function() {
+            tokenInput.value = "";
+            verificationComplete = false;
+          },
+          "error-callback": function() {
+            tokenInput.value = "";
+            verificationComplete = false;
+          }
+        });
+
+        widgetRendered = true;
+      }
+
+      sendBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        if (isSubmitting) return;
+
+        if (skipVerification) {
+          submitContact();
+          return;
+        }
+
+        sendBtn.disabled = true;
+        resetModalState();
+        modal.hidden = false;
+        renderWidget();
+      });
+
+      closeBtn.addEventListener("click", function() {
+        if (!verificationComplete) closeModal();
+      });
+
+      modal.addEventListener("click", function(e) {
+        if (e.target === modal && !verificationComplete) closeModal();
+      });
+    }
+
+    document.addEventListener("DOMContentLoaded", initContactTurnstileFlow);
+    document.addEventListener("turbo:load", initContactTurnstileFlow);
+  </script>
+<% end %>
+
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-section-card" do %>
+    <%= render "components/ui/section_header",
+      kicker: t("landing.view.contact.hero.kicker"),
+      title: t("landing.view.contact.hero.title"),
+      body: t("landing.view.contact.hero.body"),
+      tag: :h1,
+      title_class: "max-w-none" %>
+
+    <%= form_with model: @contact_request, url: contact_requests_path, method: :post, class: "mt-4 grid gap-4", html: { id: "contact-request-form" } do |f| %>
+      <%= hidden_field_tag :source_page, "contact" %>
+      <%= f.hidden_field :cf_turnstile_response, id: "contact_request_cf_turnstile_response" %>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-2">
+          <%= f.label :name, t("landing.view.contact.form.name"), class: "app-stat-label" %>
+          <%= f.text_field :name, class: ui_input_classes("w-full"), required: true %>
+        </div>
+        <div class="grid gap-2">
+          <%= f.label :email, t("landing.view.contact.form.email"), class: "app-stat-label" %>
+          <%= f.email_field :email, class: ui_input_classes("w-full"), required: true %>
+        </div>
+      </div>
+
+      <div class="grid gap-4 md:grid-cols-2">
+        <div class="grid gap-2">
+          <%= f.label :company, t("landing.view.contact.form.company"), class: "app-stat-label" %>
+          <%= f.text_field :company, class: ui_input_classes("w-full") %>
+        </div>
+        <div class="grid gap-2">
+          <%= f.label :team_size, t("landing.view.contact.form.team_size"), class: "app-stat-label" %>
+          <%= f.text_field :team_size, class: ui_input_classes("w-full"), placeholder: t("landing.view.contact.form.team_size_placeholder") %>
+        </div>
+      </div>
+
+      <div class="grid gap-2">
+        <%= f.label :inquiry_type, t("landing.view.contact.form.inquiry_type"), class: "app-stat-label" %>
+        <%= f.select :inquiry_type, ContactRequest::INQUIRY_TYPES.map { |type| [type.titleize, type] }, {}, class: ui_input_classes("w-full") %>
+      </div>
+
+      <div class="grid gap-2">
+        <%= f.label :message, t("landing.view.contact.form.message"), class: "app-stat-label" %>
+        <%= f.text_area :message, rows: 6, class: ui_input_classes("w-full"), required: true, placeholder: t("landing.view.contact.form.message_placeholder") %>
+      </div>
+
+      <div class="hidden">
+        <%= f.label :website, t("landing.view.contact.form.website") %>
+        <%= f.text_field :website, autocomplete: "off", tabindex: -1 %>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <%= f.button t("landing.view.contact.form.submit"), type: :button, id: "contact-send-btn", class: ui_button_classes(:primary) %>
+        <%= render "components/ui/button", href: demo_path, variant: :ghost do %>
+          <%= t("landing.view.contact.form.demo_cta") %>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <div class="quote-turnstile-modal" id="contact-turnstile-modal" hidden>
+    <div class="quote-turnstile-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="contact-turnstile-title">
+      <button type="button" class="quote-turnstile-modal__close" id="contact-turnstile-close" aria-label="<%= t("landing.view.contact.turnstile.close") %>">×</button>
+      <h3 id="contact-turnstile-title"><%= t("landing.view.contact.turnstile.title") %></h3>
+      <p><%= t("landing.view.contact.turnstile.body") %></p>
+      <div class="quote-turnstile-modal__loading" id="contact-turnstile-loading"><%= t("landing.view.contact.turnstile.loading") %></div>
+      <div class="quote-turnstile-modal__widget" id="contact-turnstile-widget" hidden></div>
+      <div class="quote-turnstile-modal__success" id="contact-turnstile-success" hidden><%= t("landing.view.contact.turnstile.success") %></div>
+    </div>
+  </div>
+</section>

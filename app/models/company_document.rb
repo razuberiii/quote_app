@@ -34,7 +34,10 @@ class CompanyDocument < ApplicationRecord
   scope :ordered, -> { order(:document_type, :created_at) }
 
   def document_type_label
-    document_type.to_s.humanize
+    I18n.t(
+      "company_settings.view.edit.credential_types.#{document_type}",
+      default: document_type.to_s.humanize
+    )
   end
 
   private

@@ -839,7 +839,7 @@
       <% if is_current %>
         <span class="<%= tab_class %>">
           <%= label %>
-          <span class="history-tab-tag"><%= t("quotes.view.show.history.current") %></span>
+          <span class="history-tab-tag history-tab-tag-current"><%= t("quotes.view.show.history.current") %></span>
           <% if latest_revision&.id == q.id %>
             <span class="history-tab-tag history-tab-tag-latest"><%= t("quotes.view.show.history.latest") %></span>
           <% end %>

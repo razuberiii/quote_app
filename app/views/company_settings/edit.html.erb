@@ -24,69 +24,69 @@
       <div class="<%= 'settings-field-error' if @company.errors[:name].any? %>">
         <%= f.label :name, t("company_settings.view.edit.company_name") %>
         <p class="team-members-hint"><%= t("company_settings.view.edit.company_name_hint") %></p>
-        <%= f.text_field :name %>
+        <%= f.text_field :name, class: ui_input_classes %>
       </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:legal_name].any? %>">
       <%= f.label :legal_name, t("company_settings.view.edit.legal_name") %>
-      <%= f.text_field :legal_name %>
+      <%= f.text_field :legal_name, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:registration_number].any? %>">
       <%= f.label :registration_number, t("company_settings.view.edit.registration_number") %>
-      <%= f.text_field :registration_number %>
+      <%= f.text_field :registration_number, class: ui_input_classes %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:registration_details].any? %>">
       <%= f.label :registration_details, t("company_settings.view.edit.registration_details") %>
-      <%= f.text_area :registration_details, rows: 3 %>
+      <%= f.text_area :registration_details, rows: 3, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:email].any? %>">
       <%= f.label :email, t("company_settings.view.edit.company_email") %>
-      <%= f.email_field :email %>
+      <%= f.email_field :email, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:phone].any? %>">
       <%= f.label :phone, t("company_settings.view.edit.company_phone") %>
-      <%= f.text_field :phone %>
+      <%= f.text_field :phone, class: ui_input_classes %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:address].any? %>">
       <%= f.label :address, t("company_settings.view.edit.company_address") %>
-      <%= f.text_area :address, rows: 2 %>
+      <%= f.text_area :address, rows: 2, class: ui_input_classes %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:website].any? %>">
       <%= f.label :website, t("company_settings.view.edit.website") %>
-      <%= f.text_field :website, placeholder: t("company_settings.view.edit.website_placeholder") %>
+      <%= f.text_field :website, placeholder: t("company_settings.view.edit.website_placeholder"), class: ui_input_classes %>
     </div>
 
     <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_default_business") %></div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_currency].any? %>">
       <%= f.label :default_currency, t("company_settings.view.edit.default_currency") %>
-      <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY MXN BRL COP CLP PEN ARS], @company.default_currency.presence || "USD") %>
+      <%= f.select :default_currency, options_for_select(%w[USD CAD EUR GBP CNY JPY MXN BRL COP CLP PEN ARS], @company.default_currency.presence || "USD"), {}, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_validity_days].any? %>">
       <%= f.label :default_validity_days, t("company_settings.view.edit.default_validity_days") %>
-      <%= f.number_field :default_validity_days, min: 1, step: 1 %>
+      <%= f.number_field :default_validity_days, min: 1, step: 1, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_trade_term].any? %>">
       <%= f.label :default_trade_term, t("company_settings.view.edit.default_trade_terms") %>
-      <%= f.text_field :default_trade_term, placeholder: t("company_settings.view.edit.default_trade_terms_placeholder") %>
+      <%= f.text_field :default_trade_term, placeholder: t("company_settings.view.edit.default_trade_terms_placeholder"), class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_payment_term].any? %>">
       <%= f.label :default_payment_term, t("company_settings.view.edit.default_payment_terms") %>
-      <%= f.text_field :default_payment_term, placeholder: t("company_settings.view.edit.default_payment_terms_placeholder") %>
+      <%= f.text_field :default_payment_term, placeholder: t("company_settings.view.edit.default_payment_terms_placeholder"), class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:default_tax_rate].any? %>">
       <%= f.label :default_tax_rate, t("company_settings.view.edit.default_tax_rate") %>
-      <%= f.number_field :default_tax_rate, step: 0.01, min: 0 %>
+      <%= f.number_field :default_tax_rate, step: 0.01, min: 0, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:brand_color].any? || @template.errors[:accent_color].any? %>">
@@ -98,25 +98,24 @@
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:logo].any? %>">
       <div class="company-logo-row">
-        <div class="company-logo-preview">
-          <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>
+        <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>
+        <label class="company-logo-preview company-logo-preview-trigger" for="company_logo_upload">
           <% if has_logo %>
             <%= image_tag @company.logo, alt: t("company_settings.view.edit.company_logo_alt"), id: "company_logo_preview_img" %>
           <% else %>
             <%= tag.img id: "company_logo_preview_img", alt: t("company_settings.view.edit.company_logo_alt"), hidden: true %>
           <% end %>
           <span id="company_logo_preview_fallback" <%= "hidden" if has_logo %>><%= @company.name.to_s.first.to_s.upcase %></span>
-        </div>
+        </label>
         <div class="company-logo-actions">
-          <%= f.label :logo, t("company_settings.view.edit.upload_company_logo") %>
-          <%= f.file_field :logo, accept: "image/*", data: { live_preview_target: "#company_logo_preview_img", live_preview_fallback: "#company_logo_preview_fallback" } %>
-          <% if @company.logo.attached? %>
-            <%= button_tag t("company_settings.view.edit.remove_current_logo"),
-                           type: "submit",
-                           name: "company[remove_logo]",
-                           value: "1",
-                           class: "btn btn-secondary" %>
-          <% end %>
+          <%= f.file_field :logo,
+                           id: "company_logo_upload",
+                           accept: "image/*",
+                           class: "company-logo-file-input",
+                           data: { live_preview_target: "#company_logo_preview_img", live_preview_fallback: "#company_logo_preview_fallback" } %>
+          <label for="company_logo_upload" class="<%= ui_button_classes(:secondary) %>">
+            <%= t("company_settings.view.edit.upload_company_logo") %>
+          </label>
         </div>
       </div>
     </div>
@@ -146,17 +145,17 @@
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_subject].any? %>">
       <%= f.label :reminder_email_subject, t("company_settings.view.edit.reminder_email_subject") %>
-      <%= f.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %>
+      <%= f.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT, class: ui_input_classes %>
     </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_body].any? %>">
       <%= f.label :reminder_email_body, t("company_settings.view.edit.reminder_email_body") %>
-      <%= f.text_area :reminder_email_body, rows: 3, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %>
+      <%= f.text_area :reminder_email_body, rows: 3, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY, class: ui_input_classes %>
     </div>
 
     <div class="<%= 'settings-field-error' if @company.errors[:reminder_email_cta_label].any? %>">
       <%= f.label :reminder_email_cta_label, t("company_settings.view.edit.reminder_button_label") %>
-      <%= f.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %>
+      <%= f.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL, class: ui_input_classes %>
     </div>
 
     <div class="settings-grid-span-2 settings-actions">
@@ -166,40 +165,46 @@
 </section>
 
 <section class="team-members-panel">
-  <h2>Company Credentials</h2>
-  <p class="team-members-hint">These files appear as download links on public quotes and as a list in PDF export.</p>
+  <h2><%= t("company_settings.view.edit.credentials_title") %></h2>
+  <p class="team-members-hint"><%= t("company_settings.view.edit.credentials_hint") %></p>
 
   <div class="quote-section-block" style="margin-bottom: 1rem;">
-    <h3>Upload Credential Document</h3>
+    <h3><%= t("company_settings.view.edit.upload_credential_document") %></h3>
     <%= form_with model: @company_document, url: company_documents_path, local: true, multipart: true, class: "settings-form-grid" do |doc_form| %>
       <div>
-        <%= doc_form.label :title, "Document Title" %>
-        <%= doc_form.text_field :title, placeholder: "Optional. Defaults to filename." %>
+        <%= doc_form.label :title, t("company_settings.view.edit.credential_document_title") %>
+        <%= doc_form.text_field :title, placeholder: t("company_settings.view.edit.credential_document_title_placeholder"), class: ui_input_classes %>
       </div>
       <div>
-        <%= doc_form.label :document_type %>
-        <%= doc_form.select :document_type, options_for_select(CompanyDocument::DOCUMENT_TYPES.map { |value| [value.humanize, value] }, @company_document.document_type.presence || "company_profile") %>
+        <%= doc_form.label :document_type, t("company_settings.view.edit.credential_document_type") %>
+        <%= doc_form.select :document_type,
+                            options_for_select(
+                              CompanyDocument::DOCUMENT_TYPES.map { |value| [t("company_settings.view.edit.credential_types.#{value}"), value] },
+                              @company_document.document_type.presence || "company_profile"
+                            ),
+                            {},
+                            class: ui_input_classes %>
       </div>
       <div class="settings-grid-span-2">
-        <%= doc_form.label :file, "File" %>
+        <%= doc_form.label :file, t("company_settings.view.edit.credential_file") %>
         <%= doc_form.file_field :file %>
       </div>
       <div class="settings-grid-span-2">
-        <%= doc_form.submit "Upload Document", class: "btn btn-secondary" %>
+        <%= doc_form.submit t("company_settings.view.edit.upload_document"), class: "btn btn-secondary" %>
       </div>
     <% end %>
   </div>
 
   <div class="quote-section-block">
-    <h3>Current Credentials</h3>
+    <h3><%= t("company_settings.view.edit.current_credentials") %></h3>
     <% if @company_documents.any? %>
       <div class="table-responsive">
         <table class="customers-table saas-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Type</th>
-              <th>File</th>
+              <th><%= t("company_settings.view.edit.credential_table_title") %></th>
+              <th><%= t("company_settings.view.edit.credential_table_type") %></th>
+              <th><%= t("company_settings.view.edit.credential_table_file") %></th>
               <th></th>
             </tr>
           </thead>
@@ -216,7 +221,11 @@
                   <% end %>
                 </td>
                 <td class="text-right">
-                  <%= button_to "Delete", company_document_path(document), method: :delete, data: { turbo_confirm: "Delete this document?" }, class: "btn btn-secondary" %>
+                  <%= button_to t("company_settings.view.edit.delete_document"),
+                                company_document_path(document),
+                                method: :delete,
+                                data: { turbo_confirm: t("company_settings.view.edit.delete_document_confirm") },
+                                class: "btn btn-secondary" %>
                 </td>
               </tr>
             <% end %>
@@ -224,7 +233,7 @@
         </table>
       </div>
     <% else %>
-      <p class="team-members-hint">No credential documents uploaded yet.</p>
+      <p class="team-members-hint"><%= t("company_settings.view.edit.no_credentials_uploaded") %></p>
     <% end %>
   </div>
 </section>

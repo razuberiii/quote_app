@@ -24,11 +24,17 @@ Rails.application.routes.draw do
     root "landing#index"
   end
   get "demo", to: "landing#demo"
+  get "contact", to: "landing#contact"
   get "dashboard", to: "dashboard#index"
   patch "onboarding/dismiss", to: "onboarding#dismiss", as: :dismiss_onboarding
   get "sample-quote", to: "landing#sample_quote"
   get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
   get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
+  get "quote-revision-control", to: "seo#quote_revision_control"
+  get "buyer-facing-quotation-link", to: "seo#buyer_facing_quotation_link"
+  get "quotation-software-vs-excel", to: "seo#quotation_software_vs_excel"
+  get "quotation-software-vs-erp", to: "seo#quotation_software_vs_erp"
+  get "resources", to: "seo#resources"
   resources :contact_requests, only: [ :create ]
 
   resources :notifications, only: [] do

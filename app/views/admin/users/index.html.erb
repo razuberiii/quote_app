@@ -20,8 +20,8 @@
           <td><%= user.role %></td>
           <td>
             <%= form_with model: [ :admin, user ], method: :patch, local: true do |f| %>
-              <%= f.select :role, User.roles.keys.map { |role| [ role.titleize, role ] } %>
-              <%= f.submit "Update" %>
+              <%= f.select :role, User.roles.keys.map { |role| [ role.titleize, role ] }, {}, class: ui_input_classes %>
+              <%= f.submit "Update", class: ui_button_classes(:secondary) %>
             <% end %>
           </td>
         </tr>

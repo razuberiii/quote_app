@@ -274,7 +274,6 @@
                 <th><%= t("dashboard.view.index.status") %></th>
                 <th><%= t("dashboard.view.index.engagement") %></th>
                 <th><%= t("dashboard.view.index.next_move") %></th>
-                <th class="text-right"><%= t("dashboard.view.index.total") %></th>
               </tr>
             </thead>
             <tbody>
@@ -282,25 +281,30 @@
                 <% @recent_quotes.each do |entry| %>
                   <tr>
                     <td data-label="<%= t("dashboard.view.index.quote") %>">
-                      <strong><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
+                      <strong class="dashboard-quote-title"><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
                       <% if entry[:display_name].present? %>
                         <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
                       <% end %>
                     </td>
-                    <td data-label="<%= t("dashboard.view.index.buyer") %>"><%= entry[:customer_name] %></td>
+                    <td data-label="<%= t("dashboard.view.index.buyer") %>"><span class="dashboard-cell-ellipsis"><%= entry[:customer_name] %></span></td>
                     <td data-label="<%= t("dashboard.view.index.status") %>">
                       <%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %>
                     </td>
                     <td data-label="<%= t("dashboard.view.index.engagement") %>">
                       <span class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></span>
                     </td>
-                    <td data-label="<%= t("dashboard.view.index.next_move") %>"><span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span></td>
-                    <td data-label="<%= t("dashboard.view.index.total") %>" class="text-right"><%= quote_money(entry[:total], entry[:currency]) %></td>
+                    <td data-label="<%= t("dashboard.view.index.next_move") %>">
+                      <% if entry[:next_action][:path].present? %>
+                        <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %>
+                      <% else %>
+                        <span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span>
+                      <% end %>
+                    </td>
                   </tr>
                 <% end %>
               <% else %>
                 <tr>
-                  <td data-label="<%= t("dashboard.view.index.recent_quotes") %>" colspan="6" class="customers-empty-row">
+                  <td data-label="<%= t("dashboard.view.index.recent_quotes") %>" colspan="5" class="customers-empty-row">
                     <%= ui_empty_state(
                           title: t("dashboard.view.index.no_quotes_yet"),
                           body: t("dashboard.view.index.no_quotes_yet_body"),
@@ -312,6 +316,43 @@
                 </tr>
               <% end %>
             </tbody>
+          <% end %>
+        </div>
+        <div class="dashboard-mobile-list dashboard-mobile-list--recent-quotes" aria-hidden="true">
+          <% if @recent_quotes.any? %>
+            <% @recent_quotes.each do |entry| %>
+              <article class="dashboard-mobile-item" data-clickable-href="<%= quote_path(entry[:quote]) %>" tabindex="0" aria-label="<%= t("dashboard.view.index.open_quote", no: entry[:quote_no]) %>">
+                <div class="dashboard-mobile-row">
+                  <span><%= t("dashboard.view.index.quote") %></span>
+                  <div class="dashboard-mobile-stack">
+                    <strong><%= entry[:display_name].presence || entry[:quote_no] %></strong>
+                    <% if entry[:display_name].present? %>
+                      <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span><%= t("dashboard.view.index.buyer") %></span>
+                  <strong><%= entry[:customer_name] %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span><%= t("dashboard.view.index.status") %></span>
+                  <div class="dashboard-mobile-stack"><%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %></div>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span><%= t("dashboard.view.index.engagement") %></span>
+                  <strong class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></strong>
+                </div>
+                <div class="dashboard-mobile-row">
+                  <span><%= t("dashboard.view.index.next_move") %></span>
+                  <% if entry[:next_action][:path].present? %>
+                    <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: "dashboard-next-step-btn #{entry[:next_action][:style]}" %>
+                  <% else %>
+                    <span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span>
+                  <% end %>
+                </div>
+              </article>
+            <% end %>
           <% end %>
         </div>
       <% end %>
@@ -346,14 +387,6 @@
             </div>
             <strong class="dashboard-overview-value"><%= @deal_overview[:revision_rate] %>%</strong>
             <p class="dashboard-overview-insight"><%= @deal_overview[:revision_insight] %></p>
-          </li>
-          <li>
-            <div class="dashboard-overview-label-row">
-              <span><%= t("dashboard.view.index.document_mix") %></span>
-              <small><%= t("dashboard.view.index.quotation_vs_pi") %></small>
-            </div>
-            <strong class="dashboard-overview-value"><%= @deal_overview[:export_mix] %></strong>
-            <p class="dashboard-overview-insight"><%= @deal_overview[:decision_insight] %></p>
           </li>
         </ul>
       <% end %>
@@ -395,7 +428,7 @@
                   <tr data-clickable-href="<%= product_path(product) %>" tabindex="0" aria-label="<%= t("dashboard.view.index.open_product", name: product.name) %>">
                     <td data-label="<%= t("dashboard.view.index.product") %>">
                       <div class="dashboard-mobile-value">
-                        <strong><%= product.name %></strong>
+                        <strong class="dashboard-cell-ellipsis"><%= product.name %></strong>
                       </div>
                     </td>
                     <td data-label="<%= t("dashboard.view.index.quoted") %>">

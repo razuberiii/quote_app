@@ -234,7 +234,7 @@ zh-CN:
         deal_radar_empty: 当前没有紧急商机动态。
         view_quote: 查看报价
         recent_quotes: 最新报价
-        recent_quotes_caption: 展示活跃客户中最近 6 条报价。
+        recent_quotes_caption: 展示活跃客户中最近 5 条报价。
         quote: 报价
         buyer: 买家
         status: 状态

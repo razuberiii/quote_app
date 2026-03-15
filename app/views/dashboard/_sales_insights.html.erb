@@ -73,7 +73,7 @@
       <div class="sales-insight-card__body">
         <% if @analytics_revision.any? %>
           <div class="table-responsive">
-            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface sales-insight-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
               <thead>
                 <tr>
                   <th><%= t("analytics.revision_depth.revision") % { n: "#" } %></th>
@@ -85,10 +85,10 @@
               <tbody>
                 <% @analytics_revision.each do |row| %>
                   <tr>
-                    <td><%= t("analytics.revision_depth.revision", n: row[:revision_number]) %></td>
-                    <td class="text-right"><%= row[:total] %></td>
-                    <td class="text-right"><%= row[:wins] %></td>
-                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>"><%= row[:win_rate] %>%</td>
+                    <td data-label="<%= t("analytics.revision_depth.revision") % { n: "#" } %>"><%= t("analytics.revision_depth.revision", n: row[:revision_number]) %></td>
+                    <td class="text-right" data-label="<%= t("analytics.revision_depth.total") %>"><%= row[:total] %></td>
+                    <td class="text-right" data-label="<%= t("analytics.revision_depth.wins") %>"><%= row[:wins] %></td>
+                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>" data-label="<%= t("analytics.revision_depth.win_rate") %>"><%= row[:win_rate] %>%</td>
                   </tr>
                 <% end %>
               </tbody>
@@ -106,7 +106,7 @@
       <div class="sales-insight-card__body">
         <% if @analytics_top_products.any? %>
           <div class="table-responsive">
-            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface sales-insight-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
               <thead>
                 <tr>
                   <th></th>
@@ -119,11 +119,11 @@
               <tbody>
                 <% @analytics_top_products.each do |row| %>
                   <tr>
-                    <td><%= row[:product_name] %></td>
-                    <td class="text-right"><%= row[:quotes_count] %></td>
-                    <td class="text-right"><%= row[:wins_count] %></td>
-                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>"><%= row[:win_rate] %>%</td>
-                    <td class="text-right"><%= number_to_currency(row[:avg_price], precision: 0) %></td>
+                    <td data-label="<%= t("dashboard.view.index.product") %>"><%= row[:product_name] %></td>
+                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.quotes_30d") %>"><%= row[:quotes_count] %></td>
+                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.wins") %>"><%= row[:wins_count] %></td>
+                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>" data-label="<%= t("analytics.product_intelligence.win_rate") %>"><%= row[:win_rate] %>%</td>
+                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.avg_price") %>"><%= number_to_currency(row[:avg_price], precision: 0) %></td>
                   </tr>
                 <% end %>
               </tbody>

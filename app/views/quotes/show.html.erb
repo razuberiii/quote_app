@@ -16,7 +16,7 @@
   <% end %>
   <% live_refresh_enabled = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
   <div id="quote-page-content"
-       data-refresh-url="<%= quote_path(@quote, request.query_parameters.except("created").merge(format: :turbo_stream)) %>"
+       data-refresh-url="<%= quote_path(@quote, request.query_parameters.except("created", "fill_reason").merge(format: :turbo_stream)) %>"
        data-live-refresh="<%= live_refresh_enabled %>">
     <%= render "show_content" %>
   </div>

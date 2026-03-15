@@ -234,7 +234,7 @@ es-419:
         deal_radar_empty: No hay señales urgentes en las oportunidades.
         view_quote: Ver cotización
         recent_quotes: Cotizaciones recientes
-        recent_quotes_caption: Mostrando las 6 cotizaciones más recientes de las cuentas activas.
+        recent_quotes_caption: Mostrando las 5 cotizaciones más recientes de las cuentas activas.
         quote: Cotización
         buyer: Comprador
         status: Estado

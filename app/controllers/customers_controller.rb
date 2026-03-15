@@ -847,7 +847,7 @@ class CustomersController < ApplicationController
 
     latest_quotes
       .sort_by { |quote| [ -(quote.updated_at || Time.zone.at(0)).to_i, recent_quote_priority(quote) ] }
-      .first(6)
+      .first(5)
       .map do |quote|
         status = quote_display_status(quote)
         view_signal, next_action = recent_quote_signals(quote, status)
@@ -1230,7 +1230,7 @@ class CustomersController < ApplicationController
     if status == "draft"
       [
         I18n.t("dashboard.logic.signal.draft_not_shared"),
-        { label: I18n.t("dashboard.logic.signal.send_now"), path: edit_quote_path(quote), style: "is-watch" }
+        { label: I18n.t("dashboard.logic.signal.send_now"), path: quote_path(quote), style: "is-watch" }
       ]
     elsif signal&.type == "not_viewed_7d"
       [

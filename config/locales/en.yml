@@ -234,7 +234,7 @@ en:
         deal_radar_empty: No urgent deal activity right now.
         view_quote: View Quote
         recent_quotes: Recent Quotes
-        recent_quotes_caption: Showing the 6 most recent quotes across active accounts.
+        recent_quotes_caption: Showing the 5 most recent quotes across active accounts.
         quote: Quote
         buyer: Buyer
         status: Status

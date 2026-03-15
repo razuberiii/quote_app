@@ -44,7 +44,7 @@ module Users
           render :new, status: :unprocessable_entity
         }
       )
-        return
+        nil
       end
     end
 

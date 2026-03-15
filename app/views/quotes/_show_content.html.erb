@@ -284,7 +284,7 @@
         <% @quote.quote_items.ordered.each do |item| %>
           <tr>
             <% if active_template.show_images? %>
-              <td>
+              <td data-label="<%= t("quote_document.labels.image") %>">
                 <% if item.product&.display_image.present? %>
                   <%= image_tag item.product.display_image, class: "quote-item-image" %>
                 <% else %>
@@ -292,7 +292,7 @@
                 <% end %>
               </td>
             <% end %>
-            <td>
+            <td data-label="<%= @template.resolved_table_label("description") %>">
               <div class="quote-item-desc">
                 <div class="quote-item-desc-main"><%= item.product&.name.presence || t("quote_document.labels.item") %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
@@ -317,9 +317,9 @@
                 <% end %>
               </div>
             </td>
-            <td class="quote-col-right"><%= item.quantity %></td>
-            <td class="quote-col-right quote-col-money"><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
-            <td class="quote-col-right quote-col-money"><%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %></td>
+            <td class="quote-col-right" data-label="<%= @template.resolved_table_label("qty") %>"><%= item.quantity %></td>
+            <td class="quote-col-right quote-col-money" data-label="<%= @template.resolved_table_label("unit_price") %>"><%= quote_money(item.unit_price, @quote.currency, show_symbol: active_template.show_currency) %></td>
+            <td class="quote-col-right quote-col-money" data-label="<%= @template.resolved_table_label("line_total") %>"><%= quote_money(item.line_total, @quote.currency, show_symbol: active_template.show_currency) %></td>
           </tr>
         <% end %>
       </tbody>

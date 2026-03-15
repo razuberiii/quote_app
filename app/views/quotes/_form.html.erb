@@ -275,7 +275,7 @@
                 <% item = item_fields.object %>
                 <% product_name = item.product&.name.presence || item.description.to_s %>
                 <tr class="quote-item-row">
-                  <td class="quote-col-product">
+                  <td class="quote-col-product" data-label="<%= t("quotes.view.form.product_name") %>">
                     <div class="product-search">
                       <input type="text" class="js-product-name <%= ui_input_classes %>" value="<%= product_name %>" placeholder="<%= t("quotes.view.form.type_to_search_product") %>">
                       <div class="js-product-dropdown"></div>
@@ -284,7 +284,7 @@
                     <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
                   </td>
                   <%= item_fields.hidden_field :description, class: "js-description" %>
-                  <td class="quote-col-specs">
+                  <td class="quote-col-specs" data-label="<%= t("quotes.view.form.specifications") %>">
                     <% spec_payloads = item.product&.available_spec_preset_payloads || [] %>
                     <select class="js-spec-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_spec_preset_id %>">
                       <option value=""><%= t("quotes.view.form.custom_specs") %></option>
@@ -323,7 +323,7 @@
                       </div>
                     </div>
                   </td>
-                  <td class="quote-col-addons">
+                  <td class="quote-col-addons" data-label="<%= t("quotes.view.form.add_ons") %>">
                     <% addon_payloads = item.product&.available_addon_preset_payloads || [] %>
                     <select class="js-addon-preset-select quote-inline-select <%= ui_input_classes %>" data-default-id="<%= item.product&.default_addon_preset_id %>">
                       <option value=""><%= t("quotes.view.form.custom_add_ons") %></option>
@@ -362,13 +362,13 @@
                       </div>
                     </div>
                   </td>
-                  <td class="quote-col-price">
+                  <td class="quote-col-price" data-label="<%= t("quotes.view.form.unit_price") %>">
                     <%= item_fields.number_field :unit_price, step: 0.01, class: ui_input_classes("js-unit-price"), placeholder: "0.00" %>
                   </td>
-                  <td class="quote-col-qty">
+                  <td class="quote-col-qty" data-label="<%= t("quotes.view.form.quantity") %>">
                     <%= item_fields.number_field :quantity, min: 1, placeholder: "1", class: ui_input_classes("js-quantity") %>
                   </td>
-                  <td class="quote-col-remove">
+                  <td class="quote-col-remove" data-label="<%= t("quotes.view.form.remove") %>">
                     <%= item_fields.hidden_field :_destroy, class: "js-destroy-flag" %>
                     <button type="button" class="quote-item-remove-icon js-remove-item" aria-label="<%= t("quotes.view.form.remove_item") %>">&times;</button>
                   </td>

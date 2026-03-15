@@ -104,6 +104,19 @@
   flex-wrap: wrap;
   flex: 0 0 auto;
 }
+
+@media (max-width: 768px) {
+  .app-root .navbar-brand-wrap {
+    flex: 1 1 auto;
+  }
+
+  .app-root .navbar-company-context {
+    max-width: 55vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 .app-root .navbar h1 {
   font-size: 1.5rem;
 }
@@ -243,7 +256,8 @@
   .app-root .navbar-menu > li > a:not(.app-nav-link).is-active {
     background: var(--ui-nav-link-active-bg);
     color: var(--ui-nav-link-active-fg);
-    box-shadow: inset 3px 0 0 color-mix(in srgb, var(--ui-nav-link-active-fg) 82%, transparent);
+    box-shadow: inset 3px 0 0
+      color-mix(in srgb, var(--ui-nav-link-active-fg) 82%, transparent);
   }
 
   .app-root .navbar-container.menu-open .navbar-menu,
@@ -881,7 +895,9 @@
 .preview-table-head,
 .preview-table-row {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(56px, 0.35fr) minmax(84px, 0.5fr) minmax(88px, 0.55fr);
+  grid-template-columns:
+    minmax(0, 1.35fr) minmax(56px, 0.35fr) minmax(84px, 0.5fr)
+    minmax(88px, 0.55fr);
   gap: 0.45rem;
   align-items: start;
 }
@@ -980,7 +996,11 @@
 }
 .template-preview-industry {
   border-width: 2px;
-  border-color: color-mix(in srgb, var(--template-accent, #1f4e79) 45%, #cbd5e1);
+  border-color: color-mix(
+    in srgb,
+    var(--template-accent, #1f4e79) 45%,
+    #cbd5e1
+  );
   background: #ffffff;
 }
 .template-preview-industry .preview-table-head {
@@ -1435,12 +1455,6 @@
     margin-top: 0.24rem;
   }
 
-  .sales-dashboard,
-  .dashboard-detail-grid,
-  .dashboard-panel {
-    overflow-x: clip;
-  }
-
   .quote-document .quote-items-table,
   .public-quote-document .quote-items-table {
     min-width: 0;
@@ -1449,6 +1463,17 @@
   .quote-item-image {
     width: 44px;
     height: 44px;
+  }
+
+  .sales-dashboard .app-ui-button,
+  .sales-dashboard .dashboard-next-step-btn {
+    max-width: 100%;
+    white-space: normal;
+    flex-wrap: wrap;
+  }
+
+  .sales-dashboard .app-ui-button kbd.app-shortcut-badge {
+    white-space: nowrap;
   }
 } /* Unified card baseline for core app containers */
 .dashboard-panel,
@@ -1470,8 +1495,6 @@
   border-radius: var(--ui-radius-lg);
   border-color: var(--ui-border);
 }
-
-
 
 /*
   Shared app component layer.
@@ -1511,7 +1534,8 @@
 .app-root .account-menu.is-open .account-menu-trigger {
   background: var(--ui-nav-link-hover-bg);
   border-color: var(--ui-nav-control-border);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-nav-control-border) 35%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--ui-nav-control-border) 35%, transparent);
 }
 .account-avatar {
   width: 24px;
@@ -1609,9 +1633,10 @@
 .app-nav-link.is-active {
   background: var(--ui-nav-link-active-bg);
   color: var(--ui-nav-link-active-fg);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ui-nav-link-active-fg) 16%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in srgb, var(--ui-nav-link-active-fg) 16%, transparent);
 }
-  .app-root .app-nav-link-icon {
+.app-root .app-nav-link-icon {
   width: 1rem;
   height: 1rem;
   display: inline-flex;
@@ -4163,6 +4188,10 @@ input[type="submit"].btn:hover {
   min-width: 0;
 }
 
+.dashboard-onboarding-step-main > div {
+  min-width: 0;
+}
+
 .dashboard-onboarding-step-icon {
   width: 22px;
   height: 22px;
@@ -4200,6 +4229,13 @@ input[type="submit"].btn:hover {
   color: #64748b;
   font-size: 0.75rem;
   line-height: 1.3;
+}
+
+.dashboard-onboarding-step-label,
+.dashboard-onboarding-step-detail {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .dashboard-onboarding-step-action {
@@ -4530,7 +4566,9 @@ input[type="submit"].btn:hover {
 .app-command-label-sub {
   color: #64748b;
   font-size: 0.78rem;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
@@ -4657,18 +4695,34 @@ kbd.app-shortcut-badge {
   background: #e2e8f0;
   border-color: #94a3b8;
 }
+.dashboard-products-table {
+  table-layout: fixed;
+}
+.dashboard-products-table td {
+  overflow: hidden;
+}
+.dashboard-quote-title,
+.dashboard-quote-title a,
+.dashboard-cell-ellipsis {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dashboard-overview-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
   gap: 0;
+  margin-top: 1.1rem;
 }
 .dashboard-overview-list li {
   border-bottom: 1px solid #e2e8f0;
   border-radius: 0;
   background: transparent;
-  padding: 0.95rem 0;
+  padding: 1.05rem 0;
 }
 .dashboard-overview-list li:last-child {
   border-bottom: none;
@@ -4851,11 +4905,19 @@ kbd.app-shortcut-badge {
   min-width: 118px;
 }
 .dashboard-recent-table.dashboard-products-table th:nth-child(5),
-.dashboard-recent-table.dashboard-products-table td:nth-child(5),
-.dashboard-recent-table.dashboard-products-table th:nth-child(6),
-.dashboard-recent-table.dashboard-products-table td:nth-child(6) {
-  min-width: 96px;
+.dashboard-recent-table.dashboard-products-table td:nth-child(5) {
+  min-width: 140px;
   padding-right: 1rem;
+}
+
+.dashboard-quote-title,
+.dashboard-cell-ellipsis {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: top;
 }
 .dashboard-recent-table td .dashboard-quote-id {
   display: block;
@@ -4889,6 +4951,10 @@ kbd.app-shortcut-badge {
   border-radius: 16px;
   background: var(--ui-surface-bg);
 }
+
+.dashboard-task-item > div:first-child {
+  min-width: 0;
+}
 .dashboard-task-item.is-urgent {
   border-color: #fed7aa;
   background: #fff8f1;
@@ -4905,6 +4971,14 @@ kbd.app-shortcut-badge {
   margin: 0.28rem 0 0 0;
   color: #64748b;
   font-size: 0.84rem;
+}
+
+.dashboard-task-item strong,
+.dashboard-task-item p {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 .dashboard-task-actions {
   display: flex;
@@ -5962,34 +6036,66 @@ kbd.app-shortcut-badge {
   line-height: 1.42;
   vertical-align: middle;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(1),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(1) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(1),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(1) {
   width: 20%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(2),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(2) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(2),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(2) {
   width: 20%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(3),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(3) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(3),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(3) {
   width: 8%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(4),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(4),
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(5),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(5) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(4),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(4),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(5),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(5) {
   width: 10%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(6),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(6) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(6),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(6) {
   width: 8%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(7),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(7) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(7),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(7) {
   width: 10%;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(8),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(8) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  th:nth-child(8),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(8) {
   width: 14%;
 }
 .app-page-shell--customers .customer-list-name-cell {
@@ -6047,16 +6153,24 @@ kbd.app-shortcut-badge {
   padding: 0.2rem 0.58rem;
   font-size: 0.76rem;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(2) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(2) {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(7),
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(8) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(7),
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(8) {
   vertical-align: top;
 }
-.app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(8) {
+.app-page-shell--customers
+  .customers-table.saas-table.app-data-table
+  td:nth-child(8) {
   text-align: center;
 }
 .app-surface {
@@ -6331,7 +6445,11 @@ kbd.app-shortcut-badge {
   overflow: hidden;
   border-color: rgba(221, 229, 238, 0.95) !important;
   background:
-    radial-gradient(circle at top center, rgba(226, 236, 247, 0.62), transparent 42%),
+    radial-gradient(
+      circle at top center,
+      rgba(226, 236, 247, 0.62),
+      transparent 42%
+    ),
     rgba(255, 255, 255, 0.84) !important;
   box-shadow:
     0 24px 56px rgba(15, 23, 42, 0.08),
@@ -6350,8 +6468,11 @@ kbd.app-shortcut-badge {
   padding: clamp(1.4rem, 1rem + 1.4vw, 2.4rem) !important;
   border-radius: 30px !important;
   border-color: rgba(218, 228, 238, 0.92) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 255, 0.9)) !important;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.92),
+    rgba(248, 251, 255, 0.9)
+  ) !important;
   box-shadow:
     0 28px 64px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
@@ -6479,7 +6600,11 @@ kbd.app-shortcut-badge {
 }
 .marketing-root .marketing-switcher__tab.is-active {
   border-color: rgba(110, 138, 166, 0.58);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.96));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.98),
+    rgba(246, 250, 255, 0.96)
+  );
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
 }
 .marketing-root .marketing-switcher__tab.is-inactive {
@@ -6493,7 +6618,9 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-hero-copy .marketing-switcher__tab:hover,
 .marketing-root .marketing-hero-copy .marketing-switcher__tab:focus-visible,
 .marketing-root .marketing-switcher__nav--rail .marketing-switcher__tab:hover,
-.marketing-root .marketing-switcher__nav--rail .marketing-switcher__tab:focus-visible {
+.marketing-root
+  .marketing-switcher__nav--rail
+  .marketing-switcher__tab:focus-visible {
   box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
 }
 .marketing-root .marketing-switcher__tab--compact {
@@ -6529,10 +6656,16 @@ kbd.app-shortcut-badge {
   color: #526377;
   font-size: 0.68rem;
 }
-.marketing-root .marketing-switcher__tab--subtle .marketing-switcher__tab-copy strong {
+.marketing-root
+  .marketing-switcher__tab--subtle
+  .marketing-switcher__tab-copy
+  strong {
   font-size: 0.92rem;
 }
-.marketing-root .marketing-switcher__tab--subtle .marketing-switcher__tab-copy span {
+.marketing-root
+  .marketing-switcher__tab--subtle
+  .marketing-switcher__tab-copy
+  span {
   font-size: 0.82rem;
 }
 .marketing-root .marketing-switcher__tab-step {
@@ -6567,7 +6700,10 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-switcher__nav--story .marketing-switcher__tab {
   padding: 0.82rem 0.95rem;
 }
-.marketing-root .marketing-switcher__nav--story .marketing-switcher__tab-copy span {
+.marketing-root
+  .marketing-switcher__nav--story
+  .marketing-switcher__tab-copy
+  span {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -6610,7 +6746,11 @@ kbd.app-shortcut-badge {
 }
 .marketing-root .marketing-dark-card {
   background:
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.22), transparent 36%),
+    radial-gradient(
+      circle at top right,
+      rgba(37, 99, 235, 0.22),
+      transparent 36%
+    ),
     linear-gradient(180deg, #0f172a 0%, #020617 100%) !important;
   box-shadow:
     0 22px 48px rgba(2, 6, 23, 0.26),
@@ -6713,8 +6853,11 @@ kbd.app-shortcut-badge {
   padding: 1.15rem;
   border: 1px solid rgba(219, 228, 238, 0.92);
   border-radius: 26px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(246, 250, 255, 0.94));
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.96),
+    rgba(246, 250, 255, 0.94)
+  );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 16px 34px rgba(15, 23, 42, 0.04);
@@ -6893,14 +7036,22 @@ kbd.app-shortcut-badge {
   border-top: 1px solid rgba(221, 229, 238, 0.84);
   background: transparent;
 }
-.marketing-root .marketing-note-strip--summary .marketing-note-strip__item .app-section-caption {
+.marketing-root
+  .marketing-note-strip--summary
+  .marketing-note-strip__item
+  .app-section-caption {
   margin-top: 0.55rem;
   max-width: 34ch;
 }
-.marketing-root .marketing-note-strip--summary .marketing-note-strip__item--featured {
+.marketing-root
+  .marketing-note-strip--summary
+  .marketing-note-strip__item--featured {
   padding-inline: 0.2rem;
 }
-.marketing-root .marketing-note-strip--summary .marketing-note-strip__item--featured h2 {
+.marketing-root
+  .marketing-note-strip--summary
+  .marketing-note-strip__item--featured
+  h2 {
   color: #0f172a;
 }
 .marketing-root .marketing-editorial-section {
@@ -6993,7 +7144,9 @@ kbd.app-shortcut-badge {
   display: none;
 }
 .marketing-root .marketing-faq-item__icon {
-  transition: transform 180ms ease, opacity 180ms ease;
+  transition:
+    transform 180ms ease,
+    opacity 180ms ease;
 }
 .marketing-root .marketing-faq-item[open] .marketing-faq-item__icon {
   transform: rotate(45deg);
@@ -7025,8 +7178,11 @@ kbd.app-shortcut-badge {
   padding: 1.3rem 1.35rem 1.4rem;
   border: 1px solid rgba(206, 219, 232, 0.95);
   border-radius: 24px;
-  background:
-    linear-gradient(180deg, rgba(233, 241, 250, 0.9), rgba(244, 248, 252, 0.92));
+  background: linear-gradient(
+    180deg,
+    rgba(233, 241, 250, 0.9),
+    rgba(244, 248, 252, 0.92)
+  );
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.88),
     0 14px 28px rgba(15, 23, 42, 0.04);
@@ -7232,7 +7388,10 @@ kbd.app-shortcut-badge {
   border-top: 1px solid rgba(221, 229, 238, 0.84);
   text-decoration: none;
   color: inherit;
-  transition: transform 180ms ease, border-color 180ms ease, background-color 180ms ease;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
 }
 .marketing-root .marketing-resource-link:hover,
 .marketing-root .marketing-resource-link:focus-visible {
@@ -7255,7 +7414,11 @@ kbd.app-shortcut-badge {
 }
 .marketing-root .marketing-cta-band {
   background:
-    radial-gradient(circle at top right, rgba(73, 105, 148, 0.16), transparent 34%),
+    radial-gradient(
+      circle at top right,
+      rgba(73, 105, 148, 0.16),
+      transparent 34%
+    ),
     linear-gradient(180deg, #11253a, #132840) !important;
   box-shadow:
     0 22px 48px rgba(15, 23, 42, 0.13),
@@ -7278,7 +7441,9 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-mockup-emphasis-target.is-emphasized {
   border-color: rgba(59, 130, 246, 0.28);
   background-color: rgba(239, 246, 255, 0.88);
-  box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.16), 0 10px 24px rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(96, 165, 250, 0.16),
+    0 10px 24px rgba(15, 23, 42, 0.08);
   transform: translateY(-1px);
 }
 .marketing-root .marketing-evidence-card .app-stat-label {
@@ -7426,7 +7591,10 @@ kbd.app-shortcut-badge {
     border-bottom: 0;
   }
   .marketing-root .marketing-editorial-band--notes .marketing-annotation-block,
-  .marketing-root .marketing-editorial-band--notes .marketing-annotation-block + .marketing-annotation-block {
+  .marketing-root
+    .marketing-editorial-band--notes
+    .marketing-annotation-block
+    + .marketing-annotation-block {
     border-top: 0;
   }
   .marketing-root .marketing-editorial-band--three {
@@ -7444,7 +7612,10 @@ kbd.app-shortcut-badge {
   .marketing-root .marketing-note-strip--summary {
     gap: 1.8rem;
   }
-  .marketing-root .marketing-note-strip--summary .marketing-note-strip__item + .marketing-note-strip__item {
+  .marketing-root
+    .marketing-note-strip--summary
+    .marketing-note-strip__item
+    + .marketing-note-strip__item {
     border-left: 1px solid rgba(221, 229, 238, 0.78);
     padding-left: 1.25rem;
   }
@@ -7473,7 +7644,7 @@ kbd.app-shortcut-badge {
   .marketing-root .marketing-switcher__nav--story {
     gap: 0.65rem;
   }
-  .marketing-root .marketing-resource-link:nth-child(-n+3) {
+  .marketing-root .marketing-resource-link:nth-child(-n + 3) {
     border-top: 0;
   }
   .marketing-auth-grid {
@@ -9904,7 +10075,10 @@ kbd.app-shortcut-badge {
   font-size: 0.86rem;
   font-weight: 700;
 }
-.team-members-panel input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="hidden"]):not([type="file"]),
+.team-members-panel
+  input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not(
+    [type="button"]
+  ):not([type="hidden"]):not([type="file"]),
 .team-members-panel select,
 .team-members-panel textarea {
   width: 100%;
@@ -10248,6 +10422,34 @@ input[type="submit"].btn,
     text-align: left;
   }
 
+  .dashboard-decision-waiting p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .dashboard-decision-column-attention {
+    width: 100%;
+    padding: 0.85rem 0.95rem;
+  }
+
+  .dashboard-decision-waiting {
+    display: grid;
+    gap: 0.65rem;
+  }
+
+  .dashboard-decision-waiting span {
+    font-size: 0.84rem;
+  }
+
+  .dashboard-decision-waiting strong {
+    font-size: 1.35rem;
+  }
+
+  .dashboard-decision-waiting small {
+    margin-top: 0.1rem;
+  }
+
   .dashboard-kpi-card {
     padding: 0.72rem 0.78rem;
   }
@@ -10541,12 +10743,21 @@ input[type="submit"].btn,
   gap: 0.7rem;
 }
 
+.dashboard-report-topline span,
+.dashboard-report-topline small {
+  min-width: 0;
+}
+
 .dashboard-report-topline span {
   color: #64748b;
   font-size: 0.73rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .dashboard-report-topline small {
@@ -10554,12 +10765,18 @@ input[type="submit"].btn,
   font-size: 0.72rem;
   font-weight: 700;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .dashboard-report-row .dashboard-overview-value {
   margin-top: 0.22rem;
   font-size: 0.98rem;
   line-height: 1.28;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dashboard-report-row .dashboard-overview-value span {
@@ -10589,6 +10806,10 @@ input[type="submit"].btn,
   color: #64748b;
   font-size: 0.72rem;
   font-weight: 600;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dashboard-report-list + .dashboard-panel-note {
   margin-top: 0.6rem;
@@ -10600,6 +10821,10 @@ input[type="submit"].btn,
 
 .dashboard-panel.dashboard-overview-panel .dashboard-overview-list {
   padding-bottom: 0;
+}
+
+.dashboard-panel.dashboard-overview-panel {
+  padding: 1.2rem 1.25rem 1.25rem;
 }
 
 .dashboard-panel.dashboard-overview-panel
@@ -10686,19 +10911,28 @@ input[type="submit"].btn,
   padding-right: 0.72rem;
 }
 
+.dashboard-detail-grid--lists .dashboard-summary-table th:nth-child(2),
+.dashboard-detail-grid--lists .dashboard-summary-table td:nth-child(2),
+.dashboard-detail-grid--lists .dashboard-summary-table th:nth-child(3),
+.dashboard-detail-grid--lists .dashboard-summary-table td:nth-child(3) {
+  text-align: center;
+}
+
 .dashboard-detail-grid--overview .dashboard-products-table th:first-child,
 .dashboard-detail-grid--overview .dashboard-products-table td:first-child {
-  width: 18%;
+  width: 34%;
 }
 
 .dashboard-detail-grid--overview .dashboard-products-table th:nth-child(2),
 .dashboard-detail-grid--overview .dashboard-products-table td:nth-child(2) {
-  width: 15%;
+  width: 14%;
+  text-align: center;
 }
 
 .dashboard-detail-grid--overview .dashboard-products-table th:nth-child(3),
 .dashboard-detail-grid--overview .dashboard-products-table td:nth-child(3) {
-  width: 10%;
+  width: 14%;
+  text-align: center;
 }
 
 .dashboard-detail-grid--overview .dashboard-products-table th:nth-child(4),
@@ -10708,12 +10942,8 @@ input[type="submit"].btn,
 
 .dashboard-detail-grid--overview .dashboard-products-table th:nth-child(5),
 .dashboard-detail-grid--overview .dashboard-products-table td:nth-child(5) {
-  width: 17%;
-}
-
-.dashboard-detail-grid--overview .dashboard-products-table th:nth-child(6),
-.dashboard-detail-grid--overview .dashboard-products-table td:nth-child(6) {
-  width: 24%;
+  width: 22%;
+  text-align: center;
 }
 
 .dashboard-detail-grid--lists .dashboard-reminder-table th:nth-child(1),
@@ -10817,6 +11047,27 @@ input[type="submit"].btn,
     overflow-wrap: anywhere;
     word-break: break-all;
     text-align: right;
+  }
+
+  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row > strong,
+  .dashboard-mobile-list--recent-quotes .dashboard-mobile-stack {
+    text-align: left;
+  }
+
+  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row > strong,
+  .dashboard-mobile-list--recent-quotes .dashboard-mobile-stack strong {
+    overflow-wrap: anywhere;
+    word-break: break-all;
+  }
+
+  .dashboard-mobile-list--recent-quotes .dashboard-next-step-btn {
+    justify-content: flex-start;
+    white-space: normal;
   }
 
   .dashboard-detail-grid--overview,
@@ -10995,7 +11246,8 @@ input[type="submit"].btn,
     border-bottom: 0 !important;
   }
 
-  .quote-items-responsive .quote-items-table td::before {
+  .quote-items-responsive .quote-items-table td[data-label]::before {
+    content: attr(data-label);
     display: block;
     margin-bottom: 0.38rem;
     color: #64748b;
@@ -11806,4 +12058,58 @@ input[type="submit"].btn,
 
 .owner-picker-option:hover {
   background: #f1f5f9;
+}
+
+/* Sales insights tables: add readable labels in mobile layout */
+@media (max-width: 768px) {
+  .sales-insight-table-surface {
+    overflow: visible;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table,
+  .sales-insight-table-surface .dashboard-summary-table tbody,
+  .sales-insight-table-surface .dashboard-summary-table tr,
+  .sales-insight-table-surface .dashboard-summary-table td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table thead {
+    display: none !important;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table tr {
+    margin-bottom: 0.75rem;
+    padding: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table td {
+    border: 0 !important;
+    border-bottom: 1px solid #edf2f7 !important;
+    padding: 0.68rem 0.78rem !important;
+    text-align: left !important;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 0.36rem;
+    color: #64748b;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sales-insight-table-surface .dashboard-summary-table .text-right {
+    text-align: left !important;
+  }
 }

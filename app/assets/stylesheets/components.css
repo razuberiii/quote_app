@@ -6268,6 +6268,14 @@ kbd.app-shortcut-badge {
   border-color: rgba(148, 163, 184, 0.95) !important;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
 }
+.marketing-root .app-ui-button--secondary.app-ui-button--on-dark,
+.marketing-root .app-ui-button--secondary.app-ui-button--on-dark:hover,
+.marketing-root .app-ui-button--secondary.app-ui-button--on-dark:focus-visible {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  color: #ffffff !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.14);
+}
 .marketing-root .app-ui-button--ghost {
   color: #506176 !important;
 }

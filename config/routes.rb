@@ -5,9 +5,10 @@ Rails.application.routes.draw do
   devise_for :users, skip: [ :passwords ], controllers: { registrations: "users/registrations", sessions: "users/sessions" }
 
   # Email verification
-  resources :email_verifications, only: :show, param: :token do
+  resources :email_verifications, only: [] do
     collection do
       post :resend
+      post :verify
     end
   end
   get "pending-email-verification", to: "email_verifications#pending", as: :pending_email_verification

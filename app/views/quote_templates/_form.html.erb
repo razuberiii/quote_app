@@ -69,6 +69,7 @@
           <label><%= f.check_box :show_payment_term, data: { template_preview_toggle: "payment" } %> <%= t("quote_templates.view.form.show_payment_term") %></label>
           <label><%= f.check_box :show_customer_owner, data: { template_preview_toggle: "customer-owner" } %> <%= t("quote_templates.view.form.show_sales_owner") %></label>
           <label><%= f.check_box :show_notes, data: { template_preview_toggle: "notes" } %> <%= t("quote_templates.view.form.show_notes") %></label>
+          <label><%= f.check_box :show_scope_of_supply, data: { template_preview_toggle: "scope-of-supply" } %> <%= t("quote_templates.view.form.show_scope_of_supply") %></label>
           <label><%= f.check_box :show_signature_block, data: { template_preview_toggle: "signature" } %> <%= t("quote_templates.view.form.show_signature_block") %></label>
           <label><%= f.check_box :show_images, data: { template_preview_toggle: "images" } %> <%= t("quote_templates.view.form.show_product_images") %></label>
           <label><%= f.check_box :show_valid_until, data: { template_preview_toggle: "valid-until" } %> <%= t("quote_templates.view.form.show_valid_until") %></label>
@@ -79,6 +80,7 @@
           <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> <%= t("quote_templates.view.form.show_saas_branding") %></label>
           <label><%= f.check_box :excel_show_grid_lines %> <%= t("quote_templates.view.form.show_excel_gridlines") %></label>
         </div>
+        <p class="template-sub"><%= t("quote_templates.view.form.show_watermark_hint") %></p>
         <div class="template-form-grid">
           <div>
             <%= f.label :signature_name, t("quote_templates.view.form.signature_name") %>
@@ -187,6 +189,10 @@
                 <%= f.label :description_label, t("quote_templates.view.form.description_label") %>
                 <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
               </div>
+              <div data-template-doc-kind-field="quotation">
+                <%= f.label :scope_of_supply_label, t("quote_templates.view.form.scope_of_supply_label") %>
+                <%= f.text_field :scope_of_supply_label, placeholder: t("quote_templates.defaults.scope_of_supply_label"), data: { template_preview_target: "label-scope-of-supply" } %>
+              </div>
               <div>
                 <%= f.label :spec_label, t("quote_templates.view.form.spec_label") %>
                 <%= f.text_field :spec_label, placeholder: t("quote_templates.view.form.spec_placeholder"), data: { template_preview_target: "label-spec" } %>
@@ -207,33 +213,36 @@
                 <%= f.label :line_total_label, t("quote_templates.view.form.line_total_label") %>
                 <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
               </div>
-              <div>
+              <div data-template-doc-kind-field="quotation">
                 <%= f.label :quotation_title, t("quote_templates.view.form.quotation_title") %>
                 <%= f.text_field :quotation_title, placeholder: t("quote_templates.view.form.quotation_title_placeholder"), data: { template_preview_target: "title-quote" } %>
               </div>
-              <div>
+              <div data-template-doc-kind-field="quotation">
                 <%= f.label :quotation_number_label, t("quote_templates.view.form.quotation_number_label") %>
                 <%= f.text_field :quotation_number_label, placeholder: t("quote_templates.view.form.quotation_number_placeholder"), data: { template_preview_target: "number-label-quote" } %>
               </div>
-              <div>
+              <div data-template-doc-kind-field="proforma_invoice">
                 <%= f.label :pi_title, t("quote_templates.view.form.pi_title") %>
                 <%= f.text_field :pi_title, placeholder: t("quote_templates.view.form.pi_title_placeholder") %>
               </div>
-              <div>
+              <div data-template-doc-kind-field="proforma_invoice">
                 <%= f.label :pi_number_label, t("quote_templates.view.form.pi_number_label") %>
                 <%= f.text_field :pi_number_label, placeholder: t("quote_templates.view.form.pi_number_placeholder"), data: { template_preview_target: "number-label-pi" } %>
               </div>
-              <div class="template-span-2">
+              <div class="template-span-2" data-template-doc-kind-field="quotation">
                 <%= f.label :quotation_footer_note, t("quote_templates.view.form.quotation_footer_note") %>
                 <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
+                <p class="template-sub"><%= t("quote_templates.view.form.quotation_footer_note_hint") %></p>
               </div>
-              <div class="template-span-2">
+              <div class="template-span-2" data-template-doc-kind-field="proforma_invoice">
                 <%= f.label :pi_footer_note, t("quote_templates.view.form.pi_footer_note") %>
                 <%= f.text_area :pi_footer_note, rows: 2 %>
+                <p class="template-sub"><%= t("quote_templates.view.form.pi_footer_note_hint") %></p>
               </div>
               <div class="template-span-2">
                 <%= f.label :footer_text, t("quote_templates.view.form.fallback_footer_text") %>
                 <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
+                <p class="template-sub"><%= t("quote_templates.view.form.fallback_footer_text_hint") %></p>
               </div>
               <div class="template-span-2">
                 <%= f.label :closing_message, t("quote_templates.view.form.closing_message") %>
@@ -253,6 +262,10 @@
             <div>
               <%= f.label :description_label, t("quote_templates.view.form.description_label") %>
               <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
+            </div>
+            <div data-template-doc-kind-field="quotation">
+              <%= f.label :scope_of_supply_label, t("quote_templates.view.form.scope_of_supply_label") %>
+              <%= f.text_field :scope_of_supply_label, placeholder: t("quote_templates.defaults.scope_of_supply_label"), data: { template_preview_target: "label-scope-of-supply" } %>
             </div>
             <div>
               <%= f.label :spec_label, t("quote_templates.view.form.spec_label") %>
@@ -274,33 +287,36 @@
               <%= f.label :line_total_label, t("quote_templates.view.form.line_total_label") %>
               <%= f.text_field :line_total_label, data: { template_preview_target: "label-line-total" } %>
             </div>
-            <div>
+            <div data-template-doc-kind-field="quotation">
               <%= f.label :quotation_title, t("quote_templates.view.form.quotation_title") %>
               <%= f.text_field :quotation_title, placeholder: t("quote_templates.view.form.quotation_title_placeholder"), data: { template_preview_target: "title-quote" } %>
             </div>
-            <div>
+            <div data-template-doc-kind-field="quotation">
               <%= f.label :quotation_number_label, t("quote_templates.view.form.quotation_number_label") %>
               <%= f.text_field :quotation_number_label, placeholder: t("quote_templates.view.form.quotation_number_placeholder"), data: { template_preview_target: "number-label-quote" } %>
             </div>
-            <div>
+            <div data-template-doc-kind-field="proforma_invoice">
               <%= f.label :pi_title, t("quote_templates.view.form.pi_title") %>
               <%= f.text_field :pi_title, placeholder: t("quote_templates.view.form.pi_title_placeholder") %>
             </div>
-            <div>
+            <div data-template-doc-kind-field="proforma_invoice">
               <%= f.label :pi_number_label, t("quote_templates.view.form.pi_number_label") %>
               <%= f.text_field :pi_number_label, placeholder: t("quote_templates.view.form.pi_number_placeholder"), data: { template_preview_target: "number-label-pi" } %>
             </div>
-            <div class="template-span-2">
+            <div class="template-span-2" data-template-doc-kind-field="quotation">
               <%= f.label :quotation_footer_note, t("quote_templates.view.form.quotation_footer_note") %>
               <%= f.text_area :quotation_footer_note, rows: 2, data: { template_preview_target: "footer-quote" } %>
+              <p class="template-sub"><%= t("quote_templates.view.form.quotation_footer_note_hint") %></p>
             </div>
-            <div class="template-span-2">
+            <div class="template-span-2" data-template-doc-kind-field="proforma_invoice">
               <%= f.label :pi_footer_note, t("quote_templates.view.form.pi_footer_note") %>
               <%= f.text_area :pi_footer_note, rows: 2 %>
+              <p class="template-sub"><%= t("quote_templates.view.form.pi_footer_note_hint") %></p>
             </div>
             <div class="template-span-2">
               <%= f.label :footer_text, t("quote_templates.view.form.fallback_footer_text") %>
               <%= f.text_area :footer_text, rows: 2, data: { template_preview_target: "footer-fallback" } %>
+              <p class="template-sub"><%= t("quote_templates.view.form.fallback_footer_text_hint") %></p>
             </div>
             <div class="template-span-2">
               <%= f.label :closing_message, t("quote_templates.view.form.closing_message") %>
@@ -403,6 +419,7 @@
         <div class="preview-meta">
           <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong><span data-preview-i18n-label="payment_terms"><%= t("quote_document.labels.payment_terms") %></span>:</strong> TT 30% deposit, 70% before shipment</p>
           <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong><span data-preview-i18n-label="notes"><%= t("quote_document.labels.notes") %></span>:</strong> Price valid for 30 days.</p>
+          <p data-template-preview-scope-of-supply data-visible="<%= quote_template.show_scope_of_supply? %>"><strong><span data-template-preview-label-scope-of-supply><%= quote_template.resolved_scope_of_supply_label %></span>:</strong> Pump body, motor, base frame, and installation kit.</p>
           <% if quote_template.signature_image.attached? %>
             <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="<%= t("quote_templates.view.form.signature_preview_alt") %>" class="quote-sales-signature-image"></p>
           <% else %>
@@ -423,8 +440,8 @@
   <div class="template-form-footer">
     <label class="template-default-check"><%= check_box_tag :make_default, "1", quote_template.default_template? %> <%= t("quote_templates.view.form.set_as_default") %></label>
     <div class="actions">
-      <%= f.submit class: "btn btn-primary" %>
-      <%= link_to t("quote_templates.view.form.back"), quote_templates_path, class: "btn btn-secondary" %>
+      <%= f.submit class: "app-ui-button app-ui-button--primary" %>
+      <%= link_to t("quote_templates.view.form.back"), quote_templates_path, class: "app-ui-button app-ui-button--secondary" %>
     </div>
   </div>
 <% end %>
@@ -440,6 +457,7 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: "en"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: "en"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: "en"),
+      "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: "en"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: "en"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: "en"),
     },
@@ -452,6 +470,7 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"zh-CN"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"zh-CN"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: :"zh-CN"),
+      "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: :"zh-CN"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"zh-CN"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"zh-CN"),
     },
@@ -464,6 +483,7 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"es-419"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"es-419"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: :"es-419"),
+      "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: :"es-419"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"es-419"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"es-419"),
     }
@@ -471,7 +491,8 @@
 
   (() => {
     const form = document.querySelector("[data-template-editor-form]");
-    if (!form || form.dataset.previewBound === "true") return;
+    if (!form) return;
+    const alreadyBound = form.dataset.previewBound === "true";
     form.dataset.previewBound = "true";
 
     const preview = form.querySelector("[data-template-preview]");
@@ -479,6 +500,12 @@
 
     const qs = (selector) => form.querySelector(selector);
     const qsp = (selector) => preview.querySelector(selector);
+    const documentKindFields = Array.from(form.querySelectorAll("[data-template-doc-kind-field]"));
+    const syncDocumentKindFields = (kind) => {
+      documentKindFields.forEach((node) => {
+        node.hidden = node.dataset.templateDocKindField !== kind;
+      });
+    };
     const statusNode = form.querySelector("[data-template-preview-status]");
     const contrastNode = form.querySelector("[data-template-preview-contrast]");
     const scenarioNode = form.querySelector("[data-template-preview-scenario]");
@@ -723,10 +750,14 @@
       const logoPosition = qs("[data-template-preview-target='logo-position']")?.value || "right";
       const titleQuote = qs("[data-template-preview-target='title-quote']")?.value?.trim() || "QUOTATION";
       const documentKind = qs("[data-template-preview-target='document-kind']")?.value || "quotation";
+      const webviewLocale = qs("[data-template-preview-target='webview-locale']")?.value || "en";
+      const localeLabels = PREVIEW_I18N[webviewLocale] || PREVIEW_I18N["en"];
+      syncDocumentKindFields(documentKind);
       const labelDesc = qs("[data-template-preview-target='label-description']")?.value?.trim() || "Description";
       const labelQty = qs("[data-template-preview-target='label-qty']")?.value?.trim() || "Qty";
       const labelUnitPrice = qs("[data-template-preview-target='label-unit-price']")?.value?.trim() || "Unit Price";
       const labelLineTotal = qs("[data-template-preview-target='label-line-total']")?.value?.trim() || "Line Total";
+      const labelScopeOfSupply = qs("[data-template-preview-target='label-scope-of-supply']")?.value?.trim() || localeLabels.scope_of_supply || "Scope of Supply";
       const labelSpec = qs("[data-template-preview-target='label-spec']")?.value?.trim() || "Spec";
       const labelAddon = qs("[data-template-preview-target='label-addon']")?.value?.trim() || "Add-on";
       const numberLabelQuote = qs("[data-template-preview-target='number-label-quote']")?.value?.trim() || "Quote #";
@@ -815,6 +846,8 @@
       if (unitPriceNode) unitPriceNode.textContent = labelUnitPrice;
       const lineTotalNode = qsp("[data-template-preview-label-line-total]");
       if (lineTotalNode) lineTotalNode.textContent = labelLineTotal;
+      const scopeLabelNode = qsp("[data-template-preview-label-scope-of-supply]");
+      if (scopeLabelNode) scopeLabelNode.textContent = labelScopeOfSupply;
       const specNode = qsp("[data-template-preview-spec-label]");
       if (specNode) specNode.textContent = labelSpec;
       const addonNode = qsp("[data-template-preview-addon-label]");
@@ -847,6 +880,7 @@
       showNode("[data-template-preview-shipping]", !!qs("[data-template-preview-toggle='shipping']")?.checked);
       showNode("[data-template-preview-payment]", !!qs("[data-template-preview-toggle='payment']")?.checked);
       showNode("[data-template-preview-notes]", !!qs("[data-template-preview-toggle='notes']")?.checked);
+      showNode("[data-template-preview-scope-of-supply]", !!qs("[data-template-preview-toggle='scope-of-supply']")?.checked && documentKind !== "proforma_invoice");
       const showSignature = !!qs("[data-template-preview-toggle='signature']")?.checked;
       showNode("[data-template-preview-signature-image]", showSignature && hasSignatureImage);
       showNode("[data-template-preview-signature-name]", showSignature && signatureName.length > 0);
@@ -860,8 +894,6 @@
       updateContrastWarning(accent);
 
       // Update locale-dependent labels in the preview
-      const webviewLocale = qs("[data-template-preview-target='webview-locale']")?.value || "en";
-      const localeLabels = PREVIEW_I18N[webviewLocale] || PREVIEW_I18N["en"];
       preview.querySelectorAll("[data-preview-i18n-label]").forEach((node) => {
         const key = node.dataset.previewI18nLabel;
         if (localeLabels[key]) node.textContent = localeLabels[key];
@@ -870,8 +902,10 @@
       updateSaveStatus();
     };
 
-    form.addEventListener("input", updatePreview);
-    form.addEventListener("change", updatePreview);
+    if (!alreadyBound) {
+      form.addEventListener("input", updatePreview);
+      form.addEventListener("change", updatePreview);
+    }
 
     const showWatermarkToggle = qs("[data-template-preview-toggle='watermark']");
     const watermarkTextInput = qs("[data-template-preview-target='watermark-text']");
@@ -922,14 +956,14 @@
         updateFileName();
       });
     };
-    bindFilePickers();
+    if (!alreadyBound) bindFilePickers();
 
-    if (watermarkTextInput && showWatermarkToggle) {
+    if (!alreadyBound && watermarkTextInput && showWatermarkToggle) {
       watermarkTextInput.addEventListener("input", () => {
         if (watermarkTextInput.value.trim()) showWatermarkToggle.checked = true;
       });
     }
-    if (watermarkFileInput && showWatermarkToggle) {
+    if (!alreadyBound && watermarkFileInput && showWatermarkToggle) {
       watermarkFileInput.addEventListener("change", () => {
         if (watermarkFileInput.files && watermarkFileInput.files[0]) {
           showWatermarkToggle.checked = true;
@@ -938,33 +972,35 @@
         updateWatermarkModeUI();
       });
     }
-    if (removeWatermarkImageInput) {
+    if (!alreadyBound && removeWatermarkImageInput) {
       removeWatermarkImageInput.addEventListener("change", updateWatermarkModeUI);
     }
-    if (signatureFileInput && showSignatureToggle) {
+    if (!alreadyBound && signatureFileInput && showSignatureToggle) {
       signatureFileInput.addEventListener("change", () => {
         if (signatureFileInput.files && signatureFileInput.files[0]) showSignatureToggle.checked = true;
       });
     }
-    if (signatureNameInput && showSignatureToggle) {
+    if (!alreadyBound && signatureNameInput && showSignatureToggle) {
       signatureNameInput.addEventListener("input", () => {
         if (signatureNameInput.value.trim()) showSignatureToggle.checked = true;
       });
     }
-    form.addEventListener("submit", () => {
+    if (!alreadyBound) form.addEventListener("submit", () => {
       if (!statusNode) return;
       statusNode.textContent = "Saving...";
       statusNode.classList.remove("is-dirty", "is-saved");
       statusNode.classList.add("is-saving");
     });
 
-    viewportButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        applyViewport(button.dataset.templatePreviewViewportBtn);
+    if (!alreadyBound) {
+      viewportButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          applyViewport(button.dataset.templatePreviewViewportBtn);
+        });
       });
-    });
+    }
 
-    if (scenarioNode) {
+    if (!alreadyBound && scenarioNode) {
       scenarioNode.addEventListener("change", () => {
         applyScenario(scenarioNode.value);
         updatePreview();
@@ -990,10 +1026,47 @@
     if (syncSelect && syncTargets[0] && syncTargets[0].value) {
       syncSelect.value = syncTargets[0].value;
     }
-    if (syncSelect) {
+    if (!alreadyBound && syncSelect) {
       syncSelect.addEventListener("change", () => {
         applyLocaleToAll(syncSelect.value);
       });
     }
+  })();
+</script>
+
+<script>
+  (() => {
+    const runDocKindFirstPaintSync = () => {
+      const form = document.querySelector("[data-template-editor-form]");
+      if (!form) return;
+
+      const kindSelect = form.querySelector("[data-template-preview-target='document-kind']");
+      if (!kindSelect) return;
+
+      const syncFields = () => {
+        const kind = kindSelect.value || "quotation";
+        form.querySelectorAll("[data-template-doc-kind-field]").forEach((node) => {
+          node.hidden = node.dataset.templateDocKindField !== kind;
+        });
+      };
+
+      syncFields();
+
+      if (form.dataset.docKindSyncBound !== "true") {
+        form.dataset.docKindSyncBound = "true";
+        kindSelect.addEventListener("change", () => {
+          syncFields();
+          form.dispatchEvent(new Event("change", { bubbles: true }));
+        });
+      }
+
+      // Force one preview pass after Turbo render so first paint is correct.
+      window.requestAnimationFrame(() => {
+        form.dispatchEvent(new Event("change", { bubbles: true }));
+      });
+    };
+
+    document.addEventListener("turbo:load", runDocKindFirstPaintSync);
+    runDocKindFirstPaintSync();
   })();
 </script>

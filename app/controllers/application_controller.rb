@@ -77,10 +77,6 @@ class ApplicationController < ActionController::Base
     return if current_user.blank?
     return if current_user.email_verified?
 
-    # Allow existing users (created before email verification feature) to use the system
-    # These are users who have no verification token/timestamp, meaning they signed up before this feature
-    return if current_user.email_verification_token.blank? && current_user.email_verification_token_sent_at.blank?
-
     redirect_to pending_email_verification_path(email: current_user.email), alert: t("flash.verify_email")
   end
 

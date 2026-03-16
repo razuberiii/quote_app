@@ -6,7 +6,7 @@
     </div>
     <% if @change_summary.present? %>
       <button type="button"
-              class="app-button app-button--secondary quote-copy-summary-btn"
+              class="<%= ui_button_classes(:secondary, 'quote-copy-summary-btn') %>"
               data-copy-text="<%= @change_summary %>">
         <%= t("quotes.view.revision_diff.copy_change_summary") %>
       </button>

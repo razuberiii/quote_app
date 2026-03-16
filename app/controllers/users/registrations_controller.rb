@@ -17,7 +17,10 @@ module Users
         # Email verification email will be sent via after_action
         # Redirect to pending verification page instead of auto-logging in
         yield resource if block_given?
-        respond_with resource, location: pending_email_verification_path(email: resource.email)
+        respond_with resource, location: pending_email_verification_path(
+          email: resource.email,
+          initial_cooldown: EmailVerificationService::RESEND_COOLDOWN_SECONDS
+        )
       else
         clean_up_passwords resource
         set_minimum_password_length

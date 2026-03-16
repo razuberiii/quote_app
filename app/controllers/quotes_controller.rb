@@ -538,6 +538,7 @@ class QuotesController < ApplicationController
       :terms_text,
       :legal_disclaimer,
       :delivery_notes,
+      :scope_of_supply,
       :template_id,
       quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :specifications_text, :addon_charges_text, :_destroy ]
     )
@@ -728,7 +729,6 @@ class QuotesController < ApplicationController
   def use_wicked_pdf_renderer?(pdf_client)
     return false unless pdf_client
     return false unless wkhtmltopdf_available?
-    return false if windows_platform?
 
     true
   end
@@ -749,10 +749,6 @@ class QuotesController < ApplicationController
     return nil unless defined?(::WickedPdf) && ::WickedPdf.respond_to?(:config)
 
     ::WickedPdf.config[:exe_path]
-  end
-
-  def windows_platform?
-    RbConfig::CONFIG["host_os"].to_s.match?(/mswin|mingw|cygwin/i)
   end
 
   def set_superseded_context

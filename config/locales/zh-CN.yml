@@ -637,6 +637,9 @@ zh-CN:
         delivery_notes_placeholder: 交付 / 出口说明
         terms: 条款
         terms_placeholder: 付款条款、有效期说明等
+        scope_of_supply: 供货范围
+        scope_of_supply_placeholder: 填写本报价包含的供货内容（可按行或项目符号）。
+        scope_of_supply_hint: 用于说明“包含范围”边界。留空则隐藏该区块。需先在模板设置中开启“显示供货范围（仅报价单）”，否则默认不显示。
         legal_disclaimer_placeholder: 可选法律声明
         internal_information: 内部信息
         internal_information_hint: 将内部备注和成交后信息与对客报价内容分离。
@@ -1851,6 +1854,8 @@ zh-CN:
         addon_count: "%{count} 条附加项"
         no_addon_presets: 暂无附加项预设。
   quote_templates:
+    defaults:
+      scope_of_supply_label: 供货范围
     flash:
       created: 模板已创建
       updated: 模板已更新
@@ -1916,6 +1921,7 @@ zh-CN:
         show_payment_term: 显示付款条款
         show_sales_owner: 显示销售负责人
         show_notes: 显示备注区块
+        show_scope_of_supply: 显示供货范围（仅报价单）
         show_signature_block: 显示签名区块
         show_product_images: 显示产品图片
         show_valid_until: 显示有效期
@@ -1923,6 +1929,7 @@ zh-CN:
         show_currency: 显示币种符号/代码
         show_closing_message: 显示结尾文案
         show_watermark: 显示水印
+        show_watermark_hint: 开启后，预览和导出都会显示水印。文字模式使用“水印文字”；若留空则使用公司名。上传水印图片后会覆盖文字模式。
         show_saas_branding: 显示 Rubusoo 页脚（默认关闭白标）
         show_excel_gridlines: 显示 Excel 网格线
         signature_name: 授权签名姓名（可选）
@@ -1950,6 +1957,7 @@ zh-CN:
         labels_text: 标签与文案
         labels_text_hint: 用于表头标签、文档标题和页脚文案的高级设置。
         description_label: 描述标签
+        scope_of_supply_label: 供货范围标签
         spec_label: 规格标签
         spec_placeholder: 规格
         addon_label: 附加项标签
@@ -1966,8 +1974,11 @@ zh-CN:
         pi_number_label: PI 编号标签
         pi_number_placeholder: "PI #"
         quotation_footer_note: 报价页脚备注
+        quotation_footer_note_hint: 仅用于报价单。优先级高于“兜底页脚文案”。
         pi_footer_note: PI 页脚备注
+        pi_footer_note_hint: 仅用于 PI。优先级高于“兜底页脚文案”。
         fallback_footer_text: 兜底页脚文案
+        fallback_footer_text_hint: 仅在当前文档类型对应的页脚备注为空时使用。
         closing_message: 总计下方结尾文案
         closing_message_hint: 可选。即使开关开启，留空也会完全隐藏该文案。
         live_preview: 实时预览
@@ -1994,6 +2005,7 @@ zh-CN:
       pi: 形式发票
     sections:
       terms_and_conditions: 条款与条件
+      scope_of_supply: 供货范围
       company_credentials: 公司资质
       footer: 页脚
       signature: 签名
@@ -2143,8 +2155,50 @@ zh-CN:
       sent_to: 验证邮件已发送至 %{email}
       failed_send: 发送验证邮件失败
       error_occurred: 发生错误
+      invalid_code: 验证码无效，请重试。
+      code_expired: 验证码已过期，请重新获取。
+      too_many_attempts: 验证失败次数过多，请重新获取验证码。
       bot_verification_required: 需要完成人机验证
       bot_verification_failed: 人机验证失败，请重试。
+    mailer:
+      subject: 你的 Rubusoo 验证码
+      title: 验证你的邮箱地址
+      greeting: "%{name}，你好："
+      intro: 使用以下验证码激活你的账户：
+      code_hint: 请在验证页面输入该验证码完成注册。
+      expires_note: 验证码将在 %{minutes} 分钟后失效。
+      ignore_note: 如果这不是你发起的注册请求，请忽略此邮件。
+      signature_html: "此致，<br/>Rubusoo 团队"
+      signature_text: |-
+        此致，
+        Rubusoo 团队
+    view:
+      pending:
+        title: 需要邮箱验证
+        description: 感谢注册。请输入发送到你邮箱的验证码以激活账户。
+        expires_hint: 验证码有效期为 %{minutes} 分钟。
+        spam_hint: 如果没看到邮件，请检查垃圾邮箱。
+        auto_send_sent: 系统已自动发送一封新的验证码邮件。
+        auto_send_cooldown: 刚刚发送过验证码，请在 %{seconds} 秒后重试。
+        auto_send_failed: 自动补发失败，请在下方手动获取新验证码。
+        verify_code_title: 输入验证码
+        verify_code_hint: 请输入邮件中的 %{length} 位验证码。每个验证码最多可尝试 %{max_attempts} 次。
+        code_label: 验证码
+        code_placeholder: "123456"
+        verify_button: 验证并激活
+        verify_submitting: 验证中...
+        resend_title: 没有收到验证码？
+        resend_hint: 你可以每 %{seconds} 秒重新获取一次验证码。
+        resend_button: 重新发送验证码
+        resend_sending: 发送中...
+        resend_countdown: 重新发送（%{seconds}s）
+        current_email: "当前邮箱："
+        sign_up_again: 使用其他邮箱重新注册
+        modal_title: 安全验证
+        modal_hint: 请先完成人机验证，再重新发送验证码。
+        modal_loading: 正在加载验证...
+        modal_success: 验证通过，正在发送...
+        generic_error: 出现错误，请稍后重试。
   team_members:
     view:
       index:

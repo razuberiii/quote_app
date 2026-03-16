@@ -57,7 +57,7 @@
           <% end %>
 
           <div>
-            <%= f.submit t("users.registrations.view.new.create_account"), class: "btn btn-primary auth-submit-button", id: "signup-submit-btn" %>
+            <%= f.submit t("users.registrations.view.new.create_account"), class: "app-ui-button app-ui-button--primary auth-submit-button", id: "signup-submit-btn" %>
           </div>
         <% end %>
 
@@ -111,20 +111,10 @@
       let verificationComplete = false;
       let isSubmitting = false;
 
-      // Prevent form submission if already submitting
       signupForm.addEventListener('submit', function(e) {
         if (isSubmitting) {
           e.preventDefault();
           return false;
-        }
-      });
-
-      submitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-
-        // Prevent double-submission
-        if (isSubmitting) {
-          return;
         }
 
         // If verification already complete and we have a fresh token, submit immediately
@@ -132,9 +122,10 @@
           isSubmitting = true;
           submitBtn.disabled = true;
           submitBtn.textContent = creatingAccountLabel;
-          signupForm.submit();
-          return;
+          return true;
         }
+
+        e.preventDefault();
 
         // Reset and show modal
         verificationComplete = false;
@@ -147,6 +138,7 @@
         
         // Wait for Turnstile API to load, then render
         setTimeout(renderTurnstile, 300);
+        return false;
       });
 
       function renderTurnstile() {

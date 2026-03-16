@@ -1,6 +1,14 @@
 class Quote < ApplicationRecord
   REMINDER_COOLDOWN = 12.hours
   MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
+  MAX_QUOTE_ITEMS_COUNT = 200
+  MAX_NOTES_LENGTH = 6000
+  MAX_TERMS_TEXT_LENGTH = 12000
+  MAX_LEGAL_DISCLAIMER_LENGTH = 8000
+  MAX_DELIVERY_NOTES_LENGTH = 4000
+  MAX_SCOPE_OF_SUPPLY_LENGTH = 4000
+  MAX_CHANGES_REQUEST_MESSAGE_LENGTH = 2000
+  MAX_TOTAL_TEXT_BUDGET = 120_000
   STATUSES = %w[draft sent viewed negotiating won lost expired pending].freeze
   OPEN_STATUSES = %w[draft sent viewed negotiating pending].freeze
   AUTO_VIEW_STATUSES = %w[draft sent pending].freeze
@@ -79,7 +87,14 @@ class Quote < ApplicationRecord
   validates :status, inclusion: { in: STATUSES }, allow_nil: true
   validates :tax_amount, :shipping_amount, :discount_amount,
             numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validates :notes, length: { maximum: MAX_NOTES_LENGTH }, allow_blank: true
+  validates :terms_text, length: { maximum: MAX_TERMS_TEXT_LENGTH }, allow_blank: true
+  validates :legal_disclaimer, length: { maximum: MAX_LEGAL_DISCLAIMER_LENGTH }, allow_blank: true
+  validates :delivery_notes, length: { maximum: MAX_DELIVERY_NOTES_LENGTH }, allow_blank: true
+  validates :scope_of_supply, length: { maximum: MAX_SCOPE_OF_SUPPLY_LENGTH }, allow_blank: true
+  validates :changes_request_message, length: { maximum: MAX_CHANGES_REQUEST_MESSAGE_LENGTH }, allow_blank: true
   validate :must_have_at_least_one_quote_item
+  validate :quote_item_count_within_limit
   validate :discount_not_greater_than_subtotal
   validate :final_amount_required_for_won
   validate :loss_reason_required_for_lost
@@ -89,6 +104,7 @@ class Quote < ApplicationRecord
   validate :monetary_values_fit_storage_precision
   validate :grand_total_fits_storage_precision
   validate :valid_until_cannot_be_in_the_past
+  validate :total_text_budget_within_limit
 
   scope :latest_versions, -> {
   select("DISTINCT ON (quote_no) *")
@@ -373,6 +389,7 @@ class Quote < ApplicationRecord
       terms_text: terms_text,
       legal_disclaimer: legal_disclaimer,
       delivery_notes: delivery_notes,
+      scope_of_supply: scope_of_supply,
       accepted_at: nil,
       won_at: nil,
       lost_at: nil,
@@ -430,6 +447,13 @@ class Quote < ApplicationRecord
     return if quote_items.reject(&:marked_for_destruction?).any?
 
     errors.add(:quote_items, "must include at least one item")
+  end
+
+  def quote_item_count_within_limit
+    count = quote_items.reject(&:marked_for_destruction?).size
+    return if count <= MAX_QUOTE_ITEMS_COUNT
+
+    errors.add(:quote_items, "can include up to #{MAX_QUOTE_ITEMS_COUNT} items")
   end
 
   def discount_not_greater_than_subtotal
@@ -547,10 +571,36 @@ class Quote < ApplicationRecord
   end
 
   def valid_until_cannot_be_in_the_past
+    return unless new_record? || will_save_change_to_valid_until?
     return if valid_until.blank?
     return unless valid_until < Date.current
 
     errors.add(:valid_until, I18n.t("quotes.errors.valid_until_on_or_after_today"))
+  end
+
+  def total_text_budget_within_limit
+    total_chars = 0
+    total_chars += notes.to_s.length
+    total_chars += terms_text.to_s.length
+    total_chars += legal_disclaimer.to_s.length
+    total_chars += delivery_notes.to_s.length
+    total_chars += scope_of_supply.to_s.length
+    total_chars += changes_request_message.to_s.length
+
+    quote_items.reject(&:marked_for_destruction?).each do |item|
+      total_chars += item.description.to_s.length
+      item.specification_pairs.each do |pair|
+        total_chars += pair[:key].to_s.length
+        total_chars += pair[:value].to_s.length
+      end
+      item.addon_charge_entries.each do |entry|
+        total_chars += entry[:name].to_s.length
+      end
+    end
+
+    return if total_chars <= MAX_TOTAL_TEXT_BUDGET
+
+    errors.add(:base, "Total quotation text is too large (maximum is #{MAX_TOTAL_TEXT_BUDGET} characters across quote fields and line items).")
   end
 
   def reason_values_are_allowed

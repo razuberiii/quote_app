@@ -11,6 +11,7 @@ class QuoteSnapshotBuilder
     snapshot["customer_phone"] = @quote.customer.formatted_phone
     snapshot["customer_email"] = @quote.customer.email
     snapshot["trade_term"] = @quote.trade_term
+    snapshot["scope_of_supply"] = @quote.scope_of_supply
     snapshot["spec_label"] = @quote.resolved_spec_label
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title

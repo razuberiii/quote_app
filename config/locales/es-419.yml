@@ -637,6 +637,9 @@ es-419:
         delivery_notes_placeholder: Notas de entrega / exportación
         terms: Términos
         terms_placeholder: Condiciones de pago, declaración de validez, etc.
+        scope_of_supply: Alcance de suministro
+        scope_of_supply_placeholder: Enumera lo que está incluido en el alcance de suministro (por línea o viñetas).
+        scope_of_supply_hint: Úsalo para definir el alcance incluido. Déjalo vacío para ocultar esta sección. También debes activar "Mostrar alcance de suministro (solo cotización)" en la configuración de plantilla; de lo contrario, esta sección no se mostrará.
         legal_disclaimer_placeholder: Descargo de responsabilidad legal opcional
         internal_information: Información interna
         internal_information_hint: Mantén las notas internas y los datos posteriores a la decisión separados de la cotización compartida.
@@ -1851,6 +1854,8 @@ es-419:
         addon_count: "%{count} complementos"
         no_addon_presets: Aún no hay preconfiguraciones de complementos.
   quote_templates:
+    defaults:
+      scope_of_supply_label: Alcance de suministro
     flash:
       created: Plantilla creada
       updated: Plantilla actualizada
@@ -1916,6 +1921,7 @@ es-419:
         show_payment_term: Mostrar plazo de pago
         show_sales_owner: Mostrar propietario de ventas
         show_notes: Mostrar sección de notas
+        show_scope_of_supply: Mostrar alcance de suministro (solo cotización)
         show_signature_block: Mostrar bloque de firma
         show_product_images: Mostrar imágenes de productos
         show_valid_until: Mostrar válido hasta
@@ -1923,6 +1929,7 @@ es-419:
         show_currency: Mostrar símbolo/código de moneda
         show_closing_message: Mostrar mensaje de cierre
         show_watermark: Mostrar marca de agua
+        show_watermark_hint: Si está activado, la vista previa/salida mostrará marca de agua. El modo texto usa el texto de marca de agua; si está vacío, se usa el nombre de la empresa. El modo imagen tiene prioridad sobre el modo texto.
         show_saas_branding: Mostrar pie de página de Rubusoo (marca blanca desactivada por defecto)
         show_excel_gridlines: Mostrar líneas de cuadrícula de Excel
         signature_name: Autorizado por nombre (opcional)
@@ -1950,6 +1957,7 @@ es-419:
         labels_text: Etiquetas y texto
         labels_text_hint: Configuración de texto avanzada para etiquetas de tabla, títulos de documentos y notas de pie de página.
         description_label: Etiqueta de descripción
+        scope_of_supply_label: Etiqueta de alcance de suministro
         spec_label: Etiqueta de especificación
         spec_placeholder: Especificación
         addon_label: Etiqueta de complemento
@@ -1966,8 +1974,11 @@ es-419:
         pi_number_label: Etiqueta de número de PI
         pi_number_placeholder: "PI #"
         quotation_footer_note: Nota de pie de página de cotización
+        quotation_footer_note_hint: Solo para documentos de cotización. Tiene prioridad sobre el texto de pie de página alternativo.
         pi_footer_note: Nota de pie de página de PI
+        pi_footer_note_hint: Solo para documentos PI. Tiene prioridad sobre el texto de pie de página alternativo.
         fallback_footer_text: Texto de pie de página alternativo
+        fallback_footer_text_hint: Se usa solo cuando la nota de pie específica del tipo de documento está vacía.
         closing_message: Mensaje de cierre debajo del total general
         closing_message_hint: Opcional. Dejar vacío para ocultar el mensaje completamente incluso si el interruptor está activado.
         live_preview: Vista previa en vivo
@@ -1994,6 +2005,7 @@ es-419:
       pi: PI
     sections:
       terms_and_conditions: Términos y condiciones
+      scope_of_supply: Alcance de suministro
       company_credentials: Credenciales de la empresa
       footer: Pie de página
       signature: Firma
@@ -2143,8 +2155,50 @@ es-419:
       sent_to: Correo electrónico de verificación enviado a %{email}
       failed_send: No se pudo enviar el correo electrónico de verificación
       error_occurred: Ocurrió un error
+      invalid_code: El código de verificación no es válido. Intente de nuevo.
+      code_expired: El código de verificación expiró. Solicite uno nuevo.
+      too_many_attempts: Demasiados intentos incorrectos. Solicite un nuevo código.
       bot_verification_required: Se requiere verificación de bot
       bot_verification_failed: La verificación de bot falló. Por favor, intente de nuevo.
+    mailer:
+      subject: Tu código de verificación de Rubusoo
+      title: Verifica tu correo electrónico
+      greeting: "Hola %{name},"
+      intro: "Usa el siguiente código para activar tu cuenta:"
+      code_hint: Ingresa este código en la página de verificación para completar el registro.
+      expires_note: "Este código vence en %{minutes} minutos."
+      ignore_note: Si no creaste esta cuenta, puedes ignorar este correo.
+      signature_html: "Saludos,<br/>Equipo de Rubusoo"
+      signature_text: |-
+        Saludos,
+        Equipo de Rubusoo
+    view:
+      pending:
+        title: Se requiere verificación de correo
+        description: Gracias por registrarte. Ingresa el código enviado a tu correo para activar tu cuenta.
+        expires_hint: El código vence en %{minutes} minutos.
+        spam_hint: Si no ves el correo, revisa la carpeta de spam.
+        auto_send_sent: Se envió automáticamente un nuevo código de verificación.
+        auto_send_cooldown: Se envió un código recientemente. Puedes solicitar otro en %{seconds}s.
+        auto_send_failed: El reenvío automático no se completó. Solicita un nuevo código abajo.
+        verify_code_title: Ingresar código de verificación
+        verify_code_hint: Ingresa el código de %{length} dígitos de tu correo. Puedes intentar hasta %{max_attempts} veces por código.
+        code_label: Código de verificación
+        code_placeholder: "123456"
+        verify_button: Verificar y activar
+        verify_submitting: Verificando...
+        resend_title: ¿No recibiste el código?
+        resend_hint: Puedes solicitar un nuevo código cada %{seconds} segundos.
+        resend_button: Reenviar código de verificación
+        resend_sending: Enviando...
+        resend_countdown: Reenviar (%{seconds}s)
+        current_email: "Correo actual:"
+        sign_up_again: Regístrate de nuevo con otro correo
+        modal_title: Verificación de seguridad
+        modal_hint: Completa la verificación antes de reenviar.
+        modal_loading: Cargando verificación...
+        modal_success: Verificado. Enviando...
+        generic_error: Ocurrió un error. Intente nuevamente.
   team_members:
     view:
       index:

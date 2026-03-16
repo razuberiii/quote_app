@@ -1,5 +1,11 @@
 class QuoteItem < ApplicationRecord
   MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
+  MAX_DESCRIPTION_LENGTH = 1000
+  MAX_SPEC_ROWS = 40
+  MAX_SPEC_KEY_LENGTH = 120
+  MAX_SPEC_VALUE_LENGTH = 500
+  MAX_ADDON_ROWS = 40
+  MAX_ADDON_NAME_LENGTH = 180
 
   belongs_to :quote
   belongs_to :product, optional: true
@@ -10,6 +16,9 @@ class QuoteItem < ApplicationRecord
   validates :unit_price, presence: true, numericality: { greater_than: 0 }
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validate :validate_addon_charge_amounts
+  validate :description_length_within_limit
+  validate :specifications_within_limits
+  validate :addons_within_limits
   validate :product_company_matches_quote_company
   validate :snapshots_locked_after_quote_sent
   validate :monetary_values_fit_storage_precision
@@ -166,6 +175,47 @@ class QuoteItem < ApplicationRecord
     return if addon_charge_entries.all? { |entry| entry[:amount].to_d >= 0 }
 
     errors.add(:addon_charges, "must be greater than or equal to 0")
+  end
+
+  def description_length_within_limit
+    return if description.blank?
+    return if description.length <= MAX_DESCRIPTION_LENGTH
+
+    errors.add(:description, "is too long (maximum is #{MAX_DESCRIPTION_LENGTH} characters)")
+  end
+
+  def specifications_within_limits
+    rows = specification_pairs
+    if rows.length > MAX_SPEC_ROWS
+      errors.add(:specifications, "can include up to #{MAX_SPEC_ROWS} rows")
+      return
+    end
+
+    rows.each do |pair|
+      if pair[:key].to_s.length > MAX_SPEC_KEY_LENGTH
+        errors.add(:specifications, "key is too long (maximum is #{MAX_SPEC_KEY_LENGTH} characters)")
+        break
+      end
+      if pair[:value].to_s.length > MAX_SPEC_VALUE_LENGTH
+        errors.add(:specifications, "value is too long (maximum is #{MAX_SPEC_VALUE_LENGTH} characters)")
+        break
+      end
+    end
+  end
+
+  def addons_within_limits
+    rows = addon_charge_entries
+    if rows.length > MAX_ADDON_ROWS
+      errors.add(:addon_charges, "can include up to #{MAX_ADDON_ROWS} rows")
+      return
+    end
+
+    rows.each do |entry|
+      if entry[:name].to_s.length > MAX_ADDON_NAME_LENGTH
+        errors.add(:addon_charges, "name is too long (maximum is #{MAX_ADDON_NAME_LENGTH} characters)")
+        break
+      end
+    end
   end
 
   def monetary_values_fit_storage_precision

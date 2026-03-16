@@ -16,7 +16,7 @@ class EmailFlowServiceTest < ActiveSupport::TestCase
       false
     end
 
-    def email_verification_token_sent_at
+    def email_verification_code_sent_at
       nil
     end
   end

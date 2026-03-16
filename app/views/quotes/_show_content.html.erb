@@ -294,7 +294,7 @@
             <% end %>
             <td data-label="<%= @template.resolved_table_label("description") %>">
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.product&.name.presence || t("quote_document.labels.item") %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || item.description.presence || t("quote_document.labels.item") %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
                     <% if item.specification_pairs.any? %>
@@ -347,6 +347,15 @@
     <% end %>
   </aside>
 
+  <% scope_text = @quote.scope_of_supply.to_s.strip %>
+  <% show_scope_of_supply = @document_kind != "pi" && active_template.show_scope_of_supply && scope_text.present? %>
+  <% if show_scope_of_supply %>
+    <section class="quote-section-block quote-section-block--scope">
+      <h3><%= active_template.resolved_scope_of_supply_label %></h3>
+      <%= simple_format(scope_text) %>
+    </section>
+  <% end %>
+
   <% terms_lines = [] %>
   <% if active_template.show_terms_section %>
     <% terms_lines << [ t("quote_document.labels.payment_terms"), @quote.payment_term ] if active_template.show_payment_term && @quote.payment_term.present? %>
@@ -380,7 +389,7 @@
     </section>
   <% end %>
 
-  <% footer_note = @template.resolved_footer_note(@document_kind) %>
+  <% footer_note = active_template.resolved_footer_note(@document_kind) %>
   <% signature_image_url = template_signature_image_url(active_template) %>
   <% signature_name = template_signature_name(active_template) %>
   <% show_signature_section = active_template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
@@ -485,14 +494,14 @@
                 </div>
               <% end %>
               <div class="share-link-panel-actions">
-                <button type="button" class="share-link-panel-btn" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
-                <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
+                <button type="button" class="<%= ui_button_classes(:secondary, "share-link-panel-btn") %>" id="quote-share-copy-btn"><%= t("quotes.view.show.toolbar.copy_link") %></button>
+                <a href="#" target="_blank" rel="noopener" class="<%= ui_button_classes(:secondary, "share-link-panel-btn is-link") %>" id="quote-share-open-link"><%= t("quotes.view.show.toolbar.open") %></a>
                 <% if share_comms_available %>
-                  <button type="button" class="share-link-panel-btn" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
+                  <button type="button" class="<%= ui_button_classes(:secondary, "share-link-panel-btn") %>" id="quote-share-copy-message-btn"><%= t("quotes.view.show.comms.copy_message", default: "Copy Share Message") %></button>
                   <% if wa_phone_raw.present? %>
-                    <a href="#" target="_blank" rel="noopener" class="share-link-panel-btn is-link" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
+                    <a href="#" target="_blank" rel="noopener" class="<%= ui_button_classes(:secondary, "share-link-panel-btn is-link") %>" id="quote-share-whatsapp-btn"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></a>
                   <% else %>
-                    <span class="share-link-panel-btn is-disabled" title="<%= t("quotes.view.show.comms.no_phone_tooltip") %>"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></span>
+                    <span class="app-ui-button app-ui-button--secondary share-link-panel-btn is-disabled" title="<%= t("quotes.view.show.comms.no_phone_tooltip") %>"><%= t("quotes.view.show.comms.send_whatsapp", default: "Send via WhatsApp") %></span>
                   <% end %>
                 <% end %>
               </div>
@@ -1298,7 +1307,7 @@
     text.className = "quote-status-undo-text";
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "quote-status-undo-btn";
+    button.className = "<%= j(ui_button_classes(:secondary, "quote-status-undo-btn")) %>";
     button.textContent = "<%= j(t("quotes.view.show.toolbar.undo")) %>";
     wrap.append(text, button);
     document.body.appendChild(wrap);

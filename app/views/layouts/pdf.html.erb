@@ -73,28 +73,68 @@
         background: #fff !important;
         color: #222 !important;
         position: relative !important;
+        /* PDF quotation typography tokens (baseline/current values). */
+        --q-pdf-doc-title-size: 1.45rem !important;
+        --q-pdf-doc-title-lh: 1.5 !important;
+        --q-pdf-doc-title-w: 700 !important;
+        --q-pdf-section-title-size: 13px !important;
+        --q-pdf-section-title-lh: 1.5 !important;
+        --q-pdf-section-title-w: 700 !important;
+        --q-pdf-body-size: 12px !important;
+        --q-pdf-body-lh: 1.5 !important;
+        --q-pdf-body-w: 400 !important;
+        --q-pdf-meta-size: 11px !important;
+        --q-pdf-meta-lh: 1.5 !important;
+        --q-pdf-meta-w: 400 !important;
+        --q-pdf-table-head-size: 11px !important;
+        --q-pdf-table-head-lh: 1.5 !important;
+        --q-pdf-table-head-w: 700 !important;
+        --q-pdf-table-body-size: 12px !important;
+        --q-pdf-table-body-lh: 1.5 !important;
+        --q-pdf-table-body-w: 400 !important;
+        --q-pdf-item-detail-size: 10px !important;
+        --q-pdf-item-detail-lh: 1.35 !important;
+        --q-pdf-item-detail-w: 400 !important;
+        --q-pdf-total-primary-size: 1.16rem !important;
+        --q-pdf-total-primary-lh: 1.5 !important;
+        --q-pdf-total-primary-w: 800 !important;
+        --q-pdf-total-primary-label-size: 12px !important;
+        --q-pdf-total-primary-label-lh: 1.5 !important;
+        --q-pdf-total-primary-label-w: 500 !important;
+        --q-pdf-total-secondary-size: 12px !important;
+        --q-pdf-total-secondary-lh: 1.5 !important;
+        --q-pdf-total-secondary-w: 400 !important;
+        --q-pdf-notes-size: 10.8px !important;
+        --q-pdf-notes-lh: 1.5 !important;
+        --q-pdf-notes-w: 400 !important;
+        --q-pdf-closing-size: 10px !important;
+        --q-pdf-closing-lh: 1.4 !important;
+        --q-pdf-closing-w: 400 !important;
       }
 
       .pdf-render .quote-watermarked {
-        overflow: visible !important;
+        position: relative !important;
+        overflow: hidden !important;
+        isolation: isolate !important;
       }
 
       .pdf-render .quote-watermarked::before {
         content: attr(data-watermark) !important;
-        position: fixed !important;
+        position: absolute !important;
         top: 50% !important;
         left: 50% !important;
-        display: block !important;
-        text-align: center !important;
-        color: rgb(15 23 42) !important;
-        font-size: 46px !important;
+        display: inline-block !important;
+        white-space: nowrap !important;
+        line-height: 1 !important;
+        color: rgba(15, 23, 42, 0.35) !important;
+        font-size: 64px !important;
         font-weight: 700 !important;
         letter-spacing: 0.18em !important;
-        transform: translate(-50%, -50%) rotate(-18deg) !important;
+        transform: translate(-50%, -50%) rotate(-22deg) !important;
+        transform-origin: center center !important;
         pointer-events: none !important;
         z-index: 3 !important;
-        width: 100% !important;
-        opacity: var(--quote-watermark-opacity, 0.12) !important;
+        opacity: 0.08 !important;
       }
 
       .pdf-render .quote-watermarked > * {
@@ -103,16 +143,29 @@
       }
 
       .pdf-render .quote-watermark-image {
-        position: fixed !important;
+        position: absolute !important;
         top: 50% !important;
         left: 50% !important;
         max-width: 48% !important;
         max-height: 44% !important;
-        opacity: var(--quote-watermark-opacity, 0.12) !important;
+        opacity: 0.08 !important;
         transform: translate(-50%, -50%) rotate(-18deg) !important;
         pointer-events: none !important;
         z-index: 3 !important;
         object-fit: contain !important;
+      }
+
+      /* Sparse quotes: keep watermark but reduce visual dominance in the empty middle area. */
+      .pdf-render .pdf-content-sparse.quote-watermarked::before {
+        font-size: 52px !important;
+        letter-spacing: 0.14em !important;
+        opacity: 0.05 !important;
+      }
+
+      .pdf-render .pdf-content-sparse .quote-watermark-image {
+        max-width: 40% !important;
+        max-height: 34% !important;
+        opacity: 0.05 !important;
       }
 
       .pdf-render,
@@ -176,6 +229,8 @@
       .pdf-render .pdf-head-right p {
         margin: 0 0 0.015in 0 !important;
         white-space: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-doc-kicker {
@@ -188,8 +243,9 @@
       }
 
       .pdf-render .quote-doc-header h1 {
-        font-size: 1.45rem !important;
-        font-weight: 700 !important;
+        font-size: var(--q-pdf-doc-title-size) !important;
+        line-height: var(--q-pdf-doc-title-lh) !important;
+        font-weight: var(--q-pdf-doc-title-w) !important;
         margin: 0 !important;
         letter-spacing: 0 !important;
         text-transform: none !important;
@@ -205,6 +261,7 @@
         margin: 0 0 0.015in 0 !important;
         color: #888 !important;
         font-size: 11px !important;
+        overflow-wrap: anywhere !important;
         word-break: break-word !important;
       }
 
@@ -271,9 +328,12 @@
 
       .pdf-render .quote-meta-card p {
         margin: 0 0 0.02in 0 !important;
-        font-size: 11px !important;
-        line-height: 1.6 !important;
+        font-size: var(--q-pdf-meta-size) !important;
+        line-height: var(--q-pdf-meta-lh) !important;
+        font-weight: var(--q-pdf-meta-w) !important;
         color: #888 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-meta-card .pdf-party-name {
@@ -296,8 +356,9 @@
       }
 
       .pdf-render .quote-doc-table thead th {
-        font-size: 11px !important;
-        font-weight: 700 !important;
+        font-size: var(--q-pdf-table-head-size) !important;
+        line-height: var(--q-pdf-table-head-lh) !important;
+        font-weight: var(--q-pdf-table-head-w) !important;
         color: var(--doc-on-accent, #ffffff) !important;
         border-bottom: 1px solid #ddd !important;
         padding: 0.064in 0.07in !important;
@@ -320,10 +381,19 @@
       .pdf-render .quote-doc-table tbody td {
         border-bottom: 1px solid #ddd !important;
         padding: 0.07in 0.07in !important;
-        font-size: 12px !important;
+        font-size: var(--q-pdf-table-body-size) !important;
+        line-height: var(--q-pdf-table-body-lh) !important;
+        font-weight: var(--q-pdf-table-body-w) !important;
         vertical-align: top !important;
-        word-break: normal !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
         color: #222 !important;
+      }
+
+      .pdf-render .quote-doc-table tr.pdf-filler-row td {
+        color: transparent !important;
+        padding-top: 0.085in !important;
+        padding-bottom: 0.085in !important;
       }
 
       .pdf-render .quote-item-desc {
@@ -333,6 +403,8 @@
       .pdf-render .quote-item-desc-main {
         font-weight: 600 !important;
         color: #222 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-item-desc-meta {
@@ -346,16 +418,22 @@
 
       .pdf-render .quote-item-desc-group-label {
         display: block !important;
-        font-size: 9.6px !important;
+        font-size: var(--q-pdf-item-detail-size) !important;
+        line-height: var(--q-pdf-item-detail-lh) !important;
         font-weight: 600 !important;
         color: #4b5563 !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-item-desc-sub {
         display: block !important;
-        font-size: 9.6px !important;
+        font-size: var(--q-pdf-item-detail-size) !important;
         color: #6b7280 !important;
-        line-height: 1.28 !important;
+        line-height: var(--q-pdf-item-detail-lh) !important;
+        font-weight: var(--q-pdf-item-detail-w) !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-item-desc-bullet {
@@ -371,6 +449,7 @@
       .pdf-render .quote-doc-table td.is-money {
         text-align: right !important;
         white-space: nowrap !important;
+        overflow-wrap: normal !important;
         word-break: normal !important;
         font-variant-numeric: tabular-nums !important;
       }
@@ -379,6 +458,7 @@
       .pdf-render .quote-doc-table td.is-right {
         text-align: right !important;
         white-space: nowrap !important;
+        overflow-wrap: normal !important;
         word-break: normal !important;
         font-variant-numeric: tabular-nums !important;
       }
@@ -409,10 +489,29 @@
         break-inside: avoid-page !important;
       }
 
+      .pdf-render .pdf-summary-stack {
+        clear: both !important;
+        width: 320px !important;
+        max-width: 320px !important;
+        margin-left: auto !important;
+        margin-top: 0.08in !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+      }
+
+      .pdf-render .pdf-summary-stack .quote-total-box {
+        float: none !important;
+        width: auto !important;
+        max-width: none !important;
+        margin-top: 0 !important;
+      }
+
       .pdf-render .quote-total-box p {
         display: block !important;
         margin: 0 0 0.02in 0 !important;
-        font-size: 12px !important;
+        font-size: var(--q-pdf-total-secondary-size) !important;
+        line-height: var(--q-pdf-total-secondary-lh) !important;
+        font-weight: var(--q-pdf-total-secondary-w) !important;
       }
 
       .pdf-render .quote-total-box p > span {
@@ -457,15 +556,17 @@
 
       .pdf-render .quote-total-grand span {
         color: #0f172a !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
+        font-size: var(--q-pdf-total-primary-label-size) !important;
+        line-height: var(--q-pdf-total-primary-label-lh) !important;
+        font-weight: var(--q-pdf-total-primary-label-w) !important;
         letter-spacing: 0.01em !important;
       }
 
       .pdf-render .quote-total-grand strong {
         color: #1d3552 !important;
-        font-size: 1.16rem !important;
-        font-weight: 800 !important;
+        font-size: var(--q-pdf-total-primary-size) !important;
+        line-height: var(--q-pdf-total-primary-lh) !important;
+        font-weight: var(--q-pdf-total-primary-w) !important;
       }
 
       .pdf-render .quote-engagement-note {
@@ -473,17 +574,18 @@
         padding-top: 0.04in !important;
         border-top: 1px solid #d9e1ea !important;
         color: #5b6472 !important;
-        font-size: 10px !important;
-        line-height: 1.35 !important;
+        font-size: var(--q-pdf-closing-size) !important;
+        line-height: var(--q-pdf-closing-lh) !important;
+        font-weight: var(--q-pdf-closing-w) !important;
       }
 
       .pdf-render .pdf-engagement-note {
-        clear: both !important;
-        width: 320px !important;
-        max-width: 320px !important;
-        margin-left: auto !important;
-        margin-top: 0.08in !important;
-        text-align: right !important;
+        clear: none !important;
+        width: auto !important;
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-top: 0.05in !important;
+        text-align: left !important;
       }
 
       .pdf-render .quote-public-footnote {
@@ -494,28 +596,53 @@
         font-size: 9px !important;
       }
 
+      .pdf-render .pdf-summary-stack + .quote-section-block {
+        margin-top: 0.12in !important;
+      }
+
+      .pdf-render .pdf-content-sparse .pdf-summary-stack {
+        margin-top: 0.04in !important;
+      }
+
       .pdf-render .quote-section-block {
         margin-top: 0.16in !important;
         clear: both !important;
         border-top: 1px solid #d4d4d4 !important;
         padding-top: 0.07in !important;
-        page-break-inside: avoid !important;
+        page-break-inside: auto !important;
+        break-inside: auto !important;
         text-align: left !important;
+      }
+      .pdf-render .quote-total-box + .quote-section-block--scope {
+        margin-top: 0.13in !important;
+      }
+      .pdf-render .quote-section-block--scope h3 {
+        margin-bottom: 0.035in !important;
+      }
+      .pdf-render .quote-section-block--scope + .quote-section-block {
+        margin-top: 0.14in !important;
       }
 
       .pdf-render .quote-section-block h3 {
         margin: 0 0 0.025in 0 !important;
-        font-size: 13px !important;
+        font-size: var(--q-pdf-section-title-size) !important;
+        line-height: var(--q-pdf-section-title-lh) !important;
         letter-spacing: 0.03em !important;
-        font-weight: 700 !important;
+        font-weight: var(--q-pdf-section-title-w) !important;
         text-transform: uppercase !important;
         color: #222 !important;
+        page-break-after: avoid !important;
+        break-after: avoid-page !important;
       }
 
       .pdf-render .quote-section-block p,
       .pdf-render .quote-section-block div {
         margin: 0.005in 0 !important;
-        font-size: 10.8px !important;
+        font-size: var(--q-pdf-notes-size) !important;
+        line-height: var(--q-pdf-notes-lh) !important;
+        font-weight: var(--q-pdf-notes-w) !important;
+        overflow-wrap: anywhere !important;
+        word-break: break-word !important;
       }
 
       .pdf-render .quote-sales-signature-image {
@@ -524,9 +651,20 @@
         object-fit: contain !important;
       }
 
-      .pdf-render .quote-doc-table tr,
-      .pdf-render .quote-total-box {
+      .pdf-render .quote-doc-table tbody {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+
+      .pdf-render .quote-doc-table tr {
+        page-break-inside: auto !important;
+        break-inside: auto !important;
+      }
+
+      .pdf-render .quote-total-box,
+      .pdf-render .quote-signature-block {
         page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
       }
 
       .pdf-render .pdf-density-compact .quote-doc-table thead th,

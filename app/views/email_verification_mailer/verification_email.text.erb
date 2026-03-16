@@ -1,14 +1,14 @@
-Verify your email address
+<%= t("email_verifications.mailer.title") %>
 
-Hello <%= @user.full_name.presence || @user.email %>,
+<%= t("email_verifications.mailer.greeting", name: @user.full_name.presence || @user.email) %>
 
-Thank you for registering. Please verify your email address by clicking the link below:
+<%= t("email_verifications.mailer.intro") %>
 
-<%= @verification_link %>
+<%= @verification_code %>
 
-Note: This link will expire in 15 minutes.
+<%= t("email_verifications.mailer.code_hint") %>
+<%= t("email_verifications.mailer.expires_note", minutes: @validity_minutes) %>
 
-If you didn't create this account, you can ignore this email.
+<%= t("email_verifications.mailer.ignore_note") %>
 
-Best regards,
-Rubusoo Team
+<%= t("email_verifications.mailer.signature_text") %>

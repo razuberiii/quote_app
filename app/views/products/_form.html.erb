@@ -46,8 +46,8 @@
             <div class="product-gallery-toolbar">
               <p class="product-media-label"><%= t("products.view.form.gallery") %></p>
               <div class="product-gallery-toolbar-actions">
-                <button type="button" class="product-ghost-btn" id="product_gallery_select_all_<%= form_key %>"><%= t("products.view.form.select_all") %></button>
-                <button type="button" class="product-ghost-btn is-danger" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled><%= t("products.view.form.delete_selected") %></button>
+                <button type="button" class="<%= ui_button_classes(:secondary, "product-ghost-btn") %>" id="product_gallery_select_all_<%= form_key %>"><%= t("products.view.form.select_all") %></button>
+                <button type="button" class="<%= ui_button_classes(:danger, "product-ghost-btn") %>" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled><%= t("products.view.form.delete_selected") %></button>
               </div>
             </div>
             <p class="quote-form-hint" id="product_gallery_selected_count_<%= form_key %>"><%= t("products.view.form.selected_count", count: 0) %></p>

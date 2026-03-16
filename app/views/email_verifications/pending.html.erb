@@ -1,120 +1,237 @@
-<div class="container mt-5">
+<div class="container mt-5" data-email-verification-pending
+     data-pending-email="<%= @pending_email.to_s %>"
+     data-initial-cooldown="<%= [@initial_cooldown.to_i, @auto_send_cooldown.to_i].max %>"
+     data-default-cooldown="<%= @resend_cooldown_seconds %>"
+     data-login-url="<%= new_user_session_path %>">
   <div class="row justify-content-center">
     <div class="col-md-6">
-      <div class="alert alert-info" role="alert">
-        <h4 class="alert-heading">Email Verification Required</h4>
-        <p>Thank you for registering! Before you can log in, you need to verify your email address.</p>
+      <div class="alert alert-info" role="alert" style="animation: fadeIn 220ms ease-out;">
+        <h4 class="alert-heading"><%= t("email_verifications.view.pending.title") %></h4>
+        <p><%= t("email_verifications.view.pending.description") %></p>
         <hr/>
-        <p>Please check your email for a verification link. The link will expire in 15 minutes.</p>
-        <p class="mb-0">
-          If you don't see the verification email, please check your spam folder.
-        </p>
+        <p><%= t("email_verifications.view.pending.expires_hint", minutes: @code_validity_minutes) %></p>
+        <p class="mb-0"><%= t("email_verifications.view.pending.spam_hint") %></p>
       </div>
 
       <% if @auto_send_state == "sent" %>
-        <div class="alert alert-success" role="status">
-          We sent a fresh verification email automatically when you tried to log in.
+        <div class="alert alert-success" role="status" style="animation: fadeIn 220ms ease-out;">
+          <%= t("email_verifications.view.pending.auto_send_sent") %>
         </div>
       <% elsif @auto_send_state == "cooldown" %>
-        <div class="alert alert-warning" role="status">
-          A verification email was sent recently. You can request another one in <strong><%= @auto_send_cooldown %>s</strong>.
+        <div class="alert alert-warning" role="status" style="animation: fadeIn 220ms ease-out;">
+          <%= t("email_verifications.view.pending.auto_send_cooldown", seconds: @auto_send_cooldown) %>
         </div>
       <% elsif @auto_send_state == "failed" %>
-        <div class="alert alert-warning" role="status">
-          Automatic resend did not complete. Please use the button below to send a new verification email.
+        <div class="alert alert-warning" role="status" style="animation: fadeIn 220ms ease-out;">
+          <%= t("email_verifications.view.pending.auto_send_failed") %>
         </div>
       <% end %>
 
-      <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; border: 1px solid #eee;">
-        <h5 style="margin-top: 0;">Didn't receive the email?</h5>
-        <p style="margin: 10px 0 20px 0; font-size: 0.95em; color: #666;">
-          We can send a new verification link to your email address. You can request a new one every 60 seconds.
-        </p>
-        
-        <button id="resend-btn" class="btn btn-primary" type="button">
-          Resend Verification Email
+      <div class="app-surface" style="margin-top: 24px; padding: 20px; border-radius: 10px; border: 1px solid #eee;">
+        <h5 style="margin-top: 0;"><%= t("email_verifications.view.pending.verify_code_title") %></h5>
+        <p style="margin: 10px 0 16px 0; font-size: 0.95em; color: #666;"><%= t("email_verifications.view.pending.verify_code_hint", length: @code_length, max_attempts: @max_attempts) %></p>
+
+        <form id="verify-code-form" class="app-form-stack">
+          <div>
+            <label for="verification-code"><%= t("email_verifications.view.pending.code_label") %></label>
+            <input id="verification-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="<%= @code_length %>" class="<%= ui_input_classes %>" placeholder="<%= t("email_verifications.view.pending.code_placeholder") %>" />
+          </div>
+          <button id="verify-code-btn" type="submit" class="app-ui-button app-ui-button--primary"><%= t("email_verifications.view.pending.verify_button") %></button>
+        </form>
+      </div>
+
+      <div class="app-surface" style="margin-top: 20px; padding: 20px; border-radius: 10px; border: 1px solid #eee;">
+        <h5 style="margin-top: 0;"><%= t("email_verifications.view.pending.resend_title") %></h5>
+        <p style="margin: 10px 0 20px 0; font-size: 0.95em; color: #666;"><%= t("email_verifications.view.pending.resend_hint", seconds: @resend_cooldown_seconds) %></p>
+
+        <button id="resend-btn" class="app-ui-button app-ui-button--secondary" type="button">
+          <%= t("email_verifications.view.pending.resend_button") %>
         </button>
-        
-        <div id="resend-message" style="display: none; margin-top: 15px; padding: 12px; border-radius: 4px;" role="alert">
-          <span id="resend-message-text"></span>
+
+        <div id="pending-message" style="display: none; margin-top: 15px;" role="alert">
+          <span id="pending-message-text"></span>
         </div>
       </div>
 
-      <div style="margin-top: 20px; text-align: center; color: #999; font-size: 0.9em;">
+      <div style="margin-top: 18px; text-align: center; color: #999; font-size: 0.9em;">
         <% if @pending_email.present? %>
-          <div style="margin-bottom: 8px;">Current email: <strong><%= @pending_email %></strong></div>
+          <div style="margin-bottom: 8px;"><%= t("email_verifications.view.pending.current_email") %> <strong><%= @pending_email %></strong></div>
         <% end %>
-        <%= link_to "Sign up again", new_user_registration_path %> to use a different email address
+        <%= link_to t("email_verifications.view.pending.sign_up_again"), new_user_registration_path %>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Turnstile Verification Modal for Resend -->
 <div id="resend-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
   <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-    <h3 style="margin: 0 0 10px 0; color: #333;">Security Verification</h3>
-    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;">Please complete the verification to resend the email</p>
-    
+    <h3 style="margin: 0 0 10px 0; color: #333;"><%= t("email_verifications.view.pending.modal_title") %></h3>
+    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;"><%= t("email_verifications.view.pending.modal_hint") %></p>
+
     <div id="resend-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-      <p>Loading verification...</p>
+      <p><%= t("email_verifications.view.pending.modal_loading") %></p>
     </div>
-    
+
     <div id="resend-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
       <div class="cf-turnstile"></div>
     </div>
-    
+
     <div id="resend-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-      <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Sending...</p>
+      <p style="color: #28a745; font-size: 16px; margin: 0;"><%= t("email_verifications.view.pending.modal_success") %></p>
     </div>
   </div>
 </div>
 
+<style>
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+
 <script>
   function initializePendingEmailVerification() {
+    const root = document.querySelector('[data-email-verification-pending]');
+    if (!root || root.dataset.bound === 'true') {
+      return;
+    }
+    root.dataset.bound = 'true';
+
     const resendBtn = document.getElementById('resend-btn');
-    const messageDiv = document.getElementById('resend-message');
-    const messageText = document.getElementById('resend-message-text');
+    const verifyForm = document.getElementById('verify-code-form');
+    const verifyInput = document.getElementById('verification-code');
+    const verifyBtn = document.getElementById('verify-code-btn');
+    const messageBox = document.getElementById('pending-message');
+    const messageText = document.getElementById('pending-message-text');
+
     const modal = document.getElementById('resend-verification-modal');
     const loadingDiv = document.getElementById('resend-turnstile-loading');
     const containerDiv = document.getElementById('resend-turnstile-container');
     const successDiv = document.getElementById('resend-turnstile-success');
 
-    if (!resendBtn || !messageDiv || !messageText || !modal || !loadingDiv || !containerDiv || !successDiv) {
+    if (!resendBtn || !verifyForm || !verifyInput || !verifyBtn || !messageBox || !messageText || !modal || !loadingDiv || !containerDiv || !successDiv) {
       return;
     }
 
-    if (resendBtn.dataset.bound === 'true') {
-      return;
-    }
-    resendBtn.dataset.bound = 'true';
-    
-    let verificationComplete = false;
-    let isSubmitting = false;
+    const pendingEmail = root.dataset.pendingEmail || '';
+    const initialCooldown = Number(root.dataset.initialCooldown || 0);
+    const defaultCooldown = Number(root.dataset.defaultCooldown || 60);
+    const loginUrl = root.dataset.loginUrl || '<%= new_user_session_path %>';
+
+    const verifyPath = '<%= verify_email_verifications_path %>';
+    const resendPath = '<%= resend_email_verifications_path %>';
+
+    const labels = {
+      resendButton: '<%= j(t("email_verifications.view.pending.resend_button")) %>',
+      resendSending: '<%= j(t("email_verifications.view.pending.resend_sending")) %>',
+      resendCountdown: '<%= j(t("email_verifications.view.pending.resend_countdown", seconds: "__SECONDS__")) %>',
+      verifyButton: '<%= j(t("email_verifications.view.pending.verify_button")) %>',
+      verifySubmitting: '<%= j(t("email_verifications.view.pending.verify_submitting")) %>',
+      genericError: '<%= j(t("email_verifications.view.pending.generic_error")) %>'
+    };
+
     let resendCountdown = null;
-    const pendingEmail = '<%= j(@pending_email.to_s) %>';
+    let resendSubmitting = false;
 
-    resendBtn.addEventListener('click', function() {
-      // Prevent multiple submissions
-      if (isSubmitting) {
+    function csrfToken() {
+      const token = document.querySelector('meta[name="csrf-token"]');
+      return token ? token.content : '';
+    }
+
+    function showMessage(type, text) {
+      messageBox.className = `alert alert-${type}`;
+      messageText.textContent = text;
+      messageBox.style.display = 'block';
+    }
+
+    function clearMessage() {
+      messageBox.style.display = 'none';
+      messageText.textContent = '';
+    }
+
+    function setResendCountdown(seconds) {
+      const total = Math.max(Number(seconds) || 0, 0);
+      if (resendCountdown) {
+        clearInterval(resendCountdown);
+        resendCountdown = null;
+      }
+
+      if (total <= 0) {
+        resendBtn.disabled = false;
+        resendBtn.textContent = labels.resendButton;
+        resendSubmitting = false;
         return;
       }
 
-      // If verification already complete, submit
-      if (verificationComplete) {
-        submitResend();
-        return;
-      }
+      let remaining = total;
+      resendBtn.disabled = true;
+      resendBtn.textContent = labels.resendCountdown.replace('__SECONDS__', remaining);
 
-      // Show modal and start Turnstile
-      verificationComplete = false;
-      modal.style.display = 'flex';
+      resendCountdown = setInterval(() => {
+        remaining -= 1;
+        if (remaining <= 0) {
+          clearInterval(resendCountdown);
+          resendCountdown = null;
+          resendBtn.disabled = false;
+          resendBtn.textContent = labels.resendButton;
+          resendSubmitting = false;
+          return;
+        }
+        resendBtn.textContent = labels.resendCountdown.replace('__SECONDS__', remaining);
+      }, 1000);
+    }
+
+    function closeModal() {
+      modal.style.display = 'none';
       loadingDiv.style.display = 'block';
       containerDiv.style.display = 'none';
       successDiv.style.display = 'none';
-      
-      setTimeout(renderTurnstile, 300);
-    });
+    }
+
+    function submitResend(turnstileToken) {
+      resendSubmitting = true;
+      resendBtn.disabled = true;
+      resendBtn.textContent = labels.resendSending;
+      clearMessage();
+      closeModal();
+
+      const payload = { cf_turnstile_response: turnstileToken };
+      if (pendingEmail) {
+        payload.email = pendingEmail;
+      }
+
+      fetch(resendPath, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken()
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(async (response) => {
+        const body = await response.json();
+        if (response.ok) {
+          showMessage('success', body.message || labels.genericError);
+          setResendCountdown(Number(body.cooldown || defaultCooldown));
+          return;
+        }
+
+        showMessage('danger', body.error || labels.genericError);
+        if (Number(body.seconds_left || 0) > 0) {
+          setResendCountdown(Number(body.seconds_left));
+        } else {
+          resendBtn.disabled = false;
+          resendBtn.textContent = labels.resendButton;
+          resendSubmitting = false;
+        }
+      })
+      .catch(() => {
+        showMessage('danger', labels.genericError);
+        resendBtn.disabled = false;
+        resendBtn.textContent = labels.resendButton;
+        resendSubmitting = false;
+      });
+    }
 
     function renderTurnstile() {
       if (typeof turnstile === 'undefined') {
@@ -126,7 +243,6 @@
       containerDiv.style.display = 'block';
 
       const widget = containerDiv.querySelector('.cf-turnstile');
-      
       if (widget.dataset.rendered === 'true') {
         widget.innerHTML = '';
         widget.removeAttribute('data-rendered');
@@ -136,91 +252,86 @@
         sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
         theme: 'light',
         callback: function(token) {
-          verificationComplete = true;
-          
           containerDiv.style.display = 'none';
           successDiv.style.display = 'block';
-          
-          setTimeout(() => {
-            submitResend(token);
-          }, 1000);
+          setTimeout(() => submitResend(token), 600);
         }
       });
       widget.dataset.rendered = 'true';
     }
 
-    function submitResend(token) {
-      isSubmitting = true;
-      resendBtn.disabled = true;
-      resendBtn.textContent = 'Sending...';
-      messageDiv.style.display = 'none';
-      modal.style.display = 'none';
-
-      const data = token ? { cf_turnstile_response: token } : {};
-      if (pendingEmail) {
-        data.email = pendingEmail;
+    resendBtn.addEventListener('click', function() {
+      if (resendSubmitting || resendBtn.disabled) {
+        return;
       }
 
-      fetch('<%= resend_email_verifications_path %>', {
+      modal.style.display = 'flex';
+      loadingDiv.style.display = 'block';
+      containerDiv.style.display = 'none';
+      successDiv.style.display = 'none';
+      setTimeout(renderTurnstile, 250);
+    });
+
+    modal.addEventListener('click', function(event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+
+    verifyForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      if (verifyBtn.disabled) {
+        return;
+      }
+
+      const code = verifyInput.value.toString().replace(/\s+/g, '');
+      if (!code) {
+        showMessage('danger', '<%= j(t("email_verifications.flash.invalid_code")) %>');
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = labels.verifySubmitting;
+      clearMessage();
+
+      const payload = { code: code };
+      if (pendingEmail) {
+        payload.email = pendingEmail;
+      }
+
+      fetch(verifyPath, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+          'X-CSRF-Token': csrfToken()
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
       })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          messageDiv.className = 'alert alert-success';
-          messageText.textContent = '✓ ' + data.message;
-          messageDiv.style.display = 'block';
-          
-          startResendCooldown(60);
-          verificationComplete = false;
-        } else {
-          messageDiv.className = 'alert alert-danger';
-          messageText.textContent = '✗ ' + (data.error || 'Failed to send email');
-          messageDiv.style.display = 'block';
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'Resend Verification Email';
-          isSubmitting = false;
+      .then(async (response) => {
+        const body = await response.json();
+        if (response.ok && body.success) {
+          showMessage('success', body.message || labels.genericError);
+          resendBtn.style.display = 'none';
+          verifyInput.disabled = true;
+          verifyBtn.style.display = 'none';
+          setTimeout(() => { window.location.href = loginUrl; }, 900);
+          return;
         }
+
+        showMessage('danger', body.error || labels.genericError);
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = labels.verifyButton;
       })
-      .catch(error => {
-        console.error('Error:', error);
-        messageDiv.className = 'alert alert-danger';
-        messageText.textContent = '✗ An error occurred. Please try again.';
-        messageDiv.style.display = 'block';
-        resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend Verification Email';
-        isSubmitting = false;
+      .catch(() => {
+        showMessage('danger', labels.genericError);
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = labels.verifyButton;
       });
-    }
-
-    function startResendCooldown(seconds) {
-      resendBtn.disabled = true;
-      let remaining = seconds;
-
-      resendCountdown = setInterval(() => {
-        remaining--;
-        resendBtn.textContent = `Resend (${remaining}s)`;
-        
-        if (remaining <= 0) {
-          clearInterval(resendCountdown);
-          resendBtn.disabled = false;
-          resendBtn.textContent = 'Resend Verification Email';
-          isSubmitting = false;
-        }
-      }, 1000);
-    }
-
-    // Close modal on background click
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal && !verificationComplete) {
-        modal.style.display = 'none';
-      }
     });
+
+    if (initialCooldown > 0) {
+      setResendCountdown(initialCooldown);
+    }
   }
 
   document.addEventListener('DOMContentLoaded', initializePendingEmailVerification);

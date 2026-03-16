@@ -9,6 +9,13 @@ class QuoteTemplate < ApplicationRecord
   IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif image/svg+xml].freeze
   MAX_SIGNATURE_IMAGE_SIZE = 5.megabytes
   MAX_WATERMARK_IMAGE_SIZE = 8.megabytes
+  MAX_TEMPLATE_LABEL_LENGTH = 80
+  MAX_TEMPLATE_TITLE_LENGTH = 180
+  MAX_TEMPLATE_NUMBER_LABEL_LENGTH = 80
+  MAX_TEMPLATE_FOOTER_LENGTH = 4000
+  MAX_CLOSING_MESSAGE_LENGTH = 2000
+  MAX_WATERMARK_TEXT_LENGTH = 120
+  MAX_SIGNATURE_NAME_LENGTH = 120
   belongs_to :company
   has_many :quotes, foreign_key: :template_id, dependent: :nullify
   has_one_attached :watermark_image
@@ -18,6 +25,15 @@ class QuoteTemplate < ApplicationRecord
 
   validates :name, presence: true
   validates :slug, presence: true, uniqueness: { scope: :company_id }
+  validates :description_label, :spec_label, :addon_label, :qty_label, :unit_price_label, :line_total_label, :scope_of_supply_label,
+            length: { maximum: MAX_TEMPLATE_LABEL_LENGTH }
+  validates :quotation_title, :pi_title, :document_title, length: { maximum: MAX_TEMPLATE_TITLE_LENGTH }, allow_blank: true
+  validates :quotation_number_label, :pi_number_label, :document_number_label,
+            length: { maximum: MAX_TEMPLATE_NUMBER_LABEL_LENGTH }, allow_blank: true
+  validates :quotation_footer_note, :pi_footer_note, :footer_text, length: { maximum: MAX_TEMPLATE_FOOTER_LENGTH }, allow_blank: true
+  validates :closing_message, length: { maximum: MAX_CLOSING_MESSAGE_LENGTH }, allow_blank: true
+  validates :watermark_text, length: { maximum: MAX_WATERMARK_TEXT_LENGTH }, allow_blank: true
+  validates :signature_name, length: { maximum: MAX_SIGNATURE_NAME_LENGTH }, allow_blank: true
   validates :accent_color,
             format: {
               with: /\A#(?:\h{3}|\h{6})\z/,
@@ -46,6 +62,7 @@ class QuoteTemplate < ApplicationRecord
     show_valid_until
     show_customer_owner
     show_notes
+    show_scope_of_supply
     show_logo
     show_negotiated_flag
     show_currency
@@ -105,6 +122,10 @@ class QuoteTemplate < ApplicationRecord
     else
       quotation_number_label.presence || document_number_label.presence || I18n.t("quote_document.labels.quote_number")
     end
+  end
+
+  def resolved_scope_of_supply_label
+    scope_of_supply_label.to_s.strip.presence || I18n.t("quote_templates.defaults.scope_of_supply_label")
   end
 
   def resolved_footer_note(kind = default_document_kind)
@@ -183,6 +204,7 @@ class QuoteTemplate < ApplicationRecord
     self.show_shipping = true if show_shipping.nil?
     self.show_closing_message = true if show_closing_message.nil?
     self.show_saas_branding = true if show_saas_branding.nil?
+    self.show_scope_of_supply = false if show_scope_of_supply.nil?
     self.show_watermark = false if show_watermark.nil?
     self.excel_show_grid_lines = false if excel_show_grid_lines.nil?
     self.layout_density = "standard" if layout_density.blank?

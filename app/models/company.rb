@@ -86,6 +86,7 @@ class Company < ApplicationRecord
       show_currency: true,
       show_valid_until: true,
       show_notes: true,
+      show_scope_of_supply: false,
       show_terms_section: true,
       show_customer_owner: true,
       amount_decimals: 2,

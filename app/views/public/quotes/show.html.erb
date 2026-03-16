@@ -1,6 +1,6 @@
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> public-density-<%= @template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
   <% end %>
@@ -31,28 +31,38 @@
   </header>
 
   <section class="quote-meta-grid">
+    <% company_address = @quote.company.address.to_s.strip %>
+    <% company_phone = @quote.company.phone.to_s.strip %>
+    <% company_email = @quote.company.email.to_s.strip %>
+    <% company_website = @quote.company.website.to_s.strip %>
+    <% buyer_company = @quote.customer.name.to_s.strip %>
+    <% buyer_contact = @quote.customer.contact_name.to_s.strip %>
+    <% buyer_email = @quote.customer.email.to_s.strip %>
+    <% buyer_phone = @quote.customer.formatted_phone.to_s.strip %>
+    <% buyer_address = @quote.customer.address.to_s.strip %>
+    <% issued_on_text = @quote.issued_on&.strftime("%Y-%m-%d").to_s.strip %>
     <article class="quote-meta-card">
       <h3>Seller</h3>
       <p><strong><%= @quote.company.name %></strong></p>
       <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
         <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
       <% end %>
-      <p><%= @quote.company.address.presence || "-" %></p>
-      <p><%= @quote.company.phone.presence || "-" %></p>
-      <p><%= @quote.company.email.presence || "-" %></p>
-      <p><%= @quote.company.website.presence || "-" %></p>
+      <% if company_address.present? %><p><%= company_address %></p><% end %>
+      <% if company_phone.present? %><p><%= company_phone %></p><% end %>
+      <% if company_email.present? %><p><%= company_email %></p><% end %>
+      <% if company_website.present? %><p><%= company_website %></p><% end %>
     </article>
 
     <article class="quote-meta-card">
       <h3>Buyer</h3>
-      <p><strong>Company:</strong> <%= @quote.customer.name.presence || "-" %></p>
-      <p><strong>Primary Contact:</strong> <%= @quote.customer.contact_name.presence || "-" %></p>
-      <p><strong>Email:</strong> <%= @quote.customer.email.presence || "-" %></p>
-      <p><strong>Phone:</strong> <%= @quote.customer.formatted_phone.presence || "-" %></p>
+      <% if buyer_company.present? %><p><strong>Company:</strong> <%= buyer_company %></p><% end %>
+      <% if buyer_contact.present? %><p><strong>Primary Contact:</strong> <%= buyer_contact %></p><% end %>
+      <% if buyer_email.present? %><p><strong>Email:</strong> <%= buyer_email %></p><% end %>
+      <% if buyer_phone.present? %><p><strong>Phone:</strong> <%= buyer_phone %></p><% end %>
       <% if @quote.customer.tax_id.present? %>
         <p><strong>Tax ID:</strong> <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
       <% end %>
-      <p><strong>Address:</strong> <%= @quote.customer.address.presence || "-" %></p>
+      <% if buyer_address.present? %><p><strong>Address:</strong> <%= buyer_address %></p><% end %>
     </article>
 
     <article class="quote-meta-card">
@@ -62,7 +72,9 @@
       <% if @quote.custom_title.present? %>
         <p class="quote-info-row"><span>Title</span><strong><%= @quote.custom_title %></strong></p>
       <% end %>
-        <p class="quote-info-row"><span>Date</span><strong><%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></strong></p>
+        <% if issued_on_text.present? %>
+          <p class="quote-info-row"><span>Date</span><strong><%= issued_on_text %></strong></p>
+        <% end %>
         <% if @template.show_valid_until && @quote.valid_until.present? %>
           <p class="quote-info-row is-valid-until"><span>Valid Until</span><strong><%= @quote.valid_until.strftime("%Y-%m-%d") %></strong></p>
         <% end %>
@@ -111,7 +123,7 @@
             <% end %>
             <td>
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.product&.name.presence || "Item" %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || item.description.presence || "Item" %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
                     <% if item.specification_pairs.any? %>
@@ -167,6 +179,15 @@
     <% end %>
   </aside>
 
+  <% scope_text = @quote.scope_of_supply.to_s.strip %>
+  <% show_scope_of_supply = @document_kind != "pi" && @template.show_scope_of_supply && scope_text.present? %>
+  <% if show_scope_of_supply %>
+    <section class="quote-section-block quote-section-block--scope">
+      <h3><%= @template.resolved_scope_of_supply_label %></h3>
+      <%= simple_format(scope_text) %>
+    </section>
+  <% end %>
+
   <% terms_lines = [] %>
   <% if @template.show_terms_section %>
     <% terms_lines << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
@@ -195,6 +216,13 @@
           <% end %>
         </p>
       <% end %>
+    </section>
+  <% end %>
+  <% footer_note = @template.resolved_footer_note(@document_kind) %>
+  <% if footer_note.present? %>
+    <section class="quote-section-block">
+      <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
+      <%= simple_format(footer_note) %>
     </section>
   <% end %>
   <% if show_signature_section %>

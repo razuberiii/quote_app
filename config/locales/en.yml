@@ -637,6 +637,9 @@ en:
         delivery_notes_placeholder: Delivery / export notes
         terms: Terms
         terms_placeholder: Payment terms, validity statement, etc.
+        scope_of_supply: Scope of Supply
+        scope_of_supply_placeholder: List what is included in the supply scope (one line per item or bullet).
+        scope_of_supply_hint: Used to define the included supply boundary. Leave blank to hide this section. You also need to enable "Show Scope of Supply (Quotation only)" in template settings, otherwise this section stays hidden.
         legal_disclaimer_placeholder: Optional legal disclaimer
         internal_information: Internal Information
         internal_information_hint: Keep internal notes and post-decision details separate from the shared quote.
@@ -1851,6 +1854,8 @@ en:
         addon_count: "%{count} add-ons"
         no_addon_presets: No add-on presets yet.
   quote_templates:
+    defaults:
+      scope_of_supply_label: Scope of Supply
     flash:
       created: Template created
       updated: Template updated
@@ -1916,6 +1921,7 @@ en:
         show_payment_term: Show payment term
         show_sales_owner: Show sales owner
         show_notes: Show notes section
+        show_scope_of_supply: Show Scope of Supply (Quotation only)
         show_signature_block: Show signature block
         show_product_images: Show product images
         show_valid_until: Show valid until
@@ -1923,6 +1929,7 @@ en:
         show_currency: Show currency symbol/code
         show_closing_message: Show closing message
         show_watermark: Show watermark
+        show_watermark_hint: If enabled, preview/output will show watermark. Text mode uses watermark text; if text is empty, company name is used. Image mode overrides text mode.
         show_saas_branding: Show Rubusoo footer (white-label off by default)
         show_excel_gridlines: Show Excel gridlines
         signature_name: Authorized by name (optional)
@@ -1950,6 +1957,7 @@ en:
         labels_text: Labels & Text
         labels_text_hint: Advanced text settings for table labels, document titles, and footer notes.
         description_label: Description label
+        scope_of_supply_label: Scope of Supply label
         spec_label: Spec label
         spec_placeholder: Spec
         addon_label: Add-on label
@@ -1966,8 +1974,11 @@ en:
         pi_number_label: PI number label
         pi_number_placeholder: "PI #"
         quotation_footer_note: Quote footer note
+        quotation_footer_note_hint: Used only for Quote documents. Priority is higher than fallback footer text.
         pi_footer_note: PI footer note
+        pi_footer_note_hint: Used only for PI documents. Priority is higher than fallback footer text.
         fallback_footer_text: Fallback footer text
+        fallback_footer_text_hint: Used only when the current document-specific footer note is empty.
         closing_message: Closing message under Grand Total
         closing_message_hint: Optional. Leave empty to hide message completely even if toggle is on.
         live_preview: Live Preview
@@ -1994,6 +2005,7 @@ en:
       pi: PI
     sections:
       terms_and_conditions: Terms & Conditions
+      scope_of_supply: Scope of Supply
       company_credentials: Company Credentials
       footer: Footer
       signature: Signature
@@ -2143,8 +2155,50 @@ en:
       sent_to: Verification email sent to %{email}
       failed_send: Failed to send verification email
       error_occurred: An error occurred
+      invalid_code: The verification code is invalid. Please try again.
+      code_expired: The verification code has expired. Please request a new code.
+      too_many_attempts: Too many incorrect attempts. Please request a new code.
       bot_verification_required: Bot verification is required
       bot_verification_failed: Bot verification failed. Please try again.
+    mailer:
+      subject: Your Rubusoo verification code
+      title: Verify your email address
+      greeting: "Hello %{name},"
+      intro: "Use the verification code below to activate your account:"
+      code_hint: Enter this code on the verification page to complete signup.
+      expires_note: "This code will expire in %{minutes} minutes."
+      ignore_note: If you did not create this account, you can ignore this email.
+      signature_html: "Best regards,<br/>Rubusoo Team"
+      signature_text: |-
+        Best regards,
+        Rubusoo Team
+    view:
+      pending:
+        title: Email Verification Required
+        description: Thank you for registering. Enter the verification code sent to your email to activate your account.
+        expires_hint: The code expires in %{minutes} minutes.
+        spam_hint: If you do not see the email, check your spam folder.
+        auto_send_sent: A fresh verification code was sent automatically.
+        auto_send_cooldown: A code was sent recently. You can request another in %{seconds}s.
+        auto_send_failed: Automatic resend did not complete. Please request a new code below.
+        verify_code_title: Enter Verification Code
+        verify_code_hint: Enter the %{length}-digit code from your email. You can try up to %{max_attempts} times per code.
+        code_label: Verification code
+        code_placeholder: "123456"
+        verify_button: Verify and Activate
+        verify_submitting: Verifying...
+        resend_title: Did not receive a code?
+        resend_hint: You can request a new verification code every %{seconds} seconds.
+        resend_button: Resend Verification Code
+        resend_sending: Sending...
+        resend_countdown: Resend (%{seconds}s)
+        current_email: "Current email:"
+        sign_up_again: Sign up again with a different email
+        modal_title: Security Verification
+        modal_hint: Please complete verification before resending.
+        modal_loading: Loading verification...
+        modal_success: Verified. Sending...
+        generic_error: An error occurred. Please try again.
   team_members:
     view:
       index:

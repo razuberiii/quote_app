@@ -5,7 +5,7 @@
       <p class="template-page-subtitle"><%= t("quote_templates.view.index.subtitle") %></p>
     </div>
     <div class="app-page-header-actions template-index-actions">
-      <%= link_to t("quote_templates.view.index.new_template"), new_quote_template_path, class: "btn btn-primary" %>
+      <%= link_to t("quote_templates.view.index.new_template"), new_quote_template_path, class: "app-ui-button app-ui-button--primary" %>
     </div>
   </header>
 
@@ -49,11 +49,11 @@
       </div>
 
       <div class="template-actions">
-        <%= link_to t("quote_templates.view.index.edit"), edit_quote_template_path(template), class: "btn btn-secondary" %>
+        <%= link_to t("quote_templates.view.index.edit"), edit_quote_template_path(template), class: "app-ui-button app-ui-button--secondary" %>
         <% unless template.default_template? %>
-          <%= button_to t("quote_templates.view.index.set_default"), set_default_quote_template_path(template), method: :patch, class: "btn btn-info", form: { data: { turbo: false } } %>
+          <%= button_to t("quote_templates.view.index.set_default"), set_default_quote_template_path(template), method: :patch, class: "app-ui-button app-ui-button--primary", form: { data: { turbo: false } } %>
         <% end %>
-        <%= button_to t("quote_templates.view.index.delete"), quote_template_path(template), method: :delete, class: "btn btn-danger", data: { turbo_confirm: t("quote_templates.view.index.delete_confirm") } %>
+        <%= button_to t("quote_templates.view.index.delete"), quote_template_path(template), method: :delete, class: "app-ui-button app-ui-button--danger", data: { turbo_confirm: t("quote_templates.view.index.delete_confirm") } %>
       </div>
     </article>
   <% end %>

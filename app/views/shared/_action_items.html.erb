@@ -22,11 +22,11 @@
           </div>
           <div class="dashboard-task-actions">
             <% if item_cta.method == :post %>
-              <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: "dashboard-next-step-btn is-neutral" %>
+              <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-neutral") %>
             <% else %>
-              <%= link_to item_cta.label, item_cta.path, class: "dashboard-next-step-btn is-neutral" %>
+              <%= link_to item_cta.label, item_cta.path, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-neutral") %>
             <% end %>
-            <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
+            <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-primary") %>
           </div>
         </article>
       <% end %>
@@ -43,11 +43,11 @@
               </div>
               <div class="dashboard-task-actions">
                 <% if item_cta.method == :post %>
-                  <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: "dashboard-next-step-btn is-neutral" %>
+                  <%= button_to item_cta.label, item_cta.path, method: :post, form: { data: { turbo: false } }, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-neutral") %>
                 <% else %>
-                  <%= link_to item_cta.label, item_cta.path, class: "dashboard-next-step-btn is-neutral" %>
+                  <%= link_to item_cta.label, item_cta.path, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-neutral") %>
                 <% end %>
-                <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: "dashboard-next-step-btn is-primary" %>
+                <%= button_to t("dashboard.view.action_items.mark_handled"), resolve_action_item_path(item), method: :patch, class: ui_button_classes(:secondary, "dashboard-next-step-btn is-primary") %>
               </div>
             </article>
           <% end %>

@@ -117,7 +117,12 @@
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :terms_text, t("quotes.view.form.terms") %>
-          <%= f.text_area :terms_text, rows: 3, placeholder: t("quotes.view.form.terms_placeholder"), class: ui_input_classes %>
+          <%= f.text_area :terms_text, rows: 3, maxlength: Quote::MAX_TERMS_TEXT_LENGTH, placeholder: t("quotes.view.form.terms_placeholder"), class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <%= f.label :scope_of_supply, t("quotes.view.form.scope_of_supply") %>
+          <%= f.text_area :scope_of_supply, rows: 3, maxlength: Quote::MAX_SCOPE_OF_SUPPLY_LENGTH, placeholder: t("quotes.view.form.scope_of_supply_placeholder"), class: ui_input_classes %>
+          <p class="quote-form-hint quote-form-hint--scope"><%= t("quotes.view.form.scope_of_supply_hint") %></p>
         </div>
         <div class="quote-form-grid-span-2">
           <%= f.label :legal_disclaimer %>
@@ -134,7 +139,7 @@
       <div class="quote-form-grid">
         <div class="quote-form-grid-span-2">
           <%= f.label :notes %>
-          <%= f.text_area :notes, rows: 3, placeholder: t("quotes.view.form.internal_notes_placeholder"), class: ui_input_classes %>
+          <%= f.text_area :notes, rows: 3, maxlength: Quote::MAX_NOTES_LENGTH, placeholder: t("quotes.view.form.internal_notes_placeholder"), class: ui_input_classes %>
         </div>
         <div class="quote-conditional" data-show-when-status="won,accepted">
           <%= f.label :final_amount, t("quotes.view.form.final_amount") %>
@@ -1153,7 +1158,7 @@
         if (!priceInput.value && !isCurrencyMismatch) {
           priceInput.value = selected.price;
         }
-        if (!descInput.value) descInput.value = selected.name;
+        descInput.value = selected.name;
 
         fillSelect(specPresetSelect, selected.spec_presets || [], selected.default_spec_preset_id, uiText.customSpecs);
         fillSelect(addonPresetSelect, selected.addon_presets || [], selected.default_addon_preset_id, uiText.customAddOns);
@@ -1181,9 +1186,7 @@
         } else {
           productIdInput.value = "";
           productNameInput.classList.remove("is-matched");
-          if (!descInput.value && productNameInput.value.trim()) {
-            descInput.value = productNameInput.value.trim();
-          }
+          descInput.value = keyword;
           if (keyword) {
             setFeedback("muted", uiText.noExactMatchSavedAsCustom);
           } else {

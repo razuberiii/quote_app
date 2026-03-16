@@ -6,6 +6,10 @@
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = quote_watermark_data_uri || template_watermark_image_url(@template) %>
 <% pdf_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.5, 0.08].min %>
+<% pdf_items = @quote.quote_items.ordered.to_a %>
+<% pdf_min_visual_rows = 4 %>
+<% pdf_filler_rows = [pdf_min_visual_rows - pdf_items.size, 0].max %>
+<% pdf_sparse_content = pdf_items.size < pdf_min_visual_rows %>
 <% signature_image_url = template_signature_image_url(@template) %>
 <% signature_name = template_signature_name(@template) %>
 <% show_signature_section = @template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
@@ -22,8 +26,15 @@
   .pdf-render .quote-total-grand strong {
     color: #222 !important;
   }
+  /* wkhtmltopdf can be inconsistent with CSS var() on pseudo elements */
+  .pdf-render .quote-watermarked::before {
+    opacity: <%= pdf_watermark_opacity %> !important;
+  }
+  .pdf-render .quote-watermark-image {
+    opacity: <%= pdf_watermark_opacity %> !important;
+  }
 </style>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>; --doc-accent: <%= doc_accent %>; --doc-on-accent: #ffffff; --doc-font: 'Noto Sans';">
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %><%= ' pdf-content-sparse' if pdf_sparse_content %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>; --doc-accent: <%= doc_accent %>; --doc-on-accent: #ffffff; --doc-font: 'Noto Sans';">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
   <% end %>
@@ -31,6 +42,16 @@
   <% number_label = @template.resolved_document_number_label(document_kind) %>
   <% logo_uri = quote_logo_data_uri if @template.show_logo %>
   <% company_header_lines = [@quote.company.address, @quote.company.phone, @quote.company.email, @quote.company.website].compact_blank %>
+  <% seller_address = @quote.company.address.to_s.strip %>
+  <% seller_phone = @quote.company.phone.to_s.strip %>
+  <% seller_email = @quote.company.email.to_s.strip %>
+  <% seller_website = @quote.company.website.to_s.strip %>
+  <% buyer_name = @quote.customer.name.to_s.strip %>
+  <% buyer_contact = @quote.customer.contact_name.to_s.strip %>
+  <% buyer_address = @quote.customer.address.to_s.strip %>
+  <% buyer_phone = @quote.customer.formatted_phone.to_s.strip %>
+  <% buyer_email = @quote.customer.email.to_s.strip %>
+  <% issued_on_text = @quote.issued_on&.strftime("%Y-%m-%d").to_s.strip %>
   <% terms_lines = [] %>
   <% if @template.show_terms_section %>
     <% terms_lines << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
@@ -62,7 +83,9 @@
           <% if @quote.custom_title.present? %>
             <p><strong>Title:</strong> <%= @quote.custom_title %></p>
           <% end %>
-          <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= @quote.issued_on&.strftime("%Y-%m-%d") || "-" %></p>
+          <% if issued_on_text.present? %>
+            <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= issued_on_text %></p>
+          <% end %>
           <% if @template.show_valid_until && @quote.valid_until.present? %>
             <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %></p>
           <% end %>
@@ -84,18 +107,20 @@
       <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
         <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
       <% end %>
-      <p><%= @quote.company.address.presence || "-" %></p>
-      <p><%= @quote.company.phone.presence || "-" %></p>
-      <p><%= @quote.company.email.presence || "-" %></p>
-      <p><%= @quote.company.website.presence || "-" %></p>
+      <% if seller_address.present? %><p><%= seller_address %></p><% end %>
+      <% if seller_phone.present? %><p><%= seller_phone %></p><% end %>
+      <% if seller_email.present? %><p><%= seller_email %></p><% end %>
+      <% if seller_website.present? %><p><%= seller_website %></p><% end %>
     </div>
     <div class="quote-meta-card pdf-party-col">
       <h3>Buyer</h3>
-      <p class="pdf-party-name"><strong><%= @quote.customer.name %></strong></p>
-      <p>Contact: <%= @quote.customer.contact_name.presence || "-" %></p>
-      <p><%= @quote.customer.address.presence || "-" %></p>
-      <p><%= @quote.customer.formatted_phone.presence || "-" %></p>
-      <p><%= @quote.customer.email.presence || "-" %></p>
+      <% if buyer_name.present? %>
+        <p class="pdf-party-name"><strong><%= buyer_name %></strong></p>
+      <% end %>
+      <% if buyer_contact.present? %><p>Contact: <%= buyer_contact %></p><% end %>
+      <% if buyer_address.present? %><p><%= buyer_address %></p><% end %>
+      <% if buyer_phone.present? %><p><%= buyer_phone %></p><% end %>
+      <% if buyer_email.present? %><p><%= buyer_email %></p><% end %>
       <% if @quote.customer.tax_id.present? %>
         <p>Tax ID: <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
       <% end %>
@@ -124,7 +149,7 @@
         </tr>
       </thead>
       <tbody>
-        <% @quote.quote_items.ordered.each_with_index do |item, idx| %>
+        <% pdf_items.each_with_index do |item, idx| %>
           <tr>
             <td class="is-left"><%= idx + 1 %></td>
             <% if @template.show_images? %>
@@ -138,7 +163,7 @@
             <% end %>
             <td class="is-left">
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.product&.name.presence || "Item" %></div>
+                <div class="quote-item-desc-main"><%= item.product&.name.presence || item.description.presence || "Item" %></div>
                 <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
                   <div class="quote-item-desc-meta">
                     <% if item.specification_pairs.any? %>
@@ -166,6 +191,18 @@
             <td class="is-money"><%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
           </tr>
         <% end %>
+        <% pdf_filler_rows.times do %>
+          <tr class="pdf-filler-row" aria-hidden="true">
+            <td class="is-left">&nbsp;</td>
+            <% if @template.show_images? %>
+              <td class="is-left">&nbsp;</td>
+            <% end %>
+            <td class="is-left">&nbsp;</td>
+            <td class="is-right">&nbsp;</td>
+            <td class="is-money">&nbsp;</td>
+            <td class="is-money">&nbsp;</td>
+          </tr>
+        <% end %>
       </tbody>
     </table>
   </div>
@@ -175,28 +212,39 @@
   <% has_discount = discount_amount.positive? %>
   <% original_total = @quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d %>
   <% grand_amount_text = template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %>
-  <aside class="quote-total-box pdf-total-box">
-    <p><span>Subtotal</span><strong><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-    <% if @template.show_tax %>
-      <p><span>Tax / VAT</span><strong><%= template_money(@quote.tax_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+  <div class="pdf-summary-stack">
+    <aside class="quote-total-box pdf-total-box">
+      <p><span>Subtotal</span><strong><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% if @template.show_tax %>
+        <p><span>Tax / VAT</span><strong><%= template_money(@quote.tax_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% end %>
+      <% if @template.show_shipping %>
+        <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% end %>
+      <% if has_discount %>
+        <p class="quote-total-discount"><span>Discount</span><strong>-<%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+        <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% end %>
+      <p class="quote-total-grand">
+        <span>Grand Total</span>
+        <strong><%= grand_amount_text %></strong>
+      </p>
+      <% if has_discount %>
+        <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% end %>
+    </aside>
+    <% if (closing_message = @template.resolved_closing_message).present? %>
+      <p class="quote-engagement-note pdf-engagement-note"><%= closing_message %></p>
     <% end %>
-    <% if @template.show_shipping %>
-      <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-    <% end %>
-    <% if has_discount %>
-      <p class="quote-total-discount"><span>Discount</span><strong>-<%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-      <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-    <% end %>
-    <p class="quote-total-grand">
-      <span>Grand Total</span>
-      <strong><%= grand_amount_text %></strong>
-    </p>
-    <% if has_discount %>
-      <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-    <% end %>
-  </aside>
-  <% if (closing_message = @template.resolved_closing_message).present? %>
-    <p class="quote-engagement-note pdf-engagement-note"><%= closing_message %></p>
+  </div>
+
+  <% scope_text = @quote.scope_of_supply.to_s.strip %>
+  <% show_scope_of_supply = document_kind != "pi" && @template.show_scope_of_supply && scope_text.present? %>
+  <% if show_scope_of_supply %>
+    <section class="quote-section-block quote-section-block--scope">
+      <h3><%= @template.resolved_scope_of_supply_label %></h3>
+      <%= simple_format(scope_text) %>
+    </section>
   <% end %>
 
   <% if terms_lines.any? %>
@@ -221,6 +269,13 @@
       <% company_documents.each do |document| %>
         <p><strong><%= document.title %></strong> - <%= document.document_type_label %></p>
       <% end %>
+    </section>
+  <% end %>
+  <% footer_note = @template.resolved_footer_note(@document_kind) %>
+  <% if footer_note.present? %>
+    <section class="quote-section-block">
+      <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
+      <%= simple_format(footer_note) %>
     </section>
   <% end %>
   <% if show_signature_section %>

@@ -159,7 +159,7 @@
     </div>
 
     <div class="settings-grid-span-2 settings-actions">
-      <%= f.submit t("company_settings.view.edit.save_company_settings"), class: "btn btn-primary" %>
+      <%= f.submit t("company_settings.view.edit.save_company_settings"), class: "app-ui-button app-ui-button--primary" %>
     </div>
   <% end %>
 </section>
@@ -190,7 +190,7 @@
         <%= doc_form.file_field :file %>
       </div>
       <div class="settings-grid-span-2">
-        <%= doc_form.submit t("company_settings.view.edit.upload_document"), class: "btn btn-secondary" %>
+        <%= doc_form.submit t("company_settings.view.edit.upload_document"), class: "app-ui-button app-ui-button--secondary" %>
       </div>
     <% end %>
   </div>
@@ -225,7 +225,7 @@
                                 company_document_path(document),
                                 method: :delete,
                                 data: { turbo_confirm: t("company_settings.view.edit.delete_document_confirm") },
-                                class: "btn btn-secondary" %>
+                                class: "app-ui-button app-ui-button--secondary" %>
                 </td>
               </tr>
             <% end %>

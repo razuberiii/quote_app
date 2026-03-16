@@ -53,7 +53,7 @@
     </div>
 
     <%= f.hidden_field :email, value: resource.email %>
-    <%= f.submit t("users.registrations.view.edit.update_profile"), class: "btn btn-primary" %>
+    <%= f.submit t("users.registrations.view.edit.update_profile"), class: "app-ui-button app-ui-button--primary" %>
   <% end %>
 </section>
 
@@ -68,7 +68,7 @@
       <span style="padding: 8px 12px; background: #f5f5f5; border-radius: 4px; color: #666; flex: 1;">
         <%= resource.email %>
       </span>
-      <button type="button" class="btn btn-secondary" id="change-email-btn" style="white-space: nowrap;">
+      <button type="button" class="app-ui-button app-ui-button--secondary" id="change-email-btn" style="white-space: nowrap;">
         <%= t("users.registrations.view.edit.change_email") %>
       </button>
     </div>
@@ -96,7 +96,7 @@
       <%= f.password_field :current_password, autocomplete: "current-password", class: ui_input_classes %>
     </div>
 
-    <%= f.submit t("users.registrations.view.edit.update_security_settings"), class: "btn btn-primary" %>
+    <%= f.submit t("users.registrations.view.edit.update_security_settings"), class: "app-ui-button app-ui-button--primary" %>
   <% end %>
 </section>
 
@@ -130,8 +130,8 @@
       <div id="email-change-success" style="display: none; margin-bottom: 15px; padding: 12px; background: #efe; border: 1px solid #cfc; border-radius: 4px; color: #3c3; font-size: 14px;"></div>
 
       <div style="display: flex; gap: 10px;">
-        <button type="submit" class="btn btn-primary" id="email-change-submit-btn" style="flex: 1;"><%= t("users.registrations.view.edit.send_verification_email") %></button>
-        <button type="button" class="btn btn-secondary" id="email-change-cancel-btn" style="flex: 1;"><%= t("users.registrations.view.edit.cancel") %></button>
+        <button type="submit" class="app-ui-button app-ui-button--primary" id="email-change-submit-btn" style="flex: 1;"><%= t("users.registrations.view.edit.send_verification_email") %></button>
+        <button type="button" class="app-ui-button app-ui-button--secondary" id="email-change-cancel-btn" style="flex: 1;"><%= t("users.registrations.view.edit.cancel") %></button>
       </div>
     </form>
   </div>

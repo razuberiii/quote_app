@@ -186,7 +186,7 @@
 
         const delBtn = document.createElement("button");
         delBtn.type = "button";
-        delBtn.className = "app-ui-button app-ui-button--secondary inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 active:scale-[0.98] js-reason-option-delete";
+        delBtn.className = "<%= j(ui_button_classes(:secondary, "js-reason-option-delete")) %>";
         delBtn.dataset.reasonOptionId = String(option.id);
         delBtn.dataset.reasonOptionKey = option.key;
         delBtn.dataset.reasonOptionKind = option.kind;

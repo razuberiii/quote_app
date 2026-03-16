@@ -30,7 +30,7 @@
       <%= f.label :company_role, t("team_members.view.index.company_role") %>
       <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, class: ui_input_classes %>
     </div>
-    <%= f.submit t("team_members.view.index.create_invitation"), class: "btn btn-primary team-invite-submit" %>
+    <%= f.submit t("team_members.view.index.create_invitation"), class: "app-ui-button app-ui-button--primary team-invite-submit" %>
   <% end %>
 </section>
 
@@ -60,7 +60,7 @@
                               team_invitation_path(invitation.token),
                               method: :delete,
                               data: { turbo_confirm: t("team_members.view.index.revoke_confirm", email: invitation.email) },
-                              class: "btn btn-danger" %>
+                              class: "app-ui-button app-ui-button--danger" %>
               </td>
             </tr>
           <% end %>
@@ -115,14 +115,14 @@
                 <div class="team-actions">
                   <%= form_with model: member, url: team_member_path(member), method: :patch, local: true, class: "inline-form" do |f| %>
                     <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, class: ui_input_classes %>
-                    <%= f.submit t("team_members.view.index.update"), class: "btn btn-secondary" %>
+                    <%= f.submit t("team_members.view.index.update"), class: "app-ui-button app-ui-button--secondary" %>
                   <% end %>
                   <% unless member == current_user %>
                     <%= button_to t("team_members.view.index.remove_from_team"),
                                   team_member_path(member),
                                   method: :delete,
                                   data: { turbo_confirm: t("team_members.view.index.remove_confirm", email: member.email, company: current_user.company.name) },
-                                  class: "btn btn-danger" %>
+                                  class: "app-ui-button app-ui-button--danger" %>
                   <% end %>
                 </div>
               <% end %>

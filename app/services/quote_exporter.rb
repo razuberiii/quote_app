@@ -361,14 +361,14 @@ class QuoteExporter
 
     left_lines = [
       excel_text(@company.name.to_s),
-      excel_text(@company.address.presence || "-"),
-      excel_text(@company.phone.presence || "-"),
-      excel_text(@company.email.presence || "-"),
-      excel_text(@company.website.presence || "-")
+      excel_text(@company.address.to_s.strip),
+      excel_text(@company.phone.to_s.strip),
+      excel_text(@company.email.to_s.strip),
+      excel_text(@company.website.to_s.strip)
     ]
     right_lines = [
       excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
-      excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}"),
+      excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d').to_s}"),
       (@template.show_valid_until && @quote.valid_until.present? ? excel_text("Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
       (@template.show_currency ? excel_text("Currency: #{@quote.currency}") : nil),
       (@quote.trade_term.present? ? excel_text("Trade Terms: #{@quote.trade_term}") : nil)
@@ -414,24 +414,27 @@ class QuoteExporter
     seller_lines = [
       excel_text(@company.name),
       sales_owner_display_name.present? ? excel_text("#{doc_t('labels.sales_owner')}: #{sales_owner_display_name}") : nil,
-      excel_text(@company.address.presence || "-"),
-      excel_text(@company.phone.presence || "-"),
-      excel_text(@company.email.presence || "-"),
-      excel_text(@company.website.presence || "-")
+      excel_text(@company.address.to_s.strip),
+      excel_text(@company.phone.to_s.strip),
+      excel_text(@company.email.to_s.strip),
+      excel_text(@company.website.to_s.strip)
     ].compact
     buyer_lines = [
       excel_text(@customer.name),
-      excel_text("#{doc_t('labels.contact')}: #{@customer.contact_name.presence || '-'}"),
-      excel_text(@customer.address.presence || "-"),
-      excel_text(@customer.phone.presence || "-"),
-      excel_text(@customer.email.presence || "-")
-    ]
+      (@customer.contact_name.present? ? excel_text("#{doc_t('labels.contact')}: #{@customer.contact_name}") : nil),
+      excel_text(@customer.address.to_s.strip),
+      excel_text(@customer.phone.to_s.strip),
+      excel_text(@customer.email.to_s.strip)
+    ].compact
 
     [ seller_lines.length, buyer_lines.length ].max.times do |idx|
       row_no = start_row + idx + 1
+      seller_text = seller_lines[idx].to_s
+      buyer_text = buyer_lines[idx].to_s
+      row_height = excel_wrapped_row_height([ seller_text, buyer_text ], width_chars: 44, min: 17, line_height: 14, max: 72)
       sheet.add_row [ seller_lines[idx].to_s, nil, nil, buyer_lines[idx].to_s, nil, nil ],
                     style: [ styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell], styles[:block_cell] ],
-                    height: 17
+                    height: row_height
       sheet.merge_cells("A#{row_no}:C#{row_no}")
       sheet.merge_cells("D#{row_no}:F#{row_no}")
     end
@@ -505,6 +508,17 @@ class QuoteExporter
   end
 
   def render_excel_sections(sheet, styles)
+    scope_text = @quote.scope_of_supply.to_s.strip
+    show_scope_of_supply = @document_kind != "pi" && @template.show_scope_of_supply && scope_text.present?
+    if show_scope_of_supply
+      divider_row = sheet.rows.size + 1
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+      add_excel_section_heading(sheet, styles, @template.resolved_scope_of_supply_label)
+      add_excel_section_text_row(sheet, styles, scope_text)
+    end
+
     if @template.show_terms_section
       terms_rows = []
       terms_rows << [ doc_t("labels.payment_terms"), @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
@@ -534,8 +548,12 @@ class QuoteExporter
 
     footer_note = @template.resolved_footer_note(@document_kind)
     if footer_note.present?
-      sheet.add_row []
-      add_excel_terms_row(sheet, styles, doc_t("sections.footer"), footer_note)
+      divider_row = sheet.rows.size + 1
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+      add_excel_section_heading(sheet, styles, doc_t("sections.footer"))
+      add_excel_section_text_row(sheet, styles, footer_note)
     end
   end
 
@@ -652,9 +670,10 @@ class QuoteExporter
 
   def add_excel_terms_row(sheet, styles, label, value)
     row = sheet.rows.size + 1
+    row_height = excel_wrapped_row_height([ label, value ], width_chars: 54, min: 18, line_height: 14, max: 240)
     sheet.add_row [ label, nil, value, nil, nil, nil ],
                   style: [ styles[:meta_label], styles[:meta_label], styles[:terms_value], styles[:terms_value], styles[:terms_value], styles[:terms_value] ],
-                  height: 17
+                  height: row_height
     sheet.merge_cells("A#{row}:B#{row}")
     sheet.merge_cells("C#{row}:F#{row}")
   end
@@ -848,13 +867,45 @@ class QuoteExporter
     if item.description.present? && item.description.to_s != title
       lines << item.description.to_s
     end
-    item.specification_pairs.each do |pair|
-      lines << "#{doc_t('labels.spec')}: #{pair[:key]} - #{pair[:value]}"
+    spec_lines = item.specification_pairs.filter_map do |pair|
+      key = pair[:key].to_s.strip
+      value = pair[:value].to_s.strip
+      next if key.blank? && value.blank?
+
+      key.present? && value.present? ? "  - #{key}: #{value}" : "  - #{key.presence || value}"
     end
-    item.addon_charge_entries.each do |entry|
-      lines << "  #{doc_t('labels.addon')}: #{entry[:name]} (#{money_text(entry[:amount])})"
+    if spec_lines.any?
+      lines << "#{doc_t('labels.spec')}:"
+      lines.concat(spec_lines)
+    end
+
+    addon_lines = item.addon_charge_entries.filter_map do |entry|
+      name = entry[:name].to_s.strip
+      next if name.blank?
+
+      "  - #{name} (#{money_text(entry[:amount])})"
+    end
+    if addon_lines.any?
+      lines << "#{doc_t('labels.addon')}:"
+      lines.concat(addon_lines)
     end
     lines.join("\n")
+  end
+
+  def excel_wrapped_row_height(texts, width_chars:, min:, line_height:, max:)
+    wrapped_line_count = Array(texts).compact.map { |text| excel_estimated_line_count(text, width_chars) }.max || 1
+    raw_height = (wrapped_line_count * line_height) + 4
+    [ [ raw_height, min ].max, max ].min
+  end
+
+  def excel_estimated_line_count(text, width_chars)
+    return 1 if text.blank?
+
+    text.to_s.split(/\r?\n/).sum do |line|
+      next 1 if line.blank?
+
+      [ (line.length.to_f / width_chars).ceil, 1 ].max
+    end
   end
 
   def doc_t(key, **options)
@@ -877,9 +928,22 @@ class QuoteExporter
   def excel_text(value)
     text = value.to_s
     return text if text.blank?
-    return "'#{text}" if text.match?(/\A\+?[\d\-\s()]+\z/)
+    return "'#{text}" if text.match?(/\A(?=.*\d)[\d\-\s()]+\z/)
 
     text
+  end
+
+  def add_excel_section_heading(sheet, styles, title)
+    row = sheet.rows.size + 1
+    sheet.add_row [ title ], style: styles[:section], height: 18
+    sheet.merge_cells("A#{row}:F#{row}")
+  end
+
+  def add_excel_section_text_row(sheet, styles, value)
+    row = sheet.rows.size + 1
+    row_height = excel_wrapped_row_height([ value ], width_chars: 84, min: 19, line_height: 14, max: 260)
+    sheet.add_row [ value, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_value]), height: row_height
+    sheet.merge_cells("A#{row}:F#{row}")
   end
 
   def pdf_content_width(pdf)

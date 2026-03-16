@@ -53,18 +53,21 @@
 }
 
 .quote-utility-btn {
-  min-height: 34px;
-  padding: 0 12px;
-  border: 1px solid #d1dbe7;
-  border-radius: 8px;
-  background: #fff;
-  color: #334155;
+  min-height: 34px !important;
+  padding: 0 12px !important;
+  border: 1px solid #d1dbe7 !important;
+  border-radius: 8px !important;
+  background: #fff !important;
+  color: #334155 !important;
   font-weight: 600;
-  cursor: pointer;
+  box-shadow: none !important;
 }
 
 .quote-utility-btn:hover {
-  background: #f8fafc;
+  background: #f8fafc !important;
+  border-color: #c3d0e0 !important;
+  color: #334155 !important;
+  box-shadow: none !important;
 }
 
 .quote-decision-section {
@@ -381,8 +384,53 @@
 }
 
 /* Public quote: clarity + trust + print stability (no business logic changes) */
+.public-quote-document {
+  /* Public quotation typography tokens (baseline/current values). */
+  --q-public-doc-title-size: 1.45rem;
+  --q-public-doc-title-lh: 1.2;
+  --q-public-doc-title-w: 700;
+  --q-public-section-title-size: 0.95rem;
+  --q-public-section-title-lh: 1.3;
+  --q-public-section-title-w: 700;
+  --q-public-body-size: 0.9rem;
+  --q-public-body-lh: 1.38;
+  --q-public-body-w: 400;
+  --q-public-meta-size: 0.85rem;
+  --q-public-meta-lh: 1.45;
+  --q-public-meta-w: 400;
+  --q-public-table-head-size: 0.88rem;
+  --q-public-table-head-lh: 1.35;
+  --q-public-table-head-w: 700;
+  --q-public-table-body-size: 0.9rem;
+  --q-public-table-body-lh: 1.38;
+  --q-public-table-body-w: 400;
+  --q-public-item-detail-size: 0.78rem;
+  --q-public-item-detail-lh: 1.3;
+  --q-public-item-detail-w: 400;
+  --q-public-total-primary-size: 1.34rem;
+  --q-public-total-primary-lh: 1.2;
+  --q-public-total-primary-w: 700;
+  --q-public-total-primary-label-size: 1.2rem;
+  --q-public-total-primary-label-lh: 1.2;
+  --q-public-total-primary-label-w: 500;
+  --q-public-total-secondary-size: 0.9rem;
+  --q-public-total-secondary-lh: 1.4;
+  --q-public-total-secondary-w: 500;
+  --q-public-notes-size: 0.85rem;
+  --q-public-notes-lh: 1.45;
+  --q-public-notes-w: 400;
+  --q-public-footnote-size: 0.76rem;
+  --q-public-footnote-lh: 1.35;
+  --q-public-footnote-w: 400;
+}
+
 .public-quote-document .quote-meta-grid {
   gap: 0.95rem;
+}
+
+.public-quote-document .quote-doc-header h1 {
+  font-size: var(--q-public-doc-title-size);
+  font-weight: var(--q-public-doc-title-w);
 }
 
 .public-quote-document .quote-meta-card {
@@ -391,11 +439,25 @@
 
 .public-quote-document .quote-meta-card h3 {
   margin-bottom: 0.5rem;
+  font-size: var(--q-public-section-title-size);
+  line-height: var(--q-public-section-title-lh);
+  font-weight: var(--q-public-section-title-w);
 }
 
 .public-quote-document .quote-meta-card p {
   margin-bottom: 0.3rem;
-  line-height: 1.38;
+  font-size: var(--q-public-body-size);
+  line-height: var(--q-public-body-lh);
+  font-weight: var(--q-public-body-w);
+}
+.public-quote-document .quote-total-box + .quote-section-block--scope {
+  margin-top: 1rem;
+}
+.public-quote-document .quote-section-block--scope h3 {
+  margin-bottom: 0.56rem;
+}
+.public-quote-document .quote-section-block--scope + .quote-section-block {
+  margin-top: 0.95rem;
 }
 
 .public-quote-document .quote-info-list {
@@ -415,12 +477,15 @@
 
 .public-quote-document .quote-info-row span {
   color: #64748b;
-  font-size: 0.85rem;
+  font-size: var(--q-public-meta-size);
+  line-height: var(--q-public-meta-lh);
+  font-weight: var(--q-public-meta-w);
 }
 
 .public-quote-document .quote-info-row strong {
   color: #0f172a;
-  font-size: 0.9rem;
+  font-size: var(--q-public-body-size);
+  line-height: var(--q-public-body-lh);
   font-weight: 600;
   text-align: right;
 }
@@ -444,7 +509,7 @@
 }
 
 .public-quote-document .quote-item-desc-main {
-  font-size: 0.95rem;
+  font-size: var(--q-public-table-body-size);
   line-height: 1.32;
 }
 
@@ -453,8 +518,9 @@
 }
 
 .public-quote-document .quote-item-desc-sub {
-  font-size: 0.75rem;
-  line-height: 1.18;
+  font-size: var(--q-public-item-detail-size);
+  line-height: var(--q-public-item-detail-lh);
+  font-weight: var(--q-public-item-detail-w);
 }
 
 .public-quote-document .quote-item-desc-sub.is-addon {
@@ -476,19 +542,27 @@
 .public-quote-document .quote-total-grand {
   margin-top: 0.2rem;
   padding: 0.55rem 0 0;
-  font-size: 1.2rem;
+  font-size: var(--q-public-total-primary-label-size);
+  line-height: var(--q-public-total-primary-label-lh);
 }
 
 .public-quote-document .quote-total-grand span {
   color: #0f172a;
-  font-weight: 500;
+  font-weight: var(--q-public-total-primary-label-w);
 }
 
 .public-quote-document .quote-total-grand strong {
   color: #1f3650;
-  font-size: 1.34rem;
-  font-weight: 700;
+  font-size: var(--q-public-total-primary-size);
+  line-height: var(--q-public-total-primary-lh);
+  font-weight: var(--q-public-total-primary-w);
   letter-spacing: -0.02em;
+}
+
+.public-quote-document .quote-total-box p:not(.quote-total-grand) {
+  font-size: var(--q-public-total-secondary-size);
+  line-height: var(--q-public-total-secondary-lh);
+  font-weight: var(--q-public-total-secondary-w);
 }
 
 .public-quote-document .quote-engagement-note {
@@ -496,16 +570,84 @@
   padding-top: 0.45rem;
   border-top: 1px dashed #d2dbe6;
   color: var(--doc-accent, #1f4e79);
-  font-size: 0.84rem;
-  line-height: 1.35;
+  font-size: var(--q-public-notes-size);
+  line-height: var(--q-public-notes-lh);
+  font-weight: var(--q-public-notes-w);
 }
 
 .public-quote-document .quote-public-footnote {
   margin: 0.7rem 0 0;
   color: #94a3b8;
-  font-size: 0.76rem;
+  font-size: var(--q-public-footnote-size);
+  line-height: var(--q-public-footnote-lh);
+  font-weight: var(--q-public-footnote-w);
   text-align: right;
 }
+
+.public-quote-document .quote-doc-table thead th {
+  font-size: var(--q-public-table-head-size);
+  font-weight: var(--q-public-table-head-w);
+}
+
+/* Public quote density: spacing-only adjustments (no typography scale changes). */
+.public-quote-document.public-density-compact .quote-doc-table th {
+  padding-top: 0.58rem;
+  padding-bottom: 0.58rem;
+}
+
+.public-quote-document.public-density-compact .quote-doc-table td {
+  padding-top: 0.62rem;
+  padding-bottom: 0.62rem;
+}
+
+.public-quote-document.public-density-compact .quote-meta-grid {
+  gap: 0.82rem;
+}
+
+.public-quote-document.public-density-compact .quote-meta-card {
+  padding-top: 0.74rem;
+  padding-bottom: 0.82rem;
+}
+
+.public-quote-document.public-density-compact .quote-total-box {
+  padding-top: 0.7rem;
+  padding-bottom: 0.62rem;
+}
+
+.public-quote-document.public-density-compact .quote-section-block {
+  margin-top: 0.85rem;
+  padding-top: 0.62rem;
+}
+
+.public-quote-document.public-density-spacious .quote-doc-table th {
+  padding-top: 0.82rem;
+  padding-bottom: 0.82rem;
+}
+
+.public-quote-document.public-density-spacious .quote-doc-table td {
+  padding-top: 0.88rem;
+  padding-bottom: 0.88rem;
+}
+
+.public-quote-document.public-density-spacious .quote-meta-grid {
+  gap: 1.08rem;
+}
+
+.public-quote-document.public-density-spacious .quote-meta-card {
+  padding-top: 0.96rem;
+  padding-bottom: 1.04rem;
+}
+
+.public-quote-document.public-density-spacious .quote-total-box {
+  padding-top: 0.92rem;
+  padding-bottom: 0.84rem;
+}
+
+.public-quote-document.public-density-spacious .quote-section-block {
+  margin-top: 1.12rem;
+  padding-top: 0.84rem;
+}
+
 
 @media (max-width: 768px) {
   .public-quote-document .table-responsive {

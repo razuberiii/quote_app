@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_16_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -312,6 +312,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
     t.text "quotation_footer_note", default: "", null: false
     t.string "quotation_number_label", default: "", null: false
     t.string "quotation_title", default: "", null: false
+    t.string "scope_of_supply_label"
     t.boolean "show_closing_message", default: true, null: false
     t.boolean "show_currency", default: true, null: false
     t.boolean "show_customer_owner", default: true, null: false
@@ -322,6 +323,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
     t.boolean "show_payment_term", default: true, null: false
     t.boolean "show_product_images", default: true, null: false
     t.boolean "show_saas_branding", default: false, null: false
+    t.boolean "show_scope_of_supply", default: false, null: false
     t.boolean "show_shipping", default: true, null: false
     t.boolean "show_signature_block", default: false, null: false
     t.boolean "show_tax", default: true, null: false
@@ -381,6 +383,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
     t.datetime "reopened_at"
     t.string "request_reason"
     t.integer "revision_number"
+    t.text "scope_of_supply"
     t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.string "spec_label"
@@ -444,8 +447,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
     t.string "email", default: "", null: false
     t.datetime "email_change_sent_at"
     t.string "email_change_token"
-    t.string "email_verification_token"
-    t.datetime "email_verification_token_sent_at"
+    t.integer "email_verification_attempts", default: 0, null: false
+    t.string "email_verification_code_digest"
+    t.datetime "email_verification_code_sent_at"
     t.datetime "email_verified_at"
     t.string "encrypted_password", default: "", null: false
     t.string "full_name"
@@ -462,7 +466,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_13_103000) do
     t.index ["company_role"], name: "index_users_on_company_role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["email_change_token"], name: "index_users_on_email_change_token", unique: true
-    t.index ["email_verification_token"], name: "index_users_on_email_verification_token", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
   end

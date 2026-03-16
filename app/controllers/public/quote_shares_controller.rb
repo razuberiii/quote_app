@@ -44,15 +44,19 @@ module Public
       custom_message = params[:client_message].to_s.strip
       selected_reason = "other" if selected_reason.blank? && custom_message.present?
       client_message = custom_message.presence
-      @share.quote.update_columns(
+      quote = @share.quote
+      quote.assign_attributes(
         status: "negotiating",
         changes_requested_at: Time.current,
         request_reason: selected_reason.presence,
-        changes_request_message: client_message,
-        updated_at: Time.current
+        changes_request_message: client_message
       )
+      quote.save!
       Notification.create_quote_revision_requested_notification(@share.quote)
       redirect_to public_quote_share_path(@share.token, status_message: t("public_quote_shares.flash.revision_request_sent"))
+    rescue ActiveRecord::RecordInvalid
+      message = @share.quote.errors.full_messages.first.presence || t("public_quote_shares.flash.revision_request_failed", default: "Unable to submit revision request. Please shorten your message and try again.")
+      redirect_to public_quote_share_path(@share.token, status_message: message)
     end
 
     private

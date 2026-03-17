@@ -5,7 +5,7 @@ class Customer < ApplicationRecord
 
   SALES_STATUSES = %w[new contacted quoting negotiating won lost inactive].freeze
   LEGACY_STATUSES = %w[potential following closed paused].freeze
-  CUSTOMER_LEVELS = %w[normal vip distributor key_account].freeze
+  CUSTOMER_LEVELS = %w[normal key_account].freeze
   CUSTOMER_SOURCES = %w[alibaba exhibition google_seo referral old_customer other].freeze
   PAYMENT_TERMS_OPTIONS = %w[t_t l_c oa mixed].freeze
   TAX_ID_TYPES = %w[VAT GST TIN RFC CNPJ CUIT NIT RUT OTHER].freeze

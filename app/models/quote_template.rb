@@ -13,6 +13,7 @@ class QuoteTemplate < ApplicationRecord
   MAX_TEMPLATE_TITLE_LENGTH = 180
   MAX_TEMPLATE_NUMBER_LABEL_LENGTH = 80
   MAX_TEMPLATE_FOOTER_LENGTH = 4000
+  MAX_SCOPE_OF_SUPPLY_DEFAULT_CONTENT_LENGTH = 4000
   MAX_CLOSING_MESSAGE_LENGTH = 2000
   MAX_WATERMARK_TEXT_LENGTH = 120
   MAX_SIGNATURE_NAME_LENGTH = 120
@@ -31,6 +32,7 @@ class QuoteTemplate < ApplicationRecord
   validates :quotation_number_label, :pi_number_label, :document_number_label,
             length: { maximum: MAX_TEMPLATE_NUMBER_LABEL_LENGTH }, allow_blank: true
   validates :quotation_footer_note, :pi_footer_note, :footer_text, length: { maximum: MAX_TEMPLATE_FOOTER_LENGTH }, allow_blank: true
+  validates :default_scope_of_supply_content, length: { maximum: MAX_SCOPE_OF_SUPPLY_DEFAULT_CONTENT_LENGTH }, allow_blank: true
   validates :closing_message, length: { maximum: MAX_CLOSING_MESSAGE_LENGTH }, allow_blank: true
   validates :watermark_text, length: { maximum: MAX_WATERMARK_TEXT_LENGTH }, allow_blank: true
   validates :signature_name, length: { maximum: MAX_SIGNATURE_NAME_LENGTH }, allow_blank: true
@@ -198,6 +200,7 @@ class QuoteTemplate < ApplicationRecord
     self.accent_color = "#1F4E79" if accent_color.blank?
     self.font_family = "Noto Sans" if font_family.blank?
     self.footer_text ||= ""
+    self.default_scope_of_supply_content = "" if default_scope_of_supply_content.nil?
     self.closing_message = DEFAULT_CLOSING_MESSAGE if closing_message.nil?
     self.show_images = true if show_images.nil?
     self.show_tax = true if show_tax.nil?

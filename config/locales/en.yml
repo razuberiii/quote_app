@@ -961,7 +961,11 @@ en:
         clear: Clear
         all_customers: All Customers
         high_value: High Value
+        key_accounts: Key Accounts
+        needs_follow_up: Needs Follow-up
         at_risk: Needs follow-up
+        high_value_hint: High value customers are auto-identified by quote amount in %{currency}.
+        key_account_badge: Key Account
         clear_follow_up_filter: Clear Follow-up Filter
         today: Today
         soon_7_days: Soon (7 days)
@@ -1014,6 +1018,7 @@ en:
         status_auto_hint: Status is linked to the latest active quote. Paused accounts stay excluded from reminders.
         legacy_status: "%{status} (legacy)"
         customer_level: Customer Level
+        customer_level_hint: Key accounts can be filtered and prioritized in the customer list.
         primary_contact: Primary Contact
         primary_contact_hint: Keep communication details and commercial ownership easy to scan.
         primary_contact_name: Primary Contact Name
@@ -1922,6 +1927,9 @@ en:
         show_sales_owner: Show sales owner
         show_notes: Show notes section
         show_scope_of_supply: Show Scope of Supply (Quotation only)
+        default_scope_of_supply_content: Default Scope of Supply Content
+        default_scope_of_supply_content_placeholder: Enter the default Scope of Supply content
+        default_scope_of_supply_content_hint: Prefills Scope of Supply when creating a new quotation. You can still edit it per quote. Leave blank to start empty.
         show_signature_block: Show signature block
         show_product_images: Show product images
         show_valid_until: Show valid until
@@ -2102,7 +2110,8 @@ en:
         default_payment_terms_placeholder: Net 30 / 50% deposit
         default_tax_rate: Default Tax Rate (%)
         brand_primary_color: Brand Primary Color
-        section_branding_behavior: 3) Branding & Default Template Behavior
+        section_branding_behavior: 3) Default Business Settings & Display Preferences
+        section_branding_behavior_hint: These are company-level default baselines. Use Template settings for per-template output content.
         company_logo_alt: Company Logo
         upload_company_logo: Upload Company Logo
         remove_current_logo: Remove Current Logo

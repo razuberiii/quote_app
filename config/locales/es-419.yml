@@ -961,7 +961,11 @@ es-419:
         clear: Borrar
         all_customers: Todos los Clientes
         high_value: Alto Valor
+        key_accounts: Cuentas Clave
+        needs_follow_up: Requiere seguimiento
         at_risk: Requiere seguimiento
+        high_value_hint: Los clientes de alto valor se identifican automáticamente por monto cotizado en %{currency}.
+        key_account_badge: Cuenta Clave
         clear_follow_up_filter: Borrar filtro de seguimiento
         today: Hoy
         soon_7_days: Pronto (7 días)
@@ -1014,6 +1018,7 @@ es-419:
         status_auto_hint: El estado se vincula a la cotización activa más reciente. Las cuentas en pausa no activan recordatorios.
         legacy_status: "%{status} (heredado)"
         customer_level: Nivel de cliente
+        customer_level_hint: Las cuentas clave se pueden filtrar y priorizar en la lista de clientes.
         primary_contact: Contacto principal
         primary_contact_hint: Mantén los datos de comunicación y la propiedad comercial fáciles de revisar.
         primary_contact_name: Nombre del contacto principal
@@ -1922,6 +1927,9 @@ es-419:
         show_sales_owner: Mostrar propietario de ventas
         show_notes: Mostrar sección de notas
         show_scope_of_supply: Mostrar alcance de suministro (solo cotización)
+        default_scope_of_supply_content: Contenido predeterminado de alcance de suministro
+        default_scope_of_supply_content_placeholder: Ingrese el contenido predeterminado de alcance de suministro
+        default_scope_of_supply_content_hint: Precarga el alcance de suministro al crear una cotización. Aún puedes editarlo en cada cotización. Déjalo en blanco para iniciar vacío.
         show_signature_block: Mostrar bloque de firma
         show_product_images: Mostrar imágenes de productos
         show_valid_until: Mostrar válido hasta
@@ -2102,7 +2110,8 @@ es-419:
         default_payment_terms_placeholder: Neto 30 / 50% de depósito
         default_tax_rate: Tasa de impuestos predeterminada (%)
         brand_primary_color: Color principal de la marca
-        section_branding_behavior: 3) Marca y comportamiento predeterminado de la plantilla
+        section_branding_behavior: 3) Parámetros de negocio y preferencias de visualización predeterminados
+        section_branding_behavior_hint: Esta sección define valores base de la empresa. Usa Plantillas para configurar contenido de salida por plantilla.
         company_logo_alt: Logo de la empresa
         upload_company_logo: Subir el logo de la empresa
         remove_current_logo: Eliminar logo actual

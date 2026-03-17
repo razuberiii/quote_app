@@ -11,7 +11,8 @@ class DashboardController < CustomersController
     @engagement_states = all_customers.index_with(&:effective_engagement_state)
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
-    @customer_metrics = build_customer_metrics(all_customers)
+    @high_value_currency = current_user.company.default_currency.to_s.upcase.presence || "USD"
+    @customer_metrics = build_customer_metrics(all_customers, base_currency: @high_value_currency)
     @follow_up_counts = {
       today: all_customers.count(&:follow_up_due_today?),
       upcoming: all_customers.count(&:follow_up_upcoming?),

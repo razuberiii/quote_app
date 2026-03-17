@@ -94,7 +94,10 @@
       <%= f.color_field :brand_color, value: (@company.brand_color.presence || "#1F4E79") %>
     </div>
 
-    <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_branding_behavior") %></div>
+    <div class="settings-grid-span-2">
+      <div class="settings-section-title"><%= t("company_settings.view.edit.section_branding_behavior") %></div>
+      <p class="team-members-hint"><%= t("company_settings.view.edit.section_branding_behavior_hint") %></p>
+    </div>
 
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:logo].any? %>">
       <div class="company-logo-row">

@@ -1,5 +1,5 @@
 class CustomerTag < ApplicationRecord
-  PRESET_NAMES = ["VIP", "Distributor", "High Potential", "Risky", "Long-term"].freeze
+  PRESET_NAMES = ["Distributor", "High Potential", "Risky", "Urgent", "Long-term"].freeze
 
   belongs_to :company
   has_many :customer_taggings, dependent: :destroy

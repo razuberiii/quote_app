@@ -5,6 +5,8 @@ export default class extends Controller {
   static values = {
     url: String,
     enabled: Boolean,
+    draggableSelector: String,
+    filter: String,
   };
 
   connect() {
@@ -12,11 +14,11 @@ export default class extends Controller {
 
     this.sortable = Sortable.create(this.element, {
       animation: 90,
-      draggable: ".customer-tag-chip",
+      draggable: this.draggableSelectorValue || ".customer-tag-chip",
       ghostClass: "is-dragging",
       chosenClass: "is-dragging",
       fallbackTolerance: 3,
-      filter: "input, [data-tag-delete]",
+      filter: this.filterValue || "input, [data-tag-delete]",
       preventOnFilter: false,
       onEnd: () => this.persistOrder(),
     });
@@ -27,7 +29,10 @@ export default class extends Controller {
   }
 
   async persistOrder() {
-    if (!this.hasUrlValue || !this.urlValue) return;
+    if (!this.hasUrlValue || !this.urlValue) {
+      this.dispatchReordered();
+      return;
+    }
 
     const ids = Array.from(
       this.element.querySelectorAll(".customer-tag-chip.is-selected[data-id]"),
@@ -56,6 +61,10 @@ export default class extends Controller {
       return;
     }
 
+    this.dispatchReordered(ids);
+  }
+
+  dispatchReordered(ids = []) {
     this.element.dispatchEvent(
       new CustomEvent("sortable:reordered", {
         bubbles: true,

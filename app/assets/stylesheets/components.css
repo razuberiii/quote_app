@@ -106,15 +106,47 @@
 }
 
 @media (max-width: 768px) {
+  .app-root .navbar {
+    width: 100%;
+    overflow-x: visible;
+  }
+
+  .app-root .navbar-container {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+
   .app-root .navbar-brand-wrap {
     flex: 1 1 auto;
+    min-width: 0;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .app-root .navbar-brand-wrap h1 {
+    min-width: 0;
+  }
+
+  .app-root .navbar-brand-wrap h1 a {
+    display: inline;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .app-root .navbar-company-context {
-    max-width: 55vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    max-width: min(100%, 36ch);
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .app-root .navbar-toggle {
+    flex: 0 0 auto;
   }
 }
 .app-root .navbar h1 {
@@ -509,6 +541,25 @@
   gap: 1rem;
   align-items: start;
 } /* Actions section */
+@media (max-width: 768px) {
+  .quote-edit-shell,
+  .quote-edit-shell > * {
+    min-width: 0;
+  }
+
+  .quote-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .quote-form-grid-span-2 {
+    grid-column: auto;
+  }
+
+  .quote-form-section-totals {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
   .app-root .navbar-menu {
     grid-template-columns: 1fr;
@@ -2854,7 +2905,7 @@ input.app-ui-button {
 .customer-tag-chip.is-selected {
   cursor: grab;
 }
-.customer-tag-chip.is-selected.is-dragging {
+.customer-tag-chip.is-dragging {
   opacity: 0.85;
   cursor: grabbing;
   transform: scale(1.04);
@@ -2973,6 +3024,7 @@ input.app-ui-button {
 .customer-list-tag-chip {
   display: inline-flex;
   align-items: center;
+  max-width: 100%;
   min-height: 20px;
   padding: 0 0.44rem;
   border-radius: 999px;
@@ -2981,8 +3033,16 @@ input.app-ui-button {
   color: #64748b;
   font-size: 0.69rem;
   font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-align: left;
+}
+.customer-list-tag-chip.is-key-account {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
 }
 .customer-list-tag-chip.is-more {
   background: #ffffff;
@@ -3506,6 +3566,14 @@ input.app-ui-button {
   display: inline-flex;
   flex-direction: column;
   min-width: 0;
+  max-width: 100%;
+}
+.customer-list-name-meta strong,
+.customer-name-link {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .next-action-pill {
   display: inline-flex;
@@ -4137,9 +4205,9 @@ input.app-ui-button {
 
 .dashboard-onboarding-step-label,
 .dashboard-onboarding-step-detail {
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .dashboard-onboarding-step-action {
@@ -4575,6 +4643,8 @@ kbd.app-shortcut-badge {
   padding: 0.72rem 0.82rem;
   font-size: 0.83rem;
   vertical-align: middle;
+}
+.dashboard-recent-table th {
   white-space: nowrap;
 }
 .dashboard-panel-note {
@@ -4610,9 +4680,9 @@ kbd.app-shortcut-badge {
 .dashboard-cell-ellipsis {
   display: block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .dashboard-overview-list {
   list-style: none;
@@ -4814,9 +4884,9 @@ kbd.app-shortcut-badge {
 .dashboard-cell-ellipsis {
   display: inline-block;
   max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   vertical-align: top;
 }
 .dashboard-recent-table td .dashboard-quote-id {
@@ -4875,9 +4945,9 @@ kbd.app-shortcut-badge {
 
 .dashboard-task-item strong,
 .dashboard-task-item p {
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .dashboard-task-actions {
   display: flex;
@@ -5601,7 +5671,7 @@ kbd.app-shortcut-badge {
 }
 .quote-kv-chip {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   max-width: 100%;
   min-height: 24px;
   padding: 0.15rem 0.48rem;
@@ -5611,9 +5681,16 @@ kbd.app-shortcut-badge {
   color: #334155;
   font-size: 0.76rem;
   line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  cursor: grab;
+  user-select: none;
+}
+.quote-kv-chip.is-dragging {
+  opacity: 0.74;
+  cursor: grabbing;
+  box-shadow: 0 8px 18px rgba(148, 163, 184, 0.22);
 }
 .quote-kv-summary-empty {
   color: #94a3b8;
@@ -6049,9 +6126,9 @@ kbd.app-shortcut-badge {
 .app-page-shell--customers
   .customers-table.saas-table.app-data-table
   td:nth-child(2) {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .app-page-shell--customers
   .customers-table.saas-table.app-data-table
@@ -8446,7 +8523,7 @@ kbd.app-shortcut-badge {
 }
 .product-show-spec-list li {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.35rem;
   line-height: 1.45;
 }
@@ -8456,7 +8533,9 @@ kbd.app-shortcut-badge {
   white-space: nowrap;
 }
 .product-show-spec-value {
+  min-width: 0;
   color: #1f2937;
+  overflow-wrap: anywhere;
   word-break: break-word;
 }
 .product-description-text {
@@ -8764,6 +8843,9 @@ kbd.app-shortcut-badge {
   position: relative;
   background: #fff;
   vertical-align: middle;
+}
+.quote-items-table td[data-label] {
+  overflow-wrap: anywhere;
 }
 .quote-items-table td:first-child {
   border-left: 1px solid #d8e1eb;
@@ -9356,12 +9438,16 @@ kbd.app-shortcut-badge {
 .quote-document-shell .quote-item-desc-main {
   font-size: var(--q-web-table-body-size);
   line-height: 1.32;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .quote-document-shell .quote-item-desc-sub {
   font-size: var(--q-web-item-detail-size);
   line-height: var(--q-web-item-detail-lh);
   font-weight: var(--q-web-item-detail-w);
   color: #64748b;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .quote-document-shell .quote-item-desc-group-label {
   font-size: var(--q-web-item-detail-size);

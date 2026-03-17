@@ -286,6 +286,7 @@
                       <div class="js-product-dropdown"></div>
                     </div>
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
+                    <%= item_fields.hidden_field :id if item.persisted? %>
                     <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
                   </td>
                   <%= item_fields.hidden_field :description, class: "js-description" %>
@@ -298,7 +299,11 @@
                       <% end %>
                     </select>
                     <%= item_fields.text_area :specifications_text, rows: 2, class: "js-specifications sr-only-input", placeholder: "Power: 5kW&#10;Voltage: 220V", hidden: true %>
-                    <div class="quote-kv-summary js-spec-summary"></div>
+                    <div class="quote-kv-summary js-spec-summary"
+                         data-controller="sortable"
+                         data-sortable-enabled-value="true"
+                         data-sortable-draggable-selector-value=".quote-kv-chip"
+                         data-sortable-filter-value=".quote-kv-summary-empty"></div>
                     <button type="button" class="quote-kv-open js-open-spec-editor"><%= t("quotes.view.form.edit_specs") %></button>
                     <div class="quote-kv-editor js-spec-editor" data-kind="spec" hidden>
                       <div class="quote-kv-editor-head">
@@ -337,7 +342,11 @@
                       <% end %>
                     </select>
                     <%= item_fields.text_area :addon_charges_text, rows: 2, class: "js-addon-charges sr-only-input", placeholder: "Packaging: 30&#10;Installation: 120", hidden: true %>
-                    <div class="quote-kv-summary js-addon-summary"></div>
+                    <div class="quote-kv-summary js-addon-summary"
+                         data-controller="sortable"
+                         data-sortable-enabled-value="true"
+                         data-sortable-draggable-selector-value=".quote-kv-chip"
+                         data-sortable-filter-value=".quote-kv-summary-empty"></div>
                     <button type="button" class="quote-kv-open js-open-addon-editor"><%= t("quotes.view.form.edit_add_ons") %></button>
                     <div class="quote-kv-editor js-addon-editor" data-kind="addon" hidden>
                       <div class="quote-kv-editor-head">
@@ -397,13 +406,25 @@
 
 <script>
   (function() {
-    const root = document.getElementById("quote-edit-root");
-    const wrapper = document.getElementById("quote-items-wrapper");
-    const form = document.getElementById("quote-form");
+    const isVisibleNode = (element) => {
+      if (!element || !document.body.contains(element)) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+    };
+
+    const pickActiveElement = (selector) => {
+      const matches = Array.from(document.querySelectorAll(selector));
+      return matches.find(isVisibleNode) || matches[matches.length - 1] || null;
+    };
+
+    const root = pickActiveElement("#quote-edit-root");
+    const wrapper = pickActiveElement("#quote-items-wrapper");
+    const form = pickActiveElement("#quote-form");
     if (!wrapper || !root) return;
 
     const products = JSON.parse(wrapper.dataset.products || "[]");
-    const body = document.getElementById("quote-items-body");
+    const body = wrapper.querySelector("#quote-items-body");
     const addBtn = document.getElementById("add-quote-item");
     const statusInput = document.querySelector("[name='quote[status]']");
     const currencyInput = document.querySelector("[name='quote[currency]']");
@@ -563,6 +584,14 @@
         .replace(/&#10;|&#x0a;|&#13;|&#x0d;/gi, "\n")
         .replace(/\r\n?/g, "\n")
         .trim();
+    }
+
+    function isDestroyedRow(row) {
+      return row?.querySelector(".js-destroy-flag")?.value === "1";
+    }
+
+    function activeQuoteItemRows(scope = body) {
+      return Array.from(scope?.querySelectorAll(".quote-item-row") || []).filter((row) => !isDestroyedRow(row));
     }
 
     function refreshCurrencyMismatchWarning() {
@@ -745,7 +774,7 @@
     }
 
     function specsToText(specs) {
-      return Array(specs).map((entry) => {
+      return (Array.isArray(specs) ? specs : []).map((entry) => {
         const name = entry?.name || entry?.["name"];
         const value = entry?.value || entry?.["value"];
         if (!name || !value) return null;
@@ -754,7 +783,7 @@
     }
 
     function addonsToText(addons) {
-      return Array(addons).map((entry) => {
+      return (Array.isArray(addons) ? addons : []).map((entry) => {
         const name = entry?.name || entry?.["name"];
         const price = entry?.price || entry?.["price"] || entry?.amount || entry?.["amount"];
         if (!name || price === undefined || price === null || price === "") return null;
@@ -965,9 +994,11 @@
     }
 
       function bindRow(row) {
+        if (!row || isDestroyedRow(row)) return;
         const productNameInput = row.querySelector(".js-product-name");
         const productDropdown = row.querySelector(".js-product-dropdown");
       const productFeedback = row.querySelector(".js-product-feedback");
+      const rowIdInput = row.querySelector("input[name$='[id]']");
       const productIdInput = row.querySelector(".js-product-id");
       const descInput = row.querySelector(".js-description");
       const priceInput = row.querySelector(".js-unit-price");
@@ -1029,6 +1060,26 @@
         addonSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
       }
 
+      function syncSpecOrderFromSummary() {
+        if (!specSummary || !specsInput) return;
+        const lines = Array.from(specSummary.querySelectorAll(".quote-kv-chip"))
+          .map((chip) => String(chip.textContent || "").trim())
+          .filter(Boolean);
+        if (!lines.length) return;
+        specsInput.value = lines.join("\n");
+        setSpecEditorFromText(specsInput.value);
+      }
+
+      function syncAddonOrderFromSummary() {
+        if (!addonSummary || !addonInput) return;
+        const lines = Array.from(addonSummary.querySelectorAll(".quote-kv-chip"))
+          .map((chip) => String(chip.textContent || "").trim())
+          .filter(Boolean);
+        if (!lines.length) return;
+        addonInput.value = lines.join("\n");
+        setAddonEditorFromText(addonInput.value);
+      }
+
       function setFeedback(type, text, autoclear = false) {
         if (!productFeedback) return;
         if (feedbackTimer) {
@@ -1045,6 +1096,25 @@
             productFeedback.textContent = "";
           }, 1200);
         }
+      }
+
+      function hasActiveTextSelectionWithinEditor() {
+        const activeElement = document.activeElement;
+        const activeInsideEditor =
+          activeElement &&
+          (specsEditor?.contains(activeElement) || addonEditor?.contains(activeElement));
+
+        if (
+          activeInsideEditor &&
+          typeof activeElement.selectionStart === "number" &&
+          typeof activeElement.selectionEnd === "number" &&
+          activeElement.selectionStart !== activeElement.selectionEnd
+        ) {
+          return true;
+        }
+
+        const selection = window.getSelection?.();
+        return Boolean(selection && !selection.isCollapsed && String(selection).trim());
       }
 
       function optionButtons() {
@@ -1130,17 +1200,7 @@
         if (addonInput) {
           if (preset?.entries?.length) {
             addonInput.value = addonsToText(preset.entries);
-            if (addonBulkInput) {
-              addonBulkInput.value = addonInput.value;
-              renderAddonBulkCheck();
-            }
-            const parsedAddons = parseAddonRowsFromText(addonInput.value);
-            const rowsWrap = addonEditor?.querySelector(".js-kv-rows");
-            if (rowsWrap && parsedAddons.rows.length) {
-              rowsWrap.innerHTML = parsedAddons.rows.map((entry) => createAddonRow(entry.name, entry.amount)).join("");
-              refreshCurrencyCodeTags();
-              syncAddonText();
-            }
+            setAddonEditorFromText(addonInput.value);
           } else if (previousProductId !== String(selected.id)) {
             clearAddonEditor();
           }
@@ -1176,13 +1236,22 @@
       function syncProduct() {
         const keyword = (productNameInput.value || "").trim();
         const matched = findProductByName(keyword);
+        const currentProductId = String(productIdInput.value || "");
         const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
         renderDropdown(productDropdown, filtered);
         openDropdown(row, productDropdown);
         setActiveOption(0);
 
         if (matched) {
-          applyProductSelection(matched);
+          const matchedId = String(matched.id || "");
+          if (matchedId && matchedId !== currentProductId) {
+            applyProductSelection(matched);
+          } else {
+            productIdInput.value = matched.id;
+            productNameInput.classList.add("is-matched");
+            descInput.value = matched.name;
+            setFeedback("", "");
+          }
         } else {
           productIdInput.value = "";
           productNameInput.classList.remove("is-matched");
@@ -1199,7 +1268,13 @@
       if (productNameInput) {
         productNameInput.addEventListener("input", syncProduct);
         productNameInput.addEventListener("change", syncProduct);
-        productNameInput.addEventListener("focus", syncProduct);
+        productNameInput.addEventListener("focus", () => {
+          const keyword = (productNameInput.value || "").trim();
+          const filtered = keyword ? products.filter((p) => productMatches(p.name, keyword)).slice(0, 8) : products.slice(0, 12);
+          renderDropdown(productDropdown, filtered);
+          openDropdown(row, productDropdown);
+          setActiveOption(0);
+        });
         productNameInput.addEventListener("keydown", (event) => {
           const options = optionButtons();
           const dropdownOpen = productDropdown?.classList.contains("is-open");
@@ -1297,8 +1372,14 @@
           })
           .filter((pair) => pair.key && pair.value);
 
-        if (!parsedRows.length) return;
-        rowsWrap.innerHTML = parsedRows.map((pair) => createSpecRow(pair.key, pair.value)).join("");
+        if (specBulkInput) {
+          specBulkInput.value = String(text || "");
+          renderSpecBulkCheck();
+        }
+
+        rowsWrap.innerHTML = parsedRows.length
+          ? parsedRows.map((pair) => createSpecRow(pair.key, pair.value)).join("")
+          : createSpecRow();
         syncSpecsText();
       }
 
@@ -1346,6 +1427,24 @@
         addonBulkCheck.textContent = `${result.rows.length} row(s) ready`;
         addonBulkCheck.classList.remove("is-error");
         addonBulkCheck.classList.add("is-ok");
+      }
+
+      function setAddonEditorFromText(text) {
+        if (!addonEditor) return;
+        const rowsWrap = addonEditor.querySelector(".js-kv-rows");
+        if (!rowsWrap) return;
+
+        if (addonBulkInput) {
+          addonBulkInput.value = String(text || "");
+          renderAddonBulkCheck();
+        }
+
+        const parsedAddons = parseAddonRowsFromText(text);
+        rowsWrap.innerHTML = parsedAddons.rows.length
+          ? parsedAddons.rows.map((entry) => createAddonRow(entry.name, entry.amount)).join("")
+          : createAddonRow();
+        refreshCurrencyCodeTags();
+        syncAddonText();
       }
 
       function syncAddonText() {
@@ -1500,11 +1599,19 @@
       }
 
       if (addonInput) {
-        syncAddonText();
+        if (String(addonInput.value || "").trim()) {
+          setAddonEditorFromText(addonInput.value);
+        } else {
+          syncAddonText();
+        }
       }
 
       if (specsInput) {
-        syncSpecsText();
+        if (String(specsInput.value || "").trim()) {
+          setSpecEditorFromText(specsInput.value);
+        } else {
+          syncSpecsText();
+        }
       }
 
       row.querySelectorAll(".js-kv-close").forEach((btn) => {
@@ -1531,6 +1638,14 @@
           }
           openEditor(addonEditor);
         });
+      }
+
+      if (specSummary) {
+        specSummary.addEventListener("sortable:reordered", syncSpecOrderFromSummary);
+      }
+
+      if (addonSummary) {
+        addonSummary.addEventListener("sortable:reordered", syncAddonOrderFromSummary);
       }
 
       if (productDropdown && productNameInput) {
@@ -1588,6 +1703,7 @@
         document.addEventListener("click", (event) => {
           const clickPath = typeof event.composedPath === "function" ? event.composedPath() : [];
           const clickedInsideRow = clickPath.includes(row) || row.contains(event.target);
+          if (hasActiveTextSelectionWithinEditor()) return;
           if (!clickedInsideRow) {
             closeDropdown(row, productDropdown);
             closeEditor(specsEditor);
@@ -1610,6 +1726,14 @@
 
       if (removeBtn) {
         removeBtn.addEventListener("click", () => {
+          const persisted = Boolean(rowIdInput?.value);
+          if (!persisted) {
+            row.remove();
+            updateTotalsUI();
+            applyStatusUI();
+            return;
+          }
+
           if (destroyField) destroyField.value = "1";
           row.style.display = "none";
           updateTotalsUI();
@@ -1637,7 +1761,11 @@
             <option value="">${escapeHtml(uiText.customSpecs)}</option>
           </select>
           <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V" hidden></textarea>
-          <div class="quote-kv-summary js-spec-summary"></div>
+          <div class="quote-kv-summary js-spec-summary"
+               data-controller="sortable"
+               data-sortable-enabled-value="true"
+               data-sortable-draggable-selector-value=".quote-kv-chip"
+               data-sortable-filter-value=".quote-kv-summary-empty"></div>
           <button type="button" class="quote-kv-open js-open-spec-editor">${escapeHtml(uiText.editSpecs)}</button>
           <div class="quote-kv-editor js-spec-editor" data-kind="spec" hidden>
             <div class="quote-kv-editor-head">
@@ -1665,7 +1793,11 @@
             <option value="">${escapeHtml(uiText.customAddOns)}</option>
           </select>
           <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120" hidden></textarea>
-          <div class="quote-kv-summary js-addon-summary"></div>
+          <div class="quote-kv-summary js-addon-summary"
+               data-controller="sortable"
+               data-sortable-enabled-value="true"
+               data-sortable-draggable-selector-value=".quote-kv-chip"
+               data-sortable-filter-value=".quote-kv-summary-empty"></div>
           <button type="button" class="quote-kv-open js-open-addon-editor">${escapeHtml(uiText.editAddOns)}</button>
           <div class="quote-kv-editor js-addon-editor" data-kind="addon" hidden>
             <div class="quote-kv-editor-head">
@@ -1706,7 +1838,7 @@
       window.setTimeout(() => tr.classList.remove("is-new"), 420);
     }
 
-    body.querySelectorAll(".quote-item-row").forEach(bindRow);
+    activeQuoteItemRows().forEach(bindRow);
     if (addBtn) addBtn.addEventListener("click", addRow);
 
     [taxInput, shippingInput, discountInput, currencyInput].forEach((input) => {

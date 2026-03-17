@@ -9,9 +9,12 @@ class CustomersController < ApplicationController
     @engagement_states = all_customers.index_with(&:effective_engagement_state)
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
-    @customer_metrics = build_customer_metrics(all_customers)
-    @list_filter = params[:list_filter].presence_in(%w[all high_value at_risk]) || "all"
-    filtered_customers = apply_list_filter(all_customers, @customer_metrics, @list_filter, @engagement_states)
+    @high_value_currency = current_user.company.default_currency.to_s.upcase.presence || "USD"
+    @customer_metrics = build_customer_metrics(all_customers, base_currency: @high_value_currency)
+    requested_list_filter = params[:list_filter].to_s
+    requested_list_filter = "needs_follow_up" if requested_list_filter == "at_risk"
+    @list_filter = requested_list_filter.presence_in(%w[all high_value key_account needs_follow_up]) || "all"
+    filtered_customers = apply_list_filter(all_customers, @customer_metrics, @list_filter)
     @follow_up_filter = params[:follow_up_filter].presence_in(%w[all today upcoming overdue no_schedule]) || "all"
     filtered_customers = apply_follow_up_filter(filtered_customers, @follow_up_filter)
 
@@ -620,19 +623,26 @@ class CustomersController < ApplicationController
     (percentages.sum / percentages.size).round(2)
   end
 
-  def build_customer_metrics(customers)
+  def build_customer_metrics(customers, base_currency: nil)
+    base_currency = base_currency.to_s.upcase.presence || current_user&.company&.default_currency.to_s.upcase.presence || "USD"
     customers.index_with do |customer|
       quotes = latest_quotes_from_collection(active_quotes_collection(customer.quotes))
       total_quote_amount = quotes.sum { |quote| quote.grand_total.to_d }
+      base_currency_quotes = quotes.select { |quote| quote.currency.to_s.upcase == base_currency }
+      total_quote_amount_base_currency = base_currency_quotes.sum { |quote| quote.grand_total.to_d }
       won_quotes = quotes.select { |quote| quote_display_status(quote) == "won" }
       total_won_amount = won_quotes.sum { |quote| quote.display_amount.to_d }
+      won_quotes_base_currency = won_quotes.select { |quote| quote.currency.to_s.upcase == base_currency }
+      total_won_amount_base_currency = won_quotes_base_currency.sum { |quote| quote.display_amount.to_d }
       quote_count = quotes.count
       won_count = won_quotes.count
       win_rate = quote_count.positive? ? ((won_count.to_d / quote_count) * 100).round(2) : 0
 
       {
         total_quote_amount: total_quote_amount,
+        total_quote_amount_base_currency: total_quote_amount_base_currency,
         total_won_amount: total_won_amount,
+        total_won_amount_base_currency: total_won_amount_base_currency,
         quote_count: quote_count,
         won_count: won_count,
         win_rate: win_rate
@@ -640,16 +650,14 @@ class CustomersController < ApplicationController
     end
   end
 
-  def apply_list_filter(customers, metrics, filter, engagement_states = nil)
+  def apply_list_filter(customers, metrics, filter)
     case filter
     when "high_value"
-      return [] if customers.empty?
-
-      top_n = [ (customers.size * 0.2).ceil, 1 ].max
-      ranked = customers.sort_by { |customer| metrics.fetch(customer)[:total_quote_amount].to_d }.reverse
-      ranked.first(top_n)
-    when "at_risk"
-      customers.select { |customer| %w[cooling at_risk].include?(resolved_engagement_state(customer, engagement_states)) }
+      customers.select { |customer| high_value_customer?(customer, metrics) }
+    when "key_account"
+      customers.select { |customer| customer.customer_level.to_s == "key_account" }
+    when "needs_follow_up"
+      customers.select { |customer| needs_follow_up_customer?(customer) }
     else
       customers
     end
@@ -684,7 +692,9 @@ class CustomersController < ApplicationController
       customers
     end
 
-    direction == "desc" ? sorted.reverse : sorted
+    ordered = direction == "desc" ? sorted.reverse : sorted
+    key_accounts, others = ordered.partition { |customer| customer.customer_level.to_s == "key_account" }
+    key_accounts + others
   end
 
   def default_sort_direction(sort_key)
@@ -1164,9 +1174,21 @@ class CustomersController < ApplicationController
   end
 
   def high_value_customer?(customer, metrics)
-    total = metrics.fetch(customer)[:total_quote_amount].to_d
-    threshold = metrics.values.map { |data| data[:total_quote_amount].to_d }.sort.last((metrics.size * 0.2).ceil.nonzero? || 1).min.to_d
+    totals = metrics.values.map { |data| data[:total_quote_amount_base_currency].to_d }.select(&:positive?)
+    return false if totals.empty?
+
+    total = metrics.fetch(customer)[:total_quote_amount_base_currency].to_d
+    threshold = totals.sort.last((totals.size * 0.2).ceil.nonzero? || 1).min.to_d
     total >= threshold && total.positive?
+  end
+
+  def needs_follow_up_customer?(customer)
+    return false unless customer.follow_up_reminders_enabled?
+
+    customer.follow_up_due_today? ||
+      customer.follow_up_upcoming? ||
+      customer.follow_up_overdue? ||
+      customer.next_follow_up_date.blank?
   end
 
   def stalled_customer?(customer)

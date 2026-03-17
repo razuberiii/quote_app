@@ -87,6 +87,7 @@ class Company < ApplicationRecord
       show_valid_until: true,
       show_notes: true,
       show_scope_of_supply: false,
+      default_scope_of_supply_content: "",
       show_terms_section: true,
       show_customer_owner: true,
       amount_decimals: 2,

@@ -511,6 +511,8 @@
 .public-quote-document .quote-item-desc-main {
   font-size: var(--q-public-table-body-size);
   line-height: 1.32;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .public-quote-document .quote-item-desc-meta {
@@ -521,6 +523,8 @@
   font-size: var(--q-public-item-detail-size);
   line-height: var(--q-public-item-detail-lh);
   font-weight: var(--q-public-item-detail-w);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .public-quote-document .quote-item-desc-sub.is-addon {

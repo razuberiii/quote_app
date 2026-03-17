@@ -16,6 +16,10 @@
     <section class="app-toolbar-surface">
       <%= form_with url: customers_path, method: :get, local: true do |f| %>
         <%= f.hidden_field :kpi_period, value: @kpi_period %>
+        <%= f.hidden_field :list_filter, value: @list_filter %>
+        <%= f.hidden_field :follow_up_filter, value: @follow_up_filter %>
+        <%= f.hidden_field :sort, value: @sort_key %>
+        <%= f.hidden_field :direction, value: @sort_direction %>
         <div class="app-search-row">
           <div class="app-search-field app-search-field-wide">
             <span class="app-search-icon" aria-hidden="true">
@@ -30,7 +34,7 @@
             <span class="app-search-shortcut-hint" aria-hidden="true">/</span>
           </div>
           <% if @search_query.present? %>
-            <%= link_to t("customers.view.index.clear"), customers_path(kpi_period: @kpi_period), class: "app-search-clear" %>
+            <%= link_to t("customers.view.index.clear"), customers_path(kpi_period: @kpi_period, list_filter: @list_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction), class: "app-search-clear" %>
           <% end %>
         </div>
       <% end %>
@@ -38,13 +42,18 @@
       <div class="app-filter-row">
     <%= link_to t("customers.view.index.all_customers"), customers_path(query: @search_query, list_filter: "all", follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'all' ? 'is-active' : ''}" %>
     <% next_high_value_filter = @list_filter == "high_value" ? "all" : "high_value" %>
-    <% next_at_risk_filter = @list_filter == "at_risk" ? "all" : "at_risk" %>
+    <% next_key_account_filter = @list_filter == "key_account" ? "all" : "key_account" %>
+    <% next_needs_follow_up_filter = @list_filter == "needs_follow_up" ? "all" : "needs_follow_up" %>
     <%= link_to t("customers.view.index.high_value"), customers_path(query: @search_query, list_filter: next_high_value_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'high_value' ? 'is-active' : ''}" %>
-    <%= link_to t("customers.view.index.at_risk"), customers_path(query: @search_query, list_filter: next_at_risk_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'at_risk' ? 'is-active' : ''}" %>
+    <%= link_to t("customers.view.index.key_accounts"), customers_path(query: @search_query, list_filter: next_key_account_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'key_account' ? 'is-active' : ''}" %>
+    <%= link_to t("customers.view.index.needs_follow_up"), customers_path(query: @search_query, list_filter: next_needs_follow_up_filter, follow_up_filter: @follow_up_filter, sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill #{@list_filter == 'needs_follow_up' ? 'is-active' : ''}" %>
     <% if @follow_up_filter != "all" %>
       <%= link_to t("customers.view.index.clear_follow_up_filter"), customers_path(query: @search_query, list_filter: @list_filter, follow_up_filter: "all", sort: @sort_key, direction: @sort_direction, kpi_period: @kpi_period), class: "app-filter-pill" %>
     <% end %>
       </div>
+      <% if @list_filter == "high_value" %>
+        <p class="app-form-section-note"><%= t("customers.view.index.high_value_hint", currency: @high_value_currency) %></p>
+      <% end %>
 
       <div class="follow-up-summary">
     <% next_today_filter = @follow_up_filter == "today" ? "all" : "today" %>
@@ -133,8 +142,11 @@
                 </span>
                 <div class="customer-list-name-meta">
                   <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
-                  <% if tag_names.any? %>
+                  <% if customer.customer_level.to_s == "key_account" || tag_names.any? %>
                     <span class="customer-list-tag-row">
+                      <% if customer.customer_level.to_s == "key_account" %>
+                        <span class="customer-list-tag-chip is-key-account"><%= t("customers.view.index.key_account_badge") %></span>
+                      <% end %>
                       <% visible_tags.each do |tag| %>
                         <span class="customer-list-tag-chip"><%= tag %></span>
                       <% end %>
@@ -225,8 +237,11 @@
               </span>
               <div class="customer-list-name-meta">
                 <strong><%= link_to customer.name, customer_path(customer), class: "customer-name-link" %></strong>
-                <% if tag_names.any? %>
+                <% if customer.customer_level.to_s == "key_account" || tag_names.any? %>
                   <span class="customer-list-tag-row">
+                    <% if customer.customer_level.to_s == "key_account" %>
+                      <span class="customer-list-tag-chip is-key-account"><%= t("customers.view.index.key_account_badge") %></span>
+                    <% end %>
                     <% visible_tags.each do |tag| %>
                       <span class="customer-list-tag-chip"><%= tag %></span>
                     <% end %>

@@ -80,6 +80,19 @@
           <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> <%= t("quote_templates.view.form.show_saas_branding") %></label>
           <label><%= f.check_box :excel_show_grid_lines %> <%= t("quote_templates.view.form.show_excel_gridlines") %></label>
         </div>
+        <div class="template-form-grid"
+             data-template-default-scope-container
+             data-template-doc-kind-field="quotation"
+             <%= "hidden" unless quote_template.show_scope_of_supply? && quote_template.document_kind != "proforma_invoice" %>>
+          <div class="template-span-2">
+            <%= f.label :default_scope_of_supply_content, t("quote_templates.view.form.default_scope_of_supply_content") %>
+            <%= f.text_area :default_scope_of_supply_content,
+                            rows: 3,
+                            placeholder: t("quote_templates.view.form.default_scope_of_supply_content_placeholder"),
+                            data: { template_preview_target: "default-scope-of-supply-content" } %>
+            <p class="template-sub"><%= t("quote_templates.view.form.default_scope_of_supply_content_hint") %></p>
+          </div>
+        </div>
         <p class="template-sub"><%= t("quote_templates.view.form.show_watermark_hint") %></p>
         <div class="template-form-grid">
           <div>
@@ -419,7 +432,10 @@
         <div class="preview-meta">
           <p data-template-preview-payment data-visible="<%= quote_template.show_payment_term? %>"><strong><span data-preview-i18n-label="payment_terms"><%= t("quote_document.labels.payment_terms") %></span>:</strong> TT 30% deposit, 70% before shipment</p>
           <p data-template-preview-notes data-visible="<%= quote_template.show_notes? %>"><strong><span data-preview-i18n-label="notes"><%= t("quote_document.labels.notes") %></span>:</strong> Price valid for 30 days.</p>
-          <p data-template-preview-scope-of-supply data-visible="<%= quote_template.show_scope_of_supply? %>"><strong><span data-template-preview-label-scope-of-supply><%= quote_template.resolved_scope_of_supply_label %></span>:</strong> Pump body, motor, base frame, and installation kit.</p>
+          <p data-template-preview-scope-of-supply data-visible="<%= quote_template.show_scope_of_supply? %>">
+            <strong><span data-template-preview-label-scope-of-supply><%= quote_template.resolved_scope_of_supply_label %></span>:</strong>
+            <span data-template-preview-scope-default-value><%= quote_template.default_scope_of_supply_content.presence || "Pump body, motor, base frame, and installation kit." %></span>
+          </p>
           <% if quote_template.signature_image.attached? %>
             <p data-template-preview-signature-image data-visible="<%= quote_template.show_signature_block? %>"><img src="<%= url_for(quote_template.signature_image) %>" alt="<%= t("quote_templates.view.form.signature_preview_alt") %>" class="quote-sales-signature-image"></p>
           <% else %>
@@ -758,6 +774,7 @@
       const labelUnitPrice = qs("[data-template-preview-target='label-unit-price']")?.value?.trim() || "Unit Price";
       const labelLineTotal = qs("[data-template-preview-target='label-line-total']")?.value?.trim() || "Line Total";
       const labelScopeOfSupply = qs("[data-template-preview-target='label-scope-of-supply']")?.value?.trim() || localeLabels.scope_of_supply || "Scope of Supply";
+      const defaultScopeOfSupplyContent = qs("[data-template-preview-target='default-scope-of-supply-content']")?.value?.trim() || "Pump body, motor, base frame, and installation kit.";
       const labelSpec = qs("[data-template-preview-target='label-spec']")?.value?.trim() || "Spec";
       const labelAddon = qs("[data-template-preview-target='label-addon']")?.value?.trim() || "Add-on";
       const numberLabelQuote = qs("[data-template-preview-target='number-label-quote']")?.value?.trim() || "Quote #";
@@ -848,6 +865,8 @@
       if (lineTotalNode) lineTotalNode.textContent = labelLineTotal;
       const scopeLabelNode = qsp("[data-template-preview-label-scope-of-supply]");
       if (scopeLabelNode) scopeLabelNode.textContent = labelScopeOfSupply;
+      const scopeContentNode = qsp("[data-template-preview-scope-default-value]");
+      if (scopeContentNode) scopeContentNode.textContent = defaultScopeOfSupplyContent;
       const specNode = qsp("[data-template-preview-spec-label]");
       if (specNode) specNode.textContent = labelSpec;
       const addonNode = qsp("[data-template-preview-addon-label]");
@@ -880,7 +899,10 @@
       showNode("[data-template-preview-shipping]", !!qs("[data-template-preview-toggle='shipping']")?.checked);
       showNode("[data-template-preview-payment]", !!qs("[data-template-preview-toggle='payment']")?.checked);
       showNode("[data-template-preview-notes]", !!qs("[data-template-preview-toggle='notes']")?.checked);
-      showNode("[data-template-preview-scope-of-supply]", !!qs("[data-template-preview-toggle='scope-of-supply']")?.checked && documentKind !== "proforma_invoice");
+      const showScopeOfSupply = !!qs("[data-template-preview-toggle='scope-of-supply']")?.checked && documentKind !== "proforma_invoice";
+      showNode("[data-template-preview-scope-of-supply]", showScopeOfSupply);
+      const defaultScopeContainer = qs("[data-template-default-scope-container]");
+      if (defaultScopeContainer) defaultScopeContainer.hidden = !showScopeOfSupply;
       const showSignature = !!qs("[data-template-preview-toggle='signature']")?.checked;
       showNode("[data-template-preview-signature-image]", showSignature && hasSignatureImage);
       showNode("[data-template-preview-signature-name]", showSignature && signatureName.length > 0);

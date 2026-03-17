@@ -18,6 +18,7 @@ class QuotesController < ApplicationController
 
   def new
     @quote = @customer.quotes.new(currency: "USD", status: "draft", template: current_user.company.quote_template_or_default)
+    prefill_scope_of_supply_from_template!(@quote)
     ensure_quote_item_row
   end
 
@@ -564,6 +565,14 @@ class QuotesController < ApplicationController
     return if @quote.quote_items.reject(&:marked_for_destruction?).any?
 
     @quote.quote_items.build
+  end
+
+  def prefill_scope_of_supply_from_template!(quote)
+    return if quote.scope_of_supply.present?
+    return unless quote.template&.show_scope_of_supply?
+
+    default_content = quote.template&.default_scope_of_supply_content.to_s
+    quote.scope_of_supply = default_content if default_content.present?
   end
 
   def quote_exporter(kind = "quote", template = nil)

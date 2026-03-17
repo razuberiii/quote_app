@@ -961,7 +961,11 @@ zh-CN:
         clear: 清除
         all_customers: 全部客户
         high_value: 高价值
+        key_accounts: 重点客户
+        needs_follow_up: 需跟进
         at_risk: 需跟进
+        high_value_hint: 高价值客户按 %{currency} 币种报价金额自动识别。
+        key_account_badge: 重点客户
         clear_follow_up_filter: 清除跟进筛选
         today: 今天
         soon_7_days: 即将到期（7天内）
@@ -1014,6 +1018,7 @@ zh-CN:
         status_auto_hint: 状态会基于最新活跃报价自动联动，“暂停合作”的客户将不再触发提醒。
         legacy_status: "%{status}（历史值）"
         customer_level: 客户等级
+        customer_level_hint: 重点客户可用于列表筛选与优先管理。
         primary_contact: 主要联系人
         primary_contact_hint: 让沟通信息与商务归属一目了然。
         primary_contact_name: 主要联系人姓名
@@ -1922,6 +1927,9 @@ zh-CN:
         show_sales_owner: 显示销售负责人
         show_notes: 显示备注区块
         show_scope_of_supply: 显示供货范围（仅报价单）
+        default_scope_of_supply_content: 默认供货范围内容
+        default_scope_of_supply_content_placeholder: 输入默认供货范围内容
+        default_scope_of_supply_content_hint: 用于新建报价时自动预填“供货范围”内容。每份报价仍可单独修改；留空则默认不预填。
         show_signature_block: 显示签名区块
         show_product_images: 显示产品图片
         show_valid_until: 显示有效期
@@ -2102,7 +2110,8 @@ zh-CN:
         default_payment_terms_placeholder: 净30天 / 50%预付款
         default_tax_rate: 默认税率（%）
         brand_primary_color: 品牌主色
-        section_branding_behavior: 3）品牌与默认模板行为
+        section_branding_behavior: 3）默认业务参数与显示偏好
+        section_branding_behavior_hint: 这里配置公司级默认基线；具体模板输出内容请在模板设置中维护。
         company_logo_alt: 公司 Logo
         upload_company_logo: 上传公司 Logo
         remove_current_logo: 移除当前 Logo

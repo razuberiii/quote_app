@@ -94,7 +94,7 @@
       <div class="customer-details">
         <p><strong><%= t("customers.view.show.company_name") %>:</strong> <%= @customer.name.presence || "-" %></p>
         <p><strong><%= t("customers.view.show.country") %>:</strong> <%= @customer.country.presence || "-" %></p>
-        <p><strong><%= t("customers.view.show.customer_level") %>:</strong> <%= @customer.customer_level.to_s.humanize %></p>
+        <p><strong><%= t("customers.view.show.customer_level") %>:</strong> <%= t("customers.view.form.level_options.#{@customer.customer_level}", default: @customer.customer_level.to_s.humanize) %></p>
         <p><strong><%= t("customers.view.show.status") %>:</strong> <%= customer_status_badge(@customer) %></p>
         <p><strong><%= t("customers.view.show.primary_contact_name") %>:</strong> <%= @customer.contact_name.presence || "-" %></p>
         <p><strong><%= t("customers.view.show.email") %>:</strong> <%= @customer.email.presence || "-" %></p>

@@ -217,10 +217,6 @@ class Quote < ApplicationRecord
     latest_revision_for_quote_no?
   end
 
-  def can_copy_and_reprice?
-    !archived? && %w[sent viewed negotiating accepted lost].include?(workflow_state) && latest_revision_for_quote_no?
-  end
-
   def can_share_publicly?
     return false if archived?
 

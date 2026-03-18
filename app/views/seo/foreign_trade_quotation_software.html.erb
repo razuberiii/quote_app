@@ -49,10 +49,28 @@
     <% end %>
   </section>
 
-  <%= render "seo/continue_reading",
+  <%= render "components/ui/card", class: "app-surface marketing-section-card" do %>
+    <div class="grid gap-6 lg:grid-cols-[minmax(0,0.66fr)_minmax(0,1.34fr)] lg:items-start">
+      <div class="app-section-stack gap-3">
+        <p class="marketing-section-kicker"><%= t("seo.view.foreign_trade_quotation_software.preview.kicker") %></p>
+        <h2 class="text-2xl font-semibold tracking-tight text-slate-950"><%= t("seo.view.foreign_trade_quotation_software.preview.title") %></h2>
+        <p class="app-section-caption"><%= t("seo.view.foreign_trade_quotation_software.preview.body") %></p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+        <%= image_tag "marketing/screenshots/foreign-trade-quote-record.png",
+          alt: "Foreign trade quotation workspace screenshot",
+          class: "block w-full rounded-[0.95rem] border border-slate-100",
+          loading: "lazy",
+          decoding: "async" %>
+      </div>
+    </div>
+  <% end %>
+
+<%= render "seo/continue_reading",
     related_topics: [
       { label: t("seo.view.shared.links.quote_revision_control"), path: quote_revision_control_path },
-      { label: t("seo.view.shared.links.buyer_facing_quotation_link"), path: buyer_facing_quotation_link_path }
+      { label: t("seo.view.shared.links.buyer_facing_quotation_link"), path: buyer_facing_quotation_link_path },
+      { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path }
     ],
     comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path },
     cta: { label: t("seo.view.shared.links.open_demo_workspace"), path: demo_path } %>

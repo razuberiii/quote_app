@@ -34,13 +34,6 @@ default: &default
     changefreq: weekly
     priority: "0.9"
     index: true
-  quotation_crm_for_export_teams:
-    path_helper: quotation_crm_for_export_teams_url
-    title_key: seo.view.quotation_crm_for_export_teams.meta.title
-    description_key: seo.view.quotation_crm_for_export_teams.meta.description
-    changefreq: weekly
-    priority: "0.9"
-    index: true
   quote_revision_control:
     path_helper: quote_revision_control_url
     title_key: seo.view.quote_revision_control.meta.title
@@ -68,6 +61,13 @@ default: &default
     description_key: seo.view.quotation_software_vs_erp.meta.description
     changefreq: weekly
     priority: "0.8"
+    index: true
+  quick_export_quotation:
+    path_helper: quick_export_quotation_url
+    title_key: seo.view.quick_export_quotation.meta.title
+    description_key: seo.view.quick_export_quotation.meta.description
+    changefreq: weekly
+    priority: "0.78"
     index: true
   resources:
     path_helper: resources_url

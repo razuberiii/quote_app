@@ -2,10 +2,10 @@ class QuotesController < ApplicationController
   require "base64"
 
   before_action :set_customer, only: %i[new create]
-  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate duplicate_and_reprice share send_reminder update_template reopen archive update_outcome_reason mark_sent mark_negotiating mark_outcome revert_to_sent undo_status_change public_preview]
+  before_action :set_quote, only: %i[show edit update destroy export_pdf export_xlsx duplicate share send_reminder update_template reopen archive update_outcome_reason mark_sent mark_negotiating mark_outcome revert_to_sent undo_status_change public_preview]
   before_action :set_template, only: %i[show export_pdf export_xlsx share send_reminder update_template public_preview]
-  before_action :set_form_products, only: %i[new edit create update duplicate duplicate_and_reprice]
-  before_action :set_template_options, only: %i[new edit create update show duplicate duplicate_and_reprice update_template]
+  before_action :set_form_products, only: %i[new edit create update duplicate]
+  before_action :set_template_options, only: %i[new edit create update show duplicate update_template]
   around_action :with_quote_output_locale, only: %i[export_pdf export_xlsx]
   before_action :set_quote_document_locale, only: %i[show update_template]
   helper_method :quote_item_image_data_uri, :quote_logo_data_uri, :quote_watermark_data_uri
@@ -247,23 +247,6 @@ class QuotesController < ApplicationController
     render :new, formats: :html
   rescue ActiveModel::UnknownAttributeError => e
     Rails.logger.error("Quote revision failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: t("quotes.flash.revision_schema_mismatch")
-  end
-
-  def duplicate_and_reprice
-    unless @quote.can_copy_and_reprice?
-      redirect_to quote_path(@quote), alert: t("quotes.flash.copy_reprice_not_available") and return
-    end
-
-    revision = @quote.build_revision
-    revision.status = "draft"
-    revision.save!
-    redirect_to edit_quote_path(revision), status: :see_other, notice: t("quotes.flash.revision_created_update_pricing", revision: revision.revision_number)
-  rescue ActiveRecord::RecordInvalid => e
-    Rails.logger.error("Quote duplicate_and_reprice failed: #{e.class} #{e.message}")
-    redirect_to quote_path(@quote), alert: t("quotes.flash.unable_create_revision", errors: e.record.errors.full_messages.to_sentence)
-  rescue ActiveModel::UnknownAttributeError => e
-    Rails.logger.error("Quote duplicate_and_reprice failed: #{e.class} #{e.message}")
     redirect_to quote_path(@quote), alert: t("quotes.flash.revision_schema_mismatch")
   end
 

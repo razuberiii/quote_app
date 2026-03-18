@@ -77,14 +77,19 @@
     </article>
   </section>
 
-  <div class="table-responsive">
+  <% description_label = t("quote_document.labels.description", default: "Description") %>
+  <% qty_label = t("quote_document.labels.qty", default: "Qty") %>
+  <% unit_price_label = t("quote_document.labels.unit_price", default: "Unit Price") %>
+  <% line_total_label = t("quote_document.labels.line_total", default: "Line Total") %>
+
+  <div class="table-responsive quote-items-responsive">
     <table class="quote-items-table quote-doc-table">
       <thead>
         <tr>
-          <th><%= t("quote_document.labels.description", default: "Description") %></th>
-          <th><%= t("quote_document.labels.qty", default: "Qty") %></th>
-          <th><%= t("quote_document.labels.unit_price", default: "Unit Price") %></th>
-          <th><%= t("quote_document.labels.line_total", default: "Line Total") %></th>
+          <th><%= description_label %></th>
+          <th><%= qty_label %></th>
+          <th><%= unit_price_label %></th>
+          <th><%= line_total_label %></th>
         </tr>
       </thead>
       <tbody>
@@ -93,10 +98,10 @@
           <% line_total = item[:unit_price].to_d * item[:quantity].to_i %>
           <% subtotal += line_total %>
           <tr>
-            <td><%= item[:description] %></td>
-            <td><%= item[:quantity] %></td>
-            <td><%= number_to_currency(item[:unit_price], unit: "USD ") %></td>
-            <td><%= number_to_currency(line_total, unit: "USD ") %></td>
+            <td data-label="<%= description_label %>"><%= item[:description] %></td>
+            <td data-label="<%= qty_label %>"><%= item[:quantity] %></td>
+            <td data-label="<%= unit_price_label %>"><%= number_to_currency(item[:unit_price], unit: "USD ") %></td>
+            <td data-label="<%= line_total_label %>"><%= number_to_currency(line_total, unit: "USD ") %></td>
           </tr>
         <% end %>
       </tbody>

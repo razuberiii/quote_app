@@ -1,4 +1,6 @@
-# README
+﻿# README
+
+Agent instructions: see `AGENTS.md` before making project changes.
 
 This README would normally document whatever steps are necessary to get the
 application up and running.

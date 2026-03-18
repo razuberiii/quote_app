@@ -258,6 +258,7 @@
     align-items: flex-start;
     gap: 0.6rem;
     flex-wrap: wrap;
+    position: relative;
   }
 
   .app-root .navbar-toggle {
@@ -265,12 +266,23 @@
     margin-left: auto;
   }
 
+  .app-root .navbar-menu,
+  .app-root .navbar-controls,
+  .app-root .navbar-container > .locale-nav {
+    width: min(360px, calc(100vw - 2rem));
+    margin-left: auto;
+    margin-top: 0.25rem;
+    padding: 0.7rem;
+    border: 1px solid var(--ui-nav-border);
+    border-radius: 14px;
+    background: var(--ui-nav-bg);
+    box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+  }
+
   .app-root .navbar-menu {
-    width: 100%;
     display: none;
     grid-template-columns: 1fr;
     gap: var(--space-1);
-    margin-top: 0.25rem;
   }
 
   .app-root .navbar-menu li {
@@ -298,14 +310,21 @@
   }
 
   .app-root .navbar-controls {
-    width: 100%;
     display: none;
     grid-template-columns: 1fr;
-    gap: var(--space-1);
+    gap: 0.55rem;
   }
 
   .app-root .navbar-container.menu-open .navbar-controls {
     display: grid;
+  }
+
+  .app-root .navbar-container > .locale-nav {
+    display: none;
+  }
+
+  .app-root .navbar-container.menu-open > .locale-nav {
+    display: inline-flex;
   }
 
   .app-root .account-menu {
@@ -332,6 +351,19 @@
 
   .app-root .locale-nav {
     margin-left: 0;
+  }
+}
+@media (max-width: 767px) {
+  .app-root .navbar-menu,
+  .app-root .navbar-controls,
+  .app-root .navbar-container > .locale-nav {
+    width: 100%;
+    margin-left: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
   }
 }
 .app-root main {
@@ -7394,12 +7426,14 @@ kbd.app-shortcut-badge {
     0 22px 48px rgba(15, 23, 42, 0.13),
     inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
-.marketing-root .navbar-toggle {
-  display: none;
-}
-.marketing-root .navbar-menu,
-.marketing-root .navbar-controls {
-  display: flex;
+@media (min-width: 1541px) {
+  .marketing-root .navbar-toggle {
+    display: none;
+  }
+  .marketing-root .navbar-menu,
+  .marketing-root .navbar-controls {
+    display: flex;
+  }
 }
 .marketing-root .marketing-mockup-emphasis-target {
   transition:

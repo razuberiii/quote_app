@@ -248,11 +248,17 @@
 }
 
 .sales-insight-dist-pct,
-.sales-insight-dist-count,
-.sales-insight-silent-meta {
+.sales-insight-dist-count {
   color: #64748b;
   font-size: 0.83rem;
   white-space: nowrap;
+}
+
+.sales-insight-silent-meta {
+  color: #64748b;
+  font-size: 0.83rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .sales-insight-other-details {

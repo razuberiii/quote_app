@@ -1,0 +1,50 @@
+<section class="app-page-shell marketing-page-shell">
+  <%= render "components/ui/card", class: "app-surface marketing-hero-shell" do %>
+    <div class="marketing-section-heading">
+      <p class="marketing-section-kicker"><%= t("seo.view.quick_export_quotation.hero.kicker") %></p>
+      <h1 class="marketing-section-title max-w-none"><%= t("seo.view.quick_export_quotation.hero.title") %></h1>
+      <p class="marketing-section-body"><%= t("seo.view.quick_export_quotation.hero.body") %></p>
+    </div>
+  <% end %>
+
+  <%= render "components/ui/card", class: "app-surface marketing-section-card" do %>
+    <div class="app-section-stack gap-5">
+      <div class="app-section-stack gap-2 max-w-3xl">
+        <p class="marketing-section-kicker"><%= t("seo.view.quick_export_quotation.showcase.kicker") %></p>
+        <h2 class="marketing-section-title marketing-section-title--quiet max-w-none"><%= t("seo.view.quick_export_quotation.showcase.title") %></h2>
+        <p class="marketing-section-body marketing-section-body--compact"><%= t("seo.view.quick_export_quotation.showcase.body") %></p>
+      </div>
+      <div class="grid gap-4 md:grid-cols-2">
+        <article class="rounded-2xl border border-slate-200 bg-white p-3">
+          <p class="text-sm font-semibold text-slate-900"><%= t("seo.view.quick_export_quotation.showcase.pdf_title") %></p>
+          <div class="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-1" data-screenshot-slot="quick-export-pdf">
+            <%= image_tag "marketing/screenshots/resources-export-pdf.png",
+              alt: "PDF quotation screenshot",
+              class: "block w-full rounded-lg border border-slate-100",
+              loading: "lazy",
+              decoding: "async" %>
+          </div>
+        </article>
+        <article class="rounded-2xl border border-slate-200 bg-white p-3">
+          <p class="text-sm font-semibold text-slate-900"><%= t("seo.view.quick_export_quotation.showcase.excel_title") %></p>
+          <div class="mt-3 rounded-xl border border-slate-100 bg-slate-50 p-1" data-screenshot-slot="quick-export-excel">
+            <%= image_tag "marketing/screenshots/resources-export-excel.png",
+              alt: "Excel quotation screenshot",
+              class: "block w-full rounded-lg border border-slate-100",
+              loading: "lazy",
+              decoding: "async" %>
+          </div>
+        </article>
+      </div>
+    </div>
+  <% end %>
+
+  <%= render "seo/continue_reading",
+    related_topics: [
+      { label: t("seo.view.shared.links.foreign_trade_quotation_software"), path: foreign_trade_quotation_software_path },
+      { label: t("seo.view.shared.links.quote_revision_control"), path: quote_revision_control_path },
+      { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path }
+    ],
+    comparison_link: { label: t("seo.view.shared.links.quotation_software_vs_excel"), path: quotation_software_vs_excel_path },
+    cta: { label: t("seo.view.shared.links.view_sample_quote"), path: sample_quote_path, target: "_blank" } %>
+</section>

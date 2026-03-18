@@ -30,11 +30,11 @@ Rails.application.routes.draw do
   patch "onboarding/dismiss", to: "onboarding#dismiss", as: :dismiss_onboarding
   get "sample-quote", to: "landing#sample_quote"
   get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
-  get "quotation-crm-for-export-teams", to: "seo#quotation_crm_for_export_teams"
   get "quote-revision-control", to: "seo#quote_revision_control"
   get "buyer-facing-quotation-link", to: "seo#buyer_facing_quotation_link"
   get "quotation-software-vs-excel", to: "seo#quotation_software_vs_excel"
   get "quotation-software-vs-erp", to: "seo#quotation_software_vs_erp"
+  get "quick-export-quotation", to: "seo#quick_export_quotation"
   get "resources", to: "seo#resources"
   resources :contact_requests, only: [ :create ]
 
@@ -107,7 +107,6 @@ Rails.application.routes.draw do
     resources :quotes, shallow: true do
       member do
         post :duplicate
-        post :duplicate_and_reprice
         post :archive
         post :mark_sent
         post :mark_negotiating

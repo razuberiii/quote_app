@@ -190,3 +190,4 @@ data-action="click->clipboard#copy"
 2. Do not create one-off page selectors when a family can be reused.
 3. Do not create parallel button systems.
 4. Do not hardcode long utility class strings in JS when helper output is available.
+5. Do not force `white-space: nowrap` on descriptive text in mobile cards/lists unless truncation is explicitly required.

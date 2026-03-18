@@ -1,4 +1,7 @@
-<% flow_steps = t("landing.homepage.flow_showcase.steps") %>
+<%
+  flow_steps = t("landing.homepage.flow_showcase.steps")
+  capability_cards = t("landing.homepage.capability_cards")
+%>
 
 <section id="product-story" class="app-page-shell marketing-page-shell">
   <div class="app-section-stack" data-controller="marketing-switcher" data-marketing-switcher-selected-value="<%= flow_steps.first[:key] %>">
@@ -10,6 +13,14 @@
             <h1 class="marketing-hero-title"><%= t("landing.homepage.hero.title") %></h1>
             <p class="marketing-hero-body"><%= t("landing.homepage.hero.body") %></p>
             <p class="app-subtle-note"><%= t("landing.homepage.hero.helper") %></p>
+            <ul class="grid gap-2 sm:grid-cols-2">
+              <% capability_cards.each do |card| %>
+                <li class="rounded-xl border border-slate-200 bg-white px-3 py-2">
+                  <p class="text-sm font-semibold text-slate-900"><%= card[:title] %></p>
+                  <p class="mt-1 text-xs text-slate-600"><%= card[:body] %></p>
+                </li>
+              <% end %>
+            </ul>
           </div>
         </div>
 
@@ -30,84 +41,95 @@
         </div>
       </div>
 
-      <%= render "components/ui/card", class: "app-surface marketing-hero-card marketing-hero-shell marketing-hero-shell--record", attrs: { "data-marketing-hero-sequence": true } do %>
-        <% flow_steps.each_with_index do |step, index| %>
-          <% primary_event = step[:timeline].first %>
-          <% secondary_event = step[:timeline].second %>
-          <section
-            id="homepage-flow-panel-<%= step[:key] %>"
-            class="marketing-switcher__panel <%= 'is-active' if index.zero? %>"
-            role="tabpanel"
-            aria-labelledby="homepage-flow-tab-<%= step[:key] %>"
-            <%= "hidden" unless index.zero? %>
-            data-marketing-switcher-target="panel"
-            data-state-key="<%= step[:key] %>">
-            <article class="marketing-record-mockup">
-              <header class="marketing-record-mockup__header">
-                <div class="marketing-record-mockup__identity">
-                  <p class="marketing-section-kicker"><%= t("landing.homepage.hero_mockup.kicker") %></p>
-                  <h2 class="marketing-record-mockup__title"><%= t("landing.homepage.hero_mockup.title") %></h2>
-                  <div class="marketing-record-mockup__meta">
-                    <p class="marketing-record-mockup__meta-line">
-                      <%= t("landing.homepage.hero_mockup.meta_line", version: step[:version_badge], buyer: t("landing.homepage.hero_mockup.buyer"), status: step[:badge]) %>
-                    </p>
-                  </div>
-                </div>
-              </header>
-
-              <div class="marketing-record-mockup__main">
-                <div class="marketing-record-mockup__main-head">
-                  <div>
-                    <p class="app-stat-label"><%= step[:summary_label] %></p>
-                    <p class="app-subtle-note mt-2"><%= t("landing.homepage.hero_mockup.same_record_note") %></p>
-                  </div>
-                </div>
-
-                <div class="marketing-record-mockup__summary-grid">
-                  <% step[:summary_rows].each do |row| %>
-                    <article class="marketing-record-mockup__summary-row <%= 'is-changed' if row[:changed] %>">
-                      <span class="text-slate-600"><%= row[:label] %></span>
-                      <strong class="text-slate-950"><%= row[:value] %></strong>
-                    </article>
-                  <% end %>
-                </div>
-
-                <div class="marketing-record-mockup__update">
-                  <div class="marketing-record-mockup__update-head">
-                    <p class="app-stat-label"><%= t("landing.homepage.hero_mockup.timeline_label") %></p>
-                    <span class="app-subtle-note"><%= primary_event[:time] %></span>
-                  </div>
-                  <strong class="marketing-record-mockup__update-title"><%= primary_event[:title] %></strong>
-                  <p class="marketing-record-mockup__update-body"><%= primary_event[:body] %></p>
-
-                  <% if secondary_event.present? %>
-                    <div class="marketing-record-mockup__update-note">
-                      <div class="marketing-record-mockup__update-note-head">
-                        <span class="text-slate-950 font-medium"><%= secondary_event[:title] %></span>
-                        <span class="app-subtle-note"><%= secondary_event[:time] %></span>
+      <div class="rounded-3xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div class="flex items-center gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+          <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
+          <span class="h-2.5 w-2.5 rounded-full bg-slate-300"></span>
+          <p class="ml-2 text-xs font-medium uppercase tracking-[0.16em] text-slate-500"><%= t("landing.homepage.hero.preview_shell_title") %></p>
+        </div>
+        <div class="space-y-4 p-4">
+          <%= render "components/ui/card", class: "app-surface marketing-hero-card marketing-hero-shell marketing-hero-shell--record", attrs: { "data-marketing-hero-sequence": true } do %>
+            <% flow_steps.each_with_index do |step, index| %>
+              <% primary_event = step[:timeline].first %>
+              <% secondary_event = step[:timeline].second %>
+              <section
+                id="homepage-flow-panel-<%= step[:key] %>"
+                class="marketing-switcher__panel <%= 'is-active' if index.zero? %>"
+                role="tabpanel"
+                aria-labelledby="homepage-flow-tab-<%= step[:key] %>"
+                <%= "hidden" unless index.zero? %>
+                data-marketing-switcher-target="panel"
+                data-state-key="<%= step[:key] %>">
+                <article class="marketing-record-mockup">
+                  <header class="marketing-record-mockup__header">
+                    <div class="marketing-record-mockup__identity">
+                      <p class="marketing-section-kicker"><%= t("landing.homepage.hero_mockup.kicker") %></p>
+                      <h2 class="marketing-record-mockup__title"><%= t("landing.homepage.hero_mockup.title") %></h2>
+                      <div class="marketing-record-mockup__meta">
+                        <p class="marketing-record-mockup__meta-line">
+                          <%= t("landing.homepage.hero_mockup.meta_line", version: step[:version_badge], buyer: t("landing.homepage.hero_mockup.buyer"), status: step[:badge]) %>
+                        </p>
                       </div>
-                      <p class="app-subtle-note"><%= secondary_event[:body] %></p>
                     </div>
-                  <% end %>
-                </div>
-              </div>
+                  </header>
 
-              <div class="marketing-record-mockup__footer">
-                <article class="marketing-record-mockup__aux">
-                  <span class="app-stat-label"><%= step[:activity][:label] %></span>
-                  <strong class="app-stat-value"><%= step[:activity][:value] %></strong>
-                  <p class="app-subtle-note mt-2"><%= step[:activity][:body] %></p>
+                  <div class="marketing-record-mockup__main">
+                    <div class="marketing-record-mockup__main-head">
+                      <div>
+                        <p class="app-stat-label"><%= step[:summary_label] %></p>
+                        <p class="app-subtle-note mt-2"><%= t("landing.homepage.hero_mockup.same_record_note") %></p>
+                      </div>
+                    </div>
+
+                    <div class="marketing-record-mockup__summary-grid">
+                      <% step[:summary_rows].each do |row| %>
+                        <article class="marketing-record-mockup__summary-row <%= 'is-changed' if row[:changed] %>">
+                          <span class="text-slate-600"><%= row[:label] %></span>
+                          <strong class="text-slate-950"><%= row[:value] %></strong>
+                        </article>
+                      <% end %>
+                    </div>
+
+                    <div class="marketing-record-mockup__update">
+                      <div class="marketing-record-mockup__update-head">
+                        <p class="app-stat-label"><%= t("landing.homepage.hero_mockup.timeline_label") %></p>
+                        <span class="app-subtle-note"><%= primary_event[:time] %></span>
+                      </div>
+                      <strong class="marketing-record-mockup__update-title"><%= primary_event[:title] %></strong>
+                      <p class="marketing-record-mockup__update-body"><%= primary_event[:body] %></p>
+
+                      <% if secondary_event.present? %>
+                        <div class="marketing-record-mockup__update-note">
+                          <div class="marketing-record-mockup__update-note-head">
+                            <span class="text-slate-950 font-medium"><%= secondary_event[:title] %></span>
+                            <span class="app-subtle-note"><%= secondary_event[:time] %></span>
+                          </div>
+                          <p class="app-subtle-note"><%= secondary_event[:body] %></p>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+
+                  <div class="marketing-record-mockup__footer">
+                    <article class="marketing-record-mockup__aux">
+                      <span class="app-stat-label"><%= step[:activity][:label] %></span>
+                      <strong class="app-stat-value"><%= step[:activity][:value] %></strong>
+                      <p class="app-subtle-note mt-2"><%= step[:activity][:body] %></p>
+                    </article>
+                    <article class="marketing-record-mockup__aux">
+                      <span class="app-stat-label"><%= step[:next_action][:label] %></span>
+                      <strong class="app-stat-value"><%= step[:next_action][:value] %></strong>
+                      <p class="app-subtle-note mt-2"><%= step[:next_action][:body] %></p>
+                    </article>
+                  </div>
                 </article>
-                <article class="marketing-record-mockup__aux">
-                  <span class="app-stat-label"><%= step[:next_action][:label] %></span>
-                  <strong class="app-stat-value"><%= step[:next_action][:value] %></strong>
-                  <p class="app-subtle-note mt-2"><%= step[:next_action][:body] %></p>
-                </article>
-              </div>
-            </article>
-          </section>
-        <% end %>
-      <% end %>
+              </section>
+            <% end %>
+          <% end %>
+
+        </div>
+      </div>
     </section>
 
     <section class="marketing-editorial-section marketing-editorial-section--flow">
@@ -146,6 +168,7 @@
     <section class="marketing-editorial-section marketing-editorial-section--bridge">
       <div class="app-section-stack gap-6">
         <h2 class="marketing-section-title marketing-section-title--quiet max-w-4xl"><%= t("landing.homepage.why.title") %></h2>
+        <p class="marketing-section-body marketing-section-body--compact max-w-4xl"><%= t("landing.homepage.why.body") %></p>
 
         <div class="marketing-compare-band">
           <article class="marketing-compare-band__column is-before">
@@ -169,20 +192,6 @@
       </div>
     </section>
 
-    <section class="marketing-editorial-section marketing-editorial-section--light marketing-editorial-section--fit">
-      <div class="app-section-stack gap-6">
-        <h2 class="marketing-section-title marketing-section-title--supporting max-w-3xl"><%= t("landing.homepage.fit.title") %></h2>
-
-        <ul class="marketing-fit-list" role="list">
-          <% t("landing.homepage.fit.items").each do |item| %>
-            <li class="marketing-fit-list__item">
-              <p class="app-section-caption"><%= item %></p>
-            </li>
-          <% end %>
-        </ul>
-      </div>
-    </section>
-
     <section class="marketing-editorial-section marketing-editorial-section--faq marketing-editorial-section--faq-shell">
       <div class="app-section-stack gap-6">
         <h2 class="marketing-section-title marketing-section-title--supporting max-w-3xl"><%= t("landing.homepage.faq.title") %></h2>
@@ -200,5 +209,25 @@
         </div>
       </div>
     </section>
+
+    <%= render "components/ui/card", class: "app-surface marketing-dark-card border-slate-950 text-white marketing-hero-shell marketing-cta-band" do %>
+      <div class="app-section-heading marketing-cta-band__content">
+        <div class="app-section-stack gap-3 max-w-2xl">
+          <h2 class="marketing-section-title max-w-none text-white"><%= t("landing.homepage.final_cta.title") %></h2>
+          <p class="text-sm leading-7 text-slate-300"><%= t("landing.homepage.final_cta.body") %></p>
+        </div>
+        <div class="flex flex-wrap gap-3">
+          <%= render "components/ui/button", href: demo_path, variant: :secondary do %>
+            <%= t("landing.homepage.final_cta.cta_demo") %>
+          <% end %>
+          <%= render "components/ui/button", href: sample_quote_path, variant: :secondary, attrs: { target: "_blank" } do %>
+            <%= t("landing.homepage.final_cta.cta_sample") %>
+          <% end %>
+          <%= render "components/ui/button", href: contact_path, variant: :secondary do %>
+            <%= t("landing.homepage.final_cta.cta_contact") %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
 </section>

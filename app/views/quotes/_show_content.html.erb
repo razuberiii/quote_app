@@ -522,7 +522,7 @@
       </div>
     </details>
 
-    <% if @quote.can_create_new_revision? || @quote.can_reopen? || @quote.can_copy_and_reprice? %>
+    <% if @quote.can_create_new_revision? || @quote.can_reopen? %>
       <div class="quote-toolbar-op-group" role="group" aria-label="<%= t("quotes.view.show.toolbar.quote_operations", default: "Quote operations") %>">
         <% if @quote.can_create_new_revision? %>
           <%= button_to t("quotes.view.show.toolbar.new_revision"),
@@ -536,13 +536,6 @@
                         reopen_quote_path(@quote),
                         method: :post,
                         form: { data: { turbo_confirm: t("quotes.view.show.toolbar.reopen_confirm") } },
-                        class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary quote-toolbar-op-btn" %>
-        <% end %>
-        <% if @quote.can_copy_and_reprice? %>
-          <%= button_to t("quotes.view.show.toolbar.copy_reprice"),
-                        duplicate_and_reprice_quote_path(@quote),
-                        method: :post,
-                        form: { data: { turbo: false } },
                         class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary quote-toolbar-op-btn" %>
         <% end %>
       </div>

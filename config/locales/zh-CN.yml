@@ -538,7 +538,6 @@ zh-CN:
           mark_lost_hint: 记录丢单原因，方便后续复盘价格、定位和再激活机会。
           reopen_quote: 重开报价
           reopen_confirm: 重开后该报价将恢复可编辑，并把当前公开版本标记为过时。客户在分享新版本前无法接受。
-          copy_reprice: 复制后改价
           quote_operations: 报价操作
           add_win_reason: 补赢单原因
           add_loss_reason: 补丢单原因
@@ -747,8 +746,6 @@ zh-CN:
       new_revision_not_available: 当前报价状态不可创建新版本。
       revision_draft_created: 已基于报价 %{quote_no} 创建草稿版本，请编辑并保存以生成新版本。
       revision_schema_mismatch: 版本创建失败：数据库结构不匹配，请先在服务器执行迁移。
-      copy_reprice_not_available: 当前报价状态不可使用“复制后改价”。
-      revision_created_update_pricing: 已创建版本 V%{revision}，请更新价格并分享。
       unable_create_revision: 无法创建版本：%{errors}
       sharing_disabled: 当前报价状态不支持分享。
       unable_create_public_share_link: 无法创建公开分享链接：%{errors}
@@ -2498,7 +2495,7 @@ zh-CN:
         print: 打印
     homepage:
       meta_title: Rubusoo | 面向出口团队的报价管理软件
-      meta_description: Rubusoo 为出口团队提供结构化报价管理，覆盖首次发送、修订、买家响应与后续跟进。
+      meta_description: Rubusoo 是面向外贸业务员与小团队的轻量报价软件，让报价到成交这段流程更快、更清楚、更可追溯。
       workflow_steps:
         - number: "01"
           title: 创建结构化报价
@@ -2517,14 +2514,14 @@ zh-CN:
           body: 用查看和修订信号来判断什么时候跟进。
           emphasis: false
       capability_cards:
-        - title: 版本控制
-          body: 将每个版本保留在同一条报价版本链中，让当前版本始终一目了然。
-        - title: 买家报价链接
-          body: 用一个报价页面替代来回附件，让买家直接查看和响应。
-        - title: 客户时间线
-          body: 把查看、修订请求和跟进时机都挂在同一条报价记录上。
-        - title: PDF / Excel 导出
-          body: 继续导出流程所需文件，但不把文件重新变成系统真源。
+        - title: 报价推进更快
+          body: 减少来回确认和重复改表。
+        - title: 当前版本更清楚
+          body: 团队和买家始终对齐同一版。
+        - title: 跟进判断更准确
+          body: 查看、修订、状态都可直接判断动作。
+        - title: 交付方式不受限
+          body: 在线推进，同时保留 PDF / Excel 输出。
       context_cards:
         - title: 发送后 18 分钟即被查看
           body: 买家活动会记录在客户时间轴上，并绑定到对应报价。
@@ -2546,24 +2543,35 @@ zh-CN:
           decision: 团队知道现在该联系谁。
           cta: 查看客户上下文
       hero:
-        kicker: 面向出口团队的报价管理软件
-        title: 让报价修订、买家反馈和销售跟进，落在同一条记录里
-        body: Rubusoo 把报价版本、买家查看、修改请求和后续动作统一放在一起，不用再靠 Excel、PDF 和邮件来回翻最新版本。
-        helper: 适合经常发报价、改价和跟进客户的出口团队
+        kicker: 面向外贸业务员和小团队的报价软件
+        title: 让报价成为推动成交的起点。
+        body: Rubusoo 不做重 CRM / ERP，而是围绕报价，把查看、修订、跟进和状态推进组织在同一条清晰记录里。
+        helper: 适合经常报价、反复改价、需要持续跟进买家反馈的外贸 SOHO 与小团队
+        preview_shell_title: 产品预览
+        preview_slots:
+          - label: Demo Workspace
+            body: 报价记录、客户动态与待办跟进
+            slot: hero-demo-workspace
+          - label: Buyer-facing Quote
+            body: 买家查看与响应的在线报价页面
+            slot: hero-online-quote
+          - label: Revision / Status
+            body: 版本变化、状态推进与买家活动
+            slot: hero-revision-status
         cta_primary: 免费开始
         cta_demo: 查看演示工作台
         cta_sample: 查看示例报价
         cta_support: 无需注册，先看完整流程
       flow_showcase:
-        kicker: 报价发出后仍在同一条记录里
-        title: 看看发送之后，流程如何继续留在同一条报价记录里
-        body: 买家查看、请求修改和销售跟进，都会继续留在这条报价记录里，不会再散到新的文件和邮件里。
+        kicker: 发送之后，流程仍在一条线上
+        title: 报价不是一个文件，而是一条可持续推进的记录
+        body: 查看、修订、跟进都回到同一条报价记录，不再在附件和聊天里来回找上一次。
         aria_label: 报价推进步骤
         steps:
           - key: sent
             step: "01"
             title: 发送报价
-            body: 报价一发出去，版本和前后情况就已经留在同一条记录里。
+            body: 报价一发出去，版本和当前情况就留在同一条记录里。
             quote_title: QT-2026-0240 / 修订版 2
             badge: 已发送
             badge_tone: is-good
@@ -2602,7 +2610,7 @@ zh-CN:
           - key: viewed
             step: "02"
             title: 买家查看
-            body: 买家查看会直接变成团队里看得见的动态，跟进前先知道客户有没有看、什么时候看的。
+            body: 买家看到什么、看到哪一版，团队更容易判断。
             quote_title: QT-2026-0240 / 修订版 2
             badge: 买家活跃中
             badge_tone: is-good
@@ -2641,7 +2649,7 @@ zh-CN:
           - key: revision
             step: "03"
             title: 请求修改
-            body: 买家提修改时，要求直接回到原报价记录，不会再分散成新的文件链。
+            body: 买家提出修改时，变更直接回到原报价记录。
             quote_title: QT-2026-0240 / 请求修订中
             badge: 请求修订
             badge_tone: is-neutral
@@ -2680,7 +2688,7 @@ zh-CN:
           - key: follow_up
             step: "04"
             title: 销售跟进
-            body: Revision 3 成为当前版本后，销售能一眼看到改了什么、接下来该做什么。
+            body: 版本、反馈和下一步动作留在一起，更容易继续推进。
             quote_title: QT-2026-0240 / 修订版 3
             badge: 可以跟进
             badge_tone: is-good
@@ -2768,25 +2776,46 @@ zh-CN:
           excel_export: Excel 导出
           excel_note: 内部交接
       why:
-        title: 报价一旦进入修订阶段，附件和邮件线程就会越来越乱
+        title: 为什么不是重 CRM / ERP，也不能只靠 Excel
+        body: 对很多外贸 SOHO 和小团队来说，重 CRM / ERP 往往太重，Excel 和附件又太散。更合适的做法，是把报价、查看、修订和跟进放回同一条清晰记录里，让流程继续往前走。
         before:
-          title: 以前
+          title: 只靠 Excel 或附件
           items:
-            - V2 发出去后，不知道客户看的是不是最新版
-            - 修改意见散落在邮件和附件里
-            - 销售自己记下一步，团队很难同步
+            - 版本一多，就很难确认买家看到的是哪一版
+            - 修改意见散在邮件和聊天里，交接时很容易说不清前后过程
+            - 报价可以发出去，但后续推进不连续，也不容易复盘
         after:
-          title: 现在
+          title: Rubusoo 的做法
           items:
-            - 买家始终查看当前版本
-            - 请求修改回到同一条报价记录
-            - 查看、修订和跟进都有时间线
+            - 不替代 ERP，只把报价到成交这一段做顺。
+            - 报价、查看、修订和跟进留在同一条记录里
+            - 在线推进和 PDF / Excel 并行，轻量但更稳定
       workflow:
         kicker: 工作方式
         title: 即使谈判越来越复杂，报价系统也不会散掉。
       capabilities:
         kicker: 核心能力
-        kicker_title: 专门解决报价工作最容易断掉的地方。
+        kicker_title: 围绕成交，先打通最关键的报价流程。
+      delivery_showcase:
+        kicker: 真实交付面
+        title: 在线报价、文件导出与版本控制，围绕同一条记录协同
+        body: 报价可以在线推进，也可以按业务需要继续交付 PDF / Excel。关键是所有动作都回到同一条记录。
+        items:
+          - kicker: 在线报价
+            title: 买家端先看清，再决定
+            body: 用在线链接展示当前版本，接受报价或请求修订都可直接发生在页面内。
+            slot: homepage-online-quote
+            slot_hint: 预留：在线报价页面截图
+          - kicker: 版本控制
+            title: 改价改条款，不再断链
+            body: 每次修订都保留在同一条报价记录，团队随时知道“当前版本”与“下一步动作”。
+            slot: homepage-revision-control
+            slot_hint: 预留：revision / status / buyer activity 截图
+          - kicker: 交付输出
+            title: PDF / Excel 照常输出
+            body: 对外或内部流程仍可使用文件，但文件不再承载协作主记录。
+            slot: homepage-pdf-excel
+            slot_hint: 预留：PDF / Excel 导出截图
       signature:
         kicker: 标志能力
         title: 让团队和买家都能读懂的版本控制。
@@ -2809,22 +2838,22 @@ zh-CN:
         cta_sample: 查看示例报价
         card_kicker: 客户时间轴
       fit:
-        title: 适合这样的出口团队
+        title: 适合这样的外贸团队
         items:
-          - 经常发报价、改价、追客户
-          - 买家反馈经常回在邮件和附件里
-          - 团队需要知道当前版本和下一步动作
+          - 报价频繁、修订频繁，成交节奏快
+          - 不想上重系统，但又不想继续靠附件硬撑
+          - 需要可追溯记录，方便协作、交接和复盘
       faq:
         title: 常见问题
         items:
           - question: "买家需要登录吗？"
-            answer: "不需要。公开示例中的买家页面可以直接查看，实际产品也可以按场景配置访问方式。"
+            answer: "不需要。你可以直接分享在线报价链接，让买家查看内容并作出回应。"
           - question: "还能导出 PDF / Excel 吗？"
-            answer: "可以。PDF 和 Excel 仍然可导出，但它们不再承担版本协作和后续跟进的主记录角色。"
+            answer: "可以。PDF、Excel 和在线报价都可以按场景使用。你可以继续发文件，也可以直接发在线链接。"
           - question: "这会替代 ERP 吗？"
-            answer: "不会。ERP 继续负责订单、财务、库存等内部流程，Rubusoo 负责报价发出后的查看、修订和推进。"
+            answer: "不会。Rubusoo 不是 ERP，也不要求你先有 ERP。它更适合把报价、查看、修订和跟进这一段做顺。"
           - question: "什么样的团队更适合使用？"
-            answer: "更适合那些经常改价、需要反复确认版本、并且要持续跟进买家反馈的出口团队。"
+            answer: "更适合经常报价、经常改价，并且要持续跟进买家反馈的外贸 SOHO 与小团队。"
       proof:
         kicker: 证明快照
         title: 这些都是产品里的真实状态，不是空泛的功能词。
@@ -2837,9 +2866,9 @@ zh-CN:
         cta_revision: 报价版本控制
         cta_vs_excel: 对比 Excel
       final_cta:
-        kicker: 下一步
-        title: 先查看产品，再进入对应页面。
-        body: 首页用于了解整体方案，demo 用于查看内部工作台，示例报价用于查看客户侧展示。
+        kicker: 品牌收束
+        title: 一切为了成交
+        body: 让每一份报价都更快推进到下一步。
         cta_demo: 查看演示工作台
         cta_sample: 查看示例报价
         cta_contact: 联系我们
@@ -2848,8 +2877,8 @@ zh-CN:
       shared:
         continue_reading:
           kicker: 继续阅读
-          title: 继续了解相关场景
-          body: 继续查看相关能力页面、对比页面，或直接进入产品演示。
+          title: 继续看与成交最相关的页面
+          body: 按场景继续查看关键页面，确认你的报价流程该怎么落地。
           related_topics: 相关主题
           compare_next: 延伸阅读
           next_step: 下一步
@@ -2865,38 +2894,72 @@ zh-CN:
       resources:
         meta:
           title: 资源 | Rubusoo
-          description: 浏览 Rubusoo 关于报价版本控制、共享报价链接和出口团队报价流程的资源页面。
+          description: 浏览 Rubusoo 的核心资料页，围绕“报价驱动成交”理解页面与流程设计。
         hero:
           kicker: 资源
-          title: 围绕修订、买家响应与跟进的资料
-          body: 从发送后最容易失控的环节开始：修订、买家反馈、文件交接与后续跟进。
+          title: 围绕“报价驱动成交”的核心资料
+          body: 从报价发出后的关键动作入手：查看、修订、状态推进、跟进与复盘。
         cards:
           foreign_trade_quotation_software:
             title: 外贸报价软件
-            body: 从创建、发送到修订和导出，把一条报价记录持续保留在系统里
-          quotation_crm_for_export_teams:
-            title: 面向出口团队的报价 CRM
-            body: 把查看、修订和下一步动作放到客户记录里，而不是散落在邮件里
+            body: 从建单到成交，为什么报价应该是一条连续记录，而不是一堆附件
+          quick_export:
+            title: 快速导出报价单
+            body: 更快完成第一版报价，按场景导出 PDF / Excel，或直接发在线链接。
           quote_revision_control:
             title: 报价版本控制
-            body: 让团队和买家都知道当前看的是哪一版
+            body: 修订如何不打断上下文，让团队和买家始终对齐当前版本
           buyer_facing_quotation_link:
             title: 在线共享报价
-            body: 买家在线查看、接受报价或请求修改，不再依赖附件往返
+            body: 公开链接如何替代附件往返，并把买家反馈带回记录
           quotation_software_vs_excel:
             title: 报价软件 vs Excel
-            body: 为什么报价一进入修订和协作阶段，Excel 就会开始吃力
+            body: 为什么 Excel 能起步，但在修订与协作阶段容易失控
           quotation_software_vs_erp:
             title: 报价软件 vs ERP
-            body: ERP 管业务底盘，报价软件管发送后的推进与协作
+            body: ERP 负责底盘，报价软件负责成交前最频繁的推进动作
+        quick_export_quotation:
+          title: 快速导出报价单
         read_page: 阅读页面
         final_cta:
           kicker: 下一步
-          title: 先查看产品，再进入对应资料。
-          body: 首页用于了解整体方案，demo 用于查看内部工作台，示例报价用于查看客户侧展示。
+          title: 从资料回到产品，验证你的流程
+          body: 看完页面后直接进 demo 与示例报价，确认“报价驱动成交”是否符合你的实际业务。
           cta_homepage: 首页
           cta_demo: 查看演示工作台
           cta_sample: 查看示例报价
+        path:
+          kicker: 推荐阅读路径
+          title: 更快理解 Rubusoo 的三个关键页面
+          step_1:
+            title: 为什么报价不该只是附件
+            body: 建立“报价驱动成交”的整体认知。
+          step_2:
+            title: 版本如何不断线
+            body: 看清修订、状态和前后过程如何留在同一条记录里。
+          step_3:
+            title: 真实报价怎么呈现
+            body: 从买家视角理解在线报价的实际体验与交付方式。
+        exports:
+          kicker: 导出方式
+          title: PDF 和 Excel，都可以继续用
+          body: 保留你熟悉的文件交付方式，同时把主记录留在线上持续推进。
+          pdf_title: PDF 报价
+          excel_title: Excel 报价
+      quick_export_quotation:
+        meta:
+          title: 快速导出报价单 | PDF / Excel / 在线链接 | Rubusoo
+          description: 支持在线链接、PDF、Excel 三种交付方式，帮助团队更快发出第一版报价并持续推进。
+        hero:
+          kicker: 快速导出报价单
+          title: 更快完成第一版报价，再按场景交付
+          body: 报价记录保持在线可推进，同时保留 PDF 和 Excel 导出，发给不同客户都更顺手。
+        showcase:
+          kicker: 导出方式
+          title: PDF 和 Excel，都可以继续用
+          body: 一份报价可以同时满足买家在线查看、内部文件流转和归档需求。
+          pdf_title: PDF 报价
+          excel_title: Excel 报价
       quote_revision_control:
         meta:
           title: 报价修订管理 | 清晰版本记录 | Rubusoo
@@ -3109,12 +3172,12 @@ zh-CN:
             cta: 查看演示工作台
       quotation_software_vs_excel:
         meta:
-          title: 报价软件 vs Excel | 发送后真正开始拉开差距的地方 | Rubusoo
-          description: 当客户开始响应后，对比 Excel 报价与结构化报价软件的实际差异。
+          title: 报价软件 vs Excel | 为什么 Excel 难以支撑成交推进 | Rubusoo
+          description: 对比 Excel 与报价软件在修订、客户反馈、状态推进与复盘上的实际差异。
         hero:
           kicker: 报价软件 vs Excel
-          title: 一旦报价进入协作和修订阶段，Excel 就会开始吃力
-          body: 真正的差异出现在发送之后：修订、买家响应与后续跟进，需要一条始终清楚的报价记录，而不是新的表格文件。
+          title: Excel 能做报价，但很难持续推进成交
+          body: 问题不在“能不能做表”，而在发送之后。修订、反馈和跟进一多，就需要一条连续记录，而不是不断复制的文件。
         table:
           headers:
             criteria: 维度
@@ -3123,59 +3186,68 @@ zh-CN:
           rows:
             revision:
               criteria: 报价修订
-              excel: 手工复制文件并重新发送
-              rubusoo: 在同一条报价版本链中进行结构化修订管理
+              excel: 新建文件、改名、重发，历史容易断
+              rubusoo: 同一条报价记录内连续修订，版本清楚
             buyer_response:
               criteria: 买家反馈
-              excel: 反馈回到邮件和文件线程里
-              rubusoo: 买家可以直接在报价页接受或请求修订
+              excel: 反馈散在邮件 / 聊天，难以集中管理
+              rubusoo: 买家在报价页直接提交反馈或请求修改
             visibility:
               criteria: 发送后可见性
-              excel: 最新版本很容易丢失
-              rubusoo: 团队和买家都能清楚看到当前报价
+              excel: 很难确认客户看的是否是最新版
+              rubusoo: 团队和买家都围绕当前版本沟通
             export:
               criteria: 文件连续性
-              excel: 文件本身就是系统
-              rubusoo: PDF 和 Excel 仍可从同一个报价来源导出
+              excel: 文件即系统，可追溯性弱
+              rubusoo: 在线记录为主，PDF / Excel 按需导出
         cards:
           buyer_flow:
-            title: 查看客户视图
-            body: 查看单一在线报价页如何替代附件往返与零散买家回复。
+            title: 看买家端
+            body: 一个在线报价链接，减少附件传来传去带来的版本偏差。
             cta: 查看示例报价
           internal_workflow:
-            title: 查看团队视图
-            body: 打开工作台视图，查看修订状态、买家动态与建议动作如何集中呈现。
+            title: 看团队端
+            body: 查看修订、查看记录和下一步动作如何落在同一处，便于推进与复盘。
             cta: 查看演示工作台
+        preview:
+          kicker: 对比实景
+          title: 同一条报价记录如何替代附件链路
+          body: 这里预留对比截图位，用同一业务场景展示“附件模式 vs 在线记录模式”的差异。
+          slot_hint: 预留：在线报价 vs 附件流程截图
       foreign_trade_quotation_software:
         meta:
-          title: 外贸报价软件 | 出口报价管理系统 | Rubusoo
-          description: 面向 B2B 出口团队的报价软件，支持修订控制、买家可见性与后续跟进管理。
+          title: 外贸报价软件 | 围绕报价推动成交 | Rubusoo
+          description: 面向外贸业务员与小团队的轻量报价软件，连接报价、查看、修订与跟进。
         hero:
-          kicker: 外贸报价管理
-          title: 面向 B2B 出口团队的外贸报价软件
-          body: 把产品、价格和条款放进一条报价记录。买家改动继续留在原处，PDF 和 Excel 仍然可导出。
+          kicker: 外贸报价软件
+          title: 把报价做到更快、更清楚、更容易推进
+          body: Rubusoo 聚焦报价到成交这一段。报价、客户查看、修订请求和跟进动作都在一条记录里持续推进。
           cta_demo: 查看演示工作台
           cta_sample: 查看示例报价
         cards:
           revision:
-            label: 清晰的版本控制
-            body: 每次修订都保留在同一条报价记录中，团队始终可以明确当前版本。
+            label: 报价修订不再断链
+            body: 每次修改都留在原记录里，当前版本与历史变化一眼可见。
           buyer:
-            label: 买家看到的永远是最新版
-            body: 发一个在线报价链接，买家打开就是当前版本，不会再看错文件。
+            label: 买家始终对齐当前版本
+            body: 分享在线报价链接，减少“你看到的是哪一版”的反复确认。
           exports:
-            label: 需要时继续导出 PDF 与 Excel
-            body: 导出文件依然可用，但不再承担报价推进的主要管理职责。
+            label: 文件输出照常可用
+            body: 需要归档或传递时继续导出 PDF / Excel，但主记录留在系统内。
         workflow:
           step_1:
-            title: 先把产品、价格和条款放进一份报价
-            body: 将产品、价格、规格与贸易条款整理在同一条报价记录中，后续修订无需重新开始。
+            title: 快速完成第一版报价
+            body: 把产品、价格、规格和条款放在同一条记录里，减少重复录入。
           step_2:
-            title: 买家要改，就在原报价上继续修
-            body: 价格调整、规格修改与客户要求都保留在报价记录内，而不是生成新的文件链。
+            title: 买家有改动，原地修订
+            body: 调价、改规格、改条款都接在原记录上，不再另开一串附件。
           step_3:
-            title: 在线分享报价，文件也照常导出
-            body: 买家在线查看最新报价，团队需要归档或发送文件时，PDF 和 Excel 依然可用。
+            title: 在线分享并持续跟进
+            body: 买家查看动作与修订请求回到同一记录，PDF / Excel 仍可按需导出。
+        preview:
+          kicker: 产品实景
+          title: 一个页面看见报价推进全貌
+          body: 报价内容、版本状态和买家信息集中在同一页里，团队更容易判断这笔报价现在推进到哪一步。
         next:
           kicker: 相关主题
           title: 继续查看报价发送后最相关的管理主题。
@@ -3206,25 +3278,29 @@ zh-CN:
           faq: 常见问题
       quotation_software_vs_erp:
         meta:
-          title: 报价软件 vs ERP | 报价流程该放在哪里 | Rubusoo
-          description: 看看 ERP 的边界在哪里，以及出口团队在处理修订、买家反馈和后续跟进时，为什么还需要一套真正适合报价推进的系统。
+          title: 报价软件 vs ERP | 各自边界与分工 | Rubusoo
+          description: ERP 与报价软件不是互斥关系。看清分工，才能把报价到成交这段做顺。
         hero:
           kicker: 报价软件 vs ERP
-          title: ERP 管业务底盘，报价软件管报价推进
-          body: ERP 适合订单、财务、库存和内部流程；Rubusoo 负责报价发出去之后的查看、修订与跟进。
+          title: ERP 负责底盘，报价软件负责成交前推进
+          body: 对小团队来说，先把报价推进做顺，比先上重流程更关键。Rubusoo 聚焦发送后的查看、修订、跟进与状态管理。
         panels:
           erp:
             kicker: ERP
-            title: 适合管内部业务记录
-            body: 订单、采购、库存、财务和审批都适合放在 ERP 里，但频繁修订和买家来回沟通并不是它最顺手的场景。
+            title: 重 ERP 更适合
+            body: 订单、采购、库存、财务和审批流程已经很重的团队。
           rubusoo:
             kicker: Rubusoo
-            title: 适合管报价还在推进的阶段
-            body: 把当前版本、在线报价页、买家改动请求和跟进行动放在同一条报价记录里。
+            title: Rubusoo 更适合
+            body: 还在解决报价推进、版本确认、买家反馈和后续跟进问题的 SOHO 与小团队。
           model:
-            kicker: 更合理的分工
+            kicker: 不是所有团队都需要先上 ERP
             title: 两套系统各做自己最擅长的事
-            body: ERP 继续负责后端业务，Rubusoo 负责订单定下来之前那段最容易散乱的报价过程。
+            body: 对很多 SOHO 和小团队来说，先把报价、查看、修订和跟进这一段做顺，比先上重系统更现实。
+        preview:
+          kicker: 推进层实景
+          title: 先把报价推进这一段看清楚
+          body: 买家动作、当前版本和跟进状态放在同一条记录里，比单靠附件和口头交接更容易推进。
         fit:
           workflow_layer:
             label: 适合的用法
@@ -3328,14 +3404,14 @@ zh-CN:
           body: 用面向出口业务的报价软件替代表格报价，建立更受控的修订管理、客户可见性与后续跟进流程。
       quotation_crm_for_export_teams:
         meta:
-          title: 出口团队报价 CRM | B2B 报价流程 | Rubusoo
-          description: 面向出口销售团队的报价 CRM，支持修订控制、客户可见性，以及与报价进展关联的跟进管理。
+          title: 面向出口团队的报价 CRM | 报价驱动成交 | Rubusoo
+          description: 不是重 CRM，而是围绕报价推进客户动作：查看、修订、跟进、状态更新。
         hero:
-          kicker: 报价管理 CRM
-          title: 面向出口团队的报价 CRM
-          body: 把报价修订、买家查看和后续跟进放在同一条客户记录里，让销售知道客户走到了哪一步。
+          kicker: 报价 CRM（轻量）
+          title: 围绕报价推进客户，而不是只做客户档案
+          body: Rubusoo 把报价、客户查看、修订请求和下一步动作放在同一条记录里，让团队更清楚现在该做什么。
           cta_demo: 查看演示工作台
-          cta_resources: 查看资源页
+          cta_resources: 查看相关资源
           summary: 面向出口团队的报价 CRM 应服务于报价执行、客户跟进与商机推进，而不只是记录存档。
           paragraph_1: Rubusoo 将报价修订控制、在线报价共享与跟进管理整合为一套出口销售工作方式。
           paragraph_2: 团队可以更清晰地维护版本、把握响应时机，并以更强控制力管理跨境销售周期。
@@ -3347,13 +3423,13 @@ zh-CN:
         signals:
           timeline:
             label: 客户时间线
-            body: 发送后 18 分钟即被查看，销售能直接从查看记录接着跟进。
+            body: 报价发送后多久被查看、被谁查看，都能直接看到。
           activity:
             label: 客户时间线
-            body: V2 版本上请求修订，销售不用再翻附件或聊天记录。
+            body: 买家在 V2 上提修改，团队可直接基于该版本继续推进。
           execution:
             label: 客户时间线
-            body: 今天该提醒谁、下一步该做什么，都能直接看见。
+            body: 跟进提醒和下一步动作直接绑定报价状态，不靠记忆管理。
           crm_role:
             label: CRM 角色
             title: 执行，而非仅存储
@@ -3366,6 +3442,10 @@ zh-CN:
             label: 团队节奏
             title: 跟进绑定状态
             detail: 销售动作与报价生命周期真实状态保持同步。
+        preview:
+          kicker: 报价推进
+          title: 围绕报价推进客户，而不是只做客户档案
+          body: 谁看过、什么时候改过、下一步跟进什么，都能直接接在同一条报价记录上。
         toc:
           title: 本页目录
           workflow_matters: 为什么清晰流程对出口报价很重要
@@ -3405,11 +3485,11 @@ zh-CN:
           item_1: 按报价阶段分配下一动作责任。
         fit:
           connected:
-            title: 更适合每天都在修订、发送和跟进报价的出口团队。
-            body: 即使买家反复修改，销售也能清楚知道当前版本是哪一版，并继续在同一条记录里推进。
+            title: 更适合高频报价、修订和跟进的出口团队。
+            body: 客户动作与报价状态始终连在一起，团队协作和交接更稳定。
           outcome:
-            title: 买家衔接更顺，后续跟进也更快。
-            body: 发送之后更清楚，买家反馈直接回到报价本身，PDF 和 Excel 继续能导出，但团队不会再靠文件找记录。
+            title: 报价推进更连贯，成交节奏更可控。
+            body: 发送后不再失联于附件与邮件，关键流程打通，复盘也更容易。
         related:
           kicker: 继续阅读
           title: 继续看和报价修订、买家查看与出口跟进直接相关的页面。

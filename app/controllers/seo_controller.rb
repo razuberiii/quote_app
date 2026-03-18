@@ -6,8 +6,6 @@ class SeoController < ApplicationController
 
   def foreign_trade_quotation_software; end
 
-  def quotation_crm_for_export_teams; end
-
   def quote_revision_control; end
 
   def buyer_facing_quotation_link; end
@@ -15,6 +13,8 @@ class SeoController < ApplicationController
   def quotation_software_vs_excel; end
 
   def quotation_software_vs_erp; end
+
+  def quick_export_quotation; end
 
   def resources; end
 

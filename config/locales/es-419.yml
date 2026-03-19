@@ -144,7 +144,7 @@ es-419:
         title: Inicio rápido
         subtitle: Envía tu primera cotización en minutos.
         progress: "%{count}/%{total} pasos completados"
-        shortcut_hint: 'Atajos:'
+        shortcut_hint: "Atajos:"
         shortcut_help: ver atajos
         shortcut_palette: abrir paleta de comandos
         dismiss: Cerrar
@@ -318,7 +318,7 @@ es-419:
       not_enough_data: Aún no hay datos suficientes
       export_mix_zero: Cotización 0% / PI 0%
       export_mix: Cotización %{quotation}% / PI %{pi}%
-      follow_up_interval: 'Intervalo de seguimiento: %{state}'
+      follow_up_interval: "Intervalo de seguimiento: %{state}"
       unknown_customer: Cliente sin identificar
       default_currency: USD
       operational_risk: Riesgo de seguimiento
@@ -402,26 +402,26 @@ es-419:
     errors:
       valid_until_on_or_after_today: debe ser hoy o una fecha posterior
     change_summary:
-      header: 'Resumen de actualización de revisión:'
+      header: "Resumen de actualización de revisión:"
       quantity_updated: "- Cantidad de %{product} actualizada: %{before} -> %{after}"
       unit_price_updated: "- Precio unitario de %{product} actualizado: %{before} -> %{after}"
       added_item: "- Artículo nuevo añadido: %{product}"
       removed_item: "- Artículo eliminado: %{product}"
       commercial_updated: "- %{label} actualizado: %{before} -> %{after}"
-      total_updated: 'Total actualizado: %{before} -> %{after}'
+      total_updated: "Total actualizado: %{before} -> %{after}"
     share_message:
       greeting: Hola %{customer_name},
       intro: Te compartimos la cotización que preparamos para ti.
-      quote_line: 'Cotización: %{quote_no}'
-      quote_date_line: 'Fecha de la cotización: %{quote_date}'
-      valid_until_line: 'Válida hasta: %{valid_until}'
-      payment_term_line: 'Condiciones de pago: %{payment_term}'
-      total_line: 'Total: %{total}'
-      items_title: 'Resumen de productos:'
+      quote_line: "Cotización: %{quote_no}"
+      quote_date_line: "Fecha de la cotización: %{quote_date}"
+      valid_until_line: "Válida hasta: %{valid_until}"
+      payment_term_line: "Condiciones de pago: %{payment_term}"
+      total_line: "Total: %{total}"
+      items_title: "Resumen de productos:"
       item_line: "- %{product} x %{quantity} (%{unit_price})"
       extra_items_line: "- y %{count} artículos más"
-      review_here: 'Puedes revisarla aquí:'
-      revision_changes_title: 'Cambios de esta revisión:'
+      review_here: "Puedes revisarla aquí:"
+      revision_changes_title: "Cambios de esta revisión:"
       revision_note: Esta es una revisión actualizada de la cotización.
       closing: Si necesitas cambios o una nueva revisión, avísanos.
       generic_item: Artículo
@@ -463,7 +463,7 @@ es-419:
       show:
         created_banner:
           title: Cotización creada con éxito.
-          subtitle: 'Siguiente paso: compártela con tu comprador.'
+          subtitle: "Siguiente paso: compártela con tu comprador."
           action: Copiar enlace para compartir
           link_copied: Enlace copiado y listo para enviar.
         back_to_customer: Volver al cliente
@@ -517,7 +517,7 @@ es-419:
           message_copied: Mensaje para compartir copiado.
           editor_label: Mensaje para compartir
           editor_placeholder: Puedes editar este mensaje antes de copiar o enviar.
-          editor_hint: 'Consejo: adapta productos, cambios de revisión o próximos pasos para este cliente.'
+          editor_hint: "Consejo: adapta productos, cambios de revisión o próximos pasos para este cliente."
         toolbar:
           template: Plantilla
           search_template: Buscar plantilla
@@ -535,8 +535,8 @@ es-419:
           edit: Editar
           new_revision: Nueva revisión
           mark_negotiating: Marcar en negociación
-          status_selector: 'Estado: %{status}'
-          status_mark_action: 'Marcar: %{status}'
+          status_selector: "Estado: %{status}"
+          status_mark_action: "Marcar: %{status}"
           status_option_negotiating: En negociación
           status_option_won: Ganada
           status_option_lost: Perdida
@@ -574,7 +574,7 @@ es-419:
           open: Abrir
           delete_quote: Eliminar cotización
           delete_confirm: "¿Eliminar la cotización %{quote_no} con todas sus revisiones y caducar cualquier enlace público? Esta acción no se puede deshacer."
-          delete_final_warning: 'Advertencia final: esto caducará los enlaces públicos y eliminará todo el historial de la cotización.'
+          delete_final_warning: "Advertencia final: esto caducará los enlaces públicos y eliminará todo el historial de la cotización."
           delete_prompt: Escribe ELIMINAR para confirmar la eliminación de la cotización.
           unable_generate_public_link: No se puede generar el enlace público
           public_link_ready: Enlace público listo.
@@ -609,7 +609,7 @@ es-419:
         days_left: "%{count} días restantes"
         viewed: Visto
         true: Sí
-        false: 'No'
+        false: "No"
         error_summary: "%{count} errores impidieron guardar esta cotización:"
         complete_required_fields: Completa los campos obligatorios antes de guardar.
         basic_information: Información básica
@@ -690,7 +690,7 @@ es-419:
         quote_item_hint_2: Los precios predeterminados del producto son solo de referencia. Los precios finales de la cotización deben ingresarse en la moneda de cotización seleccionada.
         quote_item_hint_3: Si la moneda de referencia del producto difiere de la moneda de la cotización, el precio unitario no se autocompletará.
         quote_item_hint_4: Las especificaciones y los complementos pueden cargarse desde preconfiguraciones de producto, cambiarse por otro preajuste o pegarse línea por línea como texto.
-        currency_mismatch_warning: 'Advertencia de moneda: el autocompletado del precio unitario se desactivará y tendrás que ingresarlo manualmente.'
+        currency_mismatch_warning: "Advertencia de moneda: el autocompletado del precio unitario se desactivará y tendrás que ingresarlo manualmente."
         pricing_attention_needed: El precio requiere atención antes de guardar esta cotización.
         product_name: Nombre del producto
         specifications: Especificaciones
@@ -730,7 +730,7 @@ es-419:
         update_quote: Actualizar cotización
         create_quote: Crear cotización
     flash:
-      free_plan_limit_reached: 'Límite del plan gratuito alcanzado: %{used}/%{limit} cotizaciones de la empresa utilizadas.'
+      free_plan_limit_reached: "Límite del plan gratuito alcanzado: %{used}/%{limit} cotizaciones de la empresa utilizadas."
       revision_read_only: Esta revisión es de solo lectura en el estado actual.
       template_change_not_allowed: La plantilla no se puede cambiar en el estado actual.
       no_template_available: No hay plantilla disponible. Por favor, cree una plantilla de cotización primero.
@@ -745,9 +745,9 @@ es-419:
       new_revision_not_available: No hay una nueva revisión disponible para el estado actual de la cotización.
       revision_draft_created: Borrador de revisión creado a partir de la cotización %{quote_no}. Edite y guarde para crear una nueva versión.
       revision_schema_mismatch: La revisión falló debido a una falta de coincidencia de esquema. Por favor, ejecute las migraciones de la base de datos en el servidor.
-      unable_create_revision: 'No se pudo crear la revisión: %{errors}'
+      unable_create_revision: "No se pudo crear la revisión: %{errors}"
       sharing_disabled: Compartir está deshabilitado para el estado actual de la cotización.
-      unable_create_public_share_link: 'No se pudo crear el enlace público para compartir: %{errors}'
+      unable_create_public_share_link: "No se pudo crear el enlace público para compartir: %{errors}"
       unable_create_public_share_link_now: No se pudo crear el enlace público para compartir en este momento. Por favor, inténtelo de nuevo.
       reminder_not_available: El recordatorio no está disponible para esta cotización.
       reminder_verification_required: Completa la verificación antes de enviar un recordatorio.
@@ -939,9 +939,9 @@ es-419:
     view:
       quote_card:
         next_action: Siguiente acción
-        win_reason: 'Motivo de victoria: %{reason}'
-        loss_reason: 'Motivo de pérdida: %{reason}'
-        pressure: 'Presión: %{reason}'
+        win_reason: "Motivo de victoria: %{reason}"
+        loss_reason: "Motivo de pérdida: %{reason}"
+        pressure: "Presión: %{reason}"
         expired_on: Venció el %{date}
         total: Total
         updated: Actualizado
@@ -1037,7 +1037,7 @@ es-419:
         owner_avatar_alt: Avatar del propietario
         select_internal_owner: Seleccionar propietario interno
         choose_team_owner: Elegir entre los miembros de su equipo
-        owner_hint: 'El propietario puede mostrarse en la cotización mediante el interruptor de plantilla (predeterminado: ACTIVADO).'
+        owner_hint: "El propietario puede mostrarse en la cotización mediante el interruptor de plantilla (predeterminado: ACTIVADO)."
         follow_up_date: Fecha de seguimiento
         additional_information: Información adicional
         additional_information_hint: Capture contexto de apoyo, etiquetas y notas sin saturar el perfil principal.
@@ -1085,7 +1085,7 @@ es-419:
           o_a: O/A
           cash: Efectivo
       edit:
-        title: 'Editar Cliente: %{name}'
+        title: "Editar Cliente: %{name}"
         update_customer: Actualizar Cliente
         back_to_customer: Volver al cliente
       show:
@@ -1115,7 +1115,7 @@ es-419:
           normal: NORMAL
         show_all_tasks: Mostrar todas las tareas (%{count})
         no_immediate_tasks: No hay tareas inmediatas.
-        customer_timeline: Cronología del cliente
+        customer_timeline: Cronología del comprador
         customer_timeline_hint: Eventos clave del cliente y del sistema en una sola línea de tiempo.
         high_signal: Señales clave del cliente
         show_older_high_signals: Mostrar actividad anterior del cliente (%{count})
@@ -1397,13 +1397,13 @@ es-419:
         quote_created_title: "%{quote_name} creado"
         revision_detail: Revisión V%{revision}.
         quote_updated_title: "%{quote_name} actualizado"
-        latest_status_detail: 'Estado más reciente: %{status}.'
+        latest_status_detail: "Estado más reciente: %{status}."
         quote_sent_title: "%{quote_name} enviado"
         quote_sent_detail: Enviado al cliente.
         quote_viewed_title: "%{quote_name} visto"
         quote_viewed_detail: Abierto por el cliente.
         quote_revision_requested_title: Revisión de %{quote_name} solicitada
-        client_request_detail: 'Solicitud del cliente: %{message}'
+        client_request_detail: "Solicitud del cliente: %{message}"
         customer_requested_updates: El cliente solicitó actualizaciones para esta revisión.
         quote_accepted_title: "%{quote_name} aceptado"
         accepted_via_public_link: Aceptado a través de enlace público.
@@ -1411,8 +1411,8 @@ es-419:
         quote_reopened_detail: Reabierto para edición.
         quote_won_title: "%{quote_name} ganado"
         marked_won_internally: Marcado como Ganado internamente.
-        marked_lost_reason: 'Marcado como Perdido. Motivo: %{reason}'
-        expired_pressure_reason: 'Vencida. Motivo: %{reason}'
+        marked_lost_reason: "Marcado como Perdido. Motivo: %{reason}"
+        expired_pressure_reason: "Vencida. Motivo: %{reason}"
         final_status_changed: El estado final cambió a %{status}.
         quote_status_title: "%{quote_name} %{status}"
         win_reason_captured_title: Motivo de ganancia de %{quote_name} capturado
@@ -1430,7 +1430,7 @@ es-419:
         quote_deleted_title: "%{quote_name} eliminado"
         quote_deleted_detail: La cotización se eliminó y los enlaces compartidos vencieron.
     flash:
-      free_plan_limit_reached: 'Límite del plan gratuito alcanzado: %{used}/%{limit} clientes utilizados.'
+      free_plan_limit_reached: "Límite del plan gratuito alcanzado: %{used}/%{limit} clientes utilizados."
       follow_up_marked_today: Seguimiento marcado para hoy. Próximo seguimiento programado para las %{date}
       unsupported_follow_up_interval: Intervalo de seguimiento no compatible.
       next_follow_up_scheduled: Próximo seguimiento programado para el %{date} (%{label}).
@@ -1438,8 +1438,8 @@ es-419:
       resumed: Cuenta reactivada.
   follow_up:
     message:
-      quote_link_intro: 'Puedes ver la cotización aquí:'
-      quote_link_label: 'Enlace de cotización:'
+      quote_link_intro: "Puedes ver la cotización aquí:"
+      quote_link_label: "Enlace de cotización:"
     assistant:
       title: Borrador de seguimiento
       subtitle: Parta de la última cotización y del estado de seguimiento, y edite antes de enviar.
@@ -1451,7 +1451,7 @@ es-419:
       suggested_message: Borrador sugerido
       placeholder: Escriba el mensaje de seguimiento que piensa enviar
       hint: Guardar aquí registrará este borrador en el seguimiento; el botón superior solo actualiza el estado.
-      email_blocked_hint: 'Antes de enviar el correo, complete: %{missing}.'
+      email_blocked_hint: "Antes de enviar el correo, complete: %{missing}."
       fix_profile: Actualizar perfil
       fix_company: Actualizar empresa
       no_whatsapp_number: Este cliente no tiene número de teléfono registrado
@@ -1499,12 +1499,12 @@ es-419:
     timeline:
       event_title: Seguimiento por %{channel}
       logged_by: Registrado por %{user}
-      quote_reference: 'Cotización: %{quote_name}'
+      quote_reference: "Cotización: %{quote_name}"
       event_detail_fallback: Seguimiento registrado.
     flash:
       logged: Seguimiento registrado. Próximo seguimiento programado para %{date}
       email_sent: Correo de seguimiento enviado. Próximo seguimiento programado para %{date}
-      email_setup_incomplete: 'Antes de enviar el correo, completa: %{missing}.'
+      email_setup_incomplete: "Antes de enviar el correo, completa: %{missing}."
       email_verification_required: Complete la verificación anti-bot antes de enviar el correo de seguimiento.
       email_verification_failed: Falló la verificación anti-bot. Intente nuevamente.
       email_cooldown: Ya se envió un correo de seguimiento hace poco. Espera %{minutes} minutos antes de volver a enviarlo.
@@ -1677,7 +1677,7 @@ es-419:
         configurator: Configurador
         specifications: Especificaciones
         add_ons: Complementos
-        default_preset: 'Preajuste predeterminado: %{name}'
+        default_preset: "Preajuste predeterminado: %{name}"
         using_inline_default_specs: Usando valores de especificación predeterminados en línea
         using_inline_default_addons: Usando valores de complemento predeterminados en línea
         default: Predeterminado
@@ -1784,7 +1784,7 @@ es-419:
         entries_placeholder: |-
           Garantía Extendida: 50
           Kit de Instalación: 120
-        hint_html: 'Una línea por artículo. Usa el formato <code>nombre: precio</code>.'
+        hint_html: "Una línea por artículo. Usa el formato <code>nombre: precio</code>."
         update: Actualizar preajuste de complemento
         create: Crear preajuste de complemento
       index:
@@ -1815,7 +1815,7 @@ es-419:
           Voltaje: 220V
           Frecuencia: 50Hz
           Material: SS304
-        hint_html: 'Una línea por elemento. Usa <code>nombre: valor</code>, <code>nombre=valor</code> o dos puntos chinos.'
+        hint_html: "Una línea por elemento. Usa <code>nombre: valor</code>, <code>nombre=valor</code> o dos puntos chinos."
         update: Actualizar ajuste preestablecido de especificaciones
         create: Crear ajuste preestablecido de especificaciones
       index:
@@ -1890,7 +1890,7 @@ es-419:
         visual_style_hint: Controle la firma visual de sus documentos de cotización.
         back: Volver
         output_language_title: Idioma de salida
-        output_language_hint: 'Establecer idioma por canal de salida. Predeterminado: inglés.'
+        output_language_hint: "Establecer idioma por canal de salida. Predeterminado: inglés."
         apply_all_locales: Aplicar a todos
         webview_locale: Vista web
         public_link_locale: Enlace público
@@ -1950,7 +1950,7 @@ es-419:
         watermark_image_hint: La marca de agua se renderiza detrás del contenido de la cotización.
         remove_existing_watermark_image: Eliminar imagen de marca de agua existente
         watermark_intensity: Intensidad de marca de agua (%)
-        watermark_intensity_hint: 'Rango recomendado: 8-16. Un valor más alto significa una marca de agua más oscura.'
+        watermark_intensity_hint: "Rango recomendado: 8-16. Un valor más alto significa una marca de agua más oscura."
         number_format: Número y formato
         number_format_hint: Establecer estándares de legibilidad monetaria para todos los documentos de cotización exportados.
         decimal_places: Decimales
@@ -1975,7 +1975,7 @@ es-419:
         pi_title: Título de factura proforma
         pi_title_placeholder: FACTURA PROFORMA
         pi_number_label: Etiqueta de número de PI
-        pi_number_placeholder: 'PI #'
+        pi_number_placeholder: "PI #"
         quotation_footer_note: Nota de pie de página de cotización
         quotation_footer_note_hint: Solo para documentos de cotización. Tiene prioridad sobre el texto de pie de página alternativo.
         pi_footer_note: Nota de pie de página de PI
@@ -2045,7 +2045,7 @@ es-419:
       qty: Cant.
       unit_price: Precio unitario
       line_total: Total
-      'no': Nro.
+      "no": Nro.
       image: Imagen
       download: Descargar
       quote_date: Fecha de cotización
@@ -2117,7 +2117,7 @@ es-419:
         show_payment_terms_default: Mostrar condiciones de pago por defecto
         show_sales_owner_default: Mostrar propietario de ventas por defecto
         section_reminder_email: 4) Correo de recordatorio
-        reminder_hint_html: 'Se usa cuando ventas hace clic en Enviar recordatorio. Deja cualquier campo en blanco para usar el texto predeterminado. Variables disponibles: quote_no, company_name, customer_name.'
+        reminder_hint_html: "Se usa cuando ventas hace clic en Enviar recordatorio. Deja cualquier campo en blanco para usar el texto predeterminado. Variables disponibles: quote_no, company_name, customer_name."
         reminder_email_subject: Asunto del correo de recordatorio
         reminder_email_body: Cuerpo del correo de recordatorio
         reminder_button_label: Texto del botón de recordatorio
@@ -2168,7 +2168,7 @@ es-419:
       subject: Tu código de verificación de Rubusoo
       title: Verifica tu correo electrónico
       greeting: Hola %{name},
-      intro: 'Usa el siguiente código para activar tu cuenta:'
+      intro: "Usa el siguiente código para activar tu cuenta:"
       code_hint: Ingresa este código en la página de verificación para completar el registro.
       expires_note: Este código vence en %{minutes} minutos.
       ignore_note: Si no creaste esta cuenta, puedes ignorar este correo.
@@ -2188,7 +2188,7 @@ es-419:
         verify_code_title: Ingresar código de verificación
         verify_code_hint: Ingresa el código de %{length} dígitos de tu correo. Puedes intentar hasta %{max_attempts} veces por código.
         code_label: Código de verificación
-        code_placeholder: '123456'
+        code_placeholder: "123456"
         verify_button: Verificar y activar
         verify_submitting: Verificando...
         resend_title: "¿No recibiste el código?"
@@ -2196,7 +2196,7 @@ es-419:
         resend_button: Reenviar código de verificación
         resend_sending: Enviando...
         resend_countdown: Reenviar (%{seconds}s)
-        current_email: 'Correo actual:'
+        current_email: "Correo actual:"
         sign_up_again: Regístrate de nuevo con otro correo
         modal_title: Verificación de seguridad
         modal_hint: Completa la verificación antes de reenviar.
@@ -2261,7 +2261,7 @@ es-419:
       member_role_updated: Rol de miembro actualizado.
       owner_cannot_removed: El propietario no puede ser eliminado.
       cannot_remove_self: No puedes eliminarte a ti mismo.
-      removed_from_team: 'Eliminado del equipo: %{email}. Cuenta preservada.'
+      removed_from_team: "Eliminado del equipo: %{email}. Cuenta preservada."
   team_invitations:
     view:
       index:
@@ -2283,7 +2283,7 @@ es-419:
       invitation_created: Invitación creada para %{email}.
       invitation_revoked: Invitación revocada.
       joined_company: Te uniste a %{company}.
-      unable_accept: 'No se pudo aceptar la invitación: %{message}'
+      unable_accept: "No se pudo aceptar la invitación: %{message}"
   admin:
     users:
       flash:
@@ -2396,31 +2396,37 @@ es-419:
         tagline: Rubusoo centraliza revisiones de cotización, actividad del comprador y seguimiento para equipos de exportación.
         homepage: Inicio
         demo: Demo
-        sample_quote: Cotización de muestra
+        sample_quote: Cotización de ejemplo
         resources: Recursos
         contact: Contacto
     view:
       contact:
-        meta_title: Contactar a Rubusoo
-        meta_description: Converse con Rubusoo sobre su proceso de cotización y evalúe si una gestión estructurada se ajusta a su equipo de exportación.
+        meta_title: Contacto | Rubusoo
+        meta_description: Cuéntanos cómo funciona hoy tu proceso de cotización, qué frena al equipo y qué herramientas usan actualmente.
         hero:
-          kicker: Contacto
-          title: Converse con Rubusoo sobre su proceso de cotización.
+          kicker: CONTACTO
+          title: Habla con Rubusoo sobre tu proceso de cotización
           body: Cuéntanos cómo cotiza hoy tu equipo, dónde se complica el seguimiento después del envío y qué herramientas usan actualmente. Te responderemos con una recomendación práctica.
-          subtitle: Evalúe si Rubusoo se ajusta a su flujo comercial, al volumen de revisiones y a los requisitos de seguimiento de su equipo.
+          subtitle: Cuéntanos cómo cotiza hoy tu equipo, dónde se complica el seguimiento después del envío y qué herramientas usan actualmente. Te responderemos con una recomendación práctica.
         form:
           name: Nombre
           email: Correo
           company: Empresa
           team_size: Tamaño del equipo
-          team_size_placeholder: p. ej. 5-20
+          team_size_placeholder: p. ej. 5–20
           inquiry_type: Tipo de consulta
+          inquiry_type_options:
+            general: General
+            product_question: Consulta sobre el producto
+            demo_request: Solicitud de demo
+            partnership: Alianza
+            other: Otro
           message: Mensaje
           message_placeholder: Cuéntanos cómo funciona hoy tu proceso de cotización, qué frena al equipo y qué herramientas están usando.
           website: Sitio web
           submit: Enviar mensaje
           sending: Enviando...
-          demo_cta: Ver demo
+          demo_cta: Ver espacio de trabajo demo
         turnstile:
           close: Cerrar verificación
           title: Verifica antes de enviar
@@ -2428,27 +2434,27 @@ es-419:
           loading: Cargando verificación...
           success: Verificado. Enviando ahora...
       demo:
-        meta_title: Demo de Rubusoo | Espacio de gestión de cotizaciones
-        meta_description: Explore el demo de Rubusoo para revisar revisiones de cotización, actividad del comprador y seguimiento después del envío.
+        meta_title: Espacio de trabajo demo | Rubusoo
+        meta_description: Mira cómo se gestionan las revisiones de cotización, la actividad del comprador, las tareas de seguimiento y los cambios de estado después del envío.
         kicker: ESPACIO DE TRABAJO DEMO
         title: Espacio de trabajo demo de Rubusoo
-        subtitle: Este demo simplificado muestra c?mo se gestionan las revisiones de cotizaci?n, la actividad del comprador, las tareas de seguimiento y los cambios de estado despu?s del env?o.
-        page_is_label: 'Qu? es esta p?gina:'
+        subtitle: Este demo simplificado muestra cómo se gestionan las revisiones de cotización, la actividad del comprador, las tareas de seguimiento y los cambios de estado después del envío.
+        page_is_label: "Qué es esta página:"
         page_is_body: una vista previa del espacio de trabajo interno para tu equipo comercial.
-        buyer_view_label: 'Vista del comprador:'
+        buyer_view_label: "Vista del comprador:"
         buyer_view_prefix: abre la
-        sample_quote_page: p?gina de cotizaci?n de ejemplo
+        sample_quote_page: página de cotización de ejemplo
         note: Todos los nombres y números en esta página son ejemplos ficticios creados para mostrar el producto.
         proof_1: Una cola de cotizaciones fácil de leer
         proof_2: Las revisiones siguen en el mismo registro
         proof_3: La salida para el comprador sigue disponible
-        open_deals: 'Negocios activos: %{count}'
-        quotes_this_week: 'Cotizaciones esta semana: %{count}'
-        pending_follow_ups: 'Seguimientos pendientes: %{count}'
+        open_deals: "Negocios activos: %{count}"
+        quotes_this_week: "Cotizaciones esta semana: %{count}"
+        pending_follow_ups: "Seguimientos pendientes: %{count}"
         queue_kicker: Cola
         recent_quotes: COTIZACIONES RECIENTES
         sorted_by_urgency: Ordenadas por urgencia
-        queue_summary: Negociaci?n, visualizaci?n y espera en una sola cola
+        queue_summary: Negociación, visualización y espera en una sola cola
         table:
           quote: Cotización
           quote_no: N.º de Cotización
@@ -2462,266 +2468,267 @@ es-419:
         signals_kicker: ACTIVIDAD
         deal_overview: Resumen del negocio
         one_account_workspace: Espacio de trabajo por cuenta
-        top_product: 'Producto principal:'
-        average_quote_cycle: 'Ciclo promedio de cotizaci?n:'
-        revision_rate: 'Tasa de revisiones:'
-        export_mix: 'Mezcla de exportaci?n:'
-        start_free_trial: Comenzar prueba gratis
-        open_sample_quote: Abrir cotizaci?n de ejemplo
+        top_product: "Producto principal:"
+        average_quote_cycle: "Ciclo promedio de cotización:"
+        revision_rate: "Tasa de revisiones:"
+        export_mix: "Mezcla de exportación:"
+        start_free_trial: Comenzar gratis
+        open_sample_quote: Ver cotización de ejemplo
       sample_quote:
-        meta_title: Cotización de muestra de Rubusoo | Ejemplo de cotización pública
-        meta_description: Vea una cotización pública de muestra de Rubusoo, incluyendo detalles de comprador/vendedor, artículos y términos de pago.
-        kicker: EJEMPLO DE COTIZACI?N P?BLICA
-        title: Cotizaci?n compartida de ejemplo
-        subtitle: Esta p?gina presenta una cotizaci?n online de ejemplo publicada por Rubusoo. Es un ejemplo est?tico y no una negociaci?n en vivo.
-        preview_label: 'Vista previa de la experiencia del comprador en vivo:'
-        preview_body: esta es la p?gina que abre tu comprador.
-        preview_supporting: "?sala para revisar condiciones, aprobar o pedir una revisi?n sin ciclos de adjuntos."
+        meta_title: Cotización compartida de ejemplo | Rubusoo
+        meta_description: Mira una página de cotización compartida para comprador con versión actual visible, acciones de aceptar/revisión y estructura lista para PDF.
+        kicker: EJEMPLO DE COTIZACIÓN PÚBLICA
+        title: Cotización compartida de ejemplo
+        subtitle: Esta página presenta una cotización online de ejemplo publicada por Rubusoo. Es un ejemplo estático y no una negociación en vivo.
+        preview_label: "Vista previa de la experiencia del comprador en vivo:"
+        preview_body: esta es la página que abre tu comprador.
+        preview_supporting: "Úsala para revisar condiciones, aprobar o pedir una revisión sin ciclos de adjuntos."
         buyer_can_accept: El comprador puede aceptar
-        buyer_can_request_revision: El comprador puede pedir revisi?n
+        buyer_can_request_revision: El comprador puede pedir revisión
         pdf_excel_available: PDF/Excel siguen disponibles
         view_demo_workspace: Ver espacio de trabajo demo
         start_for_free: Comenzar gratis
+        contact_us: Contáctanos
         buyer_actions: ACCIONES DEL COMPRADOR
         accept_quote: Aceptar cotización
         request_revision: Solicitar revisión
-        preview_mode_note: 'Modo de vista previa: las acciones se muestran solo como contexto de dise?o.'
-        pi_number: 'PI # %{number}'
+        preview_mode_note: "Modo de vista previa: las acciones se muestran solo como contexto de diseño."
+        pi_number: "PI # %{number}"
         delivery_days: 20 días hábiles
         validity: Validez
         delivery: Entrega
         print: Imprimir
     homepage:
-      meta_title: Rubusoo | Gestión de cotizaciones para equipos de exportación
-      meta_description: Rubusoo ofrece gestión estructurada de cotizaciones para equipos de exportación, desde el primer envío hasta la revisión, la respuesta del comprador y el seguimiento.
+      meta_title: Rubusoo | Software de cotización para equipos de exportación
+      meta_description: Rubusoo ayuda a los equipos de exportación a gestionar cotizaciones, revisiones, respuesta del comprador y seguimiento en un solo registro claro. Comparte online, mantén el control de versiones y sigue exportando en PDF o Excel.
       workflow_steps:
-      - number: '01'
-        title: Crear una cotización estructurada
-        body: Reúna productos, especificaciones, precios y términos comerciales en un solo registro.
-        emphasis: false
-      - number: '02'
-        title: Revisar sin confusión
-        body: Mantenga clara la línea de revisiones en lugar de crear archivos desconectados.
-        emphasis: true
-      - number: '03'
-        title: Compartir una cotización en vivo
-        body: Envíe un enlace para el comprador que siempre refleje la versión actual.
-        emphasis: true
-      - number: '04'
-        title: Hacer seguimiento con señales reales
-        body: Usa las vistas y los eventos de revisión para dar seguimiento en el momento adecuado.
-        emphasis: false
+        - number: "01"
+          title: Crear una cotización estructurada
+          body: Reúna productos, especificaciones, precios y términos comerciales en un solo registro.
+          emphasis: false
+        - number: "02"
+          title: Revisar sin confusión
+          body: Mantenga clara la línea de revisiones en lugar de crear archivos desconectados.
+          emphasis: true
+        - number: "03"
+          title: Compartir una cotización en vivo
+          body: Envíe un enlace para el comprador que siempre refleje la versión actual.
+          emphasis: true
+        - number: "04"
+          title: Hacer seguimiento con señales reales
+          body: Usa las vistas y los eventos de revisión para dar seguimiento en el momento adecuado.
+          emphasis: false
       capability_cards:
-      - title: Control de revisiones
-        body: Mant?n cada versi?n dentro de una misma familia de cotizaci?n para que la actual siempre est? clara.
-      - title: Enlace de cotizaci?n online
-        body: Reemplaza el desgaste de los adjuntos con una sola p?gina de cotizaci?n que el comprador puede revisar y responder.
-      - title: Cronolog?a del cliente
-        body: Mant?n vistas, solicitudes de revisi?n y tiempos de seguimiento conectados al mismo registro de cotizaci?n.
-      - title: Exportaciones en PDF y Excel
-        body: Exporta los archivos que tu equipo necesita sin perder de vista la cotizaci?n m?s reciente.
+        - title: Control de revisiones
+          body: Mantén cada versión dentro de un mismo registro de cotización para que la versión actual siempre esté clara.
+        - title: Enlace de cotización online
+          body: Reemplaza el desgaste de los adjuntos con una sola página de cotización que el comprador puede revisar y responder.
+        - title: Cronología del comprador
+          body: Mantén vistas, solicitudes de revisión y tiempos de seguimiento conectados al mismo registro de cotización.
+        - title: Exportaciones en PDF y Excel
+          body: Exporta los archivos que tu equipo necesita sin perder de vista la cotización más reciente.
       context_cards:
-      - title: Vista 18 min después del envío
-        body: La actividad del comprador queda registrada en la línea de tiempo del cliente con la cotización adjunta.
-      - title: Revisión solicitada en V2
-        body: Las solicitudes de cambio regresan al mismo hilo de cotización en lugar de fragmentos de correo.
-      - title: Recordatorio vence hoy
-        body: El representante ve el siguiente paso con señal y momento ya conectados.
+        - title: Vista 18 min después del envío
+          body: La actividad del comprador queda registrada en la línea de tiempo del cliente con la cotización adjunta.
+        - title: Revisión solicitada en V2
+          body: Las solicitudes de cambio regresan al mismo hilo de cotización en lugar de fragmentos de correo.
+        - title: Recordatorio vence hoy
+          body: El representante ve el siguiente paso con señal y momento ya conectados.
       trust_evidence:
-      - source: Detalle de cotización
-        signal: La revisión V3 se volvió actual hace 2 horas
-        decision: El representante responde desde la última versión, no desde un archivo viejo.
-        cta: Ver demo
-      - source: Cotización para comprador
-        signal: El comprador puede aceptar o pedir revisión desde la página
-        decision: La respuesta del comprador vuelve directamente al registro de la cotización.
-        cta: Ver cotización de muestra
-      - source: Línea de tiempo del cliente
-        signal: Los eventos de vista, revisión y recordatorio tienen marca de tiempo
-        decision: El equipo sabe a quién contactar ahora.
-        cta: Ver contexto del cliente
+        - source: Detalle de cotización
+          signal: La revisión V3 se volvió actual hace 2 horas
+          decision: El representante responde desde la última versión, no desde un archivo viejo.
+          cta: Ver espacio de trabajo demo
+        - source: Cotización para comprador
+          signal: El comprador puede aceptar o pedir revisión desde la página
+          decision: La respuesta del comprador vuelve directamente al registro de cotización.
+          cta: Ver cotización de ejemplo
+        - source: Línea de tiempo del cliente
+          signal: Los eventos de vista, revisión y recordatorio tienen marca de tiempo
+          decision: El equipo sabe a quién contactar ahora.
+          cta: Ver contexto del cliente
       hero:
-        kicker: GESTI?N DE COTIZACIONES PARA EQUIPOS DE EXPORTACI?N
-        title: Haz que cada cotizaci?n sea el punto de partida de un negocio.
-        body: Rubusoo no es un CRM o ERP pesado. Mantiene vistas de la cotizaci?n, revisiones, seguimiento, versionado y avance de estado en un solo registro claro.
-        helper: Pensado para equipos de exportaci?n que env?an, revisan y dan seguimiento a cotizaciones todos los d?as.
+        kicker: GESTIÓN DE COTIZACIONES PARA EQUIPOS DE EXPORTACIÓN
+        title: Haz que cada cotización sea el punto de partida de un negocio.
+        body: Rubusoo no es un CRM ni un ERP pesado. Mantiene cotización, revisiones, seguimiento, versiones y avance de estado dentro de un solo registro claro.
+        helper: Pensado para equipos de exportación que envían, revisan y dan seguimiento a cotizaciones todos los días.
         preview_shell_title: Vista del producto
         preview_slots:
-        - label: Demo Workspace
-          body: Registro de cotización, actividad y seguimiento
-          slot: hero-demo-workspace
-        - label: Buyer-facing Quote
-          body: Cotización en línea que abre el comprador
-          slot: hero-online-quote
-        - label: Revision / Status
-          body: Cambios de versión, estado y señales del comprador
-          slot: hero-revision-status
+          - label: Demo Workspace
+            body: Registro de cotización, actividad y seguimiento
+            slot: hero-demo-workspace
+          - label: Buyer-facing Quote
+            body: Cotización en línea que abre el comprador
+            slot: hero-online-quote
+          - label: Revision / Status
+            body: Cambios de versión, estado y señales del comprador
+            slot: hero-revision-status
         cta_primary: Comenzar gratis
         cta_demo: Ver espacio de trabajo demo
-        cta_sample: Ver cotizaci?n de ejemplo
+        cta_sample: Ver cotización de ejemplo
         cta_support: No se requiere registro. Primero mira el flujo completo.
       flow_showcase:
-        kicker: UN SOLO REGISTRO DESPU?S DEL ENV?O
-        title: Ve c?mo el avance de la cotizaci?n permanece en el mismo registro despu?s del env?o
-        body: Avanza dentro del mismo registro de cotizaci?n mientras la actividad del comprador, las solicitudes de revisi?n y el seguimiento siguen actualizando la vista de trabajo.
+        kicker: UN SOLO REGISTRO DESPUÉS DEL ENVÍO
+        title: Ve cómo el avance de la cotización permanece en el mismo registro después del envío
+        body: Avanza dentro del mismo registro de cotización mientras la actividad del comprador, las solicitudes de revisión y el seguimiento siguen actualizando la vista de trabajo.
         aria_label: Pasos del avance de la cotización
         steps:
-        - key: sent
-          step: '01'
-          title: Enviar cotizaci?n
-          body: La cotizaci?n se publica una sola vez, con el contexto de versi?n ya asociado.
-          quote_title: QT-2026-0240 / Revisión 2
-          badge: Cotización enviada
-          badge_tone: is-good
-          version_badge: Versión actual V2
-          summary_label: Resumen de cotización
-          summary_rows:
-          - label: Precio unitario
-            value: USD 4.80
-            changed: false
-          - label: Cantidad
-            value: 12,000 pzas
-            changed: false
-          - label: Término de entrega
-            value: FOB Qingdao
-            changed: false
-          - label: Vigencia
-            value: 14 días
-            changed: false
-          timeline:
-          - title: Cotización enviada
-            body: El comprador recibe un solo enlace en línea ligado a la Revisión 2.
-            time: Ahora
-            emphasis: true
-          - title: Exportación lista
-            body: PDF y Excel siguen disponibles desde el mismo registro.
-            time: Listo
-            emphasis: false
-          activity:
-            label: Actividad del comprador
-            value: Esperando primera vista
-            body: Las vistas, revisiones y aceptaciones seguirán volviendo al mismo registro de cotización.
-          next_action:
-            label: Siguiente acción
-            value: Esperar la primera respuesta
-            body: Ventas no necesita abrir otro hilo ni otra hoja para seguir el proceso.
-        - key: viewed
-          step: '02'
-          title: El comprador la vio
-          body: La actividad del comprador aparece en la cotizaci?n y le da al equipo contexto real antes del seguimiento.
-          quote_title: QT-2026-0240 / Revisión 2
-          badge: Comprador activo
-          badge_tone: is-good
-          version_badge: Versión actual V2
-          summary_label: Señal del comprador
-          summary_rows:
-          - label: Primera vista
-            value: 18 min después del envío
-            changed: true
-          - label: Última vista
-            value: Los Ángeles
-            changed: true
-          - label: Versión de cotización
-            value: Revisión 2
-            changed: false
-          - label: Exportación
-            value: PDF disponible
-            changed: false
-          timeline:
-          - title: El comprador abrió la cotización
-            body: El comprador abrió la misma página en vivo y no un archivo copiado.
-            time: Hace 18 min
-            emphasis: true
-          - title: Contexto de seguimiento actualizado
-            body: El equipo ya ve quién la abrió y cuándo antes de dar seguimiento.
-            time: Ahora
-            emphasis: false
-          activity:
-            label: Actividad del comprador
-            value: 6 vistas
-            body: La actividad queda unida al mismo registro y se vuelve contexto útil para ventas.
-          next_action:
-            label: Siguiente acción
-            value: Seguimiento listo
-            body: Ventas puede responder con claridad de tiempo y versión, no adivinando desde el correo.
-        - key: revision
-          step: '03'
-          title: Pedir revisi?n
-          body: El comprador solicita cambios y la petici?n vuelve al mismo registro de cotizaci?n.
-          quote_title: QT-2026-0240 / Revisión solicitada
-          badge: Revisión solicitada
-          badge_tone: is-neutral
-          version_badge: Actualizando a V3
-          summary_label: Cambios solicitados
-          summary_rows:
-          - label: Precio unitario
-            value: Solicita ajuste
-            changed: true
-          - label: Cantidad
-            value: 15,000 pzas
-            changed: true
-          - label: Término de entrega
-            value: Ajustar a CFR LA
-            changed: true
-          - label: Vigencia
-            value: Sin cambios
-            changed: false
-          timeline:
-          - title: El comprador pidió cambios
-            body: Las notas de revisión regresan a la misma cotización y no a otra hoja de cálculo.
-            time: Hace 2 horas
-            emphasis: true
-          - title: La solicitud sigue ligada a V2
-            body: El equipo sabe exactamente sobre qué versión llegó el pedido de cambio.
-            time: Registrado
-            emphasis: false
-          activity:
-            label: Actividad del comprador
-            value: Solicitud de revisión recibida
-            body: Los cambios pedidos quedan unidos al historial de versiones para continuar desde ahí.
-          next_action:
-            label: Siguiente acción
-            value: Preparar Revisión 3
-            body: Ventas ajusta precio y términos en la misma familia de cotizaciones y no en otro archivo.
-        - key: follow_up
-          step: '04'
-          title: Seguimiento comercial
-          body: La revisi?n 3 pasa a ser la actual y el equipo sabe qu? cambi? y qu? hacer despu?s.
-          quote_title: QT-2026-0240 / Revisión 3
-          badge: Seguimiento listo
-          badge_tone: is-good
-          version_badge: Versión actual V3
-          summary_label: Versión actual
-          summary_rows:
-          - label: Precio unitario
-            value: USD 4.65
-            changed: true
-          - label: Cantidad
-            value: 15,000 pzas
-            changed: true
-          - label: Término de entrega
-            value: CFR Los Ángeles
-            changed: true
-          - label: Vigencia
-            value: 10 días
-            changed: true
-          timeline:
-          - title: Revisión 3 publicada
-            body: La última versión pasa a ser la actual sin romper el historial.
-            time: Hace 2 horas
-            emphasis: true
-          - title: Seguimiento asignado
-            body: La siguiente acción queda ligada al mismo registro y al contexto del comprador.
-            time: Listo
-            emphasis: false
-          activity:
-            label: Actividad del comprador
-            value: El comprador ve V3 actual
-            body: Equipo y comprador avanzan sobre la misma versión activa antes de la siguiente conversación.
-          next_action:
-            label: Siguiente acción
-            value: Confirmar términos revisados
-            body: Ventas sigue desde la versión actual con señal del comprador, historial y próximo paso en la misma vista.
+          - key: sent
+            step: "01"
+            title: Enviar cotización
+            body: La cotización se publica una sola vez, con el contexto de versión ya asociado.
+            quote_title: QT-2026-0240 / Revisión 2
+            badge: Cotización enviada
+            badge_tone: is-good
+            version_badge: Versión actual V2
+            summary_label: Resumen de cotización
+            summary_rows:
+              - label: Precio unitario
+                value: USD 4.80
+                changed: false
+              - label: Cantidad
+                value: 12,000 pzas
+                changed: false
+              - label: Término de entrega
+                value: FOB Qingdao
+                changed: false
+              - label: Vigencia
+                value: 14 días
+                changed: false
+            timeline:
+              - title: Cotización enviada
+                body: El comprador recibe un solo enlace en línea ligado a la Revisión 2.
+                time: Ahora
+                emphasis: true
+              - title: Exportación lista
+                body: PDF y Excel siguen disponibles desde el mismo registro.
+                time: Listo
+                emphasis: false
+            activity:
+              label: Actividad del comprador
+              value: Esperando primera vista
+              body: Las vistas, revisiones y aceptaciones seguirán volviendo al mismo registro de cotización.
+            next_action:
+              label: Siguiente acción
+              value: Esperar la primera respuesta
+              body: Ventas no necesita abrir otro hilo ni otra hoja para seguir el proceso.
+          - key: viewed
+            step: "02"
+            title: El comprador la vio
+            body: La actividad del comprador aparece en la cotización y le da al equipo contexto real antes del seguimiento.
+            quote_title: QT-2026-0240 / Revisión 2
+            badge: Comprador activo
+            badge_tone: is-good
+            version_badge: Versión actual V2
+            summary_label: Señal del comprador
+            summary_rows:
+              - label: Primera vista
+                value: 18 min después del envío
+                changed: true
+              - label: Última vista
+                value: Los Ángeles
+                changed: true
+              - label: Versión de cotización
+                value: Revisión 2
+                changed: false
+              - label: Exportación
+                value: PDF disponible
+                changed: false
+            timeline:
+              - title: El comprador abrió la cotización
+                body: El comprador abrió la misma página en vivo y no un archivo copiado.
+                time: Hace 18 min
+                emphasis: true
+              - title: Contexto de seguimiento actualizado
+                body: El equipo ya ve quién la abrió y cuándo antes de dar seguimiento.
+                time: Ahora
+                emphasis: false
+            activity:
+              label: Actividad del comprador
+              value: 6 vistas
+              body: La actividad queda unida al mismo registro y se vuelve contexto útil para ventas.
+            next_action:
+              label: Siguiente acción
+              value: Seguimiento listo
+              body: Ventas puede responder con claridad de tiempo y versión, no adivinando desde el correo.
+          - key: revision
+            step: "03"
+            title: Pedir revisión
+            body: El comprador solicita cambios y la petición vuelve al mismo registro de cotización.
+            quote_title: QT-2026-0240 / Revisión solicitada
+            badge: Revisión solicitada
+            badge_tone: is-neutral
+            version_badge: Actualizando a V3
+            summary_label: Cambios solicitados
+            summary_rows:
+              - label: Precio unitario
+                value: Solicita ajuste
+                changed: true
+              - label: Cantidad
+                value: 15,000 pzas
+                changed: true
+              - label: Término de entrega
+                value: Ajustar a CFR LA
+                changed: true
+              - label: Vigencia
+                value: Sin cambios
+                changed: false
+            timeline:
+              - title: El comprador pidió cambios
+                body: Las notas de revisión regresan a la misma cotización y no a otra hoja de cálculo.
+                time: Hace 2 horas
+                emphasis: true
+              - title: La solicitud sigue ligada a V2
+                body: El equipo sabe exactamente sobre qué versión llegó el pedido de cambio.
+                time: Registrado
+                emphasis: false
+            activity:
+              label: Actividad del comprador
+              value: Solicitud de revisión recibida
+              body: Los cambios pedidos quedan unidos al historial de versiones para continuar desde ahí.
+            next_action:
+              label: Siguiente acción
+              value: Preparar Revisión 3
+              body: Ventas ajusta precio y términos en la mismo registro de cotización y no en otro archivo.
+          - key: follow_up
+            step: "04"
+            title: Seguimiento comercial
+            body: La revisión 3 pasa a ser la actual y el equipo sabe qué cambió y qué hacer después.
+            quote_title: QT-2026-0240 / Revisión 3
+            badge: Seguimiento listo
+            badge_tone: is-good
+            version_badge: Versión actual V3
+            summary_label: Versión actual
+            summary_rows:
+              - label: Precio unitario
+                value: USD 4.65
+                changed: true
+              - label: Cantidad
+                value: 15,000 pzas
+                changed: true
+              - label: Término de entrega
+                value: CFR Los Ángeles
+                changed: true
+              - label: Vigencia
+                value: 10 días
+                changed: true
+            timeline:
+              - title: Revisión 3 publicada
+                body: La última versión pasa a ser la actual sin romper el historial.
+                time: Hace 2 horas
+                emphasis: true
+              - title: Seguimiento asignado
+                body: La siguiente acción queda ligada al mismo registro y al contexto del comprador.
+                time: Listo
+                emphasis: false
+            activity:
+              label: Actividad del comprador
+              value: El comprador ve V3 actual
+              body: Equipo y comprador avanzan sobre la misma versión activa antes de la siguiente conversación.
+            next_action:
+              label: Siguiente acción
+              value: Confirmar términos revisados
+              body: Ventas sigue desde la versión actual con señal del comprador, historial y próximo paso en la misma vista.
       hero_metrics:
         primary_value:
           label: Valor principal
@@ -2742,7 +2749,7 @@ es-419:
         meta_line: "%{version} · %{buyer} · %{status}"
         buyer_active: Comprador activo
         timeline_label: Última actualización
-        buyer: 'Comprador: Pacific Trading Group'
+        buyer: "Comprador: Pacific Trading Group"
         latest_version: Última versión V3
         timeline:
           current:
@@ -2774,19 +2781,19 @@ es-419:
           excel_export: Exportación Excel
           excel_note: Entrega interna
       why:
-        title: Cuando empiezan las revisiones, los adjuntos y los correos se vuelven ca?ticos
+        title: Cuando empiezan las revisiones, los adjuntos y los correos se vuelven caóticos
         before:
           title: Antes
           items:
-          - Despu?s de enviar la V2, el equipo ya no sabe con certeza qu? versi?n est? viendo el comprador
-          - Las solicitudes de revisi?n quedan dispersas entre correos y adjuntos
-          - Cada vendedor lleva el siguiente paso por su cuenta y el equipo pierde contexto
+            - Después de enviar la V2, el equipo ya no sabe con certeza qué versión está viendo el comprador
+            - Las solicitudes de revisión quedan dispersas entre correos y adjuntos
+            - Cada vendedor lleva el siguiente paso por su cuenta y el equipo pierde contexto
         after:
           title: Ahora
           items:
-          - El comprador siempre ve la versi?n actual
-          - Las solicitudes de revisi?n permanecen en el mismo registro de cotizaci?n
-          - Vistas, revisiones y acciones de seguimiento permanecen en una sola l?nea de tiempo
+            - El comprador siempre ve la versión actual
+            - Las solicitudes de revisión permanecen en el mismo registro de cotización
+            - Vistas, revisiones y acciones de seguimiento permanecen en una sola línea de tiempo
       workflow:
         kicker: Cómo funciona
         title: Un sistema de cotización que sigue siendo útil cuando la negociación se complica.
@@ -2798,21 +2805,21 @@ es-419:
         title: Cotización en línea, exportaciones y control de revisiones en un mismo registro
         body: Colabora en línea y mantén PDF/Excel para cuando el negocio aún necesita archivos.
         items:
-        - kicker: Cotización en línea
-          title: El comprador ve contexto antes de decidir
-          body: Comparte un enlace vivo donde el comprador puede revisar, aceptar o pedir cambios.
-          slot: homepage-online-quote
-          slot_hint: 'Espacio: captura de cotización para comprador'
-        - kicker: Control de revisiones
-          title: Ajusta términos sin romper historial
-          body: Cada revisión queda en el mismo registro con versión actual y siguiente acción visibles.
-          slot: homepage-revision-control
-          slot_hint: 'Espacio: captura de revisión/estado/actividad'
-        - kicker: Salidas de entrega
-          title: PDF y Excel siguen disponibles
-          body: Mantén los archivos para aprobaciones y traspaso sin mover la fuente principal fuera del sistema.
-          slot: homepage-pdf-excel
-          slot_hint: 'Espacio: captura de exportación PDF/Excel'
+          - kicker: Cotización en línea
+            title: El comprador ve contexto antes de decidir
+            body: Comparte un enlace vivo donde el comprador puede revisar, aceptar o pedir cambios.
+            slot: homepage-online-quote
+            slot_hint: "Espacio: captura de cotización para comprador"
+          - kicker: Control de revisiones
+            title: Ajusta términos sin romper historial
+            body: Cada revisión queda en el mismo registro con versión actual y siguiente acción visibles.
+            slot: homepage-revision-control
+            slot_hint: "Espacio: captura de revisión/estado/actividad"
+          - kicker: Salidas de entrega
+            title: PDF y Excel siguen disponibles
+            body: Mantén los archivos para aprobaciones y traspaso sin mover la fuente principal fuera del sistema.
+            slot: homepage-pdf-excel
+            slot_hint: "Espacio: captura de exportación PDF/Excel"
       signature:
         kicker: Capacidad distintiva
         title: Control de revisiones que su equipo y su comprador pueden entender.
@@ -2823,7 +2830,7 @@ es-419:
             body: La revisión actual es obvia en lugar de quedar enterrada entre archivos viejos.
           response:
             label: La respuesta del comprador sigue unida
-            body: Las solicitudes de revisión y la aceptación permanecen en el registro de la cotización.
+            body: Las solicitudes de revisión y la aceptación permanecen en el registro de cotización.
           exports:
             label: Las exportaciones siguen funcionando
             body: PDF y Excel siguen disponibles sin volver a convertirlos en el sistema principal.
@@ -2831,30 +2838,30 @@ es-419:
         kicker: Contexto del cliente
         title: Actividad de la cotización vinculada al registro del cliente.
         body: Revise envíos, vistas, revisiones y recordatorios en una sola vista para que el seguimiento se base en el contexto comercial actual.
-        cta_demo: Ver demo
-        cta_sample: Ver cotización de muestra
+        cta_demo: Ver espacio de trabajo demo
+        cta_sample: Ver cotización de ejemplo
         card_kicker: Línea de tiempo del cliente
       fit:
         title: Encaja bien con equipos como estos
         items:
-        - Envían, revisan y dan seguimiento a cotizaciones con frecuencia
-        - La respuesta del comprador suele volver por correos y adjuntos
-        - El equipo necesita saber cuál es la versión actual y cuál es la siguiente acción
+          - Envían, revisan y dan seguimiento a cotizaciones con frecuencia
+          - La respuesta del comprador suele volver por correos y adjuntos
+          - El equipo necesita saber cuál es la versión actual y cuál es la siguiente acción
       faq:
         title: Preguntas frecuentes
         items:
-        - question: "?El comprador necesita iniciar sesi?n?"
-          answer: No. Puedes compartir un solo enlace de cotizaci?n online para que el comprador revise y responda directamente.
-        - question: "?Todav?a podemos exportar PDF o Excel?"
-          answer: S?. PDF y Excel siguen disponibles. Puedes enviar archivos cuando haga falta o mantener la cotizaci?n online y compartir la p?gina en vivo.
-        - question: "?Esto reemplaza un ERP?"
-          answer: No. Rubusoo no es un ERP y tampoco requiere tener un ERP primero. Est? mejor orientado a la etapa en la que la cotizaci?n se revisa, se modifica y se sigue antes de cerrar el pedido.
-        - question: "?Para qu? equipos funciona mejor?"
-          answer: Encaja mejor con equipos de exportaci?n que cotizan con frecuencia, revisan con frecuencia y necesitan que la retroalimentaci?n del comprador y el seguimiento permanezcan ligados al mismo registro de cotizaci?n.
+          - question: "¿El comprador necesita iniciar sesión?"
+            answer: No. Puedes compartir un solo enlace de cotización online para que el comprador revise y responda directamente.
+          - question: "¿Todavía podemos exportar PDF o Excel?"
+            answer: Sí. PDF y Excel siguen disponibles. Puedes enviar archivos cuando haga falta o mantener la cotización online y compartir la página en vivo.
+          - question: "¿Esto reemplaza un ERP?"
+            answer: No. Rubusoo no es un ERP y tampoco requiere tener un ERP primero. Est? mejor orientado a la etapa en la que la cotización se revisa, se modifica y se sigue antes de cerrar el pedido.
+          - question: "¿Para qué equipos funciona mejor?"
+            answer: Encaja mejor con equipos de exportación que cotizan con frecuencia, revisan con frecuencia y necesitan que la retroalimentación del comprador y el seguimiento permanezcan ligados al mismo registro de cotización.
       proof:
         kicker: Pruebas rápidas
         title: Evidencia de estados reales del producto, no promesas vacías.
-        changes_label: 'Lo que cambia:'
+        changes_label: "Lo que cambia:"
       resources:
         kicker: Recursos
         title: Profundice por tema o por comparación
@@ -2864,88 +2871,88 @@ es-419:
         cta_vs_excel: Comparar con Excel
       final_cta:
         kicker: Listo para verlo
-        title: Revisa el producto y luego contin?a con la vista adecuada.
-        body: Usa la p?gina principal para la visi?n general, el demo para la vista interna del equipo o la cotizaci?n de ejemplo para la vista del comprador.
-        cta_demo: Abrir espacio de trabajo demo
-        cta_sample: Ver cotizaci?n de ejemplo
-        cta_contact: Cont?ctanos
+        title: Everything for closing deals.
+        body: Haz que cada cotización avance más rápido hacia el siguiente paso.
+        cta_demo: Ver espacio de trabajo demo
+        cta_sample: Ver cotización de ejemplo
+        cta_contact: Contáctanos
   seo:
     view:
       shared:
         continue_reading:
           kicker: Sigue explorando
           title: Explora el siguiente tema relevante
-          body: Sigue con una p?gina de capacidades relacionada, una p?gina comparativa o un recorrido del producto.
+          body: Sigue con una página de capacidades relacionada, una página comparativa o un recorrido del producto.
           related_topics: Temas relacionados
           compare_next: Sigue con esta comparación
           next_step: Siguiente paso
         links:
-          quote_revision_control: Control de revisiones de cotizaci?n
+          quote_revision_control: Control de revisiones de cotización
           buyer_facing_quotation_link: Cotizaciones compartidas online
-          foreign_trade_quotation_software: Software de cotizaci?n para comercio exterior
-          quotation_software_vs_excel: Software de cotizaci?n vs Excel
-          quotation_software_vs_erp: Software de cotizaci?n vs ERP
+          foreign_trade_quotation_software: Software de cotización para exportación
+          quotation_software_vs_excel: Software de cotización vs Excel
+          quotation_software_vs_erp: Software de cotización vs ERP
           quotation_crm_for_export_teams: CRM de cotización para equipos de exportación
           open_demo_workspace: Ver espacio de trabajo demo
-          view_sample_quote: Ver cotizaci?n de ejemplo
+          view_sample_quote: Ver cotización de ejemplo
       resources:
         meta:
           title: Recursos | Rubusoo
-          description: Explore los recursos de Rubusoo sobre control de revisiones, cotización en línea y gestión de cotizaciones para equipos de exportación.
+          description: Aprende a gestionar revisiones de cotización, respuesta del comprador, páginas de cotización compartida y seguimiento sin perder el hilo después del envío.
         hero:
           kicker: RECURSOS
           title: Recursos sobre revisiones, respuesta del comprador y seguimiento
-          body: 'Empieza por las partes que normalmente se rompen despu?s de enviar una cotizaci?n: revisiones, retroalimentaci?n del comprador, entrega de archivos y seguimiento.'
+          body: "Empieza por las partes que normalmente se rompen después de enviar una cotización: revisiones, retroalimentación del comprador, entrega de archivos y seguimiento."
         cards:
           foreign_trade_quotation_software:
-            title: Software de cotizaci?n para exportaci?n
-            body: Mant?n el mismo registro de cotizaci?n dentro del sistema desde la creaci?n y el env?o hasta la revisi?n y la exportaci?n
+            title: Software de cotización para exportación
+            body: Mantén el mismo registro de cotización dentro del sistema desde la creación y el envío hasta la revisión y la exportación
           quote_revision_control:
-            title: Control de revisiones de cotizaci?n
-            body: Deja claro tanto para tu equipo como para el comprador cu?l es la versi?n actual
+            title: Control de revisiones de cotización
+            body: Deja claro tanto para tu equipo como para el comprador cuál es la versión actual
           buyer_facing_quotation_link:
             title: Cotizaciones compartidas online
             body: Permite que los compradores vean, acepten o pidan cambios online en lugar de devolver adjuntos una y otra vez
           quotation_software_vs_excel:
-            title: Software de cotizaci?n vs Excel
-            body: Por qu? Excel empieza a quedarse corto cuando las cotizaciones entran en revisi?n y colaboraci?n
+            title: Software de cotización vs Excel
+            body: Por qué Excel empieza a quedarse corto cuando las cotizaciones entran en revisión y colaboración
           quotation_software_vs_erp:
-            title: Software de cotizaci?n vs ERP
-            body: El ERP sostiene la operaci?n; el software de cotizaci?n gestiona el avance y la colaboraci?n despu?s del env?o
+            title: Software de cotización vs ERP
+            body: El ERP sostiene la operación; el software de cotización gestiona el avance y la colaboración después del envío
           quick_export:
-            title: Exportaci?n r?pida de cotizaci?n
-            body: Completa la primera cotizaci?n m?s r?pido y luego entr?gala por enlace online, PDF o Excel seg?n haga falta
-        read_page: LEER P?GINA
+            title: Exportación rápida de cotización
+            body: Completa la primera cotización más rápido y luego entrégala por enlace online, PDF o Excel según haga falta
+        read_page: LEER PÁGINA
         final_cta:
           kicker: SIGUIENTE PASO
-          title: Empieza por el producto y luego sigue con la referencia adecuada.
-          body: Usa la p?gina principal para la visi?n general, el espacio de trabajo demo para la vista interna del equipo, o la cotizaci?n de ejemplo para la vista del comprador.
-          cta_homepage: P?gina principal
+          title: Everything for closing deals.
+          body: Haz que cada cotización avance más rápido hacia el siguiente paso.
+          cta_homepage: Página principal
           cta_demo: Ver espacio de trabajo demo
-          cta_sample: Ver cotizaci?n de ejemplo
+          cta_sample: Ver cotización de ejemplo
         path:
           kicker: RUTA SUGERIDA
-          title: Sigue esta secuencia para entenderlo m?s r?pido
-          slot_hint: 'Espacio: captura resumen de ruta de lectura'
+          title: Sigue esta secuencia para entenderlo más rápido
+          slot_hint: "Espacio: captura resumen de ruta de lectura"
           step_1:
-            title: Empieza con software de cotizaci?n para exportaci?n
-            body: Construye la visi?n completa de una ejecuci?n comercial impulsada por la cotizaci?n.
+            title: Empieza con software de cotización para exportación
+            body: Construye la visión completa de una ejecución comercial impulsada por la cotización.
           step_2:
             title: Sigue con control de revisiones
-            body: Mira c?mo revisiones, estados y contexto permanecen en un solo registro.
+            body: Mira cómo revisiones, estados y contexto permanecen en un solo registro.
           step_3:
-            title: Val?dalo en la cotizaci?n de ejemplo
+            title: Valídalo en la cotización de ejemplo
             body: Confirma la experiencia del comprador y el estilo de entrega.
       quote_revision_control:
         meta:
-          title: Control de revisiones de cotización | Historial de versiones claro | Rubusoo
-          description: Mantén un historial de versiones claro para tu equipo y tu cliente con un solo registro estructurado de cotización.
+          title: Control de revisiones de cotización | Rubusoo
+          description: Haz visible la versión más reciente, mantén los cambios del comprador dentro del registro de cotización y gestiona revisiones sin perder contexto después del envío.
         hero:
-          kicker: CONTROL DE REVISIONES DE COTIZACI?N
-          title: Gestiona revisiones de cotizaci?n con registros de versi?n claros
-          body: Haz visible la versi?n m?s reciente, mant?n los cambios del comprador en el registro de la cotizaci?n y reduce la confusi?n de versiones despu?s del env?o.
-          cta_demo: Ver espacio de trabajo de demostración
-          cta_sample: Ver cotización de muestra
+          kicker: CONTROL DE REVISIONES DE COTIZACIÓN
+          title: Gestiona revisiones de cotización con registros de versión claros
+          body: Haz visible la versión más reciente, mantén los cambios del comprador en el registro de cotización y reduce la confusión de versiones después del envío.
+          cta_demo: Ver espacio de trabajo demo
+          cta_sample: Ver cotización de ejemplo
         cards:
           current_version:
             label: Sepa cuál versión es la actual
@@ -2959,201 +2966,201 @@ es-419:
         comparison:
           before:
             title: Antes
-            body: Los equipos duplican archivos y pierden de vista qu? cotizaci?n est? revisando el comprador.
+            body: Los equipos duplican archivos y pierden de vista qué cotización está revisando el comprador.
           with_rubusoo:
             title: Con Rubusoo
-            body: Cada revisi?n permanece dentro de una misma familia de cotizaci?n con progreso y contexto visibles.
+            body: Cada revisión permanece dentro de un mismo registro de cotización con progreso y contexto visibles.
           result:
             title: Resultado
-            body: Negociaci?n m?s ?gil, menos errores de versi?n y decisiones de seguimiento m?s claras.
+            body: Negociación más ágil, menos errores de versión y decisiones de seguimiento más claras.
         version_switcher:
           aria_label: Versiones de cotización
           versions:
-          - key: v1
-            label: V1
-            date: Env?o original
-            panel_kicker: Registro de versión
-            title: Primera cotización enviada
-            badge: Enviada
-            badge_tone: is-neutral
-            current: false
-            fields:
-            - label: Precio unitario
-              value: USD 4.90
-              changed: false
-            - label: Cantidad
-              value: 10,000 pzas
-              changed: false
-            - label: Término de entrega
-              value: FOB Qingdao
-              changed: false
-            - label: Vigencia
-              value: 14 días
-              changed: false
-            timeline:
-            - title: Cotización creada
-              body: Productos, precios y términos quedaron en el primer registro de cotización.
-              time: 2 mar
-              emphasis: true
-            - title: Base de versión
-              body: Las revisiones futuras siguen conectadas a este punto de partida.
-              time: Registrado
-              emphasis: false
-          - key: v2
-            label: V2
-            date: El comprador pidi? cambios
-            panel_kicker: Registro de revisión
-            title: Los cambios del comprador quedan ligados a V2
-            badge: Revisión solicitada
-            badge_tone: is-neutral
-            current: false
-            fields:
-            - label: Precio unitario
-              value: USD 4.80
-              changed: true
-            - label: Cantidad
-              value: 12,000 pzas
-              changed: true
-            - label: Término de entrega
-              value: FOB Qingdao
-              changed: false
-            - label: Vigencia
-              value: 12 días
-              changed: true
-            timeline:
-            - title: El comprador pidió cambios
-              body: Los ajustes de precio y cantidad regresaron al mismo registro de cotización.
-              time: 4 mar
-              emphasis: true
-            - title: La revisión sigue conectada
-              body: El equipo todavía puede ver con claridad qué cambió respecto a V1.
-              time: Sincronizado
-              emphasis: false
-          - key: v3
-            label: V3
-            date: Versi?n actual
-            panel_kicker: VERSI?N ACTUAL
-            title: La revisi?n 3 es ahora la versi?n actual
-            badge: Actual
-            badge_tone: is-good
-            current: true
-            fields:
-            - label: Precio unitario
-              value: USD 4.65
-              changed: true
-            - label: Cantidad
-              value: 15,000 pzas
-              changed: true
-            - label: Condici?n de entrega
-              value: CFR Los Ángeles
-              changed: true
-            - label: Vigencia
-              value: 10 días
-              changed: true
-            timeline:
-            - title: Revisi?n 3 publicada
-              body: La ?ltima versi?n est? marcada como actual tanto para el equipo como para el comprador.
-              time: 6 mar
-              emphasis: true
-            - title: El seguimiento contin?a aqu?
-              body: La solicitud del comprador, los campos modificados y el siguiente paso permanecen en el mismo registro.
-              time: Listo
-              emphasis: false
+            - key: v1
+              label: V1
+              date: Envío original
+              panel_kicker: Registro de versión
+              title: Primera cotización enviada
+              badge: Enviada
+              badge_tone: is-neutral
+              current: false
+              fields:
+                - label: Precio unitario
+                  value: USD 4.90
+                  changed: false
+                - label: Cantidad
+                  value: 10,000 pzas
+                  changed: false
+                - label: Término de entrega
+                  value: FOB Qingdao
+                  changed: false
+                - label: Vigencia
+                  value: 14 días
+                  changed: false
+              timeline:
+                - title: Cotización creada
+                  body: Productos, precios y términos quedaron en el primer registro de cotización.
+                  time: 2 mar
+                  emphasis: true
+                - title: Base de versión
+                  body: Las revisiones futuras siguen conectadas a este punto de partida.
+                  time: Registrado
+                  emphasis: false
+            - key: v2
+              label: V2
+              date: El comprador pidió cambios
+              panel_kicker: Registro de revisión
+              title: Los cambios del comprador quedan ligados a V2
+              badge: Revisión solicitada
+              badge_tone: is-neutral
+              current: false
+              fields:
+                - label: Precio unitario
+                  value: USD 4.80
+                  changed: true
+                - label: Cantidad
+                  value: 12,000 pzas
+                  changed: true
+                - label: Término de entrega
+                  value: FOB Qingdao
+                  changed: false
+                - label: Vigencia
+                  value: 12 días
+                  changed: true
+              timeline:
+                - title: El comprador pidió cambios
+                  body: Los ajustes de precio y cantidad regresaron al mismo registro de cotización.
+                  time: 4 mar
+                  emphasis: true
+                - title: La revisión sigue conectada
+                  body: El equipo todavía puede ver con claridad qué cambió respecto a V1.
+                  time: Sincronizado
+                  emphasis: false
+            - key: v3
+              label: V3
+              date: Versión actual
+              panel_kicker: VERSIÓN ACTUAL
+              title: La revisión 3 es ahora la versión actual
+              badge: Actual
+              badge_tone: is-good
+              current: true
+              fields:
+                - label: Precio unitario
+                  value: USD 4.65
+                  changed: true
+                - label: Cantidad
+                  value: 15,000 pzas
+                  changed: true
+                - label: Condición de entrega
+                  value: CFR Los Ángeles
+                  changed: true
+                - label: Vigencia
+                  value: 10 días
+                  changed: true
+              timeline:
+                - title: Revisión 3 publicada
+                  body: La última versión está marcada como actual tanto para el equipo como para el comprador.
+                  time: 6 mar
+                  emphasis: true
+                - title: El seguimiento continúa aquí
+                  body: La solicitud del comprador, los campos modificados y el siguiente paso permanecen en el mismo registro.
+                  time: Listo
+                  emphasis: false
       buyer_facing_quotation_link:
         meta:
-          title: Cotización en línea compartida | Rubusoo
-          description: Comparta una sola página de cotización en línea donde el cliente pueda revisar, aceptar o solicitar revisiones sin intercambio de adjuntos.
+          title: Cotizaciones compartidas online | Rubusoo
+          description: Permite que los compradores revisen, acepten y pidan cambios desde una sola página de cotización. Mantén visible la versión actual y reduce el ida y vuelta de adjuntos.
         hero:
-          kicker: COTIZACI?N ONLINE COMPARTIDA
-          title: Reemplaza el ida y vuelta de adjuntos con cotizaciones online
-          body: Los compradores pueden ver, aceptar y pedir cambios en la misma p?gina en lugar de confirmar versiones por cadenas de correo.
+          kicker: COTIZACIÓN ONLINE COMPARTIDA
+          title: Reemplaza el ida y vuelta de adjuntos con una sola página de cotización compartida
+          body: Los compradores pueden revisar, aceptar y pedir cambios en la misma página en lugar de ordenar hilos de correo y adjuntos.
         cards:
           action:
-            label: LA ACCI?N DEL COMPRADOR OCURRE EN LA COTIZACI?N
-            body: El comprador puede aceptar la cotizaci?n o pedir una revisi?n desde la misma p?gina que est? revisando.
+            label: LA ACCIÓN DEL COMPRADOR OCURRE EN LA COTIZACIÓN
+            body: El comprador puede aceptar la cotización o pedir una revisión desde la misma página que está revisando.
           visibility:
-            label: LA VERSI?N M?S RECIENTE SIGUE VISIBLE
-            body: El comprador abre una sola p?gina de cotizaci?n en vivo en lugar de adivinar cu?l archivo es el actual.
+            label: LA VERSIÓN MÁS RECIENTE SIGUE VISIBLE
+            body: El comprador abre una sola página de cotización en vivo en lugar de adivinar cuál archivo es el actual.
           thread:
-            label: LA RESPUESTA VUELVE AL MISMO HILO
-            body: La retroalimentaci?n del cliente permanece en la cotizaci?n en lugar de dividirse entre cadenas de correo.
+            label: LAS RESPUESTAS PERMANECEN EN EL MISMO REGISTRO
+            body: La retroalimentación del cliente permanece en la cotización en lugar de dividirse entre cadenas de correo.
         actions:
-        - kicker: Paso 1
-          title: Abrir la cotización actual
-          body: El comprador entra en una sola página activa en lugar de revisar qué adjunto es el más reciente.
-        - kicker: Paso 2
-          title: Aceptar en la misma página
-          body: La revisión y la aceptación ocurren donde la cotización ya está visible.
-        - kicker: Paso 3
-          title: Pedir cambios sin salir
-          body: Las solicitudes de cambio vuelven al mismo registro de cotización en lugar de iniciar otro ciclo de archivos.
+          - kicker: Paso 1
+            title: Abrir la cotización actual
+            body: El comprador entra en una sola página activa en lugar de revisar qué adjunto es el más reciente.
+          - kicker: Paso 2
+            title: Aceptar en la misma página
+            body: La revisión y la aceptación ocurren donde la cotización ya está visible.
+          - kicker: Paso 3
+            title: Pedir cambios sin salir
+            body: Las solicitudes de cambio vuelven al mismo registro de cotización en lugar de iniciar otro ciclo de archivos.
         switcher:
-          kicker: CICLO CERRADO DE LA ACCI?N DEL COMPRADOR
-          title: Ve c?mo las acciones del comprador se convierten en estado interno del equipo
-          body: Alterna entre la p?gina del comprador y el registro interno para ver c?mo la cotizaci?n online mantiene alineados a ambos lados.
+          kicker: CICLO CERRADO DE LA ACCIÓN DEL COMPRADOR
+          title: Ve cómo las acciones del comprador se convierten en estado interno del equipo
+          body: Alterna entre la página del comprador y el registro interno para ver cómo la cotización online mantiene alineados a ambos lados.
           aria_label: Perspectivas de la cotización
         perspectives:
-        - key: buyer
-          label: Vista del comprador
-          summary: Revisar, aceptar o pedir cambios en una sola p?gina.
-          panel_kicker: P?GINA DEL COMPRADOR
-          title: El comprador trabaja en una sola p?gina de cotizaci?n en vivo
-          body: En lugar de confirmar versiones por correo, el comprador puede actuar en la misma p?gina donde la cotizaci?n ya est? visible.
-          chips:
-          - Ver versión actual
-          - Aceptar cotización
-          - Solicitar revisión
-          record_kicker: VISIBLE EN LA P?GINA
-          record_rows:
-          - label: Estado de la cotizaci?n
-            value: Versi?n actual visible
-            emphasis: true
-          - label: Acci?n del comprador
-            value: Revisi?n en la misma p?gina
-            emphasis: false
-          - label: Opci?n de exportaci?n
-            value: PDF disponible
-            emphasis: false
-        - key: team
-          label: Vista del equipo
-          summary: Las acciones del comprador regresan como estado, se?al y siguiente paso.
-          panel_kicker: Registro del equipo
-          title: Las acciones del comprador se convierten en contexto de seguimiento
-          body: Cuando el comprador pide cambios o acepta la cotización, la misma acción actualiza el registro interno y no se pierde en el correo.
-          chips:
-          - Revisión solicitada
-          - Comprador la vio
-          - Seguimiento listo
-          record_kicker: Actualizado en el registro
-          record_rows:
-          - label: Estado de cotización
-            value: Revisión solicitada
-            emphasis: true
-          - label: Actividad del comprador
-            value: Vista 18 min después del envío
-            emphasis: false
-          - label: Siguiente acción
-            value: Preparar Revisión 3
-            emphasis: true
+          - key: buyer
+            label: Vista del comprador
+            summary: Revisar, aceptar o pedir cambios en una sola página.
+            panel_kicker: PÁGINA DEL COMPRADOR
+            title: El comprador trabaja en una sola página de cotización en vivo
+            body: En lugar de confirmar versiones por correo, el comprador puede actuar en la misma página donde la cotización ya está visible.
+            chips:
+              - Ver versión actual
+              - Aceptar cotización
+              - Solicitar revisión
+            record_kicker: VISIBLE EN LA PÁGINA
+            record_rows:
+              - label: Estado de la cotización
+                value: Versión actual visible
+                emphasis: true
+              - label: Acción del comprador
+                value: Revisión en la misma página
+                emphasis: false
+              - label: Opción de exportación
+                value: PDF disponible
+                emphasis: false
+          - key: team
+            label: Vista del equipo
+            summary: Las acciones del comprador regresan como estado, señal y siguiente paso.
+            panel_kicker: Registro del equipo
+            title: Las acciones del comprador se convierten en contexto de seguimiento
+            body: Cuando el comprador pide cambios o acepta la cotización, la misma acción actualiza el registro interno y no se pierde en el correo.
+            chips:
+              - Revisión solicitada
+              - Comprador la vio
+              - Seguimiento listo
+            record_kicker: Actualizado en el registro
+            record_rows:
+              - label: Estado de cotización
+                value: Revisión solicitada
+                emphasis: true
+              - label: Actividad del comprador
+                value: Vista 18 min después del envío
+                emphasis: false
+              - label: Siguiente acción
+                value: Preparar Revisión 3
+                emphasis: true
         preview:
           sample:
             kicker: Vista del cliente
             title: Mira la página que realmente abre tu comprador
             body: Una cotización en línea estructurada facilita la revisión, la aprobación y las solicitudes de cambio con más claridad que los adjuntos por correo.
-            cta: Ver cotización de muestra
+            cta: Ver cotización de ejemplo
           internal:
             kicker: Vista del equipo
             title: Mira qué hace tu equipo después de la respuesta del comprador
             body: Rubusoo mantiene la respuesta, la revisión y la siguiente acción unidas al mismo registro de cotización.
-            cta: Ver demo
+            cta: Ver espacio de trabajo demo
       quotation_software_vs_excel:
         meta:
-          title: Software de Cotización vs Excel | Lo que se rompe después del envío | Rubusoo
-          description: Compare las cotizaciones en Excel con un software estructurado de cotizaciones una vez que los clientes empiezan a responder.
+          title: Software de cotización vs Excel | Rubusoo
+          description: "Excel sirve para archivos. Rubusoo sirve para el avance de la cotización después del envío: revisiones, respuesta del comprador, visibilidad de versión actual y seguimiento."
         hero:
-          kicker: SOFTWARE DE COTIZACI?N VS EXCEL
-          title: Cuando las cotizaciones entran en revisi?n y colaboraci?n, Excel empieza a quedarse corto
-          body: 'La diferencia real aparece despu?s del env?o: las revisiones, la respuesta del comprador y el seguimiento requieren un registro claro de cotizaci?n, no otra hoja de c?lculo.'
+          kicker: SOFTWARE DE COTIZACIÓN VS EXCEL
+          title: Cuando las cotizaciones entran en revisión y colaboración, Excel empieza a quedarse corto
+          body: "La diferencia real aparece después del envío: las revisiones, la respuesta del comprador y el seguimiento requieren un registro claro de cotización, no otra hoja de cálculo."
         table:
           headers:
             criteria: Criterio
@@ -3161,76 +3168,76 @@ es-419:
             rubusoo: Rubusoo
           rows:
             revision:
-              criteria: Revisiones de cotizaci?n
-              excel: Duplicaci?n manual de archivos y reenv?o
-              rubusoo: Control estructurado de revisiones dentro de una misma familia de cotizaci?n
+              criteria: Revisiones de cotización
+              excel: Duplicación manual de archivos y reenvío
+              rubusoo: Control estructurado de revisiones dentro de un mismo registro de cotización
             buyer_response:
               criteria: Respuesta del comprador
-              excel: La retroalimentaci?n regresa por correo y cadenas de archivos
-              rubusoo: El comprador puede aceptar o pedir revisi?n en la p?gina de la cotizaci?n
+              excel: La retroalimentación regresa por correo y cadenas de archivos
+              rubusoo: El comprador puede aceptar o pedir revisión en la página de la cotización
             visibility:
-              criteria: Visibilidad despu?s del env?o
-              excel: La ?ltima versi?n es f?cil de perder
-              rubusoo: La cotizaci?n actual se mantiene clara tanto para el equipo como para el comprador
+              criteria: Visibilidad después del envío
+              excel: La última versión es fácil de perder
+              rubusoo: La cotización actual se mantiene clara tanto para el equipo como para el comprador
             export:
               criteria: Continuidad del archivo
               excel: El archivo es el sistema
-              rubusoo: PDF y Excel siguen disponibles desde la misma fuente de cotizaci?n
+              rubusoo: PDF y Excel siguen disponibles desde la misma fuente de cotización
         cards:
           buyer_flow:
             title: Ve la vista del comprador
-            body: Mira c?mo una sola p?gina de cotizaci?n en vivo reemplaza los ciclos de adjuntos y las respuestas dispersas del comprador.
-            cta: Ver cotizaci?n de ejemplo
+            body: Mira cómo una sola página de cotización en vivo reemplaza los ciclos de adjuntos y las respuestas dispersas del comprador.
+            cta: Ver cotización de ejemplo
           internal_workflow:
-            title: Ve la vista del equipo detr?s de eso
+            title: Ve la vista del equipo detrás de eso
             body: Abre la vista del espacio de trabajo para revisar el estado de revisiones, la actividad del cliente y el siguiente paso recomendado en una sola vista.
-            cta: Abrir espacio de trabajo demo
+            cta: Ver espacio de trabajo demo
         preview:
           kicker: Comparación visual
           title: Un registro vivo frente a la cadena de adjuntos
           body: Espacio reservado para comparar captura de flujo por archivos vs flujo con registro en línea.
-          slot_hint: 'Espacio: captura cotización en línea vs adjuntos'
+          slot_hint: "Espacio: captura cotización en línea vs adjuntos"
       foreign_trade_quotation_software:
         meta:
-          title: Software de Cotización de Comercio Exterior | Sistema de Gestión de Cotizaciones de Exportación | Rubusoo
-          description: Software de cotizaciones para equipos B2B de exportación con control de revisiones, visibilidad para el cliente y gestión del seguimiento.
+          title: Software de cotización para equipos de exportación | Rubusoo
+          description: Mantén productos, precios, condiciones, revisiones y cambios del comprador en un solo registro de cotización. Comparte online y sigue exportando en PDF o Excel cuando haga falta.
         hero:
-          kicker: SOFTWARE DE COTIZACI?N PARA EXPORTACI?N
-          title: Software de cotizaci?n para equipos B2B de exportaci?n
-          body: Mant?n productos, precios y condiciones en un solo registro de cotizaci?n. Los cambios del comprador permanecen en el mismo lugar, mientras que las exportaciones en PDF y Excel siguen disponibles.
-          cta_demo: Ver espacio de trabajo de demostración
-          cta_sample: Ver cotización de muestra
+          kicker: SOFTWARE DE COTIZACIÓN PARA EXPORTACIÓN
+          title: Software de cotización para equipos B2B de exportación
+          body: Mantén productos, precios y condiciones en un solo registro de cotización. Los cambios del comprador permanecen en el mismo lugar, mientras que las exportaciones en PDF y Excel siguen disponibles.
+          cta_demo: Ver espacio de trabajo demo
+          cta_sample: Ver cotización de ejemplo
         cards:
           revision:
             label: CONTROL CLARO DE VERSIONES
-            body: Cada revisi?n permanece en el mismo registro de cotizaci?n, para que la versi?n actual siempre est? clara para el equipo.
+            body: Cada revisión permanece en el mismo registro de cotización, para que la versión actual siempre esté clara para el equipo.
           buyer:
-            label: MUESTRA AL COMPRADOR LA ?LTIMA COTIZACI?N
-            body: Env?a un solo enlace de cotizaci?n online para que el cliente siempre abra la versi?n m?s reciente y no un adjunto anterior.
+            label: MUESTRA AL COMPRADOR LA ÚLTIMA COTIZACIÓN
+            body: Envía un solo enlace de cotización online para que el cliente siempre abra la versión más reciente y no un adjunto anterior.
           exports:
             label: PDF Y EXCEL CUANDO SE NECESITEN
-            body: Los archivos exportados siguen disponibles sin convertirse en el sistema principal para dar seguimiento a la cotizaci?n.
+            body: Los archivos exportados siguen disponibles sin convertirse en el sistema principal para dar seguimiento a la cotización.
         workflow:
           step_1:
-            title: Crea la cotizaci?n en un solo registro estructurado
-            body: Re?ne productos, precios, especificaciones y condiciones comerciales en un solo registro de cotizaci?n que se puede revisar sin empezar de nuevo.
+            title: Crea la cotización en un solo registro estructurado
+            body: Reúne productos, precios, especificaciones y condiciones comerciales en un solo registro de cotización que se puede revisar sin empezar de nuevo.
           step_2:
-            title: Revisa la misma cotizaci?n cuando el comprador pida cambios
-            body: Los cambios de precio, ajustes de especificaciones y solicitudes del cliente permanecen ligados a la cotizaci?n en lugar de generar otra cadena de archivos.
+            title: Revisa la misma cotización cuando el comprador pida cambios
+            body: Los cambios de precio, ajustes de especificaciones y solicitudes del cliente permanecen ligados a la cotización en lugar de generar otra cadena de archivos.
           step_3:
-            title: Comp?rtela online y exporta archivos cuando haga falta
-            body: El cliente puede revisar la cotizaci?n m?s reciente online, mientras tu equipo todav?a puede enviar archivos PDF o Excel cuando lo necesite.
+            title: Compártela online y exporta archivos cuando haga falta
+            body: El cliente puede revisar la cotización más reciente online, mientras tu equipo todavía puede enviar archivos PDF o Excel cuando lo necesite.
         preview:
-          kicker: VISTA EN VIVO DE LA COTIZACI?N
-          title: Ve la cotizaci?n actual en una sola p?gina
-          body: El contenido de la cotizaci?n, la versi?n actual, los datos del comprador y el historial de revisiones permanecen juntos en una sola p?gina en lugar de quedar repartidos entre archivos y chats.
-          slot_hint: 'Espacio: captura demo workspace'
+          kicker: VISTA EN VIVO DE LA COTIZACIÓN
+          title: Ve la cotización actual en una sola página
+          body: El contenido de la cotización, la versión actual, los datos del comprador y el historial de revisiones permanecen juntos en una sola página en lugar de quedar repartidos entre archivos y chats.
+          slot_hint: "Espacio: captura demo workspace"
         next:
           kicker: TEMAS RELACIONADOS
           title: Explora el siguiente tema relevante
-          cta_revision: Control de revisiones de cotizaci?n
+          cta_revision: Control de revisiones de cotización
           cta_buyer: Cotizaciones compartidas online
-          cta_vs_excel: Software de cotizaci?n vs Excel
+          cta_vs_excel: Software de cotización vs Excel
         signals:
           primary_gain:
             label: Beneficio principal
@@ -3255,30 +3262,30 @@ es-419:
           faq: Preguntas Frecuentes
       quotation_software_vs_erp:
         meta:
-          title: Software de cotización vs ERP | Dónde encaja el flujo de cotización | Rubusoo
-          description: Vea dónde termina el ERP y dónde empieza el trabajo real de ejecutar, revisar y dar seguimiento a una cotización.
+          title: Software de cotización vs ERP | Rubusoo
+          description: "El ERP sostiene la operación. El software de cotización se enfoca en el avance de la cotización antes del handoff: visibilidad, revisiones, respuesta del comprador y seguimiento."
         hero:
-          kicker: SOFTWARE DE COTIZACI?N VS ERP
-          title: El ERP sostiene la operaci?n; el software de cotizaci?n mueve el avance de la cotizaci?n
-          body: 'El ERP est? hecho para pedidos, finanzas, inventario y operaciones internas. Rubusoo gestiona lo que ocurre despu?s de enviar la cotizaci?n: visualizaci?n, revisiones y seguimiento.'
+          kicker: SOFTWARE DE COTIZACIÓN VS ERP
+          title: El ERP sostiene la operación; el software de cotización mueve el avance de la cotización
+          body: "El ERP está hecho para pedidos, finanzas, inventario y operaciones internas. Rubusoo gestiona lo que ocurre después de enviar la cotización: visualización, revisiones, respuesta del comprador y seguimiento."
         panels:
           erp:
             kicker: ERP
             title: Hecho para registros y control operativo
-            body: El ERP es ?til para inventario, compras, finanzas, aprobaciones y control de procesos internos.
+            body: El ERP es útil para inventario, compras, finanzas, aprobaciones y control de procesos internos.
           rubusoo:
             kicker: RUBUSOO
-            title: Hecho para la cotizaci?n mientras sigue en movimiento
-            body: Mant?n visible la versi?n actual, comparte una sola cotizaci?n online, recibe solicitudes de cambio del comprador y da seguimiento desde el mismo registro de cotizaci?n.
+            title: Hecho para la cotización mientras sigue en movimiento
+            body: Mantén visible la versión actual, comparte una sola cotización online, recibe solicitudes de cambio del comprador y da seguimiento desde el mismo registro de cotización.
           model:
             kicker: MODELO DE TRABAJO
-            title: Use ambos sin forzar a uno a hacer todo
-            body: No todos los equipos necesitan un ERP primero. Para muchos equipos peque?os de exportaci?n, es m?s pr?ctico ordenar el avance de la cotizaci?n antes de adoptar un sistema m?s pesado.
+            title: No todos los equipos necesitan un ERP primero.
+            body: No todos los equipos necesitan un ERP primero. Para muchos equipos pequeños de exportación, es más práctico ordenar el avance de la cotización antes de adoptar un sistema más pesado.
         preview:
-          kicker: CAPA DE EJECUCI?N DE LA COTIZACI?N
-          title: Ve con claridad la capa de avance de la cotizaci?n
-          body: Las acciones del comprador, la versi?n actual y el estado del seguimiento permanecen en un solo registro de cotizaci?n en lugar de quedar dispersos entre archivos y handoffs.
-          slot_hint: 'Espacio: captura capa de ejecución'
+          kicker: CAPA DE EJECUCIÓN DE LA COTIZACIÓN
+          title: Ve con claridad la capa de avance de la cotización
+          body: Las acciones del comprador, la versión actual y el estado del seguimiento permanecen en un solo registro de cotización en lugar de quedar dispersos entre archivos y handoffs.
+          slot_hint: "Espacio: captura capa de ejecución"
         fit:
           workflow_layer:
             label: Mejor uso
@@ -3286,7 +3293,7 @@ es-419:
           keep_using_erp:
             label: Mantenga el ERP para
             body: Pedidos, finanzas, inventario y el registro operativo más amplio.
-        cta_foreign_trade: Software de cotización de comercio exterior
+        cta_foreign_trade: Software de cotización para exportación
         cta_vs_excel: Cotización vs Excel
         spreadsheet_problems:
           title: Problemas con la cotización basada en hojas de cálculo
@@ -3388,7 +3395,7 @@ es-419:
           kicker: CRM DE COTIZACIONES PARA EXPORTACIÓN
           title: Un CRM de cotización para equipos de exportación
           body: Mantenga revisiones de cotización, vistas del comprador y seguimiento dentro del mismo registro del cliente para que ventas siempre sepa qué pasó y qué sigue.
-          cta_demo: Ver espacio de trabajo de demostración
+          cta_demo: Ver espacio de trabajo demo
           cta_resources: Ver recursos
           summary: Un CRM de cotizaciones para equipos de exportación debe respaldar la ejecución de la cotización, el seguimiento del cliente y el avance comercial, no solo el registro.
           paragraph_1: Rubusoo integra control de revisiones, cotización en línea y gestión del seguimiento para equipos de ventas de exportación.
@@ -3396,8 +3403,8 @@ es-419:
           proof_1: CRM de cotizaciones con control de revisiones
           proof_2: Acceso a cotizaciones para el comprador
           proof_3: Seguimiento vinculado al estado de la cotización
-          start_free: Empezar Gratis
-          view_demo: Ver Demostración
+          start_free: Comenzar gratis
+          view_demo: Ver espacio de trabajo demo
         signals:
           timeline:
             label: Historial del cliente
@@ -3424,7 +3431,7 @@ es-419:
           kicker: CRM en acción
           title: Línea de tiempo del cliente y estado de cotización en una vista
           body: Espacio reservado para mostrar quién vio, cuándo se revisó y qué acción sigue.
-          slot_hint: 'Espacio: captura timeline/revisión/estado'
+          slot_hint: "Espacio: captura timeline/revisión/estado"
         toc:
           title: En esta página
           workflow_matters: Por qué un proceso claro importa en la cotización de exportación
@@ -3474,7 +3481,7 @@ es-419:
           title: Continúa con páginas que muestran cómo se conectan el CRM de cotizaciones, las revisiones y la visibilidad para el comprador.
           cta_vs_erp: Software de cotización vs ERP
           cta_vs_excel: Software de cotización vs Excel
-          cta_foreign_trade: Software de cotización de comercio exterior
+          cta_foreign_trade: Software de cotización para exportación
           item_2: Utilice una cadencia de recordatorios vinculada a los eventos de revisión.
           item_3: Rastree claramente el estado de las cotizaciones enviadas, pendientes y actualizadas.
           item_4: Dé a los gerentes una visibilidad más clara de lo que pasa en cada oportunidad.
@@ -3500,7 +3507,7 @@ es-419:
         faq:
           title: Preguntas Frecuentes
           q1: "¿En qué se diferencia un CRM de cotizaciones para equipos de exportación de un CRM normal?"
-          a1: 'Se centra en la ejecución de cotizaciones: revisiones, visibilidad del comprador y seguimiento directamente vinculados al progreso de la cotización.'
+          a1: "Se centra en la ejecución de cotizaciones: revisiones, visibilidad del comprador y seguimiento directamente vinculados al progreso de la cotización."
           q2: "¿Rubusoo admite el control de revisiones de cotizaciones para negociaciones activas?"
           a2: Sí. Las revisiones se registran con una secuencia clara para que el equipo pueda gestionar los cambios del comprador con seguridad.
           q3: "¿Pueden los compradores ver las cotizaciones a través de un enlace de cotización para el comprador?"
@@ -3511,16 +3518,19 @@ es-419:
           title: Mejore la ejecución de cotizaciones y el impulso comercial
           body: Usa un CRM de cotizaciones para exportación con mejor control de revisiones, visibilidad para el cliente y seguimiento en un solo sistema.
       quick_export_quotation:
+        meta:
+          title: Exportación rápida de cotización | Rubusoo
+          description: Completa la primera cotización más rápido, mantén activo el registro online y sigue entregando PDF o Excel según haga falta.
         hero:
-          kicker: EXPORTACI?N R?PIDA DE COTIZACI?N
-          title: Termina la primera cotizaci?n m?s r?pido y luego entr?gala seg?n el caso
-          body: Mant?n el registro de la cotizaci?n activo online y sigue exportando PDF y Excel cuando haga falta. Cada comprador puede recibir el formato que mejor le funcione.
+          kicker: EXPORTACIÓN RÁPIDA DE COTIZACIÓN
+          title: Termina la primera cotización más rápido y luego entrégala en el formato adecuado
+          body: Mantén el registro de cotización activo online y sigue exportando PDF y Excel cuando haga falta. Cada comprador puede recibir el formato que mejor le funcione.
         showcase:
-          kicker: OPCIONES DE EXPORTACI?N
+          kicker: OPCIONES DE EXPORTACIÓN
           title: PDF y Excel siguen disponibles
-          body: Una sola cotizaci?n puede servir al mismo tiempo para la revisi?n del comprador, el traspaso interno y la entrega basada en archivos. Las plantillas de exportaci?n tambi?n se pueden ajustar seg?n tu flujo real de trabajo.
-          pdf_title: Cotizaci?n en PDF
-          excel_title: Cotizaci?n en Excel
+          body: Una sola cotización puede servir al mismo tiempo para la revisión del comprador, el traspaso interno y la entrega basada en archivos. Las plantillas de exportación también se pueden ajustar según tu flujo real de trabajo.
+          pdf_title: Cotización en PDF
+          excel_title: Cotización en Excel
   shortcuts:
     title: Atajos de teclado
     close: Cerrar

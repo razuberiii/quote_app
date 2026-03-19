@@ -25,16 +25,22 @@ class ApplicationController < ActionController::Base
   end
 
   def default_url_options
-    return {} if I18n.locale.to_s == I18n.default_locale.to_s
+    locale = I18n.locale.to_s
+    return { locale: locale } if locale_path_enabled_controller?
+    return {} if locale == I18n.default_locale.to_s
 
-    { locale: I18n.locale }
+    { locale: locale }
+  end
+
+  def locale_path_enabled_controller?
+    controller_path.in?([ "landing", "seo", "contact_requests", "sitemaps" ])
   end
 
   def locale_nav_items
     [
       { locale: :en, label: "English", short_label: "EN" },
       { locale: :"zh-CN", label: "简体中文", short_label: "中文" },
-      { locale: :"es-419", label: "Espanol (LatAm)", short_label: "ES" }
+      { locale: :"es-419", label: "Español (LatAm)", short_label: "ES" }
     ]
   end
 

@@ -2417,6 +2417,12 @@ zh-CN:
           team_size: 团队规模
           team_size_placeholder: 例如 5-20 人
           inquiry_type: 咨询类型
+          inquiry_type_options:
+            general: 常规咨询
+            product_question: 产品咨询
+            demo_request: 演示申请
+            partnership: 合作咨询
+            other: 其他
           message: 留言
           message_placeholder: 告诉我们你现在的报价流程、常见问题，以及正在使用的工具。
           website: 网站
@@ -2484,6 +2490,7 @@ zh-CN:
         pdf_excel_available: 仍可导出 PDF/Excel
         view_demo_workspace: 查看演示工作台
         start_for_free: 免费开始
+        contact_us: 联系我们
         buyer_actions: 买家操作
         accept_quote: 接受报价
         request_revision: 请求修订
@@ -2545,7 +2552,7 @@ zh-CN:
       hero:
         kicker: 面向外贸业务员和小团队的报价软件
         title: 让报价成为推动成交的起点。
-        body: Rubusoo 不做重 CRM / ERP，而是围绕报价，把查看、修订、跟进和状态推进组织在同一条清晰记录里。
+        body: Rubusoo 不做重 CRM / ERP，而是围绕报价，把查看、修订、跟进和状态推进收拢在同一条清晰记录里。
         helper: 适合经常报价、反复改价、需要持续跟进买家反馈的外贸 SOHO 与小团队
         preview_shell_title: 产品预览
         preview_slots:
@@ -2564,7 +2571,7 @@ zh-CN:
         cta_support: 无需注册，先看完整流程
       flow_showcase:
         kicker: 发送之后，流程仍在一条线上
-        title: 报价不是一个文件，而是一条可持续推进的记录
+        title: 报价不是一个文件，而是一条持续推进的记录
         body: 查看、修订、跟进都回到同一条报价记录，不再在附件和聊天里来回找上一次。
         aria_label: 报价推进步骤
         steps:
@@ -2897,7 +2904,7 @@ zh-CN:
           description: 浏览 Rubusoo 的核心资料页，围绕“报价驱动成交”理解页面与流程设计。
         hero:
           kicker: 资源
-          title: 围绕“报价驱动成交”的核心资料
+          title: 报价驱动成交
           body: 从报价发出后的关键动作入手：查看、修订、状态推进、跟进与复盘。
         cards:
           foreign_trade_quotation_software:
@@ -2930,7 +2937,7 @@ zh-CN:
           cta_sample: 查看示例报价
         path:
           kicker: 推荐阅读路径
-          title: 更快理解 Rubusoo 的三个关键页面
+          title: 快速上手
           step_1:
             title: 为什么报价不该只是附件
             body: 建立“报价驱动成交”的整体认知。
@@ -2952,7 +2959,7 @@ zh-CN:
           description: 支持在线链接、PDF、Excel 三种交付方式，帮助团队更快发出第一版报价并持续推进。
         hero:
           kicker: 快速导出报价单
-          title: 更快完成第一版报价，再按场景交付
+          title: 更快完成第一版报价，再按需要交付
           body: 报价记录保持在线可推进，同时保留 PDF 和 Excel 导出，发给不同客户都更顺手。
         showcase:
           kicker: 导出方式
@@ -3090,7 +3097,7 @@ zh-CN:
         hero:
           kicker: 在线共享报价
           title: 用在线报价替代附件往返
-          body: 买家查看、接受和请求修改都在同一页面完成，不再靠邮件线程确认哪一版。
+          body: 买家查看、接受和请求修改都在同一页面完成，不再靠邮件往来确认哪一版。
         cards:
           action:
             label: 买家动作就在报价页上发生
@@ -3282,8 +3289,8 @@ zh-CN:
           description: ERP 与报价软件不是互斥关系。看清分工，才能把报价到成交这段做顺。
         hero:
           kicker: 报价软件 vs ERP
-          title: ERP 负责底盘，报价软件负责成交前推进
-          body: 对小团队来说，先把报价推进做顺，比先上重流程更关键。Rubusoo 聚焦发送后的查看、修订、跟进与状态管理。
+          title: ERP 负责底盘，报价软件负责成交前这段推进
+          body: 对小团队来说，先把报价这段流程做顺，比先上重流程更现实。Rubusoo 聚焦发送后的查看、修订、跟进与状态管理。
         panels:
           erp:
             kicker: ERP

@@ -22,8 +22,10 @@ class ContactMailer < ApplicationMailer
 
   def inquiry_label(type)
     case type
-    when "vip" then "VIP"
-    when "support" then "Support"
+    when "product_question" then "Product question"
+    when "demo_request" then "Demo request"
+    when "partnership" then "Partnership"
+    when "other" then "Other"
     else "General"
     end
   end

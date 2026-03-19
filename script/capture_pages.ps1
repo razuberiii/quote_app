@@ -1,4 +1,4 @@
-#  .\script\capture_pages.ps1 -LoginEmail "710006009@qq.com" -LoginPassword "123456" -Locale "zh-CN/en/es-419"
+#  .\script\capture_pages.ps1 -LoginEmail "710006009@qq.com" -LoginPassword "123456" -Locale "zh-CN"
 param(
   [string]$BaseUrl = "http://127.0.0.1:3000",
   [string]$LoginEmail = "",
@@ -29,7 +29,7 @@ $routesFile = "tmp/routes_for_screenshots_manual.txt"
 $pathsFile = "tmp/screenshot_paths_manual.txt"
 $runnerFile = "tmp/capture_pages_runner.js"
 
-rails routes | Out-File -Encoding utf8 $routesFile
+bundle exec rails routes | Out-File -Encoding utf8 $routesFile
 
 $paths = @()
 Get-Content $routesFile | ForEach-Object {
@@ -37,6 +37,8 @@ Get-Content $routesFile | ForEach-Object {
     $uri = $matches[1]
     $uri = ($uri -split "\{")[0]
     $uri = $uri -replace "\(\.:format\)", ""
+    $uri = $uri -replace "^\(/:locale\)", ""
+    if ($uri -eq "/:locale") { $uri = "/" }
 
     if ([string]::IsNullOrWhiteSpace($uri)) { return }
     if ($uri -notmatch "^/") { return }
@@ -98,7 +100,7 @@ end
 puts JSON.generate(paths.uniq)
 '@
 Set-Content -Encoding UTF8 $dynamicRunnerFile $dynamicRunnerCode
-$dynamicJson = rails runner $dynamicRunnerFile
+$dynamicJson = bundle exec rails runner $dynamicRunnerFile
 if (-not [string]::IsNullOrWhiteSpace($dynamicJson)) {
   $dynamicPaths = @()
   try {
@@ -138,8 +140,32 @@ const { chromium } = require('playwright');
   const page = await context.newPage();
 
   const log = (line) => fs.appendFileSync(logFile, line + '\n');
+  const PUBLIC_LOCALE_PATHS = new Set([
+    '/',
+    '/demo',
+    '/contact',
+    '/sample-quote',
+    '/foreign-trade-quotation-software',
+    '/quote-revision-control',
+    '/buyer-facing-quotation-link',
+    '/quotation-software-vs-excel',
+    '/quotation-software-vs-erp',
+    '/quick-export-quotation',
+    '/resources'
+  ]);
+
   const withLocale = (route) => {
     if (!captureLocale) return route;
+    const qIdx = route.indexOf('?');
+    const pathname = qIdx >= 0 ? route.slice(0, qIdx) : route;
+    const query = qIdx >= 0 ? route.slice(qIdx) : '';
+
+    if (PUBLIC_LOCALE_PATHS.has(pathname)) {
+      const localePrefix = `/${captureLocale}`;
+      if (pathname === '/') return `${localePrefix}${query}`;
+      return `${localePrefix}${pathname}${query}`;
+    }
+
     const separator = route.includes('?') ? '&' : '?';
     return `${route}${separator}locale=${encodeURIComponent(captureLocale)}`;
   };

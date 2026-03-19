@@ -82,7 +82,7 @@ en:
     template: Template
     team: Team
     admin: Admin
-    start_free: Start Free
+    start_free: Start free
     login: Login
   account:
     menu: Account
@@ -2402,8 +2402,8 @@ en:
         resources: Resources
         contact: Contact
     homepage:
-      meta_title: Rubusoo | Quote management software for export teams
-      meta_description: Rubusoo gives export teams structured quote management from first send through revision, buyer response, and follow-up.
+      meta_title: Rubusoo | Export quotation software for closing deals
+      meta_description: Rubusoo helps export teams manage quotes, revisions, buyer response, and follow-up in one clear record. Share online, keep version control, and still export PDF or Excel.
       workflow_steps:
         - number: "01"
           title: Create a structured quote
@@ -2423,13 +2423,13 @@ en:
           emphasis: false
       capability_cards:
         - title: Revision control
-          body: Keep every version in one quote family so the current one stays obvious.
-        - title: Online quote link
-          body: Replace attachment churn with one quote page buyers can review and respond to.
-        - title: Customer timeline
-          body: Keep views, revision requests, and follow-up timing linked to the same quote record.
+          body: Keep every version in one quote record so the current version is always clear.
+        - title: Shared online quote
+          body: Replace attachment back-and-forth with one live quote page buyers can review and respond to.
+        - title: Buyer activity
+          body: Keep views, revision requests, and follow-up activity tied to the same quote record.
         - title: PDF and Excel exports
-          body: Export the files your team needs without losing track of the latest quote.
+          body: Export the files your team needs without losing track of the latest version.
       context_cards:
         - title: Viewed 18 min after send
           body: Buyer activity appears on the customer timeline with the quote attached.
@@ -2441,20 +2441,20 @@ en:
         - source: Quote detail
           signal: Revision V3 became current 2 hours ago
           decision: Rep replies from the latest version, not an old file.
-          cta: Open demo workspace
+          cta: View demo workspace
         - source: Shared quote
           signal: Buyer can accept or request revision on the quote page
           decision: Buyer responses stay tied to the quote.
           cta: View sample quote
-        - source: Customer timeline
+        - source: Buyer activity
           signal: Viewed, revised, and reminded events are timestamped
           decision: Team knows who needs contact now.
           cta: See customer context
       hero:
         kicker: QUOTATION MANAGEMENT FOR EXPORT TEAMS
         title: Make every quote the starting point of a deal.
-        body: Rubusoo is not heavy CRM or ERP. It keeps quote views, revisions, follow-up, versioning, and status progress in one clear record.
-        helper: Built for export teams that send, revise, and follow up on quotes every day.
+        body: Rubusoo keeps quotes, revisions, buyer response, and follow-up in one clear record instead of scattering progress across files and threads.
+        helper: Built for export teams that send quotes, manage changes, and keep deals moving every day.
         preview_shell_title: Product Preview
         preview_slots:
           - label: Demo Workspace
@@ -2472,8 +2472,8 @@ en:
         cta_support: No signup required. See the full flow first.
       flow_showcase:
         kicker: ONE RECORD AFTER SEND
-        title: See how quote progress stays on the same record after send
-        body: Move through the same quotation record as buyer activity, revision requests, and follow-up keep updating the workspace view.
+        title: See how quote progress stays on the same record after sending
+        body: Move through the same quote record as buyer activity, revision requests, and follow-up continue to update the team view.
         aria_label: Quote progress steps
         steps:
           - key: sent
@@ -2557,7 +2557,7 @@ en:
           - key: revision
             step: "03"
             title: Request revision
-            body: The buyer asks for changes, and the request comes back to the same quotation record.
+            body: The buyer asks for changes, and the request comes back to the same quote record.
             quote_title: QT-2026-0240 / Revision requested
             badge: Revision requested
             badge_tone: is-neutral
@@ -2596,7 +2596,7 @@ en:
           - key: follow_up
             step: "04"
             title: Sales follow-up
-            body: Revision 3 becomes current, and the team knows what changed and what to do next.
+            body: The latest revision becomes current, and the team knows what changed and what to do next.
             quote_title: QT-2026-0240 / Revision 3
             badge: Follow-up ready
             badge_tone: is-good
@@ -2695,7 +2695,7 @@ en:
           title: Now
           items:
             - Buyers always see the current version
-            - Revision requests stay on the same quotation record
+            - Revision requests stay on the same quote record
             - Views, revisions, and follow-up actions stay on one timeline
       workflow:
         kicker: How it works
@@ -2741,9 +2741,9 @@ en:
         kicker: Customer context
         title: Quote activity linked to the customer record.
         body: Review sends, views, revisions, and reminders in one view so follow-up is based on the current commercial context.
-        cta_demo: Open demo workspace
-        cta_sample: See sample quote
-        card_kicker: Customer timeline
+        cta_demo: View demo workspace
+        cta_sample: View sample quote
+        card_kicker: Buyer activity
       fit:
         title: A good fit for teams like this
         items:
@@ -2754,13 +2754,13 @@ en:
         title: FAQ
         items:
           - question: "Do buyers need to log in?"
-            answer: "No. You can share one online quote link so the buyer can review and respond directly."
+            answer: "No. Buyers can open the shared quote link directly and review the latest version without creating an account."
           - question: "Can we still export PDF or Excel?"
-            answer: "Yes. PDF and Excel remain available. You can send files when needed, or keep the quote online and share the live page instead."
+            answer: "Yes. PDF and Excel stay available whenever your workflow requires file delivery."
           - question: "Does this replace ERP?"
-            answer: "No. Rubusoo is not ERP, and it does not require ERP first. It is better suited to the part where quotes are viewed, revised, and followed up before the order is finalized."
+            answer: "No. Rubusoo focuses on quote progress before handoff: sharing, revisions, buyer response, and follow-up."
           - question: "What teams is this best for?"
-            answer: "It fits export teams that quote often, revise often, and need buyer feedback and follow-up to stay attached to the same quote record."
+            answer: "It is best for export teams that manage quotes actively and need clearer progress after sending."
       proof:
         kicker: Proof snapshots
         title: Evidence from real product states, not feature claims.
@@ -2773,21 +2773,21 @@ en:
         cta_revision: Quote revision control
         cta_vs_excel: Vs Excel
       final_cta:
-        title: Review the product, then continue with the relevant view.
-        body: Use the homepage for the overview, the demo for the internal workspace view, or the sample quote for the customer-facing view.
-        cta_demo: Open demo workspace
+        title: Everything for closing deals.
+        body: Move every quote forward with clearer revisions, buyer response, and follow-up in one place.
+        cta_demo: View demo workspace
         cta_sample: View sample quote
         cta_contact: Contact us
     view:
       demo:
-        meta_title: Rubusoo Demo | Quote Management Workspace
-        meta_description: Explore the Rubusoo demo workspace for quote revisions, buyer activity, and post-send follow-up workflows.
+        meta_title: Demo workspace | Rubusoo
+        meta_description: See how quote revisions, buyer activity, follow-up items, and status changes are managed in Rubusoo after a quote is sent.
         kicker: DEMO WORKSPACE
         title: Rubusoo demo workspace
-        subtitle: This simplified demo presents how quote revisions, buyer activity, follow-up items, and status changes are managed after send.
-        page_is_label: "What this page is:"
-        page_is_body: an internal workspace preview for your sales team.
-        buyer_view_label: "Buyer view:"
+        subtitle: This simplified demo shows how quote revisions, buyer activity, follow-up items, and status changes are managed after a quote is sent.
+        page_is_label: "What this page shows:"
+        page_is_body: an internal workspace preview for your team.
+        buyer_view_label: "For the buyer-facing view,"
         buyer_view_prefix: open the
         sample_quote_page: sample quote page
         note: All names and numbers on this page are fictional examples created for product presentation.
@@ -2813,27 +2813,28 @@ en:
           won: Won
         signals_kicker: ACTIVITY
         deal_overview: Deal summary
-        one_account_workspace: One account workspace
+        one_account_workspace: One account overview
         top_product: "Top Product:"
         average_quote_cycle: "Average Quote Cycle:"
         revision_rate: "Revision Rate:"
         export_mix: "Export Mix:"
-        start_free_trial: Start Free Trial
-        open_sample_quote: Open Sample Quote
+        start_free_trial: Start free
+        open_sample_quote: View sample quote
       sample_quote:
-        meta_title: Rubusoo Sample Quote | Public Quote Example
-        meta_description: View a sample online quote from Rubusoo, including buyer and seller details, line items, and payment terms.
+        meta_title: Sample shared quote | Rubusoo
+        meta_description: See a buyer-facing shared quote page with current version visibility, accept/revision actions, and PDF-ready delivery structure.
         kicker: PUBLIC QUOTE EXAMPLE
         title: Sample shared quote
-        subtitle: This page presents a sample online quote published by Rubusoo. It is a static example rather than a live negotiation.
+        subtitle: This page shows a sample online quote published by Rubusoo. It is a static example, not a live negotiation.
         preview_label: "Live buyer experience preview:"
         preview_body: this is the page your buyer opens.
         preview_supporting: Use it to review terms, approve, or request a revision without attachment loops.
         buyer_can_accept: Buyer can accept
         buyer_can_request_revision: Buyer can request revision
         pdf_excel_available: PDF/Excel still available
-        view_demo_workspace: View Demo Workspace
-        start_for_free: Start for Free
+        view_demo_workspace: View demo workspace
+        start_for_free: Start free
+        contact_us: Contact us
         buyer_actions: BUYER ACTIONS
         accept_quote: Accept quote
         request_revision: Request revision
@@ -2845,25 +2846,31 @@ en:
         print: Print
       contact:
         hero:
-          title: Discuss your quoting process with Rubusoo.
-          body: Tell us what you're solving, and we'll point you in the right direction.
-          subtitle: Review whether Rubusoo fits your export sales workflow, revision volume, and follow-up requirements.
-          kicker: Contact
-        meta_description: Discuss your quoting process with Rubusoo and evaluate whether structured quote management fits your export team.
+          title: Talk to us about your quoting workflow
+          body: Tell us what you are trying to improve, and we will point you in the right direction.
+          subtitle: Tell us how your quoting workflow works today, what is slowing your team down, and what tools you are using.
+          kicker: CONTACT
+        meta_description: Tell us how your quoting workflow works today, what is slowing the team down, and what you want to improve.
         form:
           company: Company
           demo_cta: View demo
           email: Email
           inquiry_type: Inquiry type
+          inquiry_type_options:
+            general: General
+            product_question: Product question
+            demo_request: Demo request
+            partnership: Partnership
+            other: Other
           message: Message
-          message_placeholder: Tell us how your quote process works today, what is slowing the team down, and what tools you are using.
+          message_placeholder: Tell us how your quoting workflow works today, what is slowing your team down, and what tools you are using.
           name: Name
           sending: Sending...
           submit: Send message
           team_size: Team size
-          team_size_placeholder: e.g. 5-20
+          team_size_placeholder: e.g. 5–20
           website: Website
-        meta_title: Contact Rubusoo
+        meta_title: Contact Rubusoo | Discuss your quoting workflow
         turnstile:
           body: Complete the security check before sending your message.
           close: Close verification
@@ -2883,7 +2890,7 @@ en:
         links:
           quote_revision_control: Quote revision control
           buyer_facing_quotation_link: Shared online quotations
-          foreign_trade_quotation_software: Foreign trade quotation software
+          foreign_trade_quotation_software: Export quotation software
           quotation_software_vs_excel: Quotation software vs Excel
           quotation_software_vs_erp: Quotation software vs ERP
           quotation_crm_for_export_teams: Quote CRM for export teams
@@ -2892,10 +2899,10 @@ en:
       resources:
         meta:
           title: Resources | Rubusoo
-          description: Explore Rubusoo resources on quote revisions, shared online quotes, and quote management for export teams.
+          description: Learn how to manage quote revisions, buyer response, shared quote pages, and follow-up without losing progress after sending.
         hero:
           kicker: RESOURCES
-          title: Resources on revisions, buyer response, and follow-up
+          title: Revisions, buyer response, and follow-up
           body: "Start with the parts that usually break after sending a quote: revisions, buyer feedback, file handoff, and follow-up."
         cards:
           foreign_trade_quotation_software:
@@ -2919,46 +2926,46 @@ en:
         read_page: Read page
         final_cta:
           kicker: NEXT STEP
-          title: Start with the product, then continue with the relevant reference.
-          body: Use the homepage for the overview, the demo workspace for the internal workspace view, or the sample quote for the customer-facing view.
+          title: Bring the ideas back to the product.
+          body: See how quote revisions, buyer response, and follow-up work together in one flow.
           cta_homepage: Homepage
           cta_demo: View demo workspace
           cta_sample: View sample quote
         path:
           kicker: SUGGESTED PATH
-          title: Follow this sequence for a faster understanding
+          title: Faster understanding
           slot_hint: "Slot: reading path overview screenshot"
           step_1:
-            title: Start with export quote software
+            title: Export quote software
             body: Build the full picture of quote-driven deal execution.
           step_2:
-            title: Continue with revision control
+            title: Revision control
             body: See how revisions, statuses, and context stay on one record.
           step_3:
-            title: Validate in sample quote
+            title: Sample quote
             body: Confirm the buyer-side experience and delivery style.
       quick_export_quotation:
         meta:
-          title: Quick Export Quotation | PDF / Excel / Online Delivery | Rubusoo
-          description: Finish the first quote faster, then deliver by online link, PDF, or Excel based on the buyer scenario.
+          title: Quick export quotation | Rubusoo
+          description: Create the first quote fast, keep the quote record active online, and still deliver PDF or Excel when different buyers need different formats.
         hero:
           kicker: QUICK EXPORT QUOTATION
-          title: Finish the first quote faster, then deliver it by scenario
+          title: Finish the first quote faster, then deliver it in the format that fits
           body: Keep the quote record active online while still exporting PDF and Excel when needed. Different buyers can receive the format that fits them best.
         showcase:
           kicker: EXPORT OPTIONS
-          title: PDF and Excel both stay available
+          title: PDF and Excel remain available
           body: One quote can serve buyer review, internal handoff, and file-based delivery at the same time. Export templates can also be adjusted for your actual workflow.
           pdf_title: PDF quotation
           excel_title: Excel quotation
       quote_revision_control:
         meta:
-          title: Quote Revision Control | Clear Version History | Rubusoo
-          description: Maintain a clear version history for your team and your customer with one structured quote record.
+          title: Quote revision control | Rubusoo
+          description: Keep the current version clear, store buyer changes on the quote record, and manage revisions without losing context after sending.
         hero:
           kicker: QUOTE REVISION CONTROL
-          title: Manage quotation revisions with clear version records
-          body: Make the latest version obvious, keep buyer changes on the quotation record, and reduce version confusion after sending.
+          title: Manage quote revisions with clear version history
+          body: Make the latest version obvious, keep buyer changes on the quote record, and reduce version confusion after sending.
           cta_demo: View demo workspace
           cta_sample: View sample quote
         cards:
@@ -2977,7 +2984,7 @@ en:
             body: Teams duplicate files and lose track of which quote the buyer is reviewing.
           with_rubusoo:
             title: With Rubusoo
-            body: Each revision stays in one quote family with visible progression and context.
+            body: Each revision stays in one quote record with clear progression and context.
           result:
             title: Result
             body: Faster negotiation, fewer version errors, and clearer follow-up decisions.
@@ -3076,12 +3083,12 @@ en:
                   emphasis: false
       buyer_facing_quotation_link:
         meta:
-          title: Shared Online Quote | Live Quote Sharing | Rubusoo
-          description: Share one online quote page where customers can review, accept, or request revisions without attachment back-and-forth.
+          title: Shared online quotations | Rubusoo
+          description: Let buyers review, accept, and request changes on one shared quote page. Keep the latest version visible and reduce attachment back-and-forth.
         hero:
           kicker: SHARED ONLINE QUOTE
-          title: Replace attachment back-and-forth with online quotations
-          body: Buyers can view, accept, and request changes on the same page instead of confirming versions through email threads.
+          title: Replace attachment back-and-forth with one shared quote page
+          body: Buyers can review, accept, and request changes on the same page instead of sorting through email threads and attachments.
         cards:
           action:
             label: BUYER ACTION HAPPENS ON THE QUOTE
@@ -3090,8 +3097,8 @@ en:
             label: THE LATEST VERSION STAYS VISIBLE
             body: The buyer opens one live quote page instead of guessing which file is current.
           thread:
-            label: RESPONSE RETURNS TO THE SAME THREAD
-            body: Customer feedback stays with the quote instead of splitting across email threads.
+            label: RESPONSES STAY ON THE SAME RECORD
+            body: Customer feedback stays with the quote instead of getting split across email threads.
         actions:
           - kicker: Step 1
             title: Open the current quote
@@ -3112,7 +3119,7 @@ en:
             label: Buyer view
             summary: Review, accept, or request changes on one page.
             panel_kicker: BUYER PAGE
-            title: The buyer works on one live quotation page
+            title: The buyer works on one live quote page
             body: Instead of confirming versions over email, the buyer can act on the same page where the quote is already visible.
             chips:
               - View current version
@@ -3131,7 +3138,7 @@ en:
                 emphasis: false
           - key: team
             label: Team view
-            summary: Buyer actions return as status, signal, and next step.
+            summary: Buyer actions return as visible status, context, and next step.
             panel_kicker: Team record
             title: Buyer actions turn into follow-up context for the team
             body: Once the buyer requests a change or accepts the quote, the same action updates the internal record instead of getting buried in a mailbox.
@@ -3160,15 +3167,15 @@ en:
             kicker: Team view
             title: See what your team does after the buyer responds
             body: Rubusoo keeps response, revision, and next action tied to the same quote record.
-            cta: Open demo workspace
+            cta: View demo workspace
       quotation_software_vs_excel:
         meta:
-          title: Quotation Software vs Excel | What Breaks After Send | Rubusoo
-          description: Compare Excel-based quoting with structured quote software once customers begin responding.
+          title: Quotation software vs Excel | Rubusoo
+          description: "Excel works for files. Rubusoo works for quote progress after sending: revisions, buyer response, current version visibility, and follow-up."
         hero:
           kicker: QUOTATION SOFTWARE VS EXCEL
-          title: Once quotations enter revision and collaboration, Excel starts to struggle
-          body: "The real difference appears after sending: revisions, buyer response, and follow-up require a clear quotation record, not another spreadsheet file."
+          title: Once quotes enter revision and collaboration, Excel starts to break down
+          body: "The real friction starts after sending: revisions, buyer response, and follow-up need a clear quote record, not another spreadsheet file."
         table:
           headers:
             criteria: Criteria
@@ -3178,7 +3185,7 @@ en:
             revision:
               criteria: Quote revisions
               excel: Manual file duplication and resend
-              rubusoo: Structured revision control inside one quote family
+              rubusoo: Structured revision control inside one quote record
             buyer_response:
               criteria: Buyer response
               excel: Feedback returns through email and file threads
@@ -3189,17 +3196,17 @@ en:
               rubusoo: The current quote stays clear for both team and buyer
             export:
               criteria: File continuity
-              excel: The file is the system
+              excel: The file becomes the system
               rubusoo: PDF and Excel stay available from the same quote source
         cards:
           buyer_flow:
-            title: Show the customer view
+            title: See the buyer-facing quote page
             body: Review how one live quote page replaces attachment loops and scattered buyer replies.
             cta: View sample quote
           internal_workflow:
-            title: See the team view behind it
+            title: See the internal team view
             body: Open the workspace view to review revision status, customer activity, and the recommended next step in one view.
-            cta: Open demo workspace
+            cta: View demo workspace
         preview:
           kicker: Side-by-side view
           title: One quote record vs attachment chains
@@ -3207,30 +3214,30 @@ en:
           slot_hint: "Slot: online quote vs attachment screenshot"
       foreign_trade_quotation_software:
         meta:
-          title: Export Quote Software | Quote Management for B2B Teams | Rubusoo
-          description: Quote software for B2B export teams with revision control, buyer visibility, and follow-up management.
+          title: Export quotation software for B2B teams | Rubusoo
+          description: Keep products, pricing, terms, revisions, and buyer changes in one quote record. Share online and still export PDF or Excel when needed.
         hero:
-          kicker: EXPORT QUOTE MANAGEMENT
-          title: Export quotation software for B2B teams
-          body: Keep products, pricing, and terms in one quotation record. Buyer changes stay in place, while PDF and Excel exports remain available.
+          kicker: EXPORT QUOTATION SOFTWARE
+          title: Export quotation software for teams that close deals through quotes
+          body: Keep products, pricing, terms, revisions, and buyer changes in one quote record. Share online, keep version control, and still export PDF or Excel when needed.
           cta_demo: View demo workspace
           cta_sample: View sample quote
         cards:
           revision:
             label: CLEAR VERSION CONTROL
-            body: Each revision remains on the same quote record, so the current version is always clear to the team.
+            body: Each revision stays on the same quote record, so the current version is always clear.
           buyer:
             label: SHOW BUYERS THE LATEST QUOTE
-            body: Send one online quote link so customers always open the latest version instead of an old attachment.
+            body: Send one online quote link so buyers always open the latest version instead of an old attachment.
           exports:
             label: PDF AND EXCEL WHEN REQUIRED
-            body: Export files remain available without becoming the primary system for quote progress.
+            body: Export files remain available without becoming the system of record for quote progress.
         workflow:
           step_1:
             title: Build the quote in one structured record
             body: Combine products, pricing, specifications, and trade terms in one quote record that can be revised without restarting.
           step_2:
-            title: Revise on the same quote when buyers ask for changes
+            title: Revise the same quote when buyers ask for changes
             body: Price changes, specification edits, and customer requests remain attached to the quote instead of generating another file chain.
           step_3:
             title: Share it online and export files when needed
@@ -3270,12 +3277,12 @@ en:
           faq: FAQ
       quotation_software_vs_erp:
         meta:
-          title: Quotation Software vs ERP | Where Quote Workflow Fits | Rubusoo
-          description: See where ERP ends and day-to-day quote execution begins for export teams managing revisions, buyer updates, and follow-up.
+          title: Quotation software vs ERP | Rubusoo
+          description: "ERP runs operations. Rubusoo runs quote progress before handoff: sharing, revisions, buyer response, and follow-up."
         hero:
           kicker: QUOTATION SOFTWARE VS ERP
-          title: ERP runs the business backbone; quotation software runs quote progress
-          body: "ERP is built for orders, finance, inventory, and internal operations. Rubusoo handles what happens after the quote is sent: viewing, revisions, and follow-up."
+          title: ERP runs operations. Quotation software runs quote progress.
+          body: "ERP is built for orders, finance, inventory, and internal operations. Rubusoo handles what happens after the quote is sent: viewing, revisions, buyer response, and follow-up."
         panels:
           erp:
             kicker: ERP
@@ -3283,12 +3290,12 @@ en:
             body: ERP is useful for inventory, purchasing, finance, approvals, and internal process control.
           rubusoo:
             kicker: Rubusoo
-            title: Built for the quote while it is still moving
+            title: Built for the quote while the deal is still moving
             body: Keep the current version visible, share one online quote, collect buyer change requests, and follow up from the same quote record.
           model:
             kicker: WORKING MODEL
-            title: Use both without forcing one tool to do everything
-            body: Not every team needs ERP first. For many small export teams, it is more practical to make quote progress clear before adopting a heavier system.
+            title: Not every team needs an ERP first.
+            body: For many small export teams, it is more practical to make quote progress clear before adopting a heavier system.
         preview:
           kicker: QUOTE EXECUTION LAYER
           title: See the quote progress layer clearly
@@ -3301,7 +3308,7 @@ en:
           keep_using_erp:
             label: Keep ERP for
             body: Orders, finance, inventory, and the wider operating record.
-        cta_foreign_trade: Foreign trade quotation software
+        cta_foreign_trade: Export quotation software
         cta_vs_excel: Quotation software vs Excel
         spreadsheet_problems:
           title: Problems with Spreadsheet-based Quoting
@@ -3365,7 +3372,7 @@ en:
           summary: Export teams need a clear quote process, not more file management overhead.
           paragraph: Professional export quotation software should combine speed, control, and revision clarity in one workspace.
           item_1: Reliable quote revision control with visible version history.
-          item_2: Online quote links that always show the latest approved version.
+          item_2: Shared online quotes that always show the latest approved version.
           item_3: Fast quote editing for cross-border negotiation cycles.
           item_4: Export-ready PDF/Excel output for approvals and operations.
           closing: Teams perform more consistently when these requirements are handled in one quote management system.
@@ -3384,7 +3391,7 @@ en:
           closing: This gives B2B export teams stronger quote control, clearer customer coordination, and more consistent execution.
         faq:
           title: FAQ
-          q1: Can small export teams adopt foreign trade quotation software without long setup?
+          q1: Can small export teams adopt export quotation software without long setup?
           a1: Yes. Rubusoo is designed for lean export teams and can be adopted without a long implementation cycle.
           q2: Is Rubusoo a spreadsheet alternative for export teams replacing Excel quoting?
           a2: Yes. It replaces file-based quote tracking with structured quote revision control and clearer buyer updates.
@@ -3411,17 +3418,17 @@ en:
           proof_1: Revision-aware CRM
           proof_2: Shared quote access
           proof_3: Follow-up tied to quote state
-          start_free: Start Free
-          view_demo: View Demo
+          start_free: Start free
+          view_demo: View demo workspace
         signals:
           timeline:
-            label: Customer timeline
+            label: Buyer activity
             body: Viewed 18 minutes after send, so sales can pick up follow-up with the right timing.
           activity:
-            label: Customer timeline
+            label: Buyer activity
             body: Revision requested on V2, without digging through attachments or inbox threads.
           execution:
-            label: Customer timeline
+            label: Buyer activity
             body: Today's reminder and next action are visible in the same customer record.
           crm_role:
             label: CRM role
@@ -3437,7 +3444,7 @@ en:
             detail: Sales activity stays connected to what is actually happening in the quote lifecycle.
         preview:
           kicker: CRM in action
-          title: Customer timeline and quote status in one view
+          title: Buyer activity and quote status in one view
           body: Reserved slot to show who viewed, when revisions happened, and what to do next.
           slot_hint: "Slot: customer timeline/revision/status screenshot"
         toc:
@@ -3489,7 +3496,7 @@ en:
           title: Keep going with pages that show how quote CRM, revisions, and buyer visibility work together.
           cta_vs_erp: Quotation software vs ERP
           cta_vs_excel: Quotation software vs Excel
-          cta_foreign_trade: Foreign trade quotation software
+          cta_foreign_trade: Export quotation software
           item_2: Use reminder cadence linked to revision events.
           item_3: Track sent, pending, and updated quote state clearly.
           item_4: Give managers a clearer view across opportunities.
@@ -3502,7 +3509,7 @@ en:
           item_1_detail: built for cross-border sales teams.
           item_2_label: Quote revision control
           item_2_detail: a visible timeline that keeps the team aligned.
-          item_3_label: Online quote link
+          item_3_label: Shared online quote
           item_3_detail: latest version visibility with low friction.
           item_4_label: Follow-up for export sales
           item_4_detail: follow-up tied to quote status.

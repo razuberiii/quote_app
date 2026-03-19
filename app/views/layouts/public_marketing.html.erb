@@ -29,7 +29,7 @@
       <nav class="navbar">
         <div class="navbar-container">
           <div class="navbar-brand-wrap">
-            <h1><%= link_to t("landing.shared.brand"), root_path %></h1>
+            <h1><%= link_to t("landing.shared.brand"), localized_root_path(locale: I18n.locale) %></h1>
           </div>
 
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-marketing-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
@@ -39,7 +39,7 @@
           </button>
 
           <ul class="navbar-menu navbar-menu-public" id="public-marketing-navigation">
-            <li><%= link_to t("landing.shared.navigation.product"), root_path(anchor: "product-story") %></li>
+            <li><%= link_to t("landing.shared.navigation.product"), localized_root_path(locale: I18n.locale, anchor: "product-story") %></li>
             <li><%= link_to t("landing.shared.navigation.resources"), resources_path %></li>
             <li><%= link_to t("landing.shared.navigation.contact"), contact_path %></li>
           </ul>
@@ -72,7 +72,7 @@
               <%= t("landing.shared.footer.tagline") %>
             </p>
             <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-              <%= link_to t("landing.shared.footer.homepage"), root_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
+              <%= link_to t("landing.shared.footer.homepage"), localized_root_path(locale: I18n.locale), class: "text-slate-600 no-underline transition hover:text-slate-950" %>
               <%= link_to t("landing.shared.footer.demo"), demo_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
               <%= link_to t("landing.shared.footer.sample_quote"), sample_quote_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>
               <%= link_to t("landing.shared.footer.resources"), resources_path, class: "text-slate-600 no-underline transition hover:text-slate-950" %>

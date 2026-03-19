@@ -36,7 +36,7 @@ class ContactRequestsController < ApplicationController
   private
 
   def source_page_path
-    params[:source_page] == "contact" ? contact_path : root_path
+    params[:source_page] == "contact" ? contact_path : localized_root_path(locale: I18n.locale)
   end
 
   def render_contact_error(status)

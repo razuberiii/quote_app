@@ -1,6 +1,6 @@
 default: &default
   homepage:
-    path_helper: root_url
+    path_helper: localized_root_url
     title_key: landing.homepage.meta_title
     description_key: landing.homepage.meta_description
     changefreq: daily

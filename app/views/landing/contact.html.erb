@@ -152,7 +152,7 @@
 
       <div class="grid gap-2">
         <%= f.label :inquiry_type, t("landing.view.contact.form.inquiry_type"), class: "app-stat-label" %>
-        <%= f.select :inquiry_type, ContactRequest::INQUIRY_TYPES.map { |type| [type.titleize, type] }, {}, class: ui_input_classes("w-full") %>
+        <%= f.select :inquiry_type, ContactRequest::INQUIRY_TYPES.map { |type| [t("landing.view.contact.form.inquiry_type_options.#{type}"), type] }, {}, class: ui_input_classes("w-full") %>
       </div>
 
       <div class="grid gap-2">

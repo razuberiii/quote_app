@@ -90,7 +90,7 @@
         </p>
       </div>
       <div class="flex flex-wrap gap-3">
-        <%= render "components/ui/button", href: root_path, variant: :secondary do %>
+        <%= render "components/ui/button", href: localized_root_path(locale: I18n.locale), variant: :secondary do %>
           <%= t("seo.view.resources.final_cta.cta_homepage") %>
         <% end %>
         <%= render "components/ui/button", href: demo_path, variant: :secondary do %>

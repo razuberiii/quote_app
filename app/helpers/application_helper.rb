@@ -16,7 +16,11 @@ module ApplicationHelper
   def seo_canonical_url
     return content_for(:canonical_url) if content_for?(:canonical_url)
     if @seo_page&.path_helper.present? && respond_to?(@seo_page.path_helper)
-      return public_send(@seo_page.path_helper)
+      begin
+        return public_send(@seo_page.path_helper, locale: I18n.locale)
+      rescue ArgumentError, ActionController::UrlGenerationError
+        return public_send(@seo_page.path_helper)
+      end
     end
     return unless request.present?
 

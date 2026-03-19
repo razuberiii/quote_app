@@ -2,7 +2,7 @@ class ContactRequest
   include ActiveModel::Model
   include ActiveModel::Attributes
 
-  INQUIRY_TYPES = %w[general vip support].freeze
+  INQUIRY_TYPES = %w[general product_question demo_request partnership other].freeze
 
   attribute :name, :string
   attribute :email, :string

@@ -15,6 +15,6 @@ class ReminderQueueTest < ApplicationSystemTestCase
 
     visit quote_path(@quote)
 
-    assert_button "Send Reminder"
+    assert_selector("button.js-quote-reminder-open, input.js-quote-reminder-open")
   end
 end

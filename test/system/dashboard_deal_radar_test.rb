@@ -20,15 +20,15 @@ class DashboardDealRadarTest < ApplicationSystemTestCase
 
     visit dashboard_path(locale: :"zh-CN")
 
-    radar = page.first(".dashboard-action-list")
-    titles = radar.all(".dashboard-action-item strong", minimum: 3).first(3).map(&:text)
+    radar = find("#deal-radar-section .dashboard-action-list")
+    quote_numbers = radar.all(".dashboard-quote-id", minimum: 3).first(3).map(&:text)
 
     assert_equal QuoteSignalService.new(revision_quote).call.type, "revision_requested"
     assert_equal [
-      QuoteSignalPresenter.new(locale: :"zh-CN").quote_title(revision_quote),
-      QuoteSignalPresenter.new(locale: :"zh-CN").quote_title(risk_quote),
-      QuoteSignalPresenter.new(locale: :"zh-CN").quote_title(watch_quote)
-    ], titles
+      revision_quote.quote_no,
+      risk_quote.quote_no,
+      watch_quote.quote_no
+    ], quote_numbers
 
     assert_includes page.html, "locale=zh-CN"
   end

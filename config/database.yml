@@ -98,8 +98,12 @@ production:
     username: <%= ENV.fetch("DB_USERNAME", "quote_app") %>
     password: <%= if ENV["SECRET_KEY_BASE_DUMMY"].present?
                     "build-time-placeholder"
+                  elsif ENV["POSTGRES_PASSWORD"].to_s != "" || ENV["DB_PASSWORD"].to_s != ""
+                    ENV["POSTGRES_PASSWORD"].to_s != "" ? ENV["POSTGRES_PASSWORD"] : ENV["DB_PASSWORD"]
+                  elsif defined?(Rails) && !Rails.env.production?
+                    "non-production-placeholder"
                   else
-                    ENV.fetch("POSTGRES_PASSWORD") { ENV.fetch("DB_PASSWORD") }
+                    raise KeyError, "Missing POSTGRES_PASSWORD/DB_PASSWORD for production database config"
                   end %>
   cache:
     <<: *primary_production

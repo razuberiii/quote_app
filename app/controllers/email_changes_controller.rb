@@ -34,8 +34,8 @@ class EmailChangesController < ApplicationController
     if EmailChangeService.generate_and_send(
       @user,
       new_email,
-      host: request.host_with_port,
-      protocol: request.scheme.to_sym
+      host: trusted_public_url_options[:host],
+      protocol: trusted_public_url_options[:protocol].to_sym
     )
       render json: {
         success: true,

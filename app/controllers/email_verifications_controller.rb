@@ -69,7 +69,7 @@ class EmailVerificationsController < ApplicationController
 
     # Generate and send verification email
     service = EmailVerificationService.new(user)
-    if service.send_verification_email(request.host_with_port, request.scheme.to_sym)
+    if service.send_verification_email(trusted_public_url_options[:host], trusted_public_url_options[:protocol].to_sym)
       render json: {
         success: true,
         message: current_user.present? ? t("email_verifications.flash.sent_to", email: user.email) : t("email_verifications.flash.generic_sent"),

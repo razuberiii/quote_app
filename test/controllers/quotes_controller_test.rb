@@ -47,6 +47,24 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_match(%r{/public/quote_shares/}, payload["url"])
   end
 
+  test "share json uses trusted configured host when present" do
+    previous_host = ENV["APP_HOST"]
+    previous_protocol = ENV["RAILS_PROTOCOL"]
+    ENV["APP_HOST"] = "trusted.example.com"
+    ENV["RAILS_PROTOCOL"] = "https"
+
+    assert_difference("QuoteShare.count", 1) do
+      post share_quote_url(@quote, format: :json)
+    end
+
+    assert_response :success
+    payload = JSON.parse(response.body)
+    assert_match(%r{\Ahttps://trusted\.example\.com/public/quote_shares/}, payload["url"])
+  ensure
+    ENV["APP_HOST"] = previous_host
+    ENV["RAILS_PROTOCOL"] = previous_protocol
+  end
+
   test "send reminder delivers email and updates counters" do
     @quote.customer.update!(email: "buyer@example.com")
     @quote.company.update!(
@@ -57,27 +75,34 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     @quote.update!(status: "sent", sent_at: 3.days.ago, viewed_at: nil)
 
     previous_skip = ENV["SKIP_TURNSTILE_VERIFICATION"]
+    previous_host = ENV["APP_HOST"]
+    previous_protocol = ENV["RAILS_PROTOCOL"]
     ENV["SKIP_TURNSTILE_VERIFICATION"] = "true"
+    ENV["APP_HOST"] = "trusted.example.com"
+    ENV["RAILS_PROTOCOL"] = "https"
     begin
       assert_emails 1 do
         post send_reminder_quote_url(@quote)
       end
+
+      assert_redirected_to quote_url(@quote)
+      @quote.reload
+      email = ActionMailer::Base.deliveries.last
+      assert_equal "Follow up: #{@quote.quote_no}", email.subject
+      assert_includes email.body.encoded, "Hello #{@quote.customer.name}, please review #{@quote.quote_no} from #{@quote.company.name}."
+      assert_includes email.body.encoded, "Review quote"
+      assert_includes email.body.encoded, "https://trusted.example.com/public/quote_shares/"
+      assert_equal 1, @quote.reminder_count
+      assert @quote.reminder_sent_at.present?
     ensure
       if previous_skip.nil?
         ENV.delete("SKIP_TURNSTILE_VERIFICATION")
       else
         ENV["SKIP_TURNSTILE_VERIFICATION"] = previous_skip
       end
+      ENV["APP_HOST"] = previous_host
+      ENV["RAILS_PROTOCOL"] = previous_protocol
     end
-
-    assert_redirected_to quote_url(@quote)
-    @quote.reload
-    email = ActionMailer::Base.deliveries.last
-    assert_equal "Follow up: #{@quote.quote_no}", email.subject
-    assert_includes email.body.encoded, "Hello #{@quote.customer.name}, please review #{@quote.quote_no} from #{@quote.company.name}."
-    assert_includes email.body.encoded, "Review quote"
-    assert_equal 1, @quote.reminder_count
-    assert @quote.reminder_sent_at.present?
   end
 
   test "update_outcome_reason updates win reason for won quote" do

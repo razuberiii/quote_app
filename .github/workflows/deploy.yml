@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: .ruby-version
+          bundler-cache: true
+
+      - name: Validate deploy host is not localhost
+        shell: bash
+        run: |
+          if grep -qE '^\s*-\s*127\.0\.0\.1\s*$' config/deploy.yml; then
+            echo "config/deploy.yml still points to 127.0.0.1. Update servers.web host before CI deploy."
+            exit 1
+          fi
+
+      - name: Start SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure known_hosts
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: Deploy with Kamal
+        env:
+          KAMAL_REGISTRY_PASSWORD: ${{ secrets.KAMAL_REGISTRY_PASSWORD }}
+          RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          MAILER_FROM: ${{ secrets.MAILER_FROM }}
+          LANDING_CONTACT_EMAIL: ${{ secrets.LANDING_CONTACT_EMAIL }}
+          LANDING_CONTACT_EMAIL_DEV: ${{ secrets.LANDING_CONTACT_EMAIL_DEV }}
+          TURNSTILE_SITE_KEY: ${{ secrets.TURNSTILE_SITE_KEY }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
+        run: bundle exec kamal deploy

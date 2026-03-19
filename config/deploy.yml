@@ -7,7 +7,7 @@ image: razuberiii/quote_app
 # Deploy to these servers.
 servers:
   web:
-    - 127.0.0.1
+    - 15.152.158.88
   # job:
   #   hosts:
   #     - 192.168.0.1

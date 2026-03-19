@@ -8,8 +8,9 @@ module Users
         service = EmailVerificationService.new(resource)
         auto_send_state = "failed"
         cooldown_seconds = EmailVerificationService.seconds_until_resend_allowed(resource)
+        url_options = trusted_public_url_options
 
-        if service.send_verification_email(request.host_with_port, request.scheme.to_sym)
+        if service.send_verification_email(url_options[:host], url_options[:protocol].to_sym)
           auto_send_state = "sent"
           cooldown_seconds = EmailVerificationService::RESEND_COOLDOWN_SECONDS
         else

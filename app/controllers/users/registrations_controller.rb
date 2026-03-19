@@ -55,7 +55,8 @@ module Users
       return unless resource.persisted?
 
       service = EmailVerificationService.new(resource)
-      service.send_verification_email(request.host_with_port, request.scheme.to_sym)
+      url_options = trusted_public_url_options
+      service.send_verification_email(url_options[:host], url_options[:protocol].to_sym)
     end
 
     def successful_new_user_registration?

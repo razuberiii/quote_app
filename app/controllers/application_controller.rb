@@ -36,6 +36,24 @@ class ApplicationController < ActionController::Base
     controller_path.in?([ "landing", "seo", "contact_requests", "sitemaps" ])
   end
 
+  def trusted_public_url_options
+    configured = Rails.application.config.action_mailer.default_url_options || {}
+    host = ENV["APP_HOST"].presence || configured[:host].presence
+    protocol = ENV["RAILS_PROTOCOL"].presence || configured[:protocol].presence
+    protocol = protocol.to_s.delete_suffix("://").presence || (Rails.env.production? ? "https" : request.protocol.delete_suffix("://"))
+
+    if host.present?
+      options = { host: host, protocol: protocol }
+      configured_port = configured[:port].presence
+      if configured_port.present? && !default_port_for_protocol?(configured_port, protocol)
+        options[:port] = configured_port
+      end
+      return options
+    end
+
+    { host: request.host, protocol: request.protocol.delete_suffix("://"), port: request.optional_port }
+  end
+
   def locale_nav_items
     [
       { locale: :en, label: "English", short_label: "EN" },
@@ -143,5 +161,13 @@ class ApplicationController < ActionController::Base
     b = hex[4..5].to_i(16)
     yiq = (r * 299 + g * 587 + b * 114) / 1000
     yiq >= 150 ? "#0f172a" : "#ffffff"
+  end
+
+  def default_port_for_protocol?(port, protocol)
+    normalized_port = port.to_i
+    return true if protocol == "https" && normalized_port == 443
+    return true if protocol == "http" && normalized_port == 80
+
+    false
   end
 end

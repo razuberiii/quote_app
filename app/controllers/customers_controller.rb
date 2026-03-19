@@ -463,11 +463,7 @@ class CustomersController < ApplicationController
   end
 
   def follow_up_url_options
-    {
-      host: request.host,
-      protocol: request.protocol.delete_suffix("://"),
-      port: request.optional_port
-    }
+    trusted_public_url_options
   end
 
   def set_customer

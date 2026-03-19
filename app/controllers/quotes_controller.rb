@@ -258,7 +258,7 @@ class QuotesController < ApplicationController
     publish_result = QuoteSharePublisher.new(
       @quote,
       document_kind: resolved_document_kind,
-      url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
+      url_options: trusted_public_url_options
     ).call
     share_url = publish_result.url
     mark_quote_as_sent_if_needed!
@@ -297,7 +297,7 @@ class QuotesController < ApplicationController
     QuoteReminderSender.new(
       @quote,
       document_kind: resolved_document_kind,
-      url_options: { host: request.host, port: request.optional_port, protocol: request.protocol.delete_suffix("://") }
+      url_options: trusted_public_url_options
     ).call
     redirect_to quote_path(@quote), status: :see_other, notice: t("quotes.flash.reminder_sent")
   rescue StandardError => e

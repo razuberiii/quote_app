@@ -96,7 +96,7 @@ production:
     host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
     username: <%= ENV.fetch("DB_USERNAME", "quote_app") %>
-    password: <%= ENV.fetch("POSTGRES_PASSWORD", ENV.fetch("DB_PASSWORD", "710006")) %>
+    password: <%= ENV.fetch("POSTGRES_PASSWORD") { ENV.fetch("DB_PASSWORD") } %>
   cache:
     <<: *primary_production
     database: quote_app_production_cache

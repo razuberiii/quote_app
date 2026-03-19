@@ -444,6 +444,70 @@
         padding-left: 0.03in !important;
         color: #7b8794 !important;
       }
+      .pdf-render .quote-inline-old {
+        text-decoration: line-through !important;
+        color: #7b8794 !important;
+      }
+      .pdf-render .quote-inline-new {
+        color: #222 !important;
+        font-weight: 600 !important;
+      }
+      .pdf-render .quote-diff-stack {
+        display: inline-flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+        gap: 0.02in !important;
+        line-height: 1.2 !important;
+      }
+      .pdf-render .quote-diff-old {
+        text-decoration: line-through !important;
+        color: #95a2b4 !important;
+        font-size: 8.6px !important;
+        font-weight: 500 !important;
+      }
+      .pdf-render .quote-diff-new,
+      .pdf-render .quote-diff-current {
+        color: #222 !important;
+        font-weight: 600 !important;
+      }
+      .pdf-render .quote-inline-flag {
+        display: inline !important;
+        margin-left: 0.03in !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        font-size: 8.8px !important;
+        line-height: 1.3 !important;
+        color: #738195 !important;
+        text-transform: lowercase !important;
+        letter-spacing: 0.01em !important;
+        font-weight: 600 !important;
+      }
+      .pdf-render .quote-inline-flag--compact {
+        margin-left: 0.02in !important;
+        font-size: 8.6px !important;
+      }
+      .pdf-render .quote-inline-flag::before {
+        content: "" !important;
+      }
+      .pdf-render .quote-item-inline-diff {
+        margin-top: 0.02in !important;
+      }
+      .pdf-render .quote-item-inline-diff-line {
+        font-size: 9px !important;
+        line-height: 1.35 !important;
+        color: #6b7280 !important;
+      }
+      .pdf-render .quote-row-added td,
+      .pdf-render .quote-row-removed td {
+        background: #fff !important;
+      }
+      .pdf-render .quote-row-removed td {
+        color: #637489 !important;
+      }
+      .pdf-render .quote-row-removed .quote-inline-old {
+        color: #9aa8ba !important;
+      }
 
       .pdf-render .quote-doc-table th.is-money,
       .pdf-render .quote-doc-table td.is-money {
@@ -529,10 +593,13 @@
         min-width: 1.3in !important;
         font-variant-numeric: tabular-nums !important;
       }
-
-      .pdf-render .quote-total-discount,
-      .pdf-render .quote-total-saved {
+      .pdf-render .quote-total-box p.quote-total-discount > strong,
+      .pdf-render .quote-total-box p.quote-total-saved > strong {
         color: #b91c1c !important;
+      }
+      .pdf-render .quote-total-box p > strong .quote-diff-stack {
+        min-width: 1.38in !important;
+        gap: 0.022in !important;
       }
 
       .pdf-render .quote-total-reduction strong {
@@ -567,6 +634,10 @@
         font-size: var(--q-pdf-total-primary-size) !important;
         line-height: var(--q-pdf-total-primary-lh) !important;
         font-weight: var(--q-pdf-total-primary-w) !important;
+      }
+      .pdf-render .quote-total-grand .quote-diff-old {
+        font-size: 8.2px !important;
+        color: #a2afbf !important;
       }
 
       .pdf-render .quote-engagement-note {

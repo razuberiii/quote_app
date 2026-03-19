@@ -6,15 +6,21 @@ class QuoteItem < ApplicationRecord
   MAX_SPEC_VALUE_LENGTH = 500
   MAX_ADDON_ROWS = 40
   MAX_ADDON_NAME_LENGTH = 180
+  IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
+  MAX_IMAGE_SIZE = 8.megabytes
+  IMAGE_SOURCES = %w[none product_gallery manual_upload].freeze
 
   belongs_to :quote
   belongs_to :product, optional: true
+  has_one_attached :item_image
 
   attr_writer :specifications_text, :addon_charges_text
+  attr_accessor :item_image_blob_id, :remove_item_image
 
   validates :description, presence: true
   validates :unit_price, presence: true, numericality: { greater_than: 0 }
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
+  validates :image_source, inclusion: { in: IMAGE_SOURCES }
   validate :validate_addon_charge_amounts
   validate :description_length_within_limit
   validate :specifications_within_limits
@@ -22,8 +28,10 @@ class QuoteItem < ApplicationRecord
   validate :product_company_matches_quote_company
   validate :snapshots_locked_after_quote_sent
   validate :monetary_values_fit_storage_precision
+  validate :item_image_constraints
 
   before_validation :apply_product_defaults
+  before_validation :apply_item_image_selection
   before_validation :normalize_structured_fields
   before_validation :calculate_amount
   after_commit :refresh_related_product_stats
@@ -34,6 +42,13 @@ class QuoteItem < ApplicationRecord
 
   def line_total
     amount.presence || (unit_price.to_d * quantity.to_i + addon_total).round(2)
+  end
+
+  def effective_image_attachment
+    return item_image if item_image.attached?
+    return nil unless product
+
+    product.display_image
   end
 
   def addon_total
@@ -154,6 +169,31 @@ class QuoteItem < ApplicationRecord
     self[:addon_charges] = defaults if defaults.present?
   end
 
+  def apply_item_image_selection
+    if ActiveModel::Type::Boolean.new.cast(remove_item_image)
+      item_image.detach if item_image.attached?
+      self.image_source = "none"
+      return
+    end
+
+    return if item_image_blob_id.blank?
+
+    blob = ActiveStorage::Blob.find_by(id: item_image_blob_id)
+    return if blob.blank?
+    return unless allowed_product_gallery_blob?(blob)
+
+    item_image.attach(blob)
+    self.image_source = "product_gallery"
+  end
+
+  def allowed_product_gallery_blob?(blob)
+    return false if product.blank?
+
+    ActiveStorage::Attachment.where(blob_id: blob.id, record_type: "Product", record_id: product.id)
+      .where(name: [ "image", "gallery_images" ])
+      .exists?
+  end
+
   def parse_addon_charges_text(value)
     value.to_s.lines.filter_map do |line|
       content = line.to_s.strip
@@ -243,8 +283,24 @@ class QuoteItem < ApplicationRecord
     return unless persisted?
     return if quote.blank? || quote.draft?
 
-    if will_save_change_to_spec_snapshot? || will_save_change_to_addon_snapshot? || will_save_change_to_specifications? || will_save_change_to_addon_charges?
+    if will_save_change_to_spec_snapshot? || will_save_change_to_addon_snapshot? || will_save_change_to_specifications? || will_save_change_to_addon_charges? || will_save_change_to_image_source?
       errors.add(:base, "Specifications and add-ons are locked once the quote is sent")
+    end
+  end
+
+  def item_image_constraints
+    return unless item_image.attached?
+
+    blob = item_image.blob
+    if !IMAGE_CONTENT_TYPES.include?(blob.content_type.to_s)
+      errors.add(:item_image, "must be PNG, JPG, WEBP, or GIF")
+    end
+    if blob.byte_size > MAX_IMAGE_SIZE
+      errors.add(:item_image, "must be smaller than #{MAX_IMAGE_SIZE / 1.megabyte}MB")
+    end
+
+    if image_source.to_s == "none"
+      self.image_source = "manual_upload"
     end
   end
 

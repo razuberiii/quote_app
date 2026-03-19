@@ -38,10 +38,11 @@ class QuoteSnapshotBuilder
     snapshot["product_name"] = item.product&.name
     snapshot["specifications"] = item.specification_pairs
     snapshot["addon_charges"] = item.addon_charge_entries
-    product_image = item.product&.display_image
-    snapshot["product_image_path"] = if product_image.present?
-      Rails.application.routes.url_helpers.rails_blob_path(product_image, only_path: true)
+    effective_image = item.effective_image_attachment
+    snapshot["product_image_path"] = if effective_image.present?
+      Rails.application.routes.url_helpers.rails_blob_path(effective_image, only_path: true)
     end
+    snapshot["image_source"] = item.image_source
     snapshot
   end
 end

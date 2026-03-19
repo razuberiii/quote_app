@@ -1,5 +1,6 @@
 <% advanced_collapsible = local_assigns.fetch(:advanced_collapsible, false) %>
-<%= form_with model: quote_template, html: { class: "template-editor-form", data: { template_editor_form: true } } do |f| %>
+<% existing_template_slugs = current_user.company.quote_templates.where.not(id: quote_template.id).pluck(:slug).compact %>
+<%= form_with model: quote_template, html: { class: "template-editor-form", data: { template_editor_form: true, existing_slugs: existing_template_slugs.to_json, slug_taken_message: t("quote_templates.view.form.preset_slug_taken") } } do |f| %>
   <% if quote_template.errors.any? %>
     <div class="error-messages">
       <h2><%= t("quote_templates.view.form.error_summary", count: quote_template.errors.count) %></h2>
@@ -19,6 +20,11 @@
     <div>
       <%= f.label :slug, t("quote_templates.view.form.preset_slug") %>
       <%= f.text_field :slug, placeholder: t("quote_templates.view.form.preset_slug_placeholder") %>
+      <p class="template-sub"><%= t("quote_templates.view.form.preset_slug_hint") %></p>
+      <p class="template-sub" data-template-slug-feedback hidden></p>
+      <% if quote_template.errors[:slug].any? %>
+        <p class="field-error-message"><%= quote_template.errors.full_messages_for(:slug).first %></p>
+      <% end %>
     </div>
     <div>
       <%= f.label :document_kind, t("quote_templates.view.form.default_document_view") %>
@@ -78,6 +84,9 @@
           <label><%= f.check_box :show_closing_message, data: { template_preview_toggle: "closing" } %> <%= t("quote_templates.view.form.show_closing_message") %></label>
           <label><%= f.check_box :show_watermark, data: { template_preview_toggle: "watermark" } %> <%= t("quote_templates.view.form.show_watermark") %></label>
           <label><%= f.check_box :show_saas_branding, data: { template_preview_toggle: "saas-branding" } %> <%= t("quote_templates.view.form.show_saas_branding") %></label>
+          <label><%= f.check_box :show_public_revision_summary %> <%= t("quote_templates.view.form.show_public_revision_summary") %></label>
+          <label><%= f.check_box :show_pdf_revision_summary %> <%= t("quote_templates.view.form.show_pdf_revision_summary") %></label>
+          <label><%= f.check_box :show_excel_revision_summary %> <%= t("quote_templates.view.form.show_excel_revision_summary") %></label>
           <label><%= f.check_box :excel_show_grid_lines %> <%= t("quote_templates.view.form.show_excel_gridlines") %></label>
         </div>
         <div class="template-form-grid"
@@ -516,6 +525,56 @@
 
     const qs = (selector) => form.querySelector(selector);
     const qsp = (selector) => preview.querySelector(selector);
+    const slugInput = qs("input[name='quote_template[slug]']");
+    const nameInput = qs("input[name='quote_template[name]']");
+    const slugFeedback = qs("[data-template-slug-feedback]");
+    const slugTakenMessageTemplate = form.dataset.slugTakenMessage || "This identifier is already used: %{slug}";
+    const existingSlugs = (() => {
+      try {
+        const parsed = JSON.parse(form.dataset.existingSlugs || "[]");
+        return new Set(parsed.map((value) => String(value || "").trim().toLowerCase()).filter(Boolean));
+      } catch (_) {
+        return new Set();
+      }
+    })();
+
+    const normalizeSlug = (value) => String(value || "")
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+    const syncSlugValidation = (report = false) => {
+      if (!slugInput) return false;
+
+      const slugSource = slugInput.value.trim().length > 0 ? slugInput.value : (nameInput?.value || "");
+      const normalized = normalizeSlug(slugSource);
+      const isTaken = normalized.length > 0 && existingSlugs.has(normalized);
+      const message = isTaken ? slugTakenMessageTemplate.replace("%{slug}", normalized) : "";
+
+      slugInput.setCustomValidity(message);
+      if (slugFeedback) {
+        slugFeedback.textContent = message;
+        slugFeedback.hidden = !isTaken;
+      }
+
+      if (report && isTaken) slugInput.reportValidity();
+      return isTaken;
+    };
+
+    if (!alreadyBound && slugInput) {
+      slugInput.addEventListener("input", () => syncSlugValidation(false));
+      slugInput.addEventListener("blur", () => syncSlugValidation(true));
+      if (nameInput) nameInput.addEventListener("input", () => syncSlugValidation(false));
+      form.addEventListener("submit", (event) => {
+        if (!syncSlugValidation(true)) return;
+        event.preventDefault();
+      });
+      syncSlugValidation(false);
+    }
+
     const documentKindFields = Array.from(form.querySelectorAll("[data-template-doc-kind-field]"));
     const syncDocumentKindFields = (kind) => {
       documentKindFields.forEach((node) => {

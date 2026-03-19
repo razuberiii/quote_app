@@ -428,7 +428,22 @@ const bindSearchableSelects = () => {
 };
 
 bindSearchableSelects();
+window.bindSearchableSelects = bindSearchableSelects;
 document.addEventListener("turbo:load", bindSearchableSelects);
+document.addEventListener("turbo:frame-load", bindSearchableSelects);
+
+if (!window.__searchableSelectStreamBound) {
+  window.__searchableSelectStreamBound = true;
+  document.addEventListener("turbo:before-stream-render", (event) => {
+    const originalRender = event.detail.render;
+    event.detail.render = (streamElement) => {
+      originalRender(streamElement);
+      window.queueMicrotask(() => {
+        window.bindSearchableSelects?.();
+      });
+    };
+  });
+}
 
 const getProductLightboxElements = () => {
   const lightbox = document.querySelector("[data-product-lightbox]");

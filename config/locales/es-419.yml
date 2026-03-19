@@ -402,13 +402,38 @@ es-419:
     errors:
       valid_until_on_or_after_today: debe ser hoy o una fecha posterior
     change_summary:
-      header: "Resumen de actualización de revisión:"
-      quantity_updated: "- Cantidad de %{product} actualizada: %{before} -> %{after}"
-      unit_price_updated: "- Precio unitario de %{product} actualizado: %{before} -> %{after}"
-      added_item: "- Artículo nuevo añadido: %{product}"
-      removed_item: "- Artículo eliminado: %{product}"
-      commercial_updated: "- %{label} actualizado: %{before} -> %{after}"
-      total_updated: "Total actualizado: %{before} -> %{after}"
+      header: "Resumen de revisión de cotización (V%{current} vs V%{previous})"
+      header_fallback: "Resumen de revisión de cotización"
+      overview_title: Resumen
+      overview_updated_items:
+        one: "- 1 ítem actualizado"
+        other: "- %{count} ítems actualizados"
+      overview_removed_items:
+        one: "- 1 ítem eliminado"
+        other: "- %{count} ítems eliminados"
+      overview_pricing_changed: "- precios actualizados"
+      overview_commercial_changed: "- términos comerciales actualizados"
+      item_changes_title: Cambios en ítems
+      updated_items_title: Ítems actualizados
+      removed_items_title: Ítems eliminados
+      added_items_title: Ítems añadidos
+      pricing_changes_title: Cambios de precios
+      commercial_changes_title: Cambios comerciales
+      item_bullet: "- %{item}"
+      detail_bullet: "  - %{detail}"
+      row_bullet: "- %{label}: %{before} -> %{after}"
+      qty_change_line: "Cant.: %{before} -> %{after}"
+      unit_change_line: "Precio unitario: %{before} -> %{after}"
+      line_total_change_line: "Total de línea: %{before} -> %{after}"
+      qty_line: "Cant.: %{value}"
+      unit_line: "Precio unitario: %{value}"
+      line_total_line: "Total de línea: %{value}"
+      spec_change_updated: "Especificación: %{key} %{before} -> %{after}"
+      spec_change_added: "Especificación añadida: %{key} %{value}"
+      spec_change_removed: "Especificación eliminada: %{key} %{value}"
+      addon_change_updated: "Adicional: %{name} %{before} -> %{after}"
+      addon_change_added: "Adicional añadido: %{name} %{amount}"
+      addon_change_removed: "Adicional eliminado: %{name} %{amount}"
     share_message:
       greeting: Hola %{customer_name},
       intro: Te compartimos la cotización que preparamos para ti.
@@ -451,15 +476,60 @@ es-419:
         compare_versions: Comparando V%{current} con V%{previous}.
         copy_change_summary: Copiar resumen de cambios
         empty: No se detectaron cambios comerciales o a nivel de artículo entre estas dos revisiones.
+        item_changes: Cambios en ítems
+        updated_items: Ítems actualizados
+        removed_items: Ítems eliminados
+        added_items: Ítems añadidos
+        no_item_changes: Sin cambios en ítems.
+        commercial_changes: Cambios comerciales
+        no_commercial_changes: Sin cambios comerciales.
+        pricing_changes: Cambios de precios
+        no_pricing_changes: Sin cambios de precios.
+        overview_pricing_changed: precios actualizados
+        overview_commercial_changed: términos comerciales actualizados
+        overview_updated_items:
+          one: 1 ítem actualizado
+          other: "%{count} ítems actualizados"
+        overview_removed_items:
+          one: 1 ítem eliminado
+          other: "%{count} ítems eliminados"
         modified: Modificado
         added: Añadido
         removed: Eliminado
         commercial_terms: Términos comerciales
+        financial_changes: Cambios financieros
+        specifications: Especificaciones
+        addons: Adicionales
         qty_change: Cant. %{before} -> %{after}
         unit_change: Unidad %{before} -> %{after}
+        line_total_change: Total de línea %{before} -> %{after}
         qty: Cant. %{value}
         unit: Unidad %{value}
+        line_total: Total de línea %{value}
+        spec_change_updated: "Especificación %{key}: %{before} -> %{after}"
+        spec_change_added: "Especificación añadida %{key}: %{value}"
+        spec_change_removed: "Especificación eliminada %{key}: %{value}"
+        addon_change_updated: "Adicional %{name}: %{before} -> %{after}"
+        addon_change_added: "Adicional añadido %{name}: %{amount}"
+        addon_change_removed: "Adicional eliminado %{name}: %{amount}"
         total_updated: Total actualizado
+        total_unchanged: Total sin cambios
+        fields:
+          custom_title: Título de la cotización
+          valid_until: Vigencia
+          payment_term: Condición de pago
+          trade_term: Condición comercial
+          scope_of_supply: Alcance de suministro
+          request_reason: Motivo de revisión
+          notes: Notas
+          terms_text: Términos
+          delivery_notes: Notas de entrega
+          legal_disclaimer: Aviso legal
+        financial_fields:
+          tax_amount: Impuesto / IVA
+          shipping_amount: Envío
+          discount_amount: Descuento
+          grand_total: Total general
       show:
         created_banner:
           title: Cotización creada con éxito.
@@ -495,6 +565,12 @@ es-419:
         next_action: Siguiente paso
         current_focus: Prioridad actual
         engagement_details: Detalles de interacción
+        summary:
+          current_revision: Versión actual
+          interaction: Estado de interacción
+          shares: Veces compartido
+          updated: Última actualización
+          share_count: "%{count} compartidos"
         unknown: Desconocido
         time_zone: Zona horaria
         sent: Enviado
@@ -582,6 +658,7 @@ es-419:
           public_link_ready_manual: Enlace público listo. Cópialo manualmente si hace falta.
           public_link_copied: Enlace público copiado.
           share_failed: Error al compartir
+          template_update_failed: No se pudo actualizar la plantilla
           link_copied: Enlace copiado.
           copy_failed_browser: No se pudo copiar en este navegador.
           undo: Deshacer
@@ -690,6 +767,18 @@ es-419:
         quote_item_hint_2: Los precios predeterminados del producto son solo de referencia. Los precios finales de la cotización deben ingresarse en la moneda de cotización seleccionada.
         quote_item_hint_3: Si la moneda de referencia del producto difiere de la moneda de la cotización, el precio unitario no se autocompletará.
         quote_item_hint_4: Las especificaciones y los complementos pueden cargarse desde preconfiguraciones de producto, cambiarse por otro preajuste o pegarse línea por línea como texto.
+        image: Imagen
+        item_image: Imagen del ítem
+        item_image_preview: Vista previa de imagen del ítem
+        add_image: Agregar imagen
+        change_image: Cambiar imagen
+        current_selected_image: Imagen seleccionada actualmente
+        no_image_selected: Sin imagen seleccionada
+        remove_image: Quitar imagen
+        product_gallery_empty: Este producto aún no tiene imágenes en la galería.
+        product_main_image: Imagen principal
+        product_gallery_image: Imagen de galería %{index}
+        select_from_gallery: Seleccionar desde galería
         currency_mismatch_warning: "Advertencia de moneda: el autocompletado del precio unitario se desactivará y tendrás que ingresarlo manualmente."
         pricing_attention_needed: El precio requiere atención antes de guardar esta cotización.
         product_name: Nombre del producto
@@ -829,8 +918,8 @@ es-419:
             value: Sin cambios
             detail: Las revisiones actual y anterior son comercialmente idénticas.
           changed:
-            value: "%{item_count} artículo / %{term_count} término"
-            detail: Se detectaron %{item_count} cambios en partidas y %{commercial_count} cambios comerciales en comparación con la revisión anterior.
+            value: "%{item_count} ítems / %{commercial_count} comerciales / %{pricing_count} de precio"
+            detail: Se detectaron %{item_count} cambios en ítems, %{commercial_count} cambios comerciales y %{pricing_count} cambios de precio en comparación con la revisión anterior.
         review_notes:
           accepted_on: Aceptado el %{date}.
           marked_won_on: Marcado como ganado el %{date}.
@@ -1882,6 +1971,8 @@ es-419:
         preset_name_placeholder: Cotización B2B moderna
         preset_slug: Slug del preajuste
         preset_slug_placeholder: automático-desde-nombre
+        preset_slug_hint: Se usa como identificador interno único. Los slugs repetidos no crean una nueva plantilla.
+        preset_slug_taken: "Este identificador ya está en uso: %{slug}"
         default_document_view: Vista de documento predeterminada
         document_kind:
           quotation: Cotización
@@ -1934,6 +2025,9 @@ es-419:
         show_watermark: Mostrar marca de agua
         show_watermark_hint: Si está activado, la vista previa/salida mostrará marca de agua. El modo texto usa el texto de marca de agua; si está vacío, se usa el nombre de la empresa. El modo imagen tiene prioridad sobre el modo texto.
         show_saas_branding: Mostrar pie de página de Rubusoo (marca blanca desactivada por defecto)
+        show_public_revision_summary: Mostrar resumen de revisión en enlace público
+        show_pdf_revision_summary: Mostrar resumen de revisión en PDF
+        show_excel_revision_summary: Mostrar resumen de revisión en Excel
         show_excel_gridlines: Mostrar líneas de cuadrícula de Excel
         signature_name: Autorizado por nombre (opcional)
         signature_name_placeholder: ej. Amy Chen
@@ -2074,6 +2168,31 @@ es-419:
       accepted_on: Aceptado el
     notes:
       you_save: Ahorras
+    revision_summary:
+      title: Resumen de revisión
+      compare_versions: Comparado con V%{previous} -> V%{current}
+      items_updated_count:
+        one: "%{count} ítem actualizado"
+        other: "%{count} ítems actualizados"
+      items_added_count:
+        one: "%{count} ítem agregado"
+        other: "%{count} ítems agregados"
+      items_removed_count:
+        one: "%{count} ítem eliminado"
+        other: "%{count} ítems eliminados"
+      pricing_updated: precios actualizados
+      scope_of_supply_updated: alcance de suministro actualizado
+      terms_updated: términos actualizados
+      quantity_updated: "%{item}: cantidad actualizada (%{before} -> %{after})"
+      unit_price_updated: "%{item}: precio unitario actualizado"
+      items_added: "Ítems agregados: %{names}"
+      items_removed: "Ítems eliminados: %{names}"
+      total_updated: "Total general: %{before} -> %{after}"
+      sheet_name: Resumen de revisión
+    inline_diff:
+      added: Agregado
+      removed: Eliminado
+      updated: Actualizado
   company_documents:
     flash:
       uploaded: Documento de la empresa subido.

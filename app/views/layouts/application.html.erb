@@ -571,6 +571,19 @@
                 closeBell();
               });
             });
+
+            bellDropdown.addEventListener("toggle", () => {
+              if (!bellDropdown.open) return;
+
+              const menu = document.getElementById("notification-bell-menu");
+              if (menu && !menu.querySelector(".notification-list")) {
+                menu.innerHTML = '<p class="notification-empty"><%= j(t("notifications.loading", default: "Loading notifications...")) %></p>';
+              }
+
+              if (typeof window.refreshNotificationBell === "function") {
+                window.refreshNotificationBell();
+              }
+            });
           }
 
           if (window.__notificationBellOutsideBound !== true) {
@@ -663,6 +676,13 @@
             badge.hidden = count === 0;
           };
 
+          const updateBellMenu = (menuHtml) => {
+            if (typeof menuHtml !== "string") return;
+            const menu = document.getElementById("notification-bell-menu");
+            if (!menu) return;
+            menu.innerHTML = menuHtml;
+          };
+
           const pollUnreadCount = async () => {
             try {
               const resp = await fetch("<%= unread_count_notifications_path %>", {
@@ -670,12 +690,14 @@
                 credentials: "same-origin"
               });
               if (!resp.ok) return;
-              const { count } = await resp.json();
+              const { count, menu_html: menuHtml } = await resp.json();
               updateBadge(count);
+              updateBellMenu(menuHtml);
             } catch (_) {}
           };
 
-          window.setInterval(pollUnreadCount, 30000);
+          window.refreshNotificationBell = pollUnreadCount;
+          window.setInterval(window.refreshNotificationBell, 30000);
         })();
         <% end %>
       })();

@@ -1,8 +1,27 @@
 <section class="quote-revision-panel app-surface">
-  <div class="quote-revision-head">
-    <div>
+  <% updated_items = Array(@revision_diff[:modified_items]) %>
+  <% added_items = Array(@revision_diff[:added_items]) %>
+  <% removed_items = Array(@revision_diff[:removed_items]) %>
+  <% commercial_changes = Array(@revision_diff[:commercial_changes]) %>
+  <% pricing_changes = Array(@revision_diff[:financial_changes]).dup %>
+  <% total_changed = @revision_diff[:total_before].to_d != @revision_diff[:total_after].to_d %>
+  <% unless pricing_changes.any? { |change| change[:field].to_s == "grand_total" } %>
+    <% if total_changed %>
+      <% pricing_changes << { field: :grand_total, before: @revision_diff[:total_before].to_d, after: @revision_diff[:total_after].to_d } %>
+    <% end %>
+  <% end %>
+  <% has_any_changes = updated_items.any? || added_items.any? || removed_items.any? || commercial_changes.any? || pricing_changes.any? %>
+
+  <div class="quote-revision-overview-bar">
+    <div class="quote-revision-overview-copy">
       <h3><%= t("quotes.view.revision_diff.title") %></h3>
       <p><%= t("quotes.view.revision_diff.compare_versions", current: @quote.revision_number, previous: @previous_revision_quote.revision_number) %></p>
+      <div class="quote-revision-overview-list">
+        <% if updated_items.any? %><span><%= t("quotes.view.revision_diff.overview_updated_items", count: updated_items.size) %></span><% end %>
+        <% if removed_items.any? %><span><%= t("quotes.view.revision_diff.overview_removed_items", count: removed_items.size) %></span><% end %>
+        <% if pricing_changes.any? %><span><%= t("quotes.view.revision_diff.overview_pricing_changed") %></span><% end %>
+        <% if commercial_changes.any? %><span><%= t("quotes.view.revision_diff.overview_commercial_changed") %></span><% end %>
+      </div>
     </div>
     <% if @change_summary.present? %>
       <button type="button"
@@ -13,73 +32,121 @@
     <% end %>
   </div>
 
-  <% if @revision_diff[:modified_items].blank? && @revision_diff[:added_items].blank? && @revision_diff[:removed_items].blank? && @revision_diff[:commercial_changes].blank? %>
+  <% if !has_any_changes %>
     <p class="quote-revision-empty"><%= t("quotes.view.revision_diff.empty") %></p>
   <% else %>
-    <div class="quote-revision-grid">
-      <% if @revision_diff[:modified_items].any? %>
-        <article class="quote-revision-card">
-          <h4><%= t("quotes.view.revision_diff.modified") %></h4>
-          <ul>
-            <% @revision_diff[:modified_items].each do |item| %>
-              <li>
-                <strong><%= item[:product_name] %></strong>
-                <span><%= t("quotes.view.revision_diff.qty_change", before: item[:quantity_before], after: item[:quantity_after]) %></span>
-                <span><%= t("quotes.view.revision_diff.unit_change", before: quote_money(item[:unit_price_before], @quote.currency), after: quote_money(item[:unit_price_after], @quote.currency)) %></span>
-              </li>
-            <% end %>
-          </ul>
-        </article>
-      <% end %>
+    <div class="quote-revision-sections">
+      <article class="quote-revision-section">
+        <h4><%= t("quotes.view.revision_diff.item_changes") %></h4>
 
-      <% if @revision_diff[:added_items].any? %>
-        <article class="quote-revision-card">
-          <h4><%= t("quotes.view.revision_diff.added") %></h4>
-          <ul>
-            <% @revision_diff[:added_items].each do |item| %>
-              <li>
-                <strong><%= item[:product_name] %></strong>
-                <span><%= t("quotes.view.revision_diff.qty", value: item[:quantity_after]) %></span>
-                <span><%= t("quotes.view.revision_diff.unit", value: quote_money(item[:unit_price_after], @quote.currency)) %></span>
-              </li>
-            <% end %>
-          </ul>
-        </article>
-      <% end %>
+        <% if updated_items.any? %>
+          <h5><%= t("quotes.view.revision_diff.updated_items") %></h5>
+          <div class="quote-revision-item-list">
+            <% updated_items.each do |item| %>
+              <div class="quote-revision-item-row">
+                <p class="quote-revision-item-name"><%= item[:product_name] %></p>
+                <ul class="quote-revision-points">
+                  <% if item[:quantity_changed] %><li><%= t("quotes.view.revision_diff.qty_change", before: item[:quantity_before], after: item[:quantity_after]) %></li><% end %>
+                  <% if item[:unit_price_changed] %><li><%= t("quotes.view.revision_diff.unit_change", before: quote_money(item[:unit_price_before], @quote.currency), after: quote_money(item[:unit_price_after], @quote.currency)) %></li><% end %>
+                  <% if item[:line_total_before].to_d != item[:line_total_after].to_d %><li><%= t("quotes.view.revision_diff.line_total_change", before: quote_money(item[:line_total_before], @quote.currency), after: quote_money(item[:line_total_after], @quote.currency)) %></li><% end %>
 
-      <% if @revision_diff[:removed_items].any? %>
-        <article class="quote-revision-card">
-          <h4><%= t("quotes.view.revision_diff.removed") %></h4>
-          <ul>
-            <% @revision_diff[:removed_items].each do |item| %>
-              <li>
-                <strong><%= item[:product_name] %></strong>
-                <span><%= t("quotes.view.revision_diff.qty", value: item[:quantity_before]) %></span>
-                <span><%= t("quotes.view.revision_diff.unit", value: quote_money(item[:unit_price_before], @quote.currency)) %></span>
-              </li>
-            <% end %>
-          </ul>
-        </article>
-      <% end %>
+                  <% spec_changes = item[:spec_changes] || {} %>
+                  <% Array(spec_changes[:updated]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.spec_change_updated", key: change[:key], before: change[:before], after: change[:after]) %></li>
+                  <% end %>
+                  <% Array(spec_changes[:added]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.spec_change_added", key: change[:key], value: change[:value]) %></li>
+                  <% end %>
+                  <% Array(spec_changes[:removed]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.spec_change_removed", key: change[:key], value: change[:value]) %></li>
+                  <% end %>
 
-      <% if @revision_diff[:commercial_changes].any? %>
-        <article class="quote-revision-card quote-revision-card--commercial">
-          <h4><%= t("quotes.view.revision_diff.commercial_terms") %></h4>
-          <ul>
-            <% @revision_diff[:commercial_changes].each do |change| %>
+                  <% addon_changes = item[:addon_changes] || {} %>
+                  <% Array(addon_changes[:updated]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.addon_change_updated", name: change[:name], before: quote_money(change[:before], @quote.currency), after: quote_money(change[:after], @quote.currency)) %></li>
+                  <% end %>
+                  <% Array(addon_changes[:added]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.addon_change_added", name: change[:name], amount: quote_money(change[:amount], @quote.currency)) %></li>
+                  <% end %>
+                  <% Array(addon_changes[:removed]).each do |change| %>
+                    <li><%= t("quotes.view.revision_diff.addon_change_removed", name: change[:name], amount: quote_money(change[:amount], @quote.currency)) %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if removed_items.any? %>
+          <h5><%= t("quotes.view.revision_diff.removed_items") %></h5>
+          <div class="quote-revision-item-list">
+            <% removed_items.each do |item| %>
+              <div class="quote-revision-item-row">
+                <p class="quote-revision-item-name"><%= item[:product_name] %></p>
+                <ul class="quote-revision-points">
+                  <li><%= t("quotes.view.revision_diff.qty", value: item[:quantity_before]) %></li>
+                  <li><%= t("quotes.view.revision_diff.unit", value: quote_money(item[:unit_price_before], @quote.currency)) %></li>
+                  <li><%= t("quotes.view.revision_diff.line_total", value: quote_money(item[:line_total_before], @quote.currency)) %></li>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if added_items.any? %>
+          <h5><%= t("quotes.view.revision_diff.added_items") %></h5>
+          <div class="quote-revision-item-list">
+            <% added_items.each do |item| %>
+              <div class="quote-revision-item-row">
+                <p class="quote-revision-item-name"><%= item[:product_name] %></p>
+                <ul class="quote-revision-points">
+                  <li><%= t("quotes.view.revision_diff.qty", value: item[:quantity_after]) %></li>
+                  <li><%= t("quotes.view.revision_diff.unit", value: quote_money(item[:unit_price_after], @quote.currency)) %></li>
+                  <li><%= t("quotes.view.revision_diff.line_total", value: quote_money(item[:line_total_after], @quote.currency)) %></li>
+                </ul>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if updated_items.blank? && removed_items.blank? && added_items.blank? %>
+          <p class="quote-revision-empty"><%= t("quotes.view.revision_diff.no_item_changes") %></p>
+        <% end %>
+      </article>
+
+      <article class="quote-revision-section">
+        <h4><%= t("quotes.view.revision_diff.commercial_changes") %></h4>
+        <% if commercial_changes.any? %>
+          <ul class="quote-revision-compact-list">
+            <% commercial_changes.each do |change| %>
+              <% before_text = change[:before].to_s.presence || "-" %>
+              <% after_text = change[:after].to_s.presence || "-" %>
               <li>
-                <strong><%= change[:label] %></strong>
-                <span><%= change[:before] %> -> <%= change[:after] %></span>
+                <strong><%= t("quotes.view.revision_diff.fields.#{change[:field]}", default: change[:label]) %></strong>
+                <span title="<%= "#{before_text} -> #{after_text}" %>"><%= truncate(before_text, length: 120) %> -> <%= truncate(after_text, length: 120) %></span>
               </li>
             <% end %>
           </ul>
-        </article>
-      <% end %>
+        <% else %>
+          <p class="quote-revision-empty"><%= t("quotes.view.revision_diff.no_commercial_changes") %></p>
+        <% end %>
+      </article>
+
+      <article class="quote-revision-section">
+        <h4><%= t("quotes.view.revision_diff.pricing_changes") %></h4>
+        <% if pricing_changes.any? %>
+          <ul class="quote-revision-compact-list">
+            <% pricing_changes.each do |change| %>
+              <li>
+                <strong><%= t("quotes.view.revision_diff.financial_fields.#{change[:field]}", default: change[:field].to_s.humanize) %></strong>
+                <span><%= quote_money(change[:before], @quote.currency) %> -> <%= quote_money(change[:after], @quote.currency) %></span>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="quote-revision-empty"><%= t("quotes.view.revision_diff.no_pricing_changes") %></p>
+        <% end %>
+      </article>
     </div>
   <% end %>
-
-  <p class="quote-revision-total">
-    <span><%= t("quotes.view.revision_diff.total_updated") %></span>
-    <strong><%= quote_money(@revision_diff[:total_before], @quote.currency) %> -> <%= quote_money(@revision_diff[:total_after], @quote.currency) %></strong>
-  </p>
 </section>

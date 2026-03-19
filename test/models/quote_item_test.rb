@@ -64,4 +64,28 @@ class QuoteItemTest < ActiveSupport::TestCase
     assert_not item.valid?
     assert_includes item.errors[:base], "Specifications and add-ons are locked once the quote is sent"
   end
+
+  test "can select image from current product gallery blob" do
+    product = products(:one)
+    blob = ActiveStorage::Blob.create_and_upload!(
+      io: StringIO.new("fake image content"),
+      filename: "gallery.png",
+      content_type: "image/png"
+    )
+    product.gallery_images.attach(blob)
+
+    item = QuoteItem.new(
+      quote: quotes(:one),
+      product: product,
+      description: "Item with image",
+      unit_price: 100,
+      quantity: 1
+    )
+    item.item_image_blob_id = blob.id
+
+    assert item.valid?
+    item.save!
+    assert item.item_image.attached?
+    assert_equal "product_gallery", item.image_source
+  end
 end

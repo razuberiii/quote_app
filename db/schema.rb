@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_18_101500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_20_093000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -238,6 +238,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_101500) do
     t.decimal "amount", precision: 15, scale: 4
     t.datetime "created_at", null: false
     t.string "description", null: false
+    t.string "image_source", default: "none", null: false
     t.integer "product_id"
     t.integer "quantity", default: 1, null: false
     t.bigint "quote_id", null: false
@@ -317,12 +318,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_18_101500) do
     t.boolean "show_closing_message", default: true, null: false
     t.boolean "show_currency", default: true, null: false
     t.boolean "show_customer_owner", default: true, null: false
+    t.boolean "show_excel_revision_summary", default: true, null: false
     t.boolean "show_images", default: true, null: false
     t.boolean "show_logo", default: true, null: false
     t.boolean "show_negotiated_flag", default: false, null: false
     t.boolean "show_notes", default: true, null: false
     t.boolean "show_payment_term", default: true, null: false
+    t.boolean "show_pdf_revision_summary", default: true, null: false
     t.boolean "show_product_images", default: true, null: false
+    t.boolean "show_public_revision_summary", default: true, null: false
     t.boolean "show_saas_branding", default: false, null: false
     t.boolean "show_scope_of_supply", default: false, null: false
     t.boolean "show_shipping", default: true, null: false

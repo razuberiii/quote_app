@@ -14,6 +14,17 @@ class NotificationsController < ApplicationController
   end
 
   def unread_count
-    render json: { count: current_user.notifications.unread.count }
+    unread_scope = current_user.notifications.unread
+    unread_notifications = unread_scope.recent.limit(10)
+    menu_html = render_to_string(
+      partial: "layouts/notification_bell_menu",
+      formats: [ :html ],
+      locals: { unread_notifications: unread_notifications }
+    )
+
+    render json: {
+      count: unread_scope.count,
+      menu_html: menu_html
+    }
   end
 end

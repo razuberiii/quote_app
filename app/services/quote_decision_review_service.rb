@@ -117,21 +117,32 @@ class QuoteDecisionReviewService
       @revision_diff.fetch(:added_items, []).size +
       @revision_diff.fetch(:removed_items, []).size
     commercial_changes = @revision_diff.fetch(:commercial_changes, []).size
+    pricing_changes = @revision_diff.fetch(:financial_changes, []).size
 
     if @revision_diff.blank?
       {
         value: t("revision_scope.no_compare.value"),
         detail: t("revision_scope.no_compare.detail")
       }
-    elsif item_changes.zero? && commercial_changes.zero?
+    elsif item_changes.zero? && commercial_changes.zero? && pricing_changes.zero?
       {
         value: t("revision_scope.no_change.value"),
         detail: t("revision_scope.no_change.detail")
       }
     else
       {
-        value: t("revision_scope.changed.value", item_count: item_changes, term_count: commercial_changes),
-        detail: t("revision_scope.changed.detail", item_count: item_changes, commercial_count: commercial_changes)
+        value: t(
+          "revision_scope.changed.value",
+          item_count: item_changes,
+          commercial_count: commercial_changes,
+          pricing_count: pricing_changes
+        ),
+        detail: t(
+          "revision_scope.changed.detail",
+          item_count: item_changes,
+          commercial_count: commercial_changes,
+          pricing_count: pricing_changes
+        )
       }
     end
   end

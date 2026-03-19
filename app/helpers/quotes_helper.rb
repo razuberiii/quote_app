@@ -78,6 +78,223 @@ module QuotesHelper
     lines
   end
 
+  def quote_revision_diff_context(quote)
+    previous = previous_quote_revision_for(quote)
+    return nil unless previous
+
+    diff = QuoteRevisionDiffService.new(new_quote: quote, old_quote: previous).call
+    return nil unless quote_diff_has_inline_changes?(diff)
+
+    {
+      previous_revision_number: previous.revision_number.to_i,
+      current_revision_number: quote.revision_number.to_i,
+      diff: diff
+    }
+  end
+
+  def quote_diff_has_inline_changes?(diff)
+    return false if diff.blank?
+
+    diff[:added_items].present? ||
+      diff[:removed_items].present? ||
+      diff[:modified_items].present? ||
+      diff[:commercial_changes].present? ||
+      diff[:financial_changes].present? ||
+      diff[:total_before].to_d != diff[:total_after].to_d
+  end
+
+  def quote_diff_item_map(diff)
+    map = {}
+    Array(diff[:added_items]).each { |item| map[item[:key]] = item.merge(change_type: :added) if item[:key].present? }
+    Array(diff[:removed_items]).each { |item| map[item[:key]] = item.merge(change_type: :removed) if item[:key].present? }
+    Array(diff[:modified_items]).each { |item| map[item[:key]] = item.merge(change_type: :modified) if item[:key].present? }
+    map
+  end
+
+  def quote_diff_commercial_change(diff, field)
+    Array(diff[:commercial_changes]).find { |change| change[:field].to_s == field.to_s }
+  end
+
+  def quote_diff_financial_change(diff, field)
+    Array(diff[:financial_changes]).find { |change| change[:field].to_s == field.to_s }
+  end
+
+  def quote_item_diff_key(item, counters)
+    signature = if item.respond_to?(:product_id) && item.product_id.present?
+      "product:#{item.product_id}"
+    else
+      name = item.respond_to?(:description) ? item.description : nil
+      "name:#{normalize_diff_text(item.respond_to?(:product) ? item.product&.name.presence || name : name)}"
+    end
+    counters[signature] += 1
+    "#{signature}:#{counters[signature]}"
+  end
+
+  def quote_item_diff_key_from_snapshot_item(item, counters)
+    product_id = item["product_id"] || item[:product_id]
+    product_name = item["product_name"] || item[:product_name]
+    description = item["description"] || item[:description]
+    signature = if product_id.present?
+      "product:#{product_id}"
+    else
+      "name:#{normalize_diff_text(product_name.presence || description)}"
+    end
+    counters[signature] += 1
+    "#{signature}:#{counters[signature]}"
+  end
+
+  def quote_inline_diff_text(before, after)
+    before_text = before.to_s
+    after_text = after.to_s
+    return after_text if before_text == after_text
+
+    safe_join(
+      [
+        content_tag(:del, before_text, class: "quote-inline-old"),
+        content_tag(:span, after_text, class: "quote-inline-new")
+      ],
+      " "
+    )
+  end
+
+  def quote_stacked_diff_text(before, after)
+    before_text = before.to_s
+    after_text = after.to_s
+    return content_tag(:span, after_text, class: "quote-diff-current") if before_text == after_text
+
+    content_tag(:span, class: "quote-diff-stack") do
+      safe_join(
+        [
+          content_tag(:del, before_text, class: "quote-diff-old"),
+          content_tag(:span, after_text, class: "quote-diff-new")
+        ]
+      )
+    end
+  end
+
+  def quote_inline_diff_money(before, after, currency, show_symbol:, template: nil)
+    before_text = template.present? ? template_money(before, currency, template, show_currency: show_symbol) : quote_money(before, currency, show_symbol: show_symbol)
+    after_text = template.present? ? template_money(after, currency, template, show_currency: show_symbol) : quote_money(after, currency, show_symbol: show_symbol)
+    return after_text if before.to_d == after.to_d
+
+    safe_join(
+      [
+        content_tag(:del, before_text, class: "quote-inline-old"),
+        content_tag(:span, after_text, class: "quote-inline-new")
+      ],
+      " "
+    )
+  end
+
+  def quote_stacked_diff_money(before, after, currency, show_symbol:, template: nil)
+    before_text = template.present? ? template_money(before, currency, template, show_currency: show_symbol) : quote_money(before, currency, show_symbol: show_symbol)
+    after_text = template.present? ? template_money(after, currency, template, show_currency: show_symbol) : quote_money(after, currency, show_symbol: show_symbol)
+    return content_tag(:span, after_text, class: "quote-diff-current") if before.to_d == after.to_d
+
+    content_tag(:span, class: "quote-diff-stack") do
+      safe_join(
+        [
+          content_tag(:del, before_text, class: "quote-diff-old"),
+          content_tag(:span, after_text, class: "quote-diff-new")
+        ]
+      )
+    end
+  end
+
+  def quote_spec_rows_with_diff(specs, row_diff)
+    normalized_specs = Array(specs).filter_map do |spec|
+      key_display = spec["key"] || spec[:key]
+      value = spec["value"] || spec[:value]
+      next if key_display.to_s.strip.blank? && value.to_s.strip.blank?
+
+      {
+        key: key_display.to_s.strip,
+        value: value.to_s,
+        normalized_key: normalize_diff_text(key_display)
+      }
+    end
+
+    return normalized_specs if row_diff.blank?
+
+    spec_changes = row_diff[:spec_changes] || {}
+    added_keys = Array(spec_changes[:added]).map { |change| normalize_diff_text(change[:key]) }.uniq
+    updated_map = Array(spec_changes[:updated]).index_by { |change| normalize_diff_text(change[:key]) }
+
+    rows = normalized_specs.map do |row|
+      updated = updated_map[row[:normalized_key]]
+      if updated.present?
+        row.merge(change_type: :updated, before: updated[:before].to_s, after: updated[:after].to_s)
+      elsif added_keys.include?(row[:normalized_key])
+        row.merge(change_type: :added)
+      else
+        row
+      end
+    end
+
+    removed_rows = Array(spec_changes[:removed]).filter_map do |change|
+      normalized_key = normalize_diff_text(change[:key])
+      next if rows.any? { |row| row[:normalized_key] == normalized_key }
+
+      {
+        key: change[:key].to_s,
+        value: change[:value].to_s,
+        normalized_key: normalized_key,
+        change_type: :removed
+      }
+    end
+
+    rows + removed_rows
+  end
+
+  def quote_addon_rows_with_diff(addons, row_diff)
+    normalized_addons = Array(addons).filter_map do |addon|
+      name_display = addon["name"] || addon[:name]
+      amount = addon["amount"] || addon[:amount]
+      next if name_display.to_s.strip.blank?
+
+      {
+        name: name_display.to_s.strip,
+        amount: amount.to_d,
+        normalized_name: normalize_diff_text(name_display)
+      }
+    end
+
+    return normalized_addons if row_diff.blank?
+
+    addon_changes = row_diff[:addon_changes] || {}
+    added_names = Array(addon_changes[:added]).map { |change| normalize_diff_text(change[:name]) }.uniq
+    updated_map = Array(addon_changes[:updated]).index_by { |change| normalize_diff_text(change[:name]) }
+
+    rows = normalized_addons.map do |row|
+      updated = updated_map[row[:normalized_name]]
+      if updated.present?
+        row.merge(change_type: :updated, before: updated[:before].to_d, after: updated[:after].to_d)
+      elsif added_names.include?(row[:normalized_name])
+        row.merge(change_type: :added)
+      else
+        row
+      end
+    end
+
+    removed_rows = Array(addon_changes[:removed]).filter_map do |change|
+      normalized_name = normalize_diff_text(change[:name])
+      next if rows.any? { |row| row[:normalized_name] == normalized_name }
+
+      {
+        name: change[:name].to_s,
+        amount: change[:amount].to_d,
+        normalized_name: normalized_name,
+        change_type: :removed
+      }
+    end
+
+    rows + removed_rows
+  end
+
+  def quote_diff_changed?(diff, field)
+    quote_diff_commercial_change(diff, field).present?
+  end
+
   def template_money(amount, currency, template, show_currency: true)
     code = currency.to_s.upcase.presence || "USD"
     decimals = template&.amount_decimals.to_i
@@ -146,9 +363,15 @@ module QuotesHelper
     return [] unless previous_quote
 
     diff = QuoteRevisionDiffService.new(new_quote: quote, old_quote: previous_quote).call
-    summary = QuoteChangeSummaryService.new(diff: diff, currency: quote.currency).call
+    summary = QuoteChangeSummaryService.new(
+      diff: diff,
+      currency: quote.currency,
+      current_revision: quote.revision_number,
+      previous_revision: previous_quote.revision_number
+    ).call
     lines = summary.to_s.lines.map(&:strip).reject(&:blank?)
-    lines.reject! { |line| line == I18n.t("quotes.change_summary.header") }
+    header_prefix = I18n.t("quotes.change_summary.header_fallback")
+    lines.reject! { |line| line.start_with?(header_prefix) || line == I18n.t("quotes.change_summary.overview_title") }
     lines.first(5)
   end
 
@@ -158,5 +381,9 @@ module QuotesHelper
       .where("revision_number < ?", quote.revision_number)
       .order(revision_number: :desc)
       .first
+  end
+
+  def normalize_diff_text(value)
+    value.to_s.downcase.gsub(/\s+/, " ").strip
   end
 end

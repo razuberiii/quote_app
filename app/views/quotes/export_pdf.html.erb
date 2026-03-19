@@ -7,6 +7,14 @@
 <% watermark_image_url = quote_watermark_data_uri || template_watermark_image_url(@template) %>
 <% pdf_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.5, 0.08].min %>
 <% pdf_items = @quote.quote_items.ordered.to_a %>
+<% revision_diff_context = @template.show_pdf_revision_summary? ? quote_revision_diff_context(@quote) : nil %>
+<% revision_diff = revision_diff_context&.dig(:diff) %>
+<% revision_item_map = revision_diff.present? ? quote_diff_item_map(revision_diff) : {} %>
+<% item_key_counters = Hash.new(0) %>
+<% valid_until_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :valid_until) : nil %>
+<% trade_term_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :trade_term) : nil %>
+<% payment_term_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :payment_term) : nil %>
+<% scope_of_supply_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :scope_of_supply) %>
 <% pdf_min_visual_rows = 4 %>
 <% pdf_filler_rows = [pdf_min_visual_rows - pdf_items.size, 0].max %>
 <% pdf_sparse_content = pdf_items.size < pdf_min_visual_rows %>
@@ -54,11 +62,11 @@
   <% issued_on_text = @quote.issued_on&.strftime("%Y-%m-%d").to_s.strip %>
   <% terms_lines = [] %>
   <% if @template.show_terms_section %>
-    <% terms_lines << [ "Payment Terms", @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
-    <% terms_lines << [ "Trade Terms", @quote.trade_term ] if @quote.trade_term.present? %>
-    <% terms_lines << [ "Terms", @quote.terms_text ] if @quote.terms_text.present? %>
-    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer ] if @quote.legal_disclaimer.present? %>
-    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes ] if @quote.delivery_notes.present? %>
+    <% terms_lines << [ "Payment Terms", @quote.payment_term, :payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
+    <% terms_lines << [ "Trade Terms", @quote.trade_term, :trade_term ] if @quote.trade_term.present? %>
+    <% terms_lines << [ "Terms", @quote.terms_text, :terms_text ] if @quote.terms_text.present? %>
+    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer, :legal_disclaimer ] if @quote.legal_disclaimer.present? %>
+    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes, :delivery_notes ] if @quote.delivery_notes.present? %>
   <% end %>
   <% if logo_uri.present? %>
     <div class="pdf-logo-band pdf-logo-<%= @template.logo_position %>">
@@ -87,13 +95,13 @@
             <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= issued_on_text %></p>
           <% end %>
           <% if @template.show_valid_until && @quote.valid_until.present? %>
-            <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %></p>
+            <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %> <% if valid_until_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %></p>
           <% end %>
           <% if @template.show_currency %>
             <p><strong>Currency:</strong> <%= @quote.currency %></p>
           <% end %>
           <% if @quote.trade_term.present? %>
-            <p><strong>Trade Terms:</strong> <%= @quote.trade_term %></p>
+            <p><strong>Trade Terms:</strong> <%= @quote.trade_term %> <% if trade_term_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %></p>
           <% end %>
         </td>
       </tr>
@@ -150,7 +158,12 @@
       </thead>
       <tbody>
         <% pdf_items.each_with_index do |item, idx| %>
-          <tr>
+          <% row_key = quote_item_diff_key(item, item_key_counters) %>
+          <% row_diff = revision_item_map[row_key] || {} %>
+          <% row_added = row_diff[:change_type] == :added %>
+          <% quantity_changed = row_diff[:quantity_changed] || false %>
+          <% unit_price_changed = row_diff[:unit_price_changed] || false %>
+          <tr class="<%= 'quote-row-added' if row_added %>">
             <td class="is-left"><%= idx + 1 %></td>
             <% if @template.show_images? %>
               <td class="is-left">
@@ -163,22 +176,53 @@
             <% end %>
             <td class="is-left">
               <div class="quote-item-desc">
-                <div class="quote-item-desc-main"><%= item.product&.name.presence || item.description.presence || "Item" %></div>
-                <% if item.specification_pairs.any? || item.addon_charge_entries.any? %>
+                <div class="quote-item-desc-main">
+                  <%= item.product&.name.presence || item.description.presence || "Item" %>
+                  <% if row_added %>
+                    <span class="quote-inline-flag quote-inline-flag--added"><%= t("quote_document.inline_diff.added") %></span>
+                  <% end %>
+                </div>
+                <% spec_rows = quote_spec_rows_with_diff(item.specification_pairs, row_diff) %>
+                <% addon_rows = quote_addon_rows_with_diff(item.addon_charge_entries, row_diff) %>
+                <% if spec_rows.any? || addon_rows.any? %>
                   <div class="quote-item-desc-meta">
-                    <% if item.specification_pairs.any? %>
+                    <% if spec_rows.any? %>
                       <div class="quote-item-desc-group">
                         <div class="quote-item-desc-group-label"><%= spec_label %>:</div>
-                        <% item.specification_pairs.each do |pair| %>
-                          <div class="quote-item-desc-sub"><span class="quote-item-desc-bullet">&bull;</span><%= pair[:key] %> - <%= pair[:value] %></div>
+                        <% spec_rows.each do |spec_row| %>
+                          <div class="quote-item-desc-sub">
+                            <span class="quote-item-desc-bullet">&bull;</span><%= spec_row[:key] %> -
+                            <% case spec_row[:change_type] %>
+                            <% when :updated %>
+                              <%= quote_inline_diff_text(spec_row[:before], spec_row[:after]) %>
+                            <% when :removed %>
+                              <span class="quote-inline-old"><%= spec_row[:value] %></span>
+                              <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span>
+                            <% else %>
+                              <%= spec_row[:value] %>
+                              <% if spec_row[:change_type] == :added %><span class="quote-inline-flag quote-inline-flag--added quote-inline-flag--compact"><%= t("quote_document.inline_diff.added") %></span><% end %>
+                            <% end %>
+                          </div>
                         <% end %>
                       </div>
                     <% end %>
-                    <% if item.addon_charge_entries.any? %>
+                    <% if addon_rows.any? %>
                       <div class="quote-item-desc-group is-addon">
                         <div class="quote-item-desc-group-label"><%= addon_label %>:</div>
-                        <% item.addon_charge_entries.each do |entry| %>
-                          <div class="quote-item-desc-sub is-addon"><span class="quote-item-desc-bullet">&bull;</span><%= entry[:name] %> (<%= template_money(entry[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)</div>
+                        <% addon_rows.each do |addon_row| %>
+                          <div class="quote-item-desc-sub is-addon">
+                            <span class="quote-item-desc-bullet">&bull;</span><%= addon_row[:name] %>
+                            <% case addon_row[:change_type] %>
+                            <% when :updated %>
+                              <%= quote_inline_diff_money(addon_row[:before], addon_row[:after], @quote.currency, show_symbol: @template.show_currency, template: @template) %>
+                            <% when :removed %>
+                              (<span class="quote-inline-old"><%= template_money(addon_row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %></span>)
+                              <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span>
+                            <% else %>
+                              (<%= template_money(addon_row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)
+                              <% if addon_row[:change_type] == :added %><span class="quote-inline-flag quote-inline-flag--added quote-inline-flag--compact"><%= t("quote_document.inline_diff.added") %></span><% end %>
+                            <% end %>
+                          </div>
                         <% end %>
                       </div>
                     <% end %>
@@ -186,9 +230,19 @@
                 <% end %>
               </div>
             </td>
-            <td class="is-right"><%= item.quantity %></td>
-            <td class="is-money"><%= template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
-            <td class="is-money"><%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+            <td class="is-right"><%= quantity_changed ? quote_stacked_diff_text(row_diff[:quantity_before], row_diff[:quantity_after]) : item.quantity %></td>
+            <td class="is-money"><%= unit_price_changed ? quote_stacked_diff_money(row_diff[:unit_price_before], row_diff[:unit_price_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+            <td class="is-money"><%= (quantity_changed || unit_price_changed) ? quote_stacked_diff_money(row_diff[:line_total_before], row_diff[:line_total_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+          </tr>
+        <% end %>
+        <% Array(revision_diff&.dig(:removed_items)).each do |removed_item| %>
+          <tr class="quote-row-removed">
+            <td class="is-left">-</td>
+            <% if @template.show_images? %><td class="is-left">-</td><% end %>
+            <td class="is-left"><span class="quote-inline-old"><%= removed_item[:product_name] %></span> <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span></td>
+            <td class="is-right"><span class="quote-inline-old"><%= removed_item[:quantity_before] %></span></td>
+            <td class="is-money"><span class="quote-inline-old"><%= template_money(removed_item[:unit_price_before], @quote.currency, @template, show_currency: @template.show_currency) %></span></td>
+            <td class="is-money"><span class="quote-inline-old"><%= template_money(removed_item[:line_total_before], @quote.currency, @template, show_currency: @template.show_currency) %></span></td>
           </tr>
         <% end %>
         <% pdf_filler_rows.times do %>
@@ -210,6 +264,7 @@
   <% currency_code = @quote.currency.to_s.upcase.presence || "USD" %>
   <% discount_amount = @quote.discount_amount.to_d %>
   <% has_discount = discount_amount.positive? %>
+  <% show_discount_row = has_discount %>
   <% original_total = @quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d %>
   <% grand_amount_text = template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %>
   <div class="pdf-summary-stack">
@@ -221,13 +276,15 @@
       <% if @template.show_shipping %>
         <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
       <% end %>
-      <% if has_discount %>
-        <p class="quote-total-discount"><span>Discount</span><strong>-<%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-        <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+      <% if show_discount_row %>
+        <p class="quote-total-discount"><span>Discount</span><strong><%= has_discount ? "-#{template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency)}" : template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+        <% if has_discount %>
+          <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
+        <% end %>
       <% end %>
       <p class="quote-total-grand">
         <span>Grand Total</span>
-        <strong><%= grand_amount_text %></strong>
+        <strong><%= revision_diff.present? && revision_diff[:total_before].to_d != revision_diff[:total_after].to_d ? quote_stacked_diff_money(revision_diff[:total_before], revision_diff[:total_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : grand_amount_text %></strong>
       </p>
       <% if has_discount %>
         <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
@@ -238,11 +295,24 @@
     <% end %>
   </div>
 
+  <% revision_summary = @template.show_pdf_revision_summary? ? QuoteRevisionSummaryService.new(quote: @quote).call : nil %>
+  <% if revision_summary.present? %>
+    <section class="quote-section-block quote-section-block--revision-summary">
+      <h3><%= t("quote_document.revision_summary.title") %></h3>
+      <p><%= t("quote_document.revision_summary.compare_versions", current: (revision_diff_context&.dig(:current_revision_number) || revision_summary[:current_revision_number]), previous: (revision_diff_context&.dig(:previous_revision_number) || revision_summary[:previous_revision_number])) %></p>
+      <ul class="quote-revision-summary-list">
+        <% revision_summary[:lines].first(3).each do |line| %>
+          <li><%= line %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+
   <% scope_text = @quote.scope_of_supply.to_s.strip %>
   <% show_scope_of_supply = document_kind != "pi" && @template.show_scope_of_supply && scope_text.present? %>
   <% if show_scope_of_supply %>
     <section class="quote-section-block quote-section-block--scope">
-      <h3><%= @template.resolved_scope_of_supply_label %></h3>
+      <h3><%= @template.resolved_scope_of_supply_label %> <% if scope_of_supply_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
       <%= simple_format(scope_text) %>
     </section>
   <% end %>
@@ -250,8 +320,9 @@
   <% if terms_lines.any? %>
     <section class="quote-section-block">
       <h3>Terms & Conditions</h3>
-      <% terms_lines.each do |label, value| %>
-        <p><strong><%= label %>:</strong> <%= value %></p>
+      <% terms_lines.each do |label, value, field_key| %>
+        <% field_changed = revision_diff.present? && quote_diff_changed?(revision_diff, field_key) %>
+        <p><strong><%= label %>:</strong> <% if field_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %> <%= value %></p>
       <% end %>
     </section>
   <% end %>

@@ -7,14 +7,10 @@
 <% quote_document_locale = @quote_document_locale || I18n.locale %>
 <% reason_missing = (@quote.status.to_s == "won" && @quote.win_reason.blank?) || (@quote.status.to_s == "lost" && @quote.loss_reason.blank?) %>
 <% reason_action_label = @quote.status.to_s == "won" ? t("quotes.view.show.toolbar.add_win_reason") : t("quotes.view.show.toolbar.add_loss_reason") %>
-<div class="quote-document quote-document-shell<%= " quote-watermarked" if watermark_text.present? %>"
-     data-watermark="<%= watermark_text %>"
+<div class="quote-document quote-document-shell"
      data-has-newer-revision="<%= @has_newer_revision ? "true" : "false" %>"
      data-current-latest="<%= current_latest_revision ? "true" : "false" %>"
      style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
-  <% if watermark_image_url.present? %>
-    <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-watermark-image">
-  <% end %>
   <% active_template = @template %>
   <% spec_label = @quote.resolved_spec_label %>
   <% addon_label = @quote.resolved_addon_label %>
@@ -104,76 +100,41 @@
       else
         t("quotes.view.show.urgency_valid", count: days_left)
       end %>
-  <section class="quote-signal-strip <%= 'is-urgent' if days_left.present? && days_left <= 3 %>">
-    <div class="quote-signal-item">
-      <span class="quote-signal-label"><%= t("quotes.view.show.momentum") %></span>
-      <strong><%= urgency_text %></strong>
+<% share_count = @quote.quote_shares.size %>
+<% last_shared_at = @quote.quote_shares.maximum(:created_at) %>
+<% last_updated_text = format_in_user_time(@quote.updated_at, current_user) %>
+<% interaction_state =
+    if !viewed_flag
+      t("quotes.view.show.not_viewed_yet")
+    elsif @quote.engagement_label == :hot
+      t("quotes.view.show.engagement_hot_signal", count: total_views, duration_suffix: "")
+    else
+      t("quotes.view.show.viewed_count", count: total_views)
+    end %>
+  <section class="quote-summary-strip">
+    <div class="quote-summary-chip">
+      <span><%= t("quotes.view.show.summary.current_revision", default: "Current Version") %></span>
+      <strong>V<%= @quote.revision_number %></strong>
     </div>
-    <div class="quote-signal-item">
-      <span class="quote-signal-label"><%= t("quotes.view.show.engagement") %></span>
-      <strong><%= engagement_text %></strong>
+    <div class="quote-summary-chip">
+      <span><%= t("quotes.view.show.summary.interaction", default: "Interaction") %></span>
+      <strong><%= interaction_state %></strong>
     </div>
-    <div class="quote-signal-item">
-      <span class="quote-signal-label"><%= t("quotes.view.show.current_focus") %></span>
-      <strong><%= next_action_text %></strong>
+    <div class="quote-summary-chip">
+      <span><%= t("quotes.view.show.summary.shares", default: "Shares") %></span>
+      <strong><%= t("quotes.view.show.summary.share_count", count: share_count, default: "%{count} shares") %></strong>
+    </div>
+    <div class="quote-summary-chip">
+      <span><%= t("quotes.view.show.summary.updated", default: "Updated") %></span>
+      <strong><%= last_updated_text.presence || "-" %></strong>
     </div>
   </section>
 
-  <details class="quote-engagement-details">
-    <summary><%= t("quotes.view.show.engagement_details") %></summary>
-    <%= render "shared/quote_engagement_panel" %>
-    <% access_events = @quote.quote_shares.flat_map { |share| Array(share.view_events) } %>
-    <% country_counts = Hash.new(0) %>
-    <% ip_counts = Hash.new(0) %>
-    <% access_events.each do |event| %>
-      <% country = event["country"].presence || t("quotes.view.show.unknown") %>
-      <% ip = event["ip"].presence || t("quotes.view.show.unknown") %>
-      <% country_counts[country] += 1 %>
-      <% ip_counts[ip] += 1 %>
-    <% end %>
-    <% top_countries = country_counts.sort_by { |(_, count)| -count }.first(3) %>
-    <% top_ips = ip_counts.sort_by { |(_, count)| -count }.first(3) %>
-    <% recent_accesses = access_events.last(5).reverse %>
-    <% recent_access_lines = recent_accesses.map do |event| %>
-      <% tags = [] %>
-      <% tags << event["country"] if event["country"].present? %>
-      <% tags << event["ip"] if event["ip"].present? %>
-      <% event_at = begin
-           Time.iso8601(event["at"].to_s)
-         rescue StandardError
-           nil
-         end %>
-      <% formatted_at = event_at ? format_in_user_time(event_at, current_user) : event["at"] %>
-      <% "#{formatted_at}#{tags.any? ? " [#{tags.join(' | ')}]" : ""}" %>
-    <% end %>
-    <div class="quote-engagement-details-grid">
-      <p><strong><%= t("quotes.view.show.time_zone") %>:</strong> <%= viewer_tz.name %></p>
-      <p><strong><%= t("quotes.view.show.sent") %>:</strong> <%= format_in_user_time(@quote.sent_at, current_user) %> <%= "(#{relative_in_user_time(@quote.sent_at, current_user)})" if @quote.sent_at.present? %></p>
-      <p><strong><%= t("quotes.view.show.last_shared") %>:</strong> <span id="quote-last-shared-at"><%= format_in_user_time(@quote.quote_shares.maximum(:created_at), current_user) %></span></p>
-      <p><strong><%= t("quotes.view.show.first_viewed") %>:</strong> <%= format_in_user_time(@quote.quote_shares.minimum(:first_viewed_at), current_user) %></p>
-      <p><strong><%= t("quotes.view.show.last_viewed") %>:</strong> <%= format_in_user_time(@quote.viewed_at, current_user) %> <%= "(#{relative_in_user_time(@quote.viewed_at, current_user)})" if @quote.viewed_at.present? %></p>
-      <p><strong><%= t("quotes.view.show.total_views") %>:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
-      <p><strong><%= t("quotes.view.show.top_countries") %>:</strong> <%= top_countries.any? ? top_countries.map { |country, count| "#{country} (#{count})" }.join(", ") : "-" %></p>
-      <p><strong><%= t("quotes.view.show.top_ips") %>:</strong> <%= top_ips.any? ? top_ips.map { |ip, count| "#{ip} (#{count})" }.join(", ") : "-" %></p>
-      <p><strong><%= t("quotes.view.show.recent_accesses") %>:</strong> <%= recent_access_lines.any? ? recent_access_lines.join(" | ") : "-" %></p>
-    </div>
-  </details>
-
-  <% if @revision_diff.present? && @previous_revision_quote.present? %>
-    <div id="quote-revision-diff">
-      <%= render "revision_diff" %>
-    </div>
-  <% end %>
-
-  <% if @quote_decision_review.present? %>
-    <%= render "decision_review" %>
-  <% end %>
-
-  <% if @quote_decision_timeline.any? %>
-    <%= render "decision_timeline" %>
-  <% end %>
-
   <% I18n.with_locale(quote_document_locale) do %>
+  <div class="<%= watermark_text.present? ? "quote-watermarked" : "" %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+  <% if watermark_image_url.present? %>
+    <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-watermark-image">
+  <% end %>
   <section class="quote-meta-grid">
     <article class="quote-meta-card">
       <h3><%= t("quote_document.labels.seller") %></h3>
@@ -285,8 +246,8 @@
           <tr>
             <% if active_template.show_images? %>
               <td data-label="<%= t("quote_document.labels.image") %>">
-                <% if item.product&.display_image.present? %>
-                  <%= image_tag item.product.display_image, class: "quote-item-image" %>
+                <% if item.effective_image_attachment.present? %>
+                  <%= image_tag item.effective_image_attachment, class: "quote-item-image" %>
                 <% else %>
                   -
                 <% end %>
@@ -413,7 +374,103 @@
   <% if active_template.show_saas_branding %>
     <p class="quote-public-footnote"><%= active_template.saas_branding_footer_text %></p>
   <% end %>
+  </div>
   <% end %>
+
+  <% if @revision_diff.present? && @previous_revision_quote.present? %>
+    <% revision_item_changes = @revision_diff.fetch(:modified_items, []).size + @revision_diff.fetch(:added_items, []).size + @revision_diff.fetch(:removed_items, []).size %>
+    <% revision_removed_items = @revision_diff.fetch(:removed_items, []).size %>
+    <% revision_pricing_changed = @revision_diff.fetch(:financial_changes, []).any? || (@revision_diff[:total_before].to_d != @revision_diff[:total_after].to_d) %>
+    <details id="quote-revision-diff" class="quote-collab-panel">
+      <summary>
+        <span class="quote-collab-title"><%= t("quotes.view.revision_diff.title") %></span>
+        <span class="quote-collab-summary"><%= t("quotes.view.revision_diff.compare_versions", current: @quote.revision_number, previous: @previous_revision_quote.revision_number) %></span>
+        <span class="quote-collab-summary"><%= t("quotes.view.revision_diff.overview_updated_items", count: revision_item_changes) %></span>
+        <% if revision_removed_items.positive? %><span class="quote-collab-summary"><%= t("quotes.view.revision_diff.overview_removed_items", count: revision_removed_items) %></span><% end %>
+        <% if revision_pricing_changed %><span class="quote-collab-summary"><%= t("quotes.view.revision_diff.overview_pricing_changed") %></span><% end %>
+      </summary>
+      <div class="quote-collab-content">
+        <%= render "revision_diff" %>
+      </div>
+    </details>
+  <% end %>
+
+  <% if @quote_decision_review.present? %>
+    <details class="quote-collab-panel">
+      <summary>
+        <span class="quote-collab-title"><%= t("quotes.view.decision_review.title") %></span>
+        <span class="quote-collab-summary"><%= @quote_decision_review[:recommended_move][:label] %></span>
+        <span class="quote-collab-summary"><%= @quote_decision_review[:revision_scope][:value] %></span>
+      </summary>
+      <div class="quote-collab-content">
+        <%= render "decision_review" %>
+      </div>
+    </details>
+  <% end %>
+
+  <% if @quote_decision_timeline.any? %>
+    <% recent_events = @quote_decision_timeline.first(2) %>
+    <details class="quote-collab-panel">
+      <summary>
+        <span class="quote-collab-title"><%= t("quotes.view.decision_timeline.title") %></span>
+        <% recent_events.each do |event| %>
+          <span class="quote-collab-summary"><%= event[:label] %></span>
+        <% end %>
+      </summary>
+      <div class="quote-collab-content">
+        <%= render "decision_timeline" %>
+      </div>
+    </details>
+  <% end %>
+
+  <% access_events = @quote.quote_shares.flat_map { |share| Array(share.view_events) } %>
+  <% country_counts = Hash.new(0) %>
+  <% ip_counts = Hash.new(0) %>
+  <% access_events.each do |event| %>
+    <% country = event["country"].presence || t("quotes.view.show.unknown") %>
+    <% ip = event["ip"].presence || t("quotes.view.show.unknown") %>
+    <% country_counts[country] += 1 %>
+    <% ip_counts[ip] += 1 %>
+  <% end %>
+  <% top_countries = country_counts.sort_by { |(_, count)| -count }.first(3) %>
+  <% top_ips = ip_counts.sort_by { |(_, count)| -count }.first(3) %>
+  <% recent_accesses = access_events.last(5).reverse %>
+  <% recent_access_lines = recent_accesses.map do |event| %>
+    <% tags = [] %>
+    <% tags << event["country"] if event["country"].present? %>
+    <% tags << event["ip"] if event["ip"].present? %>
+    <% event_at = begin
+         Time.iso8601(event["at"].to_s)
+       rescue StandardError
+         nil
+       end %>
+    <% formatted_at = event_at ? format_in_user_time(event_at, current_user) : event["at"] %>
+    <% "#{formatted_at}#{tags.any? ? " [#{tags.join(' | ')}]" : ""}" %>
+  <% end %>
+
+  <details class="quote-collab-panel">
+    <summary>
+      <span class="quote-collab-title"><%= t("quotes.view.show.engagement_details") %></span>
+      <span class="quote-collab-summary"><%= t("quotes.view.show.total_views") %>: <%= total_views %></span>
+      <span class="quote-collab-summary"><%= t("quotes.view.show.last_shared") %>: <%= format_in_user_time(last_shared_at, current_user).presence || "-" %></span>
+    </summary>
+    <div class="quote-collab-content">
+      <section class="quote-engagement-details quote-engagement-details--flat">
+        <%= render "shared/quote_engagement_panel" %>
+        <div class="quote-engagement-details-grid">
+          <p><strong><%= t("quotes.view.show.time_zone") %>:</strong> <%= viewer_tz.name %></p>
+          <p><strong><%= t("quotes.view.show.sent") %>:</strong> <%= format_in_user_time(@quote.sent_at, current_user) %> <%= "(#{relative_in_user_time(@quote.sent_at, current_user)})" if @quote.sent_at.present? %></p>
+          <p><strong><%= t("quotes.view.show.last_shared") %>:</strong> <span id="quote-last-shared-at"><%= format_in_user_time(@quote.quote_shares.maximum(:created_at), current_user) %></span></p>
+          <p><strong><%= t("quotes.view.show.first_viewed") %>:</strong> <%= format_in_user_time(@quote.quote_shares.minimum(:first_viewed_at), current_user) %></p>
+          <p><strong><%= t("quotes.view.show.last_viewed") %>:</strong> <%= format_in_user_time(@quote.viewed_at, current_user) %> <%= "(#{relative_in_user_time(@quote.viewed_at, current_user)})" if @quote.viewed_at.present? %></p>
+          <p><strong><%= t("quotes.view.show.total_views") %>:</strong> <%= @quote.quote_shares.sum(&:view_count) %></p>
+          <p><strong><%= t("quotes.view.show.top_countries") %>:</strong> <%= top_countries.any? ? top_countries.map { |country, count| "#{country} (#{count})" }.join(", ") : "-" %></p>
+          <p><strong><%= t("quotes.view.show.top_ips") %>:</strong> <%= top_ips.any? ? top_ips.map { |ip, count| "#{ip} (#{count})" }.join(", ") : "-" %></p>
+          <p><strong><%= t("quotes.view.show.recent_accesses") %>:</strong> <%= recent_access_lines.any? ? recent_access_lines.join(" | ") : "-" %></p>
+        </div>
+      </section>
+    </div>
+  </details>
 </div>
 
 <div class="quote-toolbar quote-toolbar-surface app-toolbar-surface app-toolbar-surface--compact">
@@ -425,7 +482,7 @@
                        options_from_collection_for_select(@template_options, :id, :name, @template.id),
                        id: "template_select_#{@quote.id}",
                        class: "js-template-select #{ui_input_classes}",
-                       data: { update_url: update_template_quote_path(@quote), doc: @document_kind, searchable_select: true, search_placeholder: t("quotes.view.show.toolbar.search_template") } %>
+                       data: { update_url: update_template_quote_path(@quote), doc: @document_kind } %>
       </div>
     <% end %>
 

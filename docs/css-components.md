@@ -70,6 +70,10 @@ With feature-level adapter class:
 - `.quote-btn*`
 - `.quote-toolbar*`
 - `.quote-turnstile-modal*`
+- `.quote-inline-*`, `.quote-diff-*` (revision diff presentation)
+  - `.quote-inline-flag*` is a lightweight text annotation (no pill, no border, no separator glyph)
+- `.quote-revision-*` (internal revision comparison panel and detail layout)
+- `.quote-summary-*`, `.quote-collab-*` (internal webview default-focus + collapsible collaboration blocks)
 
 Quote families are local to quote workflows.
 
@@ -183,6 +187,7 @@ data-action="click->clipboard#copy"
 3. Check responsive behavior for edited families.
 4. Remove dead selectors in the same change when safe.
 5. Update this manual when conventions change.
+6. If a CSS change no longer matches this manual, update this file in the same PR.
 
 ## 11. What Not To Do
 

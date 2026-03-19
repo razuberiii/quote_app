@@ -30,6 +30,8 @@
     window.__quoteTemplateAutoApplyBound = true;
 
     const toast = () => document.getElementById("quote-toast");
+    const defaultTemplateUpdatedMessage = "<%= j(t("quotes.flash.template_updated")) %>";
+    const defaultTemplateUpdateFailedMessage = "<%= j(t("quotes.view.show.toolbar.template_update_failed", default: "Template update failed")) %>";
 
     const showToast = (message, error = false) => {
       const el = toast();
@@ -49,39 +51,101 @@
 
     window.refreshQuoteState = async (force = false, skipBlocking = false) => {};
 
+    const syncSearchableSelectInput = (select) => {
+      if (!select) return;
+      const wrapper = select.previousElementSibling;
+      if (!wrapper) return;
+      const input = wrapper.querySelector("input[type='text']");
+      const selectedOption = select.options[select.selectedIndex];
+      if (input && selectedOption) input.value = selectedOption.textContent || "";
+    };
+
+    const refreshQuoteContent = async () => {
+      const container = document.getElementById("quote-page-content");
+      const refreshUrl = container?.dataset?.refreshUrl;
+      if (!refreshUrl) return;
+
+      const response = await fetch(refreshUrl, {
+        headers: { "Accept": "text/vnd.turbo-stream.html" },
+        credentials: "same-origin"
+      });
+      if (!response.ok) throw new Error("refresh failed");
+
+      const streamHtml = await response.text();
+      if (!streamHtml.trim()) return;
+      Turbo.renderStreamMessage(streamHtml);
+      window.bindSearchableSelects?.();
+    };
+
+    document.addEventListener("focusin", (event) => {
+      const select = event.target.closest(".js-template-select");
+      if (!select) return;
+
+      select.dataset.previousValue = select.value;
+      if (!select.dataset.currentValue) select.dataset.currentValue = select.value;
+    });
+
     document.addEventListener("change", async (event) => {
       const select = event.target.closest(".js-template-select");
       if (!select) return;
+      if (select.dataset.busy === "true") return;
 
       const url = select.dataset.updateUrl;
       const doc = select.dataset.doc || "quote";
       const templateId = select.value;
+      const currentValue = select.dataset.currentValue || select.dataset.previousValue || templateId;
+      if (templateId === currentValue) return;
+
       const token = document.querySelector("meta[name='csrf-token']")?.content;
       if (!url || !templateId || !token) return;
 
+      const restoreSelection = () => {
+        const fallbackValue = select.dataset.currentValue || select.dataset.previousValue;
+        if (!fallbackValue) return;
+        select.value = fallbackValue;
+        syncSearchableSelectInput(select);
+      };
+
       try {
+        select.dataset.busy = "true";
+        select.disabled = true;
+
         const body = new URLSearchParams({ template_id: templateId, doc });
         const response = await fetch(url, {
           method: "PATCH",
           headers: {
-            "Accept": "text/vnd.turbo-stream.html, application/json",
+            "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
             "X-CSRF-Token": token
           },
           body
         });
 
-        if (!response.ok) throw new Error("request failed");
+        let payload = {};
+        try {
+          payload = await response.json();
+        } catch (_) {
+          payload = {};
+        }
+        if (!response.ok) throw new Error(payload.message || defaultTemplateUpdateFailedMessage);
 
-        const contentType = response.headers.get("content-type") || "";
-        if (contentType.includes("turbo-stream")) {
-          const streamHtml = await response.text();
-          Turbo.renderStreamMessage(streamHtml);
+        select.dataset.currentValue = templateId;
+        syncSearchableSelectInput(select);
+
+        try {
+          await refreshQuoteContent();
+        } catch (_) {
+          window.location.reload();
+          return;
         }
 
-        showToast("Template updated");
-      } catch (_) {
-        showToast("Template update failed", true);
+        showToast(payload.message || defaultTemplateUpdatedMessage);
+      } catch (error) {
+        restoreSelection();
+        showToast(error?.message || defaultTemplateUpdateFailedMessage, true);
+      } finally {
+        select.dataset.busy = "false";
+        select.disabled = false;
       }
     });
 

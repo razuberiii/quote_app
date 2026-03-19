@@ -39,6 +39,7 @@ class QuoteExporter
     render_pdf_parties(pdf)
     render_pdf_items(pdf)
     render_pdf_totals(pdf)
+    render_pdf_revision_summary(pdf)
     render_pdf_terms(pdf)
     render_pdf_company_credentials(pdf)
     render_pdf_footer(pdf)
@@ -64,6 +65,7 @@ class QuoteExporter
     render_excel_totals(sheet, styles, header_ctx)
     render_excel_sections(sheet, styles)
     apply_excel_post_layout(sheet, header_ctx, config)
+    render_excel_revision_summary_sheet(workbook, styles)
 
     package
   end
@@ -315,6 +317,31 @@ class QuoteExporter
     pdf.move_down 4
     lines.each { |line| pdf.text pdf_text(line), size: 10 }
     pdf.move_down 10
+  end
+
+  def render_pdf_revision_summary(pdf)
+    return unless @template.show_pdf_revision_summary?
+
+    summary = revision_summary_payload
+    return if summary.blank?
+
+    pdf.move_down 10
+    pdf.text doc_t("revision_summary.title"), style: :bold, size: 11
+    pdf.move_down 2
+    pdf.text(
+      doc_t(
+        "revision_summary.compare_versions",
+        current: summary[:current_revision_number],
+        previous: summary[:previous_revision_number]
+      ),
+      size: 9
+    )
+    pdf.move_down 4
+
+    summary[:lines].first(5).each do |line|
+      pdf.text pdf_text("• #{line}"), size: 9
+    end
+
   end
 
   def render_pdf_company_credentials(pdf)
@@ -701,8 +728,6 @@ class QuoteExporter
   def add_excel_item_image(sheet, item, image_col_index)
     return if image_col_index.nil?
     return unless @template.show_images?
-    return unless product_display_attachment(item.product)
-
     image_path = excel_image_path_for(item)
     return if image_path.blank?
 
@@ -720,7 +745,7 @@ class QuoteExporter
   end
 
   def excel_image_path_for(item)
-    attachment = product_display_attachment(item.product)
+    attachment = item.effective_image_attachment
     return nil unless attachment
 
     blob = attachment.blob
@@ -756,7 +781,7 @@ class QuoteExporter
 
   def pdf_image_cell(item)
     return "-" unless @template.show_images?
-    attachment = product_display_attachment(item.product)
+    attachment = item.effective_image_attachment
     return "-" unless attachment
 
     path = ActiveStorage::Blob.service.path_for(attachment.blob.key)
@@ -765,11 +790,36 @@ class QuoteExporter
     doc_t("labels.image")
   end
 
-  def product_display_attachment(product)
-    return nil unless product
-    return product.image_attachment if product.image_attachment.present?
+  def render_excel_revision_summary_sheet(workbook, styles)
+    return unless @template.show_excel_revision_summary?
 
-    product.gallery_images.attachments.first
+    summary = revision_summary_payload
+    return if summary.blank?
+
+    sheet = workbook.add_worksheet(name: doc_t("revision_summary.sheet_name"))
+    sheet.add_row [ doc_t("revision_summary.title") ], style: styles[:section]
+    sheet.merge_cells("A1:E1")
+    sheet.add_row [
+      doc_t(
+        "revision_summary.compare_versions",
+        current: summary[:current_revision_number],
+        previous: summary[:previous_revision_number]
+      )
+    ], style: styles[:terms_value]
+    sheet.merge_cells("A2:E2")
+    sheet.add_row []
+
+    summary[:lines].first(15).each do |line|
+      row = sheet.rows.size + 1
+      sheet.add_row [ "• #{line}" ], style: styles[:terms_value]
+      sheet.merge_cells("A#{row}:E#{row}")
+    end
+
+    sheet.column_widths(84, 12, 12, 12, 12)
+  end
+
+  def revision_summary_payload
+    @revision_summary_payload ||= QuoteRevisionSummaryService.new(quote: @quote).call
   end
 
   def configure_pdf_font(pdf)

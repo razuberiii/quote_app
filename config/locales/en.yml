@@ -401,13 +401,38 @@ en:
     errors:
       valid_until_on_or_after_today: must be today or later
     change_summary:
-      header: "Revision Update Summary:"
-      quantity_updated: "- %{product} quantity updated: %{before} -> %{after}"
-      unit_price_updated: "- %{product} unit price updated: %{before} -> %{after}"
-      added_item: "- Added new item: %{product}"
-      removed_item: "- Removed item: %{product}"
-      commercial_updated: "- %{label} updated: %{before} -> %{after}"
-      total_updated: "Total updated: %{before} -> %{after}"
+      header: "Quote revision summary (V%{current} vs V%{previous})"
+      header_fallback: "Quote revision summary"
+      overview_title: "Overview"
+      overview_updated_items:
+        one: "- 1 item updated"
+        other: "- %{count} items updated"
+      overview_removed_items:
+        one: "- 1 item removed"
+        other: "- %{count} items removed"
+      overview_pricing_changed: "- pricing changed"
+      overview_commercial_changed: "- commercial terms changed"
+      item_changes_title: "Item changes"
+      updated_items_title: "Updated items"
+      removed_items_title: "Removed items"
+      added_items_title: "Added items"
+      pricing_changes_title: "Pricing changes"
+      commercial_changes_title: "Commercial changes"
+      item_bullet: "- %{item}"
+      detail_bullet: "  - %{detail}"
+      row_bullet: "- %{label}: %{before} -> %{after}"
+      qty_change_line: "Qty: %{before} -> %{after}"
+      unit_change_line: "Unit price: %{before} -> %{after}"
+      line_total_change_line: "Line total: %{before} -> %{after}"
+      qty_line: "Qty: %{value}"
+      unit_line: "Unit price: %{value}"
+      line_total_line: "Line total: %{value}"
+      spec_change_updated: "Spec: %{key} %{before} -> %{after}"
+      spec_change_added: "Spec added: %{key} %{value}"
+      spec_change_removed: "Spec removed: %{key} %{value}"
+      addon_change_updated: "Add-on: %{name} %{before} -> %{after}"
+      addon_change_added: "Add-on added: %{name} %{amount}"
+      addon_change_removed: "Add-on removed: %{name} %{amount}"
     share_message:
       greeting: Hello %{customer_name},
       intro: Please find our quote below.
@@ -450,15 +475,60 @@ en:
         compare_versions: Comparing V%{current} with V%{previous}.
         copy_change_summary: Copy change summary
         empty: No pricing, terms, or line-item changes were found between these two revisions.
+        item_changes: Item changes
+        updated_items: Updated items
+        removed_items: Removed items
+        added_items: Added items
+        no_item_changes: No item changes.
+        commercial_changes: Commercial changes
+        no_commercial_changes: No commercial changes.
+        pricing_changes: Pricing changes
+        no_pricing_changes: No pricing changes.
+        overview_pricing_changed: pricing changed
+        overview_commercial_changed: commercial terms changed
+        overview_updated_items:
+          one: 1 item updated
+          other: "%{count} items updated"
+        overview_removed_items:
+          one: 1 item removed
+          other: "%{count} items removed"
         modified: Modified
         added: Added
         removed: Removed
         commercial_terms: Commercial Terms
+        financial_changes: Financial changes
+        specifications: Specifications
+        addons: Add-ons
         qty_change: Qty %{before} -> %{after}
         unit_change: Unit %{before} -> %{after}
+        line_total_change: Line total %{before} -> %{after}
         qty: Qty %{value}
         unit: Unit %{value}
+        line_total: Line total %{value}
+        spec_change_updated: "Spec %{key}: %{before} -> %{after}"
+        spec_change_added: "Spec added %{key}: %{value}"
+        spec_change_removed: "Spec removed %{key}: %{value}"
+        addon_change_updated: "Add-on %{name}: %{before} -> %{after}"
+        addon_change_added: "Add-on added %{name}: %{amount}"
+        addon_change_removed: "Add-on removed %{name}: %{amount}"
         total_updated: Total updated
+        total_unchanged: Total unchanged
+        fields:
+          custom_title: Quote Title
+          valid_until: Valid Until
+          payment_term: Payment Term
+          trade_term: Trade Term
+          scope_of_supply: Scope of Supply
+          request_reason: Request Reason
+          notes: Notes
+          terms_text: Terms
+          delivery_notes: Delivery Notes
+          legal_disclaimer: Disclaimer
+        financial_fields:
+          tax_amount: Tax / VAT
+          shipping_amount: Shipping
+          discount_amount: Discount
+          grand_total: Grand Total
       show:
         created_banner:
           title: Quote created successfully.
@@ -494,6 +564,12 @@ en:
         next_action: Next Action
         current_focus: Current priority
         engagement_details: Engagement Details
+        summary:
+          current_revision: Current Version
+          interaction: Interaction
+          shares: Shares
+          updated: Updated
+          share_count: "%{count} shares"
         unknown: Unknown
         time_zone: Time Zone
         sent: Sent
@@ -568,6 +644,7 @@ en:
           public_link_ready_manual: Public link is ready. Copy it manually if needed.
           public_link_copied: Public link copied.
           share_failed: Unable to share
+          template_update_failed: Template update failed
           link_copied: Link copied.
           copy_failed_browser: Copy failed in this browser.
           undo: Undo
@@ -689,6 +766,18 @@ en:
         quote_item_hint_2: Product default prices are reference-only. Final quote prices should be entered in the selected quote currency.
         quote_item_hint_3: If product reference currency differs from quote currency, unit price will not be auto-filled.
         quote_item_hint_4: Specifications and add-ons can be loaded from product presets, switched to another preset, or pasted line by line as text.
+        image: Image
+        item_image: Item image
+        item_image_preview: Item image preview
+        add_image: Add image
+        change_image: Change image
+        current_selected_image: Current selected image
+        no_image_selected: No image selected
+        remove_image: Remove image
+        product_gallery_empty: No gallery images for this product yet.
+        product_main_image: Main image
+        product_gallery_image: Gallery image %{index}
+        select_from_gallery: Select from gallery
         currency_mismatch_warning: "Currency mismatch warning: unit price auto-fill will be disabled and must be entered manually."
         pricing_attention_needed: Pricing needs attention before this quote can be saved.
         product_name: Product Name
@@ -830,8 +919,8 @@ en:
             value: No change
             detail: The current and previous revisions are identical in price and terms.
           changed:
-            value: "%{item_count} item / %{term_count} term"
-            detail: Found %{item_count} line-item changes and %{commercial_count} pricing or terms changes versus the previous revision.
+            value: "%{item_count} items / %{commercial_count} commercial / %{pricing_count} pricing"
+            detail: Found %{item_count} item changes, %{commercial_count} commercial changes, and %{pricing_count} pricing changes versus the previous revision.
         review_notes:
           accepted_on: Accepted on %{date}.
           marked_won_on: Marked won on %{date}.
@@ -1884,6 +1973,8 @@ en:
         preset_name_placeholder: Modern B2B Quotation
         preset_slug: Preset Slug
         preset_slug_placeholder: auto-from-name
+        preset_slug_hint: Used as an internal unique identifier. Duplicate slugs will not be created.
+        preset_slug_taken: "This identifier is already used: %{slug}"
         default_document_view: Default Document Type
         document_kind:
           quotation: Quotation
@@ -1936,6 +2027,9 @@ en:
         show_watermark: Show watermark
         show_watermark_hint: If enabled, preview/output will show watermark. Text mode uses watermark text; if text is empty, company name is used. Image mode overrides text mode.
         show_saas_branding: Show Rubusoo footer (white-label off by default)
+        show_public_revision_summary: Show revision summary on public link
+        show_pdf_revision_summary: Show revision summary on PDF
+        show_excel_revision_summary: Show revision summary on Excel
         show_excel_gridlines: Show Excel gridlines
         signature_name: Authorized by name (optional)
         signature_name_placeholder: e.g. Amy Chen
@@ -2076,6 +2170,31 @@ en:
       total: Total
     notes:
       you_save: You save
+    revision_summary:
+      title: Revision Summary
+      compare_versions: Compared with V%{previous} -> V%{current}
+      items_updated_count:
+        one: "%{count} item updated"
+        other: "%{count} items updated"
+      items_added_count:
+        one: "%{count} item added"
+        other: "%{count} items added"
+      items_removed_count:
+        one: "%{count} item removed"
+        other: "%{count} items removed"
+      pricing_updated: pricing updated
+      scope_of_supply_updated: scope of supply updated
+      terms_updated: terms updated
+      quantity_updated: "%{item}: quantity updated (%{before} -> %{after})"
+      unit_price_updated: "%{item}: unit price updated"
+      items_added: "Added items: %{names}"
+      items_removed: "Removed items: %{names}"
+      total_updated: "Grand total: %{before} -> %{after}"
+      sheet_name: Revision Summary
+    inline_diff:
+      added: Added
+      removed: Removed
+      updated: Updated
   company_documents:
     flash:
       uploaded: Company document uploaded.

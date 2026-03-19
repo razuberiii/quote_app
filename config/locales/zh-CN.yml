@@ -401,13 +401,38 @@ zh-CN:
     errors:
       valid_until_on_or_after_today: 不能早于今天
     change_summary:
-      header: 修订更新摘要：
-      quantity_updated: "- %{product} 数量更新：%{before} -> %{after}"
-      unit_price_updated: "- %{product} 单价更新：%{before} -> %{after}"
-      added_item: "- 新增条目：%{product}"
-      removed_item: "- 移除条目：%{product}"
-      commercial_updated: "- %{label} 已更新：%{before} -> %{after}"
-      total_updated: 总额更新：%{before} -> %{after}
+      header: 报价修订摘要（V%{current} vs V%{previous}）
+      header_fallback: 报价修订摘要
+      overview_title: 总览
+      overview_updated_items:
+        one: "- 1 个条目已修改"
+        other: "- %{count} 个条目已修改"
+      overview_removed_items:
+        one: "- 1 个条目已移除"
+        other: "- %{count} 个条目已移除"
+      overview_pricing_changed: "- 金额已变更"
+      overview_commercial_changed: "- 商务条款已变更"
+      item_changes_title: 条目变更
+      updated_items_title: 已修改条目
+      removed_items_title: 已移除条目
+      added_items_title: 已新增条目
+      pricing_changes_title: 金额变更
+      commercial_changes_title: 商务变更
+      item_bullet: "- %{item}"
+      detail_bullet: "  - %{detail}"
+      row_bullet: "- %{label}：%{before} -> %{after}"
+      qty_change_line: "数量：%{before} -> %{after}"
+      unit_change_line: "单价：%{before} -> %{after}"
+      line_total_change_line: "行小计：%{before} -> %{after}"
+      qty_line: "数量：%{value}"
+      unit_line: "单价：%{value}"
+      line_total_line: "行小计：%{value}"
+      spec_change_updated: "规格：%{key} %{before} -> %{after}"
+      spec_change_added: "规格新增：%{key} %{value}"
+      spec_change_removed: "规格移除：%{key} %{value}"
+      addon_change_updated: "附加项：%{name} %{before} -> %{after}"
+      addon_change_added: "附加项新增：%{name} %{amount}"
+      addon_change_removed: "附加项移除：%{name} %{amount}"
     share_message:
       greeting: "%{customer_name}，您好："
       intro: 请查收我们为您准备的报价单。
@@ -450,15 +475,60 @@ zh-CN:
         compare_versions: 对比 V%{current} 与 V%{previous}。
         copy_change_summary: 复制变更摘要
         empty: 这两个修订版本之间未检测到商务或条目级变更。
+        item_changes: 条目变更
+        updated_items: 已修改条目
+        removed_items: 已移除条目
+        added_items: 已新增条目
+        no_item_changes: 无条目变更。
+        commercial_changes: 商务变更
+        no_commercial_changes: 无商务变更。
+        pricing_changes: 金额变更
+        no_pricing_changes: 无金额变更。
+        overview_pricing_changed: 金额已变更
+        overview_commercial_changed: 商务条款已变更
+        overview_updated_items:
+          one: 1 个条目已修改
+          other: "%{count} 个条目已修改"
+        overview_removed_items:
+          one: 1 个条目已移除
+          other: "%{count} 个条目已移除"
         modified: 已修改
         added: 已新增
         removed: 已移除
         commercial_terms: 商务条款
+        financial_changes: 金额变更
+        specifications: 规格
+        addons: 附加项
         qty_change: 数量 %{before} -> %{after}
         unit_change: 单价 %{before} -> %{after}
+        line_total_change: 行小计 %{before} -> %{after}
         qty: 数量 %{value}
         unit: 单价 %{value}
+        line_total: 行小计 %{value}
+        spec_change_updated: "规格 %{key}：%{before} -> %{after}"
+        spec_change_added: "规格新增 %{key}：%{value}"
+        spec_change_removed: "规格移除 %{key}：%{value}"
+        addon_change_updated: "附加项 %{name}：%{before} -> %{after}"
+        addon_change_added: "附加项新增 %{name}：%{amount}"
+        addon_change_removed: "附加项移除 %{name}：%{amount}"
         total_updated: 总额更新
+        total_unchanged: 总额未变
+        fields:
+          custom_title: 报价标题
+          valid_until: 有效期
+          payment_term: 付款条款
+          trade_term: 贸易条款
+          scope_of_supply: 供货范围
+          request_reason: 修改原因
+          notes: 备注
+          terms_text: 条款说明
+          delivery_notes: 交付说明
+          legal_disclaimer: 法律声明
+        financial_fields:
+          tax_amount: 税费
+          shipping_amount: 运费
+          discount_amount: 折扣
+          grand_total: 总计
       show:
         created_banner:
           title: 报价创建成功。
@@ -494,6 +564,12 @@ zh-CN:
         next_action: 下一步动作
         current_focus: 当前优先事项
         engagement_details: 互动详情
+        summary:
+          current_revision: 当前版本
+          interaction: 互动状态
+          shares: 分享次数
+          updated: 最近更新
+          share_count: "%{count} 次分享"
         unknown: 未知
         time_zone: 时区
         sent: 发送时间
@@ -568,6 +644,7 @@ zh-CN:
           public_link_ready_manual: 分享链接已就绪，请手动复制。
           public_link_copied: 分享链接已复制。
           share_failed: 分享失败
+          template_update_failed: 模板切换失败
           link_copied: 链接已复制。
           copy_failed_browser: 当前浏览器复制失败。
           undo: 撤销
@@ -689,6 +766,18 @@ zh-CN:
         quote_item_hint_2: 产品默认价格仅供参考。最终报价应按当前报价币种填写。
         quote_item_hint_3: 若产品参考币种与报价币种不同，将不会自动填充单价。
         quote_item_hint_4: 规格和附加项可从产品预设加载、切换为其他预设，或按行粘贴文本。
+        image: 图片
+        item_image: 报价项图片
+        item_image_preview: 报价项图片预览
+        add_image: 添加图片
+        change_image: 更换图片
+        current_selected_image: 当前已选图片
+        no_image_selected: 暂未选择图片
+        remove_image: 移除图片
+        product_gallery_empty: 当前产品暂无图库图片。
+        product_main_image: 主图
+        product_gallery_image: 图库图片 %{index}
+        select_from_gallery: 从图库选择
         currency_mismatch_warning: 币种不一致警告：单价自动填充将被禁用，需手动输入。
         pricing_attention_needed: 保存前请先处理价格相关问题。
         product_name: 产品名称
@@ -830,8 +919,8 @@ zh-CN:
             value: 无变更
             detail: 当前版本与上一版本在商业层面一致。
           changed:
-            value: "%{item_count} 项目 / %{term_count} 条款"
-            detail: 相对上一版本检测到 %{item_count} 处项目级变更和 %{commercial_count} 处商业条款变更。
+            value: "%{item_count} 项目 / %{commercial_count} 商务 / %{pricing_count} 金额"
+            detail: 相对上一版本检测到 %{item_count} 处项目变更、%{commercial_count} 处商务变更和 %{pricing_count} 处金额变更。
         review_notes:
           accepted_on: "%{date} 已接受。"
           marked_won_on: "%{date} 已标记赢单。"
@@ -1884,6 +1973,8 @@ zh-CN:
         preset_name_placeholder: 现代 B2B 报价模板
         preset_slug: 预设标识
         preset_slug_placeholder: 根据名称自动生成
+        preset_slug_hint: 用于系统内部唯一识别，重复标识不会创建新模板。
+        preset_slug_taken: "该标识已被占用：%{slug}"
         default_document_view: 默认文档视图
         document_kind:
           quotation: 报价单
@@ -1936,6 +2027,9 @@ zh-CN:
         show_watermark: 显示水印
         show_watermark_hint: 开启后，预览和导出都会显示水印。文字模式使用“水印文字”；若留空则使用公司名。上传水印图片后会覆盖文字模式。
         show_saas_branding: 显示 Rubusoo 页脚（默认关闭白标）
+        show_public_revision_summary: 在公开链接显示修订摘要
+        show_pdf_revision_summary: 在 PDF 显示修订摘要
+        show_excel_revision_summary: 在 Excel 显示修订摘要
         show_excel_gridlines: 显示 Excel 网格线
         signature_name: 授权签名姓名（可选）
         signature_name_placeholder: 例如：Amy Chen
@@ -2076,6 +2170,31 @@ zh-CN:
       total: 总计
     notes:
       you_save: 你节省了
+    revision_summary:
+      title: 修订摘要
+      compare_versions: 相比 V%{previous} -> V%{current}
+      items_updated_count:
+        one: "%{count} 个条目已更新"
+        other: "%{count} 个条目已更新"
+      items_added_count:
+        one: "新增 %{count} 个条目"
+        other: "新增 %{count} 个条目"
+      items_removed_count:
+        one: "移除 %{count} 个条目"
+        other: "移除 %{count} 个条目"
+      pricing_updated: 价格已更新
+      scope_of_supply_updated: 供货范围已更新
+      terms_updated: 条款已更新
+      quantity_updated: "%{item}：数量已调整（%{before} -> %{after}）"
+      unit_price_updated: "%{item}：单价已调整"
+      items_added: "新增项目：%{names}"
+      items_removed: "移除项目：%{names}"
+      total_updated: "总金额：%{before} -> %{after}"
+      sheet_name: 修订摘要
+    inline_diff:
+      added: 新增
+      removed: 移除
+      updated: 已更新
   company_documents:
     flash:
       uploaded: 公司文档已上传。

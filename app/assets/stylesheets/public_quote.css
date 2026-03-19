@@ -42,6 +42,11 @@
   color: #4a6380;
 }
 
+.public-quote-themed .quote-total-box p.quote-total-discount > strong,
+.public-quote-themed .quote-total-box p.quote-total-saved > strong {
+  color: #b91c1c;
+}
+
 .public-quote-themed .quote-section-block h3 {
   color: var(--doc-accent, #1f4e79);
 }
@@ -567,6 +572,22 @@
   font-size: var(--q-public-total-secondary-size);
   line-height: var(--q-public-total-secondary-lh);
   font-weight: var(--q-public-total-secondary-w);
+}
+
+.public-quote-document .quote-col-right .quote-diff-stack,
+.public-quote-document .quote-col-money .quote-diff-stack {
+  width: 100%;
+  gap: 0.18rem;
+}
+
+.public-quote-document .quote-total-box p > strong .quote-diff-stack {
+  width: 100%;
+  gap: 0.2rem;
+}
+
+.public-quote-document .quote-total-grand .quote-diff-old {
+  font-size: 0.68em;
+  color: #a6b3c2;
 }
 
 .public-quote-document .quote-engagement-note {

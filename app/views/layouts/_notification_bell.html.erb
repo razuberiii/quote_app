@@ -9,57 +9,8 @@
       </span>
         <span class="notification-badge<%= ' is-zero' if unread_count == 0 %>" id="notification-badge-count"<%= ' hidden' if unread_count == 0 %>><%= unread_count > 9 ? "9+" : unread_count %></span>
     </summary>
-    <div class="notification-bell-menu">
-      <div class="notification-bell-header">
-        <span><%= t("notifications.title") %></span>
-        <% if unread_count > 0 %>
-          <%= button_to t("notifications.mark_all_read"),
-                mark_all_read_notifications_path,
-                method: :patch,
-                class: ui_button_classes(:ghost, "notification-mark-all-btn"),
-                form: { data: { turbo: false } } %>
-        <% end %>
-      </div>
-      <% if unread_notifications.any? %>
-        <ul class="notification-list">
-          <% unread_notifications.each do |notification| %>
-            <% normalized_kind = notification.normalized_kind %>
-            <% icon = case normalized_kind
-                      when "quote_accepted" then '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/></svg>'.html_safe
-                      when "quote_revision_requested" then '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>'.html_safe
-                      else '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'.html_safe
-                      end %>
-            <li class="notification-item<%= " is-unread" if notification.read_at.blank? %>">
-              <div class="notification-item-icon"><%= icon %></div>
-              <div class="notification-item-content">
-                <div class="notification-item-text">
-                  <% case normalized_kind %>
-                  <% when "quote_accepted" %>
-                    <%= t("notifications.messages.quote_accepted", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
-                  <% when "quote_revision_requested" %>
-                    <%= t("notifications.messages.quote_revision_requested", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
-                  <% else %>
-                    <%= t("notifications.messages.quote_viewed", quote_no: notification.data["quote_no"], customer_name: notification.data["customer_name"].presence || "-") %>
-                    <% if notification.data["viewer_country"].present? %>
-                      · <%= notification.data["viewer_country"] %>
-                    <% end %>
-                  <% end %>
-                </div>
-                <div class="notification-item-time">
-                  <%= t("notifications.time_ago", time: time_ago_in_words(notification.created_at)) %>
-                </div>
-              </div>
-              <% if notification.data["quote_id"].present? %>
-                <%= link_to t("notifications.open_link"),
-                      mark_read_notification_path(notification),
-                      class: "notification-item-link" %>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="notification-empty"><%= t("notifications.empty") %></p>
-      <% end %>
+    <div class="notification-bell-menu" id="notification-bell-menu">
+      <%= render "layouts/notification_bell_menu", unread_notifications: unread_notifications %>
     </div>
   </details>
 </div>

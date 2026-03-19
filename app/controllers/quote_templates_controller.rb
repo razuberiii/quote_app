@@ -22,6 +22,7 @@ class QuoteTemplatesController < ApplicationController
       end
       redirect_to quote_templates_path, notice: t("quote_templates.flash.created")
     else
+      flash.now[:alert] = @quote_template.errors.full_messages.to_sentence
       render :new, status: :unprocessable_entity
     end
   end
@@ -36,6 +37,7 @@ class QuoteTemplatesController < ApplicationController
       apply_default_template!(@quote_template) if params[:make_default] == "1"
       redirect_to quote_templates_path, notice: t("quote_templates.flash.updated")
     else
+      flash.now[:alert] = @quote_template.errors.full_messages.to_sentence
       render :edit, status: :unprocessable_entity
     end
   end
@@ -84,6 +86,9 @@ class QuoteTemplatesController < ApplicationController
       :show_shipping,
       :show_closing_message,
       :show_saas_branding,
+      :show_public_revision_summary,
+      :show_pdf_revision_summary,
+      :show_excel_revision_summary,
       :excel_show_grid_lines,
       :closing_message,
       :show_currency,
@@ -156,6 +161,9 @@ class QuoteTemplatesController < ApplicationController
       show_shipping: true,
       show_closing_message: true,
       show_saas_branding: true,
+      show_public_revision_summary: true,
+      show_pdf_revision_summary: true,
+      show_excel_revision_summary: true,
       excel_show_grid_lines: false,
       closing_message: QuoteTemplate::DEFAULT_CLOSING_MESSAGE,
       show_currency: true,

@@ -6,7 +6,31 @@
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% submit_loading_label = quote.persisted? ? t("quotes.view.form.updating") : t("quotes.view.form.creating") %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
-<% products_payload = (@products || []).map { |p| { id: p.id, name: p.name, price: p.default_price.to_s("F"), currency: p.price_currency, default_specs: p.effective_default_specs, default_addons: p.effective_default_addons, spec_presets: p.available_spec_preset_payloads, addon_presets: p.available_addon_preset_payloads, default_spec_preset_id: p.default_spec_preset_id, default_addon_preset_id: p.default_addon_preset_id } }.to_json %>
+<%
+  products_payload = (@products || []).map do |p|
+    image_attachments = []
+    if p.image_attachment.present?
+      image_attachments << { blob_id: p.image.blob.id, url: rails_blob_path(p.image, only_path: true), label: t("quotes.view.form.product_main_image") }
+    end
+    p.gallery_images.each_with_index do |attachment, idx|
+      image_attachments << { blob_id: attachment.blob.id, url: rails_blob_path(attachment, only_path: true), label: t("quotes.view.form.product_gallery_image", index: idx + 1) }
+    end
+
+    {
+      id: p.id,
+      name: p.name,
+      price: p.default_price.to_s("F"),
+      currency: p.price_currency,
+      default_specs: p.effective_default_specs,
+      default_addons: p.effective_default_addons,
+      spec_presets: p.available_spec_preset_payloads,
+      addon_presets: p.available_addon_preset_payloads,
+      default_spec_preset_id: p.default_spec_preset_id,
+      default_addon_preset_id: p.default_addon_preset_id,
+      image_options: image_attachments
+    }
+  end.to_json
+%>
 
 <div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-has-errors="<%= quote.errors.any? %>">
   <section class="quote-edit-summary app-stat-grid quote-edit-summary--workspace">
@@ -288,6 +312,39 @@
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
                     <%= item_fields.hidden_field :id if item.persisted? %>
                     <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
+                    <%= item_fields.hidden_field :item_image_blob_id, value: "", class: "js-item-image-blob-id" %>
+                    <%= item_fields.hidden_field :remove_item_image, value: "0", class: "js-remove-item-image" %>
+                    <div class="quote-item-image-tools">
+                      <button
+                        type="button"
+                        class="quote-kv-open js-open-image-editor"
+                        data-label-add="<%= t("quotes.view.form.add_image") %>"
+                        data-label-change="<%= t("quotes.view.form.change_image") %>"
+                      ><%= item.item_image.attached? ? t("quotes.view.form.change_image") : t("quotes.view.form.add_image") %></button>
+                    </div>
+                    <div class="quote-kv-editor js-item-image-editor" data-kind="image" hidden>
+                      <div class="quote-kv-editor-head">
+                        <strong><%= t("quotes.view.form.item_image") %></strong>
+                        <button type="button" class="quote-kv-close js-kv-close"><%= t("quotes.view.form.close") %></button>
+                      </div>
+                      <div class="quote-item-image-gallery js-item-image-gallery"></div>
+                      <p class="quote-form-hint js-item-image-gallery-empty" hidden><%= t("quotes.view.form.product_gallery_empty") %></p>
+                      <div class="quote-item-image-current js-item-image-current<%= ' is-empty' unless item.item_image.attached? %>">
+                        <p class="quote-item-image-current-label"><%= t("quotes.view.form.current_selected_image") %></p>
+                        <% if item.item_image.attached? %>
+                          <%= image_tag item.item_image, class: "quote-item-current-thumb js-item-image-thumb", alt: t("quotes.view.form.item_image_preview") %>
+                        <% else %>
+                          <img src="" class="quote-item-current-thumb js-item-image-thumb" alt="<%= t("quotes.view.form.item_image_preview") %>" hidden>
+                        <% end %>
+                        <span class="quote-form-hint js-item-image-empty-hint" <%= "hidden" if item.item_image.attached? %>><%= t("quotes.view.form.no_image_selected") %></span>
+                      </div>
+                      <div class="quote-item-image-upload">
+                        <%= item_fields.file_field :item_image, accept: "image/png,image/jpeg,image/webp,image/gif", class: "quote-item-image-upload-input js-item-image-upload" %>
+                      </div>
+                      <div class="quote-kv-actions">
+                        <button type="button" class="quote-kv-clear js-item-image-remove"><%= t("quotes.view.form.remove_image") %></button>
+                      </div>
+                    </div>
                   </td>
                   <%= item_fields.hidden_field :description, class: "js-description" %>
                   <td class="quote-col-specs" data-label="<%= t("quotes.view.form.specifications") %>">
@@ -504,7 +561,17 @@
       addonBulkPlaceholder: "<%= j(t('quotes.view.form.addon_bulk_placeholder')) %>",
       addAddOn: "<%= j(t('quotes.view.form.add_add_on')) %>",
       referencePriceMismatch: "<%= j(t('quotes.view.form.reference_price_mismatch')) %>",
-      noExactMatchSavedAsCustom: "<%= j(t('quotes.view.form.no_exact_match_saved_as_custom')) %>"
+      noExactMatchSavedAsCustom: "<%= j(t('quotes.view.form.no_exact_match_saved_as_custom')) %>",
+      image: "<%= j(t('quotes.view.form.image')) %>",
+      itemImage: "<%= j(t('quotes.view.form.item_image')) %>",
+      itemImagePreview: "<%= j(t('quotes.view.form.item_image_preview')) %>",
+      noImageSelected: "<%= j(t('quotes.view.form.no_image_selected')) %>",
+      addImage: "<%= j(t('quotes.view.form.add_image')) %>",
+      changeImage: "<%= j(t('quotes.view.form.change_image')) %>",
+      currentSelectedImage: "<%= j(t('quotes.view.form.current_selected_image')) %>",
+      removeImage: "<%= j(t('quotes.view.form.remove_image')) %>",
+      productGalleryEmpty: "<%= j(t('quotes.view.form.product_gallery_empty')) %>",
+      selectFromGallery: "<%= j(t('quotes.view.form.select_from_gallery')) %>"
     };
 
     const currencySymbols = {
@@ -1011,16 +1078,29 @@
       const addonPresetSelect = row.querySelector(".js-addon-preset-select");
       const specsEditor = row.querySelector(".js-spec-editor");
       const addonEditor = row.querySelector(".js-addon-editor");
+      const imageEditor = row.querySelector(".js-item-image-editor");
       const specSummary = row.querySelector(".js-spec-summary");
       const addonSummary = row.querySelector(".js-addon-summary");
       const openSpecBtn = row.querySelector(".js-open-spec-editor");
       const openAddonBtn = row.querySelector(".js-open-addon-editor");
+      const openImageBtn = row.querySelector(".js-open-image-editor");
+      const itemImageBlobIdInput = row.querySelector(".js-item-image-blob-id");
+      const removeItemImageInput = row.querySelector(".js-remove-item-image");
+      const itemImageUploadInput = row.querySelector(".js-item-image-upload");
+      const itemImageCurrent = row.querySelector(".js-item-image-current");
+      const itemImageThumb = row.querySelector(".js-item-image-thumb");
+      const itemImageEmptyHint = row.querySelector(".js-item-image-empty-hint");
+      const itemImageGallery = row.querySelector(".js-item-image-gallery");
+      const itemImageGalleryEmpty = row.querySelector(".js-item-image-gallery-empty");
+      const removeItemImageBtn = row.querySelector(".js-item-image-remove");
       const specBulkInput = row.querySelector(".js-spec-bulk-input");
       const specBulkCheck = row.querySelector(".js-spec-bulk-check");
       const addonBulkInput = row.querySelector(".js-addon-bulk-input");
       const addonBulkCheck = row.querySelector(".js-addon-bulk-check");
       let feedbackTimer = null;
       let activeOptionIndex = -1;
+      const imageTriggerLabelAdd = openImageBtn?.dataset.labelAdd || uiText.addImage;
+      const imageTriggerLabelChange = openImageBtn?.dataset.labelChange || uiText.changeImage;
 
       function closeEditor(editor) {
         if (!editor) return;
@@ -1047,7 +1127,10 @@
           specSummary.innerHTML = `<span class="quote-kv-summary-empty">${escapeHtml(uiText.noSpecs)}</span>`;
           return;
         }
-        specSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
+        specSummary.innerHTML = lines.map((line) => {
+          const chipClass = line.length > 42 ? "quote-kv-chip is-long" : "quote-kv-chip";
+          return `<span class="${chipClass}">${escapeHtml(line)}</span>`;
+        }).join("");
       }
 
       function renderAddonSummary() {
@@ -1057,7 +1140,10 @@
           addonSummary.innerHTML = `<span class="quote-kv-summary-empty">${escapeHtml(uiText.noAddOns)}</span>`;
           return;
         }
-        addonSummary.innerHTML = lines.map((line) => `<span class="quote-kv-chip">${escapeHtml(line)}</span>`).join("");
+        addonSummary.innerHTML = lines.map((line) => {
+          const chipClass = line.length > 42 ? "quote-kv-chip is-long" : "quote-kv-chip";
+          return `<span class="${chipClass}">${escapeHtml(line)}</span>`;
+        }).join("");
       }
 
       function syncSpecOrderFromSummary() {
@@ -1102,7 +1188,7 @@
         const activeElement = document.activeElement;
         const activeInsideEditor =
           activeElement &&
-          (specsEditor?.contains(activeElement) || addonEditor?.contains(activeElement));
+          (specsEditor?.contains(activeElement) || addonEditor?.contains(activeElement) || imageEditor?.contains(activeElement));
 
         if (
           activeInsideEditor &&
@@ -1183,6 +1269,66 @@
         return (selected?.addon_presets || []).find((preset) => String(preset.id) === String(presetId));
       }
 
+      function syncImageTriggerLabel(hasImage) {
+        if (!openImageBtn) return;
+        openImageBtn.textContent = hasImage ? imageTriggerLabelChange : imageTriggerLabelAdd;
+      }
+
+      function setImagePreview(url) {
+        if (!itemImageCurrent || !itemImageThumb || !itemImageEmptyHint) return;
+        const hasUrl = Boolean(url);
+        itemImageCurrent.classList.toggle("is-empty", !hasUrl);
+        itemImageThumb.hidden = !hasUrl;
+        itemImageEmptyHint.hidden = hasUrl;
+        itemImageThumb.src = hasUrl ? url : "";
+        syncImageTriggerLabel(hasUrl);
+      }
+
+      function selectGalleryImage(imageOption) {
+        if (!imageOption) return;
+        if (itemImageBlobIdInput) itemImageBlobIdInput.value = String(imageOption.blob_id || "");
+        if (removeItemImageInput) removeItemImageInput.value = "0";
+        if (itemImageUploadInput) itemImageUploadInput.value = "";
+        setImagePreview(imageOption.url);
+      }
+
+      function clearSelectedImage() {
+        if (itemImageBlobIdInput) itemImageBlobIdInput.value = "";
+        if (removeItemImageInput) removeItemImageInput.value = "1";
+        if (itemImageUploadInput) itemImageUploadInput.value = "";
+        setImagePreview("");
+        itemImageGallery?.querySelectorAll(".quote-item-gallery-option").forEach((el) => el.classList.remove("is-active"));
+      }
+
+      function renderImageGallery(selectedProduct) {
+        if (!itemImageGallery || !itemImageGalleryEmpty) return;
+        const imageOptions = selectedProduct?.image_options || [];
+        if (!imageOptions.length) {
+          itemImageGallery.innerHTML = "";
+          itemImageGalleryEmpty.hidden = false;
+          return;
+        }
+
+        itemImageGalleryEmpty.hidden = true;
+        itemImageGallery.innerHTML = imageOptions.map((imageOption) => {
+          const blobId = String(imageOption.blob_id || "");
+          const isSelected = String(itemImageBlobIdInput?.value || "") === blobId;
+          return `
+            <button type="button" class="quote-item-gallery-option ${isSelected ? "is-active" : ""}" data-blob-id="${escapeAttr(blobId)}" data-image-url="${escapeAttr(imageOption.url || "")}">
+              <img src="${escapeAttr(imageOption.url || "")}" alt="${escapeAttr(imageOption.label || "")}">
+            </button>
+          `;
+        }).join("");
+
+        itemImageGallery.querySelectorAll(".quote-item-gallery-option").forEach((button) => {
+          button.addEventListener("click", () => {
+            selectGalleryImage({ blob_id: button.dataset.blobId, url: button.dataset.imageUrl });
+            itemImageGallery.querySelectorAll(".quote-item-gallery-option").forEach((el) => el.classList.remove("is-active"));
+            button.classList.add("is-active");
+          });
+        });
+      }
+
       function applySpecPreset(selected, presetId, previousProductId) {
         const preset = specPresetById(selected, presetId);
         if (specsInput) {
@@ -1224,6 +1370,14 @@
         fillSelect(addonPresetSelect, selected.addon_presets || [], selected.default_addon_preset_id, uiText.customAddOns);
         applySpecPreset(selected, specPresetSelect?.value || selected.default_spec_preset_id || selected.spec_presets?.[0]?.id || "", previousProductId);
         applyAddonPreset(selected, addonPresetSelect?.value || selected.default_addon_preset_id || selected.addon_presets?.[0]?.id || "", previousProductId);
+        renderImageGallery(selected);
+
+        if (!String(itemImageBlobIdInput?.value || "").trim() && itemImageUploadInput && !itemImageUploadInput.value) {
+          const fallbackImage = (selected.image_options || [])[0];
+          if (fallbackImage) {
+            selectGalleryImage(fallbackImage);
+          }
+        }
 
         productNameInput.classList.add("is-matched");
         if (isCurrencyMismatch) {
@@ -1256,6 +1410,8 @@
           productIdInput.value = "";
           productNameInput.classList.remove("is-matched");
           descInput.value = keyword;
+          renderImageGallery(null);
+          if (!keyword) clearSelectedImage();
           if (keyword) {
             setFeedback("muted", uiText.noExactMatchSavedAsCustom);
           } else {
@@ -1339,6 +1495,23 @@
           if (!selectedProduct) return;
           applyAddonPreset(selectedProduct, addonPresetSelect.value, String(selectedProduct.id));
           updateTotalsUI();
+        });
+      }
+
+      if (itemImageUploadInput) {
+        itemImageUploadInput.addEventListener("change", () => {
+          const file = itemImageUploadInput.files?.[0];
+          if (!file) return;
+          if (itemImageBlobIdInput) itemImageBlobIdInput.value = "";
+          if (removeItemImageInput) removeItemImageInput.value = "0";
+          const objectUrl = URL.createObjectURL(file);
+          setImagePreview(objectUrl);
+        });
+      }
+
+      if (removeItemImageBtn) {
+        removeItemImageBtn.addEventListener("click", () => {
+          clearSelectedImage();
         });
       }
       function syncSpecsText() {
@@ -1614,6 +1787,13 @@
         }
       }
 
+      if (itemImageThumb && !itemImageThumb.hidden && itemImageThumb.getAttribute("src")) {
+        if (removeItemImageInput) removeItemImageInput.value = "0";
+        syncImageTriggerLabel(true);
+      } else {
+        setImagePreview("");
+      }
+
       row.querySelectorAll(".js-kv-close").forEach((btn) => {
         btn.addEventListener("click", (event) => {
           closeEditor(event.target.closest(".quote-kv-editor"));
@@ -1637,6 +1817,14 @@
             renderAddonBulkCheck();
           }
           openEditor(addonEditor);
+        });
+      }
+
+      if (openImageBtn) {
+        openImageBtn.addEventListener("click", () => {
+          const selectedProduct = products.find((p) => String(p.id) === String(productIdInput.value));
+          renderImageGallery(selectedProduct);
+          openEditor(imageEditor);
         });
       }
 
@@ -1708,6 +1896,7 @@
             closeDropdown(row, productDropdown);
             closeEditor(specsEditor);
             closeEditor(addonEditor);
+            closeEditor(imageEditor);
           }
         });
 
@@ -1754,6 +1943,35 @@
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
           <input type="hidden" name="quote[quote_items_attributes][${index}][product_id]" class="js-product-id">
+          <input type="hidden" name="quote[quote_items_attributes][${index}][item_image_blob_id]" class="js-item-image-blob-id" value="">
+          <input type="hidden" name="quote[quote_items_attributes][${index}][remove_item_image]" class="js-remove-item-image" value="0">
+          <div class="quote-item-image-tools">
+            <button
+              type="button"
+              class="quote-kv-open js-open-image-editor"
+              data-label-add="${escapeAttr(uiText.addImage)}"
+              data-label-change="${escapeAttr(uiText.changeImage)}"
+            >${escapeHtml(uiText.addImage)}</button>
+          </div>
+          <div class="quote-kv-editor js-item-image-editor" data-kind="image" hidden>
+            <div class="quote-kv-editor-head">
+              <strong>${escapeHtml(uiText.itemImage)}</strong>
+              <button type="button" class="quote-kv-close js-kv-close">${escapeHtml(uiText.close)}</button>
+            </div>
+            <div class="quote-item-image-gallery js-item-image-gallery"></div>
+            <p class="quote-form-hint js-item-image-gallery-empty" hidden>${escapeHtml(uiText.productGalleryEmpty)}</p>
+            <div class="quote-item-image-current js-item-image-current is-empty">
+              <p class="quote-item-image-current-label">${escapeHtml(uiText.currentSelectedImage)}</p>
+              <img src="" class="quote-item-current-thumb js-item-image-thumb" alt="${escapeHtml(uiText.itemImagePreview)}" hidden>
+              <span class="quote-form-hint js-item-image-empty-hint">${escapeHtml(uiText.noImageSelected)}</span>
+            </div>
+            <div class="quote-item-image-upload">
+              <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" class="quote-item-image-upload-input js-item-image-upload" name="quote[quote_items_attributes][${index}][item_image]">
+            </div>
+            <div class="quote-kv-actions">
+              <button type="button" class="quote-kv-clear js-item-image-remove">${escapeHtml(uiText.removeImage)}</button>
+            </div>
+          </div>
           <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description">
         </td>
         <td class="quote-col-specs">

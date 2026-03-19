@@ -409,7 +409,14 @@ class Quote < ApplicationRecord
       item_attrs[:addon_charges] = item.addon_charge_entries if item_columns.include?("addon_charges")
       item_attrs[:spec_snapshot] = item.specification_pairs if item_columns.include?("spec_snapshot")
       item_attrs[:addon_snapshot] = item.addon_charge_entries if item_columns.include?("addon_snapshot")
+      item_attrs[:image_source] = item.image_source if item_columns.include?("image_source")
       revision.quote_items.build(item_attrs)
+    end
+
+    quote_items.ordered.each_with_index do |item, index|
+      next unless item.item_image.attached?
+
+      revision.quote_items[index]&.item_image&.attach(item.item_image.blob)
     end
 
     revision

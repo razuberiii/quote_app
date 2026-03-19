@@ -78,6 +78,9 @@ class QuoteTemplate < ApplicationRecord
     excel_show_grid_lines
     show_closing_message
     show_saas_branding
+    show_public_revision_summary
+    show_pdf_revision_summary
+    show_excel_revision_summary
     default_template
   ].freeze
 
@@ -207,6 +210,9 @@ class QuoteTemplate < ApplicationRecord
     self.show_shipping = true if show_shipping.nil?
     self.show_closing_message = true if show_closing_message.nil?
     self.show_saas_branding = true if show_saas_branding.nil?
+    self.show_public_revision_summary = true if show_public_revision_summary.nil?
+    self.show_pdf_revision_summary = true if show_pdf_revision_summary.nil?
+    self.show_excel_revision_summary = true if show_excel_revision_summary.nil?
     self.show_scope_of_supply = false if show_scope_of_supply.nil?
     self.show_watermark = false if show_watermark.nil?
     self.excel_show_grid_lines = false if excel_show_grid_lines.nil?

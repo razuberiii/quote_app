@@ -14,6 +14,7 @@ module Public
       @snapshot = @share.snapshot
       @status_message = params[:status_message].presence
       set_newer_revision_context
+      set_revision_summary_context
     end
 
     def accept
@@ -159,6 +160,13 @@ module Public
     def with_public_link_locale
       locale = @template&.output_locale_for(:public_link) || "en"
       I18n.with_locale(locale) { yield }
+    end
+
+    def set_revision_summary_context
+      @revision_summary = nil
+      return unless @template&.show_public_revision_summary?
+
+      @revision_summary = QuoteRevisionSummaryService.new(quote: @share.quote).call
     end
   end
 end

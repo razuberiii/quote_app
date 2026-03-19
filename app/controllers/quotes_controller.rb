@@ -227,6 +227,7 @@ class QuotesController < ApplicationController
     @status_message = nil
     @has_newer_revision = false
     @latest_share_url = nil
+    @revision_summary = @template&.show_public_revision_summary? ? QuoteRevisionSummaryService.new(quote: @quote).call : nil
     @share = Struct.new(:quote, :company, :token).new(@quote, @quote.company, "preview")
 
     locale = (@template || @quote&.template || current_user.company.quote_template_or_default)&.output_locale_for(:webview) || I18n.locale
@@ -483,7 +484,7 @@ class QuotesController < ApplicationController
 
   def set_quote
     Quote.expire_overdue_for_company!(current_user.company_id)
-    @quote = current_user.company.quotes.not_archived.includes({ quote_items: :product }, :customer, :template, :quote_shares).find(params[:id])
+    @quote = current_user.company.quotes.not_archived.includes({ quote_items: [ :product, { item_image_attachment: :blob } ] }, :customer, :template, :quote_shares).find(params[:id])
   end
 
   def outcome_reason_params_for(status)
@@ -524,7 +525,7 @@ class QuotesController < ApplicationController
       :delivery_notes,
       :scope_of_supply,
       :template_id,
-      quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :specifications_text, :addon_charges_text, :_destroy ]
+      quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :specifications_text, :addon_charges_text, :item_image, :item_image_blob_id, :remove_item_image, :_destroy ]
     )
   end
 
@@ -537,7 +538,7 @@ class QuotesController < ApplicationController
   end
 
   def set_form_products
-    @products = current_user.company.products.order(:name)
+    @products = current_user.company.products.with_attached_image.with_attached_gallery_images.order(:name)
   end
 
   def set_template_options
@@ -677,10 +678,10 @@ class QuotesController < ApplicationController
   end
 
   def quote_item_image_data_uri(item)
-    product_image = item.product&.display_image
-    return nil if product_image.blank?
+    attachment = item.effective_image_attachment
+    return nil if attachment.blank?
 
-    blob = product_image.blob
+    blob = attachment.blob
     payload = blob.download
     encoded = Base64.strict_encode64(payload)
     "data:#{blob.content_type};base64,#{encoded}"
@@ -771,7 +772,9 @@ class QuotesController < ApplicationController
     ).call
     @change_summary = QuoteChangeSummaryService.new(
       diff: @revision_diff,
-      currency: @quote.currency
+      currency: @quote.currency,
+      current_revision: @quote.revision_number,
+      previous_revision: @previous_revision_quote.revision_number
     ).call
   end
 

@@ -5719,6 +5719,9 @@ kbd.app-shortcut-badge {
   cursor: grab;
   user-select: none;
 }
+.quote-kv-chip.is-long {
+  border-radius: 10px;
+}
 .quote-kv-chip.is-dragging {
   opacity: 0.74;
   cursor: grabbing;
@@ -5763,6 +5766,85 @@ kbd.app-shortcut-badge {
 }
 .quote-kv-editor.is-open {
   display: grid;
+}
+.quote-item-image-tools {
+  margin-top: 0.35rem;
+  display: grid;
+  gap: 0.3rem;
+}
+.quote-item-image-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.quote-item-image-current {
+  border-top: 1px solid #dbe5f1;
+  padding-top: 0.55rem;
+  display: grid;
+  gap: 0.35rem;
+}
+.quote-item-image-current-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+}
+.quote-item-current-thumb {
+  width: min(100%, 220px);
+  max-height: 160px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #dbeafe;
+  background: #fff;
+}
+.quote-item-gallery-option {
+  border: 1px solid #dbeafe;
+  background: #fff;
+  border-radius: 8px;
+  padding: 0;
+  width: 44px;
+  height: 44px;
+  overflow: hidden;
+}
+.quote-item-gallery-option img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.quote-item-gallery-option.is-active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+.quote-item-image-upload .quote-item-image-upload-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  min-height: 38px;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.84rem;
+}
+.quote-item-image-upload .quote-item-image-upload-input::file-selector-button {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #0f172a;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.1;
+  min-height: 30px;
+  padding: 0.28rem 0.68rem;
+  margin-right: 0.55rem;
+  cursor: pointer;
+}
+.quote-item-image-upload .quote-item-image-upload-input:hover::file-selector-button {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+.quote-revision-summary-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
 }
 .quote-kv-editor-head {
   display: flex;
@@ -9044,6 +9126,76 @@ kbd.app-shortcut-badge {
   line-height: 1.35;
   letter-spacing: -0.01em;
 }
+.quote-summary-strip {
+  margin: 0.82rem 0 1rem;
+  padding: 0.56rem 0.62rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: var(--ui-surface-bg-muted);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+.quote-summary-chip {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.4rem 0.5rem;
+}
+.quote-summary-chip span {
+  display: block;
+  font-size: 0.74rem;
+  color: #64748b;
+}
+.quote-summary-chip strong {
+  display: block;
+  margin-top: 0.12rem;
+  font-size: 0.83rem;
+  color: #0f172a;
+  line-height: 1.35;
+}
+.quote-collab-panel {
+  margin: 0 0 0.72rem 0;
+  border: 1px solid #dbe3ee;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+.quote-collab-panel > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.6rem 0.7rem;
+}
+.quote-collab-panel > summary::-webkit-details-marker {
+  display: none;
+}
+.quote-collab-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-right: 0.2rem;
+}
+.quote-collab-summary {
+  font-size: 0.76rem;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  padding: 0.16rem 0.44rem;
+}
+.quote-collab-content {
+  border-top: 1px solid #e2e8f0;
+  padding: 0.62rem;
+}
+.quote-engagement-details--flat {
+  margin-top: 0;
+}
+.quote-engagement-details--flat summary {
+  display: none;
+}
 .quote-doc-kicker {
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -9150,10 +9302,124 @@ kbd.app-shortcut-badge {
 .quote-copy-summary-btn {
   white-space: nowrap;
 }
+.quote-revision-overview-bar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.85rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.65rem;
+  border-bottom: 1px solid #dbe3ee;
+}
+.quote-revision-overview-copy h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  color: #0f172a;
+}
+.quote-revision-overview-copy p {
+  margin: 0.14rem 0 0;
+  color: #64748b;
+  font-size: 0.84rem;
+}
+.quote-revision-overview-list {
+  margin-top: 0.45rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.quote-revision-overview-list span {
+  font-size: 0.78rem;
+  color: #475569;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  padding: 0.2rem 0.48rem;
+}
 .quote-revision-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
+}
+.quote-revision-sections {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.quote-revision-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 0.78rem 0.86rem;
+  background: #fff;
+}
+.quote-revision-section:first-child {
+  grid-column: 1 / -1;
+}
+.quote-revision-section h4 {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}
+.quote-revision-section h5 {
+  margin: 0.62rem 0 0.32rem;
+  font-size: 0.77rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+}
+.quote-revision-item-list {
+  display: grid;
+  gap: 0.45rem;
+}
+.quote-revision-item-row {
+  border: 1px solid #eef2f7;
+  border-radius: 10px;
+  padding: 0.58rem 0.62rem;
+  background: #fbfdff;
+}
+.quote-revision-item-name {
+  margin: 0;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+.quote-revision-points {
+  margin: 0.28rem 0 0;
+  padding: 0 0 0 1rem;
+  display: grid;
+  gap: 0.14rem;
+}
+.quote-revision-points li {
+  font-size: 0.82rem;
+  color: #475569;
+  line-height: 1.4;
+}
+.quote-revision-compact-list {
+  margin: 0.62rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.34rem;
+}
+.quote-revision-compact-list li {
+  display: grid;
+  gap: 0.08rem;
+  padding-bottom: 0.34rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.quote-revision-compact-list li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.quote-revision-compact-list strong {
+  color: #0f172a;
+  font-size: 0.85rem;
+}
+.quote-revision-compact-list span {
+  color: #475569;
+  font-size: 0.83rem;
+  line-height: 1.4;
 }
 .quote-revision-card {
   border: 1px solid #e2e8f0;
@@ -9182,6 +9448,54 @@ kbd.app-shortcut-badge {
 .quote-revision-card li {
   display: grid;
   gap: 0.12rem;
+}
+.quote-revision-item {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.quote-revision-card li:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+.quote-revision-item-title {
+  color: #0f172a;
+  font-weight: 700;
+}
+.quote-revision-line {
+  color: #475569;
+  font-size: 0.84rem;
+}
+.quote-revision-subgroup {
+  margin-top: 0.32rem;
+  padding-left: 0.45rem;
+  border-left: 2px solid #e2e8f0;
+}
+.quote-revision-subgroup p {
+  margin: 0 0 0.2rem;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.quote-revision-sublist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.16rem;
+}
+.quote-revision-sublist li {
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.38;
+}
+.quote-revision-tag {
+  display: inline-block;
+  margin-right: 0.22rem;
+  color: #64748b;
+  font-size: 0.74rem;
+  text-transform: lowercase;
 }
 .quote-revision-card li strong {
   color: #0f172a;
@@ -9489,6 +9803,81 @@ kbd.app-shortcut-badge {
   font-weight: 600;
   color: #475569;
 }
+.quote-inline-old {
+  text-decoration: line-through;
+  color: #8f9bad;
+}
+.quote-inline-new {
+  color: #0f172a;
+  font-weight: 600;
+}
+.quote-diff-stack {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.16rem;
+  line-height: 1.24;
+}
+.quote-diff-old {
+  text-decoration: line-through;
+  color: #9aa6b8;
+  font-size: 0.76em;
+  font-weight: 500;
+}
+.quote-diff-new,
+.quote-diff-current {
+  color: #0f172a;
+  font-weight: 600;
+}
+.quote-inline-flag {
+  display: inline;
+  font-size: 0.72rem;
+  letter-spacing: 0.01em;
+  text-transform: lowercase;
+  color: #7a889d;
+  margin-left: 0.3rem;
+  vertical-align: middle;
+  font-weight: 600;
+}
+.quote-inline-flag--compact {
+  font-size: 0.67rem;
+  margin-left: 0.2rem;
+}
+.quote-inline-flag--added {
+  color: #6f8198;
+}
+.quote-inline-flag--removed {
+  color: #8795a8;
+}
+.quote-inline-flag--updated {
+  color: #7a889d;
+}
+.quote-inline-flag::before {
+  content: "";
+}
+.quote-item-inline-diff {
+  margin-top: 0.2rem;
+  display: grid;
+  gap: 0.13rem;
+}
+.quote-item-inline-diff-line {
+  font-size: var(--q-web-item-detail-size);
+  line-height: 1.36;
+  color: #64748b;
+}
+.quote-row-added td {
+  background: #fcfdff;
+}
+.quote-row-removed td {
+  background: #fcfdff;
+  color: #607086;
+}
+.quote-row-removed .quote-inline-old {
+  color: #98a6b8;
+}
+.quote-row-removed .quote-inline-flag--removed {
+  color: #95a1b0;
+}
 .quote-document-shell .quote-engagement-note,
 .quote-document-shell .quote-section-block p,
 .quote-document-shell .quote-section-block div {
@@ -9534,8 +9923,15 @@ kbd.app-shortcut-badge {
   align-items: baseline;
   font-variant-numeric: tabular-nums;
 }
+.quote-total-box p > strong .quote-diff-stack {
+  min-width: 5.6rem;
+}
 .quote-total-box p:not(.quote-total-grand) {
   color: #64748b;
+}
+.quote-total-box p.quote-total-discount > strong,
+.quote-total-box p.quote-total-saved > strong {
+  color: #b91c1c;
 }
 .quote-total-grand {
   padding-top: 0.42rem;
@@ -9547,6 +9943,29 @@ kbd.app-shortcut-badge {
 .quote-total-grand span {
   color: #0f172a;
   font-weight: var(--q-web-total-primary-label-w);
+}
+.quote-total-grand strong .quote-diff-stack {
+  min-width: 6.7rem;
+  gap: 0.18rem;
+}
+.quote-total-grand strong .quote-diff-old {
+  font-size: 0.72em;
+  color: #a4afbf;
+}
+.quote-section-block--revision-summary {
+  border-top-color: #e2e8f0;
+}
+.quote-section-block--revision-summary .quote-form-hint {
+  color: #8593a6;
+  margin-top: 0.1rem;
+  margin-bottom: 0.25rem;
+}
+.quote-section-block--revision-summary .quote-revision-summary-list {
+  margin-top: 0.2rem;
+}
+.quote-section-block--revision-summary .quote-revision-summary-list li {
+  color: #66788f;
+  line-height: 1.45;
 }
 .quote-public-actions {
   margin-top: 1rem;
@@ -10327,7 +10746,9 @@ kbd.app-shortcut-badge {
 
   .quote-meta-grid,
   .quote-signal-strip,
+  .quote-summary-strip,
   .quote-revision-grid,
+  .quote-revision-sections,
   .dashboard-health-strip {
     grid-template-columns: 1fr;
   }
@@ -10352,6 +10773,7 @@ kbd.app-shortcut-badge {
   }
 
   .quote-revision-head,
+  .quote-revision-overview-bar,
   .quote-revision-total {
     flex-direction: column;
     align-items: flex-start;

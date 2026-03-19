@@ -8,7 +8,9 @@ module Admin
     end
 
     def update
-      if @user.update(user_params)
+      @user.role = role_param
+
+      if @user.save
         redirect_to admin_users_path, notice: t("admin.users.flash.role_updated")
       else
         @users = User.includes(:company).order(:id)
@@ -22,8 +24,11 @@ module Admin
       @user = User.find(params[:id])
     end
 
-    def user_params
-      params.require(:user).permit(:role)
+    def role_param
+      role = params.require(:user).fetch(:role).to_s
+      return role if User.roles.key?(role)
+
+      raise ActionController::BadRequest, "Invalid role"
     end
   end
 end

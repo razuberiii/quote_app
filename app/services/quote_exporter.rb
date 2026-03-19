@@ -341,7 +341,6 @@ class QuoteExporter
     summary[:lines].first(5).each do |line|
       pdf.text pdf_text("• #{line}"), size: 9
     end
-
   end
 
   def render_pdf_company_credentials(pdf)
@@ -395,7 +394,7 @@ class QuoteExporter
     ]
     right_lines = [
       excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
-      excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d').to_s}"),
+      excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d')}"),
       (@template.show_valid_until && @quote.valid_until.present? ? excel_text("Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
       (@template.show_currency ? excel_text("Currency: #{@quote.currency}") : nil),
       (@quote.trade_term.present? ? excel_text("Trade Terms: #{@quote.trade_term}") : nil)

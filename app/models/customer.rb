@@ -101,7 +101,7 @@ class Customer < ApplicationRecord
   end
 
   def follow_up_reminders_enabled?
-    return false if effective_sales_status == "paused"
+    return false if raw_status_css.in?(%w[paused lost inactive closed])
     return false unless active_quotes_for_follow_up?
 
     true
@@ -295,17 +295,17 @@ class Customer < ApplicationRecord
 
     open_quotes.max_by do |quote|
       status_rank = case quote_display_status_for_customer(quote)
-                    when "negotiating"
+      when "negotiating"
                       3
-                    when "viewed"
+      when "viewed"
                       2
-                    when "sent"
+      when "sent"
                       1
-                    when "draft", "pending"
+      when "draft", "pending"
                       0
-                    else
+      else
                       0
-                    end
+      end
       timestamp = quote.updated_at || quote.sent_at || quote.created_at || Time.zone.at(0)
       [ status_rank, timestamp ]
     end

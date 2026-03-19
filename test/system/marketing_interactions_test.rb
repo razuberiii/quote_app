@@ -8,7 +8,7 @@ end
 class MarketingInteractionsTest < ApplicationSystemTestCase
   driven_by :selenium,
     using: :headless_chrome,
-    screen_size: [1440, 1600],
+    screen_size: [ 1440, 1600 ],
     options: {
       browser: :chrome,
       timeout: 120

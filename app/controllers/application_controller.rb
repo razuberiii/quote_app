@@ -69,7 +69,7 @@ class ApplicationController < ActionController::Base
   def locale_switch_url(target_locale)
     locale = target_locale.to_s
 
-    if request.get?
+    if request.get? || request.head?
       return url_for(locale: locale)
     end
 

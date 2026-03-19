@@ -4,6 +4,7 @@ class CustomersControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     @customer = customers(:one)
+    @user.update!(full_name: "Test Owner")
     sign_in @user
   end
 

@@ -29,17 +29,28 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "share creates public token and redirects" do
+    quote = build_shareable_quote
+    previous_host = ENV["APP_HOST"]
+    previous_protocol = ENV["RAILS_PROTOCOL"]
+    ENV["APP_HOST"] = "www.example.com"
+    ENV["RAILS_PROTOCOL"] = "http"
+
     assert_difference("QuoteShare.count", 1) do
-      post share_quote_url(@quote)
+      post share_quote_url(quote)
     end
 
     assert_response :redirect
     assert_match(%r{/public/quote_shares/}, response.headers["Location"])
+  ensure
+    ENV["APP_HOST"] = previous_host
+    ENV["RAILS_PROTOCOL"] = previous_protocol
   end
 
   test "share returns json url" do
+    quote = build_shareable_quote
+
     assert_difference("QuoteShare.count", 1) do
-      post share_quote_url(@quote, format: :json)
+      post share_quote_url(quote, format: :json)
     end
 
     assert_response :success
@@ -48,13 +59,14 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "share json uses trusted configured host when present" do
+    quote = build_shareable_quote
     previous_host = ENV["APP_HOST"]
     previous_protocol = ENV["RAILS_PROTOCOL"]
     ENV["APP_HOST"] = "trusted.example.com"
     ENV["RAILS_PROTOCOL"] = "https"
 
     assert_difference("QuoteShare.count", 1) do
-      post share_quote_url(@quote, format: :json)
+      post share_quote_url(quote, format: :json)
     end
 
     assert_response :success
@@ -133,5 +145,19 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to quote_url(@quote)
     @quote.reload
     assert_nil @quote.win_reason
+  end
+
+  private
+
+  def build_shareable_quote
+    Quote.create!(
+      company: @user.company,
+      customer: @customer,
+      quote_no: "QT-SHARE-#{SecureRandom.hex(4).upcase}",
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "Share Item", unit_price: 100, quantity: 1 } ]
+    )
   end
 end

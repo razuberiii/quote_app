@@ -8,8 +8,10 @@ class QuoteChangeSummaryServiceTest < ActiveSupport::TestCase
           product_name: "Widget A",
           quantity_before: 2,
           quantity_after: 5,
+          quantity_changed: true,
           unit_price_before: BigDecimal("10"),
-          unit_price_after: BigDecimal("9.5")
+          unit_price_after: BigDecimal("9.5"),
+          unit_price_changed: true
         }
       ],
       added_items: [ { product_name: "Widget C" } ],
@@ -20,14 +22,16 @@ class QuoteChangeSummaryServiceTest < ActiveSupport::TestCase
 
     summary = QuoteChangeSummaryService.new(diff: diff, currency: "USD").call
 
-    assert_includes summary, I18n.t("quotes.change_summary.quantity_updated", product: "Widget A", before: 2, after: 5)
+    assert_includes summary, I18n.t("quotes.change_summary.overview_title")
+    assert_includes summary, I18n.t("quotes.change_summary.overview_updated_items", count: 1)
+    assert_includes summary, I18n.t("quotes.change_summary.overview_removed_items", count: 1)
     assert_includes summary, "Widget A"
     assert_includes summary, "$10.00"
     assert_includes summary, "$9.50"
-    assert_includes summary, I18n.t("quotes.change_summary.added_item", product: "Widget C")
-    assert_includes summary, I18n.t("quotes.change_summary.removed_item", product: "Widget B")
+    assert_includes summary, I18n.t("quotes.change_summary.item_bullet", item: "Widget C")
+    assert_includes summary, I18n.t("quotes.change_summary.item_bullet", item: "Widget B")
     assert_includes summary, "$100.00"
     assert_includes summary, "$147.50"
-    assert_includes summary, I18n.t("quotes.change_summary.total_updated", before: "$100.00", after: "$147.50").split(":").first
+    assert_includes summary, I18n.t("quotes.change_summary.pricing_changes_title")
   end
 end

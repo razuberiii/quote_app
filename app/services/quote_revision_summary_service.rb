@@ -56,5 +56,4 @@ class QuoteRevisionSummaryService
     Array(diff[:financial_changes]).any? ||
       Array(diff[:modified_items]).any? { |item| item[:quantity_changed] || item[:unit_price_changed] }
   end
-
 end

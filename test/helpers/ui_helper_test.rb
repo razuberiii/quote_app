@@ -11,8 +11,7 @@ class UiHelperTest < ActionView::TestCase
   end
 
   test "customer status badge uses customer label and mapped color" do
-    customer = customers(:one)
-    customer.status = "contacted"
+    customer = Struct.new(:status_css, :status_label).new("contacted", "Contacted")
 
     html = customer_status_badge(customer)
 

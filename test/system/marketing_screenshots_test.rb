@@ -9,16 +9,16 @@ end
 class MarketingScreenshotsTest < ApplicationSystemTestCase
   driven_by :selenium,
     using: :headless_chrome,
-    screen_size: [1440, 2200],
+    screen_size: [ 1440, 2200 ],
     options: {
       browser: :chrome,
       timeout: 120
     }
 
   VIEWPORTS = {
-    desktop: [1440, 2200],
-    tablet: [1024, 2000],
-    mobile: [390, 2200]
+    desktop: [ 1440, 2200 ],
+    tablet: [ 1024, 2000 ],
+    mobile: [ 390, 2200 ]
   }.freeze
 
   PAGES = [

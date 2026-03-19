@@ -57,8 +57,7 @@ class DashboardActionItemsTest < ActionDispatch::IntegrationTest
         quote_no: "QT-COUNT-#{index}",
         revision_number: 1,
         currency: "USD",
-        status: "sent",
-        sent_at: 8.days.ago,
+        status: "won",
         issued_on: Date.current,
         quote_items_attributes: [
           {
@@ -66,11 +65,14 @@ class DashboardActionItemsTest < ActionDispatch::IntegrationTest
             unit_price: 50,
             quantity: 1
           }
-        ]
-      )
+        ],
+        win_reason: "price_accepted",
+        win_reason_detail: "fixture"
+      ).tap { |quote| quote.update_columns(win_reason: nil, win_reason_detail: nil) }
     end
 
-    expected_count = ActionItemGenerator.new(user: @user).call.count
+    ActionItemGenerator.new(user: @user).call
+    expected_count = @user.action_items.unresolved.where(action_type: %w[win_reason_missing loss_reason_missing revision_requested]).count
 
     get dashboard_path(locale: :"zh-CN")
     assert_response :success

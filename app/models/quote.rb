@@ -679,10 +679,10 @@ class Quote < ApplicationRecord
     def default_reason_option_pairs_for(kind)
       case kind.to_sym
       when :win
-        WIN_REASONS.reject { |reason| reason == "other" }
+        WIN_REASONS
           .map { |reason| [ I18n.t("analytics.reason_labels.win.#{reason}", default: reason.humanize), reason ] }
       when :loss
-        LOSS_REASONS.reject { |reason| reason == "other" }
+        LOSS_REASONS
           .map { |reason| [ I18n.t("analytics.reason_labels.loss.#{reason}", default: reason.humanize), reason ] }
       when :stalled
         STALLED_REASONS.map { |reason| [ reason.humanize, reason ] }

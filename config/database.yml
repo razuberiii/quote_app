@@ -96,7 +96,11 @@ production:
     host: <%= ENV.fetch("DB_HOST", "127.0.0.1") %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
     username: <%= ENV.fetch("DB_USERNAME", "quote_app") %>
-    password: <%= ENV.fetch("POSTGRES_PASSWORD") { ENV.fetch("DB_PASSWORD") } %>
+    password: <%= if ENV["SECRET_KEY_BASE_DUMMY"].present?
+                    "build-time-placeholder"
+                  else
+                    ENV.fetch("POSTGRES_PASSWORD") { ENV.fetch("DB_PASSWORD") }
+                  end %>
   cache:
     <<: *primary_production
     database: quote_app_production_cache

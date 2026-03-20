@@ -1,5 +1,5 @@
 <section id="action-items-section">
-<%= render "components/ui/card", class: "dashboard-panel dashboard-action-required app-surface" do %>
+<%= render "components/ui/card", class: "dashboard-panel dashboard-action-required dashboard-module--urgent app-surface" do %>
   <% signal_presenter = QuoteSignalPresenter.new(locale: I18n.locale) %>
   <% action_items = local_assigns[:action_items] || @system_action_items || @generated_action_items || [] %>
   <div class="dashboard-action-summary-head">

@@ -1,6 +1,8 @@
 <% advanced_collapsible = local_assigns.fetch(:advanced_collapsible, false) %>
+<% collapse_low_frequency_sections = advanced_collapsible && quote_template.new_record? %>
 <% existing_template_slugs = current_user.company.quote_templates.where.not(id: quote_template.id).pluck(:slug).compact %>
-<%= form_with model: quote_template, html: { class: "template-editor-form", data: { template_editor_form: true, existing_slugs: existing_template_slugs.to_json, slug_taken_message: t("quote_templates.view.form.preset_slug_taken") } } do |f| %>
+<% template_form_class = ["template-editor-form", ("template-editor-form--new" if quote_template.new_record?)].compact.join(" ") %>
+<%= form_with model: quote_template, html: { class: template_form_class, data: { template_editor_form: true, existing_slugs: existing_template_slugs.to_json, slug_taken_message: t("quote_templates.view.form.preset_slug_taken") } } do |f| %>
   <% if quote_template.errors.any? %>
     <div class="error-messages">
       <h2><%= t("quote_templates.view.form.error_summary", count: quote_template.errors.count) %></h2>
@@ -12,29 +14,40 @@
     </div>
   <% end %>
 
-  <section class="template-identity-row">
-    <div>
-      <%= f.label :name, t("quote_templates.view.form.preset_name") %>
-      <%= f.text_field :name, required: true, placeholder: t("quote_templates.view.form.preset_name_placeholder") %>
-    </div>
-    <div>
-      <%= f.label :slug, t("quote_templates.view.form.preset_slug") %>
-      <%= f.text_field :slug, placeholder: t("quote_templates.view.form.preset_slug_placeholder") %>
-      <p class="template-sub"><%= t("quote_templates.view.form.preset_slug_hint") %></p>
-      <p class="template-sub" data-template-slug-feedback hidden></p>
-      <% if quote_template.errors[:slug].any? %>
-        <p class="field-error-message"><%= quote_template.errors.full_messages_for(:slug).first %></p>
-      <% end %>
-    </div>
-    <div>
-      <%= f.label :document_kind, t("quote_templates.view.form.default_document_view") %>
-      <%= f.select :document_kind, [[t("quote_templates.view.form.document_kind.quotation"), "quotation"], [t("quote_templates.view.form.document_kind.proforma_invoice"), "proforma_invoice"]], {}, data: { template_preview_target: "document-kind" } %>
-    </div>
+  <section class="template-stage-block template-stage-block--core">
+    <header class="template-stage-header template-stage-header--core">
+      <h2><%= t("quote_templates.view.form.stage_core_title", default: "1. Template basics") %></h2>
+      <p><%= t("quote_templates.view.form.stage_core_hint", default: "Start with the minimum fields to create a usable template.") %></p>
+    </header>
+    <section class="template-identity-row">
+      <div>
+        <%= f.label :name, t("quote_templates.view.form.preset_name") %>
+        <%= f.text_field :name, required: true, placeholder: t("quote_templates.view.form.preset_name_placeholder") %>
+      </div>
+      <div>
+        <%= f.label :slug, t("quote_templates.view.form.preset_slug") %>
+        <%= f.text_field :slug, placeholder: t("quote_templates.view.form.preset_slug_placeholder") %>
+        <p class="template-sub"><%= t("quote_templates.view.form.preset_slug_hint") %></p>
+        <p class="template-sub" data-template-slug-feedback hidden></p>
+        <% if quote_template.errors[:slug].any? %>
+          <p class="field-error-message"><%= quote_template.errors.full_messages_for(:slug).first %></p>
+        <% end %>
+      </div>
+      <div>
+        <%= f.label :document_kind, t("quote_templates.view.form.default_document_view") %>
+        <%= f.select :document_kind, [[t("quote_templates.view.form.document_kind.quotation"), "quotation"], [t("quote_templates.view.form.document_kind.proforma_invoice"), "proforma_invoice"]], {}, data: { template_preview_target: "document-kind" } %>
+      </div>
+    </section>
   </section>
 
   <div class="template-editor-layout">
     <div class="template-editor-sections">
-      <section class="template-editor-section template-editor-section-visual">
+      <div class="template-level-marker template-level-marker--common">
+        <strong><%= t("quote_templates.view.form.stage_common_title", default: "2. Common look and structure") %></strong>
+        <span><%= t("quote_templates.view.form.stage_common_hint", default: "Set the visual style and default visible sections.") %></span>
+      </div>
+
+      <section class="template-editor-section template-editor-section-visual template-editor-section--common template-editor-section--visual">
         <header>
           <h3><%= t("quote_templates.view.form.visual_style") %></h3>
           <p><%= t("quote_templates.view.form.visual_style_hint") %></p>
@@ -63,11 +76,13 @@
         </div>
       </section>
 
-      <section class="template-editor-section">
+      <section class="template-editor-section template-editor-section--common template-editor-section--structure">
         <header>
           <h3><%= t("quote_templates.view.form.document_structure") %></h3>
           <p><%= t("quote_templates.view.form.document_structure_hint") %></p>
         </header>
+        <div class="template-form-subgroup">
+          <p class="template-form-subgroup-title"><%= t("quote_templates.view.form.section_visibility_group", default: "Section visibility") %></p>
         <div class="template-toggle-grid">
           <label><%= f.check_box :show_logo, data: { template_preview_toggle: "logo" } %> <%= t("quote_templates.view.form.show_logo") %></label>
           <label><%= f.check_box :show_tax, data: { template_preview_toggle: "tax" } %> <%= t("quote_templates.view.form.show_tax") %></label>
@@ -89,6 +104,7 @@
           <label><%= f.check_box :show_excel_revision_summary %> <%= t("quote_templates.view.form.show_excel_revision_summary") %></label>
           <label><%= f.check_box :excel_show_grid_lines %> <%= t("quote_templates.view.form.show_excel_gridlines") %></label>
         </div>
+        </div>
         <div class="template-form-grid"
              data-template-default-scope-container
              data-template-doc-kind-field="quotation"
@@ -102,8 +118,79 @@
             <p class="template-sub"><%= t("quote_templates.view.form.default_scope_of_supply_content_hint") %></p>
           </div>
         </div>
-        <p class="template-sub"><%= t("quote_templates.view.form.show_watermark_hint") %></p>
+      </section>
+
+      <div class="template-level-marker template-level-marker--output">
+        <strong><%= t("quote_templates.view.form.stage_output_title", default: "3. Output and number format") %></strong>
+        <span><%= t("quote_templates.view.form.stage_output_hint", default: "Define output language and formatting standards.") %></span>
+      </div>
+
+      <section class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-language">
+        <header>
+          <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
+          <p><%= t("quote_templates.view.form.output_language_hint") %></p>
+          <div class="output-lang-sync-row">
+            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select aria-label="<%= t("quote_templates.view.form.apply_all_locales") %>">
+              <% quote_template.output_locale_options.each do |label, value| %>
+                <option value="<%= value %>"><%= label %></option>
+              <% end %>
+            </select>
+          </div>
+        </header>
         <div class="template-form-grid">
+          <div>
+            <%= f.label :webview_locale, t("quote_templates.view.form.output_language_webview") %>
+            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { template_preview_target: "webview-locale", output_lang_target: true } %>
+          </div>
+          <div>
+            <%= f.label :public_link_locale, t("quote_templates.view.form.public_link_locale") %>
+            <%= f.select :public_link_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
+          </div>
+          <div>
+            <%= f.label :pdf_locale, t("quote_templates.view.form.pdf_locale") %>
+            <%= f.select :pdf_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
+          </div>
+          <div>
+            <%= f.label :excel_locale, t("quote_templates.view.form.excel_locale") %>
+            <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
+          </div>
+        </div>
+      </section>
+
+      <section class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-number">
+        <header>
+          <h3><%= t("quote_templates.view.form.number_format") %></h3>
+          <p><%= t("quote_templates.view.form.number_format_hint") %></p>
+        </header>
+        <div class="template-form-grid">
+          <div>
+            <%= f.label :amount_decimals, t("quote_templates.view.form.decimal_places") %>
+            <%= f.select :amount_decimals, [["0", 0], ["2", 2]], {}, data: { template_preview_target: "amount-decimals" } %>
+          </div>
+          <div>
+            <%= f.label :thousand_separator, t("quote_templates.view.form.thousand_separator") %>
+            <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]], {}, data: { template_preview_target: "thousand-separator" } %>
+          </div>
+          <div>
+            <%= f.label :currency_display_mode, t("quote_templates.view.form.currency_display") %>
+            <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]], {}, data: { template_preview_target: "currency-display-mode" } %>
+          </div>
+        </div>
+      </section>
+
+      <div class="template-level-marker template-level-marker--advanced">
+        <strong><%= t("quote_templates.view.form.stage_advanced_title", default: "4. Advanced text and branding") %></strong>
+        <span><%= t("quote_templates.view.form.stage_advanced_hint", default: "Use these lower-frequency options after the core template is ready.") %></span>
+      </div>
+
+      <details class="template-editor-section template-editor-section-advanced template-editor-section--brand" <%= "open" unless collapse_low_frequency_sections %>>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.brand_signature_group", default: "Brand and signature") %></strong>
+          <span><%= t("quote_templates.view.form.brand_signature_group_hint", default: "Set watermark and signature defaults for exports and shared quote outputs.") %></span>
+        </summary>
+        <div class="template-editor-section-body">
+          <p class="template-sub"><%= t("quote_templates.view.form.show_watermark_hint") %></p>
+          <div class="template-form-grid">
           <div>
             <%= f.label :signature_name, t("quote_templates.view.form.signature_name") %>
             <%= f.text_field :signature_name, placeholder: t("quote_templates.view.form.signature_name_placeholder"), data: { template_preview_target: "signature-name" } %>
@@ -143,64 +230,12 @@
             <%= f.number_field :watermark_opacity, min: 3, max: 40, step: 1, data: { template_preview_target: "watermark-opacity" } %>
             <p class="template-sub"><%= t("quote_templates.view.form.watermark_intensity_hint") %></p>
           </div>
-        </div>
-      </section>
-
-      <section class="template-editor-section template-editor-section-compact">
-        <header>
-          <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
-          <p><%= t("quote_templates.view.form.output_language_hint") %></p>
-          <div class="output-lang-sync-row">
-            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select aria-label="<%= t("quote_templates.view.form.apply_all_locales") %>">
-              <% quote_template.output_locale_options.each do |label, value| %>
-                <option value="<%= value %>"><%= label %></option>
-              <% end %>
-            </select>
-          </div>
-        </header>
-        <div class="template-form-grid">
-          <div>
-            <%= f.label :webview_locale, t("quote_templates.view.form.output_language_webview") %>
-            <%= f.select :webview_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { template_preview_target: "webview-locale", output_lang_target: true } %>
-          </div>
-          <div>
-            <%= f.label :public_link_locale, t("quote_templates.view.form.public_link_locale") %>
-            <%= f.select :public_link_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
-          </div>
-          <div>
-            <%= f.label :pdf_locale, t("quote_templates.view.form.pdf_locale") %>
-            <%= f.select :pdf_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
-          </div>
-          <div>
-            <%= f.label :excel_locale, t("quote_templates.view.form.excel_locale") %>
-            <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
           </div>
         </div>
-      </section>
-
-      <section class="template-editor-section template-editor-section-compact">
-        <header>
-          <h3><%= t("quote_templates.view.form.number_format") %></h3>
-          <p><%= t("quote_templates.view.form.number_format_hint") %></p>
-        </header>
-        <div class="template-form-grid">
-          <div>
-            <%= f.label :amount_decimals, t("quote_templates.view.form.decimal_places") %>
-            <%= f.select :amount_decimals, [["0", 0], ["2", 2]], {}, data: { template_preview_target: "amount-decimals" } %>
-          </div>
-          <div>
-            <%= f.label :thousand_separator, t("quote_templates.view.form.thousand_separator") %>
-            <%= f.select :thousand_separator, [["1,234.00", "comma"], ["1 234.00", "space"], ["1234.00", "none"]], {}, data: { template_preview_target: "thousand-separator" } %>
-          </div>
-          <div>
-            <%= f.label :currency_display_mode, t("quote_templates.view.form.currency_display") %>
-            <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]], {}, data: { template_preview_target: "currency-display-mode" } %>
-          </div>
-        </div>
-      </section>
+      </details>
 
       <% if advanced_collapsible %>
-        <details class="template-editor-section template-editor-section-advanced" open>
+        <details class="template-editor-section template-editor-section-advanced template-editor-section--labels" <%= "open" unless collapse_low_frequency_sections %>>
           <summary class="template-editor-summary">
             <strong><%= t("quote_templates.view.form.labels_text") %></strong>
             <span><%= t("quote_templates.view.form.advanced_settings") %></span>
@@ -275,7 +310,7 @@
           </div>
         </details>
       <% else %>
-        <section class="template-editor-section template-editor-section-advanced">
+        <section class="template-editor-section template-editor-section-advanced template-editor-section--labels">
           <header>
             <h3><%= t("quote_templates.view.form.labels_text") %></h3>
             <p><%= t("quote_templates.view.form.labels_text_hint") %></p>
@@ -350,7 +385,7 @@
       <% end %>
     </div>
 
-    <aside class="template-live-pane">
+    <aside class="template-live-pane template-live-pane--support">
       <div class="template-live-pane-header">
         <h3><%= t("quote_templates.view.form.live_preview") %></h3>
         <p><%= t("quote_templates.view.form.live_preview_hint") %></p>

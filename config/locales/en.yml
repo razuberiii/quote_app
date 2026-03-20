@@ -1074,11 +1074,11 @@ en:
           contact: Contact
           email: Email
           status: Status
-          total_quote_amount: Total Quote Amount
-          total_won_amount: Total Won Amount
+          total_quote_amount: Quote
+          total_won_amount: Won
           win_rate: Win Rate
           last_follow_up: Last Follow-up
-          next_follow_up: Next Follow-up
+          next_follow_up: Follow-up
           next_action: Next Action
         win_rate_progress_aria: Win rate progress
         more_details: More details
@@ -1967,6 +1967,9 @@ en:
       edit:
         title: Edit Brand Preset
         subtitle: Tune visual style, structure, and labels from one focused design center.
+      new:
+        title: New Brand Preset
+        subtitle: Create a reusable visual system for quotation documents.
       form:
         error_summary: "%{count} errors prevented this template from being saved:"
         preset_name: Preset Name
@@ -1976,6 +1979,14 @@ en:
         preset_slug_hint: Used as an internal unique identifier. Duplicate slugs will not be created.
         preset_slug_taken: "This identifier is already used: %{slug}"
         default_document_view: Default Document Type
+        stage_core_title: 1. Template basics
+        stage_core_hint: Start with the minimum fields to create a usable template.
+        stage_common_title: 2. Common look and structure
+        stage_common_hint: Set the visual style and default visible sections.
+        stage_output_title: 3. Output and number format
+        stage_output_hint: Define output language and formatting standards.
+        stage_advanced_title: 4. Advanced text and branding
+        stage_advanced_hint: Use these lower-frequency options after the core template is ready.
         document_kind:
           quotation: Quotation
           proforma_invoice: Proforma Invoice (PI)

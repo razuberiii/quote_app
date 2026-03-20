@@ -75,9 +75,9 @@
                     <strong><%= link_to product.name, product_path(product), class: "product-library-name-link" %></strong>
                   </td>
                   <td><span class="product-sku"><%= product.sku %></span></td>
-                  <td><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
-                  <td><span class="next-action-pill is-muted"><%= stats[:quote_count] %></span></td>
-                  <td>
+                  <td class="product-price-cell"><%= number_with_precision(product.default_price, precision: 2) %> <span class="product-price-currency"><%= product.price_currency %></span></td>
+                  <td class="product-quote-cell"><span class="next-action-pill is-muted"><%= stats[:quote_count] %></span></td>
+                  <td class="product-last-used-cell">
                     <% if stats[:last_used_at].present? %>
                       <%= stats[:last_used_at].strftime("%Y-%m-%d %H:%M") %>
                     <% else %>

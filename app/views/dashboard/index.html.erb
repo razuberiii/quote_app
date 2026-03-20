@@ -18,6 +18,7 @@
       <%= render "quick_create" %>
     <% end %>
 
+    <div class="dashboard-priority-layer dashboard-priority-layer--urgent">
     <section class="app-toolbar-surface app-toolbar-surface--compact">
       <div class="app-section-heading">
         <div>
@@ -50,7 +51,7 @@
       </div>
     </section>
 
-    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-summary app-surface" do %>
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-summary dashboard-module--urgent app-surface" do %>
       <div class="dashboard-action-summary-head">
         <h2><%= t("dashboard.view.index.action_overview", count: @action_required_summary[:total]) %></h2>
         <% if @action_required_summary[:has_risk] %>
@@ -77,78 +78,8 @@
       <% end %>
     <% end %>
 
-    <%= render "components/ui/card", class: "dashboard-panel dashboard-decision-snapshot app-surface" do %>
-      <div class="dashboard-action-summary-head">
-        <h2><%= t("dashboard.view.index.sales_signals") %></h2>
-        <span class="dashboard-decision-period"><%= @kpi_period == "month" ? t("dashboard.view.index.this_month") : t("dashboard.view.index.this_week") %></span>
-      </div>
-      <div class="dashboard-decision-flow">
-        <div class="dashboard-decision-column">
-          <h3><%= t("dashboard.view.index.outcome_signals") %></h3>
-          <div class="dashboard-decision-metrics">
-            <p class="dashboard-decision-metric">
-              <span><%= t("dashboard.view.index.accepted") %></span>
-              <strong><%= @decision_snapshot[:accepted_count] %></strong>
-            </p>
-            <p class="dashboard-decision-metric">
-              <span><%= t("dashboard.view.index.revision_requested") %></span>
-              <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
-            </p>
-          </div>
-        </div>
-        <div class="dashboard-decision-column">
-          <h3><%= t("dashboard.view.index.pressure_signals") %></h3>
-          <div class="dashboard-decision-metrics">
-            <p class="dashboard-decision-metric">
-              <span><%= t("dashboard.view.index.reopened") %></span>
-              <strong><%= @decision_snapshot[:reopened_count] %></strong>
-            </p>
-            <p class="dashboard-decision-metric">
-              <span><%= t("dashboard.view.index.negotiating_stale") %></span>
-              <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
-            </p>
-          </div>
-        </div>
-        <div class="dashboard-decision-column dashboard-decision-column-attention">
-          <h3><%= t("dashboard.view.index.attention_signal") %></h3>
-          <div class="dashboard-decision-waiting">
-            <p>
-              <span><%= t("dashboard.view.index.public_actionable") %></span>
-              <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
-            </p>
-            <small><%= t("dashboard.view.index.awaiting_client_decision") %></small>
-          </div>
-        </div>
-      </div>
-      <%= render "shared/quote_funnel" %>
-    <% end %>
-
-    <div class="dashboard-kpi-row app-stat-grid">
-      <article class="dashboard-kpi-card app-stat-card">
-        <div class="dashboard-kpi-head">
-          <span class="app-stat-label"><%= t("dashboard.view.index.open_deals") %></span>
-        </div>
-        <strong class="app-stat-value"><%= @dashboard_stats[:open_deals][:value] %></strong>
-        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
-      </article>
-      <article class="dashboard-kpi-card app-stat-card">
-        <div class="dashboard-kpi-head">
-          <span class="app-stat-label"><%= t("dashboard.view.index.quotes_this_period", period: (@kpi_period == "month" ? t("dashboard.view.index.period_month") : t("dashboard.view.index.period_week"))) %></span>
-        </div>
-        <strong class="app-stat-value"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
-        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
-      </article>
-      <article class="dashboard-kpi-card app-stat-card">
-        <div class="dashboard-kpi-head">
-          <span class="app-stat-label"><%= t("dashboard.view.index.pending_followups") %></span>
-        </div>
-        <strong class="app-stat-value"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
-        <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
-      </article>
-    </div>
-
     <div id="today-focus-section">
-    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center app-surface" do %>
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center dashboard-module--urgent app-surface" do %>
       <h2><%= t("dashboard.view.index.today_focus") %></h2>
       <% if @primary_action.present? %>
         <div class="dashboard-action-list">
@@ -200,7 +131,7 @@
     </div>
 
     <div id="deal-radar-section">
-    <%= render "components/ui/card", class: "dashboard-panel app-surface" do %>
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-module--urgent app-surface" do %>
       <div class="dashboard-action-summary-head">
         <h2><%= t("dashboard.view.index.deal_radar") %></h2>
         <span class="dashboard-alert-pill <%= @deal_radar_signals.any? ? 'is-watch' : 'is-good' %>">
@@ -256,9 +187,94 @@
     </div>
 
     <%= render "shared/action_items" %>
+    </div>
+
+    <div class="dashboard-priority-layer dashboard-priority-layer--health">
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-decision-snapshot dashboard-module--snapshot app-surface" do %>
+        <div class="dashboard-action-summary-head">
+          <h2><%= t("dashboard.view.index.sales_signals") %></h2>
+          <span class="dashboard-decision-period"><%= @kpi_period == "month" ? t("dashboard.view.index.this_month") : t("dashboard.view.index.this_week") %></span>
+        </div>
+        <div class="dashboard-decision-flow">
+          <div class="dashboard-decision-column">
+            <h3><%= t("dashboard.view.index.outcome_signals") %></h3>
+            <div class="dashboard-decision-metrics">
+              <p class="dashboard-decision-metric">
+                <span><%= t("dashboard.view.index.accepted") %></span>
+                <strong><%= @decision_snapshot[:accepted_count] %></strong>
+              </p>
+              <p class="dashboard-decision-metric">
+                <span><%= t("dashboard.view.index.revision_requested") %></span>
+                <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
+              </p>
+            </div>
+          </div>
+          <div class="dashboard-decision-column">
+            <h3><%= t("dashboard.view.index.pressure_signals") %></h3>
+            <div class="dashboard-decision-metrics">
+              <p class="dashboard-decision-metric">
+                <span><%= t("dashboard.view.index.reopened") %></span>
+                <strong><%= @decision_snapshot[:reopened_count] %></strong>
+              </p>
+              <p class="dashboard-decision-metric">
+                <span><%= t("dashboard.view.index.negotiating_stale") %></span>
+                <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
+              </p>
+            </div>
+          </div>
+          <div class="dashboard-decision-column dashboard-decision-column-attention">
+            <h3><%= t("dashboard.view.index.attention_signal") %></h3>
+            <div class="dashboard-decision-waiting">
+              <p>
+                <span><%= t("dashboard.view.index.public_actionable") %></span>
+                <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
+              </p>
+              <small><%= t("dashboard.view.index.awaiting_client_decision") %></small>
+            </div>
+          </div>
+        </div>
+        <%= render "shared/quote_funnel" %>
+      <% end %>
+
+      <div class="dashboard-kpi-row app-stat-grid">
+        <article class="dashboard-kpi-card app-stat-card">
+          <div class="dashboard-kpi-head">
+            <span class="app-stat-label"><%= t("dashboard.view.index.open_deals") %></span>
+          </div>
+          <strong class="app-stat-value"><%= @dashboard_stats[:open_deals][:value] %></strong>
+          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
+        </article>
+        <article class="dashboard-kpi-card app-stat-card">
+          <div class="dashboard-kpi-head">
+            <span class="app-stat-label"><%= t("dashboard.view.index.quotes_this_period", period: (@kpi_period == "month" ? t("dashboard.view.index.period_month") : t("dashboard.view.index.period_week"))) %></span>
+          </div>
+          <strong class="app-stat-value"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
+          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
+        </article>
+        <article class="dashboard-kpi-card app-stat-card">
+          <div class="dashboard-kpi-head">
+            <span class="app-stat-label"><%= t("dashboard.view.index.pending_followups") %></span>
+          </div>
+          <strong class="app-stat-value"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
+          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
+        </article>
+      </div>
+
+      <section class="dashboard-health-strip dashboard-health-band">
+        <% @dashboard_health_snapshot.each do |item| %>
+          <article class="dashboard-health-card is-<%= item[:tone] %>">
+            <span class="dashboard-health-label"><%= item[:label] %></span>
+            <strong><%= item[:value] %></strong>
+            <p><%= item[:detail] %></p>
+          </article>
+        <% end %>
+      </section>
+    </div>
+
+    <div class="dashboard-priority-layer dashboard-priority-layer--insight">
 
     <div class="dashboard-detail-grid dashboard-detail-grid--overview">
-      <%= render "components/ui/card", class: "dashboard-panel dashboard-overview-panel app-surface" do %>
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-overview-panel dashboard-module--insight app-surface" do %>
         <div class="app-section-heading">
           <div>
             <h2><%= t("dashboard.view.index.recent_quotes") %></h2>
@@ -357,7 +373,7 @@
         </div>
       <% end %>
 
-      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data app-surface" do %>
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data dashboard-module--insight app-surface" do %>
         <div class="app-section-heading">
           <div>
             <h2><%= t("dashboard.view.index.deal_overview") %></h2>
@@ -392,20 +408,10 @@
       <% end %>
     </div>
 
-    <section class="dashboard-health-strip dashboard-health-band">
-      <% @dashboard_health_snapshot.each do |item| %>
-        <article class="dashboard-health-card is-<%= item[:tone] %>">
-          <span class="dashboard-health-label"><%= item[:label] %></span>
-          <strong><%= item[:value] %></strong>
-          <p><%= item[:detail] %></p>
-        </article>
-      <% end %>
-    </section>
-
     <%= render "shared/performance_reports" %>
 
     <div class="dashboard-detail-grid dashboard-detail-grid--lists">
-      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data app-surface" do %>
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data dashboard-module--insight app-surface" do %>
         <div class="app-section-heading">
           <div>
             <h2><%= t("dashboard.view.index.top_quoted_products") %></h2>
@@ -482,7 +488,7 @@
         </div>
       <% end %>
 
-      <%= render "components/ui/card", class: "dashboard-panel app-surface" do %>
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-module--reminder app-surface" do %>
         <div class="app-section-heading">
           <div>
             <h2><%= t("dashboard.view.index.reminder_queue") %></h2>
@@ -567,6 +573,7 @@
     </div>
 
     <%= render "dashboard/sales_insights" %>
+    </div>
   </div>
 </section>
 

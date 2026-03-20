@@ -1967,6 +1967,9 @@ zh-CN:
       edit:
         title: 编辑品牌预设
         subtitle: 在一个集中的设计中心调整视觉风格、结构和标签。
+      new:
+        title: 新建品牌预设
+        subtitle: 创建一个可复用的报价文档视觉系统。
       form:
         error_summary: 有 %{count} 个错误导致模板无法保存：
         preset_name: 预设名称
@@ -1976,6 +1979,14 @@ zh-CN:
         preset_slug_hint: 用于系统内部唯一识别，重复标识不会创建新模板。
         preset_slug_taken: "该标识已被占用：%{slug}"
         default_document_view: 默认文档视图
+        stage_core_title: 1. 模板基础
+        stage_core_hint: 先完成最少字段，快速创建一个可用模板。
+        stage_common_title: 2. 常用外观与结构
+        stage_common_hint: 设置视觉风格与默认可见区块。
+        stage_output_title: 3. 输出与格式
+        stage_output_hint: 设定输出语言与数值格式标准。
+        stage_advanced_title: 4. 高级文案与品牌
+        stage_advanced_hint: 在核心模板完成后，再处理低频高级设置。
         document_kind:
           quotation: 报价单
           proforma_invoice: 形式发票（PI）

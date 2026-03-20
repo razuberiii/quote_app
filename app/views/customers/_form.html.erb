@@ -59,7 +59,7 @@
         <p class="app-form-section-note"><%= t("customers.view.form.company_information_hint") %></p>
       </div>
       <div class="customer-identity-grid">
-        <div class="customer-avatar-panel">
+        <div class="customer-avatar-panel customer-avatar-panel--quiet">
           <div class="customer-avatar-preview">
             <% has_avatar = customer.avatar.attached? && customer.avatar.blob&.persisted? %>
             <% if has_avatar %>
@@ -86,7 +86,7 @@
           </div>
         </div>
 
-        <div class="customer-identity-fields">
+        <div class="customer-identity-fields customer-identity-fields--primary">
           <div class="customer-profile-grid customer-profile-grid-2">
             <div class="customer-name-field">
               <%= f.label :name, t("customers.view.form.company_name") %>

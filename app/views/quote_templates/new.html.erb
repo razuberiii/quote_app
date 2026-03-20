@@ -3,6 +3,13 @@
   <meta name="turbo-visit-control" content="reload">
 <% end %>
 
-<h1>New Brand Preset</h1>
-<p class="template-page-subtitle">Create a reusable visual system for quotation documents.</p>
-<%= render "form", quote_template: @quote_template %>
+<section class="app-page-shell template-page-shell app-page-shell--form app-page-shell--template-form">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1><%= t("quote_templates.view.new.title") %></h1>
+      <p class="template-page-subtitle"><%= t("quote_templates.view.new.subtitle") %></p>
+    </div>
+  </header>
+
+  <%= render "form", quote_template: @quote_template, advanced_collapsible: true %>
+</section>

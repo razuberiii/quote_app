@@ -32,13 +32,13 @@ It focuses on quote revisions, buyer interaction, public quote links, and multi-
 ```powershell
 bundle install
 npm install
-rails db:prepare
+bundle exec rails db:prepare
 ```
 
 Run app:
 
 ```powershell
-rails server
+bundle exec rails server
 ```
 
 Optional dev process runner:
@@ -74,6 +74,26 @@ Run minimal checks:
 bundle exec rails zeitwerk:check
 bundle exec rails test
 ```
+
+## Page Screenshot Script
+
+Manual page capture script:
+
+- Path: `script/capture_pages.ps1`
+- Typical command:
+
+```powershell
+.\script\capture_pages.ps1 -LoginEmail "you@example.com" -LoginPassword "your_password" -Locale "zh-CN"
+```
+
+Behavior notes:
+
+- Script checks `-BaseUrl` reachability before starting.
+- When login credentials are provided, script captures only signed-in pages.
+- Public pages and admin-only routes are skipped by default.
+- Export/download endpoints (PDF/XLSX) are skipped from screenshot output.
+- For review convenience, always use `tmp/review_shots/` as the base folder.
+- For each capture run, create a new subfolder inside it and keep that run's screenshots there.
 
 Lint/security checks:
 
@@ -121,3 +141,35 @@ Ensure before deploy:
 
 - Agent/project execution rules are defined in `AGENTS.md`.
 - CSS conventions are in `docs/css-components.md` and should be updated when CSS patterns change.
+
+## Asset Troubleshooting (Development)
+
+If you see errors like:
+
+- `The asset 'tailwind.css' was not found in the load path.`
+- CSS changes not reflecting even after refresh
+
+check whether development switched to stale precompiled assets.
+
+Quick recovery (PowerShell):
+
+```powershell
+# 1) Stop rails server first (Ctrl + C)
+
+# 2) If manifest exists, remove it so dev serves fresh assets
+Remove-Item .\public\assets\.manifest.json -Force -ErrorAction SilentlyContinue
+
+# 3) Rebuild tailwind output used by layout/application
+bundle exec rails tailwindcss:build
+
+# 4) Restart server
+bundle exec rails server -p 3000
+```
+
+Then hard refresh browser (`Ctrl + F5`).
+
+Notes:
+
+- `app/views/layouts/application.html.erb` expects `stylesheet_link_tag "tailwind"` and `stylesheet_link_tag "components"`.
+- `tailwind.css` should exist at `app/assets/builds/tailwind.css`.
+- Running `bundle exec rails assets:precompile` in development can pin digest assets; remove manifest to return to normal dev behavior.

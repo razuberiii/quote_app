@@ -159,7 +159,7 @@
               </div>
             </td>
             <td data-label="<%= t('customers.view.index.table.email') %>"><%= customer.email %></td>
-            <td data-label="<%= t('customers.view.index.table.status') %>"><%= customer_status_badge(customer) %></td>
+            <td data-label="<%= t('customers.view.index.table.status') %>" class="customer-status-cell"><%= customer_status_badge(customer) %></td>
             <td data-label="<%= t('customers.view.index.table.total_quote_amount') %>" class="text-right customer-money-cell"><strong><%= number_to_currency(metrics[:total_quote_amount]) %></strong></td>
             <td data-label="<%= t('customers.view.index.table.total_won_amount') %>" class="text-right customer-money-cell"><strong><%= number_to_currency(metrics[:total_won_amount]) %></strong></td>
             <td data-label="<%= t('customers.view.index.table.win_rate') %>" class="text-right">
@@ -178,7 +178,7 @@
                 <span class="upcoming-badge"><%= t("customers.view.index.soon_badge") %></span>
               <% end %>
             </td>
-            <td data-label="<%= t('customers.view.index.table.next_action') %>">
+            <td data-label="<%= t('customers.view.index.table.next_action') %>" class="customer-action-cell">
               <div class="customer-list-next-action">
                 <span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span>
                 <small><%= row_signal[:reason] %></small>
@@ -217,8 +217,8 @@
       <% metrics = @customer_metrics.fetch(customer) %>
       <% row_signal = @customer_row_signals.fetch(customer.id) %>
       <% tag_names = customer.ordered_tag_names %>
-      <% visible_tags = tag_names.first(2) %>
-      <% hidden_tags_count = [tag_names.size - visible_tags.size, 0].max %>
+      <% mobile_visible_tags = tag_names.first(2) %>
+      <% mobile_hidden_tags_count = [tag_names.size - mobile_visible_tags.size, 0].max %>
       <article
         class="customer-mobile-card follow-up-<%= customer.follow_up_status %> <%= row_signal[:row_risk] %>"
         data-clickable-href="<%= customer_path(customer) %>"
@@ -227,7 +227,7 @@
       >
         <div class="customer-mobile-head">
           <div class="customer-mobile-title-wrap">
-            <div class="customer-list-name-cell customer-list-name-cell-mobile">
+            <div class="customer-mobile-identity customer-list-name-cell customer-list-name-cell-mobile">
               <span class="customer-list-avatar" aria-hidden="true">
                 <% if customer.avatar.attached? && customer.avatar.blob&.persisted? %>
                   <%= image_tag customer.avatar, alt: t('customers.view.form.customer_avatar_alt', name: customer.name) %>
@@ -242,11 +242,11 @@
                     <% if customer.customer_level.to_s == "key_account" %>
                       <span class="customer-list-tag-chip is-key-account"><%= t("customers.view.index.key_account_badge") %></span>
                     <% end %>
-                    <% visible_tags.each do |tag| %>
+                    <% mobile_visible_tags.each do |tag| %>
                       <span class="customer-list-tag-chip"><%= tag %></span>
                     <% end %>
-                    <% if hidden_tags_count.positive? %>
-                      <span class="customer-list-tag-chip is-more">+<%= hidden_tags_count %></span>
+                    <% if mobile_hidden_tags_count.positive? %>
+                      <span class="customer-list-tag-chip is-more">+<%= mobile_hidden_tags_count %></span>
                     <% end %>
                   </span>
                 <% end %>
@@ -284,22 +284,22 @@
             <span><%= t('customers.view.index.table.last_follow_up') %></span>
             <strong><%= customer.last_follow_up_date&.strftime('%Y-%m-%d') || "—" %></strong>
           </div>
-          <div class="customer-mobile-metric">
-            <span><%= t('customers.view.index.table.next_action') %></span>
-            <strong><span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span></strong>
-            <small class="customer-mobile-signal-reason"><%= row_signal[:reason] %></small>
-          </div>
         </div>
 
-        <details class="customer-mobile-details">
-          <summary><%= t('customers.view.index.more_details') %></summary>
-          <div class="customer-mobile-details-grid">
-            <div class="customer-mobile-detail-item customer-mobile-detail-item-wide">
-              <span><%= t('customers.view.index.table.email') %></span>
-              <strong><%= customer.email.presence || "—" %></strong>
+        <footer class="customer-mobile-footer">
+          <div class="customer-mobile-decision">
+            <span class="customer-mobile-decision-label"><%= t('customers.view.index.table.next_action') %></span>
+            <div class="customer-mobile-decision-body">
+              <span class="next-action-pill <%= row_signal[:klass] %>"><%= row_signal[:label] %></span>
+              <small class="customer-mobile-signal-reason"><%= row_signal[:reason] %></small>
             </div>
           </div>
-        </details>
+
+          <p class="customer-mobile-meta">
+            <span class="customer-mobile-meta-label"><%= t('customers.view.index.table.email') %></span>
+            <span class="customer-mobile-meta-value"><%= customer.email.presence || "—" %></span>
+          </p>
+        </footer>
       </article>
     <% end %>
   <% else %>

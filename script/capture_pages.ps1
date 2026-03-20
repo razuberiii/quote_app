@@ -10,7 +10,9 @@ param(
     "/command_palette/search",
     "/customers/shortcut_candidates",
     "/addon_presets/new",
-    "/spec_presets/new"
+    "/spec_presets/new",
+    "/pending-email-verification",
+    "/notifications/unread_count"
   )
 )
 
@@ -45,6 +47,7 @@ Get-Content $routesFile | ForEach-Object {
     if ($uri -match ":") { return }
     if ($uri -match "\*") { return }
     if ($uri -match "^/rails") { return }
+    if ($uri -match "^/admin(?:/|$)") { return }
     if ($uri -in @("/up", "/recede_historical_location", "/resume_historical_location", "/refresh_historical_location")) { return }
     if ($SkipPaths -contains $uri) { return }
 
@@ -111,6 +114,7 @@ if (-not [string]::IsNullOrWhiteSpace($dynamicJson)) {
   if ($dynamicPaths) {
     foreach ($dp in $dynamicPaths) {
       if ([string]::IsNullOrWhiteSpace($dp)) { continue }
+      if ($dp -match "^/admin(?:/|$)") { continue }
       if ($SkipPaths -contains $dp) { continue }
       $paths += $dp
     }
@@ -153,6 +157,20 @@ const { chromium } = require('playwright');
     '/quick-export-quotation',
     '/resources'
   ]);
+  const PUBLIC_PATH_PATTERNS = [
+    /^\/users\/sign_in$/,
+    /^\/users\/sign_up$/,
+    /^\/users\/password\/new$/,
+    /^\/users\/password\/edit$/,
+    /^\/users\/confirmation\/new$/,
+    /^\/public\/quote_shares\/[^/]+$/
+  ];
+
+  const isPublicRoute = (route) => {
+    const qIdx = route.indexOf('?');
+    const pathname = qIdx >= 0 ? route.slice(0, qIdx) : route;
+    return PUBLIC_LOCALE_PATHS.has(pathname) || PUBLIC_PATH_PATTERNS.some((re) => re.test(pathname));
+  };
 
   const withLocale = (route) => {
     if (!captureLocale) return route;
@@ -188,8 +206,7 @@ const { chromium } = require('playwright');
     ]);
     await page.waitForTimeout(800);
 
-    // Authoritative auth check: try opening dashboard after sign-in.
-    await page.goto(targetUrl('/dashboard'), { waitUntil: 'domcontentloaded', timeout: 30000 });
+    // Auth check from post-login state to avoid an extra dashboard navigation.
     const currentPath = new URL(page.url()).pathname;
     const loginFormStillVisible =
       (await page.locator('input[name="user[email]"]').count()) > 0 &&
@@ -208,6 +225,11 @@ const { chromium } = require('playwright');
   let fail = 0;
   for (let i = 0; i < routes.length; i++) {
     const p = routes[i];
+    if (loginEmail && loginPassword && isPublicRoute(p)) {
+      log(`[SKIP-PUBLIC] ${p} -> does not require login`);
+      continue;
+    }
+
     const idx = String(i + 1).padStart(3, '0');
     let slug = p === '/' ? 'home' : p.replace(/^\//, '').replace(/[^a-zA-Z0-9\-_\/]/g, '').replace(/\//g, '__');
     if (!slug) slug = 'page';
@@ -257,6 +279,12 @@ const { chromium } = require('playwright');
 '@
 
 Set-Content -Encoding UTF8 $runnerFile $runner
+
+try {
+  Invoke-WebRequest -Uri $BaseUrl -Method Head -TimeoutSec 5 -ErrorAction Stop | Out-Null
+} catch {
+  throw "Cannot connect to BaseUrl: $BaseUrl. Please start the Rails server first (example: bundle exec rails server -p 3000), or pass a reachable -BaseUrl."
+}
 
 $env:BASE_URL = $BaseUrl
 $env:OUT_DIR = (Resolve-Path $OutDir).Path

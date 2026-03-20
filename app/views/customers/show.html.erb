@@ -1,4 +1,4 @@
-<section class="app-page-shell">
+<section class="app-page-shell app-page-shell--customer-detail">
 <header class="app-page-header">
   <div class="app-page-header-main">
     <h1><%= @customer.name %></h1>
@@ -16,7 +16,7 @@
 </header>
 
 <div class="app-page-split customer-workspace-layout">
-  <aside class="app-page-split-side app-section-stack">
+  <aside class="app-page-split-side app-section-stack customer-detail-side">
     <%= render "components/ui/card", class: "customer-profile-card app-surface app-panel-muted" do %>
       <div class="customer-profile-card-head">
         <div class="customer-profile-identity">
@@ -52,7 +52,7 @@
       </div>
     <% end %>
 
-    <section class="quote-edit-summary customer-top-summary app-stat-grid">
+    <section class="quote-edit-summary customer-top-summary app-stat-grid customer-side-section customer-side-section--metrics">
       <article class="quote-edit-summary-card app-surface">
         <span class="summary-label"><%= t("customers.view.show.total_quotes") %></span>
         <strong><%= @customer_summary[:total_quotes] %></strong>
@@ -73,7 +73,7 @@
       </article>
     </section>
 
-    <section class="customer-operating-signals app-surface">
+    <section class="customer-operating-signals app-surface customer-side-section customer-side-section--signals">
       <div class="app-section-heading">
         <h3><%= t("customers.view.show.operating_signals") %></h3>
         <span class="app-subtle-note"><%= t("customers.view.show.operating_signals_hint") %></span>
@@ -89,7 +89,7 @@
       </div>
     </section>
 
-    <details class="customer-details-collapsible app-surface">
+    <details class="customer-details-collapsible app-surface customer-side-section customer-side-section--secondary">
       <summary><%= t("customers.view.show.company_contact_details") %></summary>
       <div class="customer-details">
         <p><strong><%= t("customers.view.show.company_name") %>:</strong> <%= @customer.name.presence || "-" %></p>
@@ -128,7 +128,7 @@
       </div>
     </details>
 
-    <section class="customer-follow-up-callout app-surface follow-up-<%= @customer.follow_up_status %>">
+    <section class="customer-follow-up-callout app-surface customer-side-section customer-side-section--action follow-up-<%= @customer.follow_up_status %>">
       <div>
         <span class="summary-label"><%= t("customers.view.show.follow_up_action") %></span>
         <strong><%= @follow_up_text %></strong>
@@ -146,7 +146,7 @@
       </div>
     </section>
 
-    <section class="customer-task-board app-surface">
+    <section class="customer-task-board app-surface customer-side-section customer-side-section--primary">
       <div class="app-section-heading">
         <h3><%= t("customers.view.show.next_tasks") %></h3>
         <span class="app-subtle-note"><%= t("customers.view.show.next_tasks_hint") %></span>
@@ -212,16 +212,18 @@
       <% end %>
     </section>
 
-    <%= render "follow_up_assistant",
-               customer: @customer,
-               follow_up_quote: @follow_up_assistant_quote,
-               message: @suggested_follow_up_message,
-               best_contact_time: @best_contact_time,
-               follow_up_email_ready: @follow_up_email_ready,
-               follow_up_email_block_reason: @follow_up_email_block_reason,
-               quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
+    <div class="customer-side-section customer-side-section--assistant">
+      <%= render "follow_up_assistant",
+                 customer: @customer,
+                 follow_up_quote: @follow_up_assistant_quote,
+                 message: @suggested_follow_up_message,
+                 best_contact_time: @best_contact_time,
+                 follow_up_email_ready: @follow_up_email_ready,
+                 follow_up_email_block_reason: @follow_up_email_block_reason,
+                 quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
+    </div>
 
-    <section class="customer-timeline app-surface">
+    <section class="customer-timeline app-surface customer-side-section customer-side-section--secondary">
       <div class="app-section-heading">
         <h3><%= t("customers.view.show.customer_timeline") %></h3>
         <span class="app-subtle-note"><%= t("customers.view.show.customer_timeline_hint") %></span>
@@ -303,7 +305,7 @@
     </section>
   </aside>
 
-  <div class="app-page-split-main app-section-stack">
+  <div class="app-page-split-main app-section-stack customer-detail-main">
     <section class="app-toolbar-surface customer-quote-workbench">
       <div class="app-section-heading customer-quote-action-bar">
         <div>

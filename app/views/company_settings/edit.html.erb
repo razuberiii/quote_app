@@ -1,3 +1,4 @@
+<section class="app-page-shell app-page-shell--form app-page-shell--settings-form">
 <%= render "shared/settings_header", title: t("company_settings.view.edit.header_title"), section: :company %>
 
 <section class="team-members-panel">
@@ -140,23 +141,23 @@
       </div>
     </div>
 
-    <div class="settings-section-title settings-grid-span-2"><%= t("company_settings.view.edit.section_reminder_email") %></div>
+    <div class="settings-section-title settings-section-title--reminder settings-grid-span-2"><%= t("company_settings.view.edit.section_reminder_email") %></div>
 
-    <div class="settings-grid-span-2">
+    <div class="settings-grid-span-2 settings-reminder-intro">
       <p class="team-members-hint"><%= t("company_settings.view.edit.reminder_hint_html") %></p>
     </div>
 
-    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_subject].any? %>">
+    <div class="settings-grid-span-2 settings-reminder-field <%= 'settings-field-error' if @company.errors[:reminder_email_subject].any? %>">
       <%= f.label :reminder_email_subject, t("company_settings.view.edit.reminder_email_subject") %>
       <%= f.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT, class: ui_input_classes %>
     </div>
 
-    <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:reminder_email_body].any? %>">
+    <div class="settings-grid-span-2 settings-reminder-field <%= 'settings-field-error' if @company.errors[:reminder_email_body].any? %>">
       <%= f.label :reminder_email_body, t("company_settings.view.edit.reminder_email_body") %>
       <%= f.text_area :reminder_email_body, rows: 3, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY, class: ui_input_classes %>
     </div>
 
-    <div class="<%= 'settings-field-error' if @company.errors[:reminder_email_cta_label].any? %>">
+    <div class="settings-reminder-field <%= 'settings-field-error' if @company.errors[:reminder_email_cta_label].any? %>">
       <%= f.label :reminder_email_cta_label, t("company_settings.view.edit.reminder_button_label") %>
       <%= f.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL, class: ui_input_classes %>
     </div>
@@ -167,11 +168,11 @@
   <% end %>
 </section>
 
-<section class="team-members-panel">
+<section class="team-members-panel team-members-panel--secondary">
   <h2><%= t("company_settings.view.edit.credentials_title") %></h2>
   <p class="team-members-hint"><%= t("company_settings.view.edit.credentials_hint") %></p>
 
-  <div class="quote-section-block" style="margin-bottom: 1rem;">
+  <div class="settings-subsection settings-subsection--spaced">
     <h3><%= t("company_settings.view.edit.upload_credential_document") %></h3>
     <%= form_with model: @company_document, url: company_documents_path, local: true, multipart: true, class: "settings-form-grid" do |doc_form| %>
       <div>
@@ -198,7 +199,7 @@
     <% end %>
   </div>
 
-  <div class="quote-section-block">
+  <div class="settings-subsection">
     <h3><%= t("company_settings.view.edit.current_credentials") %></h3>
     <% if @company_documents.any? %>
       <div class="table-responsive">
@@ -239,4 +240,5 @@
       <p class="team-members-hint"><%= t("company_settings.view.edit.no_credentials_uploaded") %></p>
     <% end %>
   </div>
+</section>
 </section>

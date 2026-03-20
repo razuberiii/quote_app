@@ -12499,3 +12499,1445 @@ kbd.app-shortcut-badge {
     text-align: left !important;
   }
 }
+
+/* Phase 1 (Admin UI polish): establish backend visual baseline without changing workflows. */
+body.app-root[data-controller~="shortcuts"] main > .app-page-shell:not(.marketing-page-shell) {
+  gap: 1.35rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell .app-page-header {
+  gap: 0.95rem 1.25rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell .app-page-header h1,
+body.app-root[data-controller~="shortcuts"] .app-page-shell .app-page-header-main h1 {
+  font-size: clamp(1.8rem, 1.55rem + 0.85vw, 2.3rem);
+  line-height: 1.08;
+  letter-spacing: -0.032em;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell .app-page-header p {
+  margin-top: 0.3rem;
+  max-width: 46rem;
+  color: #5b697d;
+  font-size: 0.93rem;
+  line-height: 1.56;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-section-heading {
+  gap: 0.65rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-section-heading h2,
+body.app-root[data-controller~="shortcuts"] .app-section-heading h3 {
+  color: #0f172a;
+  font-size: 1.02rem;
+  font-weight: 675;
+  line-height: 1.26;
+  letter-spacing: -0.015em;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-subtle-note,
+body.app-root[data-controller~="shortcuts"] .app-form-section-note,
+body.app-root[data-controller~="shortcuts"] .customer-field-hint,
+body.app-root[data-controller~="shortcuts"] .team-members-hint,
+body.app-root[data-controller~="shortcuts"] .quote-form-hint {
+  color: #627287;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-form-section-head {
+  gap: 0.2rem;
+  margin-bottom: 0.75rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-form-section-head h3,
+body.app-root[data-controller~="shortcuts"] .customer-profile-section-head h3,
+body.app-root[data-controller~="shortcuts"] .settings-section-title {
+  font-size: 0.98rem;
+  font-weight: 675;
+  letter-spacing: -0.01em;
+}
+
+body.app-root[data-controller~="shortcuts"] .customer-profile-form label,
+body.app-root[data-controller~="shortcuts"] .settings-form-grid label,
+body.app-root[data-controller~="shortcuts"] .team-invite-field label,
+body.app-root[data-controller~="shortcuts"] .app-form-stack > div > label,
+body.app-root[data-controller~="shortcuts"] .template-editor-form label {
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-surface,
+body.app-root[data-controller~="shortcuts"] .app-table-surface,
+body.app-root[data-controller~="shortcuts"] .team-members-panel,
+body.app-root[data-controller~="shortcuts"] .settings-header-card {
+  border-color: #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-surface .app-surface,
+body.app-root[data-controller~="shortcuts"] .app-surface .app-table-surface,
+body.app-root[data-controller~="shortcuts"] .app-table-surface .app-surface,
+body.app-root[data-controller~="shortcuts"] .app-table-surface .app-table-surface {
+  border-color: #e8eef5 !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-ui-button {
+  min-height: 38px;
+  padding: 0 0.95rem;
+  border-radius: 11px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-ui-input {
+  min-height: 41px;
+  padding: 0.54rem 0.68rem;
+  border-color: #c6d1df;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.36;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-ui-input::placeholder {
+  color: #94a3b8;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-ui-input:focus,
+body.app-root[data-controller~="shortcuts"] .team-members-panel input:focus,
+body.app-root[data-controller~="shortcuts"] .team-members-panel select:focus,
+body.app-root[data-controller~="shortcuts"] .team-members-panel textarea:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+body.app-root[data-controller~="shortcuts"] .app-status-badge {
+  min-height: 24px;
+  padding: 0.12rem 0.58rem;
+  font-size: 0.74rem;
+  font-weight: 680;
+  letter-spacing: 0.01em;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-table-surface .table-responsive {
+  border-radius: 12px;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-table-surface table thead th,
+body.app-root[data-controller~="shortcuts"] table.customers-table.saas-table thead th {
+  background: #f8fafc;
+  color: #5d6b80;
+  font-size: 0.77rem;
+  font-weight: 700;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-table-surface table tbody td,
+body.app-root[data-controller~="shortcuts"] table.customers-table.saas-table tbody td {
+  border-bottom-color: #edf2f7;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-table-surface table tbody tr:hover td,
+body.app-root[data-controller~="shortcuts"] table.customers-table.saas-table tbody tr:hover td {
+  background: #fbfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .dashboard-kpi-card strong,
+body.app-root[data-controller~="shortcuts"] .dashboard-overview-value,
+body.app-root[data-controller~="shortcuts"] .customer-money-cell,
+body.app-root[data-controller~="shortcuts"] .product-show-rail-price strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Phase 2 (Admin UI polish): long-form pages (company settings, customer/product create-edit, template new). */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--form {
+  gap: 1.5rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--form .form-page-back-link {
+  margin-top: -0.25rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel {
+  padding: 1.05rem 1.1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-form-grid {
+  gap: 0.9rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-section-title {
+  margin-top: 0.55rem;
+  margin-bottom: 0.1rem;
+  padding-top: 0.55rem;
+  border-top-color: #e8eef5;
+  color: #334155;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-shell {
+  gap: 1.1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-section {
+  border-color: #e5ebf3;
+  border-radius: 14px;
+  box-shadow: none;
+  padding: 1.02rem 1.08rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-section-head h3 {
+  margin-bottom: 0.46rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-form-submit {
+  padding-top: 0.75rem;
+  border-top: 1px solid #e8eef5;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-edit-layout {
+  gap: 1.1rem 1.3rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-edit-stack {
+  gap: 1.05rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-edit-panel {
+  border-color: #e5ebf3 !important;
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .quote-form-section {
+  padding: 1rem 1.05rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .quote-form-grid {
+  gap: 0.8rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-main-image-frame {
+  border-color: #e5ebf3;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-identity-row,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-section,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-live-pane,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-form-footer {
+  border-color: #e4ebf3;
+  border-radius: 14px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-identity-row {
+  padding: 1rem 1.05rem;
+  gap: 0.82rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-layout {
+  gap: 1.12rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-sections {
+  gap: 1.05rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-section {
+  padding: 1rem 1.05rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-section header p,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-sub {
+  color: #627287;
+  font-size: 0.84rem;
+  line-height: 1.48;
+}
+
+@media (max-width: 1080px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-edit-layout,
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--product-form .product-edit-media,
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-live-pane {
+    position: static;
+    top: auto;
+  }
+}
+
+/* Phase 2 refinement: keep reducing heaviness and improve section hierarchy contrast. */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--form .app-page-header {
+  margin-bottom: -0.1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--form .app-page-header p {
+  color: #5f6f84;
+  font-size: 0.9rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-header-card {
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel {
+  border-radius: 14px !important;
+  box-shadow: none !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary {
+  background: #fcfdff;
+  border-color: #e8eef5 !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection {
+  border: 1px solid #e8eef5;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.85rem 0.9rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection--spaced {
+  margin-bottom: 0.75rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection h3 {
+  margin: 0 0 0.55rem;
+  font-size: 0.96rem;
+  font-weight: 670;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-form-grid {
+  gap: 0.8rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-checkbox-grid {
+  border: 1px solid #e8eef5;
+  border-radius: 10px;
+  background: #fcfdff;
+  padding: 0.7rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-checkbox-grid label {
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-section {
+  border-color: #e7edf5;
+  padding: 0.95rem 1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-section:not(.customer-profile-identity) {
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-profile-identity {
+  border-color: #dfe7f0;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-avatar-panel--quiet {
+  border: 1px solid #e7edf5;
+  background: #fcfdff;
+  border-radius: 12px;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-avatar-panel--quiet .customer-avatar-preview {
+  width: 78px;
+  height: 78px;
+  font-size: 1.65rem;
+  background: #eaf1fb;
+  color: #365a83;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-avatar-panel--quiet .quote-form-hint,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-avatar-panel--quiet .customer-avatar-remove {
+  color: #76869a;
+  font-size: 0.78rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-identity-fields--primary .customer-name-input {
+  min-height: 44px;
+  font-size: 1.08rem;
+  font-weight: 680;
+  border-color: #bfcddd;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-form .customer-identity-fields--primary .customer-name-input:focus {
+  border-color: #3b82f6;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form--new .template-identity-row {
+  border-color: #dce6f1;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form--new .template-editor-section {
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form--new .template-editor-section:first-of-type {
+  border-color: #dfe8f2;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-form-subgroup {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.65rem 0.7rem;
+  border: 1px solid #e6edf5;
+  border-radius: 10px;
+  background: #fcfdff;
+  margin-bottom: 0.7rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-form-subgroup-title {
+  margin: 0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 660;
+  letter-spacing: 0.015em;
+}
+
+/* Template new: progressive hierarchy pass (single-page scope). */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-block {
+  display: grid;
+  gap: 0.5rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-header {
+  display: grid;
+  gap: 0.18rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-header h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.01rem;
+  font-weight: 710;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.84rem;
+  line-height: 1.36;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-layout {
+  grid-template-columns: minmax(0, 1.34fr) minmax(320px, 0.66fr);
+  gap: 1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-sections {
+  display: grid;
+  gap: 0.78rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker {
+  display: grid;
+  gap: 0.1rem;
+  padding: 0.22rem 0.08rem 0.02rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker strong {
+  color: #334155;
+  font-size: 0.81rem;
+  font-weight: 700;
+  letter-spacing: 0.018em;
+  text-transform: uppercase;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker span {
+  color: #7a8b9e;
+  font-size: 0.77rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker--common {
+  order: 10;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--visual {
+  order: 20;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--structure {
+  order: 21;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker--output {
+  order: 30;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--output-language {
+  order: 31;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--output-number {
+  order: 32;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker--advanced {
+  order: 40;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand {
+  order: 41;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels {
+  order: 42;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--common {
+  border-color: #dfe8f2;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--output {
+  border-color: #e6edf5;
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels {
+  padding: 0.78rem 0.86rem;
+  border-color: #edf2f8;
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand .template-editor-summary,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels .template-editor-summary {
+  align-items: flex-start;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand .template-editor-summary span,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels .template-editor-summary span {
+  color: #7f90a4;
+  font-size: 0.79rem;
+  line-height: 1.35;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand .template-editor-section-body,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels .template-editor-section-body {
+  margin-top: 0.56rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-live-pane--support {
+  border-color: #edf2f8;
+  background: #fcfdff;
+}
+
+@media (max-width: 1080px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-header h2 {
+    font-size: 0.95rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-stage-header p {
+    font-size: 0.8rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker {
+    padding-top: 0.1rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker strong {
+    font-size: 0.75rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-level-marker span {
+    font-size: 0.73rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--brand,
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-editor-section--labels {
+    padding: 0.68rem 0.74rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--template-form .template-editor-form .template-live-pane--support .template-live-pane-tools {
+    display: none;
+  }
+}
+
+/* Phase 3 start: customers index + products index only. */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-toolbar-surface,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-listing-shell,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .app-toolbar-surface,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .app-listing-shell {
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-listing-shell,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .app-listing-shell {
+  border-color: #e4ebf3;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-section-heading h2,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .app-section-heading h2 {
+  font-size: 1.05rem;
+  font-weight: 690;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table tbody td,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .customers-table.products-table.saas-table.app-data-table tbody td {
+  padding-top: 0.8rem;
+  padding-bottom: 0.8rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-name-meta strong,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-name-link,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-library-name-link {
+  font-weight: 700;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-next-action small {
+  font-size: 0.75rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-row-menu-trigger {
+  border-color: #d6e1ee;
+  background: #fbfdff;
+}
+
+/* Phase 3 refinement: decision-oriented row/card hierarchy (customers first, then mapped to products). */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-overdue {
+  background: #fff7f7;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-upcoming {
+  background: #fffdf6;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-today {
+  background: #f4f8ff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-overdue td:first-child {
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-upcoming td:first-child {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row.follow-up-today td:first-child {
+  box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-row:hover td:first-child {
+  box-shadow: inset 3px 0 0 #1f4e79;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-avatar {
+  width: 38px;
+  height: 38px;
+  border: 1px solid #d7e2ef;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-name-link {
+  color: #0f172a;
+  font-size: 1.02rem;
+  font-weight: 720;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-name-meta strong {
+  margin-bottom: 0.06rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-tag-chip {
+  min-height: 20px;
+  border-color: #e4ebf3;
+  background: #f8fbff;
+  color: #6b7d91;
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-tag-chip.is-key-account {
+  background: #eef4ff;
+  color: #315d94;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(2) {
+  color: #66778b;
+  font-size: 0.86rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-status-cell .app-status-badge {
+  min-height: 25px;
+  padding-inline: 0.62rem;
+  font-size: 0.75rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-action-cell {
+  vertical-align: middle !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card {
+  border: 1px solid #e4ebf3;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card.follow-up-overdue {
+  box-shadow: inset 3px 0 0 #ef4444;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card.follow-up-upcoming {
+  box-shadow: inset 3px 0 0 #f59e0b;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card.follow-up-today {
+  box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-head .app-status-badge {
+  min-height: 24px;
+  font-size: 0.73rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-signal-reason {
+  color: #7f90a4;
+  font-size: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(1),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(1) {
+  width: 25%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(2),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(2) {
+  width: 15%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(3),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(3) {
+  width: 9%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(4),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(4),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(5),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(5) {
+  width: 9%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(6),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(6) {
+  width: 8%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(7),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(7) {
+  width: 10%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(8),
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(8) {
+  width: 16%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table th:nth-child(8) {
+  text-align: right;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-status-cell {
+  vertical-align: middle !important;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-status-cell .app-status-badge {
+  min-height: 26px;
+  padding-inline: 0.68rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table td:nth-child(2) {
+  color: #7f91a6;
+  font-size: 0.81rem;
+  line-height: 1.3;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-name-meta strong,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-name-link {
+  font-size: 1.04rem;
+  font-weight: 730;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-tag-row {
+  gap: 0.22rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-list-tag-chip {
+  min-height: 19px;
+  padding-inline: 0.36rem;
+  border-color: #e7eef6;
+  background: #f9fbfe;
+  color: #7d8fa4;
+  font-size: 0.66rem;
+  font-weight: 560;
+}
+
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-head {
+  gap: 0.58rem;
+  border-bottom: 0;
+  background: #ffffff;
+  padding: 0.84rem 0.88rem 0.52rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-title-wrap {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.52rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-identity {
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-identity .customer-list-name-meta {
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-identity .customer-name-link {
+  display: block;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-identity .customer-list-tag-row {
+  margin-top: 0.2rem;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.2rem;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-identity .customer-list-tag-chip {
+  white-space: nowrap;
+  max-width: 48%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-head .app-status-badge {
+  justify-self: end;
+  align-self: start;
+  margin-top: 0.06rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem 0.64rem;
+  margin: 0 0.88rem 0.34rem;
+  padding: 0.6rem 0.68rem;
+  border: 1px solid #e6eef7;
+  border-radius: 10px;
+  background: #f8fbff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metric {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metric:nth-child(odd) {
+  border-right: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metric span {
+  color: #6f8399;
+  font-size: 0.66rem;
+  font-weight: 620;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metric strong {
+  margin-top: 0.16rem;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 680;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-footer {
+  padding: 0 0.88rem 0.52rem;
+  border-top: 1px solid #edf2f8;
+  display: grid;
+  gap: 0.34rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-decision {
+  margin: 0.46rem 0 0;
+  padding: 0.5rem 0.58rem;
+  border: 1px solid #d6e2ef;
+  border-radius: 10px;
+  background: #ffffff;
+  display: grid;
+  gap: 0.24rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-decision-label {
+  color: #64768b;
+  font-size: 0.69rem;
+  font-weight: 670;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-decision-body {
+  display: grid;
+  gap: 0.24rem;
+  justify-items: start;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-decision .next-action-pill {
+  min-height: 26px;
+  padding-inline: 0.68rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-meta {
+  margin: 0;
+  color: #93a2b5;
+  font-size: 0.66rem;
+  line-height: 1.25;
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-meta-label {
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-meta-value {
+  color: #8b9caf;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 66vw;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card.risk-high,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-card.risk-medium {
+  border-color: #e4ebf3;
+}
+
+@media (max-width: 480px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-mobile-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Products index mapping of the same hierarchy rules. */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-library-name-link {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 710;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-sku,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-last-used-cell {
+  color: #6a7b90;
+  font-size: 0.84rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-price-cell {
+  color: #0f172a;
+  font-weight: 680;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .product-quote-cell .next-action-pill.is-muted {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--products .products-mobile-title-wrap .product-sku {
+  color: #7c8ea3;
+  font-size: 0.78rem;
+}
+
+/* Approved priority pass (scope-locked): customers desktop final + company settings mobile slimming. */
+@media (min-width: 981px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-toolbar-surface {
+    gap: 0.62rem;
+    padding: 0.82rem 0.9rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-filter-stack {
+    display: grid;
+    gap: 0.36rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    column-gap: 0.26rem;
+    row-gap: 0.22rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-filter-row .app-filter-pill {
+    min-height: 32px;
+    padding: 0 0.52rem;
+    font-size: 0.78rem;
+    line-height: 1.06;
+    white-space: nowrap;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .follow-up-summary {
+    gap: 0.44rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .summary-card {
+    min-height: 66px;
+    padding: 0.5rem 0.54rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .summary-card strong {
+    font-size: 1.36rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .summary-label {
+    font-size: 0.8rem;
+    line-height: 1.16;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table thead th {
+    height: 42px;
+    padding: 0.58rem 0.64rem;
+    vertical-align: middle;
+    line-height: 1;
+    white-space: nowrap;
+    font-size: 0.77rem;
+    letter-spacing: 0.028em;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table thead .customer-sort-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.22rem;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customers-table.saas-table.app-data-table thead .customer-sort-link-icon {
+    margin-left: 0 !important;
+    flex: 0 0 auto;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-action-cell {
+    vertical-align: middle !important;
+    text-align: right;
+    padding-left: 0.36rem !important;
+    padding-right: 0.58rem !important;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-action-cell .customer-list-next-action {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.1rem;
+    width: auto;
+    max-width: 21ch;
+    min-width: 0;
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-action-cell .next-action-pill {
+    min-height: 23px;
+    padding-inline: 0.56rem;
+    font-size: 0.72rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .customer-action-cell .customer-list-next-action small {
+    max-width: 21ch;
+    color: #9cabbd;
+    font-size: 0.64rem;
+    line-height: 1.18;
+    text-align: right;
+  }
+}
+
+@media (min-width: 981px) and (max-width: 1180px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customers .app-filter-row .app-filter-pill {
+    min-height: 31px;
+    padding: 0 0.48rem;
+    font-size: 0.76rem;
+  }
+}
+
+@media (max-width: 768px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form {
+    gap: 0.82rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel {
+    padding: 0.7rem 0.76rem;
+    border-radius: 12px !important;
+    margin-bottom: 0.62rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel h2 {
+    margin-bottom: 0.34rem;
+    font-size: 0.96rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary {
+    background: #fbfdff;
+    border-color: #f0f4f9 !important;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-hint {
+    margin: 0.06rem 0 0.24rem;
+    font-size: 0.75rem;
+    line-height: 1.34;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-form-grid {
+    gap: 0.52rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-section-title {
+    margin-top: 0.3rem;
+    margin-bottom: 0;
+    padding-top: 0.32rem;
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    color: #66768a;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-checkbox-grid {
+    gap: 0.34rem;
+    padding: 0.38rem;
+    border-radius: 9px;
+    border-color: #f0f4f9;
+    background: #fcfdff;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-checkbox-grid label {
+    gap: 0.36rem;
+    padding: 0.34rem 0.4rem;
+    border: 1px solid #f0f4f9;
+    border-radius: 8px;
+    background: #ffffff;
+    font-size: 0.76rem;
+    font-weight: 550;
+    line-height: 1.22;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection {
+    padding: 0.5rem 0.56rem;
+    border-radius: 9px;
+    border-color: #f0f4f9;
+    background: #fcfdff;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection--spaced {
+    margin-bottom: 0.44rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection h3 {
+    margin-bottom: 0.28rem;
+    font-size: 0.82rem;
+    font-weight: 610;
+    color: #475569;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .company-logo-row {
+    align-items: flex-start;
+    gap: 0.52rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .company-logo-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 9px;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-actions {
+    padding-top: 0.3rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-section-title--reminder {
+    margin-top: 0.18rem;
+    padding-top: 0.22rem;
+    color: #76879b;
+    font-size: 0.75rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-reminder-intro .team-members-hint {
+    margin-top: 0;
+    color: #8293a7;
+    font-size: 0.73rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-reminder-field {
+    padding: 0.34rem 0.38rem;
+    border: 1px dashed #edf2f7;
+    border-radius: 8px;
+    background: #fcfdff;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary .team-members-hint {
+    color: #7a8a9e;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary .settings-subsection {
+    background: #ffffff;
+    border-color: #f2f5f9;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary .table-responsive {
+    border-color: #eef3f8;
+    border-radius: 9px;
+  }
+}
+
+/* Phase 4: customer detail refinement (left/right role clarity + reduced fragmentation). */
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-workspace-layout {
+  gap: 0.95rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-side {
+  gap: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-main {
+  gap: 0.84rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-profile-card {
+  border-color: #dce6f2;
+  border-radius: 16px;
+  padding: 0.82rem 0.9rem;
+  box-shadow: none;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-follow-up-callout {
+  margin: 0;
+  border-radius: 14px;
+  border-color: #d9e4f0;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-top-summary {
+  gap: 0.56rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-top-summary .quote-edit-summary-card {
+  box-shadow: none;
+  border-color: #e6edf5;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-operating-signals,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-task-board,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-timeline,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details-collapsible {
+  border-radius: 14px;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-operating-signals {
+  border-color: #e4ebf3;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-task-board,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-timeline {
+  border-color: #e6edf5;
+  background: #ffffff;
+  padding: 0.88rem 0.94rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details-collapsible,
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-timeline.customer-side-section--secondary {
+  border-color: #edf2f7;
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details-collapsible > summary {
+  padding: 0.8rem 0.9rem;
+  font-size: 0.88rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details-collapsible > summary::after {
+  color: #8a99ab;
+  font-size: 0.74rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details {
+  padding: 1rem 1.04rem;
+  margin-bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details p {
+  margin-bottom: 0.52rem;
+  color: #4b5b70;
+  font-size: 0.84rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--action {
+  order: 20;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--metrics {
+  order: 30;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--signals {
+  order: 40;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--primary {
+  order: 50;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--assistant {
+  order: 60;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-side-section--secondary {
+  order: 70;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-main .customer-quote-workbench {
+  border-color: #dce6f1;
+  border-radius: 16px;
+  box-shadow: none;
+  padding: 0.94rem 1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-main .quote-queue-toolbar {
+  border-color: #e5edf6;
+  border-radius: 12px;
+  box-shadow: none;
+}
+
+@media (max-width: 980px) {
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-side,
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-detail-main {
+    gap: 0.68rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-follow-up-callout {
+    padding: 0.84rem 0.9rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .app-page-shell--customer-detail .customer-details {
+    padding: 0.9rem 0.94rem;
+  }
+}
+
+/* Phase 5 (Admin UI polish): dashboard decision-first hierarchy and cadence. */
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .sales-dashboard-content {
+  gap: 1.05rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.84rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .dashboard-panel,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .app-toolbar-surface {
+  border-color: #dbe7f2;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-panel,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-health-card {
+  border-color: #e2e8f0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-table-surface {
+  border-color: #e6edf5;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-section-caption,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel-note {
+  color: #64748b;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--urgent h2,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder h2 {
+  color: #16243a;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--insight h2,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--snapshot h2 {
+  color: #23334a;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder {
+  border-color: #d8e4f2;
+  background: #fbfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder .dashboard-summary-table td,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder .dashboard-summary-table th {
+  font-size: 0.83rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-kpi-row {
+  margin-top: -0.04rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid {
+  gap: 0.9rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insights-section {
+  padding-top: 0.1rem;
+}
+
+@media (max-width: 980px) {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .sales-dashboard-content {
+    gap: 0.86rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer {
+    gap: 0.72rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder {
+    background: #ffffff;
+  }
+}

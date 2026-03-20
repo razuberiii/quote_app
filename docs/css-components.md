@@ -63,6 +63,12 @@ With feature-level adapter class:
 - `.app-surface`
 - `.app-table-surface`
 - `.app-page-shell`
+- `.app-page-shell--form` (long-form page rhythm baseline)
+- `.app-page-shell--customer-form`
+- `.app-page-shell--customer-detail`
+- `.app-page-shell--product-form`
+- `.app-page-shell--settings-form`
+- `.app-page-shell--template-form`
 - `.app-page-header`
 - `.app-toolbar-surface`
 
@@ -74,8 +80,19 @@ With feature-level adapter class:
   - `.quote-inline-flag*` is a lightweight text annotation (no pill, no border, no separator glyph)
 - `.quote-revision-*` (internal revision comparison panel and detail layout)
 - `.quote-summary-*`, `.quote-collab-*` (internal webview default-focus + collapsible collaboration blocks)
+- `.template-form-subgroup*` (template form grouping helper for long-form clarity)
+- `.template-stage-*`, `.template-level-marker*`, `.template-editor-section--*` (template-new information-tier hierarchy adapters)
 
 Quote families are local to quote workflows.
+
+5. Dashboard-scope families
+- `.dashboard-priority-layer*` (dashboard decision hierarchy layers: urgent/health/insight)
+- `.dashboard-module--urgent`
+- `.dashboard-module--snapshot`
+- `.dashboard-module--insight`
+- `.dashboard-module--reminder`
+
+Dashboard families are local to dashboard sequencing and must not be reused as global card primitives.
 
 ## 4. CSS Layer Contract
 
@@ -104,6 +121,9 @@ If a selector appears in multiple sections, consolidate into one canonical block
 2. Use feature classes as adapters for local spacing/size/layout only.
 3. If JavaScript creates buttons at runtime, generate class strings with helper output instead of hardcoded utility strings.
 4. Remove dead selectors when references reach zero.
+5. Do not stack new page overrides on top of known conflicting historical rules in the same scope; consolidate first.
+6. For any edited component/page scope, prefer one canonical selector block at the end state (avoid multi-era duplicate rule chains).
+7. If a selector is functionally replaced, delete or merge the old selector in the same change when safe.
 
 ## 7. Component Index
 
@@ -127,10 +147,15 @@ If a selector appears in multiple sections, consolidate into one canonical block
 - Use: `ui_button_classes(...)` plus public-page adapter class (for example `.quote-utility-btn`)
 - Example: `app/views/public/quote_shares/show.html.erb`
 
+6. Settings long-form subsections
+- Use: `.settings-subsection`, `.settings-subsection--spaced` inside settings panels to reduce nested box heaviness.
+- Example: `app/views/company_settings/edit.html.erb`
+
 ## 8. Scenario Quickstart
 
 1. New form page
 - Shell: `.app-page-shell` + `.app-surface`
+- For long admin forms, prefer `.app-page-shell app-page-shell--form` and add a page-specific modifier when available.
 - Inputs: `ui_input_classes`
 - Actions: primary submit + secondary cancel via `ui_button_classes`
 
@@ -186,8 +211,9 @@ data-action="click->clipboard#copy"
 2. Confirm no duplicate selector blocks were introduced.
 3. Check responsive behavior for edited families.
 4. Remove dead selectors in the same change when safe.
-5. Update this manual when conventions change.
-6. If a CSS change no longer matches this manual, update this file in the same PR.
+5. For edited scopes, remove/merge conflicting historical overrides so the final cascade is intentional and minimal.
+6. Update this manual when conventions change.
+7. If a CSS change no longer matches this manual, update this file in the same PR.
 
 ## 11. What Not To Do
 

@@ -1,5 +1,12 @@
-<h1><%= t("customers.view.new.title") %></h1>
+<section class="app-page-shell app-page-shell--form app-page-shell--customer-form">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1><%= t("customers.view.new.title") %></h1>
+      <p><%= t("customers.view.new.subtitle", default: t("customers.view.form.company_information_hint")) %></p>
+    </div>
+  </header>
 
-<%= render "form", customer: @customer, submit_label: t("customers.view.new.create_customer") %>
+  <%= render "form", customer: @customer, submit_label: t("customers.view.new.create_customer") %>
 
-<%= link_to t("customers.view.new.back_to_customers"), customers_path, class: "form-page-back-link" %>
+  <%= link_to t("customers.view.new.back_to_customers"), customers_path, class: "form-page-back-link" %>
+</section>

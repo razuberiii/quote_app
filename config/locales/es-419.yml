@@ -1075,11 +1075,11 @@ es-419:
           contact: Contacto
           email: Correo electrónico
           status: Estado
-          total_quote_amount: Monto Total de Cotización
-          total_won_amount: Monto total ganado
+          total_quote_amount: Cotizado
+          total_won_amount: Ganado
           win_rate: Tasa de éxito
           last_follow_up: Último seguimiento
-          next_follow_up: Próximo seguimiento
+          next_follow_up: Seguimiento
           next_action: Siguiente acción
         win_rate_progress_aria: Progreso de la tasa de éxito
       new:
@@ -1965,6 +1965,9 @@ es-419:
       edit:
         title: Editar ajuste preestablecido de marca
         subtitle: Ajusta el estilo visual, la estructura y las etiquetas desde un centro de diseño centralizado.
+      new:
+        title: Nuevo ajuste preestablecido de marca
+        subtitle: Crea un sistema visual reutilizable para documentos de cotización.
       form:
         error_summary: "%{count} errores impidieron guardar esta plantilla:"
         preset_name: Nombre del preajuste
@@ -1974,6 +1977,14 @@ es-419:
         preset_slug_hint: Se usa como identificador interno único. Los slugs repetidos no crean una nueva plantilla.
         preset_slug_taken: "Este identificador ya está en uso: %{slug}"
         default_document_view: Vista de documento predeterminada
+        stage_core_title: 1. Datos básicos de la plantilla
+        stage_core_hint: Comienza con los campos mínimos para crear una plantilla usable.
+        stage_common_title: 2. Apariencia y estructura comunes
+        stage_common_hint: Configura el estilo visual y las secciones visibles por defecto.
+        stage_output_title: 3. Salida y formato numérico
+        stage_output_hint: Define el idioma de salida y las reglas de formato.
+        stage_advanced_title: 4. Texto avanzado y marca
+        stage_advanced_hint: Usa estas opciones de baja frecuencia después de completar la plantilla base.
         document_kind:
           quotation: Cotización
           proforma_invoice: Factura proforma (PI)

@@ -348,7 +348,77 @@ Quote/public preview alignment (minimal-touch only):
   - separated reminder-oriented modules from insight-oriented modules with explicit module role classes and calmer insight styling,
   - reduced equal-weight card pile-up feel via layer cadence and restrained module contrast tuning,
   - captured fresh dashboard verification screenshots in `tmp/review_shots/phase5_dashboard_2026-03-20T13-45-47`.
+- `2026-03-20`: Phase 5 second-pass dashboard refinement (dashboard-only):
+  - desktop: strengthened first-screen primary grouping (`today focus` / `deal radar` / `action summary`) and reduced setup/checklist prominence by moving onboarding modules after urgent action modules,
+  - desktop: reduced first-screen flatness by introducing a focused urgent-primary grid and clearer primary-vs-secondary module weight inside the urgent layer,
+  - mobile: compressed dashboard flow by prioritizing urgent modules first, trimming low-frequency insight density, and shortening onboarding/insight treatments to reduce long-scroll fatigue,
+  - captured second-pass dashboard verification screenshots in `tmp/review_shots/phase5_dashboard_pass2_2026-03-20T17-31-31`.
+- `2026-03-20`: Phase 5 mobile visibility follow-up (dashboard-only, no scope expansion):
+  - kept mobile compression strategy, but replaced full mobile hiding of `silent customers` with a lightweight summary treatment,
+  - preserved low-priority insight visibility via compact count + primary example + optional expandable details,
+  - avoided restoring the full heavy desktop module on mobile.
+- `2026-03-20`: Silent-customers mobile visibility issue resolved:
+  - confirmed accepted behavior is now stable: visible lightweight mobile summary (not fully hidden, not full desktop block),
+  - locked this module behavior for Phase 5; further dashboard work should focus on broader mobile insight-density reduction.
+- `2026-03-20`: Phase 5 final narrow mobile insight-density pass (dashboard-only):
+  - compressed lower-frequency mobile insight modules by reducing visible rows/items in report/list-style blocks and trimming non-essential explanatory copy in insight cards,
+  - kept desktop insight richness unchanged while shortening mobile block treatments,
+  - preserved `silent customers` lightweight mobile visibility (no full hide, no heavy desktop restoration),
+  - captured updated mobile verification screenshot in `tmp/review_shots/phase5_dashboard_mobile_density_2026-03-20T17-48-27`.
+- `2026-03-20`: Phase 5 low-value-card cleanup pass (dashboard-only):
+  - removed standalone `owner workload` card and folded its key signal into a compact summary inside the stronger customer-portfolio report module,
+  - removed standalone lower-section `reminder queue` table card and integrated reminders into a lighter summary module in the urgent layer,
+  - reduced awkward sparse-card footprint while preserving reminder/ownership visibility.
+- `2026-03-20`: Phase 5 composition + copy cleanup pass (dashboard-only):
+  - rebalanced mid/lower dashboard composition by removing half-empty paired-grid behavior and compacting the right-side overview snapshot card into denser signal blocks,
+  - refined dashboard Chinese copy in performance-report captions to product-language phrasing, replacing awkward machine-translated wording,
+  - preserved urgent/first-screen hierarchy and kept dashboard scope locked.
+- `2026-03-20`: Phase 5 final narrow composition pass (dashboard-only):
+  - tightened upper urgent composition by downgrading reminder queue from standalone card to inline summary and reducing setup/checklist stack weight,
+  - further reduced mobile lower-half scroll fatigue by hiding low-frequency report grid modules while keeping key insight summaries visible,
+  - kept silent-customers lightweight mobile visibility unchanged.
+- `2026-03-20`: Phase 5 terminal composition cleanup (dashboard-only):
+  - recomposed upper urgent area into a designed group (`today focus` main pane + right-side action/reminder rail) to eliminate awkward long-short stacking rhythm,
+  - integrated reminder queue directly into urgent rail and removed standalone borrowed-block feeling,
+  - converted silent-customers from isolated bottom card into a lightweight analytics-footer insight to improve ending rhythm on desktop/mobile.
+- `2026-03-20`: Phase 5 stability-focused composition pass (dashboard-only):
+  - stabilized urgent side rail under variable data by unifying action/deal-radar/reminder into one compact-summary component system,
+  - reduced deal-radar underfilled footprint by limiting to concise high-signal rows and adding grouped priority counters in the header,
+  - kept silent-customers placement logic while differentiating its visual language as a muted analytics footer insight (distinct from reminder/action summaries).
+- `2026-03-20`: Phase 5 layout-logic correction pass (dashboard-only):
+  - removed upper-left compensating empty area by stacking `today focus` + `action items` in the urgent primary column,
+  - tightened deal-radar footprint to a one-row high-signal compact summary with supporting detail line, reducing empty lower card space,
+  - merged silent-customers into customer-portfolio grouping (`dashboard-report-silent-group`) and removed detached analytics footer strip.
+- `2026-03-20`: Phase 5 ROI cleanup pass from approved module-value audit (dashboard-only):
+  - merged `action overview` + `action items` into one stable urgent action module family by embedding compact action-items summary inside the action-overview side module and removing the separate full action-items card,
+  - kept `deal radar` + `reminder` as compact urgent side-rail summaries (no standalone heavy reminder card restoration),
+  - kept `silent customers` only inside `customer portfolio` grouping (no detached footer module),
+  - consolidated homepage product insights by removing duplicated `product intelligence` card from sales-insights area and retaining one product leaderboard module on dashboard,
+  - removed standalone `deal overview` card from homepage insight grid to cut low-density footprint and reduce variable-height composition drift,
+  - captured fresh dashboard screenshots in `tmp/review_shots/phase5_dashboard_roi_cleanup_2026-03-20T18-41-28`.
+- `2026-03-20`: Dashboard reminder-queue removal pass (dashboard-only, owner-approved):
+  - removed `reminder queue` module from dashboard urgent rail (no duplicate reminder stream on homepage),
+  - kept reminder capability in quote/notification flows (feature not deleted),
+  - removed now-unused reminder-inline CSS selectors and cleaned dashboard CSS/docs references to avoid dead style accumulation.
+- `2026-03-20`: Dashboard silent-customer slot stabilization pass (dashboard-only):
+  - updated silent-customer visibility rule to hide customers from dashboard silent-slot after an effective outbound touch (follow-up event or reminder send) that happened after their last view,
+  - preserved customer status/business state (no forced pause/downgrade), only adjusted homepage prioritization logic,
+  - simplified silent-customer rendering to show up to 3 entries directly and removed low-value `show more` hint.
+- `2026-03-20`: Dashboard composition rebalance pass (dashboard-only):
+  - moved `deal radar` from the urgent side rail into the urgent main stack under `today focus` to reduce left-column compensation blank space and stabilize upper-group rhythm,
+  - kept right rail focused on `pending` execution summary so the three urgent modules no longer fight for equal early prominence,
+  - changed `recent quotes` overview grid to single-column full width, removing empty right-half placeholder space in the insight layer,
+  - captured updated screenshots in `tmp/review_shots/phase5_layout_recompose_2026-03-20T19-59-49`.
+- `2026-03-20`: Customer follow-up pause-consistency bugfix (customer detail scope):
+  - blocked follow-up action endpoints when customer status is `paused` (`mark/schedule/log/email/whatsapp`) to prevent backend bypass while reminders are paused,
+  - hid follow-up assistant panel on `customers/show` when customer is paused to avoid conflicting guidance/UI state,
+  - updated follow-up log action copy to explicit wording ("记录跟进") across locales.
+- `2026-03-20`: Customer follow-up availability consistency follow-up (customer detail scope):
+  - expanded follow-up action guard to block submissions when follow-up reminders are unavailable because there is no active quote (not only `paused`),
+  - aligned assistant visibility with `follow_up_reminders_enabled?` so follow-up suggestion panel is hidden whenever follow-up is unavailable,
+  - corrected assistant hint semantics (top vs bottom button roles) and shortened follow-up log CTA copy for better readability.
 
 ### Next priority queue (owner-approved)
-- Continue `Phase 5` dashboard refinement based on screenshot review feedback (decision hierarchy tuning only, dashboard scope only).
+- Continue `Phase 5` dashboard refinement based on screenshot review feedback (decision hierarchy tuning + broader mobile insight-density reduction, dashboard scope only).
+- Do not reopen `silent customers` behavior unless a regression is found.
 - Start `Phase 6` only after Phase 5 is accepted.

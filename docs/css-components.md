@@ -87,12 +87,24 @@ Quote families are local to quote workflows.
 
 5. Dashboard-scope families
 - `.dashboard-priority-layer*` (dashboard decision hierarchy layers: urgent/health/insight)
+- `.dashboard-onboarding-secondary` (secondary treatment wrapper for setup/checklist modules)
 - `.dashboard-module--urgent`
 - `.dashboard-module--snapshot`
 - `.dashboard-module--insight`
-- `.dashboard-module--reminder`
+- `.dashboard-urgent-composition`, `.dashboard-urgent-main`, `.dashboard-urgent-rail` (composed urgent group layout)
+- `.dashboard-side-module*` (stable compact-summary system for variable-density urgent side rail content)
+- `.dashboard-urgent-main-primary` (left primary stack in urgent composition to avoid blank compensation area)
+- `.dashboard-report-compact-summary` (folded owner-workload signal inside portfolio report card)
+- `.dashboard-overview-snapshot` (balanced compact composition for right-side overview signals)
+- `.dashboard-report-silent-group*` (silent-customer insight merged into customer portfolio grouping)
+- `.dashboard-notes-*` (global personal notes widget, localStorage-backed, draggable panel, user-owned scratchpad)
 
 Dashboard families are local to dashboard sequencing and must not be reused as global card primitives.
+
+6. Scoped exception families
+- When a UI block has a clearly different product role and tone (for example, a personal sticky-note rail that is intentionally non-system), it may use a dedicated feature family instead of force-fitting existing card/form families.
+- This exception must remain strictly scoped by feature prefix and ownership boundaries. Example: `.dashboard-notes-*` is mounted globally for signed-in pages, but should not leak into other feature families or become generic card primitives.
+- Do not create broad global overrides for this exception type; keep tokens restrained and compatible with admin baseline.
 
 ## 4. CSS Layer Contract
 
@@ -124,6 +136,7 @@ If a selector appears in multiple sections, consolidate into one canonical block
 5. Do not stack new page overrides on top of known conflicting historical rules in the same scope; consolidate first.
 6. For any edited component/page scope, prefer one canonical selector block at the end state (avoid multi-era duplicate rule chains).
 7. If a selector is functionally replaced, delete or merge the old selector in the same change when safe.
+8. If a component is approved as a scoped exception family (personal widget / sticky utility), do not force it into existing app-card/app-form primitives; keep it isolated and documented.
 
 ## 7. Component Index
 

@@ -138,6 +138,21 @@ en:
         one: almost 1 year
         other: almost %{count} years
   dashboard:
+    notes:
+      title: Work Notes
+      short_title: Notes
+      head_count: Open
+      subtitle: Personal quick todo only.
+      input_placeholder: Add a quick note...
+      add_symbol: +
+      add: Add
+      empty: No notes yet
+      empty_subtle: Jot down what you want to handle today
+      keyhint: "Tip: press Tab to convert the current line into a todo"
+      tip: Personal scratchpad only, not a system task panel.
+      open_aria: Open work notes
+      close_aria: Collapse work notes
+      collapse: Collapse
     onboarding:
       quick_start:
         title: Quick Start
@@ -200,11 +215,11 @@ en:
         negotiating_stale: negotiating for over 7 days
         no_immediate_risk: No immediate follow-up issues.
         action_required: Needs Attention (%{count})
-        action_overview: Priority summary (%{count})
+        action_overview: Pending items (%{count})
         risk_customers: "%{count} customers need follow-up"
         stalled_negotiations: "%{count} stalled negotiations"
         no_customer_or_decision_risk: No immediate follow-up or decision risk
-        handle_overdue_first: Handle overdue and stalled accounts first.
+        handle_overdue_first: Showing 1 pending item first; continue with the rest in the queue.
         jump_to_action_items: View action items (%{count})
         sales_signals: Sales Signals
         this_month: This month
@@ -228,6 +243,7 @@ en:
         show_less: Show less
         no_high_priority_actions: No high-priority actions today.
         deal_radar: Deal Watchlist
+        deal_radar_summary_hint: Showing the top 1 deal signal first; review the rest in the quote list.
         deal_radar_count:
           one: "%{count} active lead"
           other: "%{count} active leads"
@@ -1540,7 +1556,7 @@ en:
       close_verification: Close verification
       suggested_message: Suggested Draft
       placeholder: Write the follow-up message you plan to send
-      hint: Saving here will store the draft below in the follow-up record; the top button only updates follow-up status.
+      hint: Top buttons send and auto-log follow-up; bottom buttons copy message or save a log only.
       email_blocked_hint: "Before sending email, please complete: %{missing}."
       fix_profile: Update profile
       fix_company: Update company settings
@@ -1579,7 +1595,7 @@ en:
       whatsapp: Send via WhatsApp
       email: Send Email
       copy: Copy Message
-      log: Save This Draft to Record
+      log: Save & Log
     channels:
       manual: Manual
       whatsapp: WhatsApp
@@ -1603,6 +1619,8 @@ en:
       whatsapp_logged: WhatsApp follow-up logged. Next follow-up scheduled at %{date}
       whatsapp_failed: Unable to open WhatsApp follow-up right now.
       whatsapp_unavailable: Customer WhatsApp number is unavailable.
+      paused_blocked: This customer is paused for follow-up. Action is unavailable.
+      no_active_quote_blocked: No active quote available. Follow-up action is unavailable.
       message_copied: Follow-up message copied.
       copy_failed: Unable to copy the follow-up message in this browser.
     mailer:
@@ -1677,6 +1695,7 @@ en:
     customer_silent:
       title: Silent Customers
       label: Customer went quiet
+      days_badge: Quiet %{days}d
       detail: Last viewed a quote %{days} days ago, no follow-up since.
       no_silent: No silent customers detected.
   products:

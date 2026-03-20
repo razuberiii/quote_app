@@ -138,6 +138,21 @@ zh-CN:
         one: 将近1年
         other: 将近%{count}年
   dashboard:
+    notes:
+      title: 工作便签
+      short_title: 便签
+      head_count: 便签
+      subtitle: 仅记录你的临时事项。
+      input_placeholder: 写下一条待办…
+      add_symbol: +
+      add: 新增
+      empty: 还没有便签
+      empty_subtle: 写下今天别忘的事
+      keyhint: 提示：按 Tab 可将当前行切换为待办
+      tip: 这不是系统任务面板，仅用于你自己的临时记录。
+      open_aria: 打开便签
+      close_aria: 收起便签
+      collapse: 收起
     onboarding:
       quick_start:
         title: 快速开始
@@ -200,11 +215,11 @@ zh-CN:
         negotiating_stale: 谈判超过 7 天
         no_immediate_risk: 当前没有紧急跟进风险。
         action_required: 待处理事项（%{count}）
-        action_overview: 优先级概览（%{count}）
+        action_overview: 待处理（%{count}）
         risk_customers: "%{count} 个客户需要跟进"
         stalled_negotiations: "%{count} 个停滞谈判"
         no_customer_or_decision_risk: 当前无跟进或决策压力
-        handle_overdue_first: 优先处理逾期和停滞的客户。
+        handle_overdue_first: 优先展示 1 条待处理事项，其他可在待处理队列继续处理。
         jump_to_action_items: 查看待处理事项（%{count}）
         sales_signals: 销售信号
         this_month: 本月
@@ -228,6 +243,7 @@ zh-CN:
         show_less: 收起
         no_high_priority_actions: 今天没有高优先级事项。
         deal_radar: 商机看板
+        deal_radar_summary_hint: 优先展示 1 条最需要处理的商机，其他可在报价列表继续查看。
         deal_radar_count:
           one: "%{count} 个活跃商机"
           other: "%{count} 个活跃商机"
@@ -274,7 +290,7 @@ zh-CN:
         no_reminders_pending_body: 当已发送报价长时间未读时，会显示在此供你跟进。
       quote_funnel:
         title: 报价漏斗
-        caption: 当前报价线程数量与转化率。
+        caption: 当前报价流程数量与转化率。
         sent: 已发送
         viewed: 已查看
         revisions: 修订
@@ -294,14 +310,14 @@ zh-CN:
         sales_ownership_caption: 按内部负责人查看客户负载和报价结果。
         accounts: "%{count} 个账户"
         open_won: "%{open} 活跃中 • %{won} 已赢单"
-        threads: "%{count} 条线程"
+        threads: "%{count} 条报价流程"
         win_rate: 赢单率 %{rate}%
         overdue: "%{count} 个逾期"
         latest: 最近
         showing_top_owners: 按当前报价负载与结果，仅展示前 %{count} 位负责人。
         assign_internal_owners: 先为客户分配内部负责人，这里才会显示归属负载。
         customer_portfolio: 客户组合
-        customer_portfolio_caption: 按活跃中和赢单报价线程排序的核心客户。
+        customer_portfolio_caption: 按活跃报价与赢单表现筛选出的核心客户。
         follow_up_overdue: 跟进逾期
         follow_up_normal: 跟进正常
         open: "%{count} 进行中"
@@ -382,7 +398,7 @@ zh-CN:
       sales_ownership_caption: 按内部负责人查看客户负载与报价结果。
       showing_top_owners: 按当前报价负载和结果，仅展示前 %{count} 位负责人。
       assign_internal_owners: 先为客户分配内部负责人，这里才会显示归属负载。
-      customer_portfolio_caption: 按活跃中与赢单报价线程排序的客户。
+      customer_portfolio_caption: 按活跃报价与赢单表现筛选出的核心客户。
       showing_top_accounts: 按活跃报价表现展示前 %{count} 个客户。
   flash:
     not_authorized: 无权限访问。
@@ -1540,7 +1556,7 @@ zh-CN:
       close_verification: 关闭验证
       suggested_message: 建议文案
       placeholder: 输入准备发给客户的跟进内容
-      hint: 这里会把下面这段内容保存到跟进记录；上方按钮只更新跟进状态。
+      hint: 上方按钮发送后会自动记录跟进；下方可复制消息或仅保存记录。
       email_blocked_hint: 发送邮件前请先完善：%{missing}。
       fix_profile: 去完善个人资料
       fix_company: 去完善公司设置
@@ -1579,7 +1595,7 @@ zh-CN:
       whatsapp: 通过 WhatsApp 发送
       email: 发送邮件
       copy: 复制消息
-      log: 保存这条内容并记录
+      log: 保存并记录
     channels:
       manual: 手动
       whatsapp: WhatsApp
@@ -1603,6 +1619,8 @@ zh-CN:
       whatsapp_logged: 已记录 WhatsApp 跟进，下次跟进安排在 %{date}
       whatsapp_failed: 当前无法打开 WhatsApp 跟进。
       whatsapp_unavailable: 客户没有可用的 WhatsApp 号码。
+      paused_blocked: 当前客户已暂停跟进，无法执行该操作。
+      no_active_quote_blocked: 当前没有活跃报价，无法执行跟进操作。
       message_copied: 跟进消息已复制。
       copy_failed: 当前浏览器无法复制跟进消息。
     mailer:
@@ -1677,6 +1695,7 @@ zh-CN:
     customer_silent:
       title: 沉默客户
       label: 客户已沉默
+      days_badge: 沉默 %{days} 天
       detail: 最近一次浏览报价是 %{days} 天前，此后无任何跟进。
       no_silent: 未检测到沉默客户。
   products:

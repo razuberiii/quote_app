@@ -1,4 +1,4 @@
-﻿/*
+/*
   SINGLE STYLE PATH (READ BEFORE EDITING)
   ---------------------------------------
   This file is the canonical stylesheet for app + marketing UI.
@@ -8148,6 +8148,9 @@ kbd.app-shortcut-badge {
   border-left: 1px solid #e2e8f0;
   padding-left: var(--space-1);
   padding-bottom: var(--space-1);
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .customer-timeline-time {
   margin: 0;
@@ -8159,11 +8162,17 @@ kbd.app-shortcut-badge {
   margin: var(--space-1) 0 0 0;
   color: #0f172a;
   font-size: 0.95rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .customer-timeline-content p {
   margin: var(--space-1) 0 0 0;
   color: #475569;
   font-size: 0.88rem;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .customer-timeline-toggle {
   margin-top: var(--space-1);
@@ -11162,7 +11171,7 @@ kbd.app-shortcut-badge {
 }
 
 .dashboard-detail-grid--overview {
-  grid-template-columns: minmax(0, 1.72fr) minmax(280px, 0.68fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
 }
 
@@ -11172,12 +11181,12 @@ kbd.app-shortcut-badge {
 }
 
 .dashboard-detail-grid--lists {
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
 .dashboard-detail-grid--reports {
-  grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
 }
 
@@ -11261,6 +11270,41 @@ kbd.app-shortcut-badge {
   text-transform: none;
 }
 
+.dashboard-report-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.62rem;
+  min-width: 0;
+}
+
+.dashboard-report-name-row .dashboard-overview-value {
+  margin-top: 0.22rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.dashboard-report-status-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 0.52rem;
+  border-radius: 999px;
+  border: 1px solid #dbe7f4;
+  background: #f8fbff;
+  color: #64748b;
+  font-size: 0.73rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex: 0 0 auto;
+}
+
+.dashboard-report-status-pill.is-overdue {
+  border-color: #f3d3d3;
+  background: #fff7f7;
+  color: #b45353;
+}
+
 .dashboard-report-meta {
   display: flex;
   align-items: center;
@@ -11305,6 +11349,28 @@ kbd.app-shortcut-badge {
   .dashboard-overview-list
   li:last-child {
   padding-bottom: 0;
+}
+
+.dashboard-overview-snapshot .dashboard-overview-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 0.55rem;
+}
+
+.dashboard-overview-snapshot .dashboard-overview-list li {
+  margin: 0;
+  padding: 0.58rem 0.62rem;
+  border: 1px solid #e8eef6;
+  border-radius: 10px;
+  background: #fcfdff;
+}
+
+.dashboard-overview-snapshot .dashboard-overview-list li:last-child {
+  grid-column: 1 / -1;
+}
+
+.dashboard-overview-snapshot .dashboard-overview-insight {
+  margin-top: 0.25rem;
 }
 
 .dashboard-recent-table.dashboard-products-table th:nth-child(4),
@@ -13875,9 +13941,149 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
   gap: 0.84rem;
 }
 
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-composition {
+  display: grid;
+  gap: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-main-primary {
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.72rem;
+  align-items: stretch;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail {
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > #deal-radar-section,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > .dashboard-urgent-rail,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail > #action-items-section {
+  display: flex;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > .dashboard-urgent-rail > #action-items-section {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > #deal-radar-section .dashboard-panel,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail > #action-items-section .dashboard-panel {
+  width: 100%;
+  height: 100%;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module {
+  border: 1px solid #dfe8f3;
+  border-radius: 12px;
+  background: #fcfdff;
+  padding: 0.56rem 0.62rem;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.55rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-head h2,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-head strong {
+  margin: 0;
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 680;
+  letter-spacing: 0.01em;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-signals {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-body {
+  margin-top: 0.42rem;
+  display: grid;
+  gap: 0.42rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.52rem;
+  padding: 0.42rem 0.45rem;
+  border: 1px solid #e5edf6;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-item strong {
+  display: block;
+  color: #0f172a;
+  font-size: 0.82rem;
+  line-height: 1.3;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-subline {
+  display: block;
+  margin-top: 0.08rem;
+  color: #64748b;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-cta {
+  min-height: 30px;
+  padding: 0 0.62rem;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-note,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-meta {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module--radar .dashboard-side-module-item:last-child {
+  margin-bottom: 0;
+}
+
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .dashboard-panel,
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .app-toolbar-surface {
   border-color: #dbe7f2;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .dashboard-action-summary,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent #deal-radar-section .dashboard-panel {
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent #today-focus-section .dashboard-panel {
+  border-color: #ccddef;
+  background: #ffffff;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-panel,
@@ -13896,24 +14102,13 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
   color: #64748b;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--urgent h2,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder h2 {
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--urgent h2 {
   color: #16243a;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--insight h2,
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--snapshot h2 {
   color: #23334a;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder {
-  border-color: #d8e4f2;
-  background: #fbfdff;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder .dashboard-summary-table td,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder .dashboard-summary-table th {
-  font-size: 0.83rem;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-kpi-row {
@@ -13928,6 +14123,126 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
   padding-top: 0.1rem;
 }
 
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group {
+  margin-top: 0.52rem;
+  padding-top: 0.52rem;
+  border-top: 1px dashed #dbe7f4;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group > span {
+  display: block;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 670;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list {
+  margin: 0.3rem 0 0;
+  display: grid;
+  gap: 0.35rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list li {
+  display: grid;
+  gap: 0.08rem;
+  padding: 0.34rem 0.38rem;
+  border: 1px solid #e7eef6;
+  border-radius: 8px;
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.42rem;
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-top .dashboard-report-link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-age {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 0.46rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.71rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list small,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group > small {
+  color: #64748b;
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-detail-grid--reports .dashboard-report-panel--portfolio {
+  grid-column: 1 / -1;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.46rem;
+  margin: 0 0 0.62rem;
+  padding: 0.46rem 0.55rem;
+  border: 1px solid #e7eef6;
+  border-radius: 10px;
+  background: #fcfdff;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary span {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary strong {
+  color: #0f172a;
+  font-size: 0.83rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary small {
+  color: #475569;
+  font-size: 0.75rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.62rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-panel {
+  border-color: #e6edf5;
+  background: #fcfdff;
+  box-shadow: none;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary h2 {
+  color: #334155;
+  font-size: 0.91rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-subtitle,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-quick-create-subtitle,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-progress {
+  color: #738399;
+}
+
+
 @media (max-width: 980px) {
   body.app-root[data-controller~="shortcuts"] .sales-dashboard .sales-dashboard-content {
     gap: 0.86rem;
@@ -13937,7 +14252,316 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
     gap: 0.72rem;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--reminder {
-    background: #ffffff;
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-main {
+    gap: 0.62rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair {
+    grid-template-columns: 1fr;
+    gap: 0.62rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail {
+    min-width: 0;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-section-caption,
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel-note {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 4),
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-list .dashboard-report-row:nth-child(n + 2) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insights-grid > .sales-insight-card:nth-child(n + 2) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid--lists .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 2) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid--reports {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-overview-insight,
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-topline small,
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-meta span:nth-child(n + 3) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss .sales-insight-dist-item:nth-child(n + 4) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss .sales-insight-dist-count {
+    color: #94a3b8;
+    font-size: 0.74rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel {
+    padding: 0.72rem 0.8rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-item {
+    padding: 0.36rem 0.4rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-cta {
+    min-height: 28px;
+    padding: 0 0.56rem;
+    font-size: 0.73rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary {
+    margin-bottom: 0.48rem;
+    padding: 0.42rem 0.48rem;
+    flex-wrap: wrap;
+    gap: 0.24rem 0.46rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary {
+    grid-template-columns: 1fr;
+    gap: 0.58rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-shortcuts {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-step:nth-child(n + 4) {
+    display: none;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group {
+    margin-top: 0.42rem;
+    padding-top: 0.42rem;
   }
 }
+
+/* Dashboard personal notes rail (canonical; independent from page-level controller flags). */
+.dashboard-notes-rail {
+  position: fixed !important;
+  top: auto !important;
+  bottom: 18px !important;
+  right: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  z-index: 1250 !important;
+  pointer-events: none;
+}
+
+.dashboard-notes-rail > * {
+  pointer-events: auto;
+}
+
+.dashboard-notes-panel {
+  position: absolute !important;
+  right: 10px !important;
+  top: auto !important;
+  bottom: 44px !important;
+  width: clamp(288px, 19vw, 340px);
+  height: clamp(392px, 52vh, 520px);
+  min-width: 260px;
+  min-height: 320px;
+  max-width: 560px;
+  max-height: 82vh;
+  border: 1px solid #d7e0ec;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #fffef9 0%, #f6f9ff 100%);
+  box-shadow: 0 12px 26px rgba(15, 23, 42, 0.12);
+  padding: 0.78rem 0.74rem 0.68rem;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.44rem;
+  box-sizing: border-box;
+  transform: translate(var(--notes-offset-x, 0), var(--notes-offset-y, 0)) !important;
+  transition: opacity 0.16s ease;
+  resize: both;
+  overflow: hidden;
+}
+
+.dashboard-notes-rail.is-open .dashboard-notes-panel {
+  transform: translate(var(--notes-offset-x, 0), var(--notes-offset-y, 0)) !important;
+}
+
+.dashboard-notes-panel[hidden],
+.dashboard-notes-launcher[hidden] {
+  display: none !important;
+}
+
+.dashboard-notes-launcher {
+  position: absolute !important;
+  left: auto !important;
+  right: 10px !important;
+  top: auto !important;
+  bottom: 0 !important;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  min-width: 58px;
+  height: 36px !important;
+  padding: 0 0.58rem;
+  border: 1px solid #dbe4ef;
+  border-radius: 999px;
+  background: #f6f9ff;
+  color: #455d79;
+  font-size: 0.78rem;
+  font-weight: 640;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.dashboard-notes-launcher-label {
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+  font-size: 0.73rem;
+  color: #42566f;
+}
+
+.dashboard-notes-rail.is-open .dashboard-notes-launcher {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dashboard-notes-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.44rem;
+  padding-bottom: 0.22rem;
+  border-bottom: 1px dashed #e1e8f1;
+}
+
+.dashboard-notes-head h2 {
+  margin: 0;
+  color: #17263a;
+  font-size: 0.92rem;
+  font-weight: 680;
+}
+
+.dashboard-notes-head[data-dashboard-notes-target="dragHandle"] {
+  cursor: move;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.dashboard-notes-rail.is-dragging .dashboard-notes-head[data-dashboard-notes-target="dragHandle"] {
+  cursor: grabbing;
+}
+
+.dashboard-notes-close {
+  border: 0;
+  background: transparent;
+  color: #7e90a7;
+  font-size: 0.74rem;
+  padding: 0.08rem 0.28rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.dashboard-notes-editor-wrap {
+  min-height: 0;
+  height: 100%;
+  display: block;
+}
+
+.dashboard-notes-editor {
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.22rem 0.08rem;
+  color: #1f3047;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+  outline: none;
+}
+
+.dashboard-notes-line {
+  min-height: 1.48em;
+}
+
+.dashboard-notes-line.is-todo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 0.32rem;
+}
+
+.dashboard-notes-check {
+  width: 1.04em;
+  height: 1.04em;
+  margin-top: 0.12em;
+  border: 1.6px solid #6f829d;
+  border-radius: 2px;
+  box-sizing: border-box;
+  background: #ffffff;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.dashboard-notes-check[data-done="true"] {
+  border-color: #1f3650;
+}
+
+.dashboard-notes-check[data-done="true"]::after {
+  content: "";
+  position: absolute;
+  width: 0.22em;
+  height: 0.5em;
+  border-right: 2px solid #1f3650;
+  border-bottom: 2px solid #1f3650;
+  transform: rotate(40deg);
+  left: 0.32em;
+  top: 0.12em;
+}
+
+.dashboard-notes-line-text {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-notes-line.is-done .dashboard-notes-line-text {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.2px;
+  text-decoration-color: #6f839f;
+  color: #6f839f;
+}
+
+.dashboard-notes-editor:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.dashboard-notes-editor:empty::before {
+  content: attr(data-placeholder);
+  color: #7a8ca5;
+  font-size: 0.84rem;
+  line-height: 1.4;
+  pointer-events: none;
+}
+
+@media (max-width: 1279px) {
+  .dashboard-notes-rail {
+    display: none;
+  }
+}
+
+
+

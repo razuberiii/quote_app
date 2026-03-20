@@ -212,16 +212,18 @@
       <% end %>
     </section>
 
-    <div class="customer-side-section customer-side-section--assistant">
-      <%= render "follow_up_assistant",
-                 customer: @customer,
-                 follow_up_quote: @follow_up_assistant_quote,
-                 message: @suggested_follow_up_message,
-                 best_contact_time: @best_contact_time,
-                 follow_up_email_ready: @follow_up_email_ready,
-                 follow_up_email_block_reason: @follow_up_email_block_reason,
-                 quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
-    </div>
+    <% if @customer.follow_up_reminders_enabled? %>
+      <div class="customer-side-section customer-side-section--assistant">
+        <%= render "follow_up_assistant",
+                   customer: @customer,
+                   follow_up_quote: @follow_up_assistant_quote,
+                   message: @suggested_follow_up_message,
+                   best_contact_time: @best_contact_time,
+                   follow_up_email_ready: @follow_up_email_ready,
+                   follow_up_email_block_reason: @follow_up_email_block_reason,
+                   quote_signal_label: follow_up_signal_label(@follow_up_quote_view_status, @follow_up_quote_expiry_status, @follow_up_quote_signal&.type) %>
+      </div>
+    <% end %>
 
     <section class="customer-timeline app-surface customer-side-section customer-side-section--secondary">
       <div class="app-section-heading">

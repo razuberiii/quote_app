@@ -1,6 +1,7 @@
 class CustomersController < ApplicationController
   before_action :set_customer, only: %i[show edit update destroy pause resume mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp reorder_tags]
   before_action :set_customer_form_collections, only: %i[new create edit update]
+  before_action :ensure_follow_up_available!, only: %i[mark_follow_up schedule_follow_up log_follow_up send_follow_up_email send_follow_up_whatsapp]
 
   def index
     Quote.expire_overdue_for_company!(current_user.company_id)
@@ -369,6 +370,22 @@ class CustomersController < ApplicationController
   end
 
   private
+
+  def ensure_follow_up_available!
+    message =
+      if @customer.raw_status_css == "paused"
+        t("follow_up.flash.paused_blocked")
+      elsif !@customer.follow_up_reminders_enabled?
+        t("follow_up.flash.no_active_quote_blocked")
+      end
+
+    return if message.blank?
+
+    respond_to do |format|
+      format.json { render json: { message: message }, status: :unprocessable_entity }
+      format.html { redirect_to @customer, alert: message }
+    end
+  end
 
   def follow_up_params
     params.fetch(:follow_up, {}).permit(:message, :quote_id)
@@ -1742,7 +1759,7 @@ class CustomersController < ApplicationController
       detail_parts = []
       detail_parts << I18n.t("follow_up.timeline.logged_by", user: actor) if actor.present?
       detail_parts << I18n.t("follow_up.timeline.quote_reference", quote_name: quote_display_name(event.quote)) if event.quote.present?
-      detail_parts << event.note.to_s.truncate(160) if event.note.present?
+      detail_parts << event.note.to_s.truncate(200) if event.note.present?
 
       tone = case event.channel
       when "whatsapp", "email"

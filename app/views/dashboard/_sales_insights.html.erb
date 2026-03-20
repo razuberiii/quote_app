@@ -100,62 +100,6 @@
       </div>
     <% end %>
 
-    <%# ── Top Products ─────────────────────────────────────────── %>
-    <%= render "components/ui/card", class: "sales-insight-card sales-insight-card--wide app-surface" do %>
-      <h3 class="sales-insight-card__title"><%= t("analytics.product_intelligence.title") %></h3>
-      <div class="sales-insight-card__body">
-        <% if @analytics_top_products.any? %>
-          <div class="table-responsive">
-            <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface sales-insight-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
-              <thead>
-                <tr>
-                  <th></th>
-                  <th class="text-right"><%= t("analytics.product_intelligence.quotes_30d") %></th>
-                  <th class="text-right"><%= t("analytics.product_intelligence.wins") %></th>
-                  <th class="text-right"><%= t("analytics.product_intelligence.win_rate") %></th>
-                  <th class="text-right"><%= t("analytics.product_intelligence.avg_price") %></th>
-                </tr>
-              </thead>
-              <tbody>
-                <% @analytics_top_products.each do |row| %>
-                  <tr>
-                    <td data-label="<%= t("dashboard.view.index.product") %>"><%= row[:product_name] %></td>
-                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.quotes_30d") %>"><%= row[:quotes_count] %></td>
-                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.wins") %>"><%= row[:wins_count] %></td>
-                    <td class="text-right sales-insight-winrate <%= row[:win_rate].to_f >= 50 ? 'is-good' : '' %>" data-label="<%= t("analytics.product_intelligence.win_rate") %>"><%= row[:win_rate] %>%</td>
-                    <td class="text-right" data-label="<%= t("analytics.product_intelligence.avg_price") %>"><%= number_to_currency(row[:avg_price], precision: 0) %></td>
-                  </tr>
-                <% end %>
-              </tbody>
-            <% end %>
-          </div>
-        <% else %>
-          <p class="app-empty-note"><%= t("analytics.product_intelligence.no_data") %></p>
-        <% end %>
-      </div>
-    <% end %>
-
-    <%# ── Silent Customers ────────────────────────────────────── %>
-    <%= render "components/ui/card", class: "sales-insight-card app-surface" do %>
-      <h3 class="sales-insight-card__title"><%= t("analytics.customer_silent.title") %></h3>
-      <div class="sales-insight-card__body">
-        <% if @analytics_silent_customers.any? %>
-          <ul class="sales-insight-silent-list">
-            <% @analytics_silent_customers.each do |customer| %>
-              <% svc = CustomerEngagementSignalService.new(customer) %>
-              <li class="sales-insight-silent-item">
-                <%= link_to customer.name, customer_path(customer), class: "sales-insight-silent-name" %>
-                <span class="sales-insight-silent-meta">
-                  <%= t("analytics.customer_silent.detail", days: svc.days_since_last_view) %>
-                </span>
-              </li>
-            <% end %>
-          </ul>
-        <% else %>
-          <p class="app-empty-note"><%= t("analytics.customer_silent.no_silent") %></p>
-        <% end %>
-      </div>
-    <% end %>
-
   </div><%# /.sales-insights-grid %>
+
 </div><%# /.sales-insights-section %>

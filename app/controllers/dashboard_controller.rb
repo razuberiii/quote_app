@@ -42,13 +42,6 @@ class DashboardController < CustomersController
     @quote_funnel = QuoteFunnelReportService.new(company: current_user.company).call
     @performance_report = DashboardPerformanceReportService.new(customers: all_customers).call
     @top_quoted_products = current_user.company.products.order(quoted_count: :desc, last_quoted_at: :desc).limit(5)
-    @reminder_quotes = current_user.company.quotes
-      .not_archived
-      .latest_versions
-      .includes(:customer)
-      .select(&:can_send_reminder?)
-      .first(5)
-
     # Sales Insights analytics — read-only, isolated from core signal/radar logic
     company = current_user.company
     @analytics_win_loss     = DealOutcomeAnalyticsService.new(company: company).summary
@@ -56,13 +49,31 @@ class DashboardController < CustomersController
     @analytics_channels     = ChannelUsageAnalyticsService.new(company: company).summary
     @analytics_top_products = ProductQuoteAnalyticsService.new(company: company).top_products(limit: 5)
     @analytics_silent_customers = begin
-      company.customers.includes(:customer_follow_up_events).select do |customer|
-        CustomerEngagementSignalService.new(customer).silent_customer?
+      company.customers.includes(:customer_follow_up_events, :quotes).select do |customer|
+        service = CustomerEngagementSignalService.new(customer)
+        dashboard_silent_customer_visible?(customer, service)
       end.first(5)
     end
   end
 
   private
+
+  def dashboard_silent_customer_visible?(customer, service)
+    return false if customer.status.to_s == "paused" || customer.raw_status_css.to_s == "paused"
+    return false unless service.silent_customer?
+
+    last_view_at = service.latest_view_at
+    return false if last_view_at.blank?
+
+    latest_follow_up_touch = customer.customer_follow_up_events.maximum(:contacted_at)
+    latest_reminder_touch = customer.quotes.not_archived.maximum(:reminder_sent_at)
+    latest_legacy_touch = customer.last_follow_up_date&.in_time_zone
+    latest_touch_at = [ latest_follow_up_touch, latest_reminder_touch, latest_legacy_touch ].compact.max
+
+    # If we already followed up after the last customer view but still no response,
+    # demote this customer from dashboard silent-slot to avoid long-term slot occupation.
+    latest_touch_at.blank? || latest_touch_at <= last_view_at
+  end
 
   def filter_system_action_items(items)
     strong_action_types = %w[win_reason_missing loss_reason_missing revision_requested]

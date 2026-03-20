@@ -160,6 +160,9 @@
       <% end %>
       <%= yield %>
     </main>
+    <% if user_signed_in? %>
+      <%= render "layouts/personal_notes_widget" %>
+    <% end %>
     <div id="app-toast-container" class="app-toast-container" aria-live="polite" aria-atomic="true"></div>
     <% if user_signed_in? %>
     <div id="shortcuts-modal" class="app-shortcuts-backdrop" hidden

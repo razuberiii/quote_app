@@ -139,6 +139,21 @@ es-419:
         one: casi 1 año
         other: casi %{count} años
   dashboard:
+    notes:
+      title: Notas de Trabajo
+      short_title: Notas
+      head_count: Pendientes
+      subtitle: Solo para tus pendientes temporales.
+      input_placeholder: Agregar una nota rápida...
+      add_symbol: +
+      add: Agregar
+      empty: Aún no hay notas
+      empty_subtle: Anota lo que quieres resolver hoy
+      keyhint: "Tip: presiona Tab para convertir la línea actual en pendiente"
+      tip: Es un bloc personal, no un panel de tareas del sistema.
+      open_aria: Abrir notas de trabajo
+      close_aria: Colapsar notas de trabajo
+      collapse: Colapsar
     onboarding:
       quick_start:
         title: Inicio rápido
@@ -201,11 +216,11 @@ es-419:
         negotiating_stale: en negociación por más de 7 días
         no_immediate_risk: No hay riesgos inmediatos de seguimiento.
         action_required: Requiere atención (%{count})
-        action_overview: Resumen de prioridades (%{count})
+        action_overview: Pendientes (%{count})
         risk_customers: "%{count} clientes requieren seguimiento"
         stalled_negotiations: "%{count} negociaciones estancadas"
         no_customer_or_decision_risk: Sin presión inmediata de seguimiento o decisión
-        handle_overdue_first: Atiende primero las cuentas vencidas y estancadas.
+        handle_overdue_first: Se muestra primero 1 pendiente; continúa con el resto en la cola.
         jump_to_action_items: Ver pendientes (%{count})
         sales_signals: Señales de ventas
         this_month: Este mes
@@ -229,6 +244,7 @@ es-419:
         show_less: Mostrar menos
         no_high_priority_actions: Hoy no hay acciones de alta prioridad.
         deal_radar: Radar de oportunidades
+        deal_radar_summary_hint: Se muestra primero 1 señal clave; revisa las demás en la lista de cotizaciones.
         deal_radar_count:
           one: "%{count} oportunidad activa"
           other: "%{count} oportunidades activas"
@@ -1539,7 +1555,7 @@ es-419:
       close_verification: Cerrar verificación
       suggested_message: Borrador sugerido
       placeholder: Escriba el mensaje de seguimiento que piensa enviar
-      hint: Guardar aquí registrará este borrador en el seguimiento; el botón superior solo actualiza el estado.
+      hint: Los botones superiores envían y registran seguimiento; abajo puedes copiar el mensaje o guardar solo el registro.
       email_blocked_hint: "Antes de enviar el correo, complete: %{missing}."
       fix_profile: Actualizar perfil
       fix_company: Actualizar empresa
@@ -1578,7 +1594,7 @@ es-419:
       whatsapp: Enviar por WhatsApp
       email: Enviar correo
       copy: Copiar mensaje
-      log: Guardar este borrador en el registro
+      log: Guardar y registrar
     channels:
       manual: Manual
       whatsapp: WhatsApp
@@ -1602,6 +1618,8 @@ es-419:
       whatsapp_logged: Seguimiento por WhatsApp registrado. Próximo seguimiento programado para %{date}
       whatsapp_failed: No se pudo abrir el seguimiento por WhatsApp en este momento.
       whatsapp_unavailable: El cliente no tiene un número de WhatsApp disponible.
+      paused_blocked: Este cliente tiene el seguimiento en pausa. La acción no está disponible.
+      no_active_quote_blocked: No hay cotización activa. La acción de seguimiento no está disponible.
       message_copied: Mensaje de seguimiento copiado.
       copy_failed: No se pudo copiar el mensaje de seguimiento en este navegador.
     mailer:
@@ -1676,6 +1694,7 @@ es-419:
     customer_silent:
       title: Clientes Silenciosos
       label: El cliente dejó de responder
+      days_badge: Silencio %{days} d
       detail: Vio una cotización hace %{days} días sin seguimiento posterior.
       no_silent: No se detectaron clientes silenciosos.
   products:

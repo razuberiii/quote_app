@@ -1,0 +1,35 @@
+<aside class="dashboard-notes-rail"
+       data-controller="dashboard-notes"
+       data-dashboard-notes-storage-key-value="global-notes:<%= current_user.id %>">
+  <section class="dashboard-notes-panel app-surface" data-dashboard-notes-target="panel" hidden>
+    <header class="dashboard-notes-head"
+            data-dashboard-notes-target="dragHandle"
+            data-action="pointerdown->dashboard-notes#startDrag mousedown->dashboard-notes#startDrag">
+      <div class="dashboard-notes-head-main">
+        <h2><%= t("dashboard.notes.title") %></h2>
+      </div>
+      <button type="button"
+              class="dashboard-notes-close"
+              data-action="dashboard-notes#close"
+              aria-label="<%= t("dashboard.notes.close_aria") %>"><%= t("dashboard.notes.collapse") %></button>
+    </header>
+    <div class="dashboard-notes-editor-wrap">
+      <div class="dashboard-notes-editor"
+           data-dashboard-notes-target="editor"
+           data-action="focus->dashboard-notes#onFocus input->dashboard-notes#onInput blur->dashboard-notes#onBlur keydown->dashboard-notes#onKeydown click->dashboard-notes#onClickLine"
+           data-placeholder="<%= "#{t("dashboard.notes.empty_subtle")} · #{t("dashboard.notes.keyhint")}" %>"
+           contenteditable="true"
+           role="textbox"
+           aria-multiline="true"
+           spellcheck="false"></div>
+    </div>
+  </section>
+
+  <button type="button"
+          class="dashboard-notes-launcher"
+          data-dashboard-notes-target="launcher"
+          data-action="dashboard-notes#toggle"
+          aria-label="<%= t("dashboard.notes.open_aria") %>">
+    <span class="dashboard-notes-launcher-label"><%= t("dashboard.notes.short_title") %></span>
+  </button>
+</aside>

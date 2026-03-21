@@ -11,6 +11,8 @@ It focuses on quote revisions, buyer interaction, public quote links, and multi-
 - Quote template system (branding, visibility toggles, output controls)
 - Quote item image support (gallery select + upload, stable per quote item)
 - Multi-language UI/content (`en`, `zh-CN`, `es-419`)
+- Independent admin console (`/admin`) for user management, impersonation, and audit logs
+- Public legal pages for marketing site: `/privacy`, `/terms`
 
 ## Tech Stack
 
@@ -65,6 +67,7 @@ Notes:
 
 - In production, external URL generation should use `APP_HOST`.
 - `.kamal/secrets` is env-reference based; do not commit raw secrets.
+- Contact form recipient still uses `LANDING_CONTACT_EMAIL` (production) and `LANDING_CONTACT_EMAIL_DEV` (development override).
 
 ## Tests and Checks
 
@@ -141,6 +144,10 @@ Ensure before deploy:
 
 - Agent/project execution rules are defined in `AGENTS.md`.
 - CSS conventions are in `docs/css-components.md` and should be updated when CSS patterns change.
+- For scoped planning/rule-making (UI, feature, stability, performance, refactor), start from `docs/plan-template.md`.
+- When a cycle is completed, move its plan into `docs/archive/` with a dated filename.
+- Admin-only routes are under `/admin/*` and require `role=admin`.
+- Suspended users are blocked from login and redirected to `/suspended`.
 
 ## Asset Troubleshooting (Development)
 

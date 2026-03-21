@@ -1,0 +1,8 @@
+<section class="app-page-shell app-page-shell--form">
+  <div class="app-surface">
+    <h1><%= t("users.suspended.title") %></h1>
+    <p><%= t("users.suspended.body") %></p>
+    <p><%= t("users.suspended.contact_hint") %></p>
+    <%= link_to t("users.suspended.back_to_login"), new_user_session_path, class: ui_button_classes(:secondary) %>
+  </div>
+</section>

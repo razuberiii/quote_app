@@ -10,6 +10,7 @@ class User < ApplicationRecord
   MAX_AVATAR_SIZE = 5.megabytes
 
   enum :role, { user: 0, vip: 1, admin: 2 }, default: :user
+  enum :status, { active: 0, suspended: 1 }, default: :active
   enum :company_role, { owner: 0, admin: 1, member: 2 }, default: :member, prefix: :company
   validates :language, inclusion: { in: %w[en zh-CN es-419] }, allow_blank: true
 
@@ -59,6 +60,10 @@ class User < ApplicationRecord
 
   def email_verified?
     email_verified_at.present?
+  end
+
+  def active_for_app?
+    active?
   end
 
   def move_to_personal_company!

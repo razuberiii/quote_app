@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for?(:title) ? yield(:title) : t("admin.layout.title") %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body class="app-root" data-controller="shortcuts">
+    <nav class="navbar admin-navbar">
+      <div class="navbar-container admin-navbar-container">
+        <div class="navbar-brand-wrap">
+          <h1><%= link_to t("admin.layout.brand"), admin_root_path %></h1>
+          <span class="navbar-company-context"><%= current_user.email %></span>
+        </div>
+        <ul class="admin-nav-list">
+          <%= ui_nav_link t("admin.nav.dashboard"), admin_root_path, icon: :dashboard %>
+          <%= ui_nav_link t("admin.nav.users"), admin_users_path, icon: :customers %>
+          <%= ui_nav_link t("admin.nav.audit_logs"), admin_audit_logs_path, icon: :admin %>
+          <li>
+            <%= link_to t("admin.nav.back_to_app"), dashboard_path, class: "app-nav-link" %>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="admin-console-main">
+      <%= render "layouts/impersonation_banner" %>
+
+      <% if notice %>
+        <div class="alert alert-success"><%= notice %></div>
+      <% end %>
+      <% if alert %>
+        <div class="alert alert-danger"><%= alert %></div>
+      <% end %>
+
+      <%= yield %>
+    </main>
+  </body>
+</html>

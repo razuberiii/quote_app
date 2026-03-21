@@ -26,8 +26,15 @@ module Users
         return
       end
 
+      if resource.suspended?
+        sign_out(resource)
+        redirect_to suspended_path, alert: t("users.suspended.alert")
+        return
+      end
+
       set_flash_message!(:notice, :signed_in)
       sign_in(resource_name, resource)
+      resource.update_column(:last_login_at, Time.current)
       yield resource if block_given?
       respond_with resource, location: after_sign_in_path_for(resource)
     end

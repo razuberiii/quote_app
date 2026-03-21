@@ -2434,10 +2434,93 @@ es-419:
       joined_company: Te uniste a %{company}.
       unable_accept: "No se pudo aceptar la invitación: %{message}"
   admin:
+    layout:
+      title: Consola de Administración
+      brand: Rubusoo Admin
+    nav:
+      dashboard: Resumen
+      users: Usuarios
+      audit_logs: Auditoría
+      back_to_app: Volver a la app
+    dashboard:
+      title: Admin Dashboard
+      subtitle: Vista ligera para soporte y control de riesgo.
+      metrics:
+        total_users: Usuarios totales
+        new_users_7d: Nuevos usuarios (7 días)
+        active_users: Usuarios activos
+        suspended_users: Usuarios suspendidos
+    pagination:
+      prev: Anterior
+      next: Siguiente
+      page_of: "Página %{page}/%{total_pages} · %{total_count} registros"
+    impersonation:
+      banner:
+        title: Modo de suplantación activo.
+        detail: "Admin real: %{admin_email} · Viendo como: %{user_email}"
+        exit: Salir de suplantación
+        exit_confirm: ¿Salir de suplantación y volver al admin?
+      flash:
+        stopped: Suplantación finalizada. Regresaste al admin.
     users:
+      index:
+        title: Gestión de Usuarios
+        subtitle: Busca y administra cuentas de forma segura.
+        search_label: Buscar
+        search_placeholder: correo / nombre / empresa
+        search: Buscar
+      show:
+        title: "Detalle de Usuario · %{email}"
+        subtitle: Perfil, actividad y acciones de gestión.
+        back: Volver a usuarios
+        association_summary: Resumen Relacionado
+        customers_count: Cantidad de clientes
+        quotes_count: Cantidad de cotizaciones
+        revisions_count: Cantidad de revisiones
+        public_shares_count: Cantidad de enlaces públicos
+        actions_title: Acciones de Gestión
+      columns:
+        name: Nombre
+        email: Correo
+        role: Rol
+        status: Estado
+        created_at: Creado el
+        last_login_at: Último inicio de sesión
+        last_active_at: Última actividad
+        actions: Acciones
+      actions:
+        view: Ver
+        change_role: Cambiar Rol
+        suspend: Suspender
+        reactivate: Reactivar
+        impersonate: Suplantar
+        confirm_role_change: ¿Confirmar cambio de rol?
+        confirm_suspend: ¿Suspender este usuario?
+        confirm_reactivate: ¿Reactivar este usuario?
+        confirm_impersonate: "¿Entrar en modo suplantación para %{email}?"
       flash:
         role_updated: Rol actualizado.
+        status_updated: Estado actualizado.
+        cannot_impersonate_admin: No se puede suplantar cuentas admin.
+        cannot_change_own_role: No puedes cambiar tu propio rol.
+        cannot_demote_last_admin: No se puede degradar al último admin.
+        impersonation_started: "Ahora estás suplantando a %{email}."
+    audit_logs:
+      title: Registros de Auditoría
+      subtitle: Trazabilidad de acciones admin de alto riesgo.
+      columns:
+        time: Hora
+        actor: Actor
+        action: Acción
+        target: Objetivo
+        metadata: Metadatos
   users:
+    suspended:
+      title: Cuenta Suspendida
+      body: Tu cuenta está suspendida y no puede acceder al espacio de trabajo.
+      contact_hint: Contacta a tu administrador para reactivarla.
+      back_to_login: Volver al inicio de sesión
+      alert: Tu cuenta ha sido suspendida.
     registrations:
       view:
         new:
@@ -2548,6 +2631,8 @@ es-419:
         sample_quote: Cotización de ejemplo
         resources: Recursos
         contact: Contacto
+        privacy: Política de Privacidad
+        terms: Términos de Servicio
     view:
       contact:
         meta_title: Contacto | Rubusoo
@@ -2582,6 +2667,57 @@ es-419:
           body: Completa la verificación de seguridad antes de enviar tu mensaje.
           loading: Cargando verificación...
           success: Verificado. Enviando ahora...
+      privacy:
+        meta_title: Política de Privacidad | Rubusoo
+        meta_description: Conoce cómo Rubusoo recopila, usa y protege los datos.
+        last_updated: "Última actualización: 21 de marzo de 2026"
+        hero:
+          kicker: PRIVACIDAD
+          title: Política de Privacidad
+          body: Esta página explica qué datos recopilamos y cómo los usamos.
+        sections:
+          data_collect:
+            title: 1. Datos que recopilamos
+            body: Recopilamos datos de cuenta, contenido de cotizaciones/espacios de trabajo y datos técnicos necesarios para operar y proteger el servicio.
+          data_use:
+            title: 2. Cómo usamos los datos
+            body: Usamos los datos para ofrecer funciones clave, mejorar la confiabilidad, prevenir abusos y atender solicitudes de soporte.
+          data_share:
+            title: 3. Compartición de datos
+            body: No vendemos datos personales. Solo compartimos datos con proveedores necesarios para operar Rubusoo o cuando la ley lo exige.
+          retention:
+            title: 4. Retención de datos
+            body: Conservamos los datos solo el tiempo necesario para operar el producto, cumplir obligaciones legales y fines comerciales legítimos.
+          contact:
+            title: 5. Contacto
+            body: Para consultas de privacidad, usa el formulario de Contacto.
+      terms:
+        meta_title: Términos de Servicio | Rubusoo
+        meta_description: Revisa los términos que regulan el uso de Rubusoo.
+        last_updated: "Última actualización: 21 de marzo de 2026"
+        hero:
+          kicker: TÉRMINOS
+          title: Términos de Servicio
+          body: Estos términos definen tus derechos y responsabilidades al usar Rubusoo.
+        sections:
+          acceptance:
+            title: 1. Aceptación
+            body: Al acceder o usar Rubusoo, aceptas estos términos.
+          account:
+            title: 2. Responsabilidad de la cuenta
+            body: Eres responsable de tus credenciales y de la actividad realizada bajo tu cuenta.
+          usage:
+            title: 3. Uso aceptable
+            body: Aceptas no hacer un uso indebido del servicio, no interferir con la seguridad y cumplir las leyes aplicables.
+          availability:
+            title: 4. Disponibilidad del servicio
+            body: Mejoramos el servicio continuamente y podemos actualizar funciones cuando sea necesario.
+          liability:
+            title: 5. Responsabilidad
+            body: En la máxima medida permitida por la ley, Rubusoo se ofrece tal cual y la responsabilidad está limitada.
+          contact:
+            title: 6. Contacto
+            body: Para consultas legales sobre estos términos, usa el formulario de Contacto.
       demo:
         meta_title: Espacio de trabajo demo | Rubusoo
         meta_description: Mira cómo se gestionan las revisiones de cotización, la actividad del comprador, las tareas de seguimiento y los cambios de estado después del envío.

@@ -3,13 +3,25 @@ class ApplicationController < ActionController::Base
 
   before_action :authenticate_user!
   before_action :set_locale
+  before_action :normalize_impersonation_session!
+  before_action :enforce_active_user_status!
+  before_action :touch_last_active_at!
   before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
   helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color,
-                :locale_nav_items, :current_locale_nav_item, :locale_switch_url
+                :locale_nav_items, :current_locale_nav_item, :locale_switch_url,
+                :impersonating?, :real_admin_user, :acting_user_for_audit
 
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
+
+  protected
+
+  def after_sign_in_path_for(resource)
+    return admin_root_path if resource.respond_to?(:admin?) && resource.admin?
+
+    authenticated_root_path
+  end
 
   private
 
@@ -104,6 +116,40 @@ class ApplicationController < ActionController::Base
     redirect_to pending_email_verification_path(email: current_user.email), alert: t("flash.verify_email")
   end
 
+  def normalize_impersonation_session!
+    return unless impersonating?
+    return if real_admin_user&.admin?
+
+    clear_impersonation_session!
+  end
+
+  def enforce_active_user_status!
+    return if current_user.blank?
+    return if should_skip_status_enforcement_check?
+    return if current_user.active_for_app?
+
+    clear_impersonation_session!
+    sign_out(current_user)
+    redirect_to suspended_path, alert: t("users.suspended.alert")
+  end
+
+  def should_skip_status_enforcement_check?
+    return true if controller_name == "devise_sessions" && action_name == "destroy"
+    return true if controller_name == "suspended_access"
+
+    false
+  end
+
+  def touch_last_active_at!
+    return if current_user.blank?
+    return unless current_user.active_for_app?
+
+    threshold = 5.minutes.ago
+    return if current_user.last_active_at.present? && current_user.last_active_at > threshold
+
+    current_user.update_column(:last_active_at, Time.current)
+  end
+
   def should_skip_email_verification_check?
     # Skip for Devise controllers (login, signup recovery etc)
     return true if devise_controller?
@@ -118,6 +164,27 @@ class ApplicationController < ActionController::Base
 
   def require_admin!
     redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.admin?
+  end
+
+  def impersonating?
+    session[:admin_impersonator_id].present?
+  end
+
+  def real_admin_user
+    return nil unless impersonating?
+    return @real_admin_user if defined?(@real_admin_user)
+
+    @real_admin_user = User.find_by(id: session[:admin_impersonator_id])
+  end
+
+  def acting_user_for_audit
+    real_admin_user || current_user
+  end
+
+  def clear_impersonation_session!
+    session.delete(:admin_impersonator_id)
+    session.delete(:impersonated_user_id)
+    remove_instance_variable(:@real_admin_user) if defined?(@real_admin_user)
   end
 
   def require_company_team_manager!

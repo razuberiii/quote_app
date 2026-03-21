@@ -16,6 +16,7 @@ export default class extends Controller {
     this.drag = { active: false, pointerId: null, startX: 0, startY: 0, baseX: 0, baseY: 0 };
     this.resizeObserver = null;
     this.lastMeasuredSize = null;
+    this.selectAllArmed = false;
     this.render();
   }
 
@@ -43,6 +44,7 @@ export default class extends Controller {
 
   onInput() {
     if (!this.hasEditorTarget) return;
+    this.selectAllArmed = false;
     this.state.text = this.sanitizeNoteText(this.editorPlainText());
     this.persist();
     this.renderEditorState();
@@ -50,6 +52,7 @@ export default class extends Controller {
 
   onBlur() {
     if (!this.hasEditorTarget) return;
+    this.selectAllArmed = false;
     const plain = this.editorPlainText();
     const normalized = this.sanitizeNoteText(plain);
     this.state.text = normalized;
@@ -59,6 +62,11 @@ export default class extends Controller {
   }
 
   onKeydown(event) {
+    if ((event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "a") {
+      this.selectAllArmed = true;
+      return;
+    }
+
     if ((event.key === "Backspace" || event.key === "Delete") && this.tryClearAllOnFullSelection(event)) {
       return;
     }
@@ -93,6 +101,12 @@ export default class extends Controller {
 
   tryClearAllOnFullSelection(event) {
     if (!this.hasEditorTarget) return false;
+    if (this.selectAllArmed && (event.key === "Backspace" || event.key === "Delete")) {
+      event.preventDefault();
+      this.clearAllContent();
+      return true;
+    }
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return false;
 
@@ -100,26 +114,42 @@ export default class extends Controller {
     if (!this.isFullEditorSelection(range)) return false;
 
     event.preventDefault();
+    this.clearAllContent();
+    return true;
+  }
+
+  clearAllContent() {
     this.state.text = "";
+    this.selectAllArmed = false;
     this.persist();
     this.editorTarget.innerHTML = "";
     this.renderEditorState();
-    return true;
   }
 
   isFullEditorSelection(range) {
     if (!this.hasEditorTarget) return false;
     const full = document.createRange();
     full.selectNodeContents(this.editorTarget);
+    const totalLength = full.toString().length;
+    if (totalLength === 0) return true;
 
-    const startEqual =
-      range.compareBoundaryPoints(Range.START_TO_START, full) === 0;
-    const endEqual =
-      range.compareBoundaryPoints(Range.END_TO_END, full) === 0;
-    return startEqual && endEqual;
+    const startOffset = this.offsetFromEditorStart(range.startContainer, range.startOffset);
+    const endOffset = this.offsetFromEditorStart(range.endContainer, range.endOffset);
+
+    // Allow tiny boundary tolerance for mouse drag selection.
+    return startOffset <= 1 && endOffset >= totalLength - 1;
+  }
+
+  offsetFromEditorStart(container, offset) {
+    if (!this.hasEditorTarget) return 0;
+    const probe = document.createRange();
+    probe.selectNodeContents(this.editorTarget);
+    probe.setEnd(container, offset);
+    return probe.toString().length;
   }
 
   onClickLine(event) {
+    this.selectAllArmed = false;
     if (!event || event.button !== 0 || !this.hasEditorTarget) return;
     const checkbox = event.target.closest(".dashboard-notes-check");
     if (!checkbox || !this.editorTarget.contains(checkbox)) return;

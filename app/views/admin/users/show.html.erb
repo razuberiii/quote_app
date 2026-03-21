@@ -1,0 +1,94 @@
+<section class="app-page-shell admin-page-shell admin-page-shell--user-show">
+  <header class="app-page-header">
+    <div>
+      <h1><%= t("admin.users.show.title", email: @user.email) %></h1>
+      <p><%= t("admin.users.show.subtitle") %></p>
+    </div>
+    <div>
+      <%= link_to t("admin.users.show.back"), admin_users_path, class: ui_button_classes(:secondary) %>
+    </div>
+  </header>
+
+  <section class="app-surface admin-user-detail-section">
+    <div class="admin-kv-grid">
+      <div class="admin-kv-item">
+        <span class="admin-kv-label">ID</span>
+        <strong class="admin-kv-value"><%= @user.id %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.name") %></span>
+        <strong class="admin-kv-value"><%= @user.full_name.presence || "-" %></strong>
+      </div>
+      <div class="admin-kv-item admin-kv-item--wide">
+        <span class="admin-kv-label"><%= t("admin.users.columns.email") %></span>
+        <strong class="admin-kv-value"><%= @user.email %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.role") %></span>
+        <strong class="admin-kv-value"><%= status_badge(@user.role, :indigo) %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.status") %></span>
+        <strong class="admin-kv-value"><%= status_badge(@user.status, @user.active? ? :green : :red) %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.created_at") %></span>
+        <strong class="admin-kv-value"><%= @user.created_at.present? ? format_in_user_time(@user.created_at, current_user) : "-" %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.last_login_at") %></span>
+        <strong class="admin-kv-value"><%= @user.last_login_at.present? ? format_in_user_time(@user.last_login_at, current_user) : "-" %></strong>
+      </div>
+      <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.last_active_at") %></span>
+        <strong class="admin-kv-value"><%= @user.last_active_at.present? ? format_in_user_time(@user.last_active_at, current_user) : "-" %></strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="app-surface admin-user-detail-section">
+    <h2><%= t("admin.users.show.association_summary") %></h2>
+    <div class="app-stat-grid admin-user-summary-grid">
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.users.show.customers_count") %></span>
+        <strong class="app-stat-value"><%= @summary[:customers_count] %></strong>
+      </article>
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.users.show.quotes_count") %></span>
+        <strong class="app-stat-value"><%= @summary[:quotes_count] %></strong>
+      </article>
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.users.show.revisions_count") %></span>
+        <strong class="app-stat-value"><%= @summary[:revisions_count] %></strong>
+      </article>
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.users.show.public_shares_count") %></span>
+        <strong class="app-stat-value"><%= @summary[:public_shares_count] %></strong>
+      </article>
+    </div>
+  </section>
+
+  <section class="app-surface admin-user-detail-section">
+    <h2><%= t("admin.users.show.actions_title") %></h2>
+    <div class="admin-users-actions">
+      <%= form_with url: update_role_admin_user_path(@user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
+        <%= f.select :role, User.roles.keys.map { |role| [ role, role ] }, { selected: @user.role }, class: ui_input_classes %>
+        <%= f.submit t("admin.users.actions.change_role"), class: ui_button_classes(:secondary), data: { turbo_confirm: t("admin.users.actions.confirm_role_change") } %>
+      <% end %>
+
+      <%= form_with url: update_status_admin_user_path(@user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
+        <%= f.hidden_field :status, value: @user.active? ? "suspended" : "active" %>
+        <%= f.submit(@user.active? ? t("admin.users.actions.suspend") : t("admin.users.actions.reactivate"),
+                     class: ui_button_classes(@user.active? ? :danger : :secondary),
+                     data: { turbo_confirm: @user.active? ? t("admin.users.actions.confirm_suspend") : t("admin.users.actions.confirm_reactivate") }) %>
+      <% end %>
+
+      <%= button_to t("admin.users.actions.impersonate"),
+                    impersonate_admin_user_path(@user),
+                    method: :post,
+                    class: ui_button_classes(:danger),
+                    form: { class: "admin-users-actions-group" },
+                    data: { turbo_confirm: t("admin.users.actions.confirm_impersonate", email: @user.email) } %>
+    </div>
+  </section>
+</section>

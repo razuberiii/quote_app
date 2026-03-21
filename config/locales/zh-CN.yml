@@ -2436,10 +2436,93 @@ zh-CN:
       joined_company: 你已加入 %{company}。
       unable_accept: 无法接受邀请：%{message}
   admin:
+    layout:
+      title: 管理控制台
+      brand: Rubusoo 管理后台
+    nav:
+      dashboard: 总览
+      users: 用户
+      audit_logs: 审计日志
+      back_to_app: 返回业务系统
+    dashboard:
+      title: Admin Dashboard
+      subtitle: 面向支持与风险兜底的轻量总览。
+      metrics:
+        total_users: 用户总数
+        new_users_7d: 近7天新增
+        active_users: Active 用户
+        suspended_users: Suspended 用户
+    pagination:
+      prev: 上一页
+      next: 下一页
+      page_of: "第 %{page}/%{total_pages} 页 · 共 %{total_count} 条"
+    impersonation:
+      banner:
+        title: 当前处于代看模式。
+        detail: "真实管理员：%{admin_email} · 当前代看：%{user_email}"
+        exit: 退出代看
+        exit_confirm: 确认退出代看并返回管理后台？
+      flash:
+        stopped: 已退出代看，已返回管理后台。
     users:
+      index:
+        title: 用户管理
+        subtitle: 搜索并安全管理用户账号。
+        search_label: 搜索
+        search_placeholder: 邮箱 / 姓名 / 公司
+        search: 搜索
+      show:
+        title: "用户详情 · %{email}"
+        subtitle: 账号信息、活跃情况与管理操作。
+        back: 返回用户列表
+        association_summary: 关联摘要
+        customers_count: 客户数
+        quotes_count: 报价数
+        revisions_count: 修订数
+        public_shares_count: 公开分享数
+        actions_title: 管理操作
+      columns:
+        name: 姓名
+        email: 邮箱
+        role: 角色
+        status: 状态
+        created_at: 创建时间
+        last_login_at: 最近登录
+        last_active_at: 最近活跃
+        actions: 操作
+      actions:
+        view: 查看
+        change_role: 修改角色
+        suspend: 停用
+        reactivate: 恢复
+        impersonate: 代看
+        confirm_role_change: 确认修改角色？
+        confirm_suspend: 确认停用该用户？
+        confirm_reactivate: 确认恢复该用户？
+        confirm_impersonate: "确认以 %{email} 身份代看？"
       flash:
         role_updated: 角色已更新。
+        status_updated: 状态已更新。
+        cannot_impersonate_admin: 管理员账号不允许代看。
+        cannot_change_own_role: 你不能修改自己的角色。
+        cannot_demote_last_admin: 不能降级最后一个管理员。
+        impersonation_started: "已进入 %{email} 的代看模式。"
+    audit_logs:
+      title: 审计日志
+      subtitle: 记录高风险管理动作。
+      columns:
+        time: 时间
+        actor: 操作者
+        action: 动作
+        target: 目标
+        metadata: 元数据
   users:
+    suspended:
+      title: 账号已停用
+      body: 你的账号当前已停用，无法访问系统。
+      contact_hint: 如需恢复，请联系管理员。
+      back_to_login: 返回登录
+      alert: 你的账号已被停用。
     registrations:
       view:
         new:
@@ -2550,6 +2633,8 @@ zh-CN:
         sample_quote: 示例报价
         resources: 资源
         contact: 联系
+        privacy: 隐私政策
+        terms: 服务条款
     view:
       contact:
         meta_title: 联系 Rubusoo
@@ -2584,6 +2669,57 @@ zh-CN:
           body: 请先完成安全验证，再提交这条消息。
           loading: 正在加载验证...
           success: 验证完成，正在发送...
+      privacy:
+        meta_title: 隐私政策 | Rubusoo
+        meta_description: 了解 Rubusoo 如何收集、使用和保护数据。
+        last_updated: "最后更新：2026-03-21"
+        hero:
+          kicker: 隐私政策
+          title: 隐私政策
+          body: 本页说明我们会收集哪些数据，以及这些数据如何被使用。
+        sections:
+          data_collect:
+            title: 1. 我们收集的数据
+            body: 我们会收集账号资料、报价/工作台内容，以及用于运行和安全防护的必要技术数据。
+          data_use:
+            title: 2. 数据用途
+            body: 我们使用这些数据来提供核心功能、提升稳定性、预防滥用并处理客户支持请求。
+          data_share:
+            title: 3. 数据共享
+            body: 我们不会出售个人数据。仅会在服务运行所需或法律要求的情况下，与必要服务提供方共享。
+          retention:
+            title: 4. 数据保留
+            body: 数据仅在产品运行、法律义务和合理业务需要范围内保留。
+          contact:
+            title: 5. 联系方式
+            body: 如有隐私相关问题，请使用 Contact Us 表单联系我们。
+      terms:
+        meta_title: 服务条款 | Rubusoo
+        meta_description: 阅读使用 Rubusoo 服务时适用的条款。
+        last_updated: "最后更新：2026-03-21"
+        hero:
+          kicker: 服务条款
+          title: 服务条款
+          body: 本条款说明你在使用 Rubusoo 时的权利与责任。
+        sections:
+          acceptance:
+            title: 1. 接受条款
+            body: 一旦访问或使用 Rubusoo，即表示你同意本条款。
+          account:
+            title: 2. 账户责任
+            body: 你需妥善保管账户凭据，并对该账户下发生的行为负责。
+          usage:
+            title: 3. 合理使用
+            body: 你不得滥用服务、破坏系统安全，或从事违反适用法律的行为。
+          availability:
+            title: 4. 服务可用性
+            body: 我们会持续改进服务，并可能在必要时调整功能。
+          liability:
+            title: 5. 责任限制
+            body: 在法律允许范围内，Rubusoo 按“现状”提供，相关责任受限。
+          contact:
+            title: 6. 联系方式
+            body: 如有条款相关法律问题，请使用 Contact Us 表单联系我们。
       demo:
         meta_title: Rubusoo 演示 | 报价管理工作台
         meta_description: 查看 Rubusoo 演示工作台，了解报价修订、买家动态与发送后的后续跟进。

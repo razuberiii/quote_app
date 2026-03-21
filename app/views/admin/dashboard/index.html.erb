@@ -1,0 +1,33 @@
+<section class="app-page-shell admin-page-shell admin-page-shell--dashboard">
+  <header class="app-page-header">
+    <div>
+      <h1><%= t("admin.dashboard.title") %></h1>
+      <p><%= t("admin.dashboard.subtitle") %></p>
+    </div>
+  </header>
+
+  <section class="app-surface">
+    <div class="app-section-heading">
+      <h2><%= t("admin.dashboard.metrics.title", default: "Overview Metrics") %></h2>
+      <p class="app-section-caption"><%= t("admin.dashboard.metrics.subtitle", default: "Lightweight support-first snapshot.") %></p>
+    </div>
+    <div class="app-stat-grid admin-dashboard-stat-grid">
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.dashboard.metrics.total_users") %></span>
+        <strong class="app-stat-value"><%= @total_users %></strong>
+      </article>
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.dashboard.metrics.new_users_7d") %></span>
+        <strong class="app-stat-value"><%= @new_users_last_7_days %></strong>
+      </article>
+      <article class="app-stat-card">
+        <span class="app-stat-label"><%= t("admin.dashboard.metrics.active_users") %></span>
+        <strong class="app-stat-value"><%= @active_users_count %></strong>
+      </article>
+      <article class="app-stat-card admin-stat-card--risk">
+        <span class="app-stat-label"><%= t("admin.dashboard.metrics.suspended_users") %></span>
+        <strong class="app-stat-value"><%= @suspended_users_count %></strong>
+      </article>
+    </div>
+  </section>
+</section>

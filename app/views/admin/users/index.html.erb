@@ -1,31 +1,90 @@
-<h1>User Roles</h1>
+<section class="app-page-shell admin-page-shell admin-page-shell--users">
+  <header class="app-page-header">
+    <div>
+      <h1><%= t("admin.users.index.title") %></h1>
+      <p><%= t("admin.users.index.subtitle") %></p>
+    </div>
+  </header>
 
-<div class="table-responsive">
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Email</th>
-        <th>Company</th>
-        <th>Current Role</th>
-        <th>Change Role</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% @users.each do |user| %>
+  <section class="app-surface">
+    <%= form_with url: admin_users_path, method: :get, local: true do |f| %>
+      <div class="app-filter-grid">
+        <div class="app-filter-field">
+          <%= f.label :q, t("admin.users.index.search_label") %>
+          <%= f.text_field :q, value: @query, class: ui_input_classes, placeholder: t("admin.users.index.search_placeholder") %>
+        </div>
+        <div class="app-filter-actions">
+          <%= f.submit t("admin.users.index.search"), class: ui_button_classes(:secondary) %>
+        </div>
+      </div>
+    <% end %>
+  </section>
+
+  <section class="app-table-surface">
+    <div class="table-responsive admin-table-scroll">
+      <table class="app-data-table admin-users-table">
+      <thead>
         <tr>
-          <td><%= user.id %></td>
-          <td><%= user.email %></td>
-          <td><%= user.company&.name %></td>
-          <td><%= user.role %></td>
-          <td>
-            <%= form_with model: [ :admin, user ], method: :patch, local: true do |f| %>
-              <%= f.select :role, User.roles.keys.map { |role| [ role.titleize, role ] }, {}, class: ui_input_classes %>
-              <%= f.submit "Update", class: ui_button_classes(:secondary) %>
-            <% end %>
-          </td>
+          <th>ID</th>
+          <th><%= t("admin.users.columns.name") %></th>
+          <th><%= t("admin.users.columns.email") %></th>
+          <th><%= t("admin.users.columns.role") %></th>
+          <th><%= t("admin.users.columns.status") %></th>
+          <th><%= t("admin.users.columns.created_at") %></th>
+          <th><%= t("admin.users.columns.last_login_at") %></th>
+          <th><%= t("admin.users.columns.last_active_at") %></th>
+          <th><%= t("admin.users.columns.actions") %></th>
         </tr>
+      </thead>
+      <tbody>
+        <% @users.each do |user| %>
+          <tr>
+            <td><%= user.id %></td>
+            <td><%= user.full_name.presence || "-" %></td>
+            <td><%= user.email %></td>
+            <td><%= status_badge(user.role, :indigo) %></td>
+            <td><%= status_badge(user.status, user.active? ? :green : :red) %></td>
+            <td><%= user.created_at.present? ? format_in_user_time(user.created_at, current_user) : "-" %></td>
+            <td><%= user.last_login_at.present? ? format_in_user_time(user.last_login_at, current_user) : "-" %></td>
+            <td><%= user.last_active_at.present? ? format_in_user_time(user.last_active_at, current_user) : "-" %></td>
+            <td class="admin-users-actions-cell">
+              <div class="admin-users-actions">
+                <%= link_to t("admin.users.actions.view"), admin_user_path(user), class: ui_button_classes(:secondary) %>
+
+                <%= form_with url: update_role_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
+                  <%= f.select :role, User.roles.keys.map { |role| [ role, role ] }, { selected: user.role }, class: ui_input_classes %>
+                  <%= f.submit t("admin.users.actions.change_role"), class: ui_button_classes(:secondary), data: { turbo_confirm: t("admin.users.actions.confirm_role_change") } %>
+                <% end %>
+
+                <%= form_with url: update_status_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
+                  <%= f.hidden_field :status, value: user.active? ? "suspended" : "active" %>
+                  <%= f.submit(user.active? ? t("admin.users.actions.suspend") : t("admin.users.actions.reactivate"),
+                               class: ui_button_classes(user.active? ? :danger : :secondary),
+                               data: { turbo_confirm: user.active? ? t("admin.users.actions.confirm_suspend") : t("admin.users.actions.confirm_reactivate") }) %>
+                <% end %>
+
+                <%= button_to t("admin.users.actions.impersonate"),
+                              impersonate_admin_user_path(user),
+                              method: :post,
+                              class: ui_button_classes(:danger),
+                              form: { class: "admin-users-actions-group" },
+                              data: { turbo_confirm: t("admin.users.actions.confirm_impersonate", email: user.email) } %>
+              </div>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+      </table>
+    </div>
+
+    <div class="app-pagination">
+      <% if @page > 1 %>
+        <%= link_to t("admin.pagination.prev"), admin_users_path(page: @page - 1, q: @query), class: ui_button_classes(:secondary) %>
       <% end %>
-    </tbody>
-  </table>
-</div>
+      <span><%= t("admin.pagination.page_of", page: @page, total_pages: [ @total_pages, 1 ].max, total_count: @total_count) %></span>
+      <% if @page < @total_pages %>
+        <%= link_to t("admin.pagination.next"), admin_users_path(page: @page + 1, q: @query), class: ui_button_classes(:secondary) %>
+      <% end %>
+    </div>
+  </section>
+</section>

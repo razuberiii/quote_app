@@ -1,6 +1,14 @@
-<h1><%= t("addon_presets.view.edit.title") %></h1>
+<section class="app-page-shell app-page-shell--settings-form preset-admin-shell">
+  <header class="app-page-header">
+    <div class="app-page-header-main">
+      <h1><%= t("addon_presets.view.edit.title") %></h1>
+    </div>
+    <div class="app-page-header-actions">
+      <%= link_to t("addon_presets.view.edit.back"), addon_presets_path, class: "form-page-back-link" %>
+    </div>
+  </header>
 
-<section class="team-members-panel">
-  <%= render "form", addon_preset: @addon_preset %>
-  <p><%= link_to t("addon_presets.view.edit.back"), addon_presets_path, class: "form-page-back-link" %></p>
+  <article class="app-surface team-members-panel">
+    <%= render "form", addon_preset: @addon_preset %>
+  </article>
 </section>

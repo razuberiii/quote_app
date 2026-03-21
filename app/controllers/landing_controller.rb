@@ -1,6 +1,6 @@
 class LandingController < ApplicationController
   skip_before_action :authenticate_user!
-  layout "public_marketing", only: [ :index, :demo, :sample_quote, :contact ]
+  layout "public_marketing", only: [ :index, :demo, :sample_quote, :contact, :privacy, :terms ]
   before_action :set_public_paths
   before_action :set_seo_page, only: [ :index, :demo, :sample_quote, :contact ]
 
@@ -10,6 +10,10 @@ class LandingController < ApplicationController
   def demo; end
 
   def contact; end
+
+  def privacy; end
+
+  def terms; end
 
   def sample_quote
     @sample_quote = {
@@ -55,6 +59,8 @@ class LandingController < ApplicationController
       "index" => :homepage,
       "demo" => :demo,
       "contact" => :contact,
+      "privacy" => :privacy,
+      "terms" => :terms,
       "sample_quote" => :sample_quote
     }.fetch(action_name)
 

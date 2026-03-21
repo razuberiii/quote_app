@@ -101,7 +101,20 @@ Quote families are local to quote workflows.
 
 Dashboard families are local to dashboard sequencing and must not be reused as global card primitives.
 
-6. Scoped exception families
+6. Admin Console helpers (minimal)
+- Prefer canonical families for admin pages: `.app-page-shell`, `.app-surface`, `.app-table-surface`, `.app-ui-button`, `.app-ui-input`.
+- Keep admin-specific classes only as narrow helpers where canonical classes are insufficient:
+  - `.admin-impersonation-banner*` (banner layout helper)
+  - `.admin-navbar-container` (admin nav width adapter, admin-only)
+  - `.admin-users-actions*` (row action wrapping/alignment)
+  - `.admin-table-scroll` (admin table horizontal overflow wrapper)
+  - `.admin-json-cell` (long metadata wrapping)
+  - `.admin-kv-*` (user detail key-value card grid)
+  - `.admin-page-shell*` / `.admin-dashboard-stat-grid` (admin-only width/readability adapters layered on top of canonical `app-*` shells and `app-stat-*` cards)
+
+Do not create a parallel admin visual system unless explicitly approved.
+
+7. Scoped exception families
 - When a UI block has a clearly different product role and tone (for example, a personal sticky-note rail that is intentionally non-system), it may use a dedicated feature family instead of force-fitting existing card/form families.
 - This exception must remain strictly scoped by feature prefix and ownership boundaries. Example: `.dashboard-notes-*` is mounted globally for signed-in pages, but should not leak into other feature families or become generic card primitives.
 - Do not create broad global overrides for this exception type; keep tokens restrained and compatible with admin baseline.

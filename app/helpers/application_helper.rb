@@ -180,7 +180,7 @@ module ApplicationHelper
         { label: t("nav.team"), path: team_members_path },
         { label: t("settings.invitations"), path: nil }
       ]
-    when "admin/users"
+    when "admin/dashboard", "admin/users", "admin/audit_logs"
       [
         { label: t("nav.admin"), path: nil }
       ]

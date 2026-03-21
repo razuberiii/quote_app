@@ -2436,10 +2436,93 @@ en:
       joined_company: You joined %{company}.
       unable_accept: "Unable to accept invitation: %{message}"
   admin:
+    layout:
+      title: Admin Console
+      brand: Rubusoo Admin
+    nav:
+      dashboard: Dashboard
+      users: Users
+      audit_logs: Audit Logs
+      back_to_app: Back to App
+    dashboard:
+      title: Admin Dashboard
+      subtitle: Lightweight operational overview for support and risk fallback.
+      metrics:
+        total_users: Total users
+        new_users_7d: New users (7 days)
+        active_users: Active users
+        suspended_users: Suspended users
+    pagination:
+      prev: Previous
+      next: Next
+      page_of: "Page %{page}/%{total_pages} · %{total_count} records"
+    impersonation:
+      banner:
+        title: Impersonation mode active.
+        detail: "Real admin: %{admin_email} · Viewing as: %{user_email}"
+        exit: Exit impersonation
+        exit_confirm: Exit impersonation and return to admin console?
+      flash:
+        stopped: Impersonation ended. Returned to admin console.
     users:
+      index:
+        title: User Management
+        subtitle: Search and manage users safely.
+        search_label: Search
+        search_placeholder: email / name / company
+        search: Search
+      show:
+        title: "User Detail · %{email}"
+        subtitle: Account profile, activity, and operational actions.
+        back: Back to users
+        association_summary: Related Summary
+        customers_count: Customers count
+        quotes_count: Quotes count
+        revisions_count: Revisions count
+        public_shares_count: Public shares count
+        actions_title: Management Actions
+      columns:
+        name: Name
+        email: Email
+        role: Role
+        status: Status
+        created_at: Created at
+        last_login_at: Last login
+        last_active_at: Last active
+        actions: Actions
+      actions:
+        view: View
+        change_role: Change Role
+        suspend: Suspend
+        reactivate: Reactivate
+        impersonate: Impersonate
+        confirm_role_change: Confirm role change?
+        confirm_suspend: Suspend this user?
+        confirm_reactivate: Reactivate this user?
+        confirm_impersonate: "Enter impersonation mode for %{email}?"
       flash:
         role_updated: Role updated.
+        status_updated: Status updated.
+        cannot_impersonate_admin: Admin accounts cannot be impersonated.
+        cannot_change_own_role: You cannot change your own role.
+        cannot_demote_last_admin: Cannot demote the last remaining admin.
+        impersonation_started: "Now impersonating %{email}."
+    audit_logs:
+      title: Audit Logs
+      subtitle: Trace high-risk admin actions.
+      columns:
+        time: Time
+        actor: Actor
+        action: Action
+        target: Target
+        metadata: Metadata
   users:
+    suspended:
+      title: Account Suspended
+      body: Your account is currently suspended and cannot access the workspace.
+      contact_hint: Please contact your administrator for reactivation.
+      back_to_login: Back to login
+      alert: Your account has been suspended.
     registrations:
       view:
         new:
@@ -2550,6 +2633,8 @@ en:
         sample_quote: Sample quote
         resources: Resources
         contact: Contact
+        privacy: Privacy Policy
+        terms: Terms of Service
     homepage:
       meta_title: Rubusoo | Export quotation software for closing deals
       meta_description: Rubusoo helps export teams manage quotes, revisions, buyer response, and follow-up in one clear record. Share online, keep version control, and still export PDF or Excel.
@@ -3026,6 +3111,57 @@ en:
           loading: Loading verification...
           success: Verified. Sending now...
           title: Verify before sending
+      privacy:
+        meta_title: Privacy Policy | Rubusoo
+        meta_description: Learn how Rubusoo collects, uses, and protects data.
+        last_updated: "Last updated: March 21, 2026"
+        hero:
+          kicker: PRIVACY
+          title: Privacy Policy
+          body: This page explains what data we collect and how we use it.
+        sections:
+          data_collect:
+            title: 1. Data we collect
+            body: We collect account profile data, quote/workspace content, and technical usage data required to operate and secure the service.
+          data_use:
+            title: 2. How we use data
+            body: We use data to provide core product features, improve reliability, prevent abuse, and support customer requests.
+          data_share:
+            title: 3. Data sharing
+            body: We do not sell personal data. We only share data with service providers needed to run Rubusoo, or when required by law.
+          retention:
+            title: 4. Data retention
+            body: We keep data only as long as needed for product operation, legal obligations, and legitimate business purposes.
+          contact:
+            title: 5. Contact
+            body: For privacy questions, please use the Contact Us form.
+      terms:
+        meta_title: Terms of Service | Rubusoo
+        meta_description: Read the terms that govern the use of Rubusoo services.
+        last_updated: "Last updated: March 21, 2026"
+        hero:
+          kicker: TERMS
+          title: Terms of Service
+          body: These terms define your rights and responsibilities when using Rubusoo.
+        sections:
+          acceptance:
+            title: 1. Acceptance
+            body: By accessing or using Rubusoo, you agree to these terms.
+          account:
+            title: 2. Account responsibility
+            body: You are responsible for account credentials and activities that occur under your account.
+          usage:
+            title: 3. Acceptable use
+            body: You agree not to misuse the service, interfere with security, or violate applicable laws.
+          availability:
+            title: 4. Service availability
+            body: We continuously improve the service and may update features from time to time.
+          liability:
+            title: 5. Liability
+            body: To the maximum extent permitted by law, Rubusoo is provided on an as-is basis and liability is limited.
+          contact:
+            title: 6. Contact
+            body: For legal questions about these terms, please use the Contact Us form.
   seo:
     view:
       shared:

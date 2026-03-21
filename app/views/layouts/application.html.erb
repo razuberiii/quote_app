@@ -78,7 +78,7 @@
               <%= ui_nav_link t("nav.team"), team_members_path, icon: :team %>
             <% end %>
             <% if current_user.admin? %>
-              <%= ui_nav_link t("nav.admin"), admin_users_path, icon: :admin %>
+              <%= ui_nav_link t("nav.admin"), admin_root_path, icon: :admin %>
             <% end %>
           </ul>
           <% invite_count = pending_team_invitations_count %>
@@ -151,6 +151,8 @@
           </ol>
         </nav>
       <% end %>
+
+      <%= render "layouts/impersonation_banner" %>
 
       <% if notice %>
         <div class="alert alert-success"><%= notice %></div>

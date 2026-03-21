@@ -27,6 +27,20 @@ default: &default
     changefreq: weekly
     priority: "0.7"
     index: true
+  privacy:
+    path_helper: privacy_url
+    title_key: landing.view.privacy.meta_title
+    description_key: landing.view.privacy.meta_description
+    changefreq: yearly
+    priority: "0.3"
+    index: true
+  terms:
+    path_helper: terms_url
+    title_key: landing.view.terms.meta_title
+    description_key: landing.view.terms.meta_description
+    changefreq: yearly
+    priority: "0.3"
+    index: true
   foreign_trade_quotation_software:
     path_helper: foreign_trade_quotation_software_url
     title_key: seo.view.foreign_trade_quotation_software.meta.title

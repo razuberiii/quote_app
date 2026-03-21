@@ -7,11 +7,11 @@
   </header>
 
   <div class="product-presets-hub">
-    <article class="product-presets-card" id="spec-presets">
+    <article class="app-surface product-presets-card" id="spec-presets">
       <div class="product-presets-card-head">
         <div>
           <h2><%= t("product_presets.view.index.spec_title") %></h2>
-          <p><%= t("product_presets.view.index.spec_caption") %></p>
+          <p class="app-section-caption"><%= t("product_presets.view.index.spec_caption") %></p>
         </div>
         <div class="product-presets-card-actions">
           <%= link_to t("product_presets.view.index.manage_specs"), spec_presets_path, class: "app-ui-button app-ui-button--primary" %>
@@ -30,11 +30,11 @@
       <% end %>
     </article>
 
-    <article class="product-presets-card" id="addon-presets">
+    <article class="app-surface product-presets-card" id="addon-presets">
       <div class="product-presets-card-head">
         <div>
           <h2><%= t("product_presets.view.index.addon_title") %></h2>
-          <p><%= t("product_presets.view.index.addon_caption") %></p>
+          <p class="app-section-caption"><%= t("product_presets.view.index.addon_caption") %></p>
         </div>
         <div class="product-presets-card-actions">
           <%= link_to t("product_presets.view.index.manage_addons"), addon_presets_path, class: "app-ui-button app-ui-button--primary" %>

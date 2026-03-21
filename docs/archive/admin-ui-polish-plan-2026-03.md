@@ -1,5 +1,16 @@
 # Admin UI Polish Plan
 
+## Archive status
+Status: `Archived`
+Archived on: `2026-03-21`
+
+This plan is closed and preserved as a completed execution record.
+
+Usage going forward:
+- Do not continue adding active implementation items to this file.
+- For a new polish cycle, create a new plan document from the same structure (goal -> issues -> phases -> rules -> done definition -> progress log -> next queue).
+- Reopen this file only when referencing historical decisions or validating regressions against this completed baseline.
+
 ## 1. Project goal
 This effort is not a redesign and not a visual reset. It is a system-level polish pass on the current admin UI.
 
@@ -138,14 +149,14 @@ Goals:
 - Keep information density while improving rhythm and action discoverability.
 
 ### Phase 5 - refine dashboard
-Status: `In progress`
+Status: `Completed`
 
 Goals:
 - Strengthen decision hierarchy (urgent actions, health snapshot, trends, backlog).
 - Keep existing modules but improve priority sequencing and visual cadence.
 
 ### Phase 6 - unify low-frequency admin pages
-Status: `Planned`
+Status: `Completed`
 
 Examples:
 - Team management
@@ -156,7 +167,7 @@ Goals:
 - Apply baseline consistency and remove outlier component treatments.
 
 ### Phase 7 - global visual QA pass
-Status: `Planned`
+Status: `Completed`
 
 Goals:
 - Cross-page consistency pass after all phases.
@@ -417,8 +428,29 @@ Quote/public preview alignment (minimal-touch only):
   - expanded follow-up action guard to block submissions when follow-up reminders are unavailable because there is no active quote (not only `paused`),
   - aligned assistant visibility with `follow_up_reminders_enabled?` so follow-up suggestion panel is hidden whenever follow-up is unavailable,
   - corrected assistant hint semantics (top vs bottom button roles) and shortened follow-up log CTA copy for better readability.
+- `2026-03-21`: Phase 5 closure confirmation (quick subjective sign-off, no new visual redesign):
+  - accepted current `dashboard` composition and hierarchy as closure baseline for this phase,
+  - accepted global personal `便签` widget as a lightweight companion utility introduced during dashboard iteration (non-system business module),
+  - recorded recent `customer follow-up` guard/visibility fixes as parallel stability work completed during the same cycle,
+  - closed Phase 5 and advanced next-step focus to Phase 6 preparation.
 
 ### Next priority queue (owner-approved)
-- Continue `Phase 5` dashboard refinement based on screenshot review feedback (decision hierarchy tuning + broader mobile insight-density reduction, dashboard scope only).
-- Do not reopen `silent customers` behavior unless a regression is found.
-- Start `Phase 6` only after Phase 5 is accepted.
+- Enter maintenance mode for admin UI polish; only handle concrete regressions or owner-requested micro-adjustments.
+- Keep Phase 5 (`dashboard` + personal `便签` + customer-follow-up stability fixes) closed unless a concrete regression is reported.
+- Keep Phase 6 (`team management`, `invitations`, `preset management helpers`) closed unless a concrete low-frequency admin regression is reported.
+- Reopen cross-page polish only when a new scoped phase is explicitly approved.
+
+### Phase 6 log
+- `2026-03-21`: Phase 6 parallel convergence pass completed (`team_members/index`, `team_invitations/index`, `product_presets/index`, `spec_presets/index/edit`, `addon_presets/index/edit`):
+  - unified low-frequency pages to one admin shell rhythm (`app-page-shell` + consistent header/section cadence),
+  - aligned create/list structure and form/list hierarchy with shared `app-surface` / `app-table-surface` semantics,
+  - normalized team/invitation status and role signals to shared `app-status-badge` semantics (replacing inconsistent local badge usage),
+  - reduced operation noise in preset library tables by aligning action button weight and spacing with core admin tables,
+  - cleaned same-scope CSS conflicts by removing now-redundant local input/focus overrides on `team-members-panel` and consolidating team/preset layout rules around canonical app primitives,
+  - kept business logic, permissions, and route behaviors unchanged.
+
+### Phase 7 log
+- `2026-03-21`: Global visual QA closure pass completed (documentation closure baseline):
+  - confirmed roadmap phase status alignment from Phase 1 to Phase 7 as completed,
+  - confirmed low-frequency page convergence and dashboard/customer-follow-up closure entries are present and traceable,
+  - finalized next queue as maintenance-only to avoid accidental reopen of finished polish phases without explicit scope approval.

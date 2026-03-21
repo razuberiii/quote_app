@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_20_093000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_21_101000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_093000) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "name"], name: "index_addon_presets_on_company_id_and_name", unique: true
     t.index ["company_id"], name: "index_addon_presets_on_company_id"
+  end
+
+  create_table "audit_logs", force: :cascade do |t|
+    t.string "action", null: false
+    t.bigint "actor_id"
+    t.datetime "created_at", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "target_id", null: false
+    t.string "target_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["action"], name: "index_audit_logs_on_action"
+    t.index ["actor_id"], name: "index_audit_logs_on_actor_id"
+    t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -460,25 +473,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_20_093000) do
     t.string "full_name"
     t.string "job_title"
     t.string "language"
+    t.datetime "last_active_at"
+    t.datetime "last_login_at"
     t.string "pending_email"
     t.datetime "remember_created_at"
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "role", default: 0, null: false
+    t.integer "status", default: 0, null: false
     t.string "time_zone"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["company_role"], name: "index_users_on_company_role"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["email_change_token"], name: "index_users_on_email_change_token", unique: true
+    t.index ["last_active_at"], name: "index_users_on_last_active_at"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
+    t.index ["status"], name: "index_users_on_status"
   end
 
   add_foreign_key "action_items", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addon_presets", "companies"
+  add_foreign_key "audit_logs", "users", column: "actor_id"
   add_foreign_key "company_documents", "companies"
   add_foreign_key "customer_follow_up_events", "customers"
   add_foreign_key "customer_follow_up_events", "quotes"

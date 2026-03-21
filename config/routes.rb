@@ -12,6 +12,7 @@ Rails.application.routes.draw do
     end
   end
   get "pending-email-verification", to: "email_verifications#pending", as: :pending_email_verification
+  get "suspended", to: "suspended_access#show", as: :suspended
 
   # Email change
   post "email-change/request", to: "email_changes#request_change", as: :request_email_change
@@ -29,6 +30,8 @@ Rails.application.routes.draw do
   scope "(:locale)", locale: /en|zh-CN|es-419/ do
     get "demo", to: "landing#demo"
     get "contact", to: "landing#contact"
+    get "privacy", to: "landing#privacy"
+    get "terms", to: "landing#terms"
     get "sample-quote", to: "landing#sample_quote"
     get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
     get "quote-revision-control", to: "seo#quote_revision_control"
@@ -139,6 +142,15 @@ Rails.application.routes.draw do
   end
 
   namespace :admin do
-    resources :users, only: [ :index, :update ]
+    root "dashboard#index"
+    resources :users, only: [ :index, :show ] do
+      member do
+        patch :update_role
+        patch :update_status
+        post :impersonate
+      end
+    end
+    resources :audit_logs, only: [ :index ]
+    resource :impersonation, only: [ :destroy ], controller: "impersonations"
   end
 end

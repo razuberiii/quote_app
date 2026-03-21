@@ -107,6 +107,7 @@ Dashboard families are local to dashboard sequencing and must not be reused as g
   - `.admin-impersonation-banner*` (banner layout helper)
   - `.admin-navbar-container` (admin nav width adapter, admin-only)
   - `.admin-users-actions*` (row action wrapping/alignment)
+  - `.admin-users-action-card*` (row-level expandable action card in admin users table)
   - `.admin-table-scroll` (admin table horizontal overflow wrapper)
   - `.admin-json-cell` (long metadata wrapping)
   - `.admin-kv-*` (user detail key-value card grid)

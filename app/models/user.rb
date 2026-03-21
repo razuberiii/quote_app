@@ -55,7 +55,18 @@ class User < ApplicationRecord
   def company_unlimited_plan?
     return false if company.blank?
 
-    company.users.where(role: [ User.roles[:vip], User.roles[:admin] ]).exists?
+    company.users.where(
+      "role = :admin_role OR (role = :vip_role AND (vip_expires_at IS NULL OR vip_expires_at > :now))",
+      admin_role: User.roles[:admin],
+      vip_role: User.roles[:vip],
+      now: Time.current
+    ).exists?
+  end
+
+  def grant_vip_for!(duration)
+    now = Time.current
+    base_time = [ vip_expires_at, now ].compact.max
+    update!(role: :vip, vip_expires_at: base_time + duration)
   end
 
   def email_verified?

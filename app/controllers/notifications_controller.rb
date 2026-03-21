@@ -10,7 +10,21 @@ class NotificationsController < ApplicationController
     notification = current_user.notifications.find(params[:id])
     notification.mark_as_read!
     quote_id = notification.data&.dig("quote_id")
-    redirect_to quote_id.present? ? quote_path(quote_id) : root_path
+    link_url = notification.data&.dig("link_url")
+
+    if quote_id.present?
+      redirect_to quote_path(quote_id)
+    elsif safe_redirect_link?(link_url)
+      redirect_to link_url, allow_other_host: true
+    else
+      redirect_to root_path
+    end
+  end
+
+  def dismiss
+    notification = current_user.notifications.find(params[:id])
+    notification.mark_as_read!
+    redirect_back_or_to root_path
   end
 
   def unread_count
@@ -26,5 +40,18 @@ class NotificationsController < ApplicationController
       count: unread_scope.count,
       menu_html: menu_html
     }
+  end
+
+  private
+
+  def safe_redirect_link?(url)
+    value = url.to_s.strip
+    return false if value.blank?
+    return true if value.start_with?("/")
+
+    uri = URI.parse(value)
+    uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+  rescue URI::InvalidURIError
+    false
   end
 end

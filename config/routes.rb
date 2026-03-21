@@ -53,6 +53,7 @@ Rails.application.routes.draw do
     end
     member do
       get :mark_read
+      patch :dismiss
     end
   end
 
@@ -147,9 +148,12 @@ Rails.application.routes.draw do
       member do
         patch :update_role
         patch :update_status
+        post :grant_vip
+        post :send_notification
         post :impersonate
       end
     end
+    resources :notifications, only: [ :create ]
     resources :audit_logs, only: [ :index ]
     resource :impersonation, only: [ :destroy ], controller: "impersonations"
   end

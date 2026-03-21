@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_21_101000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_21_181500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -483,6 +483,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_101000) do
     t.integer "status", default: 0, null: false
     t.string "time_zone"
     t.datetime "updated_at", null: false
+    t.datetime "vip_expires_at"
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["company_role"], name: "index_users_on_company_role"
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -491,6 +492,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_101000) do
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role"], name: "index_users_on_role"
     t.index ["status"], name: "index_users_on_status"
+    t.index ["vip_expires_at"], name: "index_users_on_vip_expires_at"
   end
 
   add_foreign_key "action_items", "users"

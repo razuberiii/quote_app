@@ -30,4 +30,37 @@
       </article>
     </div>
   </section>
+
+  <section class="app-surface">
+    <div class="app-section-heading">
+      <h2><%= t("admin.notifications.broadcast_title") %></h2>
+      <p class="app-section-caption"><%= t("admin.notifications.broadcast_subtitle") %></p>
+    </div>
+
+    <%= form_with url: admin_notifications_path, method: :post, scope: :announcement, local: true do |f| %>
+      <div class="app-filter-grid">
+        <div class="app-filter-field">
+          <%= f.label :title, t("admin.notifications.fields.title") %>
+          <%= f.text_field :title, class: ui_input_classes, required: true, maxlength: 120 %>
+        </div>
+        <div class="app-filter-field">
+          <%= f.label :link_url, t("admin.notifications.fields.link_url") %>
+          <%= f.url_field :link_url, class: ui_input_classes, placeholder: "https://rubusoo.com/changelog" %>
+        </div>
+        <div class="app-filter-field app-filter-field--full">
+          <%= f.label :message, t("admin.notifications.fields.message") %>
+          <%= f.text_area :message, class: "#{ui_input_classes} admin-notice-textarea", rows: 6, required: true, placeholder: t("admin.notifications.template.body") %>
+          <p class="app-section-caption"><%= t("admin.notifications.fields.message_wrap_hint") %></p>
+        </div>
+        <div class="app-filter-actions">
+          <%= f.submit t("admin.notifications.actions.send_all"), class: ui_button_classes(:primary), data: { turbo_confirm: t("admin.notifications.actions.confirm_send_all") } %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="app-section-caption">
+      <strong><%= t("admin.notifications.template.title") %></strong><br>
+      <%= simple_format(t("admin.notifications.template.body")) %>
+    </div>
+  </section>
 </section>

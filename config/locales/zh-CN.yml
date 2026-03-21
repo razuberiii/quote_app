@@ -4,6 +4,7 @@ zh-CN:
   notifications:
     title: 通知
     mark_all_read: 全部标记已读
+    mark_read: 标记已读
     empty: 暂无新通知
     open_link: 查看
     time_ago: "%{time}前"
@@ -12,6 +13,7 @@ zh-CN:
       quote_viewed: 买家已查看 %{quote_no}（%{customer_name}）
       quote_accepted: 买家已接受 %{quote_no}（%{customer_name}）
       quote_revision_requested: 买家已就 %{quote_no} 提出修订请求（%{customer_name}）
+      admin_announcement: 管理员通知
   engagement:
     hot: 高意向
     warm: 有意向
@@ -2464,6 +2466,35 @@ zh-CN:
         exit_confirm: 确认退出代看并返回管理后台？
       flash:
         stopped: 已退出代看，已返回管理后台。
+        target_no_longer_active: 代看对象已停用，已自动退出代看并返回管理后台。
+    notifications:
+      broadcast_title: 全体通知
+      broadcast_subtitle: 发送到所有 active 用户的小铃铛通知。
+      single_title: 发送用户通知
+      fields:
+        title: 标题
+        message: 内容
+        link_url: 跳转链接（可选）
+        message_wrap_hint: 超长内容会自动换行，避免在通知列表中出现横向滚动。
+      actions:
+        send_all: 发送给全体
+        send_single: 发送给该用户
+        confirm_send_all: 确认发送给所有 active 用户？
+        confirm_send_single: "确认发送给 %{email}？"
+      template:
+        title: 更新内容模板（可直接改）
+        body: |
+          【产品更新】YYYY-MM-DD
+          1) 新增：
+          - ...
+          2) 优化：
+          - ...
+          3) 修复：
+          - ...
+          如有问题请通过 Contact Us 反馈。
+      flash:
+        broadcast_sent: "已发送全体通知（%{count} 人）。"
+        single_sent: "已发送通知给 %{email}。"
     users:
       index:
         title: 用户管理
@@ -2486,24 +2517,31 @@ zh-CN:
         email: 邮箱
         role: 角色
         status: 状态
+        vip_expires_at: VIP 到期时间
         created_at: 创建时间
         last_login_at: 最近登录
         last_active_at: 最近活跃
         actions: 操作
       actions:
         view: 查看
+        view_details: 查看详情
+        more_actions: 更多操作
         change_role: 修改角色
         suspend: 停用
         reactivate: 恢复
+        add_vip_one_month: 增加1个月VIP
         impersonate: 代看
         confirm_role_change: 确认修改角色？
         confirm_suspend: 确认停用该用户？
         confirm_reactivate: 确认恢复该用户？
+        confirm_add_vip_one_month: "确认为 %{email} 增加 1 个月 VIP？"
         confirm_impersonate: "确认以 %{email} 身份代看？"
       flash:
         role_updated: 角色已更新。
         status_updated: 状态已更新。
+        vip_extended: 已增加 1 个月 VIP。
         cannot_impersonate_admin: 管理员账号不允许代看。
+        cannot_impersonate_inactive: 该用户未激活或已停用，不能代看。
         cannot_change_own_role: 你不能修改自己的角色。
         cannot_demote_last_admin: 不能降级最后一个管理员。
         impersonation_started: "已进入 %{email} 的代看模式。"

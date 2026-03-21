@@ -32,6 +32,10 @@
         <strong class="admin-kv-value"><%= status_badge(@user.status, @user.active? ? :green : :red) %></strong>
       </div>
       <div class="admin-kv-item">
+        <span class="admin-kv-label"><%= t("admin.users.columns.vip_expires_at") %></span>
+        <strong class="admin-kv-value"><%= @user.vip_expires_at.present? ? format_in_user_time(@user.vip_expires_at, current_user) : "-" %></strong>
+      </div>
+      <div class="admin-kv-item">
         <span class="admin-kv-label"><%= t("admin.users.columns.created_at") %></span>
         <strong class="admin-kv-value"><%= @user.created_at.present? ? format_in_user_time(@user.created_at, current_user) : "-" %></strong>
       </div>
@@ -83,6 +87,15 @@
                      data: { turbo_confirm: @user.active? ? t("admin.users.actions.confirm_suspend") : t("admin.users.actions.confirm_reactivate") }) %>
       <% end %>
 
+      <% unless @user.admin? %>
+        <%= button_to t("admin.users.actions.add_vip_one_month"),
+                      grant_vip_admin_user_path(@user),
+                      method: :post,
+                      class: ui_button_classes(:secondary),
+                      form: { class: "admin-users-actions-group" },
+                      data: { turbo_confirm: t("admin.users.actions.confirm_add_vip_one_month", email: @user.email) } %>
+      <% end %>
+
       <%= button_to t("admin.users.actions.impersonate"),
                     impersonate_admin_user_path(@user),
                     method: :post,
@@ -90,5 +103,29 @@
                     form: { class: "admin-users-actions-group" },
                     data: { turbo_confirm: t("admin.users.actions.confirm_impersonate", email: @user.email) } %>
     </div>
+  </section>
+
+  <section class="app-surface admin-user-detail-section">
+    <h2><%= t("admin.notifications.single_title") %></h2>
+    <%= form_with url: send_notification_admin_user_path(@user), method: :post, scope: :announcement, local: true do |f| %>
+      <div class="app-filter-grid">
+        <div class="app-filter-field">
+          <%= f.label :title, t("admin.notifications.fields.title") %>
+          <%= f.text_field :title, class: ui_input_classes, required: true, maxlength: 120 %>
+        </div>
+        <div class="app-filter-field">
+          <%= f.label :link_url, t("admin.notifications.fields.link_url") %>
+          <%= f.url_field :link_url, class: ui_input_classes, placeholder: "https://rubusoo.com/changelog" %>
+        </div>
+        <div class="app-filter-field app-filter-field--full">
+          <%= f.label :message, t("admin.notifications.fields.message") %>
+          <%= f.text_area :message, class: ui_input_classes, rows: 5, required: true, placeholder: t("admin.notifications.template.body") %>
+          <p class="app-section-caption"><%= t("admin.notifications.fields.message_wrap_hint") %></p>
+        </div>
+        <div class="app-filter-actions">
+          <%= f.submit t("admin.notifications.actions.send_single"), class: ui_button_classes(:secondary), data: { turbo_confirm: t("admin.notifications.actions.confirm_send_single", email: @user.email) } %>
+        </div>
+      </div>
+    <% end %>
   </section>
 </section>

@@ -128,6 +128,26 @@ class ApplicationController < ActionController::Base
     return if should_skip_status_enforcement_check?
     return if current_user.active_for_app?
 
+    if impersonating? && real_admin_user&.admin?
+      admin_actor = real_admin_user
+      impersonated_user = current_user
+
+      Admin::AuditLogger.log!(
+        actor: admin_actor,
+        target: impersonated_user,
+        action: :impersonation_stopped,
+        metadata: {
+          impersonated_user_id: impersonated_user.id,
+          impersonated_user_email: impersonated_user.email,
+          stop_reason: "target_no_longer_active"
+        }
+      )
+
+      clear_impersonation_session!
+      sign_in(:user, admin_actor)
+      redirect_to admin_root_path, alert: t("admin.impersonation.flash.target_no_longer_active") and return
+    end
+
     clear_impersonation_session!
     sign_out(current_user)
     redirect_to suspended_path, alert: t("users.suspended.alert")

@@ -370,8 +370,8 @@
     if (!initialContainer) return;
     if (initialContainer.dataset.liveRefresh !== "true") return;
 
-    const engagementDetailsSelector = ".quote-engagement-details";
-    const storageKey = `quote:engagement-details:${window.location.pathname}`;
+    const collabPanelSelector = ".quote-collab-panel[data-collab-key]";
+    const collabStoragePrefix = `quote:collab-panel:${window.location.pathname}:`;
     const hasOpenBlockingModal = () => {
       const blockingModalOpen = Array.from(document.querySelectorAll(".quote-turnstile-modal, .quote-reason-options-modal")).some((modal) => !modal.hidden);
       if (blockingModalOpen) return true;
@@ -382,46 +382,64 @@
       return Array.from(document.querySelectorAll(".quote-toolbar-export")).some((menu) => menu.hasAttribute("open"));
     };
 
-    const readPersistedState = () => {
+    const readPersistedPanelState = (panelKey) => {
+      if (!panelKey) return null;
       try {
-        return window.sessionStorage.getItem(storageKey) === "true";
+        const raw = window.sessionStorage.getItem(`${collabStoragePrefix}${panelKey}`);
+        if (raw === "true") return true;
+        if (raw === "false") return false;
+        return null;
       } catch (_) {
-        return false;
+        return null;
       }
     };
-    const persistState = (open) => {
+    const persistPanelState = (panelKey, open) => {
+      if (!panelKey) return;
       try {
-        window.sessionStorage.setItem(storageKey, open ? "true" : "false");
+        window.sessionStorage.setItem(`${collabStoragePrefix}${panelKey}`, open ? "true" : "false");
       } catch (_) {
       }
     };
 
-    // Read the live <details>.open and write it onto the container dataset.
-    // Must be called BEFORE any async operation (while the element still exists).
-    const snapshotEngagement = () => {
+    // Snapshot the live <details>.open states BEFORE async refresh.
+    const snapshotCollabPanels = () => {
       const c = getContainer();
-      if (!c) return;
-      const el = c.querySelector(engagementDetailsSelector);
-      if (el) c.dataset.engagementOpen = el.open ? "true" : "false";
+      if (!c) return {};
+      const snapshot = {};
+      c.querySelectorAll(collabPanelSelector).forEach((panel) => {
+        const panelKey = panel.dataset.collabKey;
+        if (!panelKey) return;
+        snapshot[panelKey] = panel.open;
+      });
+      return snapshot;
     };
 
-    const bindEngagementDetails = () => {
+    const bindCollabPanels = (snapshot = null) => {
       const container = getContainer();
       if (!container) return;
-      // Init from sessionStorage the very first time (attribute not yet on the element)
-      if (!("engagementOpen" in container.dataset)) {
-        container.dataset.engagementOpen = readPersistedState() ? "true" : "false";
-      }
-      const el = container.querySelector(engagementDetailsSelector);
-      if (!el || el.dataset.bound === "true") return;
-      el.dataset.bound = "true";
-      el.addEventListener("toggle", () => {
-        container.dataset.engagementOpen = el.open ? "true" : "false";
-        persistState(el.open);
+      container.querySelectorAll(collabPanelSelector).forEach((panel) => {
+        const panelKey = panel.dataset.collabKey;
+        if (!panelKey) return;
+
+        if (panel.dataset.bound !== "true") {
+          panel.dataset.bound = "true";
+          panel.addEventListener("toggle", () => {
+            persistPanelState(panelKey, panel.open);
+          });
+        }
+
+        const snapshotValue = snapshot && Object.prototype.hasOwnProperty.call(snapshot, panelKey) ? snapshot[panelKey] : null;
+        const persistedValue = snapshotValue === null ? readPersistedPanelState(panelKey) : null;
+
+        if (snapshotValue === true || persistedValue === true) {
+          panel.setAttribute("open", "");
+          return;
+        }
+
+        if (snapshotValue === false || persistedValue === false) {
+          panel.removeAttribute("open");
+        }
       });
-      // container.dataset.engagementOpen holds the correct value:
-      // either from snapshotEngagement() (post-refresh) or from sessionStorage (initial load)
-      if (container.dataset.engagementOpen === "true") el.setAttribute("open", "");
     };
 
     let inFlight = false;
@@ -467,9 +485,8 @@
       const refreshUrl = container.dataset.refreshUrl;
       if (!refreshUrl) return;
 
-      // Snapshot the live <details>.open BEFORE the async fetch so we have
-      // the ground-truth state even if the user toggles during the request.
-      snapshotEngagement();
+      // Snapshot the live <details>.open states before async fetch.
+      const collabSnapshot = snapshotCollabPanels();
 
       inFlight = true;
       try {
@@ -481,13 +498,12 @@
 
         const streamHtml = await response.text();
         if (streamHtml.trim()) {
-          // container.dataset.engagementOpen already holds the correct value from snapshotEngagement().
           // Turbo.renderStreamMessage uses Promise microtasks internally; requestAnimationFrame
           // runs after all pending microtasks AND browser DOM mutations, making it
           // more reliable than setTimeout(0) for post-render state restoration.
           Turbo.renderStreamMessage(streamHtml);
           window.requestAnimationFrame(() => {
-            bindEngagementDetails();
+            bindCollabPanels(collabSnapshot);
             syncRefreshEligibility();
           });
         }
@@ -507,6 +523,6 @@
     window.addEventListener("focus", () => refreshQuoteState(true));
     intervalId = window.setInterval(() => refreshQuoteState(false), 15000);
 
-    bindEngagementDetails();
+    bindCollabPanels();
   })();
 </script>

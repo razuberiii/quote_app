@@ -5,6 +5,7 @@ es-419:
   notifications:
     title: Notificaciones
     mark_all_read: Marcar todo como leído
+    mark_read: Marcar como leído
     empty: No hay notificaciones nuevas
     open_link: Abrir
     time_ago: hace %{time}
@@ -13,6 +14,7 @@ es-419:
       quote_viewed: El comprador vio %{quote_no} (%{customer_name})
       quote_accepted: El comprador aceptó %{quote_no} (%{customer_name})
       quote_revision_requested: El comprador pidió una revisión para %{quote_no} (%{customer_name})
+      admin_announcement: Aviso del administrador
   engagement:
     hot: Alto interés
     warm: Interés medio
@@ -2462,6 +2464,35 @@ es-419:
         exit_confirm: ¿Salir de suplantación y volver al admin?
       flash:
         stopped: Suplantación finalizada. Regresaste al admin.
+        target_no_longer_active: El usuario suplantado ya no está activo. Saliste del modo suplantación y volviste al admin.
+    notifications:
+      broadcast_title: Notificación masiva
+      broadcast_subtitle: Envía una notificación de campana a todos los usuarios activos.
+      single_title: Enviar notificación a usuario
+      fields:
+        title: Título
+        message: Mensaje
+        link_url: URL de enlace (opcional)
+        message_wrap_hint: Las líneas largas se ajustan automáticamente para evitar scroll horizontal en notificaciones.
+      actions:
+        send_all: Enviar a todos
+        send_single: Enviar al usuario
+        confirm_send_all: ¿Enviar esta notificación a todos los usuarios activos?
+        confirm_send_single: "¿Enviar esta notificación a %{email}?"
+      template:
+        title: Plantilla de actualización
+        body: |
+          [Actualización del producto] YYYY-MM-DD
+          1) Nuevo:
+          - ...
+          2) Mejorado:
+          - ...
+          3) Corregido:
+          - ...
+          ¿Necesitas ayuda? Contáctanos desde Contact Us.
+      flash:
+        broadcast_sent: "Envío masivo realizado a %{count} usuarios."
+        single_sent: "Notificación enviada a %{email}."
     users:
       index:
         title: Gestión de Usuarios
@@ -2484,24 +2515,31 @@ es-419:
         email: Correo
         role: Rol
         status: Estado
+        vip_expires_at: VIP vence el
         created_at: Creado el
         last_login_at: Último inicio de sesión
         last_active_at: Última actividad
         actions: Acciones
       actions:
         view: Ver
+        view_details: Ver detalle
+        more_actions: Más acciones
         change_role: Cambiar Rol
         suspend: Suspender
         reactivate: Reactivar
+        add_vip_one_month: Agregar 1 mes VIP
         impersonate: Suplantar
         confirm_role_change: ¿Confirmar cambio de rol?
         confirm_suspend: ¿Suspender este usuario?
         confirm_reactivate: ¿Reactivar este usuario?
+        confirm_add_vip_one_month: "¿Agregar 1 mes VIP para %{email}?"
         confirm_impersonate: "¿Entrar en modo suplantación para %{email}?"
       flash:
         role_updated: Rol actualizado.
         status_updated: Estado actualizado.
+        vip_extended: VIP extendido por 1 mes.
         cannot_impersonate_admin: No se puede suplantar cuentas admin.
+        cannot_impersonate_inactive: Este usuario no está activo o no está verificado y no se puede suplantar.
         cannot_change_own_role: No puedes cambiar tu propio rol.
         cannot_demote_last_admin: No se puede degradar al último admin.
         impersonation_started: "Ahora estás suplantando a %{email}."

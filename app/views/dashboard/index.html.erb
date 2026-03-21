@@ -123,15 +123,15 @@
       <p class="dashboard-side-module-note"><%= t("dashboard.view.index.deal_radar_summary_hint") %></p>
       <% if @deal_radar_signals.any? %>
         <div class="dashboard-side-module-body">
-        <div class="dashboard-side-module-list">
-          <% @deal_radar_signals.first(1).each do |entry| %>
+        <div class="dashboard-side-module-list dashboard-action-list">
+          <% @deal_radar_signals.first(3).each do |entry| %>
             <div class="dashboard-side-module-item is-<%= entry[:signal].priority %>">
               <div>
                 <span class="dashboard-action-secondary-label"><%= entry[:signal].label %></span>
                 <strong><%= entry[:quote].customer&.name.presence || t("dashboard.logic.unknown_customer") %></strong>
                 <small class="dashboard-side-module-subline">
                   <%= entry[:quote].custom_title.presence || entry[:quote].quote_items.ordered.first&.product&.name.presence || entry[:quote].quote_items.ordered.first&.description.presence || entry[:quote].quote_no %>
-                  · <%= entry[:quote].quote_no %>
+                  · <span class="dashboard-quote-id"><%= entry[:quote].quote_no %></span>
                 </small>
                 <small class="dashboard-side-module-subline"><%= entry[:detail] %></small>
               </div>
@@ -478,6 +478,24 @@
         });
       });
 
+      document.querySelectorAll("[data-action-items-toggle]").forEach((toggle) => {
+        const extra = document.querySelector("[data-action-items-more]");
+        if (!extra || toggle.dataset.bound === "true") return;
+        toggle.dataset.bound = "true";
+
+        const count = Number(toggle.dataset.actionCount || 0);
+        const applyState = (expanded) => {
+          extra.hidden = !expanded;
+          toggle.dataset.expanded = expanded ? "true" : "false";
+          toggle.textContent = expanded ? showLessLabel : showMoreLabel.replace("%{count}", String(count));
+        };
+
+        applyState(false);
+
+        toggle.addEventListener("click", () => {
+          applyState(toggle.dataset.expanded !== "true");
+        });
+      });
     };
 
     bindActionToggle();

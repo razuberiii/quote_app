@@ -30,6 +30,7 @@
           <th><%= t("admin.users.columns.email") %></th>
           <th><%= t("admin.users.columns.role") %></th>
           <th><%= t("admin.users.columns.status") %></th>
+          <th><%= t("admin.users.columns.vip_expires_at") %></th>
           <th><%= t("admin.users.columns.created_at") %></th>
           <th><%= t("admin.users.columns.last_login_at") %></th>
           <th><%= t("admin.users.columns.last_active_at") %></th>
@@ -38,37 +39,52 @@
       </thead>
       <tbody>
         <% @users.each do |user| %>
-          <tr>
+          <tr data-clickable-href="<%= admin_user_path(user) %>" tabindex="0" aria-label="<%= t("admin.users.actions.view_details") %>">
             <td><%= user.id %></td>
             <td><%= user.full_name.presence || "-" %></td>
             <td><%= user.email %></td>
             <td><%= status_badge(user.role, :indigo) %></td>
             <td><%= status_badge(user.status, user.active? ? :green : :red) %></td>
+            <td><%= user.vip_expires_at.present? ? format_in_user_time(user.vip_expires_at, current_user) : "-" %></td>
             <td><%= user.created_at.present? ? format_in_user_time(user.created_at, current_user) : "-" %></td>
             <td><%= user.last_login_at.present? ? format_in_user_time(user.last_login_at, current_user) : "-" %></td>
             <td><%= user.last_active_at.present? ? format_in_user_time(user.last_active_at, current_user) : "-" %></td>
-            <td class="admin-users-actions-cell">
-              <div class="admin-users-actions">
-                <%= link_to t("admin.users.actions.view"), admin_user_path(user), class: ui_button_classes(:secondary) %>
+            <td class="admin-users-actions-cell" data-no-row-nav="true">
+              <div class="admin-users-actions" data-no-row-nav="true">
+                <div class="admin-users-actions-quick">
+                  <%= button_to t("admin.users.actions.impersonate"),
+                                impersonate_admin_user_path(user),
+                                method: :post,
+                                class: ui_button_classes(:danger),
+                                form: { class: "admin-users-actions-group" },
+                                data: { turbo_confirm: t("admin.users.actions.confirm_impersonate", email: user.email) } %>
+                </div>
 
-                <%= form_with url: update_role_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
-                  <%= f.select :role, User.roles.keys.map { |role| [ role, role ] }, { selected: user.role }, class: ui_input_classes %>
-                  <%= f.submit t("admin.users.actions.change_role"), class: ui_button_classes(:secondary), data: { turbo_confirm: t("admin.users.actions.confirm_role_change") } %>
-                <% end %>
+                <details class="admin-users-action-card">
+                  <summary class="admin-users-action-card-summary"><%= t("admin.users.actions.more_actions") %></summary>
+                  <div class="admin-users-action-card-body">
+                    <%= form_with url: update_role_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group admin-users-actions-group--stack" do |f| %>
+                      <%= f.select :role, User.roles.keys.map { |role| [ role, role ] }, { selected: user.role }, class: ui_input_classes %>
+                      <%= f.submit t("admin.users.actions.change_role"), class: ui_button_classes(:secondary), data: { turbo_confirm: t("admin.users.actions.confirm_role_change") } %>
+                    <% end %>
 
-                <%= form_with url: update_status_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group" do |f| %>
-                  <%= f.hidden_field :status, value: user.active? ? "suspended" : "active" %>
-                  <%= f.submit(user.active? ? t("admin.users.actions.suspend") : t("admin.users.actions.reactivate"),
-                               class: ui_button_classes(user.active? ? :danger : :secondary),
-                               data: { turbo_confirm: user.active? ? t("admin.users.actions.confirm_suspend") : t("admin.users.actions.confirm_reactivate") }) %>
-                <% end %>
+                    <%= form_with url: update_status_admin_user_path(user), method: :patch, local: true, class: "admin-users-actions-group admin-users-actions-group--stack" do |f| %>
+                      <%= f.hidden_field :status, value: user.active? ? "suspended" : "active" %>
+                      <%= f.submit(user.active? ? t("admin.users.actions.suspend") : t("admin.users.actions.reactivate"),
+                                   class: ui_button_classes(user.active? ? :danger : :secondary),
+                                   data: { turbo_confirm: user.active? ? t("admin.users.actions.confirm_suspend") : t("admin.users.actions.confirm_reactivate") }) %>
+                    <% end %>
 
-                <%= button_to t("admin.users.actions.impersonate"),
-                              impersonate_admin_user_path(user),
-                              method: :post,
-                              class: ui_button_classes(:danger),
-                              form: { class: "admin-users-actions-group" },
-                              data: { turbo_confirm: t("admin.users.actions.confirm_impersonate", email: user.email) } %>
+                    <% unless user.admin? %>
+                      <%= button_to t("admin.users.actions.add_vip_one_month"),
+                                    grant_vip_admin_user_path(user),
+                                    method: :post,
+                                    class: ui_button_classes(:secondary),
+                                    form: { class: "admin-users-actions-group admin-users-actions-group--stack" },
+                                    data: { turbo_confirm: t("admin.users.actions.confirm_add_vip_one_month", email: user.email) } %>
+                    <% end %>
+                  </div>
+                </details>
               </div>
             </td>
           </tr>

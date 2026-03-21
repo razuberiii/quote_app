@@ -2195,6 +2195,7 @@
   padding: 0;
   max-height: 320px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .notification-item {
@@ -2236,6 +2237,15 @@
   font-size: 13px;
   color: #334155;
   line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.notification-item-text * {
+  white-space: inherit;
+  word-break: inherit;
+  overflow-wrap: inherit;
 }
 
 .notification-item-time {
@@ -2249,10 +2259,29 @@
   font-size: 14px;
   color: #6366f1;
   text-decoration: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
 }
 
 .notification-item-link:hover {
   color: #4f46e5;
+}
+
+.notification-item-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.notification-item-action-form {
+  margin: 0;
+}
+
+.notification-item-link--secondary {
+  color: #64748b;
 }
 
 .notification-empty {
@@ -5805,6 +5834,7 @@ kbd.app-shortcut-badge {
   width: 44px;
   height: 44px;
   overflow: hidden;
+  overflow-x: hidden;
 }
 .quote-item-gallery-option img {
   width: 100%;
@@ -14638,6 +14668,70 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
   min-width: 6.9rem;
 }
 
+.admin-users-action-card {
+  min-width: 7.2rem;
+  position: relative;
+}
+
+.admin-users-action-card-summary {
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid #dbe3f0;
+  border-radius: 10px;
+  background: #f8fbff;
+  color: #344256;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 0.38rem 0.62rem;
+  text-align: center;
+}
+
+.admin-users-action-card-summary::-webkit-details-marker {
+  display: none;
+}
+
+.admin-users-action-card-summary::marker {
+  display: none;
+}
+
+.admin-users-action-card[open] .admin-users-action-card-summary {
+  border-color: #c8d5ea;
+  background: #eef5ff;
+}
+
+.admin-users-action-card-body {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.38rem);
+  z-index: 18;
+  border: 1px solid #e3ebf8;
+  border-radius: 11px;
+  background: #f8fbff;
+  padding: 0.5rem;
+  display: grid;
+  gap: 0.45rem;
+  min-width: 12.8rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+}
+
+.admin-users-actions-group--stack {
+  display: grid;
+  gap: 0.34rem;
+  width: 100%;
+}
+
+.admin-users-actions-group--stack .app-ui-input,
+.admin-users-actions-group--stack .app-ui-button {
+  width: 100%;
+}
+
+.admin-users-actions-quick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+}
+
 .admin-users-table th,
 .admin-users-table td {
   vertical-align: top;
@@ -14645,11 +14739,19 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
 
 .admin-users-table th:last-child,
 .admin-users-table td.admin-users-actions-cell {
-  min-width: 20.5rem;
+  min-width: 12.6rem;
 }
 
 .admin-users-table td {
   font-variant-numeric: tabular-nums;
+}
+
+.admin-users-table tbody tr[data-clickable-href] td:not(.admin-users-actions-cell) {
+  cursor: pointer;
+}
+
+.admin-users-table tbody tr[data-clickable-href]:hover td:not(.admin-users-actions-cell) {
+  background: #f8fbff;
 }
 
 .admin-audit-table th,
@@ -14727,10 +14829,6 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
 
   .admin-users-actions-group {
     width: 100%;
-  }
-
-  .admin-users-actions {
-    flex-wrap: wrap;
   }
 
   .admin-console-main .app-page-shell {

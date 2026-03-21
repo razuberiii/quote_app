@@ -4,7 +4,7 @@ class Notification < ApplicationRecord
     "1" => "quote_accepted",
     "2" => "quote_revision_requested"
   }.freeze
-  VALID_KINDS = %w[quote_viewed quote_accepted quote_revision_requested].freeze
+  VALID_KINDS = %w[quote_viewed quote_accepted quote_revision_requested admin_announcement].freeze
 
   belongs_to :user
 
@@ -13,6 +13,7 @@ class Notification < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   validates :kind, presence: true, inclusion: { in: VALID_KINDS + LEGACY_KIND_MAP.keys }
+  validate :admin_announcement_payload, if: -> { normalized_kind == "admin_announcement" }
 
   before_validation :normalize_kind_value
 
@@ -102,5 +103,13 @@ class Notification < ApplicationRecord
 
   def normalize_kind_value
     self[:kind] = normalized_kind if self[:kind].present?
+  end
+
+  def admin_announcement_payload
+    title = data.is_a?(Hash) ? data["title"].presence || data[:title].presence : nil
+    message = data.is_a?(Hash) ? data["message"].presence || data[:message].presence : nil
+
+    errors.add(:data, "title is required") if title.blank?
+    errors.add(:data, "message is required") if message.blank?
   end
 end

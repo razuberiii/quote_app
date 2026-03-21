@@ -36,4 +36,39 @@ class NotificationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, payload["count"]
     assert_includes payload["menu_html"], I18n.t("notifications.empty")
   end
+
+  test "mark_read redirects to link_url for admin announcement" do
+    notification = Notification.create!(
+      user: @user,
+      kind: "admin_announcement",
+      data: {
+        title: "Announcement",
+        message: "System upgraded",
+        link_url: "https://example.com/changelog"
+      }
+    )
+
+    get mark_read_notification_url(notification)
+
+    assert_redirected_to "https://example.com/changelog"
+    notification.reload
+    assert notification.read_at.present?
+  end
+
+  test "dismiss marks notification as read without opening link" do
+    notification = Notification.create!(
+      user: @user,
+      kind: "admin_announcement",
+      data: {
+        title: "Announcement",
+        message: "System upgraded"
+      }
+    )
+
+    patch dismiss_notification_url(notification)
+
+    assert_redirected_to root_path
+    notification.reload
+    assert notification.read_at.present?
+  end
 end

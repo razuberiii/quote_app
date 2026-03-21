@@ -2,7 +2,7 @@ module Admin
   class UsersController < BaseController
     PER_PAGE = 25
 
-    before_action :set_user, only: [ :show, :update_role, :update_status, :impersonate ]
+    before_action :set_user, only: [ :show, :update_role, :update_status, :grant_vip, :send_notification, :impersonate ]
 
     def index
       @query = params[:q].to_s.strip
@@ -72,9 +72,74 @@ module Admin
       end
     end
 
+    def grant_vip
+      if @user == acting_user_for_audit
+        redirect_back fallback_location: admin_user_path(@user), alert: t("admin.users.flash.cannot_change_own_role") and return
+      end
+
+      if @user.admin? && User.where(role: :admin).count <= 1
+        redirect_back fallback_location: admin_user_path(@user), alert: t("admin.users.flash.cannot_demote_last_admin") and return
+      end
+
+      before_role = @user.role
+      before_vip_expires_at = @user.vip_expires_at
+
+      @user.grant_vip_for!(1.month)
+
+      Admin::AuditLogger.log!(
+        actor: acting_user_for_audit,
+        target: @user,
+        action: :vip_extended,
+        metadata: {
+          before_role: before_role,
+          after_role: @user.role,
+          before_vip_expires_at: before_vip_expires_at&.iso8601,
+          after_vip_expires_at: @user.vip_expires_at&.iso8601
+        }
+      )
+
+      redirect_back fallback_location: admin_user_path(@user), notice: t("admin.users.flash.vip_extended")
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_back fallback_location: admin_user_path(@user), alert: e.record.errors.full_messages.to_sentence
+    end
+
+    def send_notification
+      payload = announcement_params
+
+      Notification.create!(
+        user: @user,
+        kind: "admin_announcement",
+        data: {
+          title: payload[:title].to_s,
+          message: wrap_notification_message(payload[:message].to_s),
+          link_url: safe_link_url(payload[:link_url]),
+          sender_email: acting_user_for_audit&.email
+        }.compact
+      )
+
+      Admin::AuditLogger.log!(
+        actor: acting_user_for_audit,
+        target: @user,
+        action: :notification_sent,
+        metadata: {
+          recipient_scope: "single_user",
+          recipient_count: 1,
+          title: payload[:title].to_s,
+          has_link: payload[:link_url].present?
+        }
+      )
+
+      redirect_back fallback_location: admin_user_path(@user), notice: t("admin.notifications.flash.single_sent", email: @user.email)
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_back fallback_location: admin_user_path(@user), alert: e.record.errors.full_messages.to_sentence
+    end
+
     def impersonate
       if @user.admin?
         redirect_back fallback_location: admin_user_path(@user), alert: t("admin.users.flash.cannot_impersonate_admin") and return
+      end
+      unless @user.active? && @user.email_verified?
+        redirect_back fallback_location: admin_user_path(@user), alert: t("admin.users.flash.cannot_impersonate_inactive") and return
       end
 
       admin_actor = current_user
@@ -121,6 +186,27 @@ module Admin
         "LOWER(users.email) LIKE :q OR LOWER(COALESCE(users.full_name, '')) LIKE :q OR LOWER(COALESCE(companies.name, '')) LIKE :q",
         q: q
       )
+    end
+
+    def announcement_params
+      params.require(:announcement).permit(:title, :message, :link_url)
+    end
+
+    def safe_link_url(raw_url)
+      value = raw_url.to_s.strip
+      return nil if value.blank?
+      return value if value.start_with?("/")
+
+      uri = URI.parse(value)
+      return value if uri.is_a?(URI::HTTP) || uri.is_a?(URI::HTTPS)
+
+      nil
+    rescue URI::InvalidURIError
+      nil
+    end
+
+    def wrap_notification_message(message, line_limit = 44)
+      message.to_s.split("\n", -1).map { |line| line.scan(/.{1,#{line_limit}}/mu).join("\n") }.join("\n")
     end
   end
 end

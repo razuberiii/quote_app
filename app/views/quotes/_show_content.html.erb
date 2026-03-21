@@ -381,7 +381,7 @@
     <% revision_item_changes = @revision_diff.fetch(:modified_items, []).size + @revision_diff.fetch(:added_items, []).size + @revision_diff.fetch(:removed_items, []).size %>
     <% revision_removed_items = @revision_diff.fetch(:removed_items, []).size %>
     <% revision_pricing_changed = @revision_diff.fetch(:financial_changes, []).any? || (@revision_diff[:total_before].to_d != @revision_diff[:total_after].to_d) %>
-    <details id="quote-revision-diff" class="quote-collab-panel">
+    <details id="quote-revision-diff" class="quote-collab-panel" data-collab-key="revision_diff">
       <summary>
         <span class="quote-collab-title"><%= t("quotes.view.revision_diff.title") %></span>
         <span class="quote-collab-summary"><%= t("quotes.view.revision_diff.compare_versions", current: @quote.revision_number, previous: @previous_revision_quote.revision_number) %></span>
@@ -396,7 +396,7 @@
   <% end %>
 
   <% if @quote_decision_review.present? %>
-    <details class="quote-collab-panel">
+    <details class="quote-collab-panel" data-collab-key="decision_review">
       <summary>
         <span class="quote-collab-title"><%= t("quotes.view.decision_review.title") %></span>
         <span class="quote-collab-summary"><%= @quote_decision_review[:recommended_move][:label] %></span>
@@ -410,7 +410,7 @@
 
   <% if @quote_decision_timeline.any? %>
     <% recent_events = @quote_decision_timeline.first(2) %>
-    <details class="quote-collab-panel">
+    <details class="quote-collab-panel" data-collab-key="decision_timeline">
       <summary>
         <span class="quote-collab-title"><%= t("quotes.view.decision_timeline.title") %></span>
         <% recent_events.each do |event| %>
@@ -448,7 +448,7 @@
     <% "#{formatted_at}#{tags.any? ? " [#{tags.join(' | ')}]" : ""}" %>
   <% end %>
 
-  <details class="quote-collab-panel">
+  <details class="quote-collab-panel" data-collab-key="engagement_details">
     <summary>
       <span class="quote-collab-title"><%= t("quotes.view.show.engagement_details") %></span>
       <span class="quote-collab-summary"><%= t("quotes.view.show.total_views") %>: <%= total_views %></span>

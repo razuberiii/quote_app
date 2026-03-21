@@ -2,6 +2,7 @@ en:
   notifications:
     title: Notifications
     mark_all_read: Mark all read
+    mark_read: Mark read
     empty: No new notifications
     open_link: Open
     time_ago: "%{time} ago"
@@ -10,6 +11,7 @@ en:
       quote_viewed: Buyer viewed %{quote_no} (%{customer_name})
       quote_accepted: Buyer accepted %{quote_no} (%{customer_name})
       quote_revision_requested: Buyer requested a revision for %{quote_no} (%{customer_name})
+      admin_announcement: Admin announcement
   app:
     brand_name: Rubusoo
   engagement:
@@ -2464,6 +2466,35 @@ en:
         exit_confirm: Exit impersonation and return to admin console?
       flash:
         stopped: Impersonation ended. Returned to admin console.
+        target_no_longer_active: Impersonated user is no longer active. Exited impersonation and returned to admin console.
+    notifications:
+      broadcast_title: Broadcast Notification
+      broadcast_subtitle: Send a bell notification to all active users.
+      single_title: Send User Notification
+      fields:
+        title: Title
+        message: Message
+        link_url: Link URL (optional)
+        message_wrap_hint: Long lines are auto-wrapped to avoid horizontal scrolling in the notification list.
+      actions:
+        send_all: Send to all
+        send_single: Send to user
+        confirm_send_all: Send this notification to all active users?
+        confirm_send_single: "Send this notification to %{email}?"
+      template:
+        title: Release Update Template
+        body: |
+          [Product Update] YYYY-MM-DD
+          1) New:
+          - ...
+          2) Improved:
+          - ...
+          3) Fixed:
+          - ...
+          Need help? Please contact us via Contact Us.
+      flash:
+        broadcast_sent: "Broadcast sent to %{count} users."
+        single_sent: "Notification sent to %{email}."
     users:
       index:
         title: User Management
@@ -2486,24 +2517,31 @@ en:
         email: Email
         role: Role
         status: Status
+        vip_expires_at: VIP expires at
         created_at: Created at
         last_login_at: Last login
         last_active_at: Last active
         actions: Actions
       actions:
         view: View
+        view_details: View Details
+        more_actions: More Actions
         change_role: Change Role
         suspend: Suspend
         reactivate: Reactivate
+        add_vip_one_month: Add 1M VIP
         impersonate: Impersonate
         confirm_role_change: Confirm role change?
         confirm_suspend: Suspend this user?
         confirm_reactivate: Reactivate this user?
+        confirm_add_vip_one_month: "Add 1 month VIP for %{email}?"
         confirm_impersonate: "Enter impersonation mode for %{email}?"
       flash:
         role_updated: Role updated.
         status_updated: Status updated.
+        vip_extended: VIP extended by 1 month.
         cannot_impersonate_admin: Admin accounts cannot be impersonated.
+        cannot_impersonate_inactive: This user is not active or not verified and cannot be impersonated.
         cannot_change_own_role: You cannot change your own role.
         cannot_demote_last_admin: Cannot demote the last remaining admin.
         impersonation_started: "Now impersonating %{email}."

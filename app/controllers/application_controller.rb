@@ -2,6 +2,7 @@ class ApplicationController < ActionController::Base
   include TurnstileVerifiable
 
   before_action :authenticate_user!
+  before_action :enforce_canonical_host!
   before_action :set_locale
   before_action :normalize_impersonation_session!
   before_action :enforce_active_user_status!
@@ -24,6 +25,13 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def enforce_canonical_host!
+    return unless Rails.env.production?
+    return unless request.host.to_s.casecmp("rubusoo.com").zero?
+
+    redirect_to "#{request.protocol}www.rubusoo.com#{request.fullpath}", status: :moved_permanently, allow_other_host: true
+  end
 
   def set_locale
     locale = params[:locale].presence || current_user&.language.presence

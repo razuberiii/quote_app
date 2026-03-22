@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="<%= html_lang %>">
   <head>
     <title><%= seo_title(t("landing.shared.brand")) %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,6 +8,9 @@
     <% canonical_url = seo_canonical_url %>
     <% if canonical_url.present? %>
       <link rel="canonical" href="<%= canonical_url %>">
+    <% end %>
+    <% seo_alternate_links.each do |alternate| %>
+      <link rel="alternate" hreflang="<%= alternate[:hreflang] %>" href="<%= alternate[:href] %>">
     <% end %>
     <link rel="icon" href="<%= favicon_href %>" type="image/png">
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">

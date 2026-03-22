@@ -1,4 +1,8 @@
 module ApplicationHelper
+  def html_lang
+    I18n.locale.to_s
+  end
+
   def seo_title(default = "Rubusoo")
     return content_for(:title) if content_for?(:title)
     return t(@seo_page.title_key) if @seo_page&.title_key.present?
@@ -25,6 +29,30 @@ module ApplicationHelper
     return unless request.present?
 
     "#{request.base_url}#{request.path}"
+  end
+
+  def seo_alternate_links
+    return [] unless @seo_page&.path_helper.present? && respond_to?(@seo_page.path_helper)
+
+    locales = I18n.available_locales.map(&:to_s)
+    links = locales.filter_map do |locale|
+      begin
+        href = public_send(@seo_page.path_helper, locale: locale)
+      rescue ArgumentError, ActionController::UrlGenerationError
+        next
+      end
+
+      next if href.blank?
+
+      { hreflang: locale, href: href }
+    end
+
+    return links if links.empty?
+
+    default_locale = I18n.default_locale.to_s
+    default_href = links.find { |link| link[:hreflang] == default_locale }&.dig(:href)
+    links << { hreflang: "x-default", href: default_href } if default_href.present?
+    links
   end
 
   def seo_robots

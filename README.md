@@ -148,6 +148,11 @@ Ensure before deploy:
 - When a cycle is completed, move its plan into `docs/archive/` with a dated filename.
 - Admin-only routes are under `/admin/*` and require `role=admin`.
 - Suspended users are blocked from login and redirected to `/suspended`.
+- Public marketing pages use locale-specific SEO signals:
+  - locale canonical URLs (for example `/en`, `/zh-CN`, `/es-419`)
+  - `<html lang="...">`
+  - `<link rel="alternate" hreflang="...">` (+ `x-default`)
+- Production host canonicalization redirects `rubusoo.com` to `www.rubusoo.com` with `301`.
 
 ## Asset Troubleshooting (Development)
 

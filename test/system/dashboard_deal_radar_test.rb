@@ -6,7 +6,7 @@ class DashboardDealRadarTest < ApplicationSystemTestCase
     @company = @user.company
   end
 
-  test "deal radar sorts by priority and preserves locale in ctas" do
+  test "quote todo list prioritizes revision over risk and watch and preserves locale in ctas" do
     old_customer = Customer.create!(company: @company, name: "Dragon Labs", status: "new", customer_level: "normal", last_follow_up_date: 6.days.ago.to_date)
 
     revision_quote = create_quote_for_radar(old_customer, quote_no: "QT-RADAR-1", status: "negotiating", changes_requested_at: 1.day.ago, valid_until: Date.current + 2.days)
@@ -20,15 +20,19 @@ class DashboardDealRadarTest < ApplicationSystemTestCase
 
     visit dashboard_path(locale: :"zh-CN")
 
-    radar = find("#deal-radar-section .dashboard-action-list")
-    quote_numbers = radar.all(".dashboard-quote-id", minimum: 3).first(3).map(&:text)
+    todo = find("#quote-todo-section .dashboard-action-list")
+    quote_numbers = todo.all(".dashboard-quote-id").map(&:text)
 
     assert_equal QuoteSignalService.new(revision_quote).call.type, "revision_requested"
-    assert_equal [
-      revision_quote.quote_no,
-      risk_quote.quote_no,
-      watch_quote.quote_no
-    ], quote_numbers
+    revision_index = quote_numbers.index(revision_quote.quote_no)
+    risk_index = quote_numbers.index(risk_quote.quote_no)
+    watch_index = quote_numbers.index(watch_quote.quote_no)
+
+    assert_not_nil revision_index
+    assert_not_nil risk_index
+    assert_not_nil watch_index
+    assert_operator revision_index, :<, risk_index
+    assert_operator risk_index, :<, watch_index
 
     assert_includes page.html, "locale=zh-CN"
   end

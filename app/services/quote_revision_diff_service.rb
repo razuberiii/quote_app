@@ -218,35 +218,35 @@ class QuoteRevisionDiffService
   end
 
   def diff_specifications(before_specs, after_specs)
-    before_map = before_specs.index_by { |row| row[:key] }
-    after_map = after_specs.index_by { |row| row[:key] }
-    keys = (before_map.keys + after_map.keys).uniq
+    before_groups = before_specs.group_by { |row| row[:key] }
+    after_groups = after_specs.group_by { |row| row[:key] }
+    keys = (before_groups.keys + after_groups.keys).uniq
 
     added = []
     removed = []
     updated = []
 
     keys.each do |key|
-      before_row = before_map[key]
-      after_row = after_map[key]
+      before_rows = Array(before_groups[key]).dup
+      after_rows = Array(after_groups[key]).dup
 
-      if before_row.nil?
-        added << after_row
-        next
+      unmatched_before, unmatched_after = consume_exact_matches(before_rows, after_rows) do |before_row, after_row|
+        before_row[:value].to_s == after_row[:value].to_s
       end
 
-      if after_row.nil?
-        removed << before_row
-        next
+      pair_count = [ unmatched_before.size, unmatched_after.size ].min
+      pair_count.times do |idx|
+        before_row = unmatched_before[idx]
+        after_row = unmatched_after[idx]
+        updated << {
+          key: after_row[:key_display].presence || before_row[:key_display].presence || key,
+          before: before_row[:value].to_s,
+          after: after_row[:value].to_s
+        }
       end
 
-      next if before_row[:value].to_s == after_row[:value].to_s
-
-      updated << {
-        key: after_row[:key_display].presence || before_row[:key_display].presence || key,
-        before: before_row[:value].to_s,
-        after: after_row[:value].to_s
-      }
+      unmatched_after.drop(pair_count).each { |row| added << row }
+      unmatched_before.drop(pair_count).each { |row| removed << row }
     end
 
     {
@@ -258,35 +258,35 @@ class QuoteRevisionDiffService
   end
 
   def diff_addons(before_addons, after_addons)
-    before_map = before_addons.index_by { |row| row[:name] }
-    after_map = after_addons.index_by { |row| row[:name] }
-    keys = (before_map.keys + after_map.keys).uniq
+    before_groups = before_addons.group_by { |row| row[:name] }
+    after_groups = after_addons.group_by { |row| row[:name] }
+    keys = (before_groups.keys + after_groups.keys).uniq
 
     added = []
     removed = []
     updated = []
 
     keys.each do |key|
-      before_row = before_map[key]
-      after_row = after_map[key]
+      before_rows = Array(before_groups[key]).dup
+      after_rows = Array(after_groups[key]).dup
 
-      if before_row.nil?
-        added << after_row
-        next
+      unmatched_before, unmatched_after = consume_exact_matches(before_rows, after_rows) do |before_row, after_row|
+        before_row[:amount].to_d == after_row[:amount].to_d
       end
 
-      if after_row.nil?
-        removed << before_row
-        next
+      pair_count = [ unmatched_before.size, unmatched_after.size ].min
+      pair_count.times do |idx|
+        before_row = unmatched_before[idx]
+        after_row = unmatched_after[idx]
+        updated << {
+          name: after_row[:name_display].presence || before_row[:name_display].presence || key,
+          before: before_row[:amount].to_d,
+          after: after_row[:amount].to_d
+        }
       end
 
-      next if before_row[:amount].to_d == after_row[:amount].to_d
-
-      updated << {
-        name: after_row[:name_display].presence || before_row[:name_display].presence || key,
-        before: before_row[:amount].to_d,
-        after: after_row[:amount].to_d
-      }
+      unmatched_after.drop(pair_count).each { |row| added << row }
+      unmatched_before.drop(pair_count).each { |row| removed << row }
     end
 
     {
@@ -295,5 +295,21 @@ class QuoteRevisionDiffService
       updated: updated,
       changed: added.any? || removed.any? || updated.any?
     }
+  end
+
+  def consume_exact_matches(before_rows, after_rows)
+    remaining_after = after_rows.dup
+    remaining_before = []
+
+    before_rows.each do |before_row|
+      match_idx = remaining_after.find_index { |after_row| yield(before_row, after_row) }
+      if match_idx
+        remaining_after.delete_at(match_idx)
+      else
+        remaining_before << before_row
+      end
+    end
+
+    [ remaining_before, remaining_after ]
   end
 end

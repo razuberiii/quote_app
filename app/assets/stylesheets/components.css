@@ -369,7 +369,7 @@
   padding: 0 1rem;
   min-height: calc(100vh - 200px);
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
   transition:
     opacity var(--motion-duration-slow) var(--motion-ease-emphasized),
     transform var(--motion-duration-slow) var(--motion-ease-emphasized);
@@ -1182,54 +1182,6 @@ turbo-frame.is-content-enter {
   }
 
 }
-.public-quote-themed .quote-section-block h3 {
-  color: var(--doc-accent, #1f4e79);
-}
-.public-layout-modern .quote-doc-table,
-.public-layout-modern .quote-doc-table td,
-.public-layout-modern .quote-doc-table th {
-  border-color: #e5eaf0;
-}
-.public-layout-industry {
-  border-width: 2px;
-}
-.public-layout-industry .quote-doc-table thead {
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-}
-.public-layout-classic .quote-doc-header {
-  border-bottom-width: 1px;
-}
-@media print {
-  body.public-quote-body {
-    background: #fff !important;
-    color: #111827;
-  }
-
-  .public-quote-document {
-    border: 1px solid #d1d5db !important;
-    box-shadow: none !important;
-    border-radius: 0;
-    padding: 0.8rem;
-  }
-
-  .public-quote-document .quote-doc-table thead {
-    background: #f3f4f6 !important;
-    color: #111827 !important;
-  }
-
-  .public-quote-document .quote-meta-card,
-  .public-quote-document .quote-total-box,
-  .public-quote-document .quote-section-block {
-    background: #fff !important;
-    border: 1px solid #e5e7eb;
-  }
-
-  .public-quote-document .quote-total-grand {
-    color: #111827 !important;
-    background: #f3f4f6 !important;
-    border: 1px solid #d1d5db;
-  }
-}
 .demo-layout {
   margin-top: 0.95rem;
   display: grid;
@@ -1358,8 +1310,7 @@ turbo-frame.is-content-enter {
     grid-template-columns: 1fr;
   }
 
-  .quote-document .quote-items-table,
-  .public-quote-document .quote-items-table {
+  .quote-document .quote-items-table {
     min-width: 0;
   }
 
@@ -3573,6 +3524,12 @@ input.app-ui-button {
   background: var(--ui-surface-bg);
   box-shadow: var(--ui-shadow);
 }
+.quote-history--workspace {
+  margin-top: 0.1rem;
+  border-color: #dce6f2;
+  border-radius: 14px;
+  box-shadow: none;
+}
 .quote-history h3 {
   margin: 0 0 var(--space-1) 0;
   letter-spacing: -0.02em;
@@ -3771,9 +3728,6 @@ input.app-ui-button {
 .dashboard-action-center {
   margin-bottom: var(--space-1);
 }
-.dashboard-action-summary {
-  margin-bottom: var(--space-1);
-}
 .dashboard-action-summary-head {
   display: flex;
   align-items: center;
@@ -3784,9 +3738,6 @@ input.app-ui-button {
 .dashboard-action-summary-head h2 {
   margin: 0;
   letter-spacing: -0.02em;
-}
-.dashboard-action-summary-risk {
-  margin-left: auto;
 }
 .dashboard-action-summary-note {
   margin: var(--space-1) 0 0 0;
@@ -3859,31 +3810,16 @@ input.app-ui-button {
   color: #b45309;
 }
 .dashboard-decision-column-attention {
-  background: #fcfdff;
-  border: 1px solid #e4ecf7;
-  border-radius: 12px;
-  padding: 0.65rem 0.7rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0.02rem 0 0;
 }
-.dashboard-decision-waiting p {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
+.dashboard-decision-metric-note {
+  justify-content: flex-start;
 }
-.dashboard-decision-waiting span {
-  color: #475569;
-  font-size: 0.86rem;
-}
-.dashboard-decision-waiting strong {
-  color: #0f172a;
-  font-size: 1.14rem;
-  font-weight: 800;
-}
-.dashboard-decision-waiting small {
-  margin-top: 0.4rem;
-  display: block;
-  color: #64748b;
+.dashboard-decision-metric-note span {
+  color: #6b7d93;
   font-size: 0.78rem;
 }
 .dashboard-action-item {
@@ -3925,6 +3861,14 @@ input.app-ui-button {
   font-size: 0.85rem;
   line-height: 1.55;
 }
+.dashboard-action-item-meta {
+  margin: var(--space-1) 0 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #64748b;
+  font-size: 0.76rem;
+}
 .dashboard-action-item.is-urgent {
   border-color: #fecaca;
   background: #fef2f2;
@@ -3945,6 +3889,12 @@ input.app-ui-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  justify-self: start;
+  width: fit-content;
+  max-width: min(100%, 18rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   min-height: 18px;
   padding: 0 0.4rem;
   border-radius: 999px;
@@ -3979,6 +3929,10 @@ input.app-ui-button {
   opacity: 1;
   transform: translateY(0);
 }
+#today-focus-section .dashboard-action-more.is-collapsible:not(.is-expanded),
+#quote-todo-section .dashboard-action-more.is-collapsible:not(.is-expanded) {
+  margin-top: 0;
+}
 .dashboard-action-toggle {
   margin-top: var(--space-1);
   cursor: pointer;
@@ -3987,9 +3941,23 @@ input.app-ui-button {
   min-width: 170px;
 }
 
-.dashboard-onboarding-card,
-.dashboard-quick-create {
+.dashboard-onboarding-shell {
   padding: 1rem 1.1rem;
+  display: grid;
+  gap: 0.82rem;
+}
+
+.dashboard-onboarding-primary {
+  min-width: 0;
+}
+
+.dashboard-onboarding-actions-bar {
+  border-top: 1px solid #e5edf7;
+  padding-top: 0.72rem;
+}
+
+.dashboard-quick-create {
+  min-width: 0;
 }
 
 .dashboard-onboarding-head,
@@ -4001,8 +3969,7 @@ input.app-ui-button {
   flex-wrap: wrap;
 }
 
-.dashboard-onboarding-subtitle,
-.dashboard-quick-create-subtitle {
+.dashboard-onboarding-subtitle {
   margin: 0;
   color: #64748b;
   font-size: 0.86rem;
@@ -4152,15 +4119,30 @@ input.app-ui-button {
 }
 
 .dashboard-quick-create-actions {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.6rem;
+  gap: 0.5rem;
 }
 
 .dashboard-quick-create-action {
-  min-height: 38px;
+  min-height: 34px;
+  height: 34px;
+  padding-inline: 0.72rem;
   justify-content: center;
+  font-size: 0.78rem;
+}
+
+.dashboard-quick-create-head h2 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.dashboard-quick-create-subtitle {
+  margin-top: 0.2rem;
+  margin-bottom: 0;
+  color: #64748b;
+  font-size: 0.78rem;
 }
 
 .quote-created-banner {
@@ -4872,6 +4854,44 @@ kbd.app-shortcut-badge {
 .dashboard-task-actions .button_to {
   margin: 0;
 }
+#quote-todo-section .dashboard-action-list {
+  gap: 0.68rem;
+}
+#quote-todo-section .dashboard-action-more {
+  gap: 0.68rem;
+  margin-top: 0;
+}
+#quote-todo-section .dashboard-task-item {
+  gap: 0.72rem;
+  padding: 0.72rem 0.84rem;
+}
+#quote-todo-section .dashboard-task-item > div:first-child {
+  display: grid;
+  gap: 0.14rem;
+}
+#quote-todo-section .dashboard-task-item .dashboard-action-secondary-label {
+  margin-bottom: 0.16rem;
+  max-width: min(100%, 14.5rem);
+}
+#quote-todo-section .dashboard-task-item .dashboard-action-item-meta {
+  margin-top: 0.12rem;
+  font-size: 0.74rem;
+}
+#quote-todo-section .dashboard-task-item p {
+  margin-top: 0.12rem;
+  color: #7b8aa1;
+  font-size: 0.8rem;
+}
+#quote-todo-section .dashboard-task-actions .dashboard-action-link {
+  min-height: 32px;
+  height: 32px;
+  padding: 0 0.82rem;
+  font-size: 0.78rem;
+}
+#today-focus-section .dashboard-action-toggle,
+#quote-todo-section .dashboard-action-toggle {
+  margin-top: 0.45rem;
+}
 .dashboard-task-more[hidden] {
   display: none;
 }
@@ -4919,6 +4939,9 @@ kbd.app-shortcut-badge {
   padding: 0.72rem 0.72rem 0.68rem;
   display: grid;
   gap: 0.34rem;
+}
+.dashboard-funnel-step.is-baseline {
+  gap: 0.18rem;
 }
 .dashboard-funnel-step span {
   color: #64748b;
@@ -9081,6 +9104,95 @@ kbd.app-shortcut-badge {
   color: #64748b;
   font-variant-numeric: tabular-nums;
 }
+.quote-summary-strip--internal {
+  margin: 0.58rem 0 0.9rem;
+  padding: 0.24rem 0.2rem;
+  border-color: #e6edf4;
+  border-radius: 10px;
+  background: #ffffff;
+}
+.quote-summary-strip--internal .quote-summary-chip {
+  padding: 0.34rem 0.66rem;
+  gap: 0.14rem;
+  align-content: start;
+}
+.quote-summary-strip--internal .quote-summary-chip + .quote-summary-chip {
+  border-left: 1px solid #edf2f7;
+}
+.quote-summary-strip--internal .quote-summary-chip span {
+  font-size: 0.68rem;
+  letter-spacing: 0.008em;
+  font-weight: 520;
+  color: #8a97a8;
+}
+.quote-summary-strip--internal .quote-summary-chip:nth-child(1) strong,
+.quote-summary-strip--internal .quote-summary-chip:nth-child(2) strong {
+  width: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 660;
+  color: #0f172a;
+}
+.quote-summary-strip--internal .quote-summary-chip:last-child strong {
+  font-size: 0.79rem;
+  font-weight: 560;
+  color: #334155;
+  font-variant-numeric: tabular-nums;
+}
+.quote-workspace-layer {
+  margin-top: 1rem;
+  padding-top: 0.92rem;
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 0.8rem;
+}
+.quote-workspace-summary {
+  display: grid;
+  gap: 0.58rem;
+}
+.quote-workspace-summary .quote-collab-panel {
+  margin: 0;
+  border-color: #dce6f2;
+  border-radius: 14px;
+  background: #ffffff;
+}
+.quote-workspace-summary .quote-collab-panel > summary {
+  padding: 0.58rem 0.72rem;
+  gap: 0.35rem 0.42rem;
+}
+.quote-workspace-summary .quote-collab-panel[open] > summary {
+  border-bottom: 1px solid #e9eff7;
+}
+.quote-workspace-summary .quote-collab-title {
+  font-size: 0.83rem;
+  letter-spacing: 0.01em;
+}
+.quote-workspace-summary .quote-collab-summary {
+  font-size: 0.73rem;
+  color: #5d7087;
+  border-color: #e4ebf4;
+  background: #f8fafd;
+  padding: 0.14rem 0.4rem;
+}
+.quote-workspace-summary .quote-collab-content {
+  border-top: 0;
+  padding: 0.62rem 0.72rem 0.68rem;
+}
+.quote-workspace-actions {
+  margin-top: 0.08rem;
+}
+.quote-workspace-toolbar {
+  margin-top: 0;
+  border-radius: 14px;
+  border-color: #dce6f2;
+  background: #fcfdff;
+  box-shadow: none;
+}
 .quote-collab-panel {
   margin: 0 0 0.72rem 0;
   border: 1px solid #dbe3ee;
@@ -9686,6 +9798,33 @@ kbd.app-shortcut-badge {
   line-height: var(--q-web-meta-lh);
   font-weight: var(--q-web-meta-w);
 }
+.quote-document-shell .quote-meta-grid {
+  gap: 0;
+  margin-bottom: 0.98rem;
+  border: 1px solid #dbe5f0;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+.quote-document-shell .quote-meta-card {
+  border: 0;
+  border-left: 1px solid #e4edf6;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.86rem 0.92rem;
+}
+.quote-document-shell .quote-meta-card:first-child {
+  border-left: 0;
+}
+.quote-document-shell .quote-meta-card:nth-child(3) {
+  background: #fcfdff;
+}
+.quote-document-shell .quote-meta-card h3 {
+  margin-bottom: 0.42rem;
+}
+.quote-document-shell .quote-meta-card p {
+  margin-bottom: 0.24rem;
+}
 .quote-document-shell .quote-info-list {
   display: grid;
   gap: 0.1rem;
@@ -9823,6 +9962,37 @@ kbd.app-shortcut-badge {
 .quote-document-shell .quote-section-block--scope + .quote-section-block {
   margin-top: 0.92rem;
 }
+.quote-document-shell .quote-section-block--terms .quote-term-list {
+  margin-top: 0.2rem;
+  display: grid;
+  gap: 0.34rem;
+}
+.quote-document-shell .quote-section-block--terms .quote-term-row {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(136px, auto) minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+}
+.quote-document-shell .quote-section-block--terms .quote-term-label {
+  color: #475569;
+  font-weight: 620;
+}
+.quote-document-shell .quote-section-block--terms .quote-term-value {
+  color: #334155;
+}
+.quote-document-shell .quote-watermarked::before {
+  letter-spacing: 0.16em;
+  font-size: clamp(1.9rem, 6.2vw, 4.6rem);
+  transform: rotate(-16deg);
+  opacity: var(--quote-watermark-opacity, 0.06);
+}
+.quote-document-shell .quote-watermark-image {
+  max-width: 52%;
+  max-height: 48%;
+  opacity: var(--quote-watermark-opacity, 0.06);
+  transform: rotate(-12deg);
+}
 .quote-doc-table thead {
   background-color: #1f3650;
 }
@@ -9862,6 +10032,35 @@ kbd.app-shortcut-badge {
 .quote-total-box p.quote-total-saved > strong {
   color: #b91c1c;
 }
+.quote-document-shell .quote-items-table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin: 0.8rem 0 0.88rem;
+}
+.quote-document-shell .quote-items-table td {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+  background: transparent;
+  vertical-align: top;
+  border-top: 0;
+  border-bottom: 1px solid #e7edf6;
+}
+.quote-document-shell .quote-items-table td:first-child,
+.quote-document-shell .quote-items-table td:last-child {
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0;
+}
+.quote-document-shell .quote-items-table tbody tr:hover td {
+  background: transparent;
+}
+.quote-document-shell .quote-total-box {
+  margin-top: 0.3rem;
+  border-color: #dbe5f0;
+  border-radius: 10px;
+  background: #fff;
+}
 .quote-total-grand {
   padding-top: 0.42rem;
   border-top: 1px solid #9fb4c8;
@@ -9895,9 +10094,6 @@ kbd.app-shortcut-badge {
 .quote-section-block--revision-summary .quote-revision-summary-list li {
   color: #66788f;
   line-height: 1.45;
-}
-.quote-public-actions {
-  margin-top: 1rem;
 }
 .quote-back-link {
   color: #475569;
@@ -10181,47 +10377,6 @@ kbd.app-shortcut-badge {
 }
 .quote-toast.is-error {
   background: #991b1b;
-}
-.public-quote-themed .quote-doc-header {
-  border-bottom: 2px solid var(--doc-accent, #1f4e79);
-}
-.public-quote-themed .quote-doc-kicker {
-  color: var(--doc-accent, #1f4e79);
-}
-.public-quote-themed .quote-meta-card {
-  border-left: 3px solid var(--doc-accent, #1f4e79);
-}
-.public-quote-themed .quote-doc-table thead {
-  background-color: var(--doc-accent, #1f4e79);
-}
-.public-quote-themed .quote-total-grand {
-  margin-top: 0.2rem;
-  padding: 0.55rem 0 0;
-  background: transparent;
-  color: #0f172a;
-  border-top: 1px solid #9fb4c8;
-  border-radius: 0;
-}
-.public-quote-themed .quote-public-actions button {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--doc-accent, #1f4e79);
-  border-radius: 8px;
-  background: #fff;
-  color: var(--doc-accent, #1f4e79);
-  font-weight: 600;
-  cursor: pointer;
-}
-.public-quote-themed .quote-public-actions button:hover {
-  background: #f8fafc;
-}
-.public-quote-document .quote-public-actions {
-  margin-top: 14px;
-  display: flex;
-  justify-content: flex-end;
-}
-.public-quote-document .quote-items-table {
-  border-spacing: 0 6px;
 }
 .settings-header-card {
   background: #fff;
@@ -10726,6 +10881,15 @@ kbd.app-shortcut-badge {
     grid-template-columns: 1fr;
   }
 
+  .quote-document-shell .quote-meta-card {
+    border-left: 0;
+    border-top: 1px solid #e4edf6;
+  }
+
+  .quote-document-shell .quote-meta-card:first-child {
+    border-top: 0;
+  }
+
   .quote-summary-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     row-gap: 0.35rem;
@@ -10737,6 +10901,11 @@ kbd.app-shortcut-badge {
 
   .quote-summary-chip:nth-child(odd) {
     border-left: none;
+  }
+
+  .quote-document-shell .quote-section-block--terms .quote-term-row {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
   }
 
   .quote-engagement-details-grid {
@@ -10828,38 +10997,14 @@ kbd.app-shortcut-badge {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .dashboard-decision-column-attention,
-  .dashboard-decision-waiting {
+  .dashboard-decision-column-attention {
     justify-self: start;
     text-align: left;
   }
 
-  .dashboard-decision-waiting p {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
-  }
-
   .dashboard-decision-column-attention {
     width: 100%;
-    padding: 0.85rem 0.95rem;
-  }
-
-  .dashboard-decision-waiting {
-    display: grid;
-    gap: 0.65rem;
-  }
-
-  .dashboard-decision-waiting span {
-    font-size: 0.84rem;
-  }
-
-  .dashboard-decision-waiting strong {
-    font-size: 1.35rem;
-  }
-
-  .dashboard-decision-waiting small {
-    margin-top: 0.1rem;
+    padding: 0.08rem 0 0;
   }
 
   .dashboard-kpi-card {
@@ -11508,27 +11653,6 @@ kbd.app-shortcut-badge {
     overflow-wrap: anywhere;
     word-break: break-all;
     text-align: right;
-  }
-
-  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row {
-    grid-template-columns: 1fr;
-    gap: 0.35rem;
-  }
-
-  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row > strong,
-  .dashboard-mobile-list--recent-quotes .dashboard-mobile-stack {
-    text-align: left;
-  }
-
-  .dashboard-mobile-list--recent-quotes .dashboard-mobile-row > strong,
-  .dashboard-mobile-list--recent-quotes .dashboard-mobile-stack strong {
-    overflow-wrap: anywhere;
-    word-break: break-all;
-  }
-
-  .dashboard-mobile-list--recent-quotes .dashboard-next-step-btn {
-    justify-content: flex-start;
-    white-space: normal;
   }
 
   .dashboard-task-item {
@@ -13858,46 +13982,17 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-composition {
   display: grid;
-  gap: 0.72rem;
+  gap: 0.64rem;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-main {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 0.72rem;
+  gap: 0.68rem;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-main-primary {
   min-width: 0;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0.72rem;
-  align-items: stretch;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail {
-  min-width: 0;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > #deal-radar-section,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > .dashboard-urgent-rail,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail > #action-items-section {
-  display: flex;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > .dashboard-urgent-rail > #action-items-section {
-  flex: 1 1 auto;
-  min-width: 0;
-  width: 100%;
-}
-
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair > #deal-radar-section .dashboard-panel,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail > #action-items-section .dashboard-panel {
-  width: 100%;
-  height: 100%;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module {
@@ -13982,17 +14077,25 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-mod
   line-height: 1.35;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module--radar .dashboard-side-module-item:last-child {
-  margin-bottom: 0;
-}
-
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .dashboard-panel,
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .app-toolbar-surface {
   border-color: #dbe7f2;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent .dashboard-action-summary,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent #deal-radar-section .dashboard-panel {
+body.app-root[data-controller~="shortcuts"] .sales-dashboard {
+  --dashboard-bar-track-height: 7px;
+  --dashboard-bar-track-radius: 999px;
+  --dashboard-bar-track-bg: #f1f5fb;
+  --dashboard-bar-fill-danger: #cc8888;
+  --dashboard-bar-fill-watch: #ca9a5e;
+  --dashboard-bar-fill-neutral: #6f99cb;
+  --dashboard-bar-fill-muted: #9ab1cc;
+  --dashboard-bar-fill-good: #66ad88;
+  --dashboard-bar-fill-win: #66ab87;
+  --dashboard-bar-fill-loss: #cb8a8a;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--urgent #quote-todo-section .dashboard-panel {
   background: #fcfdff;
 }
 
@@ -14006,10 +14109,15 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority
   border-color: #e2e8f0;
 }
 
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-panel {
+  background: #fcfdff;
+}
+
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel,
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-table-surface {
   border-color: #e6edf5;
   box-shadow: none;
+  background: #ffffff;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-section-caption,
@@ -14026,121 +14134,575 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-module--
   color: #23334a;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--health .dashboard-kpi-row {
-  margin-top: -0.04rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-flow {
+  padding: 0.66rem 0.72rem;
+  gap: 0.48rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid {
-  gap: 0.9rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column {
+  padding-right: 0.38rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insights-section {
-  padding-top: 0.1rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column + .dashboard-decision-column {
+  padding-left: 0.58rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group {
-  margin-top: 0.52rem;
-  padding-top: 0.52rem;
-  border-top: 1px dashed #dbe7f4;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-metric strong {
+  font-variant-numeric: tabular-nums;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group > span {
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-metric-note span {
+  color: #72849b;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-progress {
+  margin-top: 0.36rem;
+  width: 100%;
+  height: var(--dashboard-bar-track-height);
+  border-radius: var(--dashboard-bar-track-radius);
+  background: var(--dashboard-bar-track-bg);
+  border: 1px solid #d9e3ef;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-progress-fill {
   display: block;
-  color: #475569;
-  font-size: 0.75rem;
-  font-weight: 670;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
+  height: 100%;
+  border-radius: inherit;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list {
-  margin: 0.3rem 0 0;
-  display: grid;
-  gap: 0.35rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-progress-fill.is-danger {
+  background: var(--dashboard-bar-fill-danger);
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list li {
-  display: grid;
-  gap: 0.08rem;
-  padding: 0.34rem 0.38rem;
-  border: 1px solid #e7eef6;
-  border-radius: 8px;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-progress-fill.is-watch {
+  background: var(--dashboard-bar-fill-watch);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-progress-fill.is-neutral {
+  background: var(--dashboard-bar-fill-neutral);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-decision-column-attention {
+  padding: 0.02rem 0 0;
+  background: transparent;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-inline {
+  margin-top: 0.76rem;
+  padding-top: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-grid {
+  border-top-color: #e9eff6;
+  border-bottom-color: #e9eff6;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step {
+  padding: 0.58rem 0.6rem 0.54rem;
+  gap: 0.28rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step.is-baseline {
+  gap: 0.14rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step strong,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step small {
+  font-variant-numeric: tabular-nums;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-track {
+  width: 100%;
+  height: var(--dashboard-bar-track-height);
+  border-radius: var(--dashboard-bar-track-radius);
+  background: var(--dashboard-bar-track-bg);
+  border: 1px solid #d9e3ef;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill.is-danger {
+  background: var(--dashboard-bar-fill-danger);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill.is-watch {
+  background: var(--dashboard-bar-fill-watch);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill.is-neutral {
+  background: var(--dashboard-bar-fill-neutral);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill.is-muted {
+  background: var(--dashboard-bar-fill-muted);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-funnel-step-fill.is-good {
+  background: var(--dashboard-bar-fill-good);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #today-focus-section .dashboard-action-list,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-action-list {
+  gap: 0.54rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #today-focus-section .dashboard-action-more,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-action-more {
+  gap: 0.54rem;
+  margin-top: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #today-focus-section .dashboard-action-toggle,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-action-toggle {
+  margin-top: 0.32rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #today-focus-section .dashboard-panel {
+  padding: 0.78rem 0.86rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-panel {
+  padding: 0.68rem 0.8rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-action-item {
+  padding: 0.82rem 0.88rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-action-item-primary {
+  padding: 0.84rem 0.88rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-task-item {
+  padding: 0.56rem 0.7rem;
+  gap: 0.58rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard #quote-todo-section .dashboard-task-item p {
+  margin-top: 0.1rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview {
+  border-color: #e1e8f1;
   background: #fcfdff;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.42rem;
-  min-width: 0;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.38rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-top .dashboard-report-link {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-item {
+  border: 1px solid #e6edf5;
+  border-radius: 11px;
+  background: #ffffff;
+  padding: 0.54rem 0.6rem;
+  display: grid;
+  gap: 0.12rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-age {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  padding: 0 0.46rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  background: #f8fafc;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-item span {
   color: #64748b;
-  font-size: 0.71rem;
-  font-weight: 700;
-  white-space: nowrap;
+  font-size: 0.73rem;
+  font-weight: 670;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-list small,
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group > small {
-  color: #64748b;
-  font-size: 0.74rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-item strong {
+  color: #0f172a;
+  font-size: 1.18rem;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-item small {
+  color: #7a8aa0;
+  font-size: 0.72rem;
   line-height: 1.3;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-detail-grid--reports .dashboard-report-panel--portfolio {
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-trend {
+  margin-top: 0.46rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid #ebf1f7;
+  display: grid;
+  gap: 0.3rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-trend-kicker {
+  margin: 0;
+  color: #6f8097;
+  font-size: 0.72rem;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bars {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--dashboard-bar-track-height);
+  border-radius: var(--dashboard-bar-track-radius);
+  overflow: hidden;
+  background: var(--dashboard-bar-track-bg);
+  border: 1px solid #d9e3ef;
+  box-sizing: border-box;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bar {
+  min-height: var(--dashboard-bar-track-height);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bar.is-danger {
+  background: var(--dashboard-bar-fill-danger);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bar.is-watch {
+  background: var(--dashboard-bar-fill-watch);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bar.is-neutral {
+  background: var(--dashboard-bar-fill-neutral);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-bar.is-muted {
+  background: var(--dashboard-bar-fill-muted);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-legend {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.3rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.24rem;
+  min-width: 0;
+  color: #66768b;
+  font-size: 0.72rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-legend li strong {
+  margin-left: auto;
+  color: #334155;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-dot.is-danger {
+  background: var(--dashboard-bar-fill-danger);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-dot.is-watch {
+  background: var(--dashboard-bar-fill-watch);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-dot.is-neutral {
+  background: var(--dashboard-bar-fill-neutral);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-dot.is-muted {
+  background: var(--dashboard-bar-fill-muted);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.84rem;
+  align-items: start;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid > .dashboard-panel,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid > .sales-insight-card {
+  height: 100%;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-card {
+  border-color: #e6edf5;
+  border-radius: 14px;
+  box-shadow: none;
+  background: #ffffff;
+  padding: 0.76rem 0.84rem 0.82rem;
+  gap: 0.56rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-card__title {
+  font-size: 0.93rem;
+  color: #1f2f45;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-card__body {
+  gap: 0.5rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-card--dual {
   grid-column: 1 / -1;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary {
-  display: flex;
-  align-items: baseline;
-  gap: 0.46rem;
-  margin: 0 0 0.62rem;
-  padding: 0.46rem 0.55rem;
-  border: 1px solid #e7eef6;
-  border-radius: 10px;
-  background: #fcfdff;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary span {
-  color: #64748b;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .sales-insight-subsection {
+  min-height: 206px;
+  padding: 0.24rem 0.56rem 0.24rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .sales-insight-subsection + .sales-insight-subsection {
+  border-top: 0;
+  border-left: 1px solid #e8edf4;
+  padding-top: 0.2rem;
+  padding-left: 0.66rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .sales-insight-subsection h4 {
+  margin-bottom: 0.38rem;
+  padding-bottom: 0.22rem;
+  border-bottom: 1px solid #edf2f8;
+  color: #30435a;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.34rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-item {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) minmax(120px, 1.45fr) auto auto;
+  align-items: center;
+  gap: 0.38rem;
+  min-width: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-label {
+  min-width: 0;
+  color: #4b5d75;
   font-size: 0.76rem;
+  line-height: 1.25;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary strong {
-  color: #0f172a;
-  font-size: 0.83rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-bar-wrap {
+  width: 100%;
+  height: var(--dashboard-bar-track-height);
+  border-radius: var(--dashboard-bar-track-radius);
+  background: var(--dashboard-bar-track-bg);
+  border: 1px solid #e3eaf3;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary small {
-  color: #475569;
-  font-size: 0.75rem;
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-bar {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-bar.is-win {
+  background: var(--dashboard-bar-fill-win);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-bar.is-loss {
+  background: var(--dashboard-bar-fill-loss);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-pct,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-count {
+  color: #66788f;
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-pct {
+  min-width: 36px;
+  text-align: right;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-count {
+  min-width: 32px;
+  text-align: right;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .app-empty-note {
+  min-height: 138px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  text-align: center;
+  color: #8a97aa;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-subsection {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-subsection + .sales-insight-subsection {
+  padding-top: 0.4rem;
+  border-top: 1px solid #edf2f7;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table {
+  border-color: #e3ebf4;
+  border-radius: 12px;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table thead {
+  background: #f7faff;
+  border-bottom-color: #e0e8f2;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table th,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table td {
+  padding: 0.56rem 0.68rem;
+  line-height: 1.3;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table th {
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table td {
+  font-size: 0.8rem;
+  color: #334155;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-analysis-table .text-right {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 0.06rem 0 0.26rem;
+  margin-bottom: 0.12rem;
+  border-bottom: 1px solid #ecf1f7;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell {
+  border: 0;
+  border-left: 1px solid #edf2f8;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.2rem 0.5rem 0.18rem;
+  display: grid;
+  gap: 0.06rem;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell span {
+  color: #7a8ca3;
+  font-size: 0.71rem;
+  line-height: 1.2;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell strong {
+  color: #22354c;
+  font-size: 0.93rem;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-cell {
+  display: inline-grid;
+  grid-template-columns: minmax(46px, 1fr) auto;
+  align-items: center;
+  justify-items: end;
+  gap: 0.34rem;
+  width: 100%;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-track {
+  width: 100%;
+  height: var(--dashboard-bar-track-height);
+  border-radius: var(--dashboard-bar-track-radius);
+  background: var(--dashboard-bar-track-bg);
+  border: 1px solid #e3eaf3;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-fill.is-good {
+  background: var(--dashboard-bar-fill-good);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-fill.is-muted {
+  background: var(--dashboard-bar-fill-muted);
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-winrate-cell strong {
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: #33465f;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-top-products-table td:first-child {
+  width: 44%;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-top-products-table .dashboard-cell-ellipsis {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: 2.5em;
+  line-height: 1.25;
+  white-space: normal;
+  word-break: break-word;
+}
+
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .app-section-caption,
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .dashboard-panel-note {
+  color: #72839a;
 }
 
 body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.62rem;
+  display: block;
+  margin-bottom: 0.7rem;
 }
 
-body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-panel {
+body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-shell {
   border-color: #e6edf5;
   background: #fcfdff;
   box-shadow: none;
@@ -14171,54 +14733,87 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
     gap: 0.62rem;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-pair {
-    grid-template-columns: 1fr;
-    gap: 0.62rem;
-  }
-
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-urgent-rail {
-    min-width: 0;
-  }
-
   body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .app-section-caption,
   body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel-note {
     display: none;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 4),
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-list .dashboard-report-row:nth-child(n + 2) {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 4) {
     display: none;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insights-grid > .sales-insight-card:nth-child(n + 2) {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 2) {
     display: none;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid--lists .dashboard-mobile-list .dashboard-mobile-item:nth-child(n + 2) {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-metric-overview-legend {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-strip {
+    grid-template-columns: 1fr;
+    gap: 0;
+    border-bottom: 0;
+    margin-bottom: 0.08rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell {
+    border-left: 0;
+    border-top: 1px solid #edf2f8;
+    padding: 0.3rem 0.02rem 0.24rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-summary-cell:first-child {
+    border-top: 0;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss-dual .sales-insight-dist-item:nth-child(n + 4) {
     display: none;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-detail-grid--reports {
-    display: none;
-  }
-
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-overview-insight,
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-topline small,
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-report-meta span:nth-child(n + 3) {
-    display: none;
-  }
-
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss .sales-insight-dist-item:nth-child(n + 4) {
-    display: none;
-  }
-
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss .sales-insight-dist-count {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .sales-insight-win-loss-dual .sales-insight-dist-count {
     color: #94a3b8;
     font-size: 0.74rem;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel {
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-item {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.34rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-dist-bar-wrap {
+    grid-column: 1 / -1;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-priority-layer--insight .dashboard-panel,
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-card {
     padding: 0.72rem 0.8rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid {
+    grid-template-columns: 1fr;
+    gap: 0.72rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual {
+    grid-template-columns: 1fr;
+    gap: 0.48rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .sales-insight-subsection + .sales-insight-subsection {
+    border-left: 0;
+    border-top: 1px solid #edf2f7;
+    padding-left: 0.56rem;
+    padding-top: 0.46rem;
+  }
+
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .sales-insight-subsection,
+  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-analysis-grid .sales-insight-win-loss-dual .app-empty-note {
+    min-height: 0;
   }
 
   body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-side-module-item {
@@ -14231,18 +14826,6 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
     font-size: 0.73rem;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-compact-summary {
-    margin-bottom: 0.48rem;
-    padding: 0.42rem 0.48rem;
-    flex-wrap: wrap;
-    gap: 0.24rem 0.46rem;
-  }
-
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary {
-    grid-template-columns: 1fr;
-    gap: 0.58rem;
-  }
-
   body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboarding-secondary .dashboard-onboarding-shortcuts {
     display: none;
   }
@@ -14251,10 +14834,6 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
     display: none;
   }
 
-  body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-report-silent-group {
-    margin-top: 0.42rem;
-    padding-top: 0.42rem;
-  }
 }
 
 /* Dashboard personal notes rail (canonical; independent from page-level controller flags). */

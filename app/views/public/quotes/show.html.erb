@@ -1,6 +1,7 @@
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> public-density-<%= @template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+<% web_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.45, 0.07].min %>
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> public-density-<%= @template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= web_watermark_opacity %>;">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
   <% end %>
@@ -24,6 +25,9 @@
       <% end %>
     </div>
     <div class="quote-doc-logo-wrap">
+      <div class="no-print quote-public-utility">
+        <button type="button" class="<%= ui_button_classes(:secondary, "quote-utility-btn") %>" onclick="window.print()">Print</button>
+      </div>
       <% if @template.show_logo && @quote.company.logo.attached? %>
         <%= image_tag @quote.company.logo, class: "quote-doc-logo" %>
       <% end %>
@@ -237,9 +241,6 @@
     </section>
   <% end %>
 
-  <div class="no-print quote-public-actions">
-    <button type="button" onclick="window.print()">Print</button>
-  </div>
   <% if @template.show_saas_branding %>
     <p class="quote-public-footnote"><%= @template.saas_branding_footer_text %></p>
   <% end %>

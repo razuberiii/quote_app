@@ -40,4 +40,66 @@ class QuoteRevisionDiffServiceTest < ActiveSupport::TestCase
     assert_equal BigDecimal("50"), diff[:total_before]
     assert_equal BigDecimal("68"), diff[:total_after]
   end
+
+  test "detects duplicate spec and addon key changes without collapsing rows" do
+    company = companies(:one)
+    customer = customers(:one)
+
+    previous = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-DUP-001",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      issued_on: Date.current
+    )
+    previous.quote_items.build(
+      description: "Duplicate Key Item",
+      quantity: 1,
+      unit_price: 100,
+      specifications: [
+        { key: "test", value: "1" },
+        { key: "test", value: "11" }
+      ],
+      addon_charges: [
+        { name: "fee", amount: "2.00" },
+        { name: "fee", amount: "3.00" }
+      ]
+    )
+    previous.save!
+
+    current = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-DUP-001",
+      revision_number: 2,
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current
+    )
+    current.quote_items.build(
+      description: "Duplicate Key Item",
+      quantity: 1,
+      unit_price: 100,
+      specifications: [
+        { key: "test", value: "2" },
+        { key: "test", value: "11" }
+      ],
+      addon_charges: [
+        { name: "fee", amount: "1.00" },
+        { name: "fee", amount: "3.00" }
+      ]
+    )
+    current.save!
+
+    diff = QuoteRevisionDiffService.new(new_quote: current, old_quote: previous).call
+    modified = diff[:modified_items].first
+
+    assert_equal 1, diff[:modified_items].size
+    assert_equal 1, modified[:spec_changes][:updated].size
+    assert_equal "1", modified[:spec_changes][:updated].first[:before]
+    assert_equal "2", modified[:spec_changes][:updated].first[:after]
+    assert_equal 1, modified[:addon_changes][:updated].size
+    assert_equal BigDecimal("2.0"), modified[:addon_changes][:updated].first[:before]
+    assert_equal BigDecimal("1.0"), modified[:addon_changes][:updated].first[:after]
+  end
 end

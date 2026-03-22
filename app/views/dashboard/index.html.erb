@@ -16,44 +16,26 @@
   </header>
 
   <div class="sales-dashboard-content app-section-stack">
+    <% if @show_onboarding %>
+      <div class="dashboard-onboarding-secondary">
+        <%= render "components/ui/card", class: "dashboard-panel app-surface dashboard-onboarding-shell" do %>
+          <section class="dashboard-onboarding-primary" aria-label="<%= t("dashboard.onboarding.quick_start.title") %>">
+            <%= render "quick_start_checklist" %>
+          </section>
+          <section class="dashboard-onboarding-actions-bar" aria-label="<%= t("dashboard.onboarding.quick_create.title") %>">
+            <%= render "quick_create" %>
+          </section>
+        <% end %>
+      </div>
+    <% end %>
+
     <div class="dashboard-priority-layer dashboard-priority-layer--urgent">
     <div class="dashboard-urgent-composition">
-    <section class="app-toolbar-surface app-toolbar-surface--compact">
-      <div class="app-section-heading">
-        <div>
-          <h2><%= t("dashboard.view.index.operating_snapshot") %></h2>
-          <p class="app-section-caption"><%= t("dashboard.view.index.operating_snapshot_caption") %></p>
-        </div>
-      </div>
-      <div class="dashboard-alert-strip">
-      <% if @risk_snapshot[:at_risk].positive? %>
-        <span class="dashboard-alert-pill is-danger"><strong><%= @risk_snapshot[:at_risk] %></strong> <%= t("customers.logic.engagement_state.at_risk") %></span>
-      <% end %>
-      <% if @follow_up_counts[:today].positive? %>
-        <span class="dashboard-alert-pill is-today"><strong><%= @follow_up_counts[:today] %></strong> <%= t("dashboard.view.index.due_today") %></span>
-      <% end %>
-      <% if @risk_snapshot[:cooling].positive? %>
-        <span class="dashboard-alert-pill is-watch"><strong><%= @risk_snapshot[:cooling] %></strong> <%= t("customers.logic.engagement_state.cooling") %></span>
-      <% end %>
-      <% if @decision_snapshot[:accepted_count].positive? %>
-        <span class="dashboard-alert-pill is-good"><strong><%= @decision_snapshot[:accepted_count] %></strong> <%= t("dashboard.view.index.accepted") %></span>
-      <% end %>
-      <% if @decision_snapshot[:revision_requested_count].positive? %>
-        <span class="dashboard-alert-pill is-watch"><strong><%= @decision_snapshot[:revision_requested_count] %></strong> <%= t("dashboard.view.index.revision_requests") %></span>
-      <% end %>
-      <% if @decision_snapshot[:negotiating_stale_count].positive? %>
-        <span class="dashboard-alert-pill is-danger"><strong><%= @decision_snapshot[:negotiating_stale_count] %></strong> <%= t("dashboard.view.index.negotiating_stale") %></span>
-      <% end %>
-      <% if @risk_snapshot[:at_risk].zero? && @follow_up_counts[:today].zero? && @risk_snapshot[:cooling].zero? && @decision_snapshot[:negotiating_stale_count].zero? %>
-        <span class="dashboard-alert-pill is-good"><%= t("dashboard.view.index.no_immediate_risk") %></span>
-      <% end %>
-      </div>
-    </section>
-
     <div class="dashboard-urgent-main">
     <div class="dashboard-urgent-main-primary" id="today-focus-section">
     <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center dashboard-module--urgent app-surface" do %>
       <h2><%= t("dashboard.view.index.today_focus") %></h2>
+      <p class="app-section-caption"><%= t("dashboard.view.index.today_focus_caption") %></p>
       <% if @primary_action.present? %>
         <div class="dashboard-action-list">
           <div class="dashboard-action-item dashboard-action-item-primary is-<%= @primary_action[:priority] %>">
@@ -103,76 +85,77 @@
     <% end %>
     </div>
 
-    <div class="dashboard-urgent-pair">
-    <div id="deal-radar-section">
-    <%= render "components/ui/card", class: "dashboard-panel dashboard-side-module dashboard-side-module--radar dashboard-module--urgent app-surface" do %>
-      <% urgent_radar_count = @deal_radar_signals.count { |entry| entry[:signal].priority.to_s == "urgent" } %>
-      <% watch_radar_count = @deal_radar_signals.count { |entry| entry[:signal].priority.to_s == "watch" } %>
-      <div class="dashboard-side-module-head">
-        <h2><%= t("dashboard.view.index.deal_radar") %></h2>
-        <div class="dashboard-side-module-signals">
-          <% if urgent_radar_count.positive? %>
-            <span class="dashboard-alert-pill is-danger"><%= urgent_radar_count %></span>
-          <% end %>
-          <% if watch_radar_count.positive? %>
-            <span class="dashboard-alert-pill is-watch"><%= watch_radar_count %></span>
-          <% end %>
-          <% if urgent_radar_count.zero? && watch_radar_count.zero? %>
-            <span class="dashboard-alert-pill is-good">0</span>
-          <% end %>
-        </div>
+    <div id="quote-todo-section">
+    <%= render "components/ui/card", class: "dashboard-panel dashboard-action-center dashboard-module--urgent app-surface" do %>
+      <div class="dashboard-action-summary-head">
+        <h2><%= t("dashboard.view.index.quote_todo") %></h2>
       </div>
-
-      <p class="dashboard-side-module-note"><%= t("dashboard.view.index.deal_radar_summary_hint") %></p>
-      <% if @deal_radar_signals.any? %>
-        <div class="dashboard-side-module-body">
-        <div class="dashboard-side-module-list dashboard-action-list">
-          <% @deal_radar_signals.first(3).each do |entry| %>
-            <div class="dashboard-side-module-item is-<%= entry[:signal].priority %>">
-              <div>
-                <span class="dashboard-action-secondary-label"><%= entry[:signal].label %></span>
-                <strong><%= entry[:quote].customer&.name.presence || t("dashboard.logic.unknown_customer") %></strong>
-                <small class="dashboard-side-module-subline">
-                  <%= entry[:quote].custom_title.presence || entry[:quote].quote_items.ordered.first&.product&.name.presence || entry[:quote].quote_items.ordered.first&.description.presence || entry[:quote].quote_no %>
-                  · <span class="dashboard-quote-id"><%= entry[:quote].quote_no %></span>
-                </small>
-                <small class="dashboard-side-module-subline"><%= entry[:detail] %></small>
+      <p class="app-section-caption"><%= t("dashboard.view.index.quote_todo_caption") %></p>
+      <% if @quote_todo_entries.any? %>
+        <div class="dashboard-action-list">
+            <% @quote_todo_entries.first(1).each do |entry| %>
+              <article class="dashboard-task-item is-<%= entry[:priority] %>">
+                <div>
+                  <span class="dashboard-action-secondary-label"><%= entry[:customer_name] %></span>
+                  <strong><%= entry[:display_name].presence || entry[:quote_no] %></strong>
+                  <small class="dashboard-action-item-meta">
+                    <span class="dashboard-quote-id"><%= entry[:quote_no] %></span>
+                    · <%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %>
+                  </small>
+                  <p><%= entry[:signal] %></p>
+                </div>
+                <div class="dashboard-task-actions">
+                  <% if entry[:next_action][:method].to_s == "post" %>
+                    <%= button_to entry[:next_action][:label],
+                                  entry[:next_action][:path],
+                                  method: :post,
+                                  form: { data: { turbo: false } },
+                                  class: ui_button_classes(:secondary, "dashboard-action-link #{entry[:next_action][:style]}") %>
+                  <% else %>
+                    <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: ui_button_classes(:secondary, "dashboard-action-link #{entry[:next_action][:style]}") %>
+                  <% end %>
+                </div>
+              </article>
+            <% end %>
+            <% if @quote_todo_entries.size > 1 %>
+              <div class="dashboard-action-more" data-action-more data-expand-id="quote-todo-more" hidden>
+                <% @quote_todo_entries.drop(1).each do |entry| %>
+                  <article class="dashboard-task-item is-<%= entry[:priority] %>">
+                    <div>
+                      <span class="dashboard-action-secondary-label"><%= entry[:customer_name] %></span>
+                      <strong><%= entry[:display_name].presence || entry[:quote_no] %></strong>
+                      <small class="dashboard-action-item-meta">
+                        <span class="dashboard-quote-id"><%= entry[:quote_no] %></span>
+                        · <%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %>
+                      </small>
+                      <p><%= entry[:signal] %></p>
+                    </div>
+                    <div class="dashboard-task-actions">
+                      <% if entry[:next_action][:method].to_s == "post" %>
+                        <%= button_to entry[:next_action][:label],
+                                      entry[:next_action][:path],
+                                      method: :post,
+                                      form: { data: { turbo: false } },
+                                      class: ui_button_classes(:secondary, "dashboard-action-link #{entry[:next_action][:style]}") %>
+                      <% else %>
+                        <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: ui_button_classes(:secondary, "dashboard-action-link #{entry[:next_action][:style]}") %>
+                      <% end %>
+                    </div>
+                  </article>
+                <% end %>
               </div>
-              <%= render "components/ui/button", href: quote_path(entry[:quote]), variant: :secondary, class: "dashboard-side-module-cta" do %>
-                <%= t("dashboard.view.index.view_quote") %>
+              <%= render "components/ui/button",
+                         variant: :secondary,
+                         class: "dashboard-action-toggle dashboard-inline-toggle",
+                         attrs: { data: { action_toggle: true, expanded: "false", action_count: @quote_todo_entries.size - 1, expand_id: "quote-todo-more" } } do %>
+                <%= t("dashboard.view.index.show_more", count: @quote_todo_entries.size - 1) %>
               <% end %>
-            </div>
-          <% end %>
-        </div>
-        <p class="dashboard-side-module-meta"><%= t("dashboard.view.index.deal_radar_count", count: @deal_radar_signals.size) %></p>
+            <% end %>
         </div>
       <% else %>
-        <p class="dashboard-side-module-note"><%= t("dashboard.view.index.deal_radar_empty") %></p>
+        <p class="team-members-hint"><%= t("dashboard.view.index.quote_todo_empty") %></p>
       <% end %>
     <% end %>
-    </div>
-    <aside class="dashboard-urgent-rail">
-      <div id="action-items-section">
-      <%= render "components/ui/card", class: "dashboard-panel dashboard-side-module dashboard-side-module--action dashboard-action-summary dashboard-module--urgent app-surface" do %>
-        <div class="dashboard-side-module-head">
-          <h2><%= t("dashboard.view.index.action_overview", count: @action_required_summary[:total]) %></h2>
-          <span class="dashboard-alert-pill <%= @action_required_summary[:has_risk] ? 'is-danger' : 'is-good' %>">
-            <%= @action_required_summary[:total] %>
-          </span>
-        </div>
-        <div class="dashboard-side-module-body">
-          <% if @action_required_summary[:has_risk] %>
-            <% risk_text_parts = [] %>
-            <% risk_text_parts << t("dashboard.view.index.risk_customers", count: @action_required_summary[:risk_customers]) if @action_required_summary[:risk_customers].positive? %>
-            <% risk_text_parts << t("dashboard.view.index.stalled_negotiations", count: @action_required_summary[:decision_alerts]) if @action_required_summary[:decision_alerts].positive? %>
-            <p class="dashboard-side-module-note"><%= risk_text_parts.join(" • ") %></p>
-          <% end %>
-          <p class="dashboard-side-module-meta"><%= t("dashboard.view.index.handle_overdue_first") %></p>
-          <%= render "shared/action_items", mode: :compact_summary, action_items: @system_action_items %>
-        </div>
-      <% end %>
-      </div>
-    </aside>
     </div>
     </div>
     </div>
@@ -183,6 +166,12 @@
           <h2><%= t("dashboard.view.index.sales_signals") %></h2>
           <span class="dashboard-decision-period"><%= @kpi_period == "month" ? t("dashboard.view.index.this_month") : t("dashboard.view.index.this_week") %></span>
         </div>
+        <% outcome_counts = [@decision_snapshot[:accepted_count].to_i, @decision_snapshot[:revision_requested_count].to_i] %>
+        <% pressure_counts = [@decision_snapshot[:reopened_count].to_i, @decision_snapshot[:negotiating_stale_count].to_i] %>
+        <% outcome_total = outcome_counts.sum %>
+        <% pressure_total = pressure_counts.sum %>
+        <% attention_base = outcome_total + pressure_total %>
+        <% attention_ratio = attention_base.positive? ? ((@decision_snapshot[:public_actionable_count].to_f / attention_base) * 100).round : 0 %>
         <div class="dashboard-decision-flow">
           <div class="dashboard-decision-column">
             <h3><%= t("dashboard.view.index.outcome_signals") %></h3>
@@ -195,6 +184,9 @@
                 <span><%= t("dashboard.view.index.revision_requested") %></span>
                 <strong class="<%= 'is-attention' if @decision_snapshot[:revision_requested_count].positive? %>"><%= @decision_snapshot[:revision_requested_count] %></strong>
               </p>
+            </div>
+            <div class="dashboard-decision-column-progress" role="presentation" aria-hidden="true">
+              <span class="dashboard-decision-column-progress-fill is-neutral" style="width: <%= outcome_total.positive? ? [((@decision_snapshot[:accepted_count].to_f / outcome_total) * 100).round, 8].max : 0 %>%"></span>
             </div>
           </div>
           <div class="dashboard-decision-column">
@@ -209,175 +201,69 @@
                 <strong><%= @decision_snapshot[:negotiating_stale_count] %></strong>
               </p>
             </div>
+            <div class="dashboard-decision-column-progress" role="presentation" aria-hidden="true">
+              <span class="dashboard-decision-column-progress-fill is-watch" style="width: <%= pressure_total.positive? ? [((@decision_snapshot[:negotiating_stale_count].to_f / pressure_total) * 100).round, 8].max : 0 %>%"></span>
+            </div>
           </div>
           <div class="dashboard-decision-column dashboard-decision-column-attention">
             <h3><%= t("dashboard.view.index.attention_signal") %></h3>
-            <div class="dashboard-decision-waiting">
-              <p>
+            <div class="dashboard-decision-metrics">
+              <p class="dashboard-decision-metric">
                 <span><%= t("dashboard.view.index.public_actionable") %></span>
-                <strong><%= @decision_snapshot[:public_actionable_count] %></strong>
+                <strong class="<%= 'is-attention' if @decision_snapshot[:public_actionable_count].positive? %>"><%= @decision_snapshot[:public_actionable_count] %></strong>
               </p>
-              <small><%= t("dashboard.view.index.awaiting_client_decision") %></small>
+              <p class="dashboard-decision-metric dashboard-decision-metric-note">
+                <span><%= t("dashboard.view.index.awaiting_client_decision") %></span>
+              </p>
+            </div>
+            <div class="dashboard-decision-column-progress" role="presentation" aria-hidden="true">
+              <span class="dashboard-decision-column-progress-fill is-danger" style="width: <%= [attention_ratio, 8].max %>%"></span>
             </div>
           </div>
         </div>
         <%= render "shared/quote_funnel" %>
       <% end %>
 
-      <div class="dashboard-kpi-row app-stat-grid">
-        <article class="dashboard-kpi-card app-stat-card">
-          <div class="dashboard-kpi-head">
-            <span class="app-stat-label"><%= t("dashboard.view.index.open_deals") %></span>
-          </div>
-          <strong class="app-stat-value"
-                  data-dashboard-enhance-target="count"
-                  data-count-final="<%= @dashboard_stats[:open_deals][:value] %>"><%= @dashboard_stats[:open_deals][:value] %></strong>
-          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
-        </article>
-        <article class="dashboard-kpi-card app-stat-card">
-          <div class="dashboard-kpi-head">
-            <span class="app-stat-label"><%= t("dashboard.view.index.quotes_this_period", period: (@kpi_period == "month" ? t("dashboard.view.index.period_month") : t("dashboard.view.index.period_week"))) %></span>
-          </div>
-          <strong class="app-stat-value"
-                  data-dashboard-enhance-target="count"
-                  data-count-final="<%= @dashboard_stats[:quotes_this_week][:value] %>"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
-          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
-        </article>
-        <article class="dashboard-kpi-card app-stat-card">
-          <div class="dashboard-kpi-head">
-            <span class="app-stat-label"><%= t("dashboard.view.index.pending_followups") %></span>
-          </div>
-          <strong class="app-stat-value"
-                  data-dashboard-enhance-target="count"
-                  data-count-final="<%= @dashboard_stats[:pending_follow_ups][:value] %>"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
-          <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
-        </article>
-      </div>
-
-      <section class="dashboard-health-strip dashboard-health-band">
-        <% @dashboard_health_snapshot.each do |item| %>
-          <article class="dashboard-health-card is-<%= item[:tone] %>">
-            <span class="dashboard-health-label"><%= item[:label] %></span>
-            <strong><%= item[:value] %></strong>
-            <p><%= item[:detail] %></p>
-          </article>
-        <% end %>
-      </section>
-    </div>
-
-    <% if @show_onboarding %>
-      <div class="dashboard-onboarding-secondary">
-        <%= render "quick_create" %>
-        <%= render "quick_start_checklist" %>
-      </div>
-    <% end %>
-
-    <div class="dashboard-priority-layer dashboard-priority-layer--insight">
-
-    <div class="dashboard-detail-grid dashboard-detail-grid--overview">
-      <%= render "components/ui/card", class: "dashboard-panel dashboard-overview-panel dashboard-module--insight app-surface" do %>
+      <%= render "components/ui/card", class: "dashboard-panel dashboard-metric-overview dashboard-module--snapshot app-surface" do %>
         <div class="app-section-heading">
           <div>
-            <h2><%= t("dashboard.view.index.recent_quotes") %></h2>
-            <p class="app-section-caption"><%= t("dashboard.view.index.recent_quotes_caption") %></p>
+            <h2><%= t("dashboard.view.index.metrics_overview") %></h2>
+            <p class="app-section-caption"><%= t("dashboard.view.index.metrics_overview_caption") %></p>
           </div>
         </div>
-        <div class="table-responsive">
-          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-products-table app-table-surface", table_class: "dashboard-recent-table dashboard-products-table app-data-table" do %>
-            <thead>
-              <tr>
-                <th><%= t("dashboard.view.index.quote") %></th>
-                <th><%= t("dashboard.view.index.buyer") %></th>
-                <th><%= t("dashboard.view.index.status") %></th>
-                <th><%= t("dashboard.view.index.engagement") %></th>
-                <th><%= t("dashboard.view.index.next_move") %></th>
-              </tr>
-            </thead>
-            <tbody>
-              <% if @recent_quotes.any? %>
-                <% @recent_quotes.each do |entry| %>
-                  <tr>
-                    <td data-label="<%= t("dashboard.view.index.quote") %>">
-                      <strong class="dashboard-quote-title"><%= link_to(entry[:display_name].presence || entry[:quote_no], quote_path(entry[:quote])) %></strong>
-                      <% if entry[:display_name].present? %>
-                        <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
-                      <% end %>
-                    </td>
-                    <td data-label="<%= t("dashboard.view.index.buyer") %>"><span class="dashboard-cell-ellipsis"><%= entry[:customer_name] %></span></td>
-                    <td data-label="<%= t("dashboard.view.index.status") %>">
-                      <%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %>
-                    </td>
-                    <td data-label="<%= t("dashboard.view.index.engagement") %>">
-                      <span class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></span>
-                    </td>
-                    <td data-label="<%= t("dashboard.view.index.next_move") %>">
-                      <% if entry[:next_action][:path].present? %>
-                        <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: ui_button_classes(:secondary, "dashboard-next-step-btn #{entry[:next_action][:style]}") %>
-                      <% else %>
-                        <span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              <% else %>
-                <tr>
-                  <td data-label="<%= t("dashboard.view.index.recent_quotes") %>" colspan="5" class="customers-empty-row">
-                    <%= ui_empty_state(
-                          title: t("dashboard.view.index.no_quotes_yet"),
-                          body: t("dashboard.view.index.no_quotes_yet_body"),
-                          action_label: t("dashboard.view.index.new_quote"),
-                          action_path: customers_path,
-                          icon: :quotes
-                        ) %>
-                  </td>
-                </tr>
-              <% end %>
-            </tbody>
+        <div class="dashboard-metric-overview-grid">
+          <% @dashboard_core_metrics.each do |metric| %>
+            <article class="dashboard-metric-overview-item">
+              <span><%= metric[:label] %></span>
+              <strong data-dashboard-enhance-target="count" data-count-final="<%= metric[:value] %>"><%= metric[:value] %></strong>
+              <small><%= metric[:detail] %></small>
+            </article>
           <% end %>
         </div>
-        <div class="dashboard-mobile-list dashboard-mobile-list--recent-quotes" aria-hidden="true">
-          <% if @recent_quotes.any? %>
-            <% @recent_quotes.each do |entry| %>
-              <article class="dashboard-mobile-item" data-clickable-href="<%= quote_path(entry[:quote]) %>" tabindex="0" aria-label="<%= t("dashboard.view.index.open_quote", no: entry[:quote_no]) %>">
-                <div class="dashboard-mobile-row">
-                  <span><%= t("dashboard.view.index.quote") %></span>
-                  <div class="dashboard-mobile-stack">
-                    <strong><%= entry[:display_name].presence || entry[:quote_no] %></strong>
-                    <% if entry[:display_name].present? %>
-                      <small class="dashboard-quote-id"><%= entry[:quote_no] %></small>
-                    <% end %>
-                  </div>
-                </div>
-                <div class="dashboard-mobile-row">
-                  <span><%= t("dashboard.view.index.buyer") %></span>
-                  <strong><%= entry[:customer_name] %></strong>
-                </div>
-                <div class="dashboard-mobile-row">
-                  <span><%= t("dashboard.view.index.status") %></span>
-                  <div class="dashboard-mobile-stack"><%= quote_status_badge(entry[:status], label: entry[:status].capitalize) %></div>
-                </div>
-                <div class="dashboard-mobile-row">
-                  <span><%= t("dashboard.view.index.engagement") %></span>
-                  <strong class="dashboard-engagement-pill <%= entry[:view_signal] == "—" ? "is-subtle" : "" %>"><%= entry[:view_signal] %></strong>
-                </div>
-                <div class="dashboard-mobile-row">
-                  <span><%= t("dashboard.view.index.next_move") %></span>
-                  <% if entry[:next_action][:path].present? %>
-                    <%= link_to entry[:next_action][:label], entry[:next_action][:path], class: ui_button_classes(:secondary, "dashboard-next-step-btn #{entry[:next_action][:style]}") %>
-                  <% else %>
-                    <span class="dashboard-next-step-btn is-neutral is-static"><%= entry[:next_action][:label] %></span>
-                  <% end %>
-                </div>
-              </article>
+        <div class="dashboard-metric-overview-trend">
+          <p class="dashboard-metric-overview-trend-kicker"><%= t("dashboard.view.index.followup_mix_caption") %></p>
+          <div class="dashboard-metric-overview-bars" role="img" aria-label="<%= t("dashboard.view.index.followup_mix_caption") %>">
+            <% @dashboard_activity_mix.each do |segment| %>
+              <span class="dashboard-metric-overview-bar is-<%= segment[:tone] %>" style="width: <%= [segment[:percent], 4].max %>%"></span>
             <% end %>
-          <% end %>
+          </div>
+          <ul class="dashboard-metric-overview-legend">
+            <% @dashboard_activity_mix.each do |segment| %>
+              <li>
+                <span class="dashboard-metric-overview-dot is-<%= segment[:tone] %>"></span>
+                <span><%= segment[:label] %></span>
+                <strong><%= segment[:count] %></strong>
+              </li>
+            <% end %>
+          </ul>
         </div>
       <% end %>
     </div>
 
-    <%= render "shared/performance_reports" %>
+    <div class="dashboard-priority-layer dashboard-priority-layer--insight">
 
-    <div class="dashboard-detail-grid dashboard-detail-grid--lists">
+    <div class="dashboard-analysis-grid">
+      <%= render "dashboard/sales_insights" %>
       <%= render "components/ui/card", class: "dashboard-panel dashboard-panel--data dashboard-module--insight app-surface" do %>
         <div class="app-section-heading">
           <div>
@@ -386,7 +272,7 @@
           </div>
         </div>
         <div class="table-responsive">
-          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table app-data-table" do %>
+          <%= render "components/ui/table", class: "dashboard-recent-table dashboard-summary-table dashboard-analysis-table dashboard-top-products-table app-table-surface", table_class: "dashboard-recent-table dashboard-summary-table dashboard-analysis-table dashboard-top-products-table app-data-table" do %>
             <thead>
               <tr>
                 <th><%= t("dashboard.view.index.product") %></th>
@@ -455,8 +341,6 @@
         </div>
       <% end %>
     </div>
-
-    <%= render "dashboard/sales_insights" %>
     </div>
   </div>
 

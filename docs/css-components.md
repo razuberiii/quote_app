@@ -80,6 +80,8 @@ With feature-level adapter class:
   - `.quote-inline-flag*` is a lightweight text annotation (no pill, no border, no separator glyph)
 - `.quote-revision-*` (internal revision comparison panel and detail layout)
 - `.quote-summary-*`, `.quote-collab-*` (internal webview default-focus + collapsible collaboration blocks)
+  - `.quote-summary-strip--internal` should read as a lightweight internal meta row (document-to-workflow bridge), not as dashboard-like KPI widgets.
+- `.quote-workspace-*` (internal quote webview layer boundary: document body vs. internal workflow summary/actions/history)
 - `.template-form-subgroup*` (template form grouping helper for long-form clarity)
 - `.template-stage-*`, `.template-level-marker*`, `.template-editor-section--*` (template-new information-tier hierarchy adapters)
 
@@ -91,9 +93,18 @@ Quote families are local to quote workflows.
 - `.dashboard-module--urgent`
 - `.dashboard-module--snapshot`
 - `.dashboard-module--insight`
-- `.dashboard-urgent-composition`, `.dashboard-urgent-main`, `.dashboard-urgent-rail` (composed urgent group layout)
+- `.dashboard-urgent-composition`, `.dashboard-urgent-main` (composed urgent group layout)
+- `.dashboard-decision-*` inside sales signals should keep a unified summary-column syntax; avoid per-column inner widget blocks (including attention signal).
 - `.dashboard-side-module*` (stable compact-summary system for variable-density urgent side rail content)
 - `.dashboard-urgent-main-primary` (left primary stack in urgent composition to avoid blank compensation area)
+- `.dashboard-kpi-matrix` (quiet 3x2 metric matrix in analysis layer)
+- `.dashboard-metric-overview*` (single-panel quiet metrics system: 4 core metrics + lightweight mix trend)
+- `.dashboard-analysis-table*`, `.dashboard-top-products-table*` (unified insight-table language for revision depth + top quoted products; shared header/row density and numeric alignment)
+- shared bar tokens under dashboard scope (`--dashboard-bar-*`) unify metric mix bars, win/loss distribution bars, and funnel micro-progress tracks
+- `.dashboard-analysis-grid` (desktop-first 2x2 deep-analysis layout; collapses to single-column on small screens)
+- `.sales-insight-card--dual`, `.sales-insight-win-loss-dual` (paired win/loss distribution panel with fixed-height balanced halves)
+- `.sales-insight-summary-strip*`, `.sales-insight-winrate-*` (light revision-depth summary row + mini win-rate bar in analysis table)
+  - `sales-insight-summary-strip*` should stay as slot rows (light separators), not inner mini-card blocks.
 - `.dashboard-report-compact-summary` (folded owner-workload signal inside portfolio report card)
 - `.dashboard-overview-snapshot` (balanced compact composition for right-side overview signals)
 - `.dashboard-report-silent-group*` (silent-customer insight merged into customer portfolio grouping)

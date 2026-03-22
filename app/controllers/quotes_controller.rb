@@ -241,11 +241,20 @@ class QuotesController < ApplicationController
       redirect_to quote_path(@quote), alert: t("quotes.flash.new_revision_not_available") and return
     end
 
-    @customer = @quote.customer
-    @quote = @quote.build_revision
+    source_quote = @quote
+    @customer = source_quote.customer
+    revision = source_quote.build_revision
+
+    if revision.save
+      redirect_to edit_quote_path(revision), notice: t("quotes.flash.revision_draft_created", quote_no: revision.quote_no)
+      return
+    end
+
+    @quote = revision
+    @source_quote = source_quote
     ensure_quote_item_row
-    flash.now[:notice] = t("quotes.flash.revision_draft_created", quote_no: @quote.quote_no)
-    render :new, formats: :html
+    flash.now[:alert] = revision.errors.full_messages.to_sentence if revision.errors.any?
+    render :new, formats: :html, status: :unprocessable_entity
   rescue ActiveModel::UnknownAttributeError => e
     Rails.logger.error("Quote revision failed: #{e.class} #{e.message}")
     redirect_to quote_path(@quote), alert: t("quotes.flash.revision_schema_mismatch")

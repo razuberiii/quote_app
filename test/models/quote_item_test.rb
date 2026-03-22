@@ -55,6 +55,36 @@ class QuoteItemTest < ActiveSupport::TestCase
     assert_equal [ { "name" => "Warranty", "amount" => "15.0" } ], item.addon_snapshot
   end
 
+  test "keeps user-cleared specifications and add-ons on existing item update" do
+    product = products(:one)
+    spec_preset = product.company.spec_presets.create!(name: "Default Spec Keep", entries_text: "Voltage: 220V")
+    addon_preset = product.company.addon_presets.create!(name: "Default Add-on Keep", entries_text: "Warranty: 15")
+    product.update!(
+      spec_preset_ids: [ spec_preset.id ],
+      addon_preset_ids: [ addon_preset.id ],
+      default_spec_preset: spec_preset,
+      default_addon_preset: addon_preset
+    )
+
+    item = QuoteItem.create!(
+      quote: quotes(:one),
+      product: product,
+      description: product.name,
+      unit_price: 100,
+      quantity: 1
+    )
+    assert item.specification_pairs.any?
+    assert item.addon_charge_entries.any?
+
+    item.specifications_text = ""
+    item.addon_charges_text = ""
+    item.save!
+    item.reload
+
+    assert_equal [], item.specification_pairs
+    assert_equal [], item.addon_charge_entries
+  end
+
   test "prevents snapshot edits after quote is sent" do
     item = quote_items(:one)
     item.quote.update!(status: "sent", sent_at: 3.days.ago)

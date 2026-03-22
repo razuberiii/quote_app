@@ -186,9 +186,11 @@
       }
 
       .pdf-render .quote-doc-header {
-        border-bottom: 1px solid #edf2f7 !important;
-        padding-bottom: 0.85rem !important;
-        margin-bottom: 1rem !important;
+        border-bottom: 1px solid #dce4ec !important;
+        padding-bottom: 0.65rem !important;
+        margin-bottom: 0.75rem !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
       }
 
       .pdf-render .pdf-head-table {
@@ -203,15 +205,15 @@
 
       .pdf-render .pdf-head-left {
         width: 60% !important;
-        padding-right: 0.12in !important;
+        padding-right: 0.16in !important;
         text-align: left !important;
       }
 
       .pdf-render .pdf-head-right {
         width: 40% !important;
-        text-align: right !important;
-        font-size: 11px !important;
-        color: #222 !important;
+        text-align: left !important;
+        font-size: 10.8px !important;
+        color: #1f2937 !important;
       }
 
       .pdf-render .pdf-head-left h1,
@@ -220,25 +222,105 @@
         text-align: left !important;
       }
 
-      .pdf-render .pdf-head-right .quote-doc-kicker,
-      .pdf-render .pdf-head-right .pdf-doc-number,
-      .pdf-render .pdf-head-right p {
-        text-align: right !important;
+      .pdf-render .pdf-doc-meta-block {
+        margin-left: auto !important;
+        width: 100% !important;
+        max-width: 3.2in !important;
       }
 
-      .pdf-render .pdf-head-right p {
-        margin: 0 0 0.015in 0 !important;
+      .pdf-render .pdf-doc-meta-grid {
+        display: table !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--primary {
+        margin-top: 0.02in !important;
+        padding-top: 0.04in !important;
+        border-top: 1px solid #dbe4ee !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--secondary {
+        margin-top: 0.03in !important;
+        padding-top: 0.03in !important;
+        border-top: 1px solid #e5ebf2 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row {
+        display: table-row !important;
         white-space: normal !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row span,
+      .pdf-render .pdf-doc-meta-row strong {
+        display: table-cell !important;
+        padding: 0.01in 0 !important;
+        vertical-align: top !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
       }
 
-      .pdf-render .quote-doc-kicker {
-        letter-spacing: 0.08em !important;
-        font-weight: 700 !important;
-        font-size: 0.75rem !important;
-        margin: 0 !important;
+      .pdf-render .pdf-doc-meta-row span {
+        width: 42% !important;
+        color: #667284 !important;
+        font-size: 10.2px !important;
+        font-weight: 500 !important;
+        padding-right: 0.08in !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row strong {
+        width: 58% !important;
+        color: #1e293b !important;
         text-align: right !important;
+        font-size: 10.8px !important;
+        font-weight: 650 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--primary .pdf-doc-meta-row span {
+        color: #5e6d80 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--primary .pdf-doc-meta-row strong {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #15283d !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--secondary .pdf-doc-meta-row span {
+        font-size: 9.9px !important;
+        color: #768499 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-grid--secondary .pdf-doc-meta-row strong {
+        font-size: 10.4px !important;
+        font-weight: 620 !important;
+        color: #36485f !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row.is-valid-until strong {
+        font-weight: 760 !important;
+        color: #0f1f33 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row.is-wide span,
+      .pdf-render .pdf-doc-meta-row.is-wide strong {
+        display: block !important;
+        width: 100% !important;
+        text-align: left !important;
+        padding: 0.01in 0 !important;
+      }
+
+      .pdf-render .pdf-doc-meta-row.is-wide strong {
+        font-weight: 600 !important;
+        color: #334155 !important;
+      }
+
+      .pdf-render .quote-doc-kicker {
+        letter-spacing: 0.075em !important;
+        font-weight: 700 !important;
+        font-size: 0.73rem !important;
+        margin: 0 !important;
+        text-align: left !important;
         margin-bottom: 0.25rem !important;
       }
 
@@ -254,29 +336,39 @@
       }
 
       .pdf-render .pdf-doc-company-lines {
-        margin-top: 0.02in !important;
+        margin-top: 0.015in !important;
       }
 
       .pdf-render .pdf-doc-company-lines p {
-        margin: 0 0 0.015in 0 !important;
-        color: #888 !important;
-        font-size: 11px !important;
+        margin: 0 0 0.01in 0 !important;
+        color: #6b7280 !important;
+        font-size: 10.3px !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
       }
 
       .pdf-render .pdf-doc-number {
-        font-size: 13px !important;
-        margin-bottom: 0.02in !important;
+        font-size: 11.8px !important;
+        margin-bottom: 0.015in !important;
+        text-align: left !important;
+        color: #5c6a7e !important;
       }
 
       .pdf-render .pdf-doc-number.is-doc-number strong {
-        font-size: 13.5px !important;
-        font-weight: 800 !important;
+        font-size: 11.1px !important;
+        font-weight: 680 !important;
+        color: #607086 !important;
+      }
+
+      .pdf-render .pdf-doc-number-value {
+        font-size: 14.2px !important;
+        font-weight: 780 !important;
+        letter-spacing: 0.01em !important;
+        color: #13263a !important;
       }
 
       .pdf-render .pdf-logo-band {
-        margin-bottom: 0.08in !important;
+        margin-bottom: 0.05in !important;
       }
 
       .pdf-render .pdf-logo-left { text-align: left !important; }
@@ -285,29 +377,34 @@
 
       .pdf-render .quote-doc-logo {
         width: auto !important;
-        max-height: 80px !important;
+        max-height: 52px !important;
       }
 
       .pdf-render .quote-meta-grid {
-        display: block !important;
-        margin-bottom: 0.21in !important;
-        padding-bottom: 0.1in !important;
-        padding-top: 0.1in !important;
-        border-top: 1px solid #ddd !important;
-        border-bottom: 1px solid #ddd !important;
+        margin-bottom: 0.17in !important;
+        padding: 0.08in 0 !important;
+        border-top: 1px solid #dce4ec !important;
+        border-bottom: 1px solid #dce4ec !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+      }
+
+      .pdf-render .pdf-party-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
       }
 
       .pdf-render .pdf-party-col {
-        float: left !important;
-        width: 48.5% !important;
+        width: 50% !important;
+        vertical-align: top !important;
       }
 
-      .pdf-render .pdf-party-col + .pdf-party-col {
-        margin-left: 3% !important;
+      .pdf-render .pdf-party-table td:first-child {
+        padding-right: 0.11in !important;
       }
 
-      .pdf-render .pdf-clear {
-        clear: both !important;
+      .pdf-render .pdf-party-table td:last-child {
+        padding-left: 0.11in !important;
       }
 
       .pdf-render .quote-meta-card {
@@ -319,27 +416,27 @@
       }
 
       .pdf-render .quote-meta-card h3 {
-        margin: 0 0 0.05in 0 !important;
-        font-size: 11.5px !important;
+        margin: 0 0 0.03in 0 !important;
+        font-size: 11px !important;
         letter-spacing: 0.03em !important;
         text-transform: uppercase !important;
-        color: #222 !important;
+        color: #334155 !important;
       }
 
       .pdf-render .quote-meta-card p {
-        margin: 0 0 0.02in 0 !important;
-        font-size: var(--q-pdf-meta-size) !important;
-        line-height: var(--q-pdf-meta-lh) !important;
+        margin: 0 0 0.012in 0 !important;
+        font-size: 10.3px !important;
+        line-height: 1.36 !important;
         font-weight: var(--q-pdf-meta-w) !important;
-        color: #888 !important;
+        color: #64748b !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
       }
 
       .pdf-render .quote-meta-card .pdf-party-name {
-        font-size: 12.5px !important;
-        margin-bottom: 0.03in !important;
-        color: #222 !important;
+        font-size: 12.2px !important;
+        margin-bottom: 0.018in !important;
+        color: #1f2937 !important;
       }
 
       .pdf-render .quote-doc-table {
@@ -348,21 +445,23 @@
         border-spacing: 0 !important;
         table-layout: fixed !important;
         border: none !important;
-        margin-bottom: 0.25in !important;
+        margin-bottom: 0.18in !important;
       }
 
       .pdf-render .quote-doc-table thead {
-        background: var(--doc-accent, #1f4e79) !important;
+        background: #f3f6fa !important;
       }
 
       .pdf-render .quote-doc-table thead th {
         font-size: var(--q-pdf-table-head-size) !important;
         line-height: var(--q-pdf-table-head-lh) !important;
         font-weight: var(--q-pdf-table-head-w) !important;
-        color: var(--doc-on-accent, #ffffff) !important;
-        border-bottom: 1px solid #ddd !important;
+        color: #334155 !important;
+        border-top: 1px solid #d7e1ec !important;
+        border-bottom: 1px solid #d7e1ec !important;
         padding: 0.064in 0.07in !important;
         text-align: left !important;
+        letter-spacing: 0.03em !important;
       }
 
       .pdf-render .quote-doc-table.has-images th:nth-child(1) { width: 6.5% !important; }
@@ -379,8 +478,8 @@
       .pdf-render .quote-doc-table.no-images th:nth-child(5) { width: 17% !important; }
 
       .pdf-render .quote-doc-table tbody td {
-        border-bottom: 1px solid #ddd !important;
-        padding: 0.07in 0.07in !important;
+        border-bottom: 1px solid #e3eaf1 !important;
+        padding: 0.062in 0.07in !important;
         font-size: var(--q-pdf-table-body-size) !important;
         line-height: var(--q-pdf-table-body-lh) !important;
         font-weight: var(--q-pdf-table-body-w) !important;
@@ -388,6 +487,18 @@
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
         color: #222 !important;
+      }
+
+      .pdf-render .quote-doc-table tbody td.is-right,
+      .pdf-render .quote-doc-table tbody td.is-money {
+        padding-top: 0.058in !important;
+        font-size: 11.6px !important;
+        line-height: 1.34 !important;
+      }
+
+      .pdf-render .quote-doc-table tbody td.is-left:first-child,
+      .pdf-render .quote-doc-table.has-images tbody td:nth-child(2) {
+        padding-top: 0.058in !important;
       }
 
       .pdf-render .quote-doc-table tr.pdf-filler-row td {
@@ -401,26 +512,30 @@
       }
 
       .pdf-render .quote-item-desc-main {
-        font-weight: 600 !important;
-        color: #222 !important;
+        display: block !important;
+        font-weight: 680 !important;
+        color: #1f2937 !important;
         overflow-wrap: anywhere !important;
+        word-wrap: break-word !important;
         word-break: break-word !important;
+        -webkit-hyphens: auto !important;
+        hyphens: auto !important;
       }
 
       .pdf-render .quote-item-desc-meta {
-        margin-top: 0.02in !important;
+        margin-top: 0.012in !important;
       }
 
       .pdf-render .quote-item-desc-group {
         display: block !important;
-        margin-top: 0.01in !important;
+        margin-top: 0.005in !important;
       }
 
       .pdf-render .quote-item-desc-group-label {
         display: block !important;
-        font-size: var(--q-pdf-item-detail-size) !important;
-        line-height: var(--q-pdf-item-detail-lh) !important;
-        font-weight: 600 !important;
+        font-size: 9.4px !important;
+        line-height: 1.25 !important;
+        font-weight: 640 !important;
         color: #4b5563 !important;
         overflow-wrap: anywhere !important;
         word-break: break-word !important;
@@ -428,12 +543,15 @@
 
       .pdf-render .quote-item-desc-sub {
         display: block !important;
-        font-size: var(--q-pdf-item-detail-size) !important;
+        font-size: 9.2px !important;
         color: #6b7280 !important;
-        line-height: var(--q-pdf-item-detail-lh) !important;
+        line-height: 1.2 !important;
         font-weight: var(--q-pdf-item-detail-w) !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
+        margin-top: 0.003in !important;
+        padding-left: 0.045in !important;
+        text-indent: -0.045in !important;
+        overflow-wrap: break-word !important;
+        word-break: normal !important;
       }
 
       .pdf-render .quote-item-desc-bullet {
@@ -441,7 +559,8 @@
       }
 
       .pdf-render .quote-item-desc-sub.is-addon {
-        padding-left: 0.03in !important;
+        padding-left: 0.06in !important;
+        text-indent: -0.045in !important;
         color: #7b8794 !important;
       }
       .pdf-render .quote-inline-old {
@@ -533,21 +652,26 @@
       }
 
       .pdf-render .quote-item-image {
+        display: block !important;
         width: auto !important;
         max-width: 64px !important;
         max-height: 64px !important;
+        margin-top: 0.005in !important;
       }
 
       .pdf-render .quote-total-box {
-        margin-top: 0.2in !important;
+        margin-top: 0.15in !important;
         float: right !important;
         display: block !important;
         width: 320px !important;
         max-width: 320px !important;
         background: #ffffff !important;
-        border: 1px solid #d4dde7 !important;
+        border-top: 1px solid #cfd9e4 !important;
+        border-bottom: 1px solid #dbe4ee !important;
+        border-left: 0 !important;
+        border-right: 0 !important;
         border-radius: 0 !important;
-        padding: 0.12in 0.14in !important;
+        padding: 0.09in 0 !important;
         page-break-before: avoid !important;
         break-before: avoid-page !important;
         break-inside: avoid-page !important;
@@ -558,7 +682,7 @@
         width: 320px !important;
         max-width: 320px !important;
         margin-left: auto !important;
-        margin-top: 0.08in !important;
+        margin-top: 0.05in !important;
         page-break-inside: avoid !important;
         break-inside: avoid-page !important;
       }
@@ -572,7 +696,7 @@
 
       .pdf-render .quote-total-box p {
         display: block !important;
-        margin: 0 0 0.02in 0 !important;
+        margin: 0 0 0.015in 0 !important;
         font-size: var(--q-pdf-total-secondary-size) !important;
         line-height: var(--q-pdf-total-secondary-lh) !important;
         font-weight: var(--q-pdf-total-secondary-w) !important;
@@ -580,7 +704,7 @@
 
       .pdf-render .quote-total-box p > span {
         float: left !important;
-        color: #4b5563 !important;
+        color: #5b6575 !important;
       }
 
       .pdf-render .quote-total-box p.quote-total-grand > span {
@@ -592,6 +716,7 @@
         text-align: right !important;
         min-width: 1.3in !important;
         font-variant-numeric: tabular-nums !important;
+        color: #1f2937 !important;
       }
       .pdf-render .quote-total-box p.quote-total-discount > strong,
       .pdf-render .quote-total-box p.quote-total-saved > strong {
@@ -614,8 +739,8 @@
       }
 
       .pdf-render .quote-total-grand {
-        margin-top: 0.2rem !important;
-        border-top: 1px solid #b9c6d5 !important;
+        margin-top: 0.14rem !important;
+        border-top: 1px solid #aebed1 !important;
         padding: 0.07in 0 0 !important;
         page-break-inside: avoid !important;
         break-inside: avoid !important;
@@ -623,17 +748,17 @@
 
       .pdf-render .quote-total-grand span {
         color: #0f172a !important;
-        font-size: var(--q-pdf-total-primary-label-size) !important;
+        font-size: 11.8px !important;
         line-height: var(--q-pdf-total-primary-label-lh) !important;
-        font-weight: var(--q-pdf-total-primary-label-w) !important;
+        font-weight: 640 !important;
         letter-spacing: 0.01em !important;
       }
 
       .pdf-render .quote-total-grand strong {
-        color: #1d3552 !important;
-        font-size: var(--q-pdf-total-primary-size) !important;
+        color: #10243c !important;
+        font-size: 1.22rem !important;
         line-height: var(--q-pdf-total-primary-lh) !important;
-        font-weight: var(--q-pdf-total-primary-w) !important;
+        font-weight: 760 !important;
       }
       .pdf-render .quote-total-grand .quote-diff-old {
         font-size: 8.2px !important;
@@ -641,9 +766,9 @@
       }
 
       .pdf-render .quote-engagement-note {
-        margin: 0.06in 0 0 0 !important;
-        padding-top: 0.04in !important;
-        border-top: 1px solid #d9e1ea !important;
+        margin: 0.045in 0 0 0 !important;
+        padding-top: 0.03in !important;
+        border-top: 1px solid #dfe6ef !important;
         color: #5b6472 !important;
         font-size: var(--q-pdf-closing-size) !important;
         line-height: var(--q-pdf-closing-lh) !important;
@@ -668,7 +793,7 @@
       }
 
       .pdf-render .pdf-summary-stack + .quote-section-block {
-        margin-top: 0.12in !important;
+        margin-top: 0.1in !important;
       }
 
       .pdf-render .pdf-content-sparse .pdf-summary-stack {
@@ -676,10 +801,10 @@
       }
 
       .pdf-render .quote-section-block {
-        margin-top: 0.16in !important;
+        margin-top: 0.13in !important;
         clear: both !important;
-        border-top: 1px solid #d4d4d4 !important;
-        padding-top: 0.07in !important;
+        border-top: 1px solid #dce4ec !important;
+        padding-top: 0.055in !important;
         page-break-inside: auto !important;
         break-inside: auto !important;
         text-align: left !important;
@@ -695,21 +820,21 @@
       }
 
       .pdf-render .quote-section-block h3 {
-        margin: 0 0 0.025in 0 !important;
-        font-size: var(--q-pdf-section-title-size) !important;
+        margin: 0 0 0.02in 0 !important;
+        font-size: 11px !important;
         line-height: var(--q-pdf-section-title-lh) !important;
-        letter-spacing: 0.03em !important;
-        font-weight: var(--q-pdf-section-title-w) !important;
+        letter-spacing: 0.035em !important;
+        font-weight: 680 !important;
         text-transform: uppercase !important;
-        color: #222 !important;
+        color: #334155 !important;
         page-break-after: avoid !important;
         break-after: avoid-page !important;
       }
 
       .pdf-render .quote-section-block p,
       .pdf-render .quote-section-block div {
-        margin: 0.005in 0 !important;
-        font-size: var(--q-pdf-notes-size) !important;
+        margin: 0.003in 0 !important;
+        font-size: 10.3px !important;
         line-height: var(--q-pdf-notes-lh) !important;
         font-weight: var(--q-pdf-notes-w) !important;
         overflow-wrap: anywhere !important;
@@ -717,8 +842,8 @@
       }
 
       .pdf-render .quote-sales-signature-image {
-        max-width: 220px !important;
-        max-height: 80px !important;
+        max-width: 200px !important;
+        max-height: 74px !important;
         object-fit: contain !important;
       }
 
@@ -736,6 +861,33 @@
       .pdf-render .quote-signature-block {
         page-break-inside: avoid !important;
         break-inside: avoid-page !important;
+      }
+
+      .pdf-render .quote-ending-stack {
+        margin-top: 0.16in !important;
+        border-top: 1px solid #d9e2ec !important;
+        padding-top: 0.075in !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid-page !important;
+      }
+
+      .pdf-render .quote-ending-stack .quote-section-block--ending {
+        border-top: 0 !important;
+        margin-top: 0.1in !important;
+        padding-top: 0 !important;
+      }
+
+      .pdf-render .quote-ending-stack .quote-section-block--ending:first-child {
+        margin-top: 0 !important;
+      }
+
+      .pdf-render .quote-ending-stack .quote-section-block--ending h3 {
+        margin-bottom: 0.028in !important;
+        color: #2f4156 !important;
+      }
+
+      .pdf-render .quote-section-block + .quote-ending-stack {
+        margin-top: 0.15in !important;
       }
 
       .pdf-render .pdf-density-compact .quote-doc-table thead th,

@@ -4,7 +4,7 @@
     <span><%= t("dashboard.view.quote_funnel.caption") %></span>
   </div>
   <div class="dashboard-funnel-grid">
-    <article class="dashboard-funnel-step">
+    <article class="dashboard-funnel-step is-baseline">
       <span><%= t("dashboard.view.quote_funnel.sent") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_sent] %></strong>
@@ -16,12 +16,18 @@
         <strong><%= @quote_funnel[:quotes_viewed] %></strong>
         <small><%= @quote_funnel[:view_rate] %>%</small>
       </div>
+      <div class="dashboard-funnel-step-track" role="presentation" aria-hidden="true">
+        <span class="dashboard-funnel-step-fill is-watch" style="width: <%= [@quote_funnel[:view_rate].to_i, 8].max %>%"></span>
+      </div>
     </article>
     <article class="dashboard-funnel-step">
       <span><%= t("dashboard.view.quote_funnel.revisions") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:revisions_requested] %></strong>
         <small><%= @quote_funnel[:revision_rate] %>%</small>
+      </div>
+      <div class="dashboard-funnel-step-track" role="presentation" aria-hidden="true">
+        <span class="dashboard-funnel-step-fill is-danger" style="width: <%= [@quote_funnel[:revision_rate].to_i, 8].max %>%"></span>
       </div>
     </article>
     <article class="dashboard-funnel-step">
@@ -30,12 +36,18 @@
         <strong><%= @quote_funnel[:quotes_accepted] %></strong>
         <small><%= @quote_funnel[:acceptance_rate] %>%</small>
       </div>
+      <div class="dashboard-funnel-step-track" role="presentation" aria-hidden="true">
+        <span class="dashboard-funnel-step-fill is-good" style="width: <%= [@quote_funnel[:acceptance_rate].to_i, 8].max %>%"></span>
+      </div>
     </article>
     <article class="dashboard-funnel-step">
       <span><%= t("dashboard.view.quote_funnel.lost") %></span>
       <div class="dashboard-funnel-step-metric">
         <strong><%= @quote_funnel[:quotes_lost] %></strong>
         <small><%= @quote_funnel[:loss_rate] %>%</small>
+      </div>
+      <div class="dashboard-funnel-step-track" role="presentation" aria-hidden="true">
+        <span class="dashboard-funnel-step-fill is-muted" style="width: <%= [@quote_funnel[:loss_rate].to_i, 8].max %>%"></span>
       </div>
     </article>
   </div>

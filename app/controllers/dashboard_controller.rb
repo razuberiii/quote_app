@@ -7,7 +7,7 @@ class DashboardController < CustomersController
     @quick_create_quote_path = resolve_quick_create_quote_path
 
     scope = current_user.company.customers.includes(:customer_tags, quotes: [ :quote_items, :template ])
-    all_customers = scope.to_a
+    all_customers = dashboard_customers_for_user(scope.to_a)
     @engagement_states = all_customers.index_with(&:effective_engagement_state)
 
     @kpi_period = params[:kpi_period].presence_in(%w[week month]) || "week"
@@ -23,61 +23,68 @@ class DashboardController < CustomersController
     @dashboard_stats = build_dashboard_stats(all_customers, @follow_up_counts, @kpi_period, @engagement_states)
     @decision_snapshot = build_decision_snapshot(all_customers, @kpi_period)
     @risk_snapshot = build_risk_snapshot(all_customers, @customer_metrics, @engagement_states)
-    @action_center = build_action_center(all_customers, @customer_metrics)
+    @action_center = Dashboard::TodayFocusBuilder.new(
+      customers: all_customers,
+      customer_metrics: @customer_metrics,
+      quote_signal_resolver: ->(quote) { quote_signal_for(quote) },
+      quote_status_resolver: ->(quote) { quote_display_status(quote) },
+      customer_path_resolver: ->(customer) { customer_path(customer) },
+      high_value_customer_resolver: ->(customer) { high_value_customer?(customer, @customer_metrics) },
+      stalled_customer_resolver: ->(customer) { stalled_customer?(customer) }
+    ).call
     @primary_action = @action_center.first
     @secondary_actions = @action_center.drop(1)
-    @generated_action_items = ActionItemGenerator.new(user: current_user).call.to_a
-    @system_action_items = filter_system_action_items(@generated_action_items)
-    @action_required_summary = {
-      total: @system_action_items.count,
-      risk_customers: @risk_snapshot[:needs_follow_up],
-      decision_alerts: @decision_snapshot[:negotiating_stale_count],
-      has_risk: @risk_snapshot[:needs_follow_up].positive? || @decision_snapshot[:negotiating_stale_count].positive?
-    }
     @deal_overview = build_deal_overview(all_customers)
     @dashboard_health_snapshot = build_dashboard_health_snapshot(all_customers)
-    @recent_quotes = build_recent_quotes(all_customers)
     latest_quotes = latest_quotes_from_collection(active_quotes_from_customers(all_customers))
-    @deal_radar_signals = DealRadarService.new(quotes: latest_quotes, limit: 6).call
+    visible_quotes = latest_quotes.select { |quote| dashboard_quote_visible_for_user?(quote) }
+    @quote_todo_entries = Dashboard::QuoteTodoBuilder.new(
+      quotes: visible_quotes,
+      today_focus_items: @action_center,
+      quote_signal_resolver: ->(quote) { quote_signal_for(quote) },
+      quote_status_resolver: ->(quote) { quote_display_status(quote) },
+      quote_path_resolver: ->(quote) { quote_path(quote) },
+      quote_display_name_resolver: ->(quote) { quote_display_name(quote) }
+    ).call
     @quote_funnel = QuoteFunnelReportService.new(company: current_user.company).call
-    @performance_report = DashboardPerformanceReportService.new(customers: all_customers).call
     @top_quoted_products = current_user.company.products.order(quoted_count: :desc, last_quoted_at: :desc).limit(5)
     # Sales Insights analytics — read-only, isolated from core signal/radar logic
     company = current_user.company
     @analytics_win_loss     = DealOutcomeAnalyticsService.new(company: company).summary
+    @analytics_win_loss_top = build_win_loss_top_summary(@analytics_win_loss, top_n: 5)
     @analytics_revision     = RevisionDepthAnalyticsService.new(company: company).win_rate_by_revision
     @analytics_channels     = ChannelUsageAnalyticsService.new(company: company).summary
     @analytics_top_products = ProductQuoteAnalyticsService.new(company: company).top_products(limit: 5)
-    @analytics_silent_customers = begin
-      company.customers.includes(:customer_follow_up_events, :quotes).select do |customer|
-        service = CustomerEngagementSignalService.new(customer)
-        dashboard_silent_customer_visible?(customer, service)
-      end.first(5)
-    end
+    @dashboard_core_metrics = build_dashboard_core_metrics(@dashboard_stats, @follow_up_counts)
+    @dashboard_activity_mix = build_dashboard_activity_mix(@follow_up_counts)
   end
 
   private
 
-  def dashboard_silent_customer_visible?(customer, service)
-    return false if customer.status.to_s == "paused" || customer.raw_status_css.to_s == "paused"
-    return false unless service.silent_customer?
+  def dashboard_customers_for_user(customers)
+    return customers unless Customer.internal_owner_enabled?
 
-    last_view_at = service.latest_view_at
-    return false if last_view_at.blank?
-
-    latest_follow_up_touch = customer.customer_follow_up_events.maximum(:contacted_at)
-    latest_reminder_touch = customer.quotes.not_archived.maximum(:reminder_sent_at)
-    latest_legacy_touch = customer.last_follow_up_date&.in_time_zone
-    latest_touch_at = [ latest_follow_up_touch, latest_reminder_touch, latest_legacy_touch ].compact.max
-
-    # If we already followed up after the last customer view but still no response,
-    # demote this customer from dashboard silent-slot to avoid long-term slot occupation.
-    latest_touch_at.blank? || latest_touch_at <= last_view_at
+    customers.select do |customer|
+      owner_id = customer.respond_to?(:internal_owner_id) ? customer.internal_owner_id : nil
+      if owner_id.present?
+        owner_id == current_user.id
+      else
+        current_user.company_owner? || current_user.company_admin?
+      end
+    end
   end
 
-  def filter_system_action_items(items)
-    strong_action_types = %w[win_reason_missing loss_reason_missing revision_requested]
-    Array(items).select { |item| strong_action_types.include?(item.action_type.to_s) }
+  def dashboard_quote_visible_for_user?(quote)
+    customer = quote.customer
+    return true if customer.blank?
+    return true unless Customer.internal_owner_enabled?
+
+    owner_id = customer.respond_to?(:internal_owner_id) ? customer.internal_owner_id : nil
+    if owner_id.present?
+      owner_id == current_user.id
+    else
+      current_user.company_owner? || current_user.company_admin?
+    end
   end
 
   def build_onboarding_progress
@@ -116,5 +123,71 @@ class DashboardController < CustomersController
     return new_customer_quote_path(customers.first) if customers.one?
 
     customers_path
+  end
+
+  def build_win_loss_top_summary(summary, top_n: 5)
+    {
+      wins: compress_reason_rows(Array(summary[:win_reasons]), top_n: top_n, category: :win),
+      losses: compress_reason_rows(Array(summary[:loss_reasons]), top_n: top_n, category: :loss)
+    }
+  end
+
+  def compress_reason_rows(rows, top_n:, category:)
+    ordered_rows = rows.sort_by { |row| -row[:count].to_i }
+    top_rows = ordered_rows.first(top_n)
+    remaining = ordered_rows.drop(top_n)
+    other_count = remaining.sum { |row| row[:count].to_i }
+    total = ordered_rows.sum { |row| row[:count].to_i }
+
+    if other_count.positive?
+      other_label = I18n.t("analytics.reason_labels.#{category}.other", default: I18n.t("analytics.reason_labels.win.other", default: "Other"))
+      pct = total.zero? ? 0 : ((other_count.to_f / total) * 100).round
+      top_rows << { label: other_label, count: other_count, pct: pct }
+    end
+
+    { rows: top_rows, total: total }
+  end
+
+  def build_dashboard_core_metrics(dashboard_stats, follow_up_counts)
+    risk_count = follow_up_counts[:overdue].to_i + follow_up_counts[:today].to_i + follow_up_counts[:no_schedule].to_i
+
+    [
+      {
+        label: I18n.t("dashboard.view.index.open_deals"),
+        value: dashboard_stats[:open_deals][:value],
+        detail: dashboard_stats[:open_deals][:trend_text]
+      },
+      {
+        label: I18n.t("dashboard.view.index.quotes_this_period", period: (@kpi_period == "month" ? I18n.t("dashboard.view.index.period_month") : I18n.t("dashboard.view.index.period_week"))),
+        value: dashboard_stats[:quotes_this_week][:value],
+        detail: dashboard_stats[:quotes_this_week][:trend_text]
+      },
+      {
+        label: I18n.t("dashboard.view.index.pending_followups"),
+        value: dashboard_stats[:pending_follow_ups][:value],
+        detail: dashboard_stats[:pending_follow_ups][:trend_text]
+      },
+      {
+        label: I18n.t("dashboard.view.index.followup_risk"),
+        value: risk_count,
+        detail: I18n.t("dashboard.view.index.followup_risk_detail", count: risk_count)
+      }
+    ]
+  end
+
+  def build_dashboard_activity_mix(follow_up_counts)
+    total = follow_up_counts.values.sum
+    total = 1 if total.zero?
+
+    segments = [
+      { key: :overdue, label: I18n.t("dashboard.view.index.mix_overdue"), count: follow_up_counts[:overdue].to_i, tone: "danger" },
+      { key: :today, label: I18n.t("dashboard.view.index.mix_due_today"), count: follow_up_counts[:today].to_i, tone: "watch" },
+      { key: :upcoming, label: I18n.t("dashboard.view.index.mix_upcoming"), count: follow_up_counts[:upcoming].to_i, tone: "neutral" },
+      { key: :no_schedule, label: I18n.t("dashboard.view.index.mix_no_schedule"), count: follow_up_counts[:no_schedule].to_i, tone: "muted" }
+    ]
+
+    segments.map do |segment|
+      segment.merge(percent: ((segment[:count].to_f / total) * 100).round)
+    end
   end
 end

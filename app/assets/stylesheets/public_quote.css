@@ -1,7 +1,7 @@
 /* Extracted from legacy.css during Tailwind migration phase 2. */
 
 .public-quote-themed .quote-doc-header {
-  border-bottom: 2px solid var(--doc-accent, #1f4e79);
+  border-bottom: 1px solid #d8e3ef;
 }
 
 .public-quote-themed .quote-doc-kicker {
@@ -9,15 +9,15 @@
 }
 
 .public-quote-themed .quote-meta-card {
-  border-left: 3px solid var(--doc-accent, #1f4e79);
+  border-left: 0;
 }
 
 .public-quote-themed .quote-doc-table thead {
-  background-color: var(--doc-accent, #1f4e79);
+  background-color: #f5f8fc;
 }
 
 .public-quote-themed .quote-doc-table thead th {
-  color: var(--doc-on-accent, #ffffff);
+  color: #2b4663;
 }
 
 .public-quote-themed .quote-total-grand {
@@ -54,12 +54,12 @@
 .quote-public-utility {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 0.45rem;
+  margin: 0;
 }
 
 .quote-utility-btn {
-  min-height: 34px !important;
-  padding: 0 12px !important;
+  min-height: 32px !important;
+  padding: 0 11px !important;
   border: 1px solid #d1dbe7 !important;
   border-radius: 8px !important;
   background: #fff !important;
@@ -77,10 +77,9 @@
 
 .quote-decision-section {
   margin-top: 1rem;
-  border: 1px solid #dbe3ee;
-  border-radius: 12px;
-  background: #f8fafc;
-  padding: 0.75rem 0.85rem;
+  border-top: 1px solid #dbe3ee;
+  padding: 0.8rem 0 0;
+  background: transparent;
 }
 
 .quote-decision-section h3 {
@@ -89,7 +88,7 @@
 }
 
 .quote-decision-note {
-  margin: 0 0 0.45rem;
+  margin: 0 0 0.5rem;
   color: #475569;
   font-size: 0.86rem;
 }
@@ -114,6 +113,7 @@
   align-items: center;
   gap: 0.45rem;
   flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .quote-decision-accept button {
@@ -170,12 +170,20 @@
 .quote-revision-modal {
   position: fixed;
   inset: 0;
-  z-index: 1050;
+  z-index: 4000;
   display: grid;
   place-items: center;
   padding: 1rem;
   opacity: 0;
   transition: opacity 180ms ease-in-out;
+  isolation: isolate;
+}
+
+/* Keep public decision modals out of generic watermark child stacking rules. */
+.public-quote-document.quote-watermarked > .quote-revision-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
 }
 
 .quote-revision-modal[hidden] {
@@ -192,10 +200,12 @@
   background: rgba(15, 23, 42, 0.44);
   opacity: 0;
   transition: opacity 180ms ease-in-out;
+  z-index: 0;
 }
 
 .quote-revision-modal-dialog {
   position: relative;
+  z-index: 1;
   width: min(680px, 96vw);
   max-height: 88vh;
   overflow: auto;
@@ -346,14 +356,8 @@
   border-bottom-width: 1px;
 }
 
-.public-quote-document .quote-public-actions {
-  margin-top: 14px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .public-quote-document .quote-items-table {
-  border-spacing: 0 6px;
+  border-spacing: 0;
 }
 
 @media print {
@@ -430,7 +434,27 @@
 }
 
 .public-quote-document .quote-meta-grid {
+  gap: 0;
+  margin-bottom: 0.95rem;
+  border: 1px solid #dbe5f0;
+  border-radius: 14px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.public-quote-document .quote-doc-header {
+  align-items: flex-start;
   gap: 0.95rem;
+  margin-bottom: 0.9rem;
+  padding-bottom: 0.72rem;
+}
+
+.public-quote-document .quote-doc-logo-wrap {
+  min-width: 148px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.42rem;
 }
 
 .public-quote-document .quote-doc-header h1 {
@@ -439,7 +463,19 @@
 }
 
 .public-quote-document .quote-meta-card {
-  padding: 0.85rem 0.95rem;
+  padding: 0.82rem 0.9rem;
+  border: 0;
+  border-left: 1px solid #e4edf6;
+  border-radius: 0;
+  background: transparent;
+}
+
+.public-quote-document .quote-meta-card:first-child {
+  border-left: 0;
+}
+
+.public-quote-document .quote-meta-card:nth-child(3) {
+  background: #fcfdff;
 }
 
 .public-quote-document .quote-meta-card h3 {
@@ -477,7 +513,7 @@
   gap: 0.8rem;
   margin: 0;
   padding: 0.18rem 0;
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px solid #e8eef5;
 }
 
 .public-quote-document .quote-info-row span {
@@ -516,7 +552,9 @@
 .public-quote-document .quote-item-desc-main {
   font-size: var(--q-public-table-body-size);
   line-height: 1.32;
+  font-weight: 600;
   overflow-wrap: anywhere;
+  word-wrap: break-word;
   word-break: break-word;
 }
 
@@ -540,12 +578,15 @@
 }
 
 .public-quote-document .table-responsive {
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.72rem;
 }
 
 .public-quote-document .quote-total-box {
-  margin-top: 0.2rem;
-  padding: 0.8rem 0.95rem 0.7rem;
+  margin-top: 0.28rem;
+  padding: 0.75rem 0.88rem 0.65rem;
+  border-color: #dbe5f0;
+  border-radius: 10px;
+  background: #ffffff;
 }
 
 .public-quote-document .quote-total-grand {
@@ -591,10 +632,10 @@
 }
 
 .public-quote-document .quote-engagement-note {
-  margin: 0.55rem 0 0.15rem;
-  padding-top: 0.45rem;
+  margin: 0.5rem 0 0.1rem;
+  padding-top: 0.4rem;
   border-top: 1px dashed #d2dbe6;
-  color: var(--doc-accent, #1f4e79);
+  color: #475569;
   font-size: var(--q-public-notes-size);
   line-height: var(--q-public-notes-lh);
   font-weight: var(--q-public-notes-w);
@@ -612,6 +653,45 @@
 .public-quote-document .quote-doc-table thead th {
   font-size: var(--q-public-table-head-size);
   font-weight: var(--q-public-table-head-w);
+}
+
+.public-quote-document .quote-doc-table th,
+.public-quote-document .quote-doc-table td {
+  padding: 0.62rem 0.68rem;
+}
+
+.public-quote-document .quote-doc-table tbody td {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 1px solid #e7edf6;
+  border-radius: 0;
+  background: transparent;
+  vertical-align: top;
+}
+
+.public-quote-document .quote-doc-table tbody tr:last-child td {
+  border-bottom-color: #dbe5f0;
+}
+
+.public-quote-document .quote-doc-table tbody tr:hover td {
+  background: transparent;
+}
+
+.public-quote-document.quote-watermarked::before {
+  letter-spacing: 0.16em;
+  font-size: clamp(1.9rem, 6.5vw, 4.4rem);
+  transform: rotate(-16deg);
+  opacity: var(--quote-watermark-opacity, 0.07);
+  z-index: 3;
+}
+
+.public-quote-document .quote-watermark-image {
+  max-width: 52%;
+  max-height: 48%;
+  opacity: var(--quote-watermark-opacity, 0.07);
+  transform: rotate(-14deg);
+  z-index: 3;
 }
 
 /* Public quote density: spacing-only adjustments (no typography scale changes). */
@@ -701,6 +781,19 @@
   .public-quote-document .quote-item-desc-sub {
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .public-quote-document .quote-meta-grid {
+    border-radius: 12px;
+  }
+
+  .public-quote-document .quote-meta-card {
+    border-left: 0;
+    border-top: 1px solid #e4edf6;
+  }
+
+  .public-quote-document .quote-meta-card:first-child {
+    border-top: 0;
   }
 }
 

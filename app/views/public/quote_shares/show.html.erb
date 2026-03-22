@@ -1,6 +1,7 @@
 <% watermark_text = template_watermark_text(@template, @share.company.name) %>
 <% watermark_image_url = template_watermark_image_url(@template) %>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> public-density-<%= @template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+<% web_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.45, 0.07].min %>
+<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> public-density-<%= @template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? %>" data-watermark="<%= watermark_text %>" style="--doc-accent: <%= @template.accent_color %>; --doc-on-accent: <%= contrast_text_color(@template.accent_color) %>; --doc-font: '<%= @template.font_family %>'; --quote-watermark-opacity: <%= web_watermark_opacity %>;">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-watermark-image">
   <% end %>
@@ -36,9 +37,6 @@
        [ "delivery terms", "Delivery terms" ],
        [ "other", "Other" ]
      ] %>
-  <div class="no-print quote-public-utility">
-    <button type="button" class="<%= ui_button_classes(:secondary, "quote-utility-btn") %>" onclick="window.print()">Print</button>
-  </div>
   <% if quote_deleted %>
     <div class="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
       This quote has expired and is no longer actionable. Please contact your sales representative for the latest version.
@@ -57,6 +55,9 @@
       <% end %>
     </div>
     <div class="quote-doc-logo-wrap">
+      <div class="no-print quote-public-utility">
+        <button type="button" class="<%= ui_button_classes(:secondary, "quote-utility-btn") %>" onclick="window.print()">Print</button>
+      </div>
       <% if @template.show_logo && @share.company.logo.attached? %>
         <%= image_tag @share.company.logo, class: "quote-doc-logo" %>
       <% end %>
@@ -403,6 +404,7 @@
           <p class="quote-decision-note">Message: <%= quote.changes_request_message %></p>
         <% end %>
       <% elsif decision_state == "active" %>
+        <p class="quote-decision-note"><%= t("public_quote_shares.decision_intro_active", default: "Review this quotation and choose how you want to proceed.") %></p>
         <div class="quote-public-actions">
           <button type="button" class="quote-decision-request-toggle js-open-accept-request">Accept Quotation</button>
           <button type="button" class="quote-decision-request-toggle js-open-revision-request">Request Revision</button>
@@ -466,9 +468,16 @@
 
 <script>
   (() => {
+    const mountModalToBody = (modal) => {
+      if (!modal || modal.dataset.mountedToBody === "true") return modal;
+      document.body.appendChild(modal);
+      modal.dataset.mountedToBody = "true";
+      return modal;
+    };
+
     const bindModal = (openSelector, modalSelector, closeSelector, focusSelector) => {
       const openBtn = document.querySelector(openSelector);
-      const modal = document.querySelector(modalSelector);
+      const modal = mountModalToBody(document.querySelector(modalSelector));
       const closeButtons = Array.from(document.querySelectorAll(closeSelector));
       if (!openBtn || !modal || openBtn.dataset.bound === "true") return;
       openBtn.dataset.bound = "true";

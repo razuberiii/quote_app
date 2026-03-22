@@ -218,8 +218,6 @@ en:
         no_immediate_risk: No immediate follow-up issues.
         action_required: Needs Attention (%{count})
         action_overview: Pending items (%{count})
-        risk_customers: "%{count} customers need follow-up"
-        stalled_negotiations: "%{count} stalled negotiations"
         no_customer_or_decision_risk: No immediate follow-up or decision risk
         handle_overdue_first: Showing 1 pending item first; continue with the rest in the queue.
         jump_to_action_items: View action items (%{count})
@@ -238,12 +236,29 @@ en:
         period_month: Month
         period_week: Week
         pending_followups: Pending Follow-ups
+        followup_risk: Follow-up risk
+        followup_risk_detail: "%{count} accounts are at risk today"
+        metrics_overview: Core Metrics
+        metrics_overview_caption: Quiet overview of current pipeline pressure.
+        followup_mix_caption: Follow-up queue distribution
+        mix_overdue: Overdue
+        mix_due_today: Due today
+        mix_upcoming: Upcoming
+        mix_no_schedule: No schedule
         today_focus: Today's Priorities
+        today_focus_caption: Priority customers to focus on today.
         top_priority: Top Priority
         secondary: Secondary
         show_more: Show more (%{count})
         show_less: Show less
         no_high_priority_actions: No high-priority actions today.
+        quote_todo: Quote To-Do
+        quote_todo_caption: Quote tasks that need action.
+        quote_todo_empty: No quote tasks need action right now.
+        todo_missing_win_reason: Won deal missing win reason
+        todo_missing_loss_reason: Lost deal missing loss reason
+        todo_revision_requested: Buyer requested revision, prioritize now
+        todo_fill_reason: Fill reason
         deal_radar: Deal Watchlist
         deal_radar_summary_hint: Showing the top 1 deal signal first; review the rest in the quote list.
         deal_radar_count:
@@ -332,6 +347,74 @@ en:
         quote_not_viewed: "%{reference} has not been viewed for 3 days after sending."
         quote_expiring: "%{reference} is close to expiry."
         revision_requested: Buyer requested changes on %{reference}.
+      today_focus:
+        cta:
+          view_customer: View customer
+          go_follow_up: Follow up
+          record_progress: Log progress
+          set_next_follow_up: Set next follow-up
+        secondary_hint: "Also: %{reasons}"
+        quote_risk_category:
+          revision: revision request
+          hot: high engagement without follow-up
+          stalled: stalled negotiation
+          expiring: expiring quote
+          general: quote risk
+        reason_short:
+          overdue_follow_up: overdue follow-up
+          due_today_follow_up: due today
+          high_value_stalled: high-value stalled
+          customer_has_quote_risk: quote risk
+          long_time_no_follow_up: long gap
+          missing_next_follow_up: missing next follow-up
+        reason:
+          overdue_follow_up:
+            title: "%{name}: follow-up overdue"
+            subtitle: Overdue by %{days} days; churn risk is rising.
+          due_today_follow_up:
+            title: "%{name}: follow-up due today"
+            subtitle: Follow-up is due today. Reach out as soon as possible.
+          high_value_stalled:
+            title: "%{name}: high-value account stalled"
+            subtitle: This high-value account is stalling. Push it forward today.
+          customer_has_quote_risk:
+            title: "%{name}: quote risk needs attention"
+            subtitle: This account has %{category} risk. Review it first.
+            subtitle_with_more: This account has %{category} risk plus %{count} more quote risks.
+          long_time_no_follow_up:
+            title: "%{name}: no recent follow-up"
+            subtitle: Follow-up has been idle for too long. Re-engage now.
+          missing_next_follow_up:
+            title: "%{name}: next follow-up missing"
+            subtitle: No next follow-up is scheduled yet.
+      quote_todo:
+        cta:
+          fill_reason: Fill reason
+          open_quote: Open quote
+          send_quote: Send quote
+          handle_revision: Handle revision
+          go_follow_up: Follow up
+        reason:
+          won_reason_missing:
+            subtitle: Won deal is missing a win reason
+          lost_reason_missing:
+            subtitle: Lost deal is missing a loss reason
+          revision_requested:
+            subtitle: Buyer requested a revision
+          draft_pending_send:
+            subtitle: Draft is ready but not sent
+          hot_engagement_no_follow_up:
+            subtitle: High engagement without follow-up
+          stalled_negotiation:
+            subtitle: Negotiation is stalled
+          expiring_soon:
+            subtitle: Quote is expiring soon
+          viewed_no_follow_up:
+            subtitle: Quote was viewed but not followed up
+          not_viewed_7d:
+            subtitle: Sent and not viewed for 7 days
+          not_viewed_3d:
+            subtitle: Sent and not viewed for 3 days
       not_enough_data: No data yet
       export_mix_zero: Quote 0% / PI 0%
       export_mix: Quote %{quotation}% / PI %{pi}%
@@ -473,6 +556,8 @@ en:
         quote_subtitle: Start a draft, complete pricing, then share it with the customer.
         revision_title: Create revision draft
         revision_subtitle: Create a new draft revision from %{quote_no}, then update it before sharing again.
+        create_revision: Create revision
+        back_to_quote: Back to Quote
       edit:
         title: Edit quote draft
         subtitle: Quote %{quote_no} · Revision V%{revision}
@@ -2651,6 +2736,7 @@ en:
       revision_not_actionable: This revision is no longer actionable.
       quotation_accepted: Quote accepted. Thank you.
       revision_request_sent: Revision request sent.
+    decision_intro_active: Review this quotation and choose how you want to proceed.
     preview_mode:
       title: Preview Mode
       body: Rendered output only. All public actions are disabled in preview mode.

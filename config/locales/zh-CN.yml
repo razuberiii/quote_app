@@ -218,8 +218,6 @@ zh-CN:
         no_immediate_risk: 当前没有紧急跟进风险。
         action_required: 待处理事项（%{count}）
         action_overview: 待处理（%{count}）
-        risk_customers: "%{count} 个客户需要跟进"
-        stalled_negotiations: "%{count} 个停滞谈判"
         no_customer_or_decision_risk: 当前无跟进或决策压力
         handle_overdue_first: 优先展示 1 条待处理事项，其他可在待处理队列继续处理。
         jump_to_action_items: 查看待处理事项（%{count}）
@@ -238,12 +236,29 @@ zh-CN:
         period_month: 月
         period_week: 周
         pending_followups: 待跟进
+        followup_risk: 跟进风险
+        followup_risk_detail: 今日有 %{count} 个客户存在跟进风险
+        metrics_overview: 核心指标
+        metrics_overview_caption: 当前管道压力的安静总览。
+        followup_mix_caption: 跟进队列分布
+        mix_overdue: 已逾期
+        mix_due_today: 今日到期
+        mix_upcoming: 即将到期
+        mix_no_schedule: 未排期
         today_focus: 今日重点
+        today_focus_caption: 今日优先关注的客户
         top_priority: 最高优先级
         secondary: 次级
         show_more: 显示更多（%{count}）
         show_less: 收起
         no_high_priority_actions: 今天没有高优先级事项。
+        quote_todo: 报价待办
+        quote_todo_caption: 待处理的报价事项
+        quote_todo_empty: 当前没有需要处理的报价事项。
+        todo_missing_win_reason: 赢单缺少成交理由
+        todo_missing_loss_reason: 丢单缺少失败理由
+        todo_revision_requested: 客户请求修订，需优先处理
+        todo_fill_reason: 补充理由
         deal_radar: 商机看板
         deal_radar_summary_hint: 优先展示 1 条最需要处理的商机，其他可在报价列表继续查看。
         deal_radar_count:
@@ -332,6 +347,74 @@ zh-CN:
         quote_not_viewed: "%{reference} 发送后 3 天仍未查看。"
         quote_expiring: "%{reference} 即将到期。"
         revision_requested: 买家对 %{reference} 提出了修改请求。
+      today_focus:
+        cta:
+          view_customer: 查看客户
+          go_follow_up: 去跟进
+          record_progress: 记录进展
+          set_next_follow_up: 设置下次跟进
+        secondary_hint: 另有：%{reasons}
+        quote_risk_category:
+          revision: 请求修订
+          hot: 高互动未跟进
+          stalled: 谈判停滞
+          expiring: 临近到期
+          general: 报价风险
+        reason_short:
+          overdue_follow_up: 跟进逾期
+          due_today_follow_up: 今日应跟进
+          high_value_stalled: 高价值停滞
+          customer_has_quote_risk: 报价风险
+          long_time_no_follow_up: 长期未跟进
+          missing_next_follow_up: 缺少下次跟进
+        reason:
+          overdue_follow_up:
+            title: "%{name}：跟进逾期"
+            subtitle: 已逾期 %{days} 天，流失风险较高。
+          due_today_follow_up:
+            title: "%{name}：今日应跟进"
+            subtitle: 今天应跟进，建议尽快联系。
+          high_value_stalled:
+            title: "%{name}：高价值停滞"
+            subtitle: 高价值客户近期停滞，建议尽快推进。
+          customer_has_quote_risk:
+            title: "%{name}：报价风险需关注"
+            subtitle: 该客户存在%{category}风险，建议优先查看。
+            subtitle_with_more: 该客户存在%{category}风险，另有 %{count} 项报价风险。
+          long_time_no_follow_up:
+            title: "%{name}：长期未跟进"
+            subtitle: 长时间未跟进，建议尽快恢复联系。
+          missing_next_follow_up:
+            title: "%{name}：未设置下次跟进"
+            subtitle: 尚未设置下次跟进时间，容易断线。
+      quote_todo:
+        cta:
+          fill_reason: 补充理由
+          open_quote: 打开报价
+          send_quote: 发送报价
+          handle_revision: 处理修订
+          go_follow_up: 去跟进
+        reason:
+          won_reason_missing:
+            subtitle: 赢单缺少成交原因
+          lost_reason_missing:
+            subtitle: 输单缺少失败原因
+          revision_requested:
+            subtitle: 客户请求修订，待处理
+          draft_pending_send:
+            subtitle: 草稿尚未发送
+          hot_engagement_no_follow_up:
+            subtitle: 高互动后未及时跟进
+          stalled_negotiation:
+            subtitle: 谈判停滞，建议尽快推进
+          expiring_soon:
+            subtitle: 报价即将到期
+          viewed_no_follow_up:
+            subtitle: 已查看但未及时跟进
+          not_viewed_7d:
+            subtitle: 已发送 7 天未查看
+          not_viewed_3d:
+            subtitle: 已发送 3 天未查看
       not_enough_data: 暂无足够数据
       export_mix_zero: 报价单 0% / PI 0%
       export_mix: 报价单 %{quotation}% / PI %{pi}%
@@ -473,6 +556,8 @@ zh-CN:
         quote_subtitle: 先建立草稿并补全价格，再分享给客户。
         revision_title: 新建修订草稿
         revision_subtitle: 基于 %{quote_no} 创建新的修订草稿，调整后再重新分享。
+        create_revision: 创建修订
+        back_to_quote: 返回报价详情
       edit:
         title: 编辑报价草稿
         subtitle: 报价 %{quote_no} · 修订 V%{revision}
@@ -2651,6 +2736,7 @@ zh-CN:
       revision_not_actionable: 该版本当前不可操作。
       quotation_accepted: 报价已接受，感谢确认。
       revision_request_sent: 修订请求已发送。
+    decision_intro_active: 请先确认这份报价内容，再选择下一步处理动作。
     preview_mode:
       title: 预览模式
       body: 仅渲染展示。预览模式下不会触发任何公开动作。

@@ -217,30 +217,35 @@ module QuotesHelper
     return normalized_specs if row_diff.blank?
 
     spec_changes = row_diff[:spec_changes] || {}
-    added_keys = Array(spec_changes[:added]).map { |change| normalize_diff_text(change[:key]) }.uniq
-    updated_map = Array(spec_changes[:updated]).index_by { |change| normalize_diff_text(change[:key]) }
+    updated_queues = Array(spec_changes[:updated]).group_by { |change| normalize_diff_text(change[:key]) }
+    added_remaining = Array(spec_changes[:added]).tally { |change| normalize_diff_text(change[:key]) }
 
     rows = normalized_specs.map do |row|
-      updated = updated_map[row[:normalized_key]]
+      updated_queue = updated_queues[row[:normalized_key]]
+      updated = updated_queue&.shift
       if updated.present?
         row.merge(change_type: :updated, before: updated[:before].to_s, after: updated[:after].to_s)
-      elsif added_keys.include?(row[:normalized_key])
+      elsif added_remaining[row[:normalized_key]].to_i.positive?
+        added_remaining[row[:normalized_key]] -= 1
         row.merge(change_type: :added)
       else
         row
       end
     end
 
-    removed_rows = Array(spec_changes[:removed]).filter_map do |change|
-      normalized_key = normalize_diff_text(change[:key])
-      next if rows.any? { |row| row[:normalized_key] == normalized_key }
+    present_counts = rows.tally { |row| row[:normalized_key] }
+    removed_rows = Array(spec_changes[:removed]).group_by { |change| normalize_diff_text(change[:key]) }.flat_map do |normalized_key, removed_group|
+      overflow = [ removed_group.size - present_counts[normalized_key].to_i, 0 ].max
+      next [] if overflow.zero?
 
-      {
-        key: change[:key].to_s,
-        value: change[:value].to_s,
-        normalized_key: normalized_key,
-        change_type: :removed
-      }
+      removed_group.first(overflow).map do |change|
+        {
+          key: change[:key].to_s,
+          value: change[:value].to_s,
+          normalized_key: normalized_key,
+          change_type: :removed
+        }
+      end
     end
 
     rows + removed_rows
@@ -262,30 +267,35 @@ module QuotesHelper
     return normalized_addons if row_diff.blank?
 
     addon_changes = row_diff[:addon_changes] || {}
-    added_names = Array(addon_changes[:added]).map { |change| normalize_diff_text(change[:name]) }.uniq
-    updated_map = Array(addon_changes[:updated]).index_by { |change| normalize_diff_text(change[:name]) }
+    updated_queues = Array(addon_changes[:updated]).group_by { |change| normalize_diff_text(change[:name]) }
+    added_remaining = Array(addon_changes[:added]).tally { |change| normalize_diff_text(change[:name]) }
 
     rows = normalized_addons.map do |row|
-      updated = updated_map[row[:normalized_name]]
+      updated_queue = updated_queues[row[:normalized_name]]
+      updated = updated_queue&.shift
       if updated.present?
         row.merge(change_type: :updated, before: updated[:before].to_d, after: updated[:after].to_d)
-      elsif added_names.include?(row[:normalized_name])
+      elsif added_remaining[row[:normalized_name]].to_i.positive?
+        added_remaining[row[:normalized_name]] -= 1
         row.merge(change_type: :added)
       else
         row
       end
     end
 
-    removed_rows = Array(addon_changes[:removed]).filter_map do |change|
-      normalized_name = normalize_diff_text(change[:name])
-      next if rows.any? { |row| row[:normalized_name] == normalized_name }
+    present_counts = rows.tally { |row| row[:normalized_name] }
+    removed_rows = Array(addon_changes[:removed]).group_by { |change| normalize_diff_text(change[:name]) }.flat_map do |normalized_name, removed_group|
+      overflow = [ removed_group.size - present_counts[normalized_name].to_i, 0 ].max
+      next [] if overflow.zero?
 
-      {
-        name: change[:name].to_s,
-        amount: change[:amount].to_d,
-        normalized_name: normalized_name,
-        change_type: :removed
-      }
+      removed_group.first(overflow).map do |change|
+        {
+          name: change[:name].to_s,
+          amount: change[:amount].to_d,
+          normalized_name: normalized_name,
+          change_type: :removed
+        }
+      end
     end
 
     rows + removed_rows

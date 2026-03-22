@@ -5,12 +5,13 @@
 <% workflow_state = @quote.workflow_state %>
 <% current_latest_revision = @quote_revisions.present? ? @quote_revisions.first&.id == @quote.id : @quote.latest_revision_for_quote_no? %>
 <% quote_document_locale = @quote_document_locale || I18n.locale %>
+<% web_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.4, 0.06].min %>
 <% reason_missing = (@quote.status.to_s == "won" && @quote.win_reason.blank?) || (@quote.status.to_s == "lost" && @quote.loss_reason.blank?) %>
 <% reason_action_label = @quote.status.to_s == "won" ? t("quotes.view.show.toolbar.add_win_reason") : t("quotes.view.show.toolbar.add_loss_reason") %>
 <div class="quote-document quote-document-shell"
      data-has-newer-revision="<%= @has_newer_revision ? "true" : "false" %>"
      data-current-latest="<%= current_latest_revision ? "true" : "false" %>"
-     style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+     style="--quote-accent: <%= @template.accent_color %>; --quote-watermark-opacity: <%= web_watermark_opacity %>;">
   <% active_template = @template %>
   <% spec_label = @quote.resolved_spec_label %>
   <% addon_label = @quote.resolved_addon_label %>
@@ -111,7 +112,7 @@
     else
       t("quotes.view.show.viewed_count", count: total_views)
     end %>
-  <section class="quote-summary-strip">
+  <section class="quote-summary-strip quote-summary-strip--internal">
     <div class="quote-summary-chip">
       <span><%= t("quotes.view.show.summary.current_revision", default: "Current Version") %></span>
       <strong>V<%= @quote.revision_number %></strong>
@@ -131,7 +132,7 @@
   </section>
 
   <% I18n.with_locale(quote_document_locale) do %>
-  <div class="<%= watermark_text.present? ? "quote-watermarked" : "" %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= template_watermark_opacity(@template) %>;">
+  <div class="<%= watermark_text.present? ? "quote-watermarked" : "" %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= web_watermark_opacity %>;">
   <% if watermark_image_url.present? %>
     <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-watermark-image">
   <% end %>
@@ -326,11 +327,16 @@
     <% terms_lines << [ t("quote_document.labels.delivery_notes"), @quote.delivery_notes ] if @quote.delivery_notes.present? %>
   <% end %>
   <% if terms_lines.any? %>
-    <section class="quote-section-block">
+    <section class="quote-section-block quote-section-block--terms">
       <h3><%= t("quote_document.sections.terms_and_conditions") %></h3>
-      <% terms_lines.each do |label, value| %>
-        <p><strong><%= label %>:</strong> <%= value %></p>
-      <% end %>
+      <div class="quote-term-list">
+        <% terms_lines.each do |label, value| %>
+          <p class="quote-term-row">
+            <span class="quote-term-label"><%= label %>:</span>
+            <span class="quote-term-value"><%= value %></span>
+          </p>
+        <% end %>
+      </div>
     </section>
   <% end %>
 
@@ -377,6 +383,10 @@
   </div>
   <% end %>
 
+  </div>
+
+<section class="quote-workspace-layer">
+  <div class="quote-workspace-summary">
   <% if @revision_diff.present? && @previous_revision_quote.present? %>
     <% revision_item_changes = @revision_diff.fetch(:modified_items, []).size + @revision_diff.fetch(:added_items, []).size + @revision_diff.fetch(:removed_items, []).size %>
     <% revision_removed_items = @revision_diff.fetch(:removed_items, []).size %>
@@ -471,9 +481,10 @@
       </section>
     </div>
   </details>
-</div>
+  </div>
 
-<div class="quote-toolbar quote-toolbar-surface app-toolbar-surface app-toolbar-surface--compact">
+<section class="quote-workspace-actions">
+<div class="quote-toolbar quote-toolbar-surface app-toolbar-surface app-toolbar-surface--compact quote-workspace-toolbar">
   <div class="quote-toolbar-left">
     <% if @quote.can_edit_revision? %>
       <div class="quote-template-picker">
@@ -601,7 +612,7 @@
 
   <div class="quote-toolbar-right">
     <div class="quote-toolbar-right-primary">
-      <% status_actions_visible = @quote.can_mark_negotiating? || @quote.can_mark_won? || @quote.can_mark_lost? || @quote.can_revert_to_sent? %>
+      <% status_actions_visible = @quote.can_mark_negotiating? || @quote.can_mark_won? || @quote.can_mark_lost? %>
       <% if status_actions_visible %>
         <% status_label = case @quote.workflow_state
                          when "won", "accepted"
@@ -640,13 +651,6 @@
                       data-stage-modal-id="quote-lost-modal-<%= @quote.id %>">
                 <%= t("quotes.view.show.toolbar.status_mark_action", status: t("quotes.view.show.toolbar.status_option_lost")) %>
               </button>
-            <% end %>
-            <% if @quote.can_revert_to_sent? %>
-              <%= button_to t("quotes.view.show.toolbar.back_to_sent"),
-                            revert_to_sent_quote_path(@quote),
-                            method: :post,
-                            form: { data: { turbo: false } },
-                            class: "#{ui_button_classes(:secondary)} quote-btn quote-btn-secondary" %>
             <% end %>
           </div>
         </details>
@@ -731,6 +735,7 @@
     </div>
   </div>
 </div>
+</section>
 
 <% if flash[:status_undo_token].present? %>
   <div id="quote-status-undo-data"
@@ -879,7 +884,7 @@
   </div>
 <% end %>
 
-<section class="quote-history app-surface">
+<section class="quote-history quote-history--workspace app-surface">
   <div class="app-section-heading">
     <h3><%= t("quotes.view.show.history.title") %></h3>
     <span class="app-subtle-note"><%= t("quotes.view.show.history.subtitle") %></span>
@@ -922,8 +927,25 @@
     </div>
   <% end %>
 </section>
+</section>
 
 <script>
+  window.__mountTurnstileModalToBody ||= (modal) => {
+    if (!modal || modal.dataset.bodyMounted === "true") return;
+    if (modal.parentElement !== document.body) {
+      document.body.appendChild(modal);
+    }
+    modal.dataset.bodyMounted = "true";
+  };
+
+  window.__mountAllTurnstileModals ||= () => {
+    document.querySelectorAll(".quote-turnstile-modal").forEach((modal) => {
+      window.__mountTurnstileModalToBody(modal);
+    });
+  };
+
+  window.__mountAllTurnstileModals();
+
   (() => {
     const button = document.querySelector(".js-share-public-link");
     const shareMenu = button?.closest(".quote-toolbar-export");
@@ -990,6 +1012,24 @@
         statusBadge.className = "app-status-badge app-status-badge--blue";
         statusBadge.textContent = "<%= j(t('quotes.view.form.status_options.sent')) %>";
       }
+
+      const statusSummary = document.querySelector(".quote-toolbar-status-control > summary");
+      if (statusSummary) {
+        statusSummary.textContent = "<%= j(t('quotes.view.show.toolbar.status_selector', status: t('quotes.view.form.status_options.sent'))) %>";
+      }
+
+      const statusFieldLabels = [
+        "<%= j(t('quotes.view.pdf.status', default: 'Status')) %>",
+        "Status",
+        "状态"
+      ].map((label) => (label || "").trim().toLowerCase());
+      const quoteInfoRows = document.querySelectorAll(".quote-summary-info dt");
+      quoteInfoRows.forEach((labelEl) => {
+        const normalized = (labelEl.textContent || "").trim().toLowerCase();
+        if (!statusFieldLabels.includes(normalized)) return;
+        const valueEl = labelEl.nextElementSibling;
+        if (valueEl) valueEl.textContent = "<%= j(t('quotes.view.form.status_options.sent')) %>";
+      });
 
       document.querySelectorAll(".js-preview-menu").forEach((menu) => {
         menu.hidden = true;
@@ -1161,6 +1201,7 @@
           throw new Error(payload.message || "<%= j(t("quotes.view.show.toolbar.unable_generate_public_link")) %>");
         }
 
+        await ensureMarkedSent();
         markSentLocally({ refresh: false });
         const canAutoCopy = navigator.userActivation?.isActive ?? true;
         const copied = canAutoCopy ? await copyText(payload.url) : false;
@@ -1194,16 +1235,11 @@
           window.showAppToast?.("<%= j(t("quotes.view.show.toolbar.public_link_ready_manual")) %>", "warn");
         }
 
-        // Re-render action buttons immediately, then restore panel/menu state on load.
+        // Refresh action area once after successful send so server-driven button states switch immediately.
         window.setTimeout(() => {
           window.refreshQuoteState?.(true, true);
-        }, 280);
+        }, 220);
       } catch (error) {
-        // Roll back optimistic sent badge/state if share fails.
-        window.setTimeout(() => {
-          window.refreshQuoteState?.(true, true);
-        }, 60);
-
         currentShareUrl = "";
         syncWhatsappHref();
         openLink.href = "#";
@@ -1300,6 +1336,7 @@
     };
 
     modals.forEach((modal) => {
+      window.__mountTurnstileModalToBody(modal);
       syncReasonDetail(modal);
       if (modal.dataset.openByDefault === "true") {
         modal.hidden = false;
@@ -1477,6 +1514,7 @@
     };
 
     modals.forEach((modal) => {
+      window.__mountTurnstileModalToBody(modal);
       syncReasonDetail(modal);
       if (modal.dataset.openByDefault === "true") {
         modal.hidden = false;

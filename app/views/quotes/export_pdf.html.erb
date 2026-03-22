@@ -78,7 +78,7 @@
     <table class="pdf-head-table">
       <tr>
         <td class="pdf-head-left">
-          <h1><%= @quote.company.name.to_s.upcase %></h1>
+          <h1><%= @quote.company.name.to_s %></h1>
           <div class="pdf-doc-company-lines">
             <% company_header_lines.each do |line| %>
               <p><%= line %></p>
@@ -86,54 +86,80 @@
           </div>
         </td>
         <td class="pdf-head-right">
-          <p class="quote-doc-kicker"><%= title_text %></p>
-          <p class="pdf-doc-number is-doc-number"><strong><%= number_label %></strong> <%= @quote.quote_no %></p>
-          <% if @quote.custom_title.present? %>
-            <p><strong>Title:</strong> <%= @quote.custom_title %></p>
-          <% end %>
-          <% if issued_on_text.present? %>
-            <p><strong><%= document_kind == "pi" ? "PI Date" : "Quote Date" %>:</strong> <%= issued_on_text %></p>
-          <% end %>
-          <% if @template.show_valid_until && @quote.valid_until.present? %>
-            <p><strong>Valid Until:</strong> <%= @quote.valid_until.strftime("%Y-%m-%d") %> <% if valid_until_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %></p>
-          <% end %>
-          <% if @template.show_currency %>
-            <p><strong>Currency:</strong> <%= @quote.currency %></p>
-          <% end %>
-          <% if @quote.trade_term.present? %>
-            <p><strong>Trade Terms:</strong> <%= @quote.trade_term %> <% if trade_term_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %></p>
-          <% end %>
+          <div class="pdf-doc-meta-block">
+            <p class="quote-doc-kicker"><%= title_text %></p>
+            <p class="pdf-doc-number is-doc-number"><strong><%= number_label %></strong> <span class="pdf-doc-number-value"><%= @quote.quote_no %></span></p>
+            <div class="pdf-doc-meta-grid pdf-doc-meta-grid--primary">
+              <% if issued_on_text.present? %>
+                <p class="pdf-doc-meta-row">
+                  <span><%= document_kind == "pi" ? "PI Date" : "Quote Date" %></span>
+                  <strong><%= issued_on_text %></strong>
+                </p>
+              <% end %>
+              <% if @template.show_valid_until && @quote.valid_until.present? %>
+                <p class="pdf-doc-meta-row is-valid-until">
+                  <span>Valid Until</span>
+                  <strong><%= @quote.valid_until.strftime("%Y-%m-%d") %></strong>
+                  <% if valid_until_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %>
+                </p>
+              <% end %>
+            </div>
+            <div class="pdf-doc-meta-grid pdf-doc-meta-grid--secondary">
+              <% if @template.show_currency %>
+                <p class="pdf-doc-meta-row">
+                  <span>Currency</span>
+                  <strong><%= @quote.currency %></strong>
+                </p>
+              <% end %>
+              <% if @quote.trade_term.present? %>
+                <p class="pdf-doc-meta-row">
+                  <span>Trade Terms</span>
+                  <strong><%= @quote.trade_term %></strong>
+                  <% if trade_term_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %>
+                </p>
+              <% end %>
+              <% if @quote.custom_title.present? %>
+                <p class="pdf-doc-meta-row is-wide">
+                  <span>Title</span>
+                  <strong><%= @quote.custom_title %></strong>
+                </p>
+              <% end %>
+            </div>
+          </div>
         </td>
       </tr>
     </table>
   </header>
 
   <section class="quote-meta-grid">
-    <div class="quote-meta-card pdf-party-col">
-      <h3>Seller</h3>
-      <p class="pdf-party-name"><strong><%= @quote.company.name %></strong></p>
-      <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
-        <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
-      <% end %>
-      <% if seller_address.present? %><p><%= seller_address %></p><% end %>
-      <% if seller_phone.present? %><p><%= seller_phone %></p><% end %>
-      <% if seller_email.present? %><p><%= seller_email %></p><% end %>
-      <% if seller_website.present? %><p><%= seller_website %></p><% end %>
-    </div>
-    <div class="quote-meta-card pdf-party-col">
-      <h3>Buyer</h3>
-      <% if buyer_name.present? %>
-        <p class="pdf-party-name"><strong><%= buyer_name %></strong></p>
-      <% end %>
-      <% if buyer_contact.present? %><p>Contact: <%= buyer_contact %></p><% end %>
-      <% if buyer_address.present? %><p><%= buyer_address %></p><% end %>
-      <% if buyer_phone.present? %><p><%= buyer_phone %></p><% end %>
-      <% if buyer_email.present? %><p><%= buyer_email %></p><% end %>
-      <% if @quote.customer.tax_id.present? %>
-        <p>Tax ID: <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
-      <% end %>
-    </div>
-    <div class="pdf-clear"></div>
+    <table class="pdf-party-table">
+      <tr>
+        <td class="quote-meta-card pdf-party-col">
+          <h3>Seller</h3>
+          <p class="pdf-party-name"><strong><%= @quote.company.name %></strong></p>
+          <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
+            <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
+          <% end %>
+          <% if seller_address.present? %><p><%= seller_address %></p><% end %>
+          <% if seller_phone.present? %><p><%= seller_phone %></p><% end %>
+          <% if seller_email.present? %><p><%= seller_email %></p><% end %>
+          <% if seller_website.present? %><p><%= seller_website %></p><% end %>
+        </td>
+        <td class="quote-meta-card pdf-party-col">
+          <h3>Buyer</h3>
+          <% if buyer_name.present? %>
+            <p class="pdf-party-name"><strong><%= buyer_name %></strong></p>
+          <% end %>
+          <% if buyer_contact.present? %><p>Contact: <%= buyer_contact %></p><% end %>
+          <% if buyer_address.present? %><p><%= buyer_address %></p><% end %>
+          <% if buyer_phone.present? %><p><%= buyer_phone %></p><% end %>
+          <% if buyer_email.present? %><p><%= buyer_email %></p><% end %>
+          <% if @quote.customer.tax_id.present? %>
+            <p>Tax ID: <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
+          <% end %>
+        </td>
+      </tr>
+    </table>
   </section>
 
   <div class="table-responsive">
@@ -343,20 +369,25 @@
     </section>
   <% end %>
   <% footer_note = @template.resolved_footer_note(@document_kind) %>
-  <% if footer_note.present? %>
-    <section class="quote-section-block">
-      <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
-      <%= simple_format(footer_note) %>
-    </section>
-  <% end %>
-  <% if show_signature_section %>
-    <section class="quote-section-block quote-signature-block">
-      <h3>Signature</h3>
-      <% if signature_image_url.present? %>
-        <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+  <% show_footer_section = footer_note.present? %>
+  <% if show_footer_section || show_signature_section %>
+    <section class="quote-ending-stack">
+      <% if show_footer_section %>
+        <section class="quote-section-block quote-section-block--ending">
+          <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
+          <%= simple_format(footer_note) %>
+        </section>
       <% end %>
-      <% if signature_name.present? %>
-        <p><strong>Authorized by:</strong> <%= signature_name %></p>
+      <% if show_signature_section %>
+        <section class="quote-section-block quote-signature-block quote-section-block--ending">
+          <h3>Signature</h3>
+          <% if signature_image_url.present? %>
+            <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
+          <% end %>
+          <% if signature_name.present? %>
+            <p><strong>Authorized by:</strong> <%= signature_name %></p>
+          <% end %>
+        </section>
       <% end %>
     </section>
   <% end %>

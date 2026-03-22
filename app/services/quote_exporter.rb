@@ -25,6 +25,7 @@ class QuoteExporter
     @document_kind = @template.normalize_document_kind(document_kind)
     @excel_tempfiles = []
     @excel_row_index_map = {}
+    @excel_image_dimensions = {}
   end
 
   def to_pdf
@@ -64,7 +65,7 @@ class QuoteExporter
     header_ctx = render_excel_items(sheet, styles)
     render_excel_totals(sheet, styles, header_ctx)
     render_excel_sections(sheet, styles)
-    apply_excel_post_layout(sheet, header_ctx, config)
+    apply_excel_post_layout(sheet, header_ctx, config, workbook)
     render_excel_revision_summary_sheet(workbook, styles)
 
     package
@@ -382,8 +383,11 @@ class QuoteExporter
 
   def render_excel_header(sheet, styles, config)
     title = @template.resolved_document_title(@document_kind)
-    sheet.add_row [ title, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title]), height: 20
+    logo_path = excel_company_logo_path
+    sheet.add_row [ title, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:title]), height: (logo_path.present? ? 50 : 20)
     sheet.merge_cells(config.fetch("title_merge", "A1:F1"))
+    add_excel_header_logo(sheet, logo_path) if logo_path.present?
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: (logo_path.present? ? 5 : 3)
 
     left_lines = [
       excel_text(@company.name.to_s),
@@ -394,10 +398,11 @@ class QuoteExporter
     ]
     right_lines = [
       excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
+      (@quote.custom_title.present? ? excel_text("#{doc_t('labels.title')}: #{@quote.custom_title}") : nil),
       excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d')}"),
-      (@template.show_valid_until && @quote.valid_until.present? ? excel_text("Valid Until: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
-      (@template.show_currency ? excel_text("Currency: #{@quote.currency}") : nil),
-      (@quote.trade_term.present? ? excel_text("Trade Terms: #{@quote.trade_term}") : nil)
+      (@template.show_valid_until && @quote.valid_until.present? ? excel_text("#{doc_t('labels.valid_until')}: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
+      (@template.show_currency ? excel_text("#{doc_t('labels.currency')}: #{@quote.currency}") : nil),
+      (@quote.trade_term.present? ? excel_text("#{doc_t('labels.trade_terms')}: #{@quote.trade_term}") : nil)
     ].compact
 
     [ left_lines.length, right_lines.length ].max.times do |idx|
@@ -581,6 +586,35 @@ class QuoteExporter
       add_excel_section_heading(sheet, styles, doc_t("sections.footer"))
       add_excel_section_text_row(sheet, styles, footer_note)
     end
+
+    signature_name = @template.signature_name.to_s.strip
+    signature_image_path = excel_signature_image_path
+    if @template.show_signature_block && (signature_name.present? || signature_image_path.present?)
+      divider_row = sheet.rows.size + 1
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+      add_excel_section_heading(sheet, styles, doc_t("sections.signature"))
+
+      if signature_image_path.present?
+        signature_row = sheet.rows.size + 1
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_value]), height: 44
+        signature_width, signature_height = excel_fitted_dimensions(
+          excel_image_dimensions(signature_image_path),
+          max_width: 156,
+          max_height: 40
+        )
+        sheet.add_image(image_src: signature_image_path) do |image|
+          image.start_at(0, signature_row - 1)
+          image.width = signature_width
+          image.height = signature_height
+        end
+      end
+
+      if signature_name.present?
+        add_excel_section_text_row(sheet, styles, "#{doc_t('labels.authorized_by')}: #{signature_name}")
+      end
+    end
   end
 
   def apply_excel_sheet_options(sheet)
@@ -591,7 +625,7 @@ class QuoteExporter
     nil
   end
 
-  def apply_excel_post_layout(sheet, ctx, config)
+  def apply_excel_post_layout(sheet, ctx, config, workbook)
     widths = (config["column_widths"] || [ 6, 14, 42, 8, 14, 16 ]).map(&:to_f)
     widths[0] = [ widths[0], 6 ].max
     widths[1] = [ widths[1], 8 ].max
@@ -600,6 +634,8 @@ class QuoteExporter
     widths[4] = [ widths[4], 15 ].max
     widths[5] = [ widths[5], 17 ].max
     sheet.column_widths(*widths)
+    apply_excel_watermark(sheet)
+    apply_excel_print_layout(sheet, ctx, workbook)
 
     freeze = config["freeze_pane"]
     return unless freeze
@@ -609,6 +645,43 @@ class QuoteExporter
       pane.state = :frozen
       pane.y_split = freeze.fetch("y_split", ctx[:header_row_index] + 1)
     end
+  end
+
+  def apply_excel_print_layout(sheet, ctx, workbook)
+    sheet.page_setup.orientation = :portrait
+    sheet.page_setup.paper_size = 9 # A4
+    sheet.page_setup.fit_to_width = 1
+    sheet.page_setup.fit_to_height = 0
+
+    sheet.page_margins.left = 0.32
+    sheet.page_margins.right = 0.32
+    sheet.page_margins.top = 0.55
+    sheet.page_margins.bottom = 0.55
+    sheet.page_margins.header = 0.2
+    sheet.page_margins.footer = 0.2
+
+    sheet.print_options.grid_lines = !!@template.excel_show_grid_lines
+    sheet.print_options.headings = false
+    sheet.print_options.horizontal_centered = true
+
+    repeat_row = [ (ctx[:header_row_index] || 0) + 1, 1 ].max
+    last_row = [ sheet.rows.size, repeat_row ].max
+    sheet_ref = excel_sheet_ref(sheet.name)
+    local_sheet_id = workbook.worksheets.index(sheet)
+    return if local_sheet_id.nil?
+
+    set_excel_defined_name(
+      workbook,
+      formula: "#{sheet_ref}!$#{repeat_row}:$#{repeat_row}",
+      name: "_xlnm.Print_Titles",
+      local_sheet_id: local_sheet_id
+    )
+    set_excel_defined_name(
+      workbook,
+      formula: "#{sheet_ref}!$A$1:$F$#{last_row}",
+      name: "_xlnm.Print_Area",
+      local_sheet_id: local_sheet_id
+    )
   end
 
   def build_excel_styles(workbook)
@@ -752,11 +825,14 @@ class QuoteExporter
 
     ext = File.extname(blob.filename.to_s)
     ext = default_extension_for(blob.content_type) if ext.blank?
-    tempfile = Tempfile.new([ "quote_item_image", ext ])
+    tempfile = Tempfile.new([ "quote_item_image", ext ], Rails.root.join("tmp").to_s)
     tempfile.binmode
-    tempfile.write(blob.download)
+    payload = blob.download
+    tempfile.write(payload)
     tempfile.flush
+    tempfile.close
     @excel_tempfiles << tempfile
+    @excel_image_dimensions[tempfile.path] = excel_dimensions_from_payload(payload, blob.content_type.to_s)
     tempfile.path
   rescue StandardError
     nil
@@ -874,9 +950,9 @@ class QuoteExporter
   def excel_item_row_height(description_text, with_images)
     line_count = description_text.to_s.split(/\r?\n/).count
     visible_lines = [ line_count, 1 ].max
-    base_height = 24 + (visible_lines * 18)
-    base_height = [ base_height, 64 ].max if with_images
-    [ [ base_height, 32 ].max, 260 ].min
+    base_height = 16 + (visible_lines * 14)
+    base_height = [ base_height, 56 ].max if with_images
+    [ [ base_height, 26 ].max, 190 ].min
   end
 
   def xlsx_sheet_name
@@ -911,31 +987,34 @@ class QuoteExporter
   end
 
   def excel_item_description_text(item)
+    spec_label = @template.spec_label.to_s.strip.presence || doc_t("labels.spec")
+    addon_label = @template.addon_label.to_s.strip.presence || doc_t("labels.addon")
     title = item.product&.name.presence || item.description.to_s.presence || doc_t("labels.item")
+    title = excel_soft_wrap_text(title)
     lines = [ title ]
     if item.description.present? && item.description.to_s != title
-      lines << item.description.to_s
+      lines << excel_soft_wrap_text(item.description.to_s)
     end
     spec_lines = item.specification_pairs.filter_map do |pair|
-      key = pair[:key].to_s.strip
-      value = pair[:value].to_s.strip
+      key = excel_soft_wrap_text(pair[:key].to_s.strip)
+      value = excel_soft_wrap_text(pair[:value].to_s.strip)
       next if key.blank? && value.blank?
 
       key.present? && value.present? ? "  - #{key}: #{value}" : "  - #{key.presence || value}"
     end
     if spec_lines.any?
-      lines << "#{doc_t('labels.spec')}:"
+      lines << "#{spec_label}:"
       lines.concat(spec_lines)
     end
 
     addon_lines = item.addon_charge_entries.filter_map do |entry|
-      name = entry[:name].to_s.strip
+      name = excel_soft_wrap_text(entry[:name].to_s.strip)
       next if name.blank?
 
       "  - #{name} (#{money_text(entry[:amount])})"
     end
     if addon_lines.any?
-      lines << "#{doc_t('labels.addon')}:"
+      lines << "#{addon_label}:"
       lines.concat(addon_lines)
     end
     lines.join("\n")
@@ -1037,6 +1116,68 @@ class QuoteExporter
     nil
   end
 
+  def excel_company_logo_path
+    return nil unless @template.show_logo
+    return nil unless @company.respond_to?(:logo) && @company.logo.attached?
+
+    excel_attachment_path_for(@company.logo, basename: "quote_company_logo")
+  end
+
+  def excel_template_watermark_image_path
+    return nil unless @template.show_watermark
+    return nil unless @template.respond_to?(:watermark_image) && @template.watermark_image.attached?
+
+    excel_attachment_path_for(@template.watermark_image, basename: "quote_watermark")
+  end
+
+  def excel_signature_image_path
+    return nil unless @template.respond_to?(:signature_image) && @template.signature_image.attached?
+
+    excel_attachment_path_for(@template.signature_image, basename: "quote_signature")
+  end
+
+  def excel_attachment_path_for(attachment, basename:)
+    blob = attachment.blob
+    payload = blob.download
+    return nil if payload.blank?
+
+    content_type = blob.content_type.to_s.downcase
+    extension = File.extname(blob.filename.to_s).presence || default_extension_for(content_type)
+
+    if EXCEL_SUPPORTED_IMAGE_TYPES.include?(content_type)
+      tempfile = Tempfile.new([ basename, extension ], Rails.root.join("tmp").to_s)
+      tempfile.binmode
+      tempfile.write(payload)
+      tempfile.flush
+      tempfile.close
+      @excel_tempfiles << tempfile
+      @excel_image_dimensions[tempfile.path] = excel_dimensions_from_payload(payload, content_type)
+      return tempfile.path
+    end
+
+    convert_excel_image_to_png(payload, basename: basename)
+  rescue StandardError
+    nil
+  end
+
+  def convert_excel_image_to_png(payload, basename:)
+    require "mini_magick"
+
+    image = MiniMagick::Image.read(payload)
+    image.auto_orient
+    tempfile = Tempfile.new([ basename, ".png" ], Rails.root.join("tmp").to_s)
+    tempfile.binmode
+    image.format("png")
+    image.write(tempfile.path)
+    tempfile.flush
+    tempfile.close
+    @excel_tempfiles << tempfile
+    @excel_image_dimensions[tempfile.path] = [ 120.0, 40.0 ]
+    tempfile.path
+  rescue StandardError
+    nil
+  end
+
   def template_watermark_image_io
     return nil unless @template.respond_to?(:watermark_image) && @template.watermark_image.attached?
 
@@ -1046,6 +1187,139 @@ class QuoteExporter
     io = StringIO.new(decoded)
     io.set_encoding(Encoding::BINARY) if io.respond_to?(:set_encoding)
     io
+  rescue StandardError
+    nil
+  end
+
+  def add_excel_header_logo(sheet, logo_path)
+    return if logo_path.blank?
+
+    width, height = excel_fitted_dimensions(excel_image_dimensions(logo_path), max_width: 140, max_height: 42)
+    col_index =
+      case @template.logo_position
+      when "left" then 0
+      when "center" then 2
+      else 5
+      end
+
+    sheet.add_image(image_src: logo_path) do |image|
+      image.start_at(col_index, 0)
+      image.width = width
+      image.height = height
+    end
+  rescue StandardError
+    nil
+  end
+
+  def apply_excel_watermark(sheet)
+    return unless @template.show_watermark
+
+    watermark_image_path = excel_template_watermark_image_path
+    if watermark_image_path.present?
+      width, height = excel_fitted_dimensions(excel_image_dimensions(watermark_image_path), max_width: 320, max_height: 170)
+      row_index = [ (sheet.rows.size * 0.35).floor, 6 ].max
+      sheet.add_image(image_src: watermark_image_path) do |image|
+        image.start_at(1, row_index)
+        image.width = width
+        image.height = height
+      end
+      return
+    end
+
+    watermark_text = @template.watermark_text.to_s.strip.presence || @company.name.to_s.strip.presence || "CONFIDENTIAL"
+    return if watermark_text.blank?
+
+    sheet.header_footer.odd_footer = "&C#{excel_header_footer_text(watermark_text)}"
+  rescue StandardError
+    nil
+  end
+
+  def excel_header_footer_text(value)
+    value.to_s.gsub("&", "&&")
+  end
+
+  def set_excel_defined_name(workbook, formula:, name:, local_sheet_id:)
+    existing = workbook.defined_names.find do |defined_name|
+      defined_name.name == name && defined_name.local_sheet_id.to_i == local_sheet_id.to_i
+    end
+    workbook.defined_names.delete(existing) if existing
+    workbook.defined_names << Axlsx::DefinedName.new(formula, name: name, local_sheet_id: local_sheet_id)
+  end
+
+  def excel_sheet_ref(sheet_name)
+    escaped = sheet_name.to_s.gsub("'", "''")
+    "'#{escaped}'"
+  end
+
+  def excel_image_dimensions(path)
+    dimensions = @excel_image_dimensions[path]
+    return dimensions if dimensions.is_a?(Array) && dimensions.length == 2 && dimensions[0].to_f.positive? && dimensions[1].to_f.positive?
+
+    [ 120.0, 40.0 ]
+  end
+
+  def excel_fitted_dimensions(dimensions, max_width:, max_height:)
+    source_width = [ dimensions[0].to_f, 1.0 ].max
+    source_height = [ dimensions[1].to_f, 1.0 ].max
+    ratio = [ max_width / source_width, max_height / source_height, 1.0 ].min
+    [ (source_width * ratio).round, (source_height * ratio).round ]
+  end
+
+  def excel_dimensions_from_payload(payload, content_type)
+    data = payload.to_s.b
+    return nil if data.bytesize < 10
+
+    case content_type.to_s.downcase
+    when "image/png"
+      return nil if data.bytesize < 24
+      width = data[16, 4].unpack1("N")
+      height = data[20, 4].unpack1("N")
+      [ width.to_f, height.to_f ] if width.to_i.positive? && height.to_i.positive?
+    when "image/gif"
+      return nil if data.bytesize < 10
+      width = data[6, 2].unpack1("v")
+      height = data[8, 2].unpack1("v")
+      [ width.to_f, height.to_f ] if width.to_i.positive? && height.to_i.positive?
+    when "image/bmp"
+      return nil if data.bytesize < 26
+      width = data[18, 4].unpack1("l<").to_i.abs
+      height = data[22, 4].unpack1("l<").to_i.abs
+      [ width.to_f, height.to_f ] if width.positive? && height.positive?
+    when "image/jpeg", "image/jpg"
+      excel_jpeg_dimensions(data)
+    end
+  rescue StandardError
+    nil
+  end
+
+  def excel_jpeg_dimensions(data)
+    index = 2
+    while index < data.bytesize - 1
+      break unless data.getbyte(index) == 0xFF
+
+      marker = data.getbyte(index + 1)
+      index += 2
+
+      if marker == 0xD9 || marker == 0xDA
+        break
+      elsif marker == 0x01 || (0xD0..0xD7).cover?(marker)
+        next
+      end
+
+      break if index + 1 >= data.bytesize
+      segment_length = data[index, 2].unpack1("n")
+      break if segment_length.nil? || segment_length < 2 || index + segment_length > data.bytesize
+
+      if [ 0xC0, 0xC1, 0xC2, 0xC3, 0xC5, 0xC6, 0xC7, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF ].include?(marker)
+        return nil if segment_length < 7
+        height = data[index + 3, 2].unpack1("n")
+        width = data[index + 5, 2].unpack1("n")
+        return [ width.to_f, height.to_f ] if width.to_i.positive? && height.to_i.positive?
+      end
+
+      index += segment_length
+    end
+    nil
   rescue StandardError
     nil
   end
@@ -1071,5 +1345,9 @@ class QuoteExporter
     gg = (g * (1 - amount)).round
     bb = (b * (1 - amount)).round
     format("%02X%02X%02X", rr, gg, bb)
+  end
+
+  def excel_soft_wrap_text(value)
+    value.to_s.gsub(/(\S{24})(?=\S)/, "\\1 ")
   end
 end

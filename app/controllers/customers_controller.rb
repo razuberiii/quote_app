@@ -1280,7 +1280,7 @@ class CustomersController < ApplicationController
     elsif signal&.type == "expiring_soon"
       [
         I18n.t("signals.quote_expiring"),
-        { label: I18n.t("actions.renew_quote"), path: duplicate_quote_path(quote), style: "is-attention" }
+        { label: I18n.t("actions.renew_quote"), path: duplicate_quote_path(quote), method: :post, style: "is-attention" }
       ]
     elsif signal&.type == "hot_engagement_no_follow_up"
       [

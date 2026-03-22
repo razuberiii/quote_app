@@ -156,6 +156,10 @@ class QuoteItem < ApplicationRecord
   end
 
   def apply_default_configuration_from_product
+    # Keep page-edited values as source of truth for existing quote items.
+    # Product defaults should only seed brand-new rows.
+    return unless new_record?
+
     if specification_pairs.blank?
       defaults = product.effective_default_specs.map { |entry| { key: entry[:name], value: entry[:value] } }
       self[:spec_snapshot] = defaults if defaults.present?

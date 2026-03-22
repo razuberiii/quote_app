@@ -4,6 +4,7 @@
 <% grand_total_value = quote.grand_total.to_d %>
 <% discount_pct_value = subtotal_value.positive? ? ((quote.discount_amount.to_d / subtotal_value) * 100).round(2) : 0 %>
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
+<% submit_label = local_assigns[:submit_label].presence || (quote.persisted? ? t("quotes.view.form.update_quote") : t("quotes.view.form.create_quote")) %>
 <% submit_loading_label = quote.persisted? ? t("quotes.view.form.updating") : t("quotes.view.form.creating") %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
 <%
@@ -456,7 +457,7 @@
     </section>
 
     <div class="quote-form-submit">
-      <%= f.submit nil, class: ui_button_classes(:primary), data: { default_label: (quote.persisted? ? t("quotes.view.form.update_quote") : t("quotes.view.form.create_quote")) } %>
+      <%= f.submit submit_label, class: ui_button_classes(:primary), data: { default_label: submit_label } %>
     </div>
   <% end %>
 </div>

@@ -219,8 +219,6 @@ es-419:
         no_immediate_risk: No hay riesgos inmediatos de seguimiento.
         action_required: Requiere atención (%{count})
         action_overview: Pendientes (%{count})
-        risk_customers: "%{count} clientes requieren seguimiento"
-        stalled_negotiations: "%{count} negociaciones estancadas"
         no_customer_or_decision_risk: Sin presión inmediata de seguimiento o decisión
         handle_overdue_first: Se muestra primero 1 pendiente; continúa con el resto en la cola.
         jump_to_action_items: Ver pendientes (%{count})
@@ -239,12 +237,29 @@ es-419:
         period_month: Mes
         period_week: Semana
         pending_followups: Seguimientos pendientes
+        followup_risk: Riesgo de seguimiento
+        followup_risk_detail: "%{count} cuentas tienen riesgo de seguimiento hoy"
+        metrics_overview: Métricas clave
+        metrics_overview_caption: Vista tranquila de la presión actual del pipeline.
+        followup_mix_caption: Distribución de la cola de seguimiento
+        mix_overdue: Vencido
+        mix_due_today: Vence hoy
+        mix_upcoming: Próximo
+        mix_no_schedule: Sin programación
         today_focus: Prioridades de hoy
+        today_focus_caption: Clientes prioritarios para enfocarte hoy.
         top_priority: Prioridad máxima
         secondary: Secundario
         show_more: Mostrar más (%{count})
         show_less: Mostrar menos
         no_high_priority_actions: Hoy no hay acciones de alta prioridad.
+        quote_todo: Pendientes de cotización
+        quote_todo_caption: Tareas de cotización pendientes por atender.
+        quote_todo_empty: No hay pendientes de cotización por atender.
+        todo_missing_win_reason: Negocio ganado sin razón de cierre
+        todo_missing_loss_reason: Negocio perdido sin razón de pérdida
+        todo_revision_requested: El comprador pidió revisión, atender primero
+        todo_fill_reason: Completar razón
         deal_radar: Radar de oportunidades
         deal_radar_summary_hint: Se muestra primero 1 señal clave; revisa las demás en la lista de cotizaciones.
         deal_radar_count:
@@ -333,6 +348,74 @@ es-419:
         quote_not_viewed: "%{reference} no ha sido visto durante 3 días después de ser enviado."
         quote_expiring: "%{reference} está cerca de vencer."
         revision_requested: El comprador solicitó cambios en %{reference}.
+      today_focus:
+        cta:
+          view_customer: Ver cliente
+          go_follow_up: Dar seguimiento
+          record_progress: Registrar avance
+          set_next_follow_up: Definir próximo seguimiento
+        secondary_hint: "También: %{reasons}"
+        quote_risk_category:
+          revision: solicitud de revisión
+          hot: alta interacción sin seguimiento
+          stalled: negociación estancada
+          expiring: cotización por vencer
+          general: riesgo de cotización
+        reason_short:
+          overdue_follow_up: seguimiento vencido
+          due_today_follow_up: vence hoy
+          high_value_stalled: alto valor estancado
+          customer_has_quote_risk: riesgo de cotización
+          long_time_no_follow_up: sin seguimiento reciente
+          missing_next_follow_up: falta próximo seguimiento
+        reason:
+          overdue_follow_up:
+            title: "%{name}: seguimiento vencido"
+            subtitle: Lleva %{days} días vencido y el riesgo de pérdida aumenta.
+          due_today_follow_up:
+            title: "%{name}: seguimiento para hoy"
+            subtitle: Hoy toca seguimiento; conviene contactar cuanto antes.
+          high_value_stalled:
+            title: "%{name}: cuenta de alto valor estancada"
+            subtitle: Es una cuenta de alto valor con avance detenido.
+          customer_has_quote_risk:
+            title: "%{name}: riesgo de cotización"
+            subtitle: Esta cuenta tiene riesgo por %{category}. Revísala primero.
+            subtitle_with_more: Esta cuenta tiene riesgo por %{category} y %{count} riesgos adicionales.
+          long_time_no_follow_up:
+            title: "%{name}: sin seguimiento reciente"
+            subtitle: Lleva mucho tiempo sin contacto. Retoma el seguimiento.
+          missing_next_follow_up:
+            title: "%{name}: sin próximo seguimiento"
+            subtitle: Aún no se definió la próxima fecha de seguimiento.
+      quote_todo:
+        cta:
+          fill_reason: Completar razón
+          open_quote: Abrir cotización
+          send_quote: Enviar cotización
+          handle_revision: Gestionar revisión
+          go_follow_up: Dar seguimiento
+        reason:
+          won_reason_missing:
+            subtitle: Falta registrar el motivo de cierre ganado
+          lost_reason_missing:
+            subtitle: Falta registrar el motivo de pérdida
+          revision_requested:
+            subtitle: El cliente pidió una revisión
+          draft_pending_send:
+            subtitle: El borrador aún no se envió
+          hot_engagement_no_follow_up:
+            subtitle: Alta interacción sin seguimiento
+          stalled_negotiation:
+            subtitle: La negociación está estancada
+          expiring_soon:
+            subtitle: La cotización está por vencer
+          viewed_no_follow_up:
+            subtitle: Fue vista pero no se dio seguimiento
+          not_viewed_7d:
+            subtitle: Enviada y sin vista por 7 días
+          not_viewed_3d:
+            subtitle: Enviada y sin vista por 3 días
       not_enough_data: Aún no hay datos suficientes
       export_mix_zero: Cotización 0% / PI 0%
       export_mix: Cotización %{quotation}% / PI %{pi}%
@@ -474,6 +557,8 @@ es-419:
         quote_subtitle: Empieza un borrador, completa los precios y luego compártelo con el cliente.
         revision_title: Crear borrador de revisión
         revision_subtitle: A partir de %{quote_no}, crea un nuevo borrador de revisión y ajusta lo necesario antes de volver a compartirlo.
+        create_revision: Crear revisión
+        back_to_quote: Volver a la cotización
       edit:
         title: Editar borrador de cotización
         subtitle: Cotización %{quote_no} · Revisión V%{revision}
@@ -2649,6 +2734,7 @@ es-419:
       revision_not_actionable: Esta revisión ya no es procesable.
       quotation_accepted: Cotización aceptada. Gracias.
       revision_request_sent: Solicitud de revisión enviada.
+    decision_intro_active: Revisa esta cotización y elige cómo deseas continuar.
     preview_mode:
       title: Modo de vista previa
       body: Solo salida renderizada. Todas las acciones públicas están deshabilitadas en el modo de vista previa.

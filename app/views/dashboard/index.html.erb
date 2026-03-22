@@ -1,4 +1,7 @@
-<section class="app-page-shell sales-dashboard">
+<section class="app-page-shell sales-dashboard"
+         data-controller="dashboard-actions dashboard-enhance"
+         data-dashboard-actions-show-less-label-value="<%= t("dashboard.view.index.show_less") %>"
+         data-dashboard-actions-show-more-template-value="<%= t("dashboard.view.index.show_more", count: "%{count}") %>">
   <header class="app-page-header">
     <div class="app-page-header-main">
       <h1><%= t("dashboard.view.index.title") %></h1>
@@ -68,7 +71,7 @@
             <% end %>
           </div>
           <% if @secondary_actions.any? %>
-            <div class="dashboard-action-more" data-action-more hidden>
+            <div class="dashboard-action-more" data-action-more data-expand-id="primary-actions" hidden>
               <% @secondary_actions.each do |item| %>
                 <div class="dashboard-action-item is-<%= item[:priority] %>">
                   <div>
@@ -89,7 +92,7 @@
             <%= render "components/ui/button",
                        variant: :secondary,
                        class: "dashboard-action-toggle dashboard-inline-toggle",
-                       attrs: { data: { action_toggle: true, expanded: "false", action_count: @secondary_actions.size } } do %>
+                       attrs: { data: { action_toggle: true, expanded: "false", action_count: @secondary_actions.size, expand_id: "primary-actions" } } do %>
               <%= t("dashboard.view.index.show_more", count: @secondary_actions.size) %>
             <% end %>
           <% end %>
@@ -226,21 +229,27 @@
           <div class="dashboard-kpi-head">
             <span class="app-stat-label"><%= t("dashboard.view.index.open_deals") %></span>
           </div>
-          <strong class="app-stat-value"><%= @dashboard_stats[:open_deals][:value] %></strong>
+          <strong class="app-stat-value"
+                  data-dashboard-enhance-target="count"
+                  data-count-final="<%= @dashboard_stats[:open_deals][:value] %>"><%= @dashboard_stats[:open_deals][:value] %></strong>
           <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:open_deals][:trend_class] %>"><%= @dashboard_stats[:open_deals][:trend_text] %></small>
         </article>
         <article class="dashboard-kpi-card app-stat-card">
           <div class="dashboard-kpi-head">
             <span class="app-stat-label"><%= t("dashboard.view.index.quotes_this_period", period: (@kpi_period == "month" ? t("dashboard.view.index.period_month") : t("dashboard.view.index.period_week"))) %></span>
           </div>
-          <strong class="app-stat-value"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
+          <strong class="app-stat-value"
+                  data-dashboard-enhance-target="count"
+                  data-count-final="<%= @dashboard_stats[:quotes_this_week][:value] %>"><%= @dashboard_stats[:quotes_this_week][:value] %></strong>
           <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:quotes_this_week][:trend_class] %>"><%= @dashboard_stats[:quotes_this_week][:trend_text] %></small>
         </article>
         <article class="dashboard-kpi-card app-stat-card">
           <div class="dashboard-kpi-head">
             <span class="app-stat-label"><%= t("dashboard.view.index.pending_followups") %></span>
           </div>
-          <strong class="app-stat-value"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
+          <strong class="app-stat-value"
+                  data-dashboard-enhance-target="count"
+                  data-count-final="<%= @dashboard_stats[:pending_follow_ups][:value] %>"><%= @dashboard_stats[:pending_follow_ups][:value] %></strong>
           <small class="app-stat-meta dashboard-kpi-trend <%= @dashboard_stats[:pending_follow_ups][:trend_class] %>"><%= @dashboard_stats[:pending_follow_ups][:trend_text] %></small>
         </article>
       </div>
@@ -452,53 +461,3 @@
   </div>
 
 </section>
-
-<script>
-  (() => {
-    const showLessLabel = "<%= j t("dashboard.view.index.show_less") %>";
-    const showMoreLabel = "<%= j t("dashboard.view.index.show_more", count: "%{count}") %>";
-
-    const bindActionToggle = () => {
-      document.querySelectorAll("[data-action-toggle]").forEach((toggle) => {
-        const extra = document.querySelector("[data-action-more]");
-        if (!extra || toggle.dataset.bound === "true") return;
-        toggle.dataset.bound = "true";
-
-        const count = Number(toggle.dataset.actionCount || 0);
-        const applyState = (expanded) => {
-          extra.hidden = !expanded;
-          toggle.dataset.expanded = expanded ? "true" : "false";
-          toggle.textContent = expanded ? showLessLabel : showMoreLabel.replace("%{count}", String(count));
-        };
-
-        applyState(false);
-
-        toggle.addEventListener("click", () => {
-          applyState(toggle.dataset.expanded !== "true");
-        });
-      });
-
-      document.querySelectorAll("[data-action-items-toggle]").forEach((toggle) => {
-        const extra = document.querySelector("[data-action-items-more]");
-        if (!extra || toggle.dataset.bound === "true") return;
-        toggle.dataset.bound = "true";
-
-        const count = Number(toggle.dataset.actionCount || 0);
-        const applyState = (expanded) => {
-          extra.hidden = !expanded;
-          toggle.dataset.expanded = expanded ? "true" : "false";
-          toggle.textContent = expanded ? showLessLabel : showMoreLabel.replace("%{count}", String(count));
-        };
-
-        applyState(false);
-
-        toggle.addEventListener("click", () => {
-          applyState(toggle.dataset.expanded !== "true");
-        });
-      });
-    };
-
-    bindActionToggle();
-    document.addEventListener("turbo:load", bindActionToggle);
-  })();
-</script>

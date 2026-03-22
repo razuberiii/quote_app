@@ -22,7 +22,7 @@
       <% end %>
     </div>
     <% if action_items.size > 4 %>
-      <div class="dashboard-task-more" data-action-items-more hidden>
+      <div class="dashboard-task-more" data-action-items-more data-expand-id="action-items" hidden>
         <% action_items.drop(4).each do |item| %>
           <% item_cta = signal_presenter.action_item_cta(item) %>
           <article class="dashboard-side-module-item dashboard-task-item is-<%= item.priority %>">
@@ -43,7 +43,7 @@
         <%= render "components/ui/button",
                    variant: :secondary,
                    class: "dashboard-action-toggle dashboard-inline-toggle",
-                   attrs: { data: { action_items_toggle: true, action_count: action_items.size - 4, expanded: "false" } } do %>
+                   attrs: { data: { action_items_toggle: true, action_count: action_items.size - 4, expanded: "false", expand_id: "action-items" } } do %>
           <%= t("dashboard.view.index.show_more", count: action_items.size - 4) %>
         <% end %>
       </div>
@@ -85,7 +85,7 @@
           <% end %>
 
           <% if action_items.size > 4 %>
-            <div class="dashboard-task-more" data-action-items-more hidden>
+            <div class="dashboard-task-more" data-action-items-more data-expand-id="action-items" hidden>
               <% action_items.drop(4).each do |item| %>
                 <% item_cta = signal_presenter.action_item_cta(item) %>
                 <article class="dashboard-task-item is-<%= item.priority %>">
@@ -110,7 +110,7 @@
               <%= render "components/ui/button",
                          variant: :secondary,
                          class: "dashboard-action-toggle dashboard-inline-toggle",
-                         attrs: { data: { action_items_toggle: true, action_count: action_items.size - 4, expanded: "false" } } do %>
+                         attrs: { data: { action_items_toggle: true, action_count: action_items.size - 4, expanded: "false", expand_id: "action-items" } } do %>
                 <%= t("dashboard.view.index.show_more", count: action_items.size - 4) %>
               <% end %>
             </div>

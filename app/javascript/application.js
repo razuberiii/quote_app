@@ -504,3 +504,31 @@ if (!window.__productLightboxListenersBound) {
 
   document.addEventListener("turbo:before-cache", closeProductLightbox);
 }
+
+const bindFrameMotion = () => {
+  if (window.__frameMotionBound) return;
+  window.__frameMotionBound = true;
+
+  const motionAllowed = () =>
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  document.addEventListener("turbo:before-fetch-request", (event) => {
+    const frame = event.target;
+    if (!frame || frame.tagName !== "TURBO-FRAME") return;
+    frame.classList.add("is-content-loading");
+  });
+
+  document.addEventListener("turbo:frame-load", (event) => {
+    const frame = event.target;
+    if (!frame || frame.tagName !== "TURBO-FRAME") return;
+    frame.classList.remove("is-content-loading");
+
+    if (!motionAllowed()) return;
+    frame.classList.remove("is-content-enter");
+    void frame.offsetWidth;
+    frame.classList.add("is-content-enter");
+    window.setTimeout(() => frame.classList.remove("is-content-enter"), 240);
+  });
+};
+
+bindFrameMotion();

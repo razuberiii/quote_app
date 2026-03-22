@@ -1,21 +1,44 @@
 <%= render "shared/settings_header", title: t("team_members.view.show.header_title"), section: :team %>
 
-<section class="team-members-panel">
-  <div class="member-profile-head">
-    <div class="member-profile-avatar">
-      <% if @member.avatar.attached? %>
-        <%= image_tag @member.avatar, alt: t("team_members.view.show.avatar_alt") %>
-      <% else %>
-        <span><%= @member.email.to_s.first.to_s.upcase %></span>
-      <% end %>
-    </div>
-    <div class="member-profile-meta">
+<section class="app-page-shell app-page-shell--settings-form team-admin-shell">
+  <article class="app-surface team-members-panel team-member-profile-panel">
+    <div class="app-section-heading">
       <h2><%= @member.email %></h2>
-      <p><strong><%= t("team_members.view.show.company_role") %>:</strong> <span class="role-badge role-badge-<%= @member.company_role %>"><%= @member.company_role.capitalize %></span></p>
-      <p><strong><%= t("team_members.view.show.company") %>:</strong> <%= @member.company.name %></p>
-      <p><strong><%= t("team_members.view.show.joined") %>:</strong> <%= @member.created_at.strftime("%Y-%m-%d %H:%M") %></p>
+      <p class="app-section-caption team-members-hint"><%= t("team_members.view.show.header_title") %></p>
     </div>
-  </div>
-</section>
 
-<%= link_to t("team_members.view.show.back"), team_members_path, class: "app-ui-button app-ui-button--secondary" %>
+    <div class="team-member-profile-content">
+      <div class="account-avatar-preview team-member-profile-avatar">
+        <% if @member.avatar.attached? %>
+          <%= image_tag @member.avatar, alt: t("team_members.view.show.avatar_alt") %>
+        <% else %>
+          <span><%= @member.email.to_s.first.to_s.upcase %></span>
+        <% end %>
+      </div>
+
+      <div class="team-member-profile-grid">
+        <article class="team-member-profile-item">
+          <span class="team-member-profile-label"><%= t("team_members.view.show.company_role") %></span>
+          <strong class="team-member-profile-value">
+            <%= status_badge(
+                  t("team_members.view.index.roles.#{@member.company_role}", default: @member.company_role.to_s.humanize),
+                  @member.company_role == "admin" ? :indigo : :slate
+                ) %>
+          </strong>
+        </article>
+        <article class="team-member-profile-item">
+          <span class="team-member-profile-label"><%= t("team_members.view.show.company") %></span>
+          <strong class="team-member-profile-value"><%= @member.company.name %></strong>
+        </article>
+        <article class="team-member-profile-item">
+          <span class="team-member-profile-label"><%= t("team_members.view.show.joined") %></span>
+          <strong class="team-member-profile-value"><%= @member.created_at.strftime("%Y-%m-%d %H:%M") %></strong>
+        </article>
+      </div>
+    </div>
+
+    <div class="team-member-profile-actions">
+      <%= link_to t("team_members.view.show.back"), team_members_path, class: ui_button_classes(:secondary) %>
+    </div>
+  </article>
+</section>

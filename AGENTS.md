@@ -1,9 +1,8 @@
-﻿# AGENTS.md
+# AGENTS.md
 
 ## Purpose
 This file defines project execution rules for coding agents working on this repository.
 Read this file before making any changes.
-
 ## Documentation First Rules (Important)
 1. Before starting any task, read this file (`AGENTS.md`) once end-to-end.
 2. Treat project documentation as part of the codebase and maintain it continuously.
@@ -11,6 +10,7 @@ Read this file before making any changes.
 - Update the relevant `.md` files in the same task.
 - Report what was updated and why.
 4. If anything is ambiguous or risky, ask the project owner directly before proceeding.
+5. Any new scoped plan/task document under `docs/` must be created from `docs/plan-template.md` structure (same section skeleton).
 
 ## Environment
 - OS: Windows

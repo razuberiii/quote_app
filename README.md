@@ -144,7 +144,7 @@ Ensure before deploy:
 
 - Agent/project execution rules are defined in `AGENTS.md`.
 - CSS conventions are in `docs/css-components.md` and should be updated when CSS patterns change.
-- For scoped planning/rule-making (UI, feature, stability, performance, refactor), start from `docs/plan-template.md`.
+- For scoped planning/rule-making (UI, feature, stability, performance, refactor), plans must follow `docs/plan-template.md` structure.
 - When a cycle is completed, move its plan into `docs/archive/` with a dated filename.
 - Admin-only routes are under `/admin/*` and require `role=admin`.
 - Suspended users are blocked from login and redirected to `/suspended`.

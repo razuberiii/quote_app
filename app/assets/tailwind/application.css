@@ -19,53 +19,7 @@
   --color-ui-table-head-fg: #ffffff;
 }
 
-/* Stable semantic classes for migrated filters/pills. */
-.app-filter-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #334155;
-  font-size: 0.95rem;
-  line-height: 1.2;
-  text-decoration: none;
-  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease, box-shadow 0.16s ease;
-}
-
-.app-filter-pill:hover {
-  background: #f8fafc;
-  border-color: #94a3b8;
-  color: #1e293b;
-}
-
-.app-filter-pill.is-active {
-  background: var(--brand-primary, #1f3650);
-  border-color: var(--brand-primary, #1f3650);
-  color: var(--brand-on-primary, #ffffff);
-  box-shadow: none;
-}
-
-.app-filter-pill.is-active:hover {
-  filter: brightness(0.98);
-  color: var(--brand-on-primary, #ffffff);
-}
-
-.app-filter-pill--kpi {
-  min-height: 40px;
-  padding: 0 16px;
-  font-size: 0.98rem;
-  font-weight: 600;
-}
-
-.app-filter-pill--kpi.is-active {
-  background: var(--brand-primary, #1f3650);
-  border-color: var(--brand-primary, #1f3650);
-  color: var(--brand-on-primary, #ffffff);
-}
+/* Canonical semantic pill styles live in app/assets/stylesheets/components.css. */
 
 /* Explicit spacing helpers for customers filters, avoids utility-class mismatch. */
 .app-filter-stack {

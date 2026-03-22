@@ -161,6 +161,37 @@
           setupMarketingReveal();
         };
 
+        const setupPageTransitions = () => {
+          if (window.__marketingPageTransitionBound) return;
+          window.__marketingPageTransitionBound = true;
+
+          const prefersReducedMotion = () =>
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+          document.addEventListener("turbo:visit", (event) => {
+            if (prefersReducedMotion()) return;
+            if (event?.detail?.action === "restore") return;
+            document.documentElement.classList.add("is-page-leaving");
+          });
+
+          document.addEventListener("turbo:render", () => {
+            if (prefersReducedMotion()) return;
+            document.documentElement.classList.remove("is-page-leaving");
+            document.documentElement.classList.add("is-page-entering");
+
+            window.requestAnimationFrame(() => {
+              window.requestAnimationFrame(() => {
+                document.documentElement.classList.remove("is-page-entering");
+              });
+            });
+          });
+
+          document.addEventListener("turbo:before-cache", () => {
+            document.documentElement.classList.remove("is-page-leaving", "is-page-entering");
+          });
+        };
+
+        setupPageTransitions();
         document.addEventListener("turbo:load", initMarketingUi);
         document.addEventListener("DOMContentLoaded", initMarketingUi);
       })();

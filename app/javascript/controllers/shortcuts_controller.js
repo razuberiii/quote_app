@@ -20,6 +20,7 @@ export default class extends Controller {
   disconnect() {
     window.clearTimeout(this._searchTimer);
     window.clearTimeout(this._paletteSearchTimer);
+    window.clearTimeout(this._modalHideTimer);
     document.removeEventListener("keydown", this._handler);
   }
 
@@ -28,12 +29,12 @@ export default class extends Controller {
     this.closeQuotePicker();
     const modal = document.getElementById("shortcuts-modal");
     if (!modal) return;
-    modal.removeAttribute("hidden");
+    this.showModal(modal);
     modal.querySelector(".js-shortcuts-close")?.focus();
   }
 
   closeHelp() {
-    document.getElementById("shortcuts-modal")?.setAttribute("hidden", "");
+    this.hideModal(document.getElementById("shortcuts-modal"));
   }
 
   openCommandPalette() {
@@ -47,16 +48,14 @@ export default class extends Controller {
 
     this.paletteItems = [];
     this.paletteActiveIndex = -1;
-    modal.removeAttribute("hidden");
+    this.showModal(modal);
     input.value = "";
     this.loadCommandPalette("");
     input.focus();
   }
 
   closeCommandPalette() {
-    document
-      .getElementById("command-palette-modal")
-      ?.setAttribute("hidden", "");
+    this.hideModal(document.getElementById("command-palette-modal"));
     this.paletteItems = [];
     this.paletteActiveIndex = -1;
   }
@@ -229,16 +228,14 @@ export default class extends Controller {
     );
     if (!modal || !searchInput) return;
 
-    modal.removeAttribute("hidden");
+    this.showModal(modal);
     searchInput.value = "";
     this.loadCustomerCandidates("");
     searchInput.focus();
   }
 
   closeQuotePicker() {
-    document
-      .getElementById("shortcut-quote-picker-modal")
-      ?.setAttribute("hidden", "");
+    this.hideModal(document.getElementById("shortcut-quote-picker-modal"));
   }
 
   quotePickerBackdropClick(e) {
@@ -423,5 +420,23 @@ export default class extends Controller {
     if (!href) return false;
     Turbo.visit(href);
     return true;
+  }
+
+  showModal(modal) {
+    if (!modal) return;
+    window.clearTimeout(this._modalHideTimer);
+    modal.hidden = false;
+    window.requestAnimationFrame(() => {
+      modal.classList.add("is-open");
+    });
+  }
+
+  hideModal(modal) {
+    if (!modal) return;
+    modal.classList.remove("is-open");
+    window.clearTimeout(this._modalHideTimer);
+    this._modalHideTimer = window.setTimeout(() => {
+      modal.hidden = true;
+    }, 180);
   }
 }

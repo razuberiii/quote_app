@@ -101,7 +101,12 @@ Quote families are local to quote workflows.
 
 Dashboard families are local to dashboard sequencing and must not be reused as global card primitives.
 
-6. Admin Console helpers (minimal)
+6. Team-scope families
+- `.team-member-profile-*` (team member detail card layout, avatar + key info blocks)
+
+Team families are local to team management pages.
+
+7. Admin Console helpers (minimal)
 - Prefer canonical families for admin pages: `.app-page-shell`, `.app-surface`, `.app-table-surface`, `.app-ui-button`, `.app-ui-input`.
 - Keep admin-specific classes only as narrow helpers where canonical classes are insufficient:
   - `.admin-impersonation-banner*` (banner layout helper)
@@ -115,7 +120,7 @@ Dashboard families are local to dashboard sequencing and must not be reused as g
 
 Do not create a parallel admin visual system unless explicitly approved.
 
-7. Scoped exception families
+8. Scoped exception families
 - When a UI block has a clearly different product role and tone (for example, a personal sticky-note rail that is intentionally non-system), it may use a dedicated feature family instead of force-fitting existing card/form families.
 - This exception must remain strictly scoped by feature prefix and ownership boundaries. Example: `.dashboard-notes-*` is mounted globally for signed-in pages, but should not leak into other feature families or become generic card primitives.
 - Do not create broad global overrides for this exception type; keep tokens restrained and compatible with admin baseline.
@@ -178,7 +183,27 @@ If a selector appears in multiple sections, consolidate into one canonical block
 - Use: `.settings-subsection`, `.settings-subsection--spaced` inside settings panels to reduce nested box heaviness.
 - Example: `app/views/company_settings/edit.html.erb`
 
-## 8. Scenario Quickstart
+7. Filter pills
+- Use: `.app-filter-pill`, `.app-filter-pill--kpi`
+- Canonical source: `app/assets/stylesheets/components.css` (do not redefine this family in `app/assets/tailwind/application.css`)
+
+## 8. Motion Tokens
+
+Use shared motion tokens from `:root` in `components.css`:
+
+- `--motion-duration-fast`
+- `--motion-duration-base`
+- `--motion-duration-slow`
+- `--motion-ease-standard`
+- `--motion-ease-emphasized`
+
+Rules:
+
+1. New transitions/animations in app-level reusable components must use motion tokens.
+2. Do not hardcode random one-off durations/easing in canonical families when a token is suitable.
+3. Keep motion subtle and state-driven; avoid decorative motion loops in CRUD surfaces.
+
+## 9. Scenario Quickstart
 
 1. New form page
 - Shell: `.app-page-shell` + `.app-surface`
@@ -196,7 +221,7 @@ If a selector appears in multiple sections, consolidate into one canonical block
 - Use canonical helper buttons for confirm/cancel
 - For runtime-created actions, use helper-generated class strings
 
-## 9. Frontend JS Utilities
+## 10. Frontend JS Utilities
 
 These small JS tools are in `app/javascript/controllers/` (Stimulus).
 
@@ -232,7 +257,35 @@ data-action="click->clipboard#copy"
 - Purpose: tab/panel switcher with keyboard navigation
 - Uses `data-state-key`, `tabTargets`, `panelTargets`
 
-## 10. PR Checklist
+6. App shell (`app_shell_controller.js`)
+- Purpose: signed-in shell interaction wiring (navbar toggle, nav group/account dropdown interactions, locale/notification close behaviors, dirty-form guards, global app toast API, notification polling).
+- Mounted on `<body>` as `data-controller="app-shell"` with optional values:
+  - `data-app-shell-unread-count-url-value`
+  - `data-app-shell-notification-loading-text-value`
+  - `data-app-shell-dirty-confirm-text-value`
+
+7. Dashboard actions (`dashboard_actions_controller.js`)
+- Purpose: animate/collapse “show more / show less” stacks in dashboard action blocks.
+- Markup contract:
+  - expandable block: `data-expand-id="..."`
+  - toggle button: `data-action-toggle` or `data-action-items-toggle` + matching `data-expand-id`
+  - container values: `data-dashboard-actions-show-less-label-value`, `data-dashboard-actions-show-more-template-value`
+- Motion timing/easing source: reads `--motion-duration-*` and `--motion-ease-*` tokens from `:root` (no controller-local hardcoded rhythm).
+
+8. Dashboard enhance (`dashboard_enhance_controller.js`)
+- Purpose: add lightweight premium motion on dashboard (KPI count-up).
+- Markup contract:
+  - mount on dashboard root: `data-controller="dashboard-enhance"`
+  - count targets: `data-dashboard-enhance-target="count"` + `data-count-final`
+
+9. Global frame motion (`app/javascript/application.js`)
+- Purpose: smooth `turbo-frame` content refresh transitions for filter/list-like interactions.
+- Hooks:
+  - add loading class on `turbo:before-fetch-request`
+  - add enter transition class on `turbo:frame-load`
+- CSS hooks in `components.css`: `turbo-frame.is-content-loading`, `turbo-frame.is-content-enter`
+
+## 11. PR Checklist
 
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.
@@ -242,7 +295,7 @@ data-action="click->clipboard#copy"
 6. Update this manual when conventions change.
 7. If a CSS change no longer matches this manual, update this file in the same PR.
 
-## 11. What Not To Do
+## 12. What Not To Do
 
 1. Do not add broad global overrides for local visual fixes.
 2. Do not create one-off page selectors when a family can be reused.

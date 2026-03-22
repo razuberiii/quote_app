@@ -19,7 +19,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 if ([string]::IsNullOrWhiteSpace($OutDir)) {
-  $OutDir = "tmp/page_screenshots_manual_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
+  $OutDir = "tmp/review_shots/capture_pages_$(Get-Date -Format 'yyyyMMdd_HHmmss')"
 }
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
@@ -138,12 +138,10 @@ const { chromium } = require('playwright');
   const pathsFile = process.env.PATHS_FILE;
   const logFile = path.join(outDir, '_capture_log.txt');
 
-  const routes = fs.readFileSync(pathsFile, 'utf8').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-  const page = await context.newPage();
-
+  fs.mkdirSync(outDir, { recursive: true });
   const log = (line) => fs.appendFileSync(logFile, line + '\n');
+
+  const routes = fs.readFileSync(pathsFile, 'utf8').split(/\r?\n/).map(s => s.trim()).filter(Boolean);
   const PUBLIC_LOCALE_PATHS = new Set([
     '/',
     '/demo',
@@ -188,100 +186,129 @@ const { chromium } = require('playwright');
     return `${route}${separator}locale=${encodeURIComponent(captureLocale)}`;
   };
   const targetUrl = (route) => `${base}${withLocale(route)}`;
+
+  let browser;
+  let ok = 0;
+  let fail = 0;
+  let skipPublic = 0;
+  let skipAuth = 0;
+  let skipNonHtml = 0;
+  let skipErrorPage = 0;
+
   log(`Capture start: ${new Date().toISOString()}`);
   log(`Base URL: ${base}`);
   log(`Locale: ${captureLocale || 'default'}`);
   log(`Total candidate pages: ${routes.length}`);
+  log(`Out dir: ${outDir}`);
 
-  if (loginEmail && loginPassword) {
-    await page.goto(targetUrl('/users/sign_in'), { waitUntil: 'domcontentloaded' });
-    await page.fill('input[name="user[email]"]', loginEmail);
-    await page.fill('input[name="user[password]"]', loginPassword);
-    await Promise.all([
-      page.waitForResponse((resp) =>
-        resp.url().includes('/users/sign_in') &&
-        resp.request().method() === 'POST'
-      ),
-      page.click('input[type="submit"], button[type="submit"]')
-    ]);
-    await page.waitForTimeout(800);
+  try {
+    browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
 
-    // Auth check from post-login state to avoid an extra dashboard navigation.
-    const currentPath = new URL(page.url()).pathname;
-    const loginFormStillVisible =
-      (await page.locator('input[name="user[email]"]').count()) > 0 &&
-      (await page.locator('input[name="user[password]"]').count()) > 0;
-    if (currentPath === '/users/sign_in' || loginFormStillVisible) {
-      const loginError = await page.locator('.alert, .flash, .error, .notice').first().textContent().catch(() => '');
-      throw new Error(`Login failed. Current path: ${currentPath}. Message: ${loginError || 'n/a'}`);
-    }
+    if (loginEmail && loginPassword) {
+      await page.goto(targetUrl('/users/sign_in'), { waitUntil: 'domcontentloaded' });
+      await page.fill('input[name="user[email]"]', loginEmail);
+      await page.fill('input[name="user[password]"]', loginPassword);
+      await Promise.all([
+        page.waitForResponse((resp) =>
+          resp.url().includes('/users/sign_in') &&
+          resp.request().method() === 'POST'
+        ),
+        page.click('input[type="submit"], button[type="submit"]')
+      ]);
+      await page.waitForTimeout(800);
 
-    log('Login: success');
-  } else {
-    log('Login: skipped (no credentials provided)');
-  }
-
-  let ok = 0;
-  let fail = 0;
-  for (let i = 0; i < routes.length; i++) {
-    const p = routes[i];
-    if (loginEmail && loginPassword && isPublicRoute(p)) {
-      log(`[SKIP-PUBLIC] ${p} -> does not require login`);
-      continue;
-    }
-
-    const idx = String(i + 1).padStart(3, '0');
-    let slug = p === '/' ? 'home' : p.replace(/^\//, '').replace(/[^a-zA-Z0-9\-_\/]/g, '').replace(/\//g, '__');
-    if (!slug) slug = 'page';
-    const file = path.join(outDir, `${idx}_${slug}.png`);
-
-    try {
-      const response = await page.goto(targetUrl(p), { waitUntil: 'domcontentloaded', timeout: 30000 });
+      // Login success check should be based on access to an authenticated page,
+      // not only immediate URL after submit (Turbo/redirect timing can be noisy).
+      await page.goto(targetUrl('/dashboard'), { waitUntil: 'domcontentloaded', timeout: 30000 });
       await page.waitForTimeout(450);
+      const currentPath = new URL(page.url()).pathname;
+      const loginFormStillVisible =
+        (await page.locator('input[name="user[email]"]').count()) > 0 &&
+        (await page.locator('input[name="user[password]"]').count()) > 0;
+      const bodyTextAfterProbe = await page.locator('body').innerText().catch(() => '');
+      const authPromptDetected = /You need to sign in or sign up before continuing|请先登录|请登录/i.test(bodyTextAfterProbe);
+      if (currentPath === '/users/sign_in' || loginFormStillVisible || authPromptDetected) {
+        const loginError = await page.locator('.alert, .flash, .error, .notice').first().textContent().catch(() => '');
+        throw new Error(`Login failed. Current path: ${currentPath}. Message: ${loginError || 'n/a'}`);
+      }
 
-      if (!loginEmail || !loginPassword) {
-        const currentPath = new URL(page.url()).pathname;
-        const loginFormVisible =
-          (await page.locator('input[name="user[email]"]').count()) > 0 &&
-          (await page.locator('input[name="user[password]"]').count()) > 0;
-        const bodyTextForAuth = await page.locator('body').innerText().catch(() => '');
-        const authPromptDetected = /You need to sign in or sign up before continuing|请先登录|请登录/i.test(bodyTextForAuth);
-        if (currentPath === '/users/sign_in' || loginFormVisible || authPromptDetected) {
-          log(`[SKIP-AUTH] ${p} -> redirected to/sign-in required`);
+      log('Login: success');
+    } else {
+      log('Login: skipped (no credentials provided)');
+    }
+
+    for (let i = 0; i < routes.length; i++) {
+      const p = routes[i];
+      if (loginEmail && loginPassword && isPublicRoute(p)) {
+        log(`[SKIP-PUBLIC] ${p} -> does not require login`);
+        skipPublic++;
+        continue;
+      }
+
+      const idx = String(i + 1).padStart(3, '0');
+      let slug = p === '/' ? 'home' : p.replace(/^\//, '').replace(/[^a-zA-Z0-9\-_\/]/g, '').replace(/\//g, '__');
+      if (!slug) slug = 'page';
+      const file = path.join(outDir, `${idx}_${slug}.png`);
+
+      try {
+        const response = await page.goto(targetUrl(p), { waitUntil: 'domcontentloaded', timeout: 30000 });
+        await page.waitForTimeout(450);
+
+        if (!loginEmail || !loginPassword) {
+          const currentPath = new URL(page.url()).pathname;
+          const loginFormVisible =
+            (await page.locator('input[name="user[email]"]').count()) > 0 &&
+            (await page.locator('input[name="user[password]"]').count()) > 0;
+          const bodyTextForAuth = await page.locator('body').innerText().catch(() => '');
+          const authPromptDetected = /You need to sign in or sign up before continuing|请先登录|请登录/i.test(bodyTextForAuth);
+          if (currentPath === '/users/sign_in' || loginFormVisible || authPromptDetected) {
+            log(`[SKIP-AUTH] ${p} -> redirected to/sign-in required`);
+            skipAuth++;
+            continue;
+          }
+        }
+
+        const contentType = (response && response.headers()['content-type']) || '';
+        if (/application\/pdf|application\/vnd\.openxmlformats-officedocument/i.test(contentType)) {
+          log(`[SKIP-NON-HTML] ${p} (${contentType})`);
+          skipNonHtml++;
           continue;
         }
+        const bodyText = await page.locator('body').innerText().catch(() => '');
+        if (/Unknown action|ActionController::RoutingError|No route matches/i.test(bodyText)) {
+          log(`[SKIP-ERROR-PAGE] ${p}`);
+          skipErrorPage++;
+          continue;
+        }
+        await page.screenshot({ path: file, fullPage: true });
+        log(`[OK] ${p} -> ${path.basename(file)}`);
+        ok++;
+      } catch (e) {
+        log(`[FAIL] ${p} -> ${e.message}`);
+        fail++;
       }
-
-      const contentType = (response && response.headers()['content-type']) || '';
-      if (/application\/pdf|application\/vnd\.openxmlformats-officedocument/i.test(contentType)) {
-        log(`[SKIP-NON-HTML] ${p} (${contentType})`);
-        continue;
-      }
-      const bodyText = await page.locator('body').innerText().catch(() => '');
-      if (/Unknown action|ActionController::RoutingError|No route matches/i.test(bodyText)) {
-        log(`[SKIP-ERROR-PAGE] ${p}`);
-        continue;
-      }
-      await page.screenshot({ path: file, fullPage: true });
-      log(`[OK] ${p} -> ${path.basename(file)}`);
-      ok++;
-    } catch (e) {
-      log(`[FAIL] ${p} -> ${e.message}`);
-      fail++;
     }
+  } catch (e) {
+    log(`[FATAL] ${e.message}`);
+    throw e;
+  } finally {
+    if (browser) {
+      await browser.close();
+    }
+    log(`Capture end: ${new Date().toISOString()}`);
+    log(`Summary: ok=${ok} fail=${fail} skip_public=${skipPublic} skip_auth=${skipAuth} skip_non_html=${skipNonHtml} skip_error_page=${skipErrorPage}`);
   }
 
-  log(`Capture end: ${new Date().toISOString()}`);
-  log(`Summary: ok=${ok} fail=${fail}`);
-  await browser.close();
-  console.log(`Summary: ok=${ok} fail=${fail}`);
+  console.log(`Summary: ok=${ok} fail=${fail} skip_public=${skipPublic} skip_auth=${skipAuth} skip_non_html=${skipNonHtml} skip_error_page=${skipErrorPage}`);
 })();
 '@
 
 Set-Content -Encoding UTF8 $runnerFile $runner
 
 try {
-  Invoke-WebRequest -Uri $BaseUrl -Method Head -TimeoutSec 5 -ErrorAction Stop | Out-Null
+  Invoke-WebRequest -Uri $BaseUrl -Method Head -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop | Out-Null
 } catch {
   throw "Cannot connect to BaseUrl: $BaseUrl. Please start the Rails server first (example: bundle exec rails server -p 3000), or pass a reachable -BaseUrl."
 }

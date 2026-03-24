@@ -51,6 +51,63 @@
   color: var(--doc-accent, #1f4e79);
 }
 
+.pdf-render .quote-section-block--supplementary {
+  page-break-inside: auto;
+  break-inside: auto;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-header {
+  margin: 0 0 0.28rem 0;
+  page-break-after: avoid;
+  break-after: avoid-page;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kicker {
+  margin: 0 0 0.12rem 0;
+  color: #64748b;
+  font-size: 0.62rem;
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-list {
+  margin: 0;
+  padding: 0;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row {
+  margin: 0;
+  padding: 0.16rem 0;
+  display: grid;
+  grid-template-columns: minmax(135px, 170px) minmax(0, 1fr);
+  gap: 0.55rem;
+  border-bottom: 1px solid #e5eaf0;
+  page-break-inside: avoid;
+  break-inside: avoid-page;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row:last-child {
+  border-bottom: none;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dt,
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dd {
+  margin: 0;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dt {
+  color: #475569;
+  font-weight: 650;
+}
+
+.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dd {
+  color: #1f2937;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .quote-public-utility {
   display: flex;
   justify-content: flex-end;

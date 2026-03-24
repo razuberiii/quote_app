@@ -622,6 +622,8 @@ zh-CN:
           payment_term: 付款条款
           trade_term: 贸易条款
           scope_of_supply: 供货范围
+          advanced_trade_terms: 贸易条款补充
+          advanced_logistics: 运输与物流
           request_reason: 修改原因
           notes: 备注
           terms_text: 条款说明
@@ -633,6 +635,20 @@ zh-CN:
           discount_amount: 折扣
           grand_total: 总计
       show:
+        advanced_trade_terms: 贸易条款补充
+        advanced_logistics: 运输与物流
+        supplementary_trade_terms: 贸易条款补充
+        shipping_and_logistics: 运输与物流
+        field_labels:
+          warranty: 保修
+          support: 支持
+          validity: 有效期
+          delivery: 交付
+          payment_terms: 付款条款
+          freight: 运费
+          shipping_scope: 运输范围
+          container_loading: 装柜
+          container_type: 柜型
         created_banner:
           title: 报价创建成功。
           subtitle: 下一步：把它分享给你的买家。
@@ -810,6 +826,24 @@ zh-CN:
           expired: 已过期
         business_terms: 商务条款
         business_terms_hint: 记录买家真正会关注的商务条款。
+        advanced_quote_sections: 高级报价区块
+        advanced_quote_sections_hint: 仅用于正式复杂报价场景。日常轻量报价建议保持关闭。
+        enable_advanced_mode: 为当前报价启用高级区块
+        advanced_trade_terms_title: 高级贸易补充条款
+        advanced_trade_terms_hint: 现有付款条款/贸易术语仍是主字段，这里只承载补充说明。
+        show_advanced_trade_terms: 显示高级贸易补充条款
+        hs_code: HS 编码
+        warranty_scope_note: 保修范围补充说明
+        support_scope_note: 支持范围补充说明
+        validity_clause_note: 有效期补充条款
+        delivery_commitment_note: 交付承诺补充条款
+        payment_clause_note: 付款补充条款
+        advanced_logistics_title: 高级物流补充信息
+        show_advanced_logistics: 显示高级物流补充信息
+        container_type: 柜型
+        freight_note: 运费说明
+        shipping_scope_note: 运输范围补充说明
+        container_loading_note: 装柜补充说明
         payment_term_placeholder: 预付 30%，发货前付清 70%
         trade_terms: 贸易术语
         trade_terms_placeholder: FOB / CIF / EXW
@@ -2148,6 +2182,28 @@ zh-CN:
         show_pdf_revision_summary: 在 PDF 显示修订摘要
         show_excel_revision_summary: 在 Excel 显示修订摘要
         show_excel_gridlines: 显示 Excel 网格线
+        advanced_defaults_group: 高级报价默认值（按需启用）
+        advanced_defaults_group_hint: 仅用于低频高价值的正式报价场景。
+        enable_advanced_by_default: 使用此模板创建报价时默认启用高级模式
+        show_trade_terms_advanced: 显示高级贸易补充条款
+        show_logistics_block: 显示高级物流补充信息
+        advanced_defaults_trade_group: 贸易条款补充
+        advanced_defaults_trade_hint: 仅承载补充说明，付款/贸易主字段仍保持主语义。
+        advanced_defaults_logistics_group: 物流补充
+        advanced_defaults_logistics_hint: 用于正式复杂场景中的柜型与运费信息。
+        advanced_defaults_apply_hint: 仅当报价启用高级模式时，这些默认值才会生效。
+        default_hs_code: 默认 HS 编码
+        default_container_type: 默认柜型
+        default_warranty_scope_note: 默认保修范围补充说明
+        default_support_scope_note: 默认支持范围补充说明
+        default_validity_clause_note: 默认有效期补充条款
+        default_delivery_commitment_note: 默认交付承诺补充条款
+        default_payment_clause_note: 默认付款补充条款
+        default_freight_note: 默认运费说明
+        default_shipping_scope_note: 默认运输范围补充说明
+        default_container_loading_note: 默认装柜补充说明
+        preview_advanced_trade_fallback: HS 与保修/支持/付款等补充条款
+        preview_advanced_logistics_fallback: 柜型与运费等物流补充信息
         signature_name: 授权签名姓名（可选）
         signature_name_placeholder: 例如：Amy Chen
         signature_name_hint: 用于签名区底部文案。留空可隐藏“授权人”。
@@ -2166,6 +2222,8 @@ zh-CN:
         watermark_intensity_hint: 建议范围：8-16，数值越大越深。
         number_format: 数字与格式
         number_format_hint: 为所有导出报价文档设置金额可读性标准。
+        brand_signature_group: 品牌与签名
+        brand_signature_group_hint: 设置导出与公开报价输出中的水印和签名默认值。
         decimal_places: 小数位
         thousand_separator: 千分位分隔符
         currency_display: 币种显示方式
@@ -2300,6 +2358,7 @@ zh-CN:
         one: "移除 %{count} 个条目"
         other: "移除 %{count} 个条目"
       pricing_updated: 价格已更新
+      field_changed: "%{label} 已更新"
       scope_of_supply_updated: 供货范围已更新
       terms_updated: 条款已更新
       quantity_updated: "%{item}：数量已调整（%{before} -> %{after}）"

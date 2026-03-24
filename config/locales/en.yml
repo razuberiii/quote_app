@@ -622,6 +622,8 @@ en:
           payment_term: Payment Term
           trade_term: Trade Term
           scope_of_supply: Scope of Supply
+          advanced_trade_terms: Supplementary Trade Terms
+          advanced_logistics: Shipping & Logistics
           request_reason: Request Reason
           notes: Notes
           terms_text: Terms
@@ -633,6 +635,20 @@ en:
           discount_amount: Discount
           grand_total: Grand Total
       show:
+        advanced_trade_terms: Supplementary Trade Terms
+        advanced_logistics: Shipping & Logistics
+        supplementary_trade_terms: Supplementary Trade Terms
+        shipping_and_logistics: Shipping & Logistics
+        field_labels:
+          warranty: Warranty
+          support: Support
+          validity: Validity
+          delivery: Delivery
+          payment_terms: Payment Terms
+          freight: Freight
+          shipping_scope: Shipping Scope
+          container_loading: Container Loading
+          container_type: Container Type
         created_banner:
           title: Quote created successfully.
           subtitle: "Next step: share it with your buyer."
@@ -810,6 +826,24 @@ en:
           expired: Expired
         business_terms: Business Terms
         business_terms_hint: Add the terms customers review alongside pricing.
+        advanced_quote_sections: Advanced Quote Sections
+        advanced_quote_sections_hint: Optional for formal and complex quotes. Keep off for daily lightweight quoting.
+        enable_advanced_mode: Enable advanced sections for this quote
+        advanced_trade_terms_title: Advanced Trade Terms (Supplement)
+        advanced_trade_terms_hint: Existing payment term/trade term stay as primary fields. These are supplemental notes.
+        show_advanced_trade_terms: Show advanced trade terms section
+        hs_code: HS Code
+        warranty_scope_note: Warranty Scope Note
+        support_scope_note: Support Scope Note
+        validity_clause_note: Validity Clause Note
+        delivery_commitment_note: Delivery Commitment Note
+        payment_clause_note: Payment Clause Note
+        advanced_logistics_title: Advanced Logistics (Supplement)
+        show_advanced_logistics: Show advanced logistics section
+        container_type: Container Type
+        freight_note: Freight Note
+        shipping_scope_note: Shipping Scope Note
+        container_loading_note: Container Loading Note
         payment_term_placeholder: 30% advance, 70% before shipment
         trade_terms: Trade terms
         trade_terms_placeholder: FOB / CIF / EXW
@@ -2148,6 +2182,28 @@ en:
         show_pdf_revision_summary: Show revision summary on PDF
         show_excel_revision_summary: Show revision summary on Excel
         show_excel_gridlines: Show Excel gridlines
+        advanced_defaults_group: Advanced quote defaults (opt-in)
+        advanced_defaults_group_hint: Low-frequency, high-value defaults for formal quotes only.
+        enable_advanced_by_default: Enable advanced mode by default for quotes using this template
+        show_trade_terms_advanced: Show advanced trade terms
+        show_logistics_block: Show advanced logistics
+        advanced_defaults_trade_group: Trade Terms (Supplement)
+        advanced_defaults_trade_hint: Supplemental notes only. Keep standard payment/trade fields as primary semantics.
+        advanced_defaults_logistics_group: Logistics (Supplement)
+        advanced_defaults_logistics_hint: Container and freight details for formal scenarios.
+        advanced_defaults_apply_hint: These defaults are applied only when advanced mode is enabled on the quote.
+        default_hs_code: Default HS Code
+        default_container_type: Default Container Type
+        default_warranty_scope_note: Default Warranty Scope Note
+        default_support_scope_note: Default Support Scope Note
+        default_validity_clause_note: Default Validity Clause Note
+        default_delivery_commitment_note: Default Delivery Commitment Note
+        default_payment_clause_note: Default Payment Clause Note
+        default_freight_note: Default Freight Note
+        default_shipping_scope_note: Default Shipping Scope Note
+        default_container_loading_note: Default Container Loading Note
+        preview_advanced_trade_fallback: HS + warranty/support/payment supplemental notes
+        preview_advanced_logistics_fallback: Container/freight supplemental notes
         signature_name: Authorized by name (optional)
         signature_name_placeholder: e.g. Amy Chen
         signature_name_hint: Used for the signature footer text. Leave blank to hide "Authorized by".
@@ -2166,6 +2222,8 @@ en:
         watermark_intensity_hint: "Recommended range: 8-16. Higher value means darker watermark."
         number_format: Number & Format
         number_format_hint: Set money readability standards for all exported quote documents.
+        brand_signature_group: Brand and signature
+        brand_signature_group_hint: Set watermark and signature defaults for exports and shared quote outputs.
         decimal_places: Decimal places
         thousand_separator: Thousand separator
         currency_display: Currency display
@@ -2300,6 +2358,7 @@ en:
         one: "%{count} item removed"
         other: "%{count} items removed"
       pricing_updated: pricing updated
+      field_changed: "%{label} updated"
       scope_of_supply_updated: scope of supply updated
       terms_updated: terms updated
       quantity_updated: "%{item}: quantity updated (%{before} -> %{after})"

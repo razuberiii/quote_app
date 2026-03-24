@@ -352,6 +352,44 @@
       <% end %>
     </section>
   <% end %>
+  <% advanced_trade_terms = @quote.advanced_trade_terms_data %>
+  <% advanced_logistics = @quote.advanced_logistics_data %>
+  <% show_advanced_trade_terms = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template) && advanced_trade_terms.any? %>
+  <% show_advanced_logistics = @quote.advanced_section_enabled?("show_logistics_block", template: @template) && advanced_logistics.any? %>
+  <% if show_advanced_trade_terms %>
+    <% trade_terms_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_trade_terms) %>
+    <section class="quote-section-block quote-section-block--supplementary">
+      <header class="quote-supp-header">
+        <p class="quote-supp-kicker"><%= t("quotes.view.show.supplementary_kicker", default: "SUPPLEMENTARY") %></p>
+        <h3><%= quote_trade_terms_section_title %> <% if trade_terms_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      </header>
+      <dl class="quote-supp-kv-list">
+        <% advanced_trade_terms.each do |key, value| %>
+          <div class="quote-supp-kv-row">
+            <dt><%= quote_supplementary_field_label(key) %></dt>
+            <dd><%= value %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+  <% if show_advanced_logistics %>
+    <% logistics_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_logistics) %>
+    <section class="quote-section-block quote-section-block--supplementary">
+      <header class="quote-supp-header">
+        <p class="quote-supp-kicker"><%= t("quotes.view.show.supplementary_kicker", default: "SUPPLEMENTARY") %></p>
+        <h3><%= quote_logistics_section_title %> <% if logistics_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      </header>
+      <dl class="quote-supp-kv-list">
+        <% advanced_logistics.each do |key, value| %>
+          <div class="quote-supp-kv-row">
+            <dt><%= quote_supplementary_field_label(key) %></dt>
+            <dd><%= value %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
 
   <% if @template.show_notes && @quote.notes.present? %>
     <section class="quote-section-block">

@@ -1,4 +1,17 @@
 class QuoteRevisionDiffService
+  KEY_LEVEL_ADVANCED_FIELDS = {
+    advanced_trade_terms: %w[
+      hs_code
+      warranty_scope_note
+      delivery_commitment_note
+      payment_clause_note
+    ],
+    advanced_logistics: %w[
+      container_type
+      freight_note
+    ]
+  }.freeze
+
   def initialize(new_quote:, old_quote:)
     @new_quote = new_quote
     @old_quote = old_quote
@@ -122,7 +135,7 @@ class QuoteRevisionDiffService
   end
 
   def build_commercial_changes
-    tracked_fields.filter_map do |field|
+    standard_changes = tracked_fields.filter_map do |field|
       before_value = normalized_field_value(@old_quote.public_send(field))
       after_value = normalized_field_value(@new_quote.public_send(field))
       next if before_value == after_value
@@ -134,6 +147,10 @@ class QuoteRevisionDiffService
         after: after_value.presence || "-"
       }
     end
+
+    standard_changes +
+      advanced_field_changes_for(:advanced_trade_terms) +
+      advanced_field_changes_for(:advanced_logistics)
   end
 
   def tracked_fields
@@ -155,6 +172,8 @@ class QuoteRevisionDiffService
     case value
     when Date
       value.strftime("%Y-%m-%d")
+    when Hash
+      normalized_hash_for_diff(value).to_json
     else
       value.to_s.squish
     end
@@ -167,12 +186,119 @@ class QuoteRevisionDiffService
       payment_term: "Payment Term",
       trade_term: "Trade Term",
       scope_of_supply: "Scope of Supply",
+      advanced_trade_terms: "Supplementary Trade Terms",
+      advanced_logistics: "Shipping & Logistics",
       request_reason: "Request Reason",
       notes: "Notes",
       terms_text: "Terms",
       delivery_notes: "Delivery Notes",
       legal_disclaimer: "Disclaimer"
     }.fetch(field, field.to_s.humanize)
+  end
+
+  def advanced_field_changes_for(section)
+    before_state = normalized_advanced_state_for_diff(@old_quote, section)
+    after_state = normalized_advanced_state_for_diff(@new_quote, section)
+    key_level_keys = KEY_LEVEL_ADVANCED_FIELDS.fetch(section, [])
+    changes = []
+
+    key_level_keys.each do |key|
+      before_value = before_state.fetch(key, "")
+      after_value = after_state.fetch(key, "")
+      next if before_value == after_value
+
+      changes << {
+        field: "#{section}.#{key}",
+        section: section.to_s,
+        diff_mode: "key",
+        label: advanced_field_label(section, key),
+        before: before_value.presence || "-",
+        after: after_value.presence || "-"
+      }
+    end
+
+    before_non_key = before_state.except(*key_level_keys)
+    after_non_key = after_state.except(*key_level_keys)
+    return changes if before_non_key == after_non_key
+
+    changes << {
+      field: section,
+      section: section.to_s,
+      diff_mode: "section",
+      label: field_label(section),
+      before: summarize_advanced_section_values(section, before_non_key),
+      after: summarize_advanced_section_values(section, after_non_key)
+    }
+
+    changes
+  end
+
+  def normalized_advanced_state_for_diff(quote, section)
+    raw_value = quote.public_send(section)
+    source =
+      if raw_value.respond_to?(:to_unsafe_h)
+        raw_value.to_unsafe_h
+      elsif raw_value.is_a?(Hash)
+        raw_value
+      else
+        {}
+      end
+    allowed_keys =
+      case section.to_sym
+      when :advanced_trade_terms then Quote::ADVANCED_TRADE_TERMS_KEYS
+      when :advanced_logistics then Quote::ADVANCED_LOGISTICS_KEYS
+      else []
+      end
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      next unless source.key?(key) || source.key?(key.to_sym)
+
+      acc[key] = (source[key] || source[key.to_sym]).to_s.squish
+    end
+  end
+
+  def summarize_advanced_section_values(section, values)
+    rows = values.filter_map do |key, value|
+      normalized_value = value.to_s.squish
+      next if normalized_value.blank?
+
+      "#{advanced_field_label(section, key)}: #{normalized_value}"
+    end
+
+    rows.presence&.join(" | ") || "-"
+  end
+
+  def advanced_field_label(section, key)
+    key_name = key.to_s
+    if section.to_sym == :advanced_trade_terms
+      {
+        "hs_code" => I18n.t("quotes.view.form.hs_code", default: "HS Code"),
+        "warranty_scope_note" => I18n.t("quotes.view.show.field_labels.warranty", default: "Warranty"),
+        "support_scope_note" => I18n.t("quotes.view.show.field_labels.support", default: "Support"),
+        "validity_clause_note" => I18n.t("quotes.view.show.field_labels.validity", default: "Validity"),
+        "delivery_commitment_note" => I18n.t("quotes.view.show.field_labels.delivery", default: "Delivery"),
+        "payment_clause_note" => I18n.t("quotes.view.show.field_labels.payment_terms", default: "Payment Terms")
+      }.fetch(key_name, key_name.humanize)
+    else
+      {
+        "freight_note" => I18n.t("quotes.view.show.field_labels.freight", default: "Freight"),
+        "container_type" => I18n.t("quotes.view.show.field_labels.container_type", default: "Container Type"),
+        "shipping_scope_note" => I18n.t("quotes.view.show.field_labels.shipping_scope", default: "Shipping Scope"),
+        "container_loading_note" => I18n.t("quotes.view.show.field_labels.container_loading", default: "Container Loading")
+      }.fetch(key_name, key_name.humanize)
+    end
+  end
+
+  def normalized_hash_for_diff(value)
+    value.to_h.each_with_object({}) do |(key, raw), acc|
+      normalized_key = key.to_s
+      next if normalized_key.blank?
+
+      normalized_value = raw.to_s.squish
+      next if normalized_value.blank?
+
+      acc[normalized_key] = normalized_value
+    end.sort.to_h
   end
 
   def build_financial_changes

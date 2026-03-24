@@ -45,7 +45,7 @@
     </div>
     <% if @pending_invitations.any? %>
       <div class="table-responsive">
-        <table>
+        <table class="team-members-table team-members-table--pending">
           <thead>
             <tr>
               <th><%= t("team_members.view.index.pending_table.email") %></th>
@@ -58,16 +58,16 @@
           <tbody>
             <% @pending_invitations.each do |invitation| %>
               <tr>
-                <td><%= invitation.email %></td>
-                <td>
+                <td data-label="<%= t("team_members.view.index.pending_table.email") %>"><%= invitation.email %></td>
+                <td data-label="<%= t("team_members.view.index.pending_table.role") %>">
                   <%= status_badge(
                         t("team_members.view.index.roles.#{invitation.company_role}", default: invitation.company_role.to_s.humanize),
                         invitation.company_role == "admin" ? :indigo : :slate
                       ) %>
                 </td>
-                <td><%= status_badge(t("team_members.view.index.pending"), :amber) %></td>
-                <td><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
-                <td>
+                <td data-label="<%= t("team_members.view.index.pending_table.status") %>"><%= status_badge(t("team_members.view.index.pending"), :amber) %></td>
+                <td data-label="<%= t("team_members.view.index.pending_table.expires") %>"><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
+                <td data-label="<%= t("team_members.view.index.pending_table.actions") %>">
                   <%= button_to t("team_members.view.index.revoke"),
                                 team_invitation_path(invitation.token),
                                 method: :delete,
@@ -89,7 +89,7 @@
       <h2><%= t("team_members.view.index.current_team") %></h2>
     </div>
     <div class="table-responsive">
-      <table>
+      <table class="team-members-table team-members-table--members">
         <thead>
           <tr>
             <th><%= t("team_members.view.index.members_table.avatar") %></th>
@@ -102,7 +102,7 @@
         <tbody>
           <% @members.each do |member| %>
             <tr>
-              <td>
+              <td data-label="<%= t("team_members.view.index.members_table.avatar") %>">
                 <div class="team-avatar-cell">
                   <%= link_to team_member_path(member), class: "team-avatar-link", title: t("team_members.view.index.view_profile") do %>
                     <% if member.avatar.attached? %>
@@ -113,15 +113,15 @@
                   <% end %>
                 </div>
               </td>
-              <td><%= link_to member.email, team_member_path(member), class: "team-member-email-link" %></td>
-              <td>
+              <td data-label="<%= t("team_members.view.index.members_table.email") %>"><%= link_to member.email, team_member_path(member), class: "team-member-email-link" %></td>
+              <td data-label="<%= t("team_members.view.index.members_table.company_role") %>">
                 <%= status_badge(
                       t("team_members.view.index.roles.#{member.company_role}", default: member.company_role.to_s.humanize),
                       member.company_role == "admin" ? :indigo : :slate
                     ) %>
               </td>
-              <td><%= status_badge(t("team_members.view.index.active"), :green) %></td>
-              <td>
+              <td data-label="<%= t("team_members.view.index.members_table.status") %>"><%= status_badge(t("team_members.view.index.active"), :green) %></td>
+              <td data-label="<%= t("team_members.view.index.members_table.actions") %>">
                 <% if member.company_owner? %>
                   <div class="team-actions">
                     <span class="team-action-note"><%= t("team_members.view.index.owner_protected") %></span>

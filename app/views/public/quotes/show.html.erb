@@ -208,6 +208,25 @@
       <% end %>
     </section>
   <% end %>
+  <% advanced_trade_terms = @quote.advanced_trade_terms_data %>
+  <% advanced_logistics = @quote.advanced_logistics_data %>
+  <% advanced_visibility = @quote.advanced_visibility_data(template: @template) %>
+  <% if @quote.advanced_mode && advanced_visibility["show_trade_terms_advanced"] && advanced_trade_terms.any? %>
+    <section class="quote-section-block">
+      <h3><%= quote_trade_terms_section_title %></h3>
+      <% advanced_trade_terms.each do |key, value| %>
+        <p><strong><%= quote_supplementary_field_label(key) %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if @quote.advanced_mode && advanced_visibility["show_logistics_block"] && advanced_logistics.any? %>
+    <section class="quote-section-block">
+      <h3><%= quote_logistics_section_title %></h3>
+      <% advanced_logistics.each do |key, value| %>
+        <p><strong><%= quote_supplementary_field_label(key) %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
   <% company_documents = @quote.company.company_documents.includes(file_attachment: :blob).ordered %>
   <% if company_documents.any? %>
     <section class="quote-section-block">

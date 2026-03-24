@@ -303,21 +303,35 @@ class QuoteExporter
   end
 
   def render_pdf_terms(pdf)
-    return unless @template.show_terms_section
+    show_advanced_trade = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template)
+    show_advanced_logistics = @quote.advanced_section_enabled?("show_logistics_block", template: @template)
+    return unless @template.show_terms_section || show_advanced_trade || show_advanced_logistics
 
-    lines = []
-    lines << "#{doc_t('labels.payment_terms')}: #{@quote.payment_term}" if @template.show_payment_term && @quote.payment_term.present?
-    lines << "#{doc_t('labels.trade_terms')}: #{@quote.trade_term}" if @quote.trade_term.present?
-    lines << "#{doc_t('labels.terms')}: #{@quote.terms_text}" if @quote.terms_text.present?
-    lines << "#{doc_t('labels.legal_disclaimer')}: #{@quote.legal_disclaimer}" if @quote.legal_disclaimer.present?
-    lines << "#{doc_t('labels.delivery_notes')}: #{@quote.delivery_notes}" if @quote.delivery_notes.present?
-    lines << "#{doc_t('labels.notes')}: #{@quote.notes}" if @template.show_notes && @quote.notes.present?
-    return if lines.empty?
+    terms_lines = []
+    if @template.show_terms_section
+      terms_lines << [ doc_t("labels.payment_terms"), @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
+      terms_lines << [ doc_t("labels.trade_terms"), @quote.trade_term ] if @quote.trade_term.present?
+      terms_lines << [ doc_t("labels.terms"), @quote.terms_text ] if @quote.terms_text.present?
+      terms_lines << [ doc_t("labels.legal_disclaimer"), @quote.legal_disclaimer ] if @quote.legal_disclaimer.present?
+      terms_lines << [ doc_t("labels.delivery_notes"), @quote.delivery_notes ] if @quote.delivery_notes.present?
+      terms_lines << [ doc_t("labels.notes"), @quote.notes ] if @template.show_notes && @quote.notes.present?
+    end
 
-    pdf.text doc_t("sections.terms_and_conditions"), style: :bold, size: 11
-    pdf.move_down 4
-    lines.each { |line| pdf.text pdf_text(line), size: 10 }
-    pdf.move_down 10
+    trade_lines = show_advanced_trade ? advanced_trade_terms_lines : []
+    logistics_lines = show_advanced_logistics ? advanced_logistics_lines : []
+    return if terms_lines.empty? && trade_lines.empty? && logistics_lines.empty?
+
+    if terms_lines.any?
+      pdf.text doc_t("sections.terms_and_conditions"), style: :bold, size: 11
+      pdf.move_down 4
+      terms_lines.each do |label, value|
+        pdf.text pdf_text("#{label}: #{value}"), size: 10
+      end
+      pdf.move_down 8
+    end
+
+    render_pdf_supplementary_section(pdf, title: supplementary_trade_terms_title, lines: trade_lines) if trade_lines.any?
+    render_pdf_supplementary_section(pdf, title: shipping_and_logistics_title, lines: logistics_lines) if logistics_lines.any?
   end
 
   def render_pdf_revision_summary(pdf)
@@ -567,6 +581,36 @@ class QuoteExporter
         sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
 
         terms_rows.each do |label, value|
+          add_excel_terms_row(sheet, styles, label, value)
+        end
+      end
+    end
+
+    if @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template)
+      trade_rows = advanced_trade_terms_lines
+      if trade_rows.any?
+        divider_row = sheet.rows.size + 1
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+        sheet.add_row [ supplementary_trade_terms_title ], style: styles[:section]
+        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
+        trade_rows.each do |label, value|
+          add_excel_terms_row(sheet, styles, label, value)
+        end
+      end
+    end
+
+    if @quote.advanced_section_enabled?("show_logistics_block", template: @template)
+      logistics_rows = advanced_logistics_lines
+      if logistics_rows.any?
+        divider_row = sheet.rows.size + 1
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+        sheet.add_row [ shipping_and_logistics_title ], style: styles[:section]
+        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
+        logistics_rows.each do |label, value|
           add_excel_terms_row(sheet, styles, label, value)
         end
       end
@@ -1072,6 +1116,91 @@ class QuoteExporter
     row_height = excel_wrapped_row_height([ value ], width_chars: 84, min: 19, line_height: 14, max: 260)
     sheet.add_row [ value, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_value]), height: row_height
     sheet.merge_cells("A#{row}:F#{row}")
+  end
+
+  def advanced_trade_terms_lines
+    @quote.advanced_trade_terms_data.filter_map do |key, value|
+      text = value.to_s.strip
+      next if text.blank?
+
+      [ advanced_trade_term_label(key), text ]
+    end
+  end
+
+  def advanced_logistics_lines
+    @quote.advanced_logistics_data.filter_map do |key, value|
+      text = value.to_s.strip
+      next if text.blank?
+
+      [ advanced_logistics_label(key), text ]
+    end
+  end
+
+  def advanced_trade_term_label(key)
+    key_name = key.to_s
+    {
+      "hs_code" => I18n.t("quotes.view.form.hs_code", default: "HS Code"),
+      "warranty_scope_note" => I18n.t("quotes.view.show.field_labels.warranty", default: "Warranty"),
+      "support_scope_note" => I18n.t("quotes.view.show.field_labels.support", default: "Support"),
+      "validity_clause_note" => I18n.t("quotes.view.show.field_labels.validity", default: "Validity"),
+      "delivery_commitment_note" => I18n.t("quotes.view.show.field_labels.delivery", default: "Delivery"),
+      "payment_clause_note" => I18n.t("quotes.view.show.field_labels.payment_terms", default: "Payment Terms")
+    }.fetch(key_name, key_name.humanize)
+  end
+
+  def advanced_logistics_label(key)
+    key_name = key.to_s
+    {
+      "freight_note" => I18n.t("quotes.view.show.field_labels.freight", default: "Freight"),
+      "container_type" => I18n.t("quotes.view.show.field_labels.container_type", default: "Container Type"),
+      "shipping_scope_note" => I18n.t("quotes.view.show.field_labels.shipping_scope", default: "Shipping Scope"),
+      "container_loading_note" => I18n.t("quotes.view.show.field_labels.container_loading", default: "Container Loading")
+    }.fetch(key_name, key_name.humanize)
+  end
+
+  def render_pdf_supplementary_section(pdf, title:, lines:)
+    return if lines.blank?
+
+    ensure_pdf_space_for_supplementary_section(pdf, lines.count)
+
+    pdf.fill_color "64748B"
+    pdf.text I18n.t("quotes.view.show.supplementary_kicker", default: "SUPPLEMENTARY"), size: 7, style: :bold, character_spacing: 1.0
+    pdf.fill_color "111827"
+    pdf.move_down 2
+    pdf.text title, size: 11, style: :bold
+    pdf.move_down 4
+
+    rows = lines.map { |label, value| [ pdf_text(label), pdf_text(value) ] }
+    pdf.table(rows, width: pdf_content_width(pdf), column_widths: [ 165, pdf_content_width(pdf) - 165 ]) do |t|
+      t.cells.borders = [ :bottom ]
+      t.cells.border_color = "E5EAF0"
+      t.cells.border_width = 0.4
+      t.cells.padding = [ 4, 2, 5, 2 ]
+      t.cells.background_color = "FFFFFF"
+      t.columns(0).font_style = :bold
+      t.columns(0).text_color = "475569"
+      t.columns(0).size = 9
+      t.columns(1).text_color = "1F2937"
+      t.columns(1).size = 9.5
+      t.columns(1).inline_format = true
+      t.columns(1).overflow = :shrink_to_fit
+      t.columns(1).min_font_size = 8
+    end
+    pdf.move_down 8
+  end
+
+  def ensure_pdf_space_for_supplementary_section(pdf, lines_count)
+    estimated = 34 + (lines_count * 16)
+    threshold = [ estimated, 120 ].max
+    pdf.start_new_page if pdf.cursor < threshold
+  end
+
+  def supplementary_trade_terms_title
+    I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+  end
+
+  def shipping_and_logistics_title
+    I18n.t("quotes.view.show.shipping_and_logistics", default: "Shipping & Logistics")
   end
 
   def pdf_content_width(pdf)

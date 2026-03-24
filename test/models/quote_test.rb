@@ -102,4 +102,83 @@ class QuoteTest < ActiveSupport::TestCase
 
     assert_equal "Faster Delivery", quote.display_win_reason
   end
+
+  test "advanced visibility derives from template defaults and explicit quote flags" do
+    template = quote_templates(:one)
+    template.update!(
+      enable_advanced_by_default: true,
+      advanced_defaults: { "trade_terms_hs_code" => "8703.10" },
+      advanced_visibility_defaults: {}
+    )
+
+    quote = Quote.new(
+      company: companies(:one),
+      customer: customers(:one),
+      template: template,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft"
+    )
+    quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+
+    visibility = quote.advanced_visibility_data(template: template)
+    assert_equal true, visibility["show_trade_terms_advanced"]
+    assert_equal false, visibility["show_logistics_block"]
+    assert_not quote.advanced_section_enabled?("show_trade_terms_advanced", template: template)
+
+    quote.advanced_mode = true
+    quote.advanced_visibility = { "show_logistics_block" => true }
+    visibility = quote.advanced_visibility_data(template: template)
+    assert_equal true, visibility["show_trade_terms_advanced"]
+    assert_equal true, visibility["show_logistics_block"]
+    assert quote.advanced_section_enabled?("show_trade_terms_advanced", template: template)
+    assert quote.advanced_section_enabled?("show_logistics_block", template: template)
+  end
+
+  test "explicitly cleared advanced value blocks template default refill" do
+    template = quote_templates(:one)
+    template.update!(
+      enable_advanced_by_default: true,
+      advanced_defaults: { "trade_terms_hs_code" => "8703.10" },
+      advanced_visibility_defaults: {}
+    )
+
+    quote = Quote.new(
+      company: companies(:one),
+      customer: customers(:one),
+      template: template,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft",
+      advanced_trade_terms: { "hs_code" => "" }
+    )
+    quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+
+    quote.apply_template_advanced_defaults!
+
+    assert_equal "", quote.advanced_trade_terms["hs_code"]
+    assert_equal({}, quote.advanced_trade_terms_data)
+  end
+
+  test "advanced section open state follows normalized non-empty values only" do
+    quote = Quote.new(
+      company: companies(:one),
+      customer: customers(:one),
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft",
+      advanced_trade_terms: {
+        "hs_code" => "   ",
+        "support_scope_note" => ""
+      },
+      advanced_logistics: {
+        "container_type" => "40HQ"
+      }
+    )
+    quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+
+    assert quote.advanced_sections_have_values?
+    assert_equal({ "container_type" => "40HQ" }, quote.advanced_logistics_data)
+    assert_equal({}, quote.advanced_trade_terms_data)
+  end
 end

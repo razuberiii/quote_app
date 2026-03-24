@@ -341,6 +341,32 @@
       <% end %>
     </section>
   <% end %>
+  <% advanced_mode = ActiveModel::Type::Boolean.new.cast(@snapshot["advanced_mode"]) %>
+  <% advanced_trade_terms = quote_normalized_supplementary_hash(@snapshot["advanced_trade_terms"], section: :trade_terms) %>
+  <% advanced_logistics = quote_normalized_supplementary_hash(@snapshot["advanced_logistics"], section: :logistics) %>
+  <% visibility_map = @snapshot["advanced_visibility"].is_a?(Hash) ? @snapshot["advanced_visibility"] : {} %>
+  <% trade_visibility = visibility_map.key?("show_trade_terms_advanced") ? ActiveModel::Type::Boolean.new.cast(visibility_map["show_trade_terms_advanced"]) : advanced_trade_terms.any? %>
+  <% logistics_visibility = visibility_map.key?("show_logistics_block") ? ActiveModel::Type::Boolean.new.cast(visibility_map["show_logistics_block"]) : advanced_logistics.any? %>
+  <% show_trade_terms_advanced = advanced_mode && trade_visibility && advanced_trade_terms.any? %>
+  <% show_logistics_block = advanced_mode && logistics_visibility && advanced_logistics.any? %>
+  <% advanced_trade_terms_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_trade_terms) %>
+  <% advanced_logistics_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_logistics) %>
+  <% if show_trade_terms_advanced %>
+    <section class="quote-section-block">
+      <h3><%= quote_trade_terms_section_title %> <% if advanced_trade_terms_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      <% advanced_trade_terms.each do |key, value| %>
+        <p><strong><%= quote_supplementary_field_label(key) %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if show_logistics_block %>
+    <section class="quote-section-block">
+      <h3><%= quote_logistics_section_title %> <% if advanced_logistics_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      <% advanced_logistics.each do |key, value| %>
+        <p><strong><%= quote_supplementary_field_label(key) %>:</strong> <%= value %></p>
+      <% end %>
+    </section>
+  <% end %>
   <% company_documents = @share.company.company_documents.includes(file_attachment: :blob).ordered %>
   <% if company_documents.any? %>
     <section class="quote-section-block">

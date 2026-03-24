@@ -49,11 +49,25 @@ class QuoteRevisionSummaryService
       lines << I18n.t("quote_document.revision_summary.pricing_updated")
     end
 
+    lines.concat(commercial_change_lines(diff))
+
     lines
   end
 
   def pricing_changed?(diff)
     Array(diff[:financial_changes]).any? ||
       Array(diff[:modified_items]).any? { |item| item[:quantity_changed] || item[:unit_price_changed] }
+  end
+
+  def commercial_change_lines(diff)
+    Array(diff[:commercial_changes]).filter_map do |change|
+      next if change[:label].to_s.blank?
+
+      I18n.t(
+        "quote_document.revision_summary.field_changed",
+        label: change[:label],
+        default: "%{label} updated"
+      )
+    end.uniq
   end
 end

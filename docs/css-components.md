@@ -82,7 +82,11 @@ With feature-level adapter class:
 - `.quote-summary-*`, `.quote-collab-*` (internal webview default-focus + collapsible collaboration blocks)
   - `.quote-summary-strip--internal` should read as a lightweight internal meta row (document-to-workflow bridge), not as dashboard-like KPI widgets.
 - `.quote-workspace-*` (internal quote webview layer boundary: document body vs. internal workflow summary/actions/history)
+- `.quote-form-advanced*` (advanced quote section local spacing/typography overrides; used to neutralize global hint offsets and keep advanced subsection rhythm readable)
+- `.quote-form-collapsible*`, `.template-editor-summary*` (details/summary based collapsible cards for quote/template long-form editors)
+- `.quote-supp-*` (PDF-only supplementary terms/logistics key-value presentation used by `export_pdf` for formal document readability polish)
 - `.template-form-subgroup*` (template form grouping helper for long-form clarity)
+- `.template-advanced-defaults-*` (opt-in advanced quote defaults split layout in template editor: trade/logistics subgroup readability)
 - `.template-stage-*`, `.template-level-marker*`, `.template-editor-section--*` (template-new information-tier hierarchy adapters)
 
 Quote families are local to quote workflows.
@@ -114,6 +118,7 @@ Dashboard families are local to dashboard sequencing and must not be reused as g
 
 6. Team-scope families
 - `.team-member-profile-*` (team member detail card layout, avatar + key info blocks)
+- `.team-members-table*` (team management table + mobile card transform for member/invitation rows)
 
 Team families are local to team management pages.
 

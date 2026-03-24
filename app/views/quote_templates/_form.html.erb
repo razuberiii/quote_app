@@ -47,11 +47,12 @@
         <span><%= t("quote_templates.view.form.stage_common_hint", default: "Set the visual style and default visible sections.") %></span>
       </div>
 
-      <section class="template-editor-section template-editor-section-visual template-editor-section--common template-editor-section--visual">
-        <header>
-          <h3><%= t("quote_templates.view.form.visual_style") %></h3>
-          <p><%= t("quote_templates.view.form.visual_style_hint") %></p>
-        </header>
+      <details class="template-editor-section template-editor-section-visual template-editor-section--common template-editor-section--visual" open>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.visual_style") %></strong>
+          <span><%= t("quote_templates.view.form.visual_style_hint") %></span>
+        </summary>
+        <div class="template-editor-section-body">
         <div class="template-form-grid">
           <div>
             <%= f.label :layout_type, t("quote_templates.view.form.layout_type") %>
@@ -74,13 +75,15 @@
             <%= f.select :logo_position, [[t("quote_templates.view.form.logo_position_options.right"), "right"], [t("quote_templates.view.form.logo_position_options.left"), "left"], [t("quote_templates.view.form.logo_position_options.center"), "center"]], {}, data: { template_preview_target: "logo-position" } %>
           </div>
         </div>
-      </section>
+        </div>
+      </details>
 
-      <section class="template-editor-section template-editor-section--common template-editor-section--structure">
-        <header>
-          <h3><%= t("quote_templates.view.form.document_structure") %></h3>
-          <p><%= t("quote_templates.view.form.document_structure_hint") %></p>
-        </header>
+      <details class="template-editor-section template-editor-section--common template-editor-section--structure" open>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.document_structure") %></strong>
+          <span><%= t("quote_templates.view.form.document_structure_hint") %></span>
+        </summary>
+        <div class="template-editor-section-body">
         <div class="template-form-subgroup">
           <p class="template-form-subgroup-title"><%= t("quote_templates.view.form.section_visibility_group", default: "Section visibility") %></p>
         <div class="template-toggle-grid">
@@ -118,25 +121,95 @@
             <p class="template-sub"><%= t("quote_templates.view.form.default_scope_of_supply_content_hint") %></p>
           </div>
         </div>
-      </section>
+        </div>
+      </details>
+
+      <% advanced_defaults = quote_template.advanced_defaults_data %>
+      <% advanced_visibility_defaults = quote_template.advanced_visibility_defaults_data %>
+      <% advanced_defaults_open = advanced_defaults.any? || quote_template.enable_advanced_by_default? %>
+      <details class="template-editor-section template-editor-section--common template-editor-section--advanced-defaults" <%= "open" if advanced_defaults_open %>>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.advanced_defaults_group", default: "Advanced quote defaults (opt-in)") %></strong>
+          <span><%= t("quote_templates.view.form.advanced_defaults_group_hint", default: "Low-frequency, high-value defaults for formal quotes only.") %></span>
+        </summary>
+        <div class="template-editor-section-body template-editor-section-body--advanced-defaults">
+          <label><%= f.check_box :enable_advanced_by_default, data: { template_preview_toggle: "advanced-enabled" } %> <%= t("quote_templates.view.form.enable_advanced_by_default", default: "Enable advanced mode by default for quotes using this template") %></label>
+          <div class="template-advanced-defaults-split mt-2">
+            <section class="template-advanced-defaults-section">
+              <h4><%= t("quote_templates.view.form.advanced_defaults_trade_group", default: "Trade Terms (Supplement)") %></h4>
+              <p class="template-sub"><%= t("quote_templates.view.form.advanced_defaults_trade_hint", default: "Supplemental notes only. Keep standard payment/trade fields as primary semantics.") %></p>
+              <div class="template-form-grid">
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_hs_code", default: "Default HS Code") %></label>
+                  <%= text_field_tag "quote_template[advanced_defaults][trade_terms_hs_code]", advanced_defaults["trade_terms_hs_code"], class: ui_input_classes, data: { template_preview_target: "advanced-hs-code" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_warranty_scope_note", default: "Default Warranty Scope Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][trade_terms_warranty_scope_note]", advanced_defaults["trade_terms_warranty_scope_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-warranty-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_support_scope_note", default: "Default Support Scope Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][trade_terms_support_scope_note]", advanced_defaults["trade_terms_support_scope_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-support-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_validity_clause_note", default: "Default Validity Clause Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][trade_terms_validity_clause_note]", advanced_defaults["trade_terms_validity_clause_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-validity-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_delivery_commitment_note", default: "Default Delivery Commitment Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][trade_terms_delivery_commitment_note]", advanced_defaults["trade_terms_delivery_commitment_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-delivery-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_payment_clause_note", default: "Default Payment Clause Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][trade_terms_payment_clause_note]", advanced_defaults["trade_terms_payment_clause_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-payment-note" } %>
+                </div>
+              </div>
+            </section>
+            <section class="template-advanced-defaults-section">
+              <h4><%= t("quote_templates.view.form.advanced_defaults_logistics_group", default: "Logistics (Supplement)") %></h4>
+              <p class="template-sub"><%= t("quote_templates.view.form.advanced_defaults_logistics_hint", default: "Container and freight details for formal scenarios.") %></p>
+              <div class="template-form-grid">
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_container_type", default: "Default Container Type") %></label>
+                  <%= text_field_tag "quote_template[advanced_defaults][logistics_container_type]", advanced_defaults["logistics_container_type"], class: ui_input_classes, data: { template_preview_target: "advanced-container-type" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_freight_note", default: "Default Freight Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][logistics_freight_note]", advanced_defaults["logistics_freight_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-freight-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_shipping_scope_note", default: "Default Shipping Scope Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][logistics_shipping_scope_note]", advanced_defaults["logistics_shipping_scope_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-shipping-note" } %>
+                </div>
+                <div class="template-span-2">
+                  <label><%= t("quote_templates.view.form.default_container_loading_note", default: "Default Container Loading Note") %></label>
+                  <%= text_area_tag "quote_template[advanced_defaults][logistics_container_loading_note]", advanced_defaults["logistics_container_loading_note"], rows: 2, class: ui_input_classes, data: { template_preview_target: "advanced-loading-note" } %>
+                </div>
+              </div>
+            </section>
+          </div>
+          <p class="template-sub"><%= t("quote_templates.view.form.advanced_defaults_apply_hint", default: "These defaults are applied only when advanced mode is enabled on the quote.") %></p>
+        </div>
+      </details>
 
       <div class="template-level-marker template-level-marker--output">
         <strong><%= t("quote_templates.view.form.stage_output_title", default: "3. Output and number format") %></strong>
         <span><%= t("quote_templates.view.form.stage_output_hint", default: "Define output language and formatting standards.") %></span>
       </div>
 
-      <section class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-language">
-        <header>
-          <h3><%= t("quote_templates.view.form.output_language_title") %></h3>
-          <p><%= t("quote_templates.view.form.output_language_hint") %></p>
-          <div class="output-lang-sync-row">
-            <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select aria-label="<%= t("quote_templates.view.form.apply_all_locales") %>">
-              <% quote_template.output_locale_options.each do |label, value| %>
-                <option value="<%= value %>"><%= label %></option>
-              <% end %>
-            </select>
-          </div>
-        </header>
+      <details class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-language" open>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.output_language_title") %></strong>
+          <span><%= t("quote_templates.view.form.output_language_hint") %></span>
+        </summary>
+        <div class="template-editor-section-body">
+        <div class="output-lang-sync-row">
+          <select id="output_lang_sync_select" class="<%= ui_input_classes %>" data-output-lang-sync-select aria-label="<%= t("quote_templates.view.form.apply_all_locales") %>">
+            <% quote_template.output_locale_options.each do |label, value| %>
+              <option value="<%= value %>"><%= label %></option>
+            <% end %>
+          </select>
+        </div>
         <div class="template-form-grid">
           <div>
             <%= f.label :webview_locale, t("quote_templates.view.form.output_language_webview") %>
@@ -155,13 +228,15 @@
             <%= f.select :excel_locale, quote_template.output_locale_options, {}, class: ui_input_classes, data: { output_lang_target: true } %>
           </div>
         </div>
-      </section>
+        </div>
+      </details>
 
-      <section class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-number">
-        <header>
-          <h3><%= t("quote_templates.view.form.number_format") %></h3>
-          <p><%= t("quote_templates.view.form.number_format_hint") %></p>
-        </header>
+      <details class="template-editor-section template-editor-section-compact template-editor-section--output template-editor-section--output-number" open>
+        <summary class="template-editor-summary">
+          <strong><%= t("quote_templates.view.form.number_format") %></strong>
+          <span><%= t("quote_templates.view.form.number_format_hint") %></span>
+        </summary>
+        <div class="template-editor-section-body">
         <div class="template-form-grid">
           <div>
             <%= f.label :amount_decimals, t("quote_templates.view.form.decimal_places") %>
@@ -176,7 +251,8 @@
             <%= f.select :currency_display_mode, [["Symbol Prefix ($123)", "symbol_prefix"], ["Code Prefix (USD 123)", "code_prefix"], ["Code Suffix (123 USD)", "code_suffix"]], {}, data: { template_preview_target: "currency-display-mode" } %>
           </div>
         </div>
-      </section>
+        </div>
+      </details>
 
       <div class="template-level-marker template-level-marker--advanced">
         <strong><%= t("quote_templates.view.form.stage_advanced_title", default: "4. Advanced text and branding") %></strong>
@@ -310,12 +386,13 @@
           </div>
         </details>
       <% else %>
-        <section class="template-editor-section template-editor-section-advanced template-editor-section--labels">
-          <header>
-            <h3><%= t("quote_templates.view.form.labels_text") %></h3>
-            <p><%= t("quote_templates.view.form.labels_text_hint") %></p>
-          </header>
-          <div class="template-form-grid">
+        <details class="template-editor-section template-editor-section-advanced template-editor-section--labels" open>
+          <summary class="template-editor-summary">
+            <strong><%= t("quote_templates.view.form.labels_text") %></strong>
+            <span><%= t("quote_templates.view.form.labels_text_hint") %></span>
+          </summary>
+          <div class="template-editor-section-body">
+            <div class="template-form-grid">
             <div>
               <%= f.label :description_label, t("quote_templates.view.form.description_label") %>
               <%= f.text_field :description_label, data: { template_preview_target: "label-description" } %>
@@ -380,8 +457,9 @@
               <%= f.text_area :closing_message, rows: 2, placeholder: QuoteTemplate::DEFAULT_CLOSING_MESSAGE %>
               <p class="template-sub"><%= t("quote_templates.view.form.closing_message_hint") %></p>
             </div>
+            </div>
           </div>
-        </section>
+        </details>
       <% end %>
     </div>
 
@@ -490,6 +568,44 @@
         <div class="preview-terms" data-template-preview-terms data-visible="<%= quote_template.show_terms_section? %>">
           <strong><%= t("quote_document.labels.terms") %>:</strong> FOB Shanghai | Lead time 20 days.
         </div>
+        <% template_preview_trade_enabled = advanced_visibility_defaults["show_trade_terms_advanced"] || [
+             advanced_defaults["trade_terms_hs_code"],
+             advanced_defaults["trade_terms_warranty_scope_note"],
+             advanced_defaults["trade_terms_support_scope_note"],
+             advanced_defaults["trade_terms_validity_clause_note"],
+             advanced_defaults["trade_terms_delivery_commitment_note"],
+             advanced_defaults["trade_terms_payment_clause_note"]
+           ].any?(&:present?) %>
+        <% template_preview_logistics_enabled = advanced_visibility_defaults["show_logistics_block"] || [
+             advanced_defaults["logistics_container_type"],
+             advanced_defaults["logistics_freight_note"],
+             advanced_defaults["logistics_shipping_scope_note"],
+             advanced_defaults["logistics_container_loading_note"]
+           ].any?(&:present?) %>
+        <div class="preview-terms" data-template-preview-advanced-trade data-visible="<%= quote_template.enable_advanced_by_default? && template_preview_trade_enabled %>">
+          <strong><span data-preview-i18n-label="advanced_trade_terms"><%= t("quotes.view.show.advanced_trade_terms", default: "Advanced Trade Terms") %></span>:</strong>
+          <span data-template-preview-advanced-trade-value data-fallback="<%= t("quote_templates.view.form.preview_advanced_trade_fallback") %>">
+            <%= [
+              advanced_defaults["trade_terms_hs_code"],
+              advanced_defaults["trade_terms_warranty_scope_note"],
+              advanced_defaults["trade_terms_support_scope_note"],
+              advanced_defaults["trade_terms_validity_clause_note"],
+              advanced_defaults["trade_terms_delivery_commitment_note"],
+              advanced_defaults["trade_terms_payment_clause_note"]
+            ].compact_blank.join(" | ").presence || t("quote_templates.view.form.preview_advanced_trade_fallback", default: "HS + warranty/support/payment supplemental notes") %>
+          </span>
+        </div>
+        <div class="preview-terms" data-template-preview-advanced-logistics data-visible="<%= quote_template.enable_advanced_by_default? && template_preview_logistics_enabled %>">
+          <strong><span data-preview-i18n-label="advanced_logistics"><%= t("quotes.view.show.advanced_logistics", default: "Advanced Logistics") %></span>:</strong>
+          <span data-template-preview-advanced-logistics-value data-fallback="<%= t("quote_templates.view.form.preview_advanced_logistics_fallback") %>">
+            <%= [
+              advanced_defaults["logistics_container_type"],
+              advanced_defaults["logistics_freight_note"],
+              advanced_defaults["logistics_shipping_scope_note"],
+              advanced_defaults["logistics_container_loading_note"]
+            ].compact_blank.join(" | ").presence || t("quote_templates.view.form.preview_advanced_logistics_fallback", default: "Container/freight supplemental notes") %>
+          </span>
+        </div>
         <p class="preview-footer-note" data-template-preview-footer><%= quote_template.quotation_footer_note.presence || quote_template.footer_text.presence || t("quote_templates.view.form.default_footer_note") %></p>
         <p class="preview-saas-footnote" data-template-preview-saas-branding data-visible="<%= quote_template.show_saas_branding? %>"><%= quote_template.saas_branding_footer_text %></p>
       </div>
@@ -517,6 +633,8 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: "en"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: "en"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: "en"),
+      "advanced_trade_terms" => I18n.t("quotes.view.show.advanced_trade_terms", locale: "en"),
+      "advanced_logistics" => I18n.t("quotes.view.show.advanced_logistics", locale: "en"),
       "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: "en"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: "en"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: "en"),
@@ -530,6 +648,8 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"zh-CN"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"zh-CN"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: :"zh-CN"),
+      "advanced_trade_terms" => I18n.t("quotes.view.show.advanced_trade_terms", locale: :"zh-CN"),
+      "advanced_logistics" => I18n.t("quotes.view.show.advanced_logistics", locale: :"zh-CN"),
       "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: :"zh-CN"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"zh-CN"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"zh-CN"),
@@ -543,6 +663,8 @@
       "grand_total"    => I18n.t("quote_document.labels.grand_total",   locale: :"es-419"),
       "payment_terms"  => I18n.t("quote_document.labels.payment_terms", locale: :"es-419"),
       "notes"          => I18n.t("quote_document.labels.notes",         locale: :"es-419"),
+      "advanced_trade_terms" => I18n.t("quotes.view.show.advanced_trade_terms", locale: :"es-419"),
+      "advanced_logistics" => I18n.t("quotes.view.show.advanced_logistics", locale: :"es-419"),
       "scope_of_supply" => I18n.t("quote_templates.defaults.scope_of_supply_label", locale: :"es-419"),
       "doc_title_quote" => I18n.t("quote_document.titles.quotation",    locale: :"es-419"),
       "doc_title_pi"    => I18n.t("quote_document.titles.pi",           locale: :"es-419"),
@@ -875,6 +997,29 @@
       const numberLabelPi = qs("[data-template-preview-target='number-label-pi']")?.value?.trim() || "PI #";
       const footerQuote = qs("[data-template-preview-target='footer-quote']")?.value?.trim();
       const closingMessage = qs("[name='quote_template[closing_message]']")?.value?.trim();
+      const advancedEnabledNode = qs("[data-template-preview-toggle='advanced-enabled']");
+      const advancedTradeToggleNode = qs("[data-template-preview-toggle='trade-terms-advanced']");
+      const advancedLogisticsToggleNode = qs("[data-template-preview-toggle='logistics-advanced']");
+      const advancedTradePreview = [
+        qs("[data-template-preview-target='advanced-hs-code']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-warranty-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-support-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-validity-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-delivery-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-payment-note']")?.value?.trim()
+      ].filter(Boolean).join(" | ");
+      const advancedLogisticsPreview = [
+        qs("[data-template-preview-target='advanced-container-type']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-freight-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-shipping-note']")?.value?.trim(),
+        qs("[data-template-preview-target='advanced-loading-note']")?.value?.trim()
+      ].filter(Boolean).join(" | ");
+      if ((advancedTradePreview.length > 0 || advancedLogisticsPreview.length > 0) && advancedEnabledNode) {
+        advancedEnabledNode.checked = true;
+      }
+      const advancedEnabled = !!advancedEnabledNode?.checked;
+      const showAdvancedTrade = advancedTradeToggleNode ? !!advancedTradeToggleNode.checked : advancedTradePreview.length > 0;
+      const showAdvancedLogistics = advancedLogisticsToggleNode ? !!advancedLogisticsToggleNode.checked : advancedLogisticsPreview.length > 0;
       const footerFallback = qs("[data-template-preview-target='footer-fallback']")?.value?.trim();
       const decimals = Number.parseInt(qs("[data-template-preview-target='amount-decimals']")?.value || "2", 10);
       const separator = qs("[data-template-preview-target='thousand-separator']")?.value || "comma";
@@ -977,6 +1122,10 @@
       if (closingNode) closingNode.textContent = closingMessage || "<No closing message>";
       const signatureNameNode = qsp("[data-template-preview-signature-name-value]");
       if (signatureNameNode) signatureNameNode.textContent = signatureName;
+      const advancedTradeNode = qsp("[data-template-preview-advanced-trade-value]");
+      if (advancedTradeNode) advancedTradeNode.textContent = advancedTradePreview || advancedTradeNode.dataset.fallback || "";
+      const advancedLogisticsNode = qsp("[data-template-preview-advanced-logistics-value]");
+      if (advancedLogisticsNode) advancedLogisticsNode.textContent = advancedLogisticsPreview || advancedLogisticsNode.dataset.fallback || "";
 
       preview.querySelectorAll("[data-template-preview-amount]").forEach((node) => {
         const raw = Number.parseFloat(node.dataset.rawAmount || "0");
@@ -1006,6 +1155,8 @@
       showNode("[data-template-preview-images]", !!qs("[data-template-preview-toggle='images']")?.checked);
       showNode("[data-template-preview-closing]", !!qs("[data-template-preview-toggle='closing']")?.checked);
       showNode("[data-template-preview-saas-branding]", !!qs("[data-template-preview-toggle='saas-branding']")?.checked);
+      showNode("[data-template-preview-advanced-trade]", advancedEnabled && showAdvancedTrade);
+      showNode("[data-template-preview-advanced-logistics]", advancedEnabled && showAdvancedLogistics);
       updateWatermarkModeUI();
       updateContrastWarning(accent);
 

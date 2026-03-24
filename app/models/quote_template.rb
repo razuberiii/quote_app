@@ -17,6 +17,22 @@ class QuoteTemplate < ApplicationRecord
   MAX_CLOSING_MESSAGE_LENGTH = 2000
   MAX_WATERMARK_TEXT_LENGTH = 120
   MAX_SIGNATURE_NAME_LENGTH = 120
+  ADVANCED_DEFAULT_KEYS = %w[
+    trade_terms_hs_code
+    trade_terms_warranty_scope_note
+    trade_terms_support_scope_note
+    trade_terms_validity_clause_note
+    trade_terms_delivery_commitment_note
+    trade_terms_payment_clause_note
+    logistics_freight_note
+    logistics_container_type
+    logistics_shipping_scope_note
+    logistics_container_loading_note
+  ].freeze
+  ADVANCED_VISIBILITY_KEYS = %w[
+    show_trade_terms_advanced
+    show_logistics_block
+  ].freeze
   belongs_to :company
   has_many :quotes, foreign_key: :template_id, dependent: :nullify
   has_one_attached :watermark_image
@@ -81,6 +97,7 @@ class QuoteTemplate < ApplicationRecord
     show_public_revision_summary
     show_pdf_revision_summary
     show_excel_revision_summary
+    enable_advanced_by_default
     default_template
   ].freeze
 
@@ -176,6 +193,14 @@ class QuoteTemplate < ApplicationRecord
     OUTPUT_LOCALES.map { |value, label| [ label, value ] }
   end
 
+  def advanced_defaults_data
+    normalized_string_hash(advanced_defaults, allowed_keys: ADVANCED_DEFAULT_KEYS)
+  end
+
+  def advanced_visibility_defaults_data
+    normalized_boolean_hash(advanced_visibility_defaults, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+  end
+
   def make_default!
     transaction do
       company.quote_templates.where(default_template: true).where.not(id: id).update_all(default_template: false)
@@ -213,6 +238,7 @@ class QuoteTemplate < ApplicationRecord
     self.show_public_revision_summary = true if show_public_revision_summary.nil?
     self.show_pdf_revision_summary = true if show_pdf_revision_summary.nil?
     self.show_excel_revision_summary = true if show_excel_revision_summary.nil?
+    self.enable_advanced_by_default = false if enable_advanced_by_default.nil?
     self.show_scope_of_supply = false if show_scope_of_supply.nil?
     self.show_watermark = false if show_watermark.nil?
     self.excel_show_grid_lines = false if excel_show_grid_lines.nil?
@@ -234,6 +260,8 @@ class QuoteTemplate < ApplicationRecord
     self.public_link_locale = normalized_output_locale(public_link_locale)
     self.pdf_locale = normalized_output_locale(pdf_locale)
     self.excel_locale = normalized_output_locale(excel_locale)
+    self.advanced_defaults = {} if advanced_defaults.blank?
+    self.advanced_visibility_defaults = {} if advanced_visibility_defaults.blank?
   end
 
   def sync_visual_toggles
@@ -243,10 +271,45 @@ class QuoteTemplate < ApplicationRecord
 
     self.show_signature_block = true if has_signature_upload || has_signature_name
     self.show_watermark = true if watermark_text.to_s.strip.present? || has_watermark_upload
+    self.advanced_defaults = normalized_string_hash(advanced_defaults, allowed_keys: ADVANCED_DEFAULT_KEYS)
+    self.advanced_visibility_defaults = normalized_boolean_hash(advanced_visibility_defaults, allowed_keys: ADVANCED_VISIBILITY_KEYS)
   end
 
   def normalized_output_locale(value)
     OUTPUT_LOCALES.key?(value.to_s) ? value.to_s : "en"
+  end
+
+  def normalized_string_hash(raw, allowed_keys:)
+    source = if raw.respond_to?(:to_unsafe_h)
+      raw.to_unsafe_h
+    elsif raw.is_a?(Hash)
+      raw
+    else
+      {}
+    end
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      value = source[key] || source[key.to_sym]
+      cleaned = value.to_s.strip
+      acc[key] = cleaned if cleaned.present?
+    end
+  end
+
+  def normalized_boolean_hash(raw, allowed_keys:)
+    source = if raw.respond_to?(:to_unsafe_h)
+      raw.to_unsafe_h
+    elsif raw.is_a?(Hash)
+      raw
+    else
+      {}
+    end
+    caster = ActiveModel::Type::Boolean.new
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      next unless source.key?(key) || source.key?(key.to_sym)
+
+      acc[key] = caster.cast(source[key] || source[key.to_sym])
+    end
   end
 
   def signature_image_constraints

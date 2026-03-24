@@ -102,4 +102,91 @@ class QuoteRevisionDiffServiceTest < ActiveSupport::TestCase
     assert_equal BigDecimal("2.0"), modified[:addon_changes][:updated].first[:before]
     assert_equal BigDecimal("1.0"), modified[:addon_changes][:updated].first[:after]
   end
+
+  test "advanced key-level changes do not duplicate section-level summary" do
+    company = companies(:one)
+    customer = customers(:one)
+
+    previous = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-ADV-001",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      issued_on: Date.current,
+      advanced_mode: true,
+      advanced_trade_terms: { "hs_code" => "8703.10" },
+      advanced_visibility: { "show_trade_terms_advanced" => true }
+    )
+    previous.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+    previous.save!
+
+    current = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-ADV-001",
+      revision_number: 2,
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current,
+      advanced_mode: true,
+      advanced_trade_terms: { "hs_code" => "8703.20" },
+      advanced_visibility: { "show_trade_terms_advanced" => true }
+    )
+    current.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+    current.save!
+
+    diff = QuoteRevisionDiffService.new(new_quote: current, old_quote: previous).call
+    commercial_fields = diff[:commercial_changes].map { |change| change[:field].to_s }
+
+    assert_includes commercial_fields, "advanced_trade_terms.hs_code"
+    assert_not_includes commercial_fields, "advanced_trade_terms"
+  end
+
+  test "advanced mixed changes keep key-level and remaining section-level summary without duplication" do
+    company = companies(:one)
+    customer = customers(:one)
+
+    previous = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-ADV-002",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      issued_on: Date.current,
+      advanced_mode: true,
+      advanced_trade_terms: {
+        "hs_code" => "8703.10",
+        "support_scope_note" => "Remote support"
+      },
+      advanced_visibility: { "show_trade_terms_advanced" => true }
+    )
+    previous.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+    previous.save!
+
+    current = company.quotes.new(
+      customer: customer,
+      quote_no: "QT-DIFF-ADV-002",
+      revision_number: 2,
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current,
+      advanced_mode: true,
+      advanced_trade_terms: {
+        "hs_code" => "8703.20",
+        "support_scope_note" => "Local spare-parts support"
+      },
+      advanced_visibility: { "show_trade_terms_advanced" => true }
+    )
+    current.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+    current.save!
+
+    diff = QuoteRevisionDiffService.new(new_quote: current, old_quote: previous).call
+    commercial_fields = diff[:commercial_changes].map { |change| change[:field].to_s }
+    section_change = diff[:commercial_changes].find { |change| change[:field].to_s == "advanced_trade_terms" }
+
+    assert_includes commercial_fields, "advanced_trade_terms.hs_code"
+    assert_equal 1, commercial_fields.count { |field| field == "advanced_trade_terms" }
+    assert_includes section_change[:before], "Support"
+    assert_includes section_change[:after], "Support"
+  end
 end

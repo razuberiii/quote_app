@@ -623,6 +623,8 @@ es-419:
           payment_term: Condición de pago
           trade_term: Condición comercial
           scope_of_supply: Alcance de suministro
+          advanced_trade_terms: Términos comerciales complementarios
+          advanced_logistics: Envío y logística
           request_reason: Motivo de revisión
           notes: Notas
           terms_text: Términos
@@ -634,6 +636,20 @@ es-419:
           discount_amount: Descuento
           grand_total: Total general
       show:
+        advanced_trade_terms: Términos comerciales complementarios
+        advanced_logistics: Envío y logística
+        supplementary_trade_terms: Términos comerciales complementarios
+        shipping_and_logistics: Envío y logística
+        field_labels:
+          warranty: Garantía
+          support: Soporte
+          validity: Vigencia
+          delivery: Entrega
+          payment_terms: Condiciones de pago
+          freight: Flete
+          shipping_scope: Alcance de envío
+          container_loading: Carga de contenedor
+          container_type: Tipo de contenedor
         created_banner:
           title: Cotización creada con éxito.
           subtitle: "Siguiente paso: compártela con tu comprador."
@@ -811,6 +827,24 @@ es-419:
           expired: Expirado
         business_terms: Términos comerciales
         business_terms_hint: Agrega los términos que el comprador revisará junto con el precio.
+        advanced_quote_sections: Secciones avanzadas de cotización
+        advanced_quote_sections_hint: Opcional para cotizaciones formales y complejas. Para cotizaciones diarias, mantenlo desactivado.
+        enable_advanced_mode: Activar secciones avanzadas para esta cotización
+        advanced_trade_terms_title: Términos comerciales avanzados (suplemento)
+        advanced_trade_terms_hint: Los campos principales de pago/comercio siguen siendo la base. Aquí solo van notas suplementarias.
+        show_advanced_trade_terms: Mostrar términos comerciales avanzados
+        hs_code: Código HS
+        warranty_scope_note: Nota de alcance de garantía
+        support_scope_note: Nota de alcance de soporte
+        validity_clause_note: Nota de cláusula de vigencia
+        delivery_commitment_note: Nota de compromiso de entrega
+        payment_clause_note: Nota de cláusula de pago
+        advanced_logistics_title: Logística avanzada (suplemento)
+        show_advanced_logistics: Mostrar logística avanzada
+        container_type: Tipo de contenedor
+        freight_note: Nota de flete
+        shipping_scope_note: Nota de alcance de envío
+        container_loading_note: Nota de carga en contenedor
         payment_term_placeholder: 30% de anticipo, 70% antes del envío
         trade_terms: Términos comerciales
         trade_terms_placeholder: FOB / CIF / EXW
@@ -2146,6 +2180,28 @@ es-419:
         show_pdf_revision_summary: Mostrar resumen de revisión en PDF
         show_excel_revision_summary: Mostrar resumen de revisión en Excel
         show_excel_gridlines: Mostrar líneas de cuadrícula de Excel
+        advanced_defaults_group: Valores predeterminados avanzados (opt-in)
+        advanced_defaults_group_hint: Valores de baja frecuencia y alto valor, solo para cotizaciones formales.
+        enable_advanced_by_default: Activar modo avanzado por defecto para cotizaciones de esta plantilla
+        show_trade_terms_advanced: Mostrar términos comerciales avanzados
+        show_logistics_block: Mostrar logística avanzada
+        advanced_defaults_trade_group: Términos comerciales (suplemento)
+        advanced_defaults_trade_hint: Solo notas suplementarias. Los campos estándar de pago/comercio siguen como semántica principal.
+        advanced_defaults_logistics_group: Logística (suplemento)
+        advanced_defaults_logistics_hint: Detalles de contenedor y flete para escenarios formales.
+        advanced_defaults_apply_hint: Estos valores solo se aplican cuando el modo avanzado está habilitado en la cotización.
+        default_hs_code: Código HS predeterminado
+        default_container_type: Tipo de contenedor predeterminado
+        default_warranty_scope_note: Nota predeterminada de alcance de garantía
+        default_support_scope_note: Nota predeterminada de alcance de soporte
+        default_validity_clause_note: Nota predeterminada de cláusula de vigencia
+        default_delivery_commitment_note: Nota predeterminada de compromiso de entrega
+        default_payment_clause_note: Nota predeterminada de cláusula de pago
+        default_freight_note: Nota predeterminada de flete
+        default_shipping_scope_note: Nota predeterminada de alcance de envío
+        default_container_loading_note: Nota predeterminada de carga en contenedor
+        preview_advanced_trade_fallback: Notas suplementarias de HS + garantia/soporte/pago
+        preview_advanced_logistics_fallback: Notas suplementarias de contenedor/flete
         signature_name: Autorizado por nombre (opcional)
         signature_name_placeholder: ej. Amy Chen
         signature_name_hint: Se utiliza para el texto del pie de página de la firma. Deje en blanco para ocultar "Autorizado por".
@@ -2164,6 +2220,8 @@ es-419:
         watermark_intensity_hint: "Rango recomendado: 8-16. Un valor más alto significa una marca de agua más oscura."
         number_format: Número y formato
         number_format_hint: Establecer estándares de legibilidad monetaria para todos los documentos de cotización exportados.
+        brand_signature_group: Marca y firma
+        brand_signature_group_hint: Configura valores predeterminados de marca de agua y firma para exportaciones y cotizaciones compartidas.
         decimal_places: Decimales
         thousand_separator: Separador de miles
         currency_display: Visualización de moneda
@@ -2298,6 +2356,7 @@ es-419:
         one: "%{count} ítem eliminado"
         other: "%{count} ítems eliminados"
       pricing_updated: precios actualizados
+      field_changed: "%{label} actualizado"
       scope_of_supply_updated: alcance de suministro actualizado
       terms_updated: términos actualizados
       quantity_updated: "%{item}: cantidad actualizada (%{before} -> %{after})"

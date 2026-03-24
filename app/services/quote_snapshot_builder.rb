@@ -12,6 +12,10 @@ class QuoteSnapshotBuilder
     snapshot["customer_email"] = @quote.customer.email
     snapshot["trade_term"] = @quote.trade_term
     snapshot["scope_of_supply"] = @quote.scope_of_supply
+    snapshot["advanced_mode"] = @quote.advanced_mode
+    snapshot["advanced_trade_terms"] = @quote.advanced_trade_terms_data
+    snapshot["advanced_logistics"] = @quote.advanced_logistics_data
+    snapshot["advanced_visibility"] = @quote.advanced_visibility_data
     snapshot["spec_label"] = @quote.resolved_spec_label
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title

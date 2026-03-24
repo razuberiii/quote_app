@@ -19,6 +19,7 @@ class QuotesController < ApplicationController
   def new
     @quote = @customer.quotes.new(currency: "USD", status: "draft", template: current_user.company.quote_template_or_default)
     prefill_scope_of_supply_from_template!(@quote)
+    prefill_advanced_sections_from_template!(@quote)
     ensure_quote_item_row
   end
 
@@ -533,7 +534,11 @@ class QuotesController < ApplicationController
       :legal_disclaimer,
       :delivery_notes,
       :scope_of_supply,
+      :advanced_mode,
       :template_id,
+      advanced_trade_terms: {},
+      advanced_logistics: {},
+      advanced_visibility: {},
       quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :specifications_text, :addon_charges_text, :item_image, :item_image_blob_id, :remove_item_image, :_destroy ]
     )
   end
@@ -566,6 +571,10 @@ class QuotesController < ApplicationController
 
     default_content = quote.template&.default_scope_of_supply_content.to_s
     quote.scope_of_supply = default_content if default_content.present?
+  end
+
+  def prefill_advanced_sections_from_template!(quote)
+    quote.apply_template_advanced_defaults!
   end
 
   def quote_exporter(kind = "quote", template = nil)

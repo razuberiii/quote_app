@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_21_181500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -297,6 +297,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_181500) do
   create_table "quote_templates", force: :cascade do |t|
     t.string "accent_color", default: "#1F4E79", null: false
     t.string "addon_label", default: "Add-on", null: false
+    t.jsonb "advanced_defaults", default: {}, null: false
+    t.jsonb "advanced_visibility_defaults", default: {}, null: false
     t.integer "amount_decimals", default: 2, null: false
     t.text "closing_message", default: "If you have questions, reply directly to this quote. Ready to proceed? Let us know.", null: false
     t.bigint "company_id", null: false
@@ -308,6 +310,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_181500) do
     t.string "document_kind", default: "quotation", null: false
     t.string "document_number_label", default: "", null: false
     t.string "document_title", default: "", null: false
+    t.boolean "enable_advanced_by_default", default: false, null: false
     t.string "excel_locale", default: "en", null: false
     t.boolean "excel_show_grid_lines", default: false, null: false
     t.string "font_family", default: "Noto Sans", null: false
@@ -373,6 +376,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_21_181500) do
   create_table "quotes", force: :cascade do |t|
     t.datetime "accepted_at"
     t.string "addon_label"
+    t.jsonb "advanced_logistics", default: {}, null: false
+    t.boolean "advanced_mode", default: false, null: false
+    t.jsonb "advanced_trade_terms", default: {}, null: false
+    t.jsonb "advanced_visibility", default: {}, null: false
     t.datetime "archived_at"
     t.text "changes_request_message"
     t.datetime "changes_requested_at"

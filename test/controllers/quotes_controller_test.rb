@@ -13,9 +13,73 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "new pre-fills advanced defaults when template enables advanced by default" do
+    template = quote_templates(:one)
+    template.update!(
+      default_template: true,
+      enable_advanced_by_default: true,
+      advanced_defaults: {
+        "trade_terms_hs_code" => "8703.10",
+        "logistics_container_type" => "40HQ"
+      },
+      advanced_visibility_defaults: {}
+    )
+
+    get new_customer_quote_url(@customer)
+    assert_response :success
+    assert_select "input[name='quote[advanced_mode]'][checked='checked']", 1
+    assert_select "input[name='quote[advanced_trade_terms][hs_code]'][value='8703.10']", 1
+    assert_select "input[name='quote[advanced_logistics][container_type]'][value='40HQ']", 1
+  end
+
+  test "new keeps advanced mode off when template does not enable advanced defaults" do
+    template = quote_templates(:one)
+    template.update!(
+      default_template: true,
+      enable_advanced_by_default: false,
+      advanced_defaults: {},
+      advanced_visibility_defaults: {}
+    )
+
+    get new_customer_quote_url(@customer)
+    assert_response :success
+    assert_select "input[name='quote[advanced_mode]'][checked='checked']", 0
+  end
+
   test "show is successful for company quote" do
     get quote_url(@quote)
     assert_response :success
+  end
+
+  test "edit keeps advanced section expanded when normalized supplementary data exists" do
+    @quote.update!(
+      advanced_mode: false,
+      advanced_trade_terms: { "hs_code" => "   " },
+      advanced_logistics: { "container_type" => "40HQ" }
+    )
+
+    get edit_quote_url(@quote)
+    assert_response :success
+    assert_select "details.quote-form-advanced[open]", 1
+  end
+
+  test "internal show uses supplementary wording for advanced sections" do
+    @quote.update!(
+      advanced_mode: true,
+      advanced_trade_terms: { "hs_code" => "8703.10" },
+      advanced_logistics: { "container_type" => "40HQ" },
+      advanced_visibility: {
+        "show_trade_terms_advanced" => true,
+        "show_logistics_block" => true
+      }
+    )
+
+    get quote_url(@quote)
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+    assert_match(/Shipping (&amp;|&) Logistics/, response.body)
+    assert_not_includes response.body, "Advanced Trade Terms"
+    assert_not_includes response.body, "Advanced Logistics"
   end
 
   test "export pdf responds successfully" do
@@ -23,9 +87,47 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "export pdf html uses customer-facing supplementary wording" do
+    @quote.update!(
+      advanced_mode: true,
+      advanced_trade_terms: { "hs_code" => "8703.10" },
+      advanced_logistics: { "container_type" => "40HQ" },
+      advanced_visibility: {
+        "show_trade_terms_advanced" => true,
+        "show_logistics_block" => true
+      }
+    )
+
+    get export_pdf_quote_url(@quote, params: { debug: 1 })
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+    assert_match(/Shipping (&amp;|&) Logistics/, response.body)
+    assert_not_includes response.body, "Advanced Trade Terms"
+    assert_not_includes response.body, "Advanced Logistics"
+  end
+
   test "export xlsx responds successfully" do
     get export_xlsx_quote_url(@quote)
     assert_response :success
+  end
+
+  test "public preview uses customer-facing supplementary wording" do
+    @quote.update!(
+      advanced_mode: true,
+      advanced_trade_terms: { "hs_code" => "8703.10" },
+      advanced_logistics: { "container_type" => "40HQ" },
+      advanced_visibility: {
+        "show_trade_terms_advanced" => true,
+        "show_logistics_block" => true
+      }
+    )
+
+    get public_preview_quote_url(@quote)
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+    assert_match(/Shipping (&amp;|&) Logistics/, response.body)
+    assert_not_includes response.body, "Advanced Trade Terms"
+    assert_not_includes response.body, "Advanced Logistics"
   end
 
   test "share creates public token and redirects" do

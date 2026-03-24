@@ -9,6 +9,50 @@ class Quote < ApplicationRecord
   MAX_SCOPE_OF_SUPPLY_LENGTH = 4000
   MAX_CHANGES_REQUEST_MESSAGE_LENGTH = 2000
   MAX_TOTAL_TEXT_BUDGET = 120_000
+  ADVANCED_TRADE_TERMS_KEYS = %w[
+    hs_code
+    warranty_scope_note
+    support_scope_note
+    validity_clause_note
+    delivery_commitment_note
+    payment_clause_note
+  ].freeze
+  ADVANCED_LOGISTICS_KEYS = %w[
+    freight_note
+    container_type
+    shipping_scope_note
+    container_loading_note
+  ].freeze
+  TEMPLATE_ADVANCED_TRADE_DEFAULT_KEYS = %w[
+    trade_terms_hs_code
+    trade_terms_warranty_scope_note
+    trade_terms_support_scope_note
+    trade_terms_validity_clause_note
+    trade_terms_delivery_commitment_note
+    trade_terms_payment_clause_note
+  ].freeze
+  TEMPLATE_ADVANCED_LOGISTICS_DEFAULT_KEYS = %w[
+    logistics_freight_note
+    logistics_container_type
+    logistics_shipping_scope_note
+    logistics_container_loading_note
+  ].freeze
+  TEMPLATE_ADVANCED_DEFAULT_FIELD_MAPPINGS = {
+    "trade_terms_hs_code" => [ :trade_terms, "hs_code" ],
+    "trade_terms_warranty_scope_note" => [ :trade_terms, "warranty_scope_note" ],
+    "trade_terms_support_scope_note" => [ :trade_terms, "support_scope_note" ],
+    "trade_terms_validity_clause_note" => [ :trade_terms, "validity_clause_note" ],
+    "trade_terms_delivery_commitment_note" => [ :trade_terms, "delivery_commitment_note" ],
+    "trade_terms_payment_clause_note" => [ :trade_terms, "payment_clause_note" ],
+    "logistics_freight_note" => [ :logistics, "freight_note" ],
+    "logistics_container_type" => [ :logistics, "container_type" ],
+    "logistics_shipping_scope_note" => [ :logistics, "shipping_scope_note" ],
+    "logistics_container_loading_note" => [ :logistics, "container_loading_note" ]
+  }.freeze
+  ADVANCED_VISIBILITY_KEYS = %w[
+    show_trade_terms_advanced
+    show_logistics_block
+  ].freeze
   STATUSES = %w[draft sent viewed negotiating won lost expired pending].freeze
   OPEN_STATUSES = %w[draft sent viewed negotiating pending].freeze
   AUTO_VIEW_STATUSES = %w[draft sent pending].freeze
@@ -81,6 +125,7 @@ class Quote < ApplicationRecord
   before_validation :set_final_amount_from_grand_total_for_won
   before_validation :sync_status_transition_timestamps
   before_validation :set_defaults
+  before_validation :normalize_advanced_blocks
   after_commit :refresh_related_product_stats, if: :saved_change_to_status?
 
   validates :currency, presence: true
@@ -356,6 +401,87 @@ class Quote < ApplicationRecord
     (subtotal + tax_amount.to_d + shipping_amount.to_d - discount_amount.to_d).round(2)
   end
 
+  def advanced_trade_terms_data
+    normalized_advanced_hash(advanced_trade_terms, allowed_keys: ADVANCED_TRADE_TERMS_KEYS)
+  end
+
+  def advanced_trade_terms_state
+    normalized_advanced_hash(advanced_trade_terms, allowed_keys: ADVANCED_TRADE_TERMS_KEYS, keep_blank: true)
+  end
+
+  def advanced_logistics_data
+    normalized_advanced_hash(advanced_logistics, allowed_keys: ADVANCED_LOGISTICS_KEYS)
+  end
+
+  def advanced_logistics_state
+    normalized_advanced_hash(advanced_logistics, allowed_keys: ADVANCED_LOGISTICS_KEYS, keep_blank: true)
+  end
+
+  def advanced_sections_have_values?
+    advanced_trade_terms_data.any? || advanced_logistics_data.any?
+  end
+
+  def apply_template_advanced_defaults!(template: self.template)
+    return if template.blank?
+    return unless template.enable_advanced_by_default?
+
+    self.advanced_mode = true if advanced_mode.nil? || advanced_mode == false
+    trade_terms_state = advanced_trade_terms_state
+    logistics_state = advanced_logistics_state
+    visibility_state = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+
+    template.advanced_defaults_data.each do |default_key, raw_value|
+      value = raw_value.to_s.squish
+      next if value.blank?
+
+      mapped = TEMPLATE_ADVANCED_DEFAULT_FIELD_MAPPINGS[default_key.to_s]
+      next if mapped.blank?
+
+      target, target_key = mapped
+      case target
+      when :trade_terms
+        trade_terms_state[target_key] = value unless trade_terms_state.key?(target_key)
+      when :logistics
+        logistics_state[target_key] = value unless logistics_state.key?(target_key)
+      end
+    end
+
+    template.advanced_visibility_defaults_data.each do |key, value|
+      next unless ADVANCED_VISIBILITY_KEYS.include?(key)
+      next if visibility_state.key?(key)
+
+      visibility_state[key] = ActiveModel::Type::Boolean.new.cast(value)
+    end
+
+    self.advanced_trade_terms = trade_terms_state
+    self.advanced_logistics = logistics_state
+    self.advanced_visibility = visibility_state
+  end
+
+  def advanced_visibility_data(template: self.template)
+    quote_flags = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+    template_flags = template&.advanced_visibility_defaults_data || {}
+    trade_terms_present = advanced_trade_terms_data.any? || template_advanced_defaults_present?(template, TEMPLATE_ADVANCED_TRADE_DEFAULT_KEYS)
+    logistics_present = advanced_logistics_data.any? || template_advanced_defaults_present?(template, TEMPLATE_ADVANCED_LOGISTICS_DEFAULT_KEYS)
+
+    ADVANCED_VISIBILITY_KEYS.index_with do |key|
+      next true if quote_flags[key] == true
+      next true if template_flags[key] == true
+
+      case key
+      when "show_trade_terms_advanced" then trade_terms_present
+      when "show_logistics_block" then logistics_present
+      else false
+      end
+    end
+  end
+
+  def advanced_section_enabled?(key, template: self.template)
+    return false unless advanced_mode
+
+    advanced_visibility_data(template: template)[key.to_s] || false
+  end
+
   def build_revision
     revision_attrs = {
       company_id: company_id,
@@ -395,6 +521,10 @@ class Quote < ApplicationRecord
       reopened_at: nil
     }
     revision_attrs[:trade_term] = trade_term if self.class.column_names.include?("trade_term")
+    revision_attrs[:advanced_mode] = advanced_mode if self.class.column_names.include?("advanced_mode")
+    revision_attrs[:advanced_trade_terms] = advanced_trade_terms_state if self.class.column_names.include?("advanced_trade_terms")
+    revision_attrs[:advanced_logistics] = advanced_logistics_state if self.class.column_names.include?("advanced_logistics")
+    revision_attrs[:advanced_visibility] = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS) if self.class.column_names.include?("advanced_visibility")
     revision = self.class.new(revision_attrs)
 
     item_columns = QuoteItem.column_names
@@ -476,6 +606,10 @@ class Quote < ApplicationRecord
     self.template ||= company&.quote_template_or_default
     self.spec_label = template&.spec_label.presence || "Spec" if spec_label.blank?
     self.addon_label = template&.addon_label.presence || "Add-on" if addon_label.blank?
+    self.advanced_mode = false if advanced_mode.nil?
+    self.advanced_trade_terms = {} if advanced_trade_terms.blank?
+    self.advanced_logistics = {} if advanced_logistics.blank?
+    self.advanced_visibility = {} if advanced_visibility.blank?
   end
 
   def normalize_status
@@ -589,6 +723,8 @@ class Quote < ApplicationRecord
     total_chars += delivery_notes.to_s.length
     total_chars += scope_of_supply.to_s.length
     total_chars += changes_request_message.to_s.length
+    total_chars += advanced_trade_terms_data.values.join.length
+    total_chars += advanced_logistics_data.values.join.length
 
     quote_items.reject(&:marked_for_destruction?).each do |item|
       total_chars += item.description.to_s.length
@@ -604,6 +740,59 @@ class Quote < ApplicationRecord
     return if total_chars <= MAX_TOTAL_TEXT_BUDGET
 
     errors.add(:base, "Total quotation text is too large (maximum is #{MAX_TOTAL_TEXT_BUDGET} characters across quote fields and line items).")
+  end
+
+  def normalize_advanced_blocks
+    self.advanced_trade_terms = normalized_advanced_hash(advanced_trade_terms, allowed_keys: ADVANCED_TRADE_TERMS_KEYS, keep_blank: true)
+    self.advanced_logistics = normalized_advanced_hash(advanced_logistics, allowed_keys: ADVANCED_LOGISTICS_KEYS, keep_blank: true)
+    self.advanced_visibility = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+  end
+
+  def normalized_advanced_hash(raw, allowed_keys:, keep_blank: false)
+    source = if raw.respond_to?(:to_unsafe_h)
+      raw.to_unsafe_h
+    elsif raw.is_a?(Hash)
+      raw
+    else
+      {}
+    end
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      has_value = source.key?(key) || source.key?(key.to_sym)
+      next unless has_value
+
+      value = source[key] || source[key.to_sym]
+      cleaned = value.to_s.squish
+      if keep_blank
+        acc[key] = cleaned
+      elsif cleaned.present?
+        acc[key] = cleaned
+      end
+    end
+  end
+
+  def normalized_boolean_hash(raw, allowed_keys:)
+    source = if raw.respond_to?(:to_unsafe_h)
+      raw.to_unsafe_h
+    elsif raw.is_a?(Hash)
+      raw
+    else
+      {}
+    end
+    caster = ActiveModel::Type::Boolean.new
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      next unless source.key?(key) || source.key?(key.to_sym)
+
+      acc[key] = caster.cast(source[key] || source[key.to_sym])
+    end
+  end
+
+  def template_advanced_defaults_present?(template, keys)
+    defaults = template&.advanced_defaults_data
+    return false unless defaults.is_a?(Hash)
+
+    keys.any? { |key| defaults[key].to_s.strip.present? }
   end
 
   def reason_values_are_allowed

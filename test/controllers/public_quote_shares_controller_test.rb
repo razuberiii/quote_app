@@ -40,4 +40,32 @@ class PublicQuoteSharesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "won", @quote.status
     assert_equal "quote_accepted", Notification.order(:created_at).last.normalized_kind
   end
+
+  test "show falls back to data-driven advanced visibility for legacy snapshots" do
+    legacy_snapshot = @share.snapshot.deep_dup
+    legacy_snapshot["advanced_mode"] = true
+    legacy_snapshot["advanced_trade_terms"] = { "hs_code" => "8703.10" }
+    legacy_snapshot["advanced_logistics"] = {}
+    legacy_snapshot.delete("advanced_visibility")
+    @share.update!(snapshot: legacy_snapshot)
+
+    get public_quote_share_url(@share.token)
+    assert_response :success
+    assert_includes response.body, I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+    assert_includes response.body, "8703.10"
+  end
+
+  test "show remains stable when legacy snapshot misses advanced keys entirely" do
+    legacy_snapshot = @share.snapshot.deep_dup
+    legacy_snapshot.delete("advanced_mode")
+    legacy_snapshot.delete("advanced_trade_terms")
+    legacy_snapshot.delete("advanced_logistics")
+    legacy_snapshot.delete("advanced_visibility")
+    @share.update!(snapshot: legacy_snapshot)
+
+    get public_quote_share_url(@share.token)
+    assert_response :success
+    assert_not_includes response.body, I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+    assert_not_includes response.body, I18n.t("quotes.view.show.shipping_and_logistics", default: "Shipping & Logistics")
+  end
 end

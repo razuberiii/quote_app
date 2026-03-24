@@ -340,6 +340,39 @@
     </section>
   <% end %>
 
+  <% advanced_trade_terms = @quote.advanced_trade_terms_data %>
+  <% advanced_logistics = @quote.advanced_logistics_data %>
+  <% show_advanced_trade_terms = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: active_template) && advanced_trade_terms.any? %>
+  <% show_advanced_logistics = @quote.advanced_section_enabled?("show_logistics_block", template: active_template) && advanced_logistics.any? %>
+  <% advanced_trade_terms_changed = @revision_diff.present? && quote_diff_changed?(@revision_diff, :advanced_trade_terms) %>
+  <% advanced_logistics_changed = @revision_diff.present? && quote_diff_changed?(@revision_diff, :advanced_logistics) %>
+  <% if show_advanced_trade_terms %>
+    <section class="quote-section-block quote-section-block--terms">
+      <h3><%= quote_trade_terms_section_title %> <% if advanced_trade_terms_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      <div class="quote-term-list">
+        <% advanced_trade_terms.each do |key, value| %>
+          <p class="quote-term-row">
+            <span class="quote-term-label"><%= quote_supplementary_field_label(key) %>:</span>
+            <span class="quote-term-value"><%= value %></span>
+          </p>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+  <% if show_advanced_logistics %>
+    <section class="quote-section-block quote-section-block--terms">
+      <h3><%= quote_logistics_section_title %> <% if advanced_logistics_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
+      <div class="quote-term-list">
+        <% advanced_logistics.each do |key, value| %>
+          <p class="quote-term-row">
+            <span class="quote-term-label"><%= quote_supplementary_field_label(key) %>:</span>
+            <span class="quote-term-value"><%= value %></span>
+          </p>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
   <% if active_template.show_notes && @quote.notes.present? %>
     <section class="quote-section-block">
       <h3><%= t("quote_document.labels.notes") %></h3>

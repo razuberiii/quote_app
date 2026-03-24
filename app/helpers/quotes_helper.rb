@@ -78,6 +78,50 @@ module QuotesHelper
     lines
   end
 
+  def quote_trade_terms_section_title
+    t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms")
+  end
+
+  def quote_logistics_section_title
+    t("quotes.view.show.shipping_and_logistics", default: "Shipping & Logistics")
+  end
+
+  def quote_supplementary_field_label(key)
+    key_name = key.to_s
+    {
+      "hs_code" => t("quotes.view.form.hs_code", default: "HS Code"),
+      "warranty_scope_note" => t("quotes.view.show.field_labels.warranty", default: "Warranty"),
+      "support_scope_note" => t("quotes.view.show.field_labels.support", default: "Support"),
+      "validity_clause_note" => t("quotes.view.show.field_labels.validity", default: "Validity"),
+      "delivery_commitment_note" => t("quotes.view.show.field_labels.delivery", default: "Delivery"),
+      "payment_clause_note" => t("quotes.view.show.field_labels.payment_terms", default: "Payment Terms"),
+      "freight_note" => t("quotes.view.show.field_labels.freight", default: "Freight"),
+      "container_type" => t("quotes.view.show.field_labels.container_type", default: "Container Type"),
+      "shipping_scope_note" => t("quotes.view.show.field_labels.shipping_scope", default: "Shipping Scope"),
+      "container_loading_note" => t("quotes.view.show.field_labels.container_loading", default: "Container Loading")
+    }.fetch(key_name, key_name.humanize)
+  end
+
+  def quote_normalized_supplementary_hash(raw, section:)
+    allowed_keys =
+      case section.to_sym
+      when :trade_terms
+        Quote::ADVANCED_TRADE_TERMS_KEYS
+      when :logistics
+        Quote::ADVANCED_LOGISTICS_KEYS
+      else
+        []
+      end
+    source = raw.is_a?(Hash) ? raw : {}
+
+    allowed_keys.each_with_object({}) do |key, acc|
+      next unless source.key?(key) || source.key?(key.to_sym)
+
+      cleaned = (source[key] || source[key.to_sym]).to_s.squish
+      acc[key] = cleaned if cleaned.present?
+    end
+  end
+
   def quote_revision_diff_context(quote)
     previous = previous_quote_revision_for(quote)
     return nil unless previous
@@ -112,7 +156,11 @@ module QuotesHelper
   end
 
   def quote_diff_commercial_change(diff, field)
-    Array(diff[:commercial_changes]).find { |change| change[:field].to_s == field.to_s }
+    field_name = field.to_s
+    Array(diff[:commercial_changes]).find do |change|
+      change_field = change[:field].to_s
+      change_field == field_name || change_field.start_with?("#{field_name}.")
+    end
   end
 
   def quote_diff_financial_change(diff, field)

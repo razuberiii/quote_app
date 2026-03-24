@@ -81,11 +81,12 @@
 
     <%= f.hidden_field :quote_no if quote.quote_no.present? %>
 
-    <section class="quote-form-section quote-form-panel">
-      <div class="app-form-section-head">
-        <h3><%= t("quotes.view.form.basic_information") %></h3>
-        <p class="app-form-section-note"><%= t("quotes.view.form.basic_information_hint") %></p>
-      </div>
+    <details class="quote-form-section quote-form-panel quote-form-collapsible" open>
+      <summary class="quote-form-section-summary quote-form-section-summary--card">
+        <strong><%= t("quotes.view.form.basic_information") %></strong>
+        <span class="app-form-section-note"><%= t("quotes.view.form.basic_information_hint") %></span>
+      </summary>
+      <div class="quote-form-section-body">
       <div class="quote-form-grid">
         <div>
           <%= f.label :template_id, t("quotes.view.form.template") %>
@@ -120,13 +121,15 @@
           </div>
         </div>
       </div>
-    </section>
-
-    <section class="quote-form-section quote-form-panel">
-      <div class="app-form-section-head">
-        <h3><%= t("quotes.view.form.business_terms") %></h3>
-        <p class="app-form-section-note"><%= t("quotes.view.form.business_terms_hint") %></p>
       </div>
+    </details>
+
+    <details class="quote-form-section quote-form-panel quote-form-collapsible" open>
+      <summary class="quote-form-section-summary quote-form-section-summary--card">
+        <strong><%= t("quotes.view.form.business_terms") %></strong>
+        <span class="app-form-section-note"><%= t("quotes.view.form.business_terms_hint") %></span>
+      </summary>
+      <div class="quote-form-section-body">
       <div class="quote-form-grid">
         <div>
           <%= f.label :payment_term %>
@@ -154,13 +157,84 @@
           <%= f.text_area :legal_disclaimer, rows: 2, placeholder: t("quotes.view.form.legal_disclaimer_placeholder"), class: ui_input_classes %>
         </div>
       </div>
-    </section>
-
-    <section class="quote-form-section quote-form-panel">
-      <div class="app-form-section-head">
-        <h3><%= t("quotes.view.form.internal_information") %></h3>
-        <p class="app-form-section-note"><%= t("quotes.view.form.internal_information_hint") %></p>
       </div>
+    </details>
+
+    <% advanced_sections_open = quote.advanced_mode? || quote.advanced_sections_have_values? %>
+    <details class="quote-form-section quote-form-panel quote-form-advanced" <%= "open" if advanced_sections_open %>>
+      <summary class="quote-form-section-summary">
+        <strong><%= t("quotes.view.form.advanced_quote_sections", default: "Advanced Quote Sections") %></strong>
+        <span class="quote-form-hint"><%= t("quotes.view.form.advanced_quote_sections_hint", default: "Optional for formal and complex quotes. Keep off for daily lightweight quoting.") %></span>
+      </summary>
+      <div class="quote-form-grid mt-3 quote-advanced-master-toggle">
+        <div class="quote-form-grid-span-2">
+          <label class="quote-inline-toggle">
+            <%= f.check_box :advanced_mode %>
+            <span><%= t("quotes.view.form.enable_advanced_mode", default: "Enable advanced sections for this quote") %></span>
+          </label>
+        </div>
+      </div>
+
+      <% advanced_trade_terms = quote.advanced_trade_terms_data %>
+      <% advanced_logistics = quote.advanced_logistics_data %>
+      <div class="quote-form-grid">
+        <div class="quote-form-grid-span-2 quote-advanced-subsection-head">
+          <h4><%= t("quotes.view.form.advanced_trade_terms_title", default: "Advanced Trade Terms (Supplement)") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.advanced_trade_terms_hint", default: "Existing payment term/trade term stay as primary fields. These are supplemental notes.") %></p>
+        </div>
+        <div>
+          <label><%= t("quotes.view.form.hs_code", default: "HS Code") %></label>
+          <%= text_field_tag "quote[advanced_trade_terms][hs_code]", advanced_trade_terms["hs_code"], class: ui_input_classes, placeholder: "8703.10" %>
+        </div>
+        <div>
+          <label><%= t("quotes.view.form.warranty_scope_note", default: "Warranty Scope Note") %></label>
+          <%= text_field_tag "quote[advanced_trade_terms][warranty_scope_note]", advanced_trade_terms["warranty_scope_note"], class: ui_input_classes %>
+        </div>
+        <div>
+          <label><%= t("quotes.view.form.support_scope_note", default: "Support Scope Note") %></label>
+          <%= text_field_tag "quote[advanced_trade_terms][support_scope_note]", advanced_trade_terms["support_scope_note"], class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <label><%= t("quotes.view.form.validity_clause_note", default: "Validity Clause Note") %></label>
+          <%= text_area_tag "quote[advanced_trade_terms][validity_clause_note]", advanced_trade_terms["validity_clause_note"], rows: 2, class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <label><%= t("quotes.view.form.delivery_commitment_note", default: "Delivery Commitment Note") %></label>
+          <%= text_area_tag "quote[advanced_trade_terms][delivery_commitment_note]", advanced_trade_terms["delivery_commitment_note"], rows: 2, class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <label><%= t("quotes.view.form.payment_clause_note", default: "Payment Clause Note") %></label>
+          <%= text_area_tag "quote[advanced_trade_terms][payment_clause_note]", advanced_trade_terms["payment_clause_note"], rows: 2, class: ui_input_classes %>
+        </div>
+
+        <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
+          <h4><%= t("quotes.view.form.advanced_logistics_title", default: "Advanced Logistics (Supplement)") %></h4>
+        </div>
+        <div>
+          <label><%= t("quotes.view.form.container_type", default: "Container Type") %></label>
+          <%= text_field_tag "quote[advanced_logistics][container_type]", advanced_logistics["container_type"], class: ui_input_classes, placeholder: "40HQ" %>
+        </div>
+        <div>
+          <label><%= t("quotes.view.form.freight_note", default: "Freight Note") %></label>
+          <%= text_field_tag "quote[advanced_logistics][freight_note]", advanced_logistics["freight_note"], class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <label><%= t("quotes.view.form.shipping_scope_note", default: "Shipping Scope Note") %></label>
+          <%= text_area_tag "quote[advanced_logistics][shipping_scope_note]", advanced_logistics["shipping_scope_note"], rows: 2, class: ui_input_classes %>
+        </div>
+        <div class="quote-form-grid-span-2">
+          <label><%= t("quotes.view.form.container_loading_note", default: "Container Loading Note") %></label>
+          <%= text_area_tag "quote[advanced_logistics][container_loading_note]", advanced_logistics["container_loading_note"], rows: 2, class: ui_input_classes %>
+        </div>
+      </div>
+    </details>
+
+    <details class="quote-form-section quote-form-panel quote-form-collapsible" open>
+      <summary class="quote-form-section-summary quote-form-section-summary--card">
+        <strong><%= t("quotes.view.form.internal_information") %></strong>
+        <span class="app-form-section-note"><%= t("quotes.view.form.internal_information_hint") %></span>
+      </summary>
+      <div class="quote-form-section-body">
       <div class="quote-form-grid">
         <div class="quote-form-grid-span-2">
           <%= f.label :notes %>
@@ -215,14 +289,16 @@
                            class: ui_input_classes("js-stalled-reason-detail") %>
         </div>
       </div>
-    </section>
+      </div>
+    </details>
 
-    <section class="quote-form-section quote-form-section-totals quote-form-panel">
+    <details class="quote-form-section quote-form-section-totals quote-form-panel quote-form-collapsible" open>
+      <summary class="quote-form-section-summary quote-form-section-summary--card">
+        <strong><%= t("quotes.view.form.totals_inputs") %></strong>
+        <span class="app-form-section-note quote-money-context"><%= t("quotes.view.form.settlement_currency") %>: <strong class="js-currency-code"><%= quote.currency %></strong></span>
+      </summary>
+      <div class="quote-form-section-body">
       <div class="quote-totals-inputs">
-        <div class="app-form-section-head">
-          <h3><%= t("quotes.view.form.totals_inputs") %></h3>
-          <p class="app-form-section-note quote-money-context"><%= t("quotes.view.form.settlement_currency") %>: <strong class="js-currency-code"><%= quote.currency %></strong></p>
-        </div>
         <div class="quote-form-grid">
           <div>
             <%= f.label :tax_amount, t("quotes.view.form.tax_vat") %>
@@ -258,13 +334,15 @@
         <p class="quote-live-grand"><span><%= t("quotes.view.form.grand_total") %></span><strong id="quote-live-grand"><%= quote_money(grand_total_value, quote.currency) %></strong></p>
         <p class="quote-live-saved js-live-saved-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>><span><%= t("quotes.view.form.you_save") %></span><strong id="quote-live-saved"><%= quote_money(quote.discount_amount.to_d, quote.currency) %></strong></p>
       </aside>
-    </section>
-
-    <section class="quote-form-section quote-form-panel">
-      <div class="app-form-section-head">
-        <h3><%= t("quotes.view.form.quote_items") %></h3>
-        <p class="app-form-section-note"><%= t("quotes.view.form.quote_items_hint") %></p>
       </div>
+    </details>
+
+    <details class="quote-form-section quote-form-panel quote-form-collapsible" open>
+      <summary class="quote-form-section-summary quote-form-section-summary--card">
+        <strong><%= t("quotes.view.form.quote_items") %></strong>
+        <span class="app-form-section-note"><%= t("quotes.view.form.quote_items_hint") %></span>
+      </summary>
+      <div class="quote-form-section-body">
       <p class="quote-form-hint">
         <%= t("quotes.view.form.quote_item_hint_1") %>
       </p>
@@ -454,7 +532,8 @@
           <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="add-quote-item"><%= t("quotes.view.form.add_item") %></button>
         </div>
       </div>
-    </section>
+      </div>
+    </details>
 
     <div class="quote-form-submit">
       <%= f.submit submit_label, class: ui_button_classes(:primary), data: { default_label: submit_label } %>

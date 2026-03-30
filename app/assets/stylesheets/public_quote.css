@@ -1,227 +1,643 @@
-/* Extracted from legacy.css during Tailwind migration phase 2. */
-
-.public-quote-themed .quote-doc-header {
-  border-bottom: 1px solid #d8e3ef;
+.public-quote-canvas {
+  position: relative;
 }
 
-.public-quote-themed .quote-doc-kicker {
-  color: var(--doc-accent, #1f4e79);
-}
-
-.public-quote-themed .quote-meta-card {
-  border-left: 0;
-}
-
-.public-quote-themed .quote-doc-table thead {
-  background-color: #f5f8fc;
-}
-
-.public-quote-themed .quote-doc-table thead th {
-  color: #2b4663;
-}
-
-.public-quote-themed .quote-total-grand {
-  margin-top: 0.2rem;
-  padding: 0.55rem 0 0;
-  background: transparent;
+.public-quote-document.public-quote-v2 {
+  font-family: var(--doc-font), "Noto Sans", "Segoe UI", Arial, sans-serif;
+  background: #fff;
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+  padding: 1rem 1.02rem 0.95rem;
   color: #0f172a;
-  border-top: 1px solid #9fb4c8;
-  border-radius: 0;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.035);
+  position: relative;
+  isolation: isolate;
 }
 
-.public-quote-themed .quote-total-grand span,
-.public-quote-themed .quote-total-grand strong {
-  color: inherit;
+.public-quote-document.quote-watermarked::before {
+  content: attr(data-watermark);
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  white-space: nowrap;
+  color: rgba(15, 23, 42, 0.12);
+  letter-spacing: 0.14em;
+  font-size: clamp(1.8rem, 6.2vw, 4.4rem);
+  font-weight: 700;
+  transform: rotate(-22deg);
+  opacity: var(--quote-watermark-opacity, 0.06);
+  z-index: 5;
 }
 
-.public-quote-themed .quote-total-box p:not(.quote-total-grand) span {
-  color: #556b84;
+.public-quote-document .quote-public-watermark-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 52%;
+  max-height: 48%;
+  object-fit: contain;
+  margin: auto;
+  opacity: var(--quote-watermark-opacity, 0.06);
+  transform: rotate(-22deg);
+  pointer-events: none;
+  z-index: 5;
 }
 
-.public-quote-themed .quote-total-box p:not(.quote-total-grand) strong {
-  color: #4a6380;
+.public-quote-document > *:not(.quote-public-watermark-image) {
+  position: relative;
+  z-index: 3;
 }
 
-.public-quote-themed .quote-total-box p.quote-total-discount > strong,
-.public-quote-themed .quote-total-box p.quote-total-saved > strong {
-  color: #b91c1c;
+.quote-public-system-banner {
+  margin: 0 0 0.8rem;
+  border-radius: 10px;
+  border: 1px solid #dbe3ee;
+  padding: 0.58rem 0.7rem;
+  font-size: 0.85rem;
+  line-height: 1.35;
 }
 
-.public-quote-themed .quote-section-block h3 {
-  color: var(--doc-accent, #1f4e79);
+.quote-public-system-banner.is-warning {
+  background: #fffbeb;
+  border-color: #f6d38f;
+  color: #92400e;
 }
 
-.pdf-render .quote-section-block--supplementary {
-  page-break-inside: auto;
-  break-inside: auto;
+.quote-public-system-banner.is-danger {
+  background: #fff1f2;
+  border-color: #fecdd3;
+  color: #9f1239;
 }
 
-.pdf-render .quote-section-block--supplementary .quote-supp-header {
-  margin: 0 0 0.28rem 0;
-  page-break-after: avoid;
-  break-after: avoid-page;
+.quote-public-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.85rem;
+  margin-bottom: 0.78rem;
+  padding-bottom: 0.58rem;
+  border-bottom: 1px solid #e3e9f1;
 }
 
-.pdf-render .quote-section-block--supplementary .quote-supp-kicker {
-  margin: 0 0 0.12rem 0;
-  color: #64748b;
-  font-size: 0.62rem;
+.quote-public-hero-main {
+  min-width: 0;
+}
+
+.quote-public-hero-eyebrow {
+  margin: 0 0 0.2rem;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.69rem;
+  font-weight: 700;
+}
+
+.quote-public-hero h1 {
+  margin: 0;
+  font-size: 1.42rem;
   line-height: 1.2;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  color: #0b1729;
+  overflow-wrap: anywhere;
 }
 
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-list {
-  margin: 0;
-  padding: 0;
+.quote-public-hero-meta {
+  margin-top: 0.3rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.28rem 0.62rem;
+  color: #5b6777;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row {
-  margin: 0;
-  padding: 0.16rem 0;
-  display: grid;
-  grid-template-columns: minmax(135px, 170px) minmax(0, 1fr);
-  gap: 0.55rem;
-  border-bottom: 1px solid #e5eaf0;
-  page-break-inside: avoid;
-  break-inside: avoid-page;
-}
-
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row:last-child {
-  border-bottom: none;
-}
-
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dt,
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dd {
-  margin: 0;
-}
-
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dt {
-  color: #475569;
+.quote-public-hero-meta span strong {
+  color: #1e293b;
   font-weight: 650;
 }
 
-.pdf-render .quote-section-block--supplementary .quote-supp-kv-row dd {
-  color: #1f2937;
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.quote-public-hero-side {
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
 }
 
-.quote-public-utility {
+.quote-public-hero-logo {
+  max-height: 52px;
+  max-width: 180px;
+  object-fit: contain;
+}
+
+.quote-public-hero-mark {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.quote-public-hero-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
-  margin: 0;
+  gap: 0.38rem;
+}
+
+.quote-public-action-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid #cad7e6;
+  background: #fff;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.quote-public-action-btn:hover {
+  background: #f8fafc;
+}
+
+.quote-public-action-btn--primary {
+  background: var(--doc-accent, #1f4e79);
+  border-color: var(--doc-accent, #1f4e79);
+  color: var(--doc-on-accent, #fff);
+}
+
+.quote-public-action-btn--primary:hover {
+  filter: brightness(0.96);
 }
 
 .quote-utility-btn {
-  min-height: 32px !important;
+  min-height: 34px !important;
   padding: 0 11px !important;
   border: 1px solid #d1dbe7 !important;
   border-radius: 8px !important;
   background: #fff !important;
   color: #334155 !important;
-  font-weight: 600;
+  font-weight: 650;
   box-shadow: none !important;
 }
 
 .quote-utility-btn:hover {
   background: #f8fafc !important;
-  border-color: #c3d0e0 !important;
-  color: #334155 !important;
-  box-shadow: none !important;
 }
 
-.quote-decision-section {
-  margin-top: 1rem;
-  border-top: 1px solid #dbe3ee;
-  padding: 0.8rem 0 0;
+.quote-public-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 0.86rem;
+}
+
+.quote-public-fact-card {
+  padding: 0.7rem 0.74rem;
+  border-left: 1px solid #e8edf4;
+}
+
+.quote-public-fact-card:first-child {
+  border-left: 0;
+}
+
+.quote-public-fact-card h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.89rem;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #1f2d3d;
+}
+
+.quote-public-fact-card dl,
+.quote-public-facts-block dl,
+.quote-public-signoff-facts {
+  margin: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.quote-public-fact-card dl div,
+.quote-public-facts-block dl div,
+.quote-public-signoff-facts div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 0.44rem;
+}
+
+.quote-public-fact-card dt,
+.quote-public-facts-block dt,
+.quote-public-signoff-facts dt {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.79rem;
+  font-weight: 600;
+}
+
+.quote-public-fact-card dd,
+.quote-public-facts-block dd,
+.quote-public-signoff-facts dd {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.84rem;
+  overflow-wrap: anywhere;
+}
+
+.quote-public-core {
+  margin-bottom: 0.9rem;
+  border: 1px solid #d6dee8;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.quote-public-core-table {
+  margin: 0;
+}
+
+.quote-public-core .quote-doc-table {
+  margin: 0;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.quote-public-core-footer {
+  border-top: 1px solid #dde4ed;
+  padding: 0.68rem 0.78rem 0.64rem;
+  display: grid;
+  justify-items: end;
+}
+
+.public-quote-document .quote-doc-table thead {
+  background: #f7f8fa;
+}
+
+.public-quote-document .quote-doc-table thead th {
+  color: #253242;
+  font-size: 0.8rem;
+  text-transform: none;
+  letter-spacing: 0;
+  border-bottom: 1px solid #333;
+}
+
+.public-quote-document .quote-doc-table th,
+.public-quote-document .quote-doc-table td {
+  padding: 0.52rem 0.58rem;
+  vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.public-quote-document .quote-doc-table td {
+  border-bottom: 1px solid #e6e9ee;
+}
+
+.quote-public-core .quote-col-description {
+  width: 68%;
+}
+
+.quote-public-core .quote-col-qty {
+  width: 8%;
+}
+
+.quote-public-core .quote-col-money {
+  width: 12%;
+}
+
+.quote-public-row--product td {
+  padding-top: 0.64rem;
+  padding-bottom: 0.64rem;
+}
+
+.quote-public-row--charge td {
+  padding-top: 0.42rem;
+  padding-bottom: 0.42rem;
+}
+
+.quote-public-row--charge td.quote-col-right,
+.quote-public-row--charge td.quote-col-money {
+  vertical-align: middle;
+}
+
+.quote-public-item-image-wrap {
+  width: 48px;
+  height: 48px;
+  max-width: 48px;
+  max-height: 48px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin: 0;
+  flex: 0 0 48px;
+}
+
+.quote-public-core .quote-public-item-image {
+  width: 100%;
+  height: 100%;
+  max-width: 48px;
+  max-height: 48px;
+  display: block;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
   background: transparent;
 }
 
-.quote-decision-section h3 {
-  margin: 0 0 0.45rem;
+.quote-item-desc--public {
+  display: grid;
+  gap: 0.14rem;
+}
+
+.quote-item-desc--public.has-inline-image {
+  grid-template-columns: 48px minmax(0, 1fr);
+  column-gap: 0.58rem;
+  align-items: start;
+}
+
+.quote-item-desc--public .quote-item-desc-content {
+  min-width: 0;
+}
+
+.quote-item-desc--public .quote-item-desc-main {
+  font-size: 0.9rem;
+  font-weight: 670;
+  line-height: 1.32;
+  overflow-wrap: anywhere;
+}
+
+.quote-item-desc-optional {
+  margin: 0;
+  color: #556476;
+  font-size: 0.8rem;
+  line-height: 1.32;
+}
+
+.quote-item-desc-group {
+  margin-top: 0.08rem;
+}
+
+.quote-item-desc-group-label {
+  margin: 0 0 0.06rem;
+  color: #5b6f87;
+  font-size: 0.71rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.quote-item-desc-group ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.08rem;
+}
+
+.quote-item-desc-group li {
+  display: grid;
+  grid-template-columns: minmax(72px, 30%) minmax(0, 1fr);
+  gap: 0.35rem;
+  font-size: 0.76rem;
+  line-height: 1.32;
+  color: #334155;
+}
+
+.quote-item-desc-group li strong {
+  color: #5a6e86;
+  font-weight: 610;
+  overflow-wrap: anywhere;
+}
+
+.quote-item-desc-group li span {
+  color: #41566f;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.quote-item-desc-group--addon {
+  margin-top: 0.12rem;
+  padding-top: 0.08rem;
+}
+
+.quote-col-right,
+.quote-col-money {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.quote-public-settlement {
+  margin-top: 0;
+}
+
+.quote-public-settlement--footer {
+  width: min(100%, 460px);
+}
+
+.quote-public-settlement h3 {
+  margin: 0 0 0.3rem;
+  font-size: 0.82rem;
+  color: #4b5563;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.quote-public-settlement p {
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.2rem 0;
+  font-size: 0.83rem;
+  color: #334155;
+  border-bottom: 1px solid #eceff4;
+}
+
+.quote-public-settlement p strong {
+  color: #1f3650;
+}
+
+.quote-public-settlement p.is-grand {
+  margin-top: 0.15rem;
+  padding-top: 0.45rem;
+  border-top: 1.5px solid #333;
+  border-bottom: 0;
+}
+
+.quote-public-settlement p.is-grand span {
+  font-size: 1rem;
+  font-weight: 700;
   color: #0f172a;
 }
 
-.quote-decision-note {
-  margin: 0 0 0.5rem;
-  color: #475569;
-  font-size: 0.86rem;
+.quote-public-settlement p.is-grand strong {
+  font-size: 1.18rem;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+  color: #152538;
 }
 
-.quote-decision-status {
-  margin: 0;
+.quote-section-block {
+  margin-top: 0.96rem;
+  padding-top: 0.36rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.quote-section-block h3 {
+  margin: 0 0 0.42rem;
+  color: #1f2d3d;
   font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.quote-detail-pictures-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.54rem;
+}
+
+.quote-detail-picture-card {
+  margin: 0;
+}
+
+.quote-detail-picture-zoom {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: block;
+  width: 100%;
+  cursor: zoom-in;
+}
+
+.quote-detail-picture-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid #dde5ee;
+  border-radius: 6px;
+  background: #f8fafc;
+  display: block;
+}
+
+.quote-detail-picture-caption {
+  margin-top: 0.22rem;
+  color: #607082;
+  font-size: 0.73rem;
+  line-height: 1.3;
+}
+
+.quote-public-scope-list ul {
+  margin: 0;
+  padding-left: 1.05rem;
+  display: grid;
+  gap: 0.26rem;
+}
+
+.quote-public-scope-list li {
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.quote-public-scope-list li.is-level-2 {
+  margin-left: 0.9rem;
+}
+
+.quote-public-scope-list li.is-level-3 {
+  margin-left: 1.8rem;
+}
+
+.quote-public-signoff-signatures {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 0.8rem;
+  border-top: 1px solid #e5ebf3;
+  padding-top: 0.62rem;
+}
+
+.quote-public-signoff-media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.quote-public-signoff-media figure {
+  margin: 0;
+}
+
+.quote-public-signoff-media figcaption {
+  margin-bottom: 0.18rem;
+  color: #64748b;
+  font-size: 0.74rem;
   font-weight: 600;
+}
+
+.quote-public-signoff-buyer-line {
+  align-self: end;
+}
+
+.quote-public-signoff-buyer-line span {
+  display: block;
+  margin-bottom: 0.26rem;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.quote-public-signoff-placeholder {
+  height: 38px;
+  border-bottom: 1px solid #a8b8ca;
+}
+
+.quote-public-tail h3 {
+  color: #64748b;
+  font-size: 0.82rem;
+}
+
+.quote-public-tail p {
+  color: #475569;
+}
+
+.quote-public-system {
+  margin-top: 1rem;
+  border-top: 1px solid #dbe3ee;
+  padding-top: 0.75rem;
+}
+
+.quote-public-system h3 {
+  margin: 0 0 0.3rem;
   color: #334155;
+  font-size: 0.88rem;
 }
 
-.quote-decision-status.is-accepted {
+.quote-public-system p {
+  margin: 0.15rem 0 0;
+  color: #475569;
+  font-size: 0.84rem;
+}
+
+.quote-public-system p.is-success {
   color: #166534;
+  font-weight: 600;
 }
 
-.quote-decision-status.is-revision {
+.quote-public-system p.is-warning {
   color: #92400e;
 }
 
-.quote-public-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.quote-decision-accept button {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid var(--doc-accent, #1f4e79);
-  border-radius: 8px;
-  background: var(--doc-accent, #1f4e79);
-  color: var(--doc-on-accent, #ffffff);
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.quote-decision-accept button:hover {
-  filter: brightness(0.96);
-}
-
-.public-quote-themed .quote-public-actions .quote-decision-accept button {
-  border-color: var(--doc-accent, #1f4e79);
-  background: var(--doc-accent, #1f4e79);
-  color: var(--doc-on-accent, #ffffff);
-}
-
-.quote-decision-request-toggle,
-.quote-decision-cancel {
-  min-height: 38px;
-  padding: 0 14px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #fff;
-  color: #334155;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.quote-decision-request-toggle:hover,
-.quote-decision-cancel:hover {
-  background: #f1f5f9;
-}
-
-.public-quote-themed .quote-public-actions .quote-decision-request-toggle,
-.public-quote-themed .quote-public-actions .quote-decision-cancel {
-  border-color: #cbd5e1;
-  background: #fff;
-  color: #334155;
-}
-
-.quote-public-revision-form {
-  margin-top: 0.55rem;
-  display: grid;
-  gap: 0.4rem;
+.quote-public-footnote {
+  margin: 0.7rem 0 0;
+  color: #97a3b5;
+  font-size: 0.76rem;
+  text-align: right;
 }
 
 .quote-revision-modal {
@@ -234,13 +650,6 @@
   opacity: 0;
   transition: opacity 180ms ease-in-out;
   isolation: isolate;
-}
-
-/* Keep public decision modals out of generic watermark child stacking rules. */
-.public-quote-document.quote-watermarked > .quote-revision-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 4000;
 }
 
 .quote-revision-modal[hidden] {
@@ -305,10 +714,6 @@
   cursor: pointer;
 }
 
-.quote-revision-modal-close:hover {
-  background: #f8fafc;
-}
-
 .quote-revision-modal-hint {
   margin: 0 0 0.55rem;
   color: #475569;
@@ -333,25 +738,13 @@
   cursor: pointer;
 }
 
-.quote-revision-reason-option input[type="checkbox"] {
-  margin-top: 2px;
-}
-
 .quote-revision-reason-option:has(input:checked) {
   border-color: var(--doc-accent, #1f4e79);
   background: #edf4fb;
 }
 
 .quote-revision-custom {
-  margin-top: 0.25rem;
-}
-
-.quote-revision-custom label {
-  display: block;
-  margin-bottom: 0.28rem;
-  color: #334155;
-  font-size: 0.84rem;
-  font-weight: 600;
+  margin-top: 0.42rem;
 }
 
 .quote-public-revision-form textarea {
@@ -363,13 +756,8 @@
   resize: vertical;
 }
 
-@media (max-width: 720px) {
-  .quote-revision-reason-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 .quote-public-revision-form-actions {
+  margin-top: 0.55rem;
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
@@ -386,489 +774,116 @@
   cursor: pointer;
 }
 
-.quote-public-revision-form-actions button[type="submit"]:hover {
-  filter: brightness(0.96);
-}
-
-.public-quote-themed {
-  font-family: var(--doc-font), "Noto Sans", "Segoe UI", Arial, sans-serif;
-  border-color: #dbe3ee;
-}
-
-.public-layout-modern .quote-doc-table,
-.public-layout-modern .quote-doc-table td,
-.public-layout-modern .quote-doc-table th {
-  border-color: #e5eaf0;
-}
-
-.public-layout-industry {
-  border-width: 2px;
-}
-
-.public-layout-industry .quote-doc-table thead {
-  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.15);
-}
-
-.public-layout-classic .quote-doc-header {
-  border-bottom-width: 1px;
-}
-
-.public-quote-document .quote-items-table {
-  border-spacing: 0;
-}
-
-@media print {
-  body.public-quote-body {
-    background: #fff !important;
-    color: #111827;
-  }
-
-  .public-quote-document {
-    border: 1px solid #d1d5db !important;
-    box-shadow: none !important;
-    border-radius: 0;
-    padding: 0.8rem;
-  }
-
-  .public-quote-document .quote-doc-table thead {
-    background: #f3f4f6 !important;
-    color: #111827 !important;
-  }
-
-  .public-quote-document .quote-meta-card,
-  .public-quote-document .quote-total-box,
-  .public-quote-document .quote-section-block {
-    background: #fff !important;
-    border: 1px solid #e5e7eb;
-  }
-
-  .public-quote-document .quote-total-grand {
-    color: #111827 !important;
-    background: #f3f4f6 !important;
-    border: 1px solid #d1d5db;
-  }
-}
-
-/* Public quote: clarity + trust + print stability (no business logic changes) */
-.public-quote-document {
-  /* Public quotation typography tokens (baseline/current values). */
-  --q-public-doc-title-size: 1.45rem;
-  --q-public-doc-title-lh: 1.2;
-  --q-public-doc-title-w: 700;
-  --q-public-section-title-size: 0.95rem;
-  --q-public-section-title-lh: 1.3;
-  --q-public-section-title-w: 700;
-  --q-public-body-size: 0.9rem;
-  --q-public-body-lh: 1.38;
-  --q-public-body-w: 400;
-  --q-public-meta-size: 0.85rem;
-  --q-public-meta-lh: 1.45;
-  --q-public-meta-w: 400;
-  --q-public-table-head-size: 0.88rem;
-  --q-public-table-head-lh: 1.35;
-  --q-public-table-head-w: 700;
-  --q-public-table-body-size: 0.9rem;
-  --q-public-table-body-lh: 1.38;
-  --q-public-table-body-w: 400;
-  --q-public-item-detail-size: 0.78rem;
-  --q-public-item-detail-lh: 1.3;
-  --q-public-item-detail-w: 400;
-  --q-public-total-primary-size: 1.34rem;
-  --q-public-total-primary-lh: 1.2;
-  --q-public-total-primary-w: 700;
-  --q-public-total-primary-label-size: 1.2rem;
-  --q-public-total-primary-label-lh: 1.2;
-  --q-public-total-primary-label-w: 500;
-  --q-public-total-secondary-size: 0.9rem;
-  --q-public-total-secondary-lh: 1.4;
-  --q-public-total-secondary-w: 500;
-  --q-public-notes-size: 0.85rem;
-  --q-public-notes-lh: 1.45;
-  --q-public-notes-w: 400;
-  --q-public-footnote-size: 0.76rem;
-  --q-public-footnote-lh: 1.35;
-  --q-public-footnote-w: 400;
-}
-
-.public-quote-document .quote-meta-grid {
-  gap: 0;
-  margin-bottom: 0.95rem;
-  border: 1px solid #dbe5f0;
-  border-radius: 14px;
+.quote-decision-cancel {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
   background: #fff;
-  overflow: hidden;
-}
-
-.public-quote-document .quote-doc-header {
-  align-items: flex-start;
-  gap: 0.95rem;
-  margin-bottom: 0.9rem;
-  padding-bottom: 0.72rem;
-}
-
-.public-quote-document .quote-doc-logo-wrap {
-  min-width: 148px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.42rem;
-}
-
-.public-quote-document .quote-doc-header h1 {
-  font-size: var(--q-public-doc-title-size);
-  font-weight: var(--q-public-doc-title-w);
-}
-
-.public-quote-document .quote-meta-card {
-  padding: 0.82rem 0.9rem;
-  border: 0;
-  border-left: 1px solid #e4edf6;
-  border-radius: 0;
-  background: transparent;
-}
-
-.public-quote-document .quote-meta-card:first-child {
-  border-left: 0;
-}
-
-.public-quote-document .quote-meta-card:nth-child(3) {
-  background: #fcfdff;
-}
-
-.public-quote-document .quote-meta-card h3 {
-  margin-bottom: 0.5rem;
-  font-size: var(--q-public-section-title-size);
-  line-height: var(--q-public-section-title-lh);
-  font-weight: var(--q-public-section-title-w);
-}
-
-.public-quote-document .quote-meta-card p {
-  margin-bottom: 0.3rem;
-  font-size: var(--q-public-body-size);
-  line-height: var(--q-public-body-lh);
-  font-weight: var(--q-public-body-w);
-}
-.public-quote-document .quote-total-box + .quote-section-block--scope {
-  margin-top: 1rem;
-}
-.public-quote-document .quote-section-block--scope h3 {
-  margin-bottom: 0.56rem;
-}
-.public-quote-document .quote-section-block--scope + .quote-section-block {
-  margin-top: 0.95rem;
-}
-
-.public-quote-document .quote-info-list {
-  display: grid;
-  gap: 0.12rem;
-}
-
-.public-quote-document .quote-info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.8rem;
-  margin: 0;
-  padding: 0.18rem 0;
-  border-bottom: 1px solid #e8eef5;
-}
-
-.public-quote-document .quote-info-row span {
-  color: #64748b;
-  font-size: var(--q-public-meta-size);
-  line-height: var(--q-public-meta-lh);
-  font-weight: var(--q-public-meta-w);
-}
-
-.public-quote-document .quote-info-row strong {
-  color: #0f172a;
-  font-size: var(--q-public-body-size);
-  line-height: var(--q-public-body-lh);
-  font-weight: 600;
-  text-align: right;
-}
-
-.public-quote-document .quote-info-row.is-doc-number span {
   color: #334155;
   font-weight: 600;
+  cursor: pointer;
 }
 
-.public-quote-document .quote-info-row.is-doc-number strong {
-  font-size: 0.98rem;
-  font-weight: 700;
-}
-
-.public-quote-document .quote-info-row.is-valid-until strong {
-  color: var(--doc-accent, #1f4e79);
-}
-
-.public-quote-document .quote-item-desc {
-  gap: 0.18rem;
-}
-
-.public-quote-document .quote-item-desc-main {
-  font-size: var(--q-public-table-body-size);
-  line-height: 1.32;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-  word-wrap: break-word;
-  word-break: break-word;
-}
-
-.public-quote-document .quote-item-desc-meta {
-  gap: 0.14rem;
-}
-
-.public-quote-document .quote-item-desc-sub {
-  font-size: var(--q-public-item-detail-size);
-  line-height: var(--q-public-item-detail-lh);
-  font-weight: var(--q-public-item-detail-w);
-  overflow-wrap: anywhere;
-  word-break: break-word;
-}
-
-.public-quote-document .quote-item-desc-sub.is-addon {
-  margin-top: 0.04rem;
-  padding-left: 0.45rem;
-  border-left: 2px solid #e2e8f0;
-  color: #64748b;
-}
-
-.public-quote-document .table-responsive {
-  margin-bottom: 0.72rem;
-}
-
-.public-quote-document .quote-total-box {
-  margin-top: 0.28rem;
-  padding: 0.75rem 0.88rem 0.65rem;
-  border-color: #dbe5f0;
-  border-radius: 10px;
-  background: #ffffff;
-}
-
-.public-quote-document .quote-total-grand {
-  margin-top: 0.2rem;
-  padding: 0.55rem 0 0;
-  font-size: var(--q-public-total-primary-label-size);
-  line-height: var(--q-public-total-primary-label-lh);
-}
-
-.public-quote-document .quote-total-grand span {
-  color: #0f172a;
-  font-weight: var(--q-public-total-primary-label-w);
-}
-
-.public-quote-document .quote-total-grand strong {
-  color: #1f3650;
-  font-size: var(--q-public-total-primary-size);
-  line-height: var(--q-public-total-primary-lh);
-  font-weight: var(--q-public-total-primary-w);
-  letter-spacing: -0.02em;
-}
-
-.public-quote-document .quote-total-box p:not(.quote-total-grand) {
-  font-size: var(--q-public-total-secondary-size);
-  line-height: var(--q-public-total-secondary-lh);
-  font-weight: var(--q-public-total-secondary-w);
-}
-
-.public-quote-document .quote-col-right .quote-diff-stack,
-.public-quote-document .quote-col-money .quote-diff-stack {
-  width: 100%;
-  gap: 0.18rem;
-}
-
-.public-quote-document .quote-total-box p > strong .quote-diff-stack {
-  width: 100%;
-  gap: 0.2rem;
-}
-
-.public-quote-document .quote-total-grand .quote-diff-old {
-  font-size: 0.68em;
-  color: #a6b3c2;
-}
-
-.public-quote-document .quote-engagement-note {
-  margin: 0.5rem 0 0.1rem;
-  padding-top: 0.4rem;
-  border-top: 1px dashed #d2dbe6;
-  color: #475569;
-  font-size: var(--q-public-notes-size);
-  line-height: var(--q-public-notes-lh);
-  font-weight: var(--q-public-notes-w);
-}
-
-.public-quote-document .quote-public-footnote {
-  margin: 0.7rem 0 0;
-  color: #94a3b8;
-  font-size: var(--q-public-footnote-size);
-  line-height: var(--q-public-footnote-lh);
-  font-weight: var(--q-public-footnote-w);
-  text-align: right;
-}
-
-.public-quote-document .quote-doc-table thead th {
-  font-size: var(--q-public-table-head-size);
-  font-weight: var(--q-public-table-head-w);
-}
-
-.public-quote-document .quote-doc-table th,
-.public-quote-document .quote-doc-table td {
-  padding: 0.62rem 0.68rem;
-}
-
-.public-quote-document .quote-doc-table tbody td {
-  border-top: 0;
-  border-left: 0;
-  border-right: 0;
-  border-bottom: 1px solid #e7edf6;
-  border-radius: 0;
-  background: transparent;
-  vertical-align: top;
-}
-
-.public-quote-document .quote-doc-table tbody tr:last-child td {
-  border-bottom-color: #dbe5f0;
-}
-
-.public-quote-document .quote-doc-table tbody tr:hover td {
-  background: transparent;
-}
-
-.public-quote-document.quote-watermarked::before {
-  letter-spacing: 0.16em;
-  font-size: clamp(1.9rem, 6.5vw, 4.4rem);
-  transform: rotate(-16deg);
-  opacity: var(--quote-watermark-opacity, 0.07);
-  z-index: 3;
-}
-
-.public-quote-document .quote-watermark-image {
-  max-width: 52%;
-  max-height: 48%;
-  opacity: var(--quote-watermark-opacity, 0.07);
-  transform: rotate(-14deg);
-  z-index: 3;
-}
-
-/* Public quote density: spacing-only adjustments (no typography scale changes). */
-.public-quote-document.public-density-compact .quote-doc-table th {
-  padding-top: 0.58rem;
-  padding-bottom: 0.58rem;
-}
-
-.public-quote-document.public-density-compact .quote-doc-table td {
-  padding-top: 0.62rem;
-  padding-bottom: 0.62rem;
-}
-
-.public-quote-document.public-density-compact .quote-meta-grid {
-  gap: 0.82rem;
-}
-
-.public-quote-document.public-density-compact .quote-meta-card {
-  padding-top: 0.74rem;
-  padding-bottom: 0.82rem;
-}
-
-.public-quote-document.public-density-compact .quote-total-box {
-  padding-top: 0.7rem;
-  padding-bottom: 0.62rem;
-}
-
-.public-quote-document.public-density-compact .quote-section-block {
-  margin-top: 0.85rem;
-  padding-top: 0.62rem;
-}
-
-.public-quote-document.public-density-spacious .quote-doc-table th {
-  padding-top: 0.82rem;
-  padding-bottom: 0.82rem;
-}
-
-.public-quote-document.public-density-spacious .quote-doc-table td {
-  padding-top: 0.88rem;
-  padding-bottom: 0.88rem;
-}
-
-.public-quote-document.public-density-spacious .quote-meta-grid {
-  gap: 1.08rem;
-}
-
-.public-quote-document.public-density-spacious .quote-meta-card {
-  padding-top: 0.96rem;
-  padding-bottom: 1.04rem;
-}
-
-.public-quote-document.public-density-spacious .quote-total-box {
-  padding-top: 0.92rem;
-  padding-bottom: 0.84rem;
-}
-
-.public-quote-document.public-density-spacious .quote-section-block {
-  margin-top: 1.12rem;
-  padding-top: 0.84rem;
-}
-
-
-@media (max-width: 768px) {
-  .public-quote-document .table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.15rem;
+@media (max-width: 940px) {
+  .quote-public-facts {
+    grid-template-columns: 1fr;
   }
 
-  .public-quote-document .quote-doc-table {
-    min-width: 640px;
-    table-layout: auto;
-  }
-
-  .public-quote-document .quote-doc-table th,
-  .public-quote-document .quote-doc-table td {
-    white-space: nowrap;
-  }
-
-  .public-quote-document .quote-doc-table td:nth-child(2),
-  .public-quote-document .quote-doc-table th:nth-child(2) {
-    white-space: normal;
-    min-width: 220px;
-  }
-
-  .public-quote-document .quote-item-desc-main,
-  .public-quote-document .quote-item-desc-sub {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .public-quote-document .quote-meta-grid {
-    border-radius: 12px;
-  }
-
-  .public-quote-document .quote-meta-card {
+  .quote-public-fact-card {
     border-left: 0;
     border-top: 1px solid #e4edf6;
   }
 
-  .public-quote-document .quote-meta-card:first-child {
+  .quote-public-fact-card:first-child {
     border-top: 0;
+  }
+
+  .quote-public-core-footer {
+    justify-items: stretch;
+  }
+
+  .quote-public-settlement--footer {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 860px) {
+  .quote-public-hero {
+    flex-direction: column;
+  }
+
+  .quote-public-hero-side {
+    width: 100%;
+    min-width: 0;
+    align-items: flex-start;
+  }
+
+  .quote-public-hero-actions {
+    justify-content: flex-start;
+  }
+
+  .quote-public-signoff-signatures {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .public-quote-document.public-quote-v2 {
+    padding: 0.9rem 0.82rem 0.85rem;
+    border-radius: 8px;
+  }
+
+  .quote-public-item-image-wrap {
+    width: 44px;
+    height: 44px;
+    max-width: 44px;
+    max-height: 44px;
+    flex-basis: 44px;
+  }
+
+  .quote-public-core .quote-public-item-image {
+    max-width: 44px;
+    max-height: 44px;
+  }
+
+  .quote-item-desc--public.has-inline-image {
+    grid-template-columns: 44px minmax(0, 1fr);
+    column-gap: 0.45rem;
+  }
+
+  .quote-detail-pictures-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .quote-doc-table {
+    min-width: 640px;
+  }
+
+  .quote-revision-reason-grid {
+    grid-template-columns: 1fr;
   }
 }
 
 @media print {
-  .public-quote-document .quote-doc-table thead {
-    display: table-header-group;
+  .public-quote-document.public-quote-v2 {
+    border-radius: 0;
+    box-shadow: none;
+    border-color: #d1d5db;
   }
 
-  .public-quote-document .quote-meta-card,
-  .public-quote-document .quote-total-box,
-  .public-quote-document .quote-section-block,
-  .public-quote-document .quote-doc-table tr {
-    break-inside: avoid;
-    page-break-inside: avoid;
+  .quote-public-system,
+  .quote-public-footnote {
+    color: #64748b !important;
   }
 
-  .public-quote-document .quote-engagement-note,
-  .public-quote-document .quote-public-footnote {
-    color: #475569 !important;
+  .quote-detail-picture-zoom {
+    cursor: default;
   }
 }

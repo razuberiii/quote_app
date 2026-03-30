@@ -34,14 +34,29 @@ class ApplicationController < ActionController::Base
   end
 
   def set_locale
-    locale = params[:locale].presence || current_user&.language.presence
-    normalized_locale = locale.to_s.tr("_", "-")
+    available_locales = I18n.available_locales.map(&:to_s)
+    requested_locale = params[:locale].presence.to_s.tr("_", "-")
+    user_locale = current_user&.language.to_s.tr("_", "-")
+    candidate = requested_locale.presence || user_locale.presence
 
-    I18n.locale = if I18n.available_locales.map(&:to_s).include?(normalized_locale)
-      normalized_locale
-    else
-      I18n.default_locale
-    end
+    resolved_locale =
+      if available_locales.include?(candidate)
+        candidate
+      else
+        I18n.default_locale.to_s
+      end
+
+    I18n.locale = resolved_locale
+    persist_user_locale_preference!(requested_locale, available_locales)
+  end
+
+  def persist_user_locale_preference!(requested_locale, available_locales)
+    return if current_user.blank?
+    return if requested_locale.blank?
+    return unless available_locales.include?(requested_locale)
+    return if current_user.language.to_s == requested_locale
+
+    current_user.update_column(:language, requested_locale)
   end
 
   def default_url_options

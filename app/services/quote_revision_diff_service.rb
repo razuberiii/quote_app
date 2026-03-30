@@ -44,6 +44,7 @@ class QuoteRevisionDiffService
       {
         key: "#{signature}:#{occurrences[signature]}",
         product_name: item_name(item),
+        description: normalize_text(item.description),
         quantity: item.quantity.to_i,
         unit_price: item.unit_price.to_d.round(4),
         line_total: item.line_total.to_d.round(4),
@@ -113,19 +114,23 @@ class QuoteRevisionDiffService
       next unless previous
       spec_changes = diff_specifications(previous[:specifications], item[:specifications])
       addon_changes = diff_addons(previous[:addon_charges], item[:addon_charges])
+      description_changed = previous[:description] != item[:description]
       quantity_changed = previous[:quantity] != item[:quantity]
       unit_price_changed = previous[:unit_price] != item[:unit_price]
-      next unless quantity_changed || unit_price_changed || spec_changes[:changed] || addon_changes[:changed]
+      next unless description_changed || quantity_changed || unit_price_changed || spec_changes[:changed] || addon_changes[:changed]
 
       {
         key: item[:key],
         product_name: item[:product_name],
+        description_before: previous[:description],
+        description_after: item[:description],
         quantity_before: previous[:quantity],
         quantity_after: item[:quantity],
         unit_price_before: previous[:unit_price],
         unit_price_after: item[:unit_price],
         line_total_before: previous[:line_total],
         line_total_after: item[:line_total],
+        description_changed: description_changed,
         quantity_changed: quantity_changed,
         unit_price_changed: unit_price_changed,
         spec_changes: spec_changes,

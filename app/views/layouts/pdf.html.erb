@@ -6,901 +6,429 @@
     <style>
       :root {
         --doc-font: "Noto Sans", "Segoe UI", Arial, sans-serif;
-        --doc-page-padding-x: 1.35rem;
-        --doc-page-padding-top: 1.35rem;
-        --doc-page-padding-bottom: 1.6rem;
       }
 
       @page {
         size: A4;
-        margin: 10mm;
+        margin: 12mm;
       }
 
-      html, body {
-        background: #ffffff !important;
-      }
-
+      html,
       body {
         margin: 0;
         padding: 0;
-        color: #111827;
-        font-family: var(--doc-font), "Noto Sans CJK SC", "Noto Sans CJK JP", "Noto Sans CJK TC", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: #fff;
+      }
+
+      body {
+        color: #222;
+        font-family: var(--doc-font), "Noto Sans CJK SC", "PingFang SC", "Microsoft YaHei", sans-serif;
       }
 
       .public-quote-main {
         max-width: 100% !important;
         margin: 0 !important;
+        position: relative;
+        z-index: 1;
       }
+      .pdf-render * { box-sizing: border-box; letter-spacing: normal !important; }
+
+      .pdf-render .quote-document {
+        position: relative;
+        background: #fff;
+        color: #222;
+        font-size: 8.9pt;
+        line-height: 1.32;
+        padding-bottom: 8mm;
+      }
+
+      .pdf-render .pdf-page-watermark-layer {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        width: 68%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        text-align: center;
+        z-index: 0;
+        pointer-events: none;
+      }
+      .pdf-render .pdf-page-watermark-image {
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 240mm;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+      .pdf-render .pdf-page-watermark-text {
+        color: #2f3f58;
+        font-size: 54px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        text-align: center;
+      }
+      .pdf-render .quote-document > :not(.pdf-page-watermark-layer) { position: relative; z-index: 1; }
+      .pdf-render .quote-document--terminal-closing { padding-bottom: 2mm; }
+
+      .pdf-render .pdf-first-page { page-break-inside: auto; }
+      .pdf-render .pdf-annex-flow { page-break-before: always; }
+
+      .pdf-render .pdf-header-block {
+        margin-bottom: 3mm;
+        page-break-inside: avoid;
+        max-height: 30mm;
+        overflow: hidden;
+      }
+
+      .pdf-render .pdf-header-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-header-table td { vertical-align: top; }
+      .pdf-render .pdf-header-company { width: 62%; padding-right: 4mm; }
+      .pdf-render .pdf-header-meta { width: 38%; }
+
+      .pdf-render .pdf-company-logo-wrap { margin-bottom: 2mm; }
+      .pdf-render .pdf-company-logo { width: auto; max-height: 9mm; max-width: 100%; display: block; }
+      .pdf-render .pdf-company-name {
+        margin: 0 0 0.8mm 0;
+        font-size: 16.5pt;
+        line-height: 1.1;
+        font-weight: 700;
+        text-transform: uppercase;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-company-line {
+        margin: 0;
+        font-size: 8.2pt;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .pdf-render .pdf-meta-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-meta-table th,
+      .pdf-render .pdf-meta-table td {
+        padding: 1.4mm 0;
+        min-height: 5mm;
+        line-height: 1.25;
+        text-align: left;
+        vertical-align: top;
+        border-top: 1px solid #ececec;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-meta-table tr:first-child td,
+      .pdf-render .pdf-meta-table tr:nth-child(2) th,
+      .pdf-render .pdf-meta-table tr:nth-child(2) td { border-top: 0; }
+      .pdf-render .pdf-meta-table th { width: 22mm; font-size: 8.2pt; font-weight: 700; padding-right: 2mm; }
+      .pdf-render .pdf-meta-table td { font-size: 8.5pt; font-weight: 400; }
+      .pdf-render .pdf-meta-document-title {
+        font-size: 13.5pt !important;
+        line-height: 1.1;
+        font-weight: 700;
+        text-align: left;
+        border-top: 0;
+        border-bottom: 1px solid #333;
+        padding-bottom: 2mm !important;
+      }
+
+      .pdf-render .pdf-buyer-block {
+        margin-bottom: 3mm;
+        page-break-inside: avoid;
+        max-height: 24mm;
+        overflow: hidden;
+      }
+      .pdf-render .pdf-light-heading { font-size: 9pt; font-weight: 700; margin: 0; }
+      .pdf-render .pdf-light-rule { margin-top: 1mm; border-top: 1px solid #333; }
+      .pdf-render .pdf-light-body { padding: 2.5mm 0; font-size: 8.5pt; }
+      .pdf-render .pdf-light-body p { margin: 0 0 1px 0; line-height: 1.28; overflow-wrap: anywhere; word-break: break-word; }
+
+      .pdf-render .pdf-main-items { page-break-inside: auto; }
+      .pdf-render .pdf-items-table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1px solid #333; }
+      .pdf-render .pdf-items-table thead { display: table-header-group; }
+      .pdf-render .pdf-items-table th {
+        border: 0;
+        border-bottom: 1px solid #333;
+        background: #f6f6f6;
+        padding: 0;
+        height: 6.5mm;
+        font-size: 8.1pt;
+        font-weight: 700;
+        text-align: center;
+        letter-spacing: normal;
+      }
+      .pdf-render .pdf-items-table td {
+        border: 0;
+        border-top: 1px solid #e6e6e6;
+        padding: 1.8mm 1.5mm;
+        font-size: 8.8pt;
+        line-height: 1.3;
+        vertical-align: top;
+        overflow-wrap: anywhere; word-break: break-word;
+      }
+      .pdf-render .pdf-items-table tr { page-break-inside: auto; }
+      .pdf-render .pdf-items-table > thead > tr > th:nth-child(2),
+      .pdf-render .pdf-items-table > tbody > tr > td:nth-child(2) { border-left: 1px solid #e1e1e1; }
+      .pdf-render .pdf-items-table > thead > tr > th:nth-child(3),
+      .pdf-render .pdf-items-table > tbody > tr > td:nth-child(3),
+      .pdf-render .pdf-items-table > thead > tr > th:nth-child(4),
+      .pdf-render .pdf-items-table > tbody > tr > td:nth-child(4),
+      .pdf-render .pdf-items-table > thead > tr > th:nth-child(5),
+      .pdf-render .pdf-items-table > tbody > tr > td:nth-child(5) { border-left: 1px solid #d6d6d6; }
+      .pdf-render .pdf-items-table > thead > tr > th:nth-child(2) { text-align: left; padding-left: 2.2mm; }
+      .pdf-render .pdf-items-table tr.pdf-row--product td { padding-top: 3mm; padding-bottom: 3mm; }
+      .pdf-render .pdf-items-table tr.pdf-row--charge td { padding-top: 1.8mm; padding-bottom: 1.8mm; }
+      .pdf-render .pdf-items-table tr.pdf-row--charge .pdf-col-qty,
+      .pdf-render .pdf-items-table tr.pdf-row--charge .pdf-col-money { vertical-align: middle; }
+
+      .pdf-render .pdf-col-no,
+      .pdf-render .pdf-col-qty,
+      .pdf-render .pdf-col-money { font-variant-numeric: tabular-nums; }
+      .pdf-render .pdf-col-no { text-align: center; }
+      .pdf-render .pdf-col-qty { text-align: center; }
+      .pdf-render .pdf-col-money { text-align: right; }
+      .pdf-render .pdf-col-desc { padding-left: 4px; padding-right: 4px; }
+
+      .pdf-render .pdf-item-details-layout { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-item-details-layout td { border: 0 !important; border-left: 0 !important; padding: 0; vertical-align: top; }
+      .pdf-render .pdf-item-details-image-cell { width: 17mm; padding-right: 3mm; }
+      .pdf-render .pdf-item-details-text-cell { width: auto; }
+
+      .pdf-render .pdf-item-thumb-box {
+        width: 17mm;
+        max-width: 17mm;
+        display: block;
+        margin: 0;
+        padding: 0;
+        line-height: 0;
+      }
+      .pdf-render .pdf-item-thumb {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 17mm;
+        max-height: 17mm;
+        margin: 0;
+        border: 0;
+      }
+
+      .pdf-render .pdf-item-name { font-size: 9pt; font-weight: 700; }
+      .pdf-render .pdf-items-table tr.pdf-row--charge .pdf-item-name { font-size: 8.6pt; }
+      .pdf-render .pdf-item-model { margin-top: 1px; font-size: 8.3pt; line-height: 1.28; }
+      .pdf-render .pdf-items-table tr.pdf-row--charge .pdf-item-model { font-size: 8.1pt; }
+      .pdf-render .pdf-item-subtitle { margin-top: 2px; font-size: 8pt; font-weight: 700; }
+      .pdf-render .pdf-item-list { margin: 1px 0 0 0; padding-left: 10px; list-style: disc; }
+      .pdf-render .pdf-item-list li { margin: 0 0 1px 0; font-size: 8pt; line-height: 1.28; }
+
+      .pdf-render .pdf-bottom-band {
+        margin-top: 3mm;
+        border-top: 0 !important;
+        padding-top: 0;
+        page-break-inside: avoid;
+      }
+      .pdf-render .pdf-bottom-band-table { width: 100%; border-collapse: collapse; table-layout: fixed; border-top: 0 !important; }
+      .pdf-render .pdf-bottom-band-table td { vertical-align: top; padding: 0; }
+      .pdf-render .pdf-bottom-band-left { padding-right: 4mm; }
+      .pdf-render .pdf-bottom-band-right { text-align: right; }
+      .pdf-render .pdf-bottom-terms-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-bottom-terms-table th,
+      .pdf-render .pdf-bottom-terms-table td {
+        border-bottom: 1px solid #ececec;
+        height: 6mm;
+        min-height: 6mm;
+        padding: 1.2mm 0;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-bottom-terms-table th {
+        width: 24mm;
+        padding-right: 1.5mm;
+        text-align: left;
+        font-size: 8pt;
+        font-weight: 700;
+      }
+      .pdf-render .pdf-bottom-terms-table td {
+        font-size: 8.5pt;
+        font-weight: 400;
+        line-height: 1.28;
+      }
+
+      .pdf-render .pdf-totals-wrap {
+        width: 68mm;
+        margin-left: auto;
+        page-break-inside: avoid;
+      }
+      .pdf-render .pdf-total-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #333;
+        border-top: 1px solid #333;
+      }
+      .pdf-render .pdf-total-table th,
+      .pdf-render .pdf-total-table td {
+        font-weight: 400;
+        padding: 2.2mm 3mm;
+        border-bottom: 1px solid #ececec;
+        line-height: 5.6mm;
+      }
+      .pdf-render .pdf-total-table th { font-size: 8.8pt; text-align: left; }
+      .pdf-render .pdf-total-table td { font-size: 9.2pt; text-align: right; font-variant-numeric: tabular-nums; }
+      .pdf-render .pdf-total-grand-row th,
+      .pdf-render .pdf-total-grand-row td {
+        font-size: 12pt;
+        font-weight: 700;
+        line-height: 7.5mm;
+        border-top: 1.5px solid #333;
+        border-bottom: 0;
+        background: transparent;
+      }
+      .pdf-render .pdf-total-grand-label { padding-top: 2.5mm; padding-bottom: 2.5mm; }
+      .pdf-render .pdf-total-grand-value { padding-top: 2.5mm; padding-bottom: 2.5mm; background: #f7f7f7; }
+
+      .pdf-render .pdf-annex-section { margin-top: 6mm; page-break-inside: auto; }
+      .pdf-render .pdf-annex-keep-first,
+      .pdf-render .pdf-detail-keep-first { page-break-inside: avoid; break-inside: avoid-page; }
+
+      .pdf-render .pdf-section-heading {
+        margin: 5mm 0 1.5mm;
+        font-size: 9.4pt;
+        font-weight: 700;
+      }
+      .pdf-render .pdf-section-divider {
+        border-top: 1px solid #333;
+        margin: 0 0 2mm;
+      }
+      .pdf-render .pdf-section-body { padding: 0; }
+      .pdf-render .pdf-section-body--kv { page-break-inside: auto; }
+      .pdf-render .pdf-section-body--scope { page-break-inside: auto; }
+      .pdf-render .pdf-section-endline { border-top: 1px solid #ececec; margin-top: 2mm; }
+
+      .pdf-render .pdf-kv-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-kv-table th,
+      .pdf-render .pdf-kv-table td {
+        font-size: 8.5pt;
+        line-height: 1.35;
+        vertical-align: top;
+        min-height: 5.5mm;
+        padding: 2.2mm 1.5mm;
+        border-bottom: 1px solid #ececec;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-kv-table th { width: 28%; font-weight: 700; text-align: left; }
+      .pdf-render .pdf-kv-table td { width: 72%; font-weight: 400; }
+
+      .pdf-render .pdf-box-title {
+        border: 1px solid #333;
+        background: #f0f0f0;
+        padding: 5px 7px;
+        font-size: 9.2pt;
+        font-weight: 700;
+      }
+      .pdf-render .pdf-box-body {
+        border-left: 1px solid #333;
+        border-right: 1px solid #333;
+        border-bottom: 1px solid #333;
+        padding: 6px 7px;
+      }
+
+      .pdf-render .pdf-section-body--container { padding: 0; }
+      .pdf-render .pdf-container-table { width: 100%; border-collapse: collapse; table-layout: fixed; margin-top: 0; }
+      .pdf-render .pdf-container-table th,
+      .pdf-render .pdf-container-table td {
+        border-bottom: 1px solid #e1e1e1;
+        padding: 4px 5px;
+        font-size: 8.5pt;
+        text-align: left;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-container-table thead th {
+        background: #f9f9f9;
+        font-weight: 700;
+        border-top: 1px solid #333;
+        border-bottom: 1px solid #333;
+      }
+      .pdf-render .pdf-container-table th:first-child,
+      .pdf-render .pdf-container-table td:first-child { padding-left: 2mm; }
+      .pdf-render .pdf-container-table th:last-child,
+      .pdf-render .pdf-container-table td:last-child { padding-right: 2mm; }
+      .pdf-render .pdf-container-table tbody tr:last-child td { border-bottom: 1px solid #ececec; }
+      .pdf-render .pdf-container-capacity { text-align: center; }
+
+      .pdf-render .pdf-scope-list { margin: 0; padding-left: 12px; }
+      .pdf-render .pdf-scope-list li { margin: 0 0 2px 0; font-size: 8.5pt; line-height: 1.35; overflow-wrap: anywhere; word-break: break-word; }
+
+      .pdf-render .pdf-detail-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-detail-table-row { page-break-inside: avoid; break-inside: avoid-page; }
+      .pdf-render .pdf-detail-table-cell { width: 50%; vertical-align: top; padding: 0 0 3mm; }
+      .pdf-render .pdf-detail-table-cell.is-left { padding-right: 3mm; }
+      .pdf-render .pdf-detail-table-cell.is-right { padding-left: 3mm; }
+      .pdf-render .pdf-detail-table-cell--single { text-align: center; padding-left: 0; padding-right: 0; }
+      .pdf-render .pdf-detail-figure { margin: 0; padding-bottom: 0.8mm; }
+      .pdf-render .pdf-detail-image-wrap { border: none; background: transparent; padding: 0; text-align: center; }
+      .pdf-render .pdf-detail-image {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        margin: 0 auto;
+        border: 0;
+      }
+      .pdf-render .pdf-detail-image.is-wide { max-height: 24mm; }
+      .pdf-render .pdf-detail-image.is-normal { max-height: 34mm; }
+      .pdf-render .pdf-detail-image.is-tall { max-height: 46mm; }
+      .pdf-render .pdf-detail-image-wrap.is-wide-single { max-width: 95mm; margin: 0 auto; }
+      .pdf-render .pdf-detail-image.is-wide-single { max-width: 95mm; max-height: 24mm; }
+      .pdf-render .pdf-detail-caption {
+        margin: 1.5mm 0 0;
+        padding-bottom: 1.2mm;
+        font-size: 8pt;
+        text-align: center;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .pdf-render .pdf-section-endline--detail { margin-top: 1.5mm; }
+
+      .pdf-render .pdf-annex-section--formal-closing .pdf-formal-closing-block {
+        min-height: 60mm;
+        page-break-inside: avoid;
+        break-inside: avoid-page;
+      }
+      .pdf-render .pdf-annex-section--formal-closing .pdf-formal-closing-block--terminal {
+        min-height: 0;
+        page-break-inside: auto;
+        break-inside: auto;
+      }
+
+      .pdf-render .pdf-bank-block { margin-top: 4mm; border-bottom: 1px solid #333; }
+      .pdf-render .pdf-bank-title { font-size: 9pt; font-weight: 700; border-bottom: 1px solid #d9d9d9; }
+      .pdf-render .pdf-bank-body p { margin: 0 0 1px 0; font-size: 8.5pt; overflow-wrap: anywhere; word-break: break-word; }
+
+      .pdf-render .pdf-signatures-shell { margin-top: 5mm; padding-top: 0; }
+      .pdf-render .pdf-signatures-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+      .pdf-render .pdf-signatures-table td { width: 33.33%; vertical-align: top; padding: 0 3mm; }
+      .pdf-render .pdf-signature-area { height: 16mm; text-align: center; }
+      .pdf-render .quote-sales-signature-image {
+        display: inline-block;
+        width: auto;
+        height: auto;
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .pdf-render .pdf-signature-line { border-top: 1px solid #333; }
+      .pdf-render .pdf-signatures-table p { margin: 2mm 0 0; font-size: 8pt; text-align: center; }
+
     </style>
-  <% 
-    # Get dynamic colors from instance variables for PDF rendering
-    pdf_accent_color = @template.accent_color.presence || "#1F4E79"
-  %>
-  <style>
-    /* Dynamic colors applied to PDF */
-    .pdf-render .quote-doc-kicker {
-      color: <%= pdf_accent_color %> !important;
-      letter-spacing: 0.08em !important;
-      font-weight: 700 !important;
-      font-size: 0.75rem !important;
-      margin: 0 !important;
-      text-align: right !important;
-      text-transform: uppercase !important;
-    }
-    .pdf-render .quote-total-grand {
-      margin-top: 0.06in !important;
-      border-top: 1px solid #9fb4c8 !important;
-      padding: 0.075in 0 !important;
-      background-color: transparent !important;
-      color: #1f3650 !important;
-    }
-    .pdf-render .quote-total-grand span,
-    .pdf-render .quote-total-grand strong {
-      color: inherit !important;
-    }
-  </style>
+  </head>
   <body class="public-quote-body pdf-render">
     <main class="public-quote-main">
       <%= yield %>
     </main>
-
-    <style>
-      .pdf-render .quote-document {
-        border: none !important;
-        border-radius: 0 !important;
-        padding: var(--doc-page-padding-top) var(--doc-page-padding-x) var(--doc-page-padding-bottom) !important;
-        box-shadow: none !important;
-        background: #fff !important;
-        color: #222 !important;
-        position: relative !important;
-        /* PDF quotation typography tokens (baseline/current values). */
-        --q-pdf-doc-title-size: 1.45rem !important;
-        --q-pdf-doc-title-lh: 1.5 !important;
-        --q-pdf-doc-title-w: 700 !important;
-        --q-pdf-section-title-size: 13px !important;
-        --q-pdf-section-title-lh: 1.5 !important;
-        --q-pdf-section-title-w: 700 !important;
-        --q-pdf-body-size: 12px !important;
-        --q-pdf-body-lh: 1.5 !important;
-        --q-pdf-body-w: 400 !important;
-        --q-pdf-meta-size: 11px !important;
-        --q-pdf-meta-lh: 1.5 !important;
-        --q-pdf-meta-w: 400 !important;
-        --q-pdf-table-head-size: 11px !important;
-        --q-pdf-table-head-lh: 1.5 !important;
-        --q-pdf-table-head-w: 700 !important;
-        --q-pdf-table-body-size: 12px !important;
-        --q-pdf-table-body-lh: 1.5 !important;
-        --q-pdf-table-body-w: 400 !important;
-        --q-pdf-item-detail-size: 10px !important;
-        --q-pdf-item-detail-lh: 1.35 !important;
-        --q-pdf-item-detail-w: 400 !important;
-        --q-pdf-total-primary-size: 1.16rem !important;
-        --q-pdf-total-primary-lh: 1.5 !important;
-        --q-pdf-total-primary-w: 800 !important;
-        --q-pdf-total-primary-label-size: 12px !important;
-        --q-pdf-total-primary-label-lh: 1.5 !important;
-        --q-pdf-total-primary-label-w: 500 !important;
-        --q-pdf-total-secondary-size: 12px !important;
-        --q-pdf-total-secondary-lh: 1.5 !important;
-        --q-pdf-total-secondary-w: 400 !important;
-        --q-pdf-notes-size: 10.8px !important;
-        --q-pdf-notes-lh: 1.5 !important;
-        --q-pdf-notes-w: 400 !important;
-        --q-pdf-closing-size: 10px !important;
-        --q-pdf-closing-lh: 1.4 !important;
-        --q-pdf-closing-w: 400 !important;
-      }
-
-      .pdf-render .quote-watermarked {
-        position: relative !important;
-        overflow: hidden !important;
-        isolation: isolate !important;
-      }
-
-      .pdf-render .quote-watermarked::before {
-        content: attr(data-watermark) !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        display: inline-block !important;
-        white-space: nowrap !important;
-        line-height: 1 !important;
-        color: rgba(15, 23, 42, 0.35) !important;
-        font-size: 64px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.18em !important;
-        transform: translate(-50%, -50%) rotate(-22deg) !important;
-        transform-origin: center center !important;
-        pointer-events: none !important;
-        z-index: 3 !important;
-        opacity: 0.08 !important;
-      }
-
-      .pdf-render .quote-watermarked > * {
-        position: relative !important;
-        z-index: 2 !important;
-      }
-
-      .pdf-render .quote-watermark-image {
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        max-width: 48% !important;
-        max-height: 44% !important;
-        opacity: 0.08 !important;
-        transform: translate(-50%, -50%) rotate(-18deg) !important;
-        pointer-events: none !important;
-        z-index: 3 !important;
-        object-fit: contain !important;
-      }
-
-      /* Sparse quotes: keep watermark but reduce visual dominance in the empty middle area. */
-      .pdf-render .pdf-content-sparse.quote-watermarked::before {
-        font-size: 52px !important;
-        letter-spacing: 0.14em !important;
-        opacity: 0.05 !important;
-      }
-
-      .pdf-render .pdf-content-sparse .quote-watermark-image {
-        max-width: 40% !important;
-        max-height: 34% !important;
-        opacity: 0.05 !important;
-      }
-
-      .pdf-render,
-      .pdf-render p,
-      .pdf-render td,
-      .pdf-render th,
-      .pdf-render div,
-      .pdf-render span,
-      .pdf-render h1,
-      .pdf-render h2,
-      .pdf-render h3 {
-        line-height: 1.5 !important;
-      }
-
-      .pdf-render .table-responsive {
-        margin-top: 0.08in !important;
-        overflow: visible !important;
-      }
-
-      .pdf-render .quote-doc-header {
-        border-bottom: 1px solid #dce4ec !important;
-        padding-bottom: 0.65rem !important;
-        margin-bottom: 0.75rem !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .pdf-head-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-      }
-
-      .pdf-render .pdf-head-table td {
-        vertical-align: top !important;
-        padding: 0 !important;
-      }
-
-      .pdf-render .pdf-head-left {
-        width: 60% !important;
-        padding-right: 0.16in !important;
-        text-align: left !important;
-      }
-
-      .pdf-render .pdf-head-right {
-        width: 40% !important;
-        text-align: left !important;
-        font-size: 10.8px !important;
-        color: #1f2937 !important;
-      }
-
-      .pdf-render .pdf-head-left h1,
-      .pdf-render .pdf-head-left .pdf-doc-company-lines,
-      .pdf-render .pdf-head-left .pdf-doc-company-lines p {
-        text-align: left !important;
-      }
-
-      .pdf-render .pdf-doc-meta-block {
-        margin-left: auto !important;
-        width: 100% !important;
-        max-width: 3.2in !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid {
-        display: table !important;
-        width: 100% !important;
-        border-collapse: collapse !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--primary {
-        margin-top: 0.02in !important;
-        padding-top: 0.04in !important;
-        border-top: 1px solid #dbe4ee !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--secondary {
-        margin-top: 0.03in !important;
-        padding-top: 0.03in !important;
-        border-top: 1px solid #e5ebf2 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row {
-        display: table-row !important;
-        white-space: normal !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row span,
-      .pdf-render .pdf-doc-meta-row strong {
-        display: table-cell !important;
-        padding: 0.01in 0 !important;
-        vertical-align: top !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row span {
-        width: 42% !important;
-        color: #667284 !important;
-        font-size: 10.2px !important;
-        font-weight: 500 !important;
-        padding-right: 0.08in !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row strong {
-        width: 58% !important;
-        color: #1e293b !important;
-        text-align: right !important;
-        font-size: 10.8px !important;
-        font-weight: 650 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--primary .pdf-doc-meta-row span {
-        color: #5e6d80 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--primary .pdf-doc-meta-row strong {
-        font-size: 11px !important;
-        font-weight: 700 !important;
-        color: #15283d !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--secondary .pdf-doc-meta-row span {
-        font-size: 9.9px !important;
-        color: #768499 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-grid--secondary .pdf-doc-meta-row strong {
-        font-size: 10.4px !important;
-        font-weight: 620 !important;
-        color: #36485f !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row.is-valid-until strong {
-        font-weight: 760 !important;
-        color: #0f1f33 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row.is-wide span,
-      .pdf-render .pdf-doc-meta-row.is-wide strong {
-        display: block !important;
-        width: 100% !important;
-        text-align: left !important;
-        padding: 0.01in 0 !important;
-      }
-
-      .pdf-render .pdf-doc-meta-row.is-wide strong {
-        font-weight: 600 !important;
-        color: #334155 !important;
-      }
-
-      .pdf-render .quote-doc-kicker {
-        letter-spacing: 0.075em !important;
-        font-weight: 700 !important;
-        font-size: 0.73rem !important;
-        margin: 0 !important;
-        text-align: left !important;
-        margin-bottom: 0.25rem !important;
-      }
-
-      .pdf-render .quote-doc-header h1 {
-        font-size: var(--q-pdf-doc-title-size) !important;
-        line-height: var(--q-pdf-doc-title-lh) !important;
-        font-weight: var(--q-pdf-doc-title-w) !important;
-        margin: 0 !important;
-        letter-spacing: 0 !important;
-        text-transform: none !important;
-        color: #222 !important;
-        text-align: left !important;
-      }
-
-      .pdf-render .pdf-doc-company-lines {
-        margin-top: 0.015in !important;
-      }
-
-      .pdf-render .pdf-doc-company-lines p {
-        margin: 0 0 0.01in 0 !important;
-        color: #6b7280 !important;
-        font-size: 10.3px !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-      }
-
-      .pdf-render .pdf-doc-number {
-        font-size: 11.8px !important;
-        margin-bottom: 0.015in !important;
-        text-align: left !important;
-        color: #5c6a7e !important;
-      }
-
-      .pdf-render .pdf-doc-number.is-doc-number strong {
-        font-size: 11.1px !important;
-        font-weight: 680 !important;
-        color: #607086 !important;
-      }
-
-      .pdf-render .pdf-doc-number-value {
-        font-size: 14.2px !important;
-        font-weight: 780 !important;
-        letter-spacing: 0.01em !important;
-        color: #13263a !important;
-      }
-
-      .pdf-render .pdf-logo-band {
-        margin-bottom: 0.05in !important;
-      }
-
-      .pdf-render .pdf-logo-left { text-align: left !important; }
-      .pdf-render .pdf-logo-right { text-align: right !important; }
-      .pdf-render .pdf-logo-center { text-align: center !important; }
-
-      .pdf-render .quote-doc-logo {
-        width: auto !important;
-        max-height: 52px !important;
-      }
-
-      .pdf-render .quote-meta-grid {
-        margin-bottom: 0.17in !important;
-        padding: 0.08in 0 !important;
-        border-top: 1px solid #dce4ec !important;
-        border-bottom: 1px solid #dce4ec !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .pdf-party-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-      }
-
-      .pdf-render .pdf-party-col {
-        width: 50% !important;
-        vertical-align: top !important;
-      }
-
-      .pdf-render .pdf-party-table td:first-child {
-        padding-right: 0.11in !important;
-      }
-
-      .pdf-render .pdf-party-table td:last-child {
-        padding-left: 0.11in !important;
-      }
-
-      .pdf-render .quote-meta-card {
-        background: #fff !important;
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        text-align: left !important;
-      }
-
-      .pdf-render .quote-meta-card h3 {
-        margin: 0 0 0.03in 0 !important;
-        font-size: 11px !important;
-        letter-spacing: 0.03em !important;
-        text-transform: uppercase !important;
-        color: #334155 !important;
-      }
-
-      .pdf-render .quote-meta-card p {
-        margin: 0 0 0.012in 0 !important;
-        font-size: 10.3px !important;
-        line-height: 1.36 !important;
-        font-weight: var(--q-pdf-meta-w) !important;
-        color: #64748b !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-      }
-
-      .pdf-render .quote-meta-card .pdf-party-name {
-        font-size: 12.2px !important;
-        margin-bottom: 0.018in !important;
-        color: #1f2937 !important;
-      }
-
-      .pdf-render .quote-doc-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        border-spacing: 0 !important;
-        table-layout: fixed !important;
-        border: none !important;
-        margin-bottom: 0.18in !important;
-      }
-
-      .pdf-render .quote-doc-table thead {
-        background: #f3f6fa !important;
-      }
-
-      .pdf-render .quote-doc-table thead th {
-        font-size: var(--q-pdf-table-head-size) !important;
-        line-height: var(--q-pdf-table-head-lh) !important;
-        font-weight: var(--q-pdf-table-head-w) !important;
-        color: #334155 !important;
-        border-top: 1px solid #d7e1ec !important;
-        border-bottom: 1px solid #d7e1ec !important;
-        padding: 0.064in 0.07in !important;
-        text-align: left !important;
-        letter-spacing: 0.03em !important;
-      }
-
-      .pdf-render .quote-doc-table.has-images th:nth-child(1) { width: 6.5% !important; }
-      .pdf-render .quote-doc-table.has-images th:nth-child(2) { width: 10% !important; }
-      .pdf-render .quote-doc-table.has-images th:nth-child(3) { width: auto !important; }
-      .pdf-render .quote-doc-table.has-images th:nth-child(4) { width: 9% !important; }
-      .pdf-render .quote-doc-table.has-images th:nth-child(5) { width: 15% !important; }
-      .pdf-render .quote-doc-table.has-images th:nth-child(6) { width: 17% !important; }
-
-      .pdf-render .quote-doc-table.no-images th:nth-child(1) { width: 6.5% !important; }
-      .pdf-render .quote-doc-table.no-images th:nth-child(2) { width: auto !important; }
-      .pdf-render .quote-doc-table.no-images th:nth-child(3) { width: 9% !important; }
-      .pdf-render .quote-doc-table.no-images th:nth-child(4) { width: 15% !important; }
-      .pdf-render .quote-doc-table.no-images th:nth-child(5) { width: 17% !important; }
-
-      .pdf-render .quote-doc-table tbody td {
-        border-bottom: 1px solid #e3eaf1 !important;
-        padding: 0.062in 0.07in !important;
-        font-size: var(--q-pdf-table-body-size) !important;
-        line-height: var(--q-pdf-table-body-lh) !important;
-        font-weight: var(--q-pdf-table-body-w) !important;
-        vertical-align: top !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-        color: #222 !important;
-      }
-
-      .pdf-render .quote-doc-table tbody td.is-right,
-      .pdf-render .quote-doc-table tbody td.is-money {
-        padding-top: 0.058in !important;
-        font-size: 11.6px !important;
-        line-height: 1.34 !important;
-      }
-
-      .pdf-render .quote-doc-table tbody td.is-left:first-child,
-      .pdf-render .quote-doc-table.has-images tbody td:nth-child(2) {
-        padding-top: 0.058in !important;
-      }
-
-      .pdf-render .quote-doc-table tr.pdf-filler-row td {
-        color: transparent !important;
-        padding-top: 0.085in !important;
-        padding-bottom: 0.085in !important;
-      }
-
-      .pdf-render .quote-item-desc {
-        display: block !important;
-      }
-
-      .pdf-render .quote-item-desc-main {
-        display: block !important;
-        font-weight: 680 !important;
-        color: #1f2937 !important;
-        overflow-wrap: anywhere !important;
-        word-wrap: break-word !important;
-        word-break: break-word !important;
-        -webkit-hyphens: auto !important;
-        hyphens: auto !important;
-      }
-
-      .pdf-render .quote-item-desc-meta {
-        margin-top: 0.012in !important;
-      }
-
-      .pdf-render .quote-item-desc-group {
-        display: block !important;
-        margin-top: 0.005in !important;
-      }
-
-      .pdf-render .quote-item-desc-group-label {
-        display: block !important;
-        font-size: 9.4px !important;
-        line-height: 1.25 !important;
-        font-weight: 640 !important;
-        color: #4b5563 !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-      }
-
-      .pdf-render .quote-item-desc-sub {
-        display: block !important;
-        font-size: 9.2px !important;
-        color: #6b7280 !important;
-        line-height: 1.2 !important;
-        font-weight: var(--q-pdf-item-detail-w) !important;
-        margin-top: 0.003in !important;
-        padding-left: 0.045in !important;
-        text-indent: -0.045in !important;
-        overflow-wrap: break-word !important;
-        word-break: normal !important;
-      }
-
-      .pdf-render .quote-item-desc-bullet {
-        color: #9aa4b2 !important;
-      }
-
-      .pdf-render .quote-item-desc-sub.is-addon {
-        padding-left: 0.06in !important;
-        text-indent: -0.045in !important;
-        color: #7b8794 !important;
-      }
-      .pdf-render .quote-inline-old {
-        text-decoration: line-through !important;
-        color: #7b8794 !important;
-      }
-      .pdf-render .quote-inline-new {
-        color: #222 !important;
-        font-weight: 600 !important;
-      }
-      .pdf-render .quote-diff-stack {
-        display: inline-flex !important;
-        flex-direction: column !important;
-        align-items: flex-end !important;
-        gap: 0.02in !important;
-        line-height: 1.2 !important;
-      }
-      .pdf-render .quote-diff-old {
-        text-decoration: line-through !important;
-        color: #95a2b4 !important;
-        font-size: 8.6px !important;
-        font-weight: 500 !important;
-      }
-      .pdf-render .quote-diff-new,
-      .pdf-render .quote-diff-current {
-        color: #222 !important;
-        font-weight: 600 !important;
-      }
-      .pdf-render .quote-inline-flag {
-        display: inline !important;
-        margin-left: 0.03in !important;
-        padding: 0 !important;
-        border: 0 !important;
-        border-radius: 0 !important;
-        font-size: 8.8px !important;
-        line-height: 1.3 !important;
-        color: #738195 !important;
-        text-transform: lowercase !important;
-        letter-spacing: 0.01em !important;
-        font-weight: 600 !important;
-      }
-      .pdf-render .quote-inline-flag--compact {
-        margin-left: 0.02in !important;
-        font-size: 8.6px !important;
-      }
-      .pdf-render .quote-inline-flag::before {
-        content: "" !important;
-      }
-      .pdf-render .quote-item-inline-diff {
-        margin-top: 0.02in !important;
-      }
-      .pdf-render .quote-item-inline-diff-line {
-        font-size: 9px !important;
-        line-height: 1.35 !important;
-        color: #6b7280 !important;
-      }
-      .pdf-render .quote-row-added td,
-      .pdf-render .quote-row-removed td {
-        background: #fff !important;
-      }
-      .pdf-render .quote-row-removed td {
-        color: #637489 !important;
-      }
-      .pdf-render .quote-row-removed .quote-inline-old {
-        color: #9aa8ba !important;
-      }
-
-      .pdf-render .quote-doc-table th.is-money,
-      .pdf-render .quote-doc-table td.is-money {
-        text-align: right !important;
-        white-space: nowrap !important;
-        overflow-wrap: normal !important;
-        word-break: normal !important;
-        font-variant-numeric: tabular-nums !important;
-      }
-
-      .pdf-render .quote-doc-table th.is-right,
-      .pdf-render .quote-doc-table td.is-right {
-        text-align: right !important;
-        white-space: nowrap !important;
-        overflow-wrap: normal !important;
-        word-break: normal !important;
-        font-variant-numeric: tabular-nums !important;
-      }
-
-      .pdf-render .quote-doc-table th.is-left,
-      .pdf-render .quote-doc-table td.is-left {
-        text-align: left !important;
-      }
-
-      .pdf-render .quote-item-image {
-        display: block !important;
-        width: auto !important;
-        max-width: 64px !important;
-        max-height: 64px !important;
-        margin-top: 0.005in !important;
-      }
-
-      .pdf-render .quote-total-box {
-        margin-top: 0.15in !important;
-        float: right !important;
-        display: block !important;
-        width: 320px !important;
-        max-width: 320px !important;
-        background: #ffffff !important;
-        border-top: 1px solid #cfd9e4 !important;
-        border-bottom: 1px solid #dbe4ee !important;
-        border-left: 0 !important;
-        border-right: 0 !important;
-        border-radius: 0 !important;
-        padding: 0.09in 0 !important;
-        page-break-before: avoid !important;
-        break-before: avoid-page !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .pdf-summary-stack {
-        clear: both !important;
-        width: 320px !important;
-        max-width: 320px !important;
-        margin-left: auto !important;
-        margin-top: 0.05in !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .pdf-summary-stack .quote-total-box {
-        float: none !important;
-        width: auto !important;
-        max-width: none !important;
-        margin-top: 0 !important;
-      }
-
-      .pdf-render .quote-total-box p {
-        display: block !important;
-        margin: 0 0 0.015in 0 !important;
-        font-size: var(--q-pdf-total-secondary-size) !important;
-        line-height: var(--q-pdf-total-secondary-lh) !important;
-        font-weight: var(--q-pdf-total-secondary-w) !important;
-      }
-
-      .pdf-render .quote-total-box p > span {
-        float: left !important;
-        color: #5b6575 !important;
-      }
-
-      .pdf-render .quote-total-box p.quote-total-grand > span {
-        color: #222 !important;
-      }
-
-      .pdf-render .quote-total-box p > strong {
-        float: right !important;
-        text-align: right !important;
-        min-width: 1.3in !important;
-        font-variant-numeric: tabular-nums !important;
-        color: #1f2937 !important;
-      }
-      .pdf-render .quote-total-box p.quote-total-discount > strong,
-      .pdf-render .quote-total-box p.quote-total-saved > strong {
-        color: #b91c1c !important;
-      }
-      .pdf-render .quote-total-box p > strong .quote-diff-stack {
-        min-width: 1.38in !important;
-        gap: 0.022in !important;
-      }
-
-      .pdf-render .quote-total-reduction strong {
-        text-decoration: line-through !important;
-        text-decoration-color: #fca5a5 !important;
-      }
-
-      .pdf-render .quote-total-box p:after {
-        content: "" !important;
-        display: block !important;
-        clear: both !important;
-      }
-
-      .pdf-render .quote-total-grand {
-        margin-top: 0.14rem !important;
-        border-top: 1px solid #aebed1 !important;
-        padding: 0.07in 0 0 !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-      }
-
-      .pdf-render .quote-total-grand span {
-        color: #0f172a !important;
-        font-size: 11.8px !important;
-        line-height: var(--q-pdf-total-primary-label-lh) !important;
-        font-weight: 640 !important;
-        letter-spacing: 0.01em !important;
-      }
-
-      .pdf-render .quote-total-grand strong {
-        color: #10243c !important;
-        font-size: 1.22rem !important;
-        line-height: var(--q-pdf-total-primary-lh) !important;
-        font-weight: 760 !important;
-      }
-      .pdf-render .quote-total-grand .quote-diff-old {
-        font-size: 8.2px !important;
-        color: #a2afbf !important;
-      }
-
-      .pdf-render .quote-engagement-note {
-        margin: 0.045in 0 0 0 !important;
-        padding-top: 0.03in !important;
-        border-top: 1px solid #dfe6ef !important;
-        color: #5b6472 !important;
-        font-size: var(--q-pdf-closing-size) !important;
-        line-height: var(--q-pdf-closing-lh) !important;
-        font-weight: var(--q-pdf-closing-w) !important;
-      }
-
-      .pdf-render .pdf-engagement-note {
-        clear: none !important;
-        width: auto !important;
-        max-width: none !important;
-        margin-left: 0 !important;
-        margin-top: 0.05in !important;
-        text-align: left !important;
-      }
-
-      .pdf-render .quote-public-footnote {
-        clear: both !important;
-        margin: 0.12in 0 0 0 !important;
-        text-align: right !important;
-        color: #9aa3af !important;
-        font-size: 9px !important;
-      }
-
-      .pdf-render .pdf-summary-stack + .quote-section-block {
-        margin-top: 0.1in !important;
-      }
-
-      .pdf-render .pdf-content-sparse .pdf-summary-stack {
-        margin-top: 0.04in !important;
-      }
-
-      .pdf-render .quote-section-block {
-        margin-top: 0.13in !important;
-        clear: both !important;
-        border-top: 1px solid #dce4ec !important;
-        padding-top: 0.055in !important;
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-        text-align: left !important;
-      }
-      .pdf-render .quote-total-box + .quote-section-block--scope {
-        margin-top: 0.13in !important;
-      }
-      .pdf-render .quote-section-block--scope h3 {
-        margin-bottom: 0.035in !important;
-      }
-      .pdf-render .quote-section-block--scope + .quote-section-block {
-        margin-top: 0.14in !important;
-      }
-
-      .pdf-render .quote-section-block h3 {
-        margin: 0 0 0.02in 0 !important;
-        font-size: 11px !important;
-        line-height: var(--q-pdf-section-title-lh) !important;
-        letter-spacing: 0.035em !important;
-        font-weight: 680 !important;
-        text-transform: uppercase !important;
-        color: #334155 !important;
-        page-break-after: avoid !important;
-        break-after: avoid-page !important;
-      }
-
-      .pdf-render .quote-section-block p,
-      .pdf-render .quote-section-block div {
-        margin: 0.003in 0 !important;
-        font-size: 10.3px !important;
-        line-height: var(--q-pdf-notes-lh) !important;
-        font-weight: var(--q-pdf-notes-w) !important;
-        overflow-wrap: anywhere !important;
-        word-break: break-word !important;
-      }
-
-      .pdf-render .quote-sales-signature-image {
-        max-width: 200px !important;
-        max-height: 74px !important;
-        object-fit: contain !important;
-      }
-
-      .pdf-render .quote-doc-table tbody {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-      }
-
-      .pdf-render .quote-doc-table tr {
-        page-break-inside: auto !important;
-        break-inside: auto !important;
-      }
-
-      .pdf-render .quote-total-box,
-      .pdf-render .quote-signature-block {
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .quote-ending-stack {
-        margin-top: 0.16in !important;
-        border-top: 1px solid #d9e2ec !important;
-        padding-top: 0.075in !important;
-        page-break-inside: avoid !important;
-        break-inside: avoid-page !important;
-      }
-
-      .pdf-render .quote-ending-stack .quote-section-block--ending {
-        border-top: 0 !important;
-        margin-top: 0.1in !important;
-        padding-top: 0 !important;
-      }
-
-      .pdf-render .quote-ending-stack .quote-section-block--ending:first-child {
-        margin-top: 0 !important;
-      }
-
-      .pdf-render .quote-ending-stack .quote-section-block--ending h3 {
-        margin-bottom: 0.028in !important;
-        color: #2f4156 !important;
-      }
-
-      .pdf-render .quote-section-block + .quote-ending-stack {
-        margin-top: 0.15in !important;
-      }
-
-      .pdf-render .pdf-density-compact .quote-doc-table thead th,
-      .pdf-render .pdf-density-compact .quote-doc-table tbody td {
-        padding-top: 0.05in !important;
-        padding-bottom: 0.05in !important;
-      }
-
-      .pdf-render .pdf-density-spacious .quote-doc-table thead th,
-      .pdf-render .pdf-density-spacious .quote-doc-table tbody td {
-        padding-top: 0.09in !important;
-        padding-bottom: 0.09in !important;
-      }
-    </style>
   </body>
 </html>

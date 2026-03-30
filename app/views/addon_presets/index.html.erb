@@ -16,28 +16,30 @@
     <%= render "form", addon_preset: @addon_preset %>
   </article>
 
-  <article class="app-table-surface team-members-panel team-members-panel--secondary">
-    <div class="app-section-heading">
+  <article class="app-table-surface product-preset-library-panel">
+    <div class="app-section-heading product-preset-library-head">
       <h2><%= t("addon_presets.view.index.library_title") %></h2>
     </div>
     <% if @addon_presets.any? %>
       <div class="table-responsive">
-        <table class="customers-table saas-table">
+        <table class="app-data-table product-preset-library-table">
           <thead>
             <tr>
               <th><%= t("addon_presets.view.index.name") %></th>
               <th><%= t("addon_presets.view.index.addons") %></th>
-              <th></th>
+              <th><%= t("quotes.view.form.actions", default: "Actions") %></th>
             </tr>
           </thead>
           <tbody>
             <% @addon_presets.each do |preset| %>
               <tr>
-                <td><strong><%= preset.name %></strong></td>
-                <td><%= preset.normalized_entries.map { |entry| "#{entry[:name]}: #{entry[:price]}" }.join(" • ") %></td>
-                <td class="text-right preset-row-actions">
-                  <%= link_to t("addon_presets.view.index.edit"), edit_addon_preset_path(preset), class: ui_button_classes(:secondary) %>
-                  <%= button_to t("addon_presets.view.index.delete"), addon_preset_path(preset), method: :delete, data: { turbo_confirm: t("addon_presets.view.index.delete_confirm") }, class: ui_button_classes(:danger) %>
+                <td class="product-preset-library-name-cell"><strong class="product-preset-library-name"><%= preset.name %></strong></td>
+                <td class="product-preset-library-values"><%= preset.normalized_entries.map { |entry| "#{entry[:name]}: #{entry[:price]}" }.join(" • ") %></td>
+                <td class="product-preset-library-actions-cell">
+                  <div class="product-preset-library-actions">
+                    <%= link_to t("addon_presets.view.index.edit"), edit_addon_preset_path(preset), class: ui_button_classes(:primary) %>
+                    <%= button_to t("addon_presets.view.index.delete"), addon_preset_path(preset), method: :delete, data: { turbo_confirm: t("addon_presets.view.index.delete_confirm") }, class: ui_button_classes(:danger) %>
+                  </div>
                 </td>
               </tr>
             <% end %>

@@ -81,10 +81,41 @@ With feature-level adapter class:
 - `.quote-revision-*` (internal revision comparison panel and detail layout)
 - `.quote-summary-*`, `.quote-collab-*` (internal webview default-focus + collapsible collaboration blocks)
   - `.quote-summary-strip--internal` should read as a lightweight internal meta row (document-to-workflow bridge), not as dashboard-like KPI widgets.
+- `.quote-internal-*` (internal webview semantic renderers: `summary` / `facts` / `table` / `settlement` / `gallery` / `matrix` / `list` / `footer`; used only for internal quote reading flow, not for PDF/public/excel)
+  - second-pass tightening rule: preserve renderer types, prioritize reading hierarchy (`status` first, `buyer > quote info > seller`), keep items as commercial rows with lightweight subordinate spec/add-on details, treat formal closing and footer as low-emphasis reference blocks.
+  - settlement placement rule: internal settlement totals are rendered as the `quote-internal-items-footer` inside the items block (right-aligned on desktop, stacked on narrow screens), not as a separate standalone section.
+  - disclosure tightening rule: any internal “more/collapse” trigger must be a bottom control row (`quote-inline-disclosure*`), never inserted between content items.
 - `.quote-workspace-*` (internal quote webview layer boundary: document body vs. internal workflow summary/actions/history)
 - `.quote-form-advanced*` (advanced quote section local spacing/typography overrides; used to neutralize global hint offsets and keep advanced subsection rhythm readable)
+- `.quote-advanced-module-*` (extended module editors in quote form: lightweight configuration rows and detail-picture mixed-source rows; detail list uses `quote-advanced-module-list--detail-pictures` card-grid variant)
+- `.quote-preset-control*`, `.js-fee-preset-controls` (module preset selector wrapper/hint/clear affordance and local spacing rhythm in quote form)
+- `.quote-preset-library*`, `.quote-preset-row-menu*` (quote preset library table refinement: name/meta stack, position pill, primary action + more-actions dropdown)
+- `.quote-signature-image-preview*` (formal closing signature/stamp upload preview with top-right remove affordance in quote/preset editors)
+- `.quote-advanced-module-row--loading`, `.quote-mini-table*` (container-loading lightweight matrix editor + shared compact table rendering for module blocks)
+- `.quote-detail-batch-preview*`, `.quote-detail-item-preview*` (detail pictures batch upload preview merges into the same card-grid container as selected detail rows; supports per-image removal before submit)
+- `.quote-detail-gallery-*` (detail pictures picker panel that previews only currently selected quote-item products and supports card-highlight multi-select / select-all toggle without checkbox UI)
 - `.quote-form-collapsible*`, `.template-editor-summary*` (details/summary based collapsible cards for quote/template long-form editors)
 - `.quote-supp-*` (PDF-only supplementary terms/logistics key-value presentation used by `export_pdf` for formal document readability polish)
+- PDF flow contract (`quotes/export_pdf` + `layouts/pdf`): first page is fixed formal quotation structure (header/meta, buyer block, items table, right-aligned totals, brief notes, one-line footer). Annex sections start on page 2+ and render only when data exists.
+- PDF section/title contract: remove repeated “SUPPLEMENTARY” kicker usage in PDF output; annex sections use single uppercase section titles with unified bordered title/body treatment.
+- PDF detail pictures contract: only render when filtered detail cards still exist after removing main table representative images; keep stable 2-column rows with final single-image row centered when needed.
+- PDF formal quote table contract: export PDF main items table uses `No. / Item Details / Qty / Unit Price / Amount` (no standalone `Image` column). Item image, when present, is rendered inside `Item Details` as a left mini column; no-image rows consume full detail width.
+- PDF signature/footer contract (Grover): signature/stamp images in PDF should use inline data URI to avoid browser fetch misses; footer typography is defined in Grover `footerTemplate` and should match document sans stack.
+- PDF first-page settlement contract: totals use a light boxed block (soft outer border + light row dividers + emphasized grand-total separator) to keep hierarchy without heavy grid feel; the commercial summary strip remains value-only and rhythm-led (no empty placeholder cells).
+- Long-value policy in quote supplementary/term blocks: prefer `overflow-wrap: anywhere` for customer-facing document values to avoid layout break on unspaced strings.
+- `.quote-detail-picture-*`, `.quote-detail-pictures-grid` (shared detail-pictures section rendering across internal/public/PDF with stable 3-column baseline)
+- `.quote-public-*` (buyer-facing public quote structure: hero, facts, commercial core, settlement, signoff, and public system state; used only in `public_quote.css`)
+  - settlement placement rule: public settlement renders as a narrowed totals block inside the items card footer (`quote-public-core-footer`), right-aligned on desktop and full-width stacked on narrow screens.
+  - item subdetail rhythm rule: `Spec / Add-on` in public item rows should keep compact spacing (tight label-to-first-row and row-to-row gaps), stable key/value scan alignment, and light group separation (not card-like breaks).
+  - high-alignment rule: when public item subdetails are tightened to internal baseline, reuse internal geometry (`minmax(72px, 30%)` key/value grid, compact 0.06~0.08 vertical rhythm) while preserving public’s lighter color weight and no-disclosure behavior.
+  - item image rule: public items table must render product thumbnails inside a dedicated wrapper (`quote-public-item-image-wrap` + `quote-public-item-image`) so row height is controlled by content rhythm, not raw image natural size.
+  - row hierarchy rule: public items rows should expose product vs charge rhythm via row classes (`quote-public-row--product` / `quote-public-row--charge`) without changing business semantics.
+  - no-placeholder image rule: public items no longer reserve an empty image slot for no-image fee rows; image appears only inside item details when a real product image exists.
+  - watermark layering rule: public watermark state must be mounted on `.public-quote-document.quote-watermarked` (not outer canvas), and image watermark must use `.quote-public-watermark-image` so stacking remains consistent above all section content including detail pictures.
+- `.quote-internal-document-body` watermark contract: internal webview watermark is mounted at this body wrapper (`quote-watermarked` + optional `.quote-internal-watermark-image`) so overlay behavior is isolated from template-preview/public watermark selectors.
+- `.quote-items-table--internal` item-details image rule: internal webview follows the same inline-image contract as PDF/public (`has-inline-image` with a fixed wrapper), and fee rows keep full-width details with no fake thumbnail slot.
+- `.quote-item-kind*` (lightweight item-type marker for product vs fee rows in formal quote tables)
+- `.quote-item-row--fee` (quote form row variant for logistics/fee items; hides spec/add-on columns and keeps manual fee-row editing compact)
 - `.template-form-subgroup*` (template form grouping helper for long-form clarity)
 - `.template-advanced-defaults-*` (opt-in advanced quote defaults split layout in template editor: trade/logistics subgroup readability)
 - `.template-stage-*`, `.template-level-marker*`, `.template-editor-section--*` (template-new information-tier hierarchy adapters)
@@ -136,7 +167,12 @@ Team families are local to team management pages.
 
 Do not create a parallel admin visual system unless explicitly approved.
 
-8. Scoped exception families
+8. Product-scope families
+- `.product-gallery-*` (product media editor/gallery cards; selection uses card highlight state + round indicator and avoids visible checkbox UI; staged upload preview reuses the same gallery card language)
+- `.product-preset-library*` (spec/add-on preset library table refinement aligned with quote preset visual language: readable name/value cells and right-side action group)
+- `.product-lightbox*` (global image-preview overlay; mounted as a body-level singleton so backdrop always covers full viewport across product and quote detail-picture triggers)
+
+9. Scoped exception families
 - When a UI block has a clearly different product role and tone (for example, a personal sticky-note rail that is intentionally non-system), it may use a dedicated feature family instead of force-fitting existing card/form families.
 - This exception must remain strictly scoped by feature prefix and ownership boundaries. Example: `.dashboard-notes-*` is mounted globally for signed-in pages, but should not leak into other feature families or become generic card primitives.
 - Do not create broad global overrides for this exception type; keep tokens restrained and compatible with admin baseline.

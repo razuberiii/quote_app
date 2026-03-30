@@ -65,7 +65,7 @@ class DashboardPerformanceReportService
 
   def latest_quotes_for(customer)
     customer.quotes
-      .reject { |quote| archived_or_deleted?(quote) }
+      .reject { |quote| archived_or_deleted?(quote) || quote.pi_document? }
       .group_by(&:quote_no)
       .values
       .map { |revisions| revisions.max_by(&:revision_number) }

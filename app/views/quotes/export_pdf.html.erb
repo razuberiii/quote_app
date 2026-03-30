@@ -1,435 +1,419 @@
-<% doc_accent = @template.accent_color.presence || "#1F4E79" %>
 <% raw_document_kind = @document_kind || params[:document_kind] || params[:doc] || params[:kind] %>
 <% document_kind = @template.normalize_document_kind(raw_document_kind || @template.default_document_kind) %>
 <% spec_label = @quote.resolved_spec_label %>
 <% addon_label = @quote.resolved_addon_label %>
 <% watermark_text = template_watermark_text(@template, @quote.company.name) %>
 <% watermark_image_url = quote_watermark_data_uri || template_watermark_image_url(@template) %>
-<% pdf_watermark_opacity = [template_watermark_opacity(@template).to_f * 0.5, 0.08].min %>
+<% template_watermark_alpha = template_watermark_opacity(@template).to_f %>
+<% pdf_watermark_opacity = [[template_watermark_alpha * 0.16, 0.012].max, 0.035].min %>
 <% pdf_items = @quote.quote_items.ordered.to_a %>
-<% revision_diff_context = @template.show_pdf_revision_summary? ? quote_revision_diff_context(@quote) : nil %>
-<% revision_diff = revision_diff_context&.dig(:diff) %>
-<% revision_item_map = revision_diff.present? ? quote_diff_item_map(revision_diff) : {} %>
-<% item_key_counters = Hash.new(0) %>
-<% valid_until_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :valid_until) : nil %>
-<% trade_term_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :trade_term) : nil %>
-<% payment_term_change = revision_diff.present? ? quote_diff_commercial_change(revision_diff, :payment_term) : nil %>
-<% scope_of_supply_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :scope_of_supply) %>
-<% pdf_min_visual_rows = 4 %>
-<% pdf_filler_rows = [pdf_min_visual_rows - pdf_items.size, 0].max %>
-<% pdf_sparse_content = pdf_items.size < pdf_min_visual_rows %>
-<% signature_image_url = template_signature_image_url(@template) %>
-<% signature_name = template_signature_name(@template) %>
-<% show_signature_section = @template.show_signature_block && (signature_image_url.present? || signature_name.present?) %>
-<style>
-  /* Dynamic accent color for PDF rendering */
-  .pdf-render .quote-doc-kicker {
-    color: <%= doc_accent %> !important;
-  }
-  .pdf-render .quote-total-grand {
-    background-color: transparent !important;
-    color: #222 !important;
-  }
-  .pdf-render .quote-total-grand span,
-  .pdf-render .quote-total-grand strong {
-    color: #222 !important;
-  }
-  /* wkhtmltopdf can be inconsistent with CSS var() on pseudo elements */
-  .pdf-render .quote-watermarked::before {
-    opacity: <%= pdf_watermark_opacity %> !important;
-  }
-  .pdf-render .quote-watermark-image {
-    opacity: <%= pdf_watermark_opacity %> !important;
-  }
-</style>
-<article class="quote-document public-quote-document public-quote-themed public-layout-<%= @template.layout_type %> pdf-density-<%= @template.layout_density %> pdf-logo-<%= @template.logo_position %><%= ' quote-watermarked' if watermark_text.present? %><%= ' pdf-content-sparse' if pdf_sparse_content %>" data-watermark="<%= watermark_text %>" style="--quote-watermark-opacity: <%= pdf_watermark_opacity %>; --doc-accent: <%= doc_accent %>; --doc-on-accent: #ffffff; --doc-font: 'Noto Sans';">
-  <% if watermark_image_url.present? %>
-    <img src="<%= watermark_image_url %>" alt="Watermark" class="quote-watermark-image">
-  <% end %>
-  <% title_text = @template.resolved_document_title(document_kind).to_s.upcase %>
-  <% number_label = @template.resolved_document_number_label(document_kind) %>
-  <% logo_uri = quote_logo_data_uri if @template.show_logo %>
-  <% company_header_lines = [@quote.company.address, @quote.company.phone, @quote.company.email, @quote.company.website].compact_blank %>
-  <% seller_address = @quote.company.address.to_s.strip %>
-  <% seller_phone = @quote.company.phone.to_s.strip %>
-  <% seller_email = @quote.company.email.to_s.strip %>
-  <% seller_website = @quote.company.website.to_s.strip %>
-  <% buyer_name = @quote.customer.name.to_s.strip %>
-  <% buyer_contact = @quote.customer.contact_name.to_s.strip %>
-  <% buyer_address = @quote.customer.address.to_s.strip %>
-  <% buyer_phone = @quote.customer.formatted_phone.to_s.strip %>
-  <% buyer_email = @quote.customer.email.to_s.strip %>
-  <% issued_on_text = @quote.issued_on&.strftime("%Y-%m-%d").to_s.strip %>
-  <% terms_lines = [] %>
-  <% if @template.show_terms_section %>
-    <% terms_lines << [ "Payment Terms", @quote.payment_term, :payment_term ] if @template.show_payment_term && @quote.payment_term.present? %>
-    <% terms_lines << [ "Trade Terms", @quote.trade_term, :trade_term ] if @quote.trade_term.present? %>
-    <% terms_lines << [ "Terms", @quote.terms_text, :terms_text ] if @quote.terms_text.present? %>
-    <% terms_lines << [ "Legal Disclaimer", @quote.legal_disclaimer, :legal_disclaimer ] if @quote.legal_disclaimer.present? %>
-    <% terms_lines << [ "Delivery Notes", @quote.delivery_notes, :delivery_notes ] if @quote.delivery_notes.present? %>
-  <% end %>
-  <% if logo_uri.present? %>
-    <div class="pdf-logo-band pdf-logo-<%= @template.logo_position %>">
-      <img src="<%= logo_uri %>" class="quote-doc-logo" alt="Company logo">
+<% seller_signature_image_url = quote_seller_signature_data_uri(@quote) || quote_seller_signature_image_url(@quote) %>
+<% seller_stamp_image_url = quote_seller_stamp_data_uri(@quote) || quote_seller_stamp_image_url(@quote) %>
+<% document_number_value = quote_document_number_value(@quote, document_kind) %>
+<% show_watermark = watermark_text.present? || watermark_image_url.present? %>
+
+<% logo_uri = quote_logo_data_uri if @template.show_logo %>
+<% issued_on_text = @quote.issued_on&.strftime("%Y-%m-%d").to_s.strip %>
+<% valid_until_text = @quote.valid_until&.strftime("%Y-%m-%d").to_s.strip %>
+<% number_label = @template.resolved_document_number_label(document_kind) %>
+<% sales_owner_text = if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-"
+  @quote.customer.internal_owner_display_name.to_s.strip
+end %>
+
+<% company_name = @quote.company.name.to_s.strip %>
+<% company_line = @quote.company.address.to_s.squish.presence || "" %>
+<% company_contact_line = [@quote.company.phone, @quote.company.email, @quote.company.website].map { |v| v.to_s.squish.presence }.compact.join(" | ") %>
+<% buyer_name = @quote.customer.name.to_s.strip %>
+<% buyer_contact = @quote.customer.contact_name.to_s.strip %>
+<% buyer_phone = @quote.customer.formatted_phone.to_s.strip %>
+<% buyer_email = @quote.customer.email.to_s.strip %>
+
+<% advanced_trade_terms = @quote.advanced_trade_terms_data %>
+<% advanced_logistics = @quote.advanced_logistics_data %>
+<% commercial_summary_rows = quote_commercial_summary_rows(advanced_trade_terms) %>
+<% logistics_summary_rows = quote_logistics_summary_rows(advanced_logistics) %>
+<% container_loading_block = @quote.container_loading_block_data %>
+<% container_loading_rows = quote_container_loading_rows(container_loading_block) %>
+<% configuration_block = @quote.configuration_block_data %>
+<% configuration_rows = quote_configuration_block_rows(configuration_block) %>
+<% detail_pictures_block = @quote.detail_pictures_block_data %>
+<% detail_picture_items = quote_detail_picture_items(detail_pictures_block) %>
+<% main_item_blob_ids = quote_pdf_primary_item_image_blob_ids(pdf_items) %>
+<% detail_picture_cards = quote_pdf_filtered_detail_picture_cards(detail_picture_items, main_item_blob_ids: main_item_blob_ids, inline_for_pdf: true) %>
+<% detail_picture_rows = detail_picture_cards.each_slice(2).to_a %>
+
+<% show_trade_terms = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template) && commercial_summary_rows.any? %>
+<% show_configuration = @quote.advanced_mode && configuration_rows.any? %>
+<% show_shipping = @quote.advanced_section_enabled?("show_logistics_block", template: @template) && logistics_summary_rows.any? %>
+<% show_container_loading = @quote.advanced_section_enabled?("show_logistics_block", template: @template) && ActiveModel::Type::Boolean.new.cast(container_loading_block["enabled"]) && container_loading_rows.any? %>
+<% show_detail_pictures = @quote.advanced_mode && ActiveModel::Type::Boolean.new.cast(detail_pictures_block["enabled"]) && detail_picture_cards.any? %>
+
+<% scope_text = @quote.scope_of_supply.to_s.strip %>
+<% scope_nodes = quote_scope_list_nodes(scope_text) %>
+<% show_scope_of_supply = document_kind != "pi" && @template.show_scope_of_supply && scope_nodes.any? %>
+
+<% formal_closing_block = @quote.formal_closing_block_data %>
+<% formal_trade_term = formal_closing_block["trade_term"].presence || @quote.trade_term %>
+<% formal_payment_term = formal_closing_block["payment_term"].presence || @quote.payment_term %>
+<% formal_delivery = formal_closing_block["delivery_time"].presence || @quote.delivery_notes %>
+<% formal_remittance_note = formal_closing_block["remittance_note"].to_s.squish.presence %>
+<% bank_route = formal_closing_block["bank_route"].to_s.squish.presence %>
+<% beneficiary_details = formal_closing_block["beneficiary_details"].to_s.squish.presence %>
+<% closing_term_rows = [] %>
+<% closing_term_rows << { label: "Trade Terms", value: formal_trade_term } if formal_trade_term.present? %>
+<% closing_term_rows << { label: "Payment Terms", value: formal_payment_term } if formal_payment_term.present? %>
+<% closing_term_rows << { label: "Delivery", value: formal_delivery } if formal_delivery.present? %>
+<% closing_term_rows << { label: "Remittance Note", value: formal_remittance_note } if formal_remittance_note.present? %>
+<% seller_signature_enabled = ActiveModel::Type::Boolean.new.cast(formal_closing_block["seller_signature_enabled"] || formal_closing_block[:seller_signature_enabled]) || seller_signature_image_url.present? %>
+<% seller_stamp_enabled = ActiveModel::Type::Boolean.new.cast(formal_closing_block["seller_stamp_enabled"] || formal_closing_block[:seller_stamp_enabled]) || seller_stamp_image_url.present? %>
+<% buyer_signature_enabled = ActiveModel::Type::Boolean.new.cast(formal_closing_block["buyer_signature_line_enabled"] || formal_closing_block[:buyer_signature_line_enabled]) %>
+<% show_signature_section = seller_signature_enabled || seller_stamp_enabled || buyer_signature_enabled %>
+<% show_formal_closing = closing_term_rows.any? || bank_route.present? || beneficiary_details.present? || show_signature_section %>
+
+<% commercial_fields = [] %>
+<% commercial_fields << { label: "Trade Terms", value: @quote.trade_term.to_s.squish } if @quote.trade_term.to_s.squish.present? %>
+<% commercial_fields << { label: "Payment Terms", value: @quote.payment_term.to_s.squish } if @quote.payment_term.to_s.squish.present? %>
+<% validity_value = valid_until_text.presence || advanced_trade_terms["validity_clause_note"].to_s.squish.presence %>
+<% commercial_fields << { label: "Validity", value: validity_value } if validity_value.present? %>
+<% commercial_fields = commercial_fields.first(3) %>
+
+<% show_annex = show_trade_terms || show_configuration || show_shipping || show_container_loading || show_scope_of_supply || show_detail_pictures || show_formal_closing %>
+<% terminal_closing = show_annex && show_formal_closing %>
+
+<article class="quote-document quote-document--formal-pdf<%= ' quote-document--terminal-closing' if terminal_closing %>">
+  <% if show_watermark %>
+    <div class="pdf-page-watermark-layer" aria-hidden="true" style="opacity:<%= format('%.4f', pdf_watermark_opacity) %>;">
+      <% if watermark_image_url.present? %>
+        <img src="<%= watermark_image_url %>" alt="" class="pdf-page-watermark-image">
+      <% elsif watermark_text.present? %>
+        <div class="pdf-page-watermark-text"><%= watermark_text %></div>
+      <% end %>
     </div>
   <% end %>
 
-  <header class="quote-doc-header pdf-doc-header">
-    <table class="pdf-head-table">
-      <tr>
-        <td class="pdf-head-left">
-          <h1><%= @quote.company.name.to_s %></h1>
-          <div class="pdf-doc-company-lines">
-            <% company_header_lines.each do |line| %>
-              <p><%= line %></p>
-            <% end %>
-          </div>
-        </td>
-        <td class="pdf-head-right">
-          <div class="pdf-doc-meta-block">
-            <p class="quote-doc-kicker"><%= title_text %></p>
-            <p class="pdf-doc-number is-doc-number"><strong><%= number_label %></strong> <span class="pdf-doc-number-value"><%= @quote.quote_no %></span></p>
-            <div class="pdf-doc-meta-grid pdf-doc-meta-grid--primary">
-              <% if issued_on_text.present? %>
-                <p class="pdf-doc-meta-row">
-                  <span><%= document_kind == "pi" ? "PI Date" : "Quote Date" %></span>
-                  <strong><%= issued_on_text %></strong>
-                </p>
-              <% end %>
-              <% if @template.show_valid_until && @quote.valid_until.present? %>
-                <p class="pdf-doc-meta-row is-valid-until">
-                  <span>Valid Until</span>
-                  <strong><%= @quote.valid_until.strftime("%Y-%m-%d") %></strong>
-                  <% if valid_until_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %>
-                </p>
-              <% end %>
-            </div>
-            <div class="pdf-doc-meta-grid pdf-doc-meta-grid--secondary">
-              <% if @template.show_currency %>
-                <p class="pdf-doc-meta-row">
-                  <span>Currency</span>
-                  <strong><%= @quote.currency %></strong>
-                </p>
-              <% end %>
-              <% if @quote.trade_term.present? %>
-                <p class="pdf-doc-meta-row">
-                  <span>Trade Terms</span>
-                  <strong><%= @quote.trade_term %></strong>
-                  <% if trade_term_change.present? %><span class="quote-inline-flag quote-inline-flag--updated quote-inline-flag--compact"><%= t("quote_document.inline_diff.updated") %></span><% end %>
-                </p>
-              <% end %>
-              <% if @quote.custom_title.present? %>
-                <p class="pdf-doc-meta-row is-wide">
-                  <span>Title</span>
-                  <strong><%= @quote.custom_title %></strong>
-                </p>
-              <% end %>
-            </div>
-          </div>
-        </td>
-      </tr>
-    </table>
-  </header>
-
-  <section class="quote-meta-grid">
-    <table class="pdf-party-table">
-      <tr>
-        <td class="quote-meta-card pdf-party-col">
-          <h3>Seller</h3>
-          <p class="pdf-party-name"><strong><%= @quote.company.name %></strong></p>
-          <% if @template.show_customer_owner && Customer.internal_owner_enabled? && @quote.customer.internal_owner_display_name != "-" %>
-            <p>Sales Owner: <%= @quote.customer.internal_owner_display_name %></p>
-          <% end %>
-          <% if seller_address.present? %><p><%= seller_address %></p><% end %>
-          <% if seller_phone.present? %><p><%= seller_phone %></p><% end %>
-          <% if seller_email.present? %><p><%= seller_email %></p><% end %>
-          <% if seller_website.present? %><p><%= seller_website %></p><% end %>
-        </td>
-        <td class="quote-meta-card pdf-party-col">
-          <h3>Buyer</h3>
-          <% if buyer_name.present? %>
-            <p class="pdf-party-name"><strong><%= buyer_name %></strong></p>
-          <% end %>
-          <% if buyer_contact.present? %><p>Contact: <%= buyer_contact %></p><% end %>
-          <% if buyer_address.present? %><p><%= buyer_address %></p><% end %>
-          <% if buyer_phone.present? %><p><%= buyer_phone %></p><% end %>
-          <% if buyer_email.present? %><p><%= buyer_email %></p><% end %>
-          <% if @quote.customer.tax_id.present? %>
-            <p>Tax ID: <%= [@quote.customer.tax_id_type.presence, @quote.customer.tax_id].compact.join(" ") %></p>
-          <% end %>
-        </td>
-      </tr>
-    </table>
-  </section>
-
-  <div class="table-responsive">
-    <table class="quote-items-table quote-doc-table <%= @template.show_images? ? 'has-images' : 'no-images' %>">
-      <colgroup>
-        <col style="width: 6.5%;">
-        <% if @template.show_images? %><col style="width: 10%;"><% end %>
-        <col>
-        <col style="width: 9%;">
-        <col style="width: 15%;">
-        <col style="width: 17%;">
-      </colgroup>
-      <thead>
+  <section class="pdf-first-page">
+    <header class="pdf-header-block">
+      <table class="pdf-header-table">
         <tr>
-          <th class="is-left">No.</th>
-          <% if @template.show_images? %><th class="is-left">Image</th><% end %>
-          <th class="is-left"><%= @template.resolved_table_label("description") %></th>
-          <th class="is-right"><%= @template.resolved_table_label("qty") %></th>
-          <th class="is-money"><%= @template.resolved_table_label("unit_price") %></th>
-          <th class="is-money"><%= @template.resolved_table_label("line_total") %></th>
+          <td class="pdf-header-company">
+            <% if logo_uri.present? %>
+              <div class="pdf-company-logo-wrap">
+                <img src="<%= logo_uri %>" class="pdf-company-logo" alt="Company logo">
+              </div>
+            <% end %>
+            <h1 class="pdf-company-name"><%= company_name.upcase %></h1>
+            <% if company_line.present? %><p class="pdf-company-line"><%= company_line %></p><% end %>
+            <% if company_contact_line.present? %><p class="pdf-company-line"><%= company_contact_line %></p><% end %>
+          </td>
+          <td class="pdf-header-meta">
+            <table class="pdf-meta-table">
+              <tr><td colspan="2" class="pdf-meta-document-title">QUOTATION</td></tr>
+              <tr><th>Quote #</th><td><%= document_number_value %></td></tr>
+              <% if issued_on_text.present? %><tr><th>Date</th><td><%= issued_on_text %></td></tr><% end %>
+              <% if @template.show_currency %><tr><th>Currency</th><td><%= @quote.currency %></td></tr><% end %>
+              <% if sales_owner_text.present? %><tr><th>Sales Owner</th><td><%= sales_owner_text %></td></tr><% end %>
+              <% if @quote.status.present? %><tr><th>Status</th><td><%= @quote.status.to_s.humanize %></td></tr><% end %>
+            </table>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        <% pdf_items.each_with_index do |item, idx| %>
-          <% row_key = quote_item_diff_key(item, item_key_counters) %>
-          <% row_diff = revision_item_map[row_key] || {} %>
-          <% row_added = row_diff[:change_type] == :added %>
-          <% quantity_changed = row_diff[:quantity_changed] || false %>
-          <% unit_price_changed = row_diff[:unit_price_changed] || false %>
-          <tr class="<%= 'quote-row-added' if row_added %>">
-            <td class="is-left"><%= idx + 1 %></td>
-            <% if @template.show_images? %>
-              <td class="is-left">
-                <% if (item_data_uri = quote_item_image_data_uri(item)).present? %>
-                  <img src="<%= item_data_uri %>" class="quote-item-image" alt="Product image">
+      </table>
+    </header>
+
+    <section class="pdf-buyer-block">
+      <div class="pdf-light-heading">BUYER</div>
+      <div class="pdf-light-rule"></div>
+      <div class="pdf-light-body">
+        <% if buyer_name.present? %><p><strong><%= buyer_name %></strong></p><% end %>
+        <% if buyer_contact.present? %><p>Contact: <%= buyer_contact %></p><% end %>
+        <% if buyer_phone.present? %><p>Phone: <%= buyer_phone %></p><% end %>
+        <% if buyer_email.present? %><p>Email: <%= buyer_email %></p><% end %>
+      </div>
+    </section>
+
+    <section class="pdf-main-items">
+      <table class="quote-items-table quote-doc-table pdf-items-table">
+        <colgroup>
+          <col style="width: 4.5%;">
+          <col style="width: 59.5%;">
+          <col style="width: 8%;">
+          <col style="width: 14%;">
+          <col style="width: 14%;">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Item Details</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% pdf_items.each_with_index do |item, idx| %>
+            <% item_name = item.product&.name.presence || item.description.presence || "Item" %>
+            <% item_model_text = item.description.to_s.squish %>
+            <% show_item_model = item_model_text.present? && item_model_text != item_name.to_s.squish %>
+            <% spec_rows = item.specification_pairs %>
+            <% addon_rows = item.addon_charge_entries %>
+            <% is_charge_row = item.respond_to?(:fee_item?) ? item.fee_item? : item.item_type.to_s.start_with?("fee_") %>
+            <% has_item_image = !is_charge_row && item.effective_image_attachment.present? %>
+            <% item_data_uri = quote_item_image_data_uri(item) %>
+            <tr class="<%= is_charge_row ? 'pdf-row--charge' : 'pdf-row--product' %>">
+              <td class="pdf-col-no"><%= idx + 1 %></td>
+              <td class="pdf-col-desc">
+                <% if has_item_image && item_data_uri.present? %>
+                  <table class="pdf-item-details-layout"><tr>
+                    <td class="pdf-item-details-image-cell">
+                      <span class="pdf-item-thumb-box">
+                        <img src="<%= item_data_uri %>" class="quote-item-image pdf-item-thumb" alt="Item image">
+                      </span>
+                    </td>
+                    <td class="pdf-item-details-text-cell">
+                      <div class="pdf-item-name"><%= item_name %></div>
+                      <% if show_item_model %><div class="pdf-item-model"><%= item_model_text %></div><% end %>
+                      <% if spec_rows.any? %>
+                        <div class="pdf-item-subtitle"><%= spec_label %>:</div>
+                        <ul class="pdf-item-list">
+                          <% spec_rows.each do |row| %><li><%= row[:key] %> - <%= row[:value] %></li><% end %>
+                        </ul>
+                      <% end %>
+                      <% if addon_rows.any? %>
+                        <div class="pdf-item-subtitle"><%= addon_label %>:</div>
+                        <ul class="pdf-item-list">
+                          <% addon_rows.each do |row| %>
+                            <li><%= row[:name] %> (<%= template_money(row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)</li>
+                          <% end %>
+                        </ul>
+                      <% end %>
+                    </td>
+                  </tr></table>
                 <% else %>
-                  -
+                  <div class="pdf-item-name"><%= item_name %></div>
+                  <% if show_item_model %><div class="pdf-item-model"><%= item_model_text %></div><% end %>
+                  <% if spec_rows.any? %>
+                    <div class="pdf-item-subtitle"><%= spec_label %>:</div>
+                    <ul class="pdf-item-list">
+                      <% spec_rows.each do |row| %><li><%= row[:key] %> - <%= row[:value] %></li><% end %>
+                    </ul>
+                  <% end %>
+                  <% if addon_rows.any? %>
+                    <div class="pdf-item-subtitle"><%= addon_label %>:</div>
+                    <ul class="pdf-item-list">
+                      <% addon_rows.each do |row| %>
+                        <li><%= row[:name] %> (<%= template_money(row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)</li>
+                      <% end %>
+                    </ul>
+                  <% end %>
                 <% end %>
               </td>
-            <% end %>
-            <td class="is-left">
-              <div class="quote-item-desc">
-                <div class="quote-item-desc-main">
-                  <%= item.product&.name.presence || item.description.presence || "Item" %>
-                  <% if row_added %>
-                    <span class="quote-inline-flag quote-inline-flag--added"><%= t("quote_document.inline_diff.added") %></span>
+              <td class="pdf-col-qty"><%= item.quantity %></td>
+              <td class="pdf-col-money"><%= template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+              <td class="pdf-col-money"><%= template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <section class="pdf-bottom-band">
+        <table class="pdf-bottom-band-table">
+          <colgroup><col style="width:56%;"><col style="width:44%;"></colgroup>
+          <tr>
+            <td class="pdf-bottom-band-left">
+              <table class="pdf-bottom-terms-table">
+                <tbody>
+                  <% commercial_fields.each do |row| %>
+                    <tr>
+                      <th><%= row[:label] %></th>
+                      <td><%= row[:value] %></td>
+                    </tr>
                   <% end %>
-                </div>
-                <% spec_rows = quote_spec_rows_with_diff(item.specification_pairs, row_diff) %>
-                <% addon_rows = quote_addon_rows_with_diff(item.addon_charge_entries, row_diff) %>
-                <% if spec_rows.any? || addon_rows.any? %>
-                  <div class="quote-item-desc-meta">
-                    <% if spec_rows.any? %>
-                      <div class="quote-item-desc-group">
-                        <div class="quote-item-desc-group-label"><%= spec_label %>:</div>
-                        <% spec_rows.each do |spec_row| %>
-                          <div class="quote-item-desc-sub">
-                            <span class="quote-item-desc-bullet">&bull;</span><%= spec_row[:key] %> -
-                            <% case spec_row[:change_type] %>
-                            <% when :updated %>
-                              <%= quote_inline_diff_text(spec_row[:before], spec_row[:after]) %>
-                            <% when :removed %>
-                              <span class="quote-inline-old"><%= spec_row[:value] %></span>
-                              <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span>
-                            <% else %>
-                              <%= spec_row[:value] %>
-                              <% if spec_row[:change_type] == :added %><span class="quote-inline-flag quote-inline-flag--added quote-inline-flag--compact"><%= t("quote_document.inline_diff.added") %></span><% end %>
-                            <% end %>
-                          </div>
-                        <% end %>
-                      </div>
-                    <% end %>
-                    <% if addon_rows.any? %>
-                      <div class="quote-item-desc-group is-addon">
-                        <div class="quote-item-desc-group-label"><%= addon_label %>:</div>
-                        <% addon_rows.each do |addon_row| %>
-                          <div class="quote-item-desc-sub is-addon">
-                            <span class="quote-item-desc-bullet">&bull;</span><%= addon_row[:name] %>
-                            <% case addon_row[:change_type] %>
-                            <% when :updated %>
-                              <%= quote_inline_diff_money(addon_row[:before], addon_row[:after], @quote.currency, show_symbol: @template.show_currency, template: @template) %>
-                            <% when :removed %>
-                              (<span class="quote-inline-old"><%= template_money(addon_row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %></span>)
-                              <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span>
-                            <% else %>
-                              (<%= template_money(addon_row[:amount], @quote.currency, @template, show_currency: @template.show_currency) %>)
-                              <% if addon_row[:change_type] == :added %><span class="quote-inline-flag quote-inline-flag--added quote-inline-flag--compact"><%= t("quote_document.inline_diff.added") %></span><% end %>
-                            <% end %>
-                          </div>
-                        <% end %>
-                      </div>
-                    <% end %>
-                  </div>
-                <% end %>
+                </tbody>
+              </table>
+            </td>
+            <td class="pdf-bottom-band-right">
+              <div class="pdf-totals-wrap">
+                <table class="quote-total-box pdf-total-table">
+                  <tr><th>Subtotal</th><td><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></td></tr>
+                  <% if @template.show_tax %><tr><th>Tax / VAT</th><td><%= template_money(@quote.tax_amount, @quote.currency, @template, show_currency: @template.show_currency) %></td></tr><% end %>
+                  <% if @template.show_shipping %><tr><th>Shipping</th><td><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></td></tr><% end %>
+                  <tr class="pdf-total-grand-row"><th class="pdf-total-grand-label">Grand Total</th><td class="pdf-total-grand-value"><strong><%= template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></td></tr>
+                </table>
               </div>
             </td>
-            <td class="is-right"><%= quantity_changed ? quote_stacked_diff_text(row_diff[:quantity_before], row_diff[:quantity_after]) : item.quantity %></td>
-            <td class="is-money"><%= unit_price_changed ? quote_stacked_diff_money(row_diff[:unit_price_before], row_diff[:unit_price_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : template_money(item.unit_price, @quote.currency, @template, show_currency: @template.show_currency) %></td>
-            <td class="is-money"><%= (quantity_changed || unit_price_changed) ? quote_stacked_diff_money(row_diff[:line_total_before], row_diff[:line_total_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : template_money(item.line_total, @quote.currency, @template, show_currency: @template.show_currency) %></td>
           </tr>
-        <% end %>
-        <% Array(revision_diff&.dig(:removed_items)).each do |removed_item| %>
-          <tr class="quote-row-removed">
-            <td class="is-left">-</td>
-            <% if @template.show_images? %><td class="is-left">-</td><% end %>
-            <td class="is-left"><span class="quote-inline-old"><%= removed_item[:product_name] %></span> <span class="quote-inline-flag quote-inline-flag--removed quote-inline-flag--compact"><%= t("quote_document.inline_diff.removed") %></span></td>
-            <td class="is-right"><span class="quote-inline-old"><%= removed_item[:quantity_before] %></span></td>
-            <td class="is-money"><span class="quote-inline-old"><%= template_money(removed_item[:unit_price_before], @quote.currency, @template, show_currency: @template.show_currency) %></span></td>
-            <td class="is-money"><span class="quote-inline-old"><%= template_money(removed_item[:line_total_before], @quote.currency, @template, show_currency: @template.show_currency) %></span></td>
-          </tr>
-        <% end %>
-        <% pdf_filler_rows.times do %>
-          <tr class="pdf-filler-row" aria-hidden="true">
-            <td class="is-left">&nbsp;</td>
-            <% if @template.show_images? %>
-              <td class="is-left">&nbsp;</td>
-            <% end %>
-            <td class="is-left">&nbsp;</td>
-            <td class="is-right">&nbsp;</td>
-            <td class="is-money">&nbsp;</td>
-            <td class="is-money">&nbsp;</td>
-          </tr>
-        <% end %>
-      </tbody>
-    </table>
-  </div>
-
-  <% currency_code = @quote.currency.to_s.upcase.presence || "USD" %>
-  <% discount_amount = @quote.discount_amount.to_d %>
-  <% has_discount = discount_amount.positive? %>
-  <% show_discount_row = has_discount %>
-  <% original_total = @quote.subtotal.to_d + @quote.tax_amount.to_d + @quote.shipping_amount.to_d %>
-  <% grand_amount_text = template_money(@quote.grand_total, @quote.currency, @template, show_currency: @template.show_currency) %>
-  <div class="pdf-summary-stack">
-    <aside class="quote-total-box pdf-total-box">
-      <p><span>Subtotal</span><strong><%= template_money(@quote.subtotal, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-      <% if @template.show_tax %>
-        <p><span>Tax / VAT</span><strong><%= template_money(@quote.tax_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-      <% end %>
-      <% if @template.show_shipping %>
-        <p><span>Shipping</span><strong><%= template_money(@quote.shipping_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-      <% end %>
-      <% if show_discount_row %>
-        <p class="quote-total-discount"><span>Discount</span><strong><%= has_discount ? "-#{template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency)}" : template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-        <% if has_discount %>
-          <p class="quote-total-reduction"><span>Original Total</span><strong><%= template_money(original_total, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-        <% end %>
-      <% end %>
-      <p class="quote-total-grand">
-        <span>Grand Total</span>
-        <strong><%= revision_diff.present? && revision_diff[:total_before].to_d != revision_diff[:total_after].to_d ? quote_stacked_diff_money(revision_diff[:total_before], revision_diff[:total_after], @quote.currency, show_symbol: @template.show_currency, template: @template) : grand_amount_text %></strong>
-      </p>
-      <% if has_discount %>
-        <p class="quote-total-saved"><span>You Save</span><strong><%= template_money(discount_amount, @quote.currency, @template, show_currency: @template.show_currency) %></strong></p>
-      <% end %>
-    </aside>
-    <% if (closing_message = @template.resolved_closing_message).present? %>
-      <p class="quote-engagement-note pdf-engagement-note"><%= closing_message %></p>
-    <% end %>
-  </div>
-
-  <% revision_summary = @template.show_pdf_revision_summary? ? QuoteRevisionSummaryService.new(quote: @quote).call : nil %>
-  <% if revision_summary.present? %>
-    <section class="quote-section-block quote-section-block--revision-summary">
-      <h3><%= t("quote_document.revision_summary.title") %></h3>
-      <p><%= t("quote_document.revision_summary.compare_versions", current: (revision_diff_context&.dig(:current_revision_number) || revision_summary[:current_revision_number]), previous: (revision_diff_context&.dig(:previous_revision_number) || revision_summary[:previous_revision_number])) %></p>
-      <ul class="quote-revision-summary-list">
-        <% revision_summary[:lines].first(3).each do |line| %>
-          <li><%= line %></li>
-        <% end %>
-      </ul>
+        </table>
+      </section>
     </section>
-  <% end %>
+  </section>
 
-  <% scope_text = @quote.scope_of_supply.to_s.strip %>
-  <% show_scope_of_supply = document_kind != "pi" && @template.show_scope_of_supply && scope_text.present? %>
-  <% if show_scope_of_supply %>
-    <section class="quote-section-block quote-section-block--scope">
-      <h3><%= @template.resolved_scope_of_supply_label %> <% if scope_of_supply_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
-      <%= simple_format(scope_text) %>
-    </section>
-  <% end %>
-
-  <% if terms_lines.any? %>
-    <section class="quote-section-block">
-      <h3>Terms & Conditions</h3>
-      <% terms_lines.each do |label, value, field_key| %>
-        <% field_changed = revision_diff.present? && quote_diff_changed?(revision_diff, field_key) %>
-        <p><strong><%= label %>:</strong> <% if field_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %> <%= value %></p>
-      <% end %>
-    </section>
-  <% end %>
-  <% advanced_trade_terms = @quote.advanced_trade_terms_data %>
-  <% advanced_logistics = @quote.advanced_logistics_data %>
-  <% show_advanced_trade_terms = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template) && advanced_trade_terms.any? %>
-  <% show_advanced_logistics = @quote.advanced_section_enabled?("show_logistics_block", template: @template) && advanced_logistics.any? %>
-  <% if show_advanced_trade_terms %>
-    <% trade_terms_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_trade_terms) %>
-    <section class="quote-section-block quote-section-block--supplementary">
-      <header class="quote-supp-header">
-        <p class="quote-supp-kicker"><%= t("quotes.view.show.supplementary_kicker", default: "SUPPLEMENTARY") %></p>
-        <h3><%= quote_trade_terms_section_title %> <% if trade_terms_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
-      </header>
-      <dl class="quote-supp-kv-list">
-        <% advanced_trade_terms.each do |key, value| %>
-          <div class="quote-supp-kv-row">
-            <dt><%= quote_supplementary_field_label(key) %></dt>
-            <dd><%= value %></dd>
+  <% if show_annex %>
+    <section class="pdf-annex-flow">
+      <% if show_trade_terms %>
+        <section class="pdf-annex-section">
+          <h3 class="pdf-section-heading">TRADE TERMS</h3>
+          <div class="pdf-section-divider"></div>
+          <div class="pdf-section-body pdf-section-body--kv">
+            <table class="pdf-kv-table"><tbody><% commercial_summary_rows.each do |row| %><tr><th><%= row[:label] %></th><td><%= row[:value] %></td></tr><% end %></tbody></table>
           </div>
-        <% end %>
-      </dl>
-    </section>
-  <% end %>
-  <% if show_advanced_logistics %>
-    <% logistics_changed = revision_diff.present? && quote_diff_changed?(revision_diff, :advanced_logistics) %>
-    <section class="quote-section-block quote-section-block--supplementary">
-      <header class="quote-supp-header">
-        <p class="quote-supp-kicker"><%= t("quotes.view.show.supplementary_kicker", default: "SUPPLEMENTARY") %></p>
-        <h3><%= quote_logistics_section_title %> <% if logistics_changed %><span class="quote-inline-flag quote-inline-flag--updated"><%= t("quote_document.inline_diff.updated") %></span><% end %></h3>
-      </header>
-      <dl class="quote-supp-kv-list">
-        <% advanced_logistics.each do |key, value| %>
-          <div class="quote-supp-kv-row">
-            <dt><%= quote_supplementary_field_label(key) %></dt>
-            <dd><%= value %></dd>
-          </div>
-        <% end %>
-      </dl>
-    </section>
-  <% end %>
-
-  <% if @template.show_notes && @quote.notes.present? %>
-    <section class="quote-section-block">
-      <h3>Notes</h3>
-      <%= simple_format(@quote.notes) %>
-    </section>
-  <% end %>
-  <% company_documents = @quote.company.company_documents.ordered %>
-  <% if company_documents.any? %>
-    <section class="quote-section-block">
-      <h3>Company Credentials</h3>
-      <% company_documents.each do |document| %>
-        <p><strong><%= document.title %></strong> - <%= document.document_type_label %></p>
-      <% end %>
-    </section>
-  <% end %>
-  <% footer_note = @template.resolved_footer_note(@document_kind) %>
-  <% show_footer_section = footer_note.present? %>
-  <% if show_footer_section || show_signature_section %>
-    <section class="quote-ending-stack">
-      <% if show_footer_section %>
-        <section class="quote-section-block quote-section-block--ending">
-          <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
-          <%= simple_format(footer_note) %>
         </section>
       <% end %>
-      <% if show_signature_section %>
-        <section class="quote-section-block quote-signature-block quote-section-block--ending">
-          <h3>Signature</h3>
-          <% if signature_image_url.present? %>
-            <p><img src="<%= signature_image_url %>" alt="Sales signature" class="quote-sales-signature-image"></p>
-          <% end %>
-          <% if signature_name.present? %>
-            <p><strong>Authorized by:</strong> <%= signature_name %></p>
-          <% end %>
+
+      <% if show_configuration %>
+        <section class="pdf-annex-section">
+          <h3 class="pdf-section-heading">CONFIGURATION</h3>
+          <div class="pdf-section-divider"></div>
+          <div class="pdf-section-body pdf-section-body--kv">
+            <table class="pdf-kv-table"><tbody><% configuration_rows.each do |row| %><tr><th><%= row[:label] %></th><td><%= row[:value] %></td></tr><% end %></tbody></table>
+          </div>
+        </section>
+      <% end %>
+
+      <% if show_shipping %>
+        <section class="pdf-annex-section">
+          <h3 class="pdf-section-heading">SHIPPING &amp; LOGISTICS</h3>
+          <div class="pdf-section-divider"></div>
+          <div class="pdf-section-body pdf-section-body--kv">
+            <table class="pdf-kv-table"><tbody><% logistics_summary_rows.each do |row| %><tr><th><%= row[:label] %></th><td><%= row[:value] %></td></tr><% end %></tbody></table>
+          </div>
+        </section>
+      <% end %>
+
+      <% if show_container_loading %>
+        <section class="pdf-annex-section">
+          <h3 class="pdf-section-heading">CONTAINER LOADING</h3>
+          <div class="pdf-section-divider"></div>
+          <div class="pdf-section-body pdf-section-body--container">
+            <table class="quote-mini-table quote-mini-table--container-loading pdf-container-table">
+              <thead><tr><th>Variant / Trim</th><th>Container Type</th><th>Load Capacity</th><th>Loading Note</th></tr></thead>
+              <tbody>
+                <% container_loading_rows.each do |row| %>
+                  <tr><td><%= row[:variant].presence || "-" %></td><td><%= row[:container_type].presence || "-" %></td><td class="pdf-container-capacity"><%= row[:capacity].presence || "-" %></td><td><%= row[:note].presence || "-" %></td></tr>
+                <% end %>
+              </tbody>
+            </table>
+            <div class="pdf-section-endline"></div>
+          </div>
+        </section>
+      <% end %>
+
+      <% if show_scope_of_supply %>
+        <section class="pdf-annex-section">
+          <h3 class="pdf-section-heading">SCOPE OF SUPPLY</h3>
+          <div class="pdf-section-divider"></div>
+          <div class="pdf-section-body pdf-section-body--scope">
+            <ul class="quote-scope-list quote-scope-list--pdf pdf-scope-list">
+              <% scope_nodes.each do |node| %><li><%= node[:text] %></li><% end %>
+            </ul>
+            <div class="pdf-section-endline"></div>
+          </div>
+        </section>
+      <% end %>
+
+      <% if show_detail_pictures %>
+        <section class="pdf-annex-section pdf-annex-section--detail-pictures">
+          <div class="pdf-detail-keep-first">
+            <h3 class="pdf-section-heading">DETAIL PICTURES</h3>
+            <div class="pdf-section-divider"></div>
+            <div class="pdf-section-body pdf-section-body--detail">
+              <table class="pdf-detail-table">
+                <tbody>
+                  <% detail_picture_rows.each_with_index do |pair, row_idx| %>
+                    <tr class="pdf-detail-table-row">
+                      <% if pair.size == 1 %>
+                        <% item = pair.first %>
+                        <% single_wide = row_idx == detail_picture_rows.size - 1 && item[:ratio].to_f >= 2.2 %>
+                        <td class="pdf-detail-table-cell pdf-detail-table-cell--single" colspan="2">
+                          <div class="pdf-detail-figure">
+                            <div class="pdf-detail-image-wrap <%= 'is-wide-single' if single_wide %>">
+                              <img src="<%= item[:image_src] %>" alt="Detail picture <%= item[:position] %>" class="quote-detail-picture-image pdf-detail-image is-<%= item[:picture_kind] %><%= ' is-wide-single' if single_wide %>">
+                            </div>
+                            <% if item[:caption].present? %><p class="pdf-detail-caption"><%= item[:caption] %></p><% end %>
+                          </div>
+                        </td>
+                      <% else %>
+                        <% pair.each_with_index do |item, i| %>
+                          <td class="pdf-detail-table-cell <%= i.zero? ? 'is-left' : 'is-right' %>">
+                            <div class="pdf-detail-figure">
+                              <div class="pdf-detail-image-wrap">
+                                <img src="<%= item[:image_src] %>" alt="Detail picture <%= item[:position] %>" class="quote-detail-picture-image pdf-detail-image is-<%= item[:picture_kind] %>">
+                              </div>
+                              <% if item[:caption].present? %><p class="pdf-detail-caption"><%= item[:caption] %></p><% end %>
+                            </div>
+                          </td>
+                        <% end %>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+              <div class="pdf-section-endline pdf-section-endline--detail"></div>
+            </div>
+          </div>
+        </section>
+      <% end %>
+
+      <% if show_formal_closing %>
+        <section class="pdf-annex-section pdf-annex-section--formal-closing">
+          <div class="pdf-annex-keep-first pdf-formal-closing-block<%= ' pdf-formal-closing-block--terminal' if terminal_closing %>">
+            <h3 class="pdf-section-heading">FORMAL CLOSING</h3>
+            <div class="pdf-section-divider"></div>
+            <div class="pdf-section-body pdf-section-body--kv">
+              <% if closing_term_rows.any? %>
+                <table class="pdf-kv-table"><tbody><% closing_term_rows.each do |row| %><tr><th><%= row[:label] %></th><td><%= row[:value] %></td></tr><% end %></tbody></table>
+              <% end %>
+
+              <% if bank_route.present? || beneficiary_details.present? %>
+                <div class="pdf-bank-block">
+                  <div class="pdf-box-title pdf-bank-title">BANK / BENEFICIARY DETAILS</div>
+                  <div class="pdf-box-body pdf-bank-body">
+                    <% if bank_route.present? %><p>Bank Route: <%= bank_route %></p><% end %>
+                    <% if beneficiary_details.present? %><p>Beneficiary: <%= beneficiary_details %></p><% end %>
+                  </div>
+                </div>
+              <% end %>
+
+              <% if show_signature_section %>
+                <div class="pdf-signatures-shell">
+                  <table class="pdf-signatures-table">
+                    <tr>
+                      <td>
+                        <% if seller_stamp_enabled %>
+                          <div class="pdf-signature-area"><% if seller_stamp_image_url.present? %><img src="<%= seller_stamp_image_url %>" alt="Seller Stamp" class="quote-sales-signature-image"><% end %></div>
+                          <div class="pdf-signature-line"></div>
+                          <p>Seller Stamp</p>
+                        <% else %>
+                          <div class="pdf-signature-area"></div>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if seller_signature_enabled %>
+                          <div class="pdf-signature-area"><% if seller_signature_image_url.present? %><img src="<%= seller_signature_image_url %>" alt="Sales Signature" class="quote-sales-signature-image"><% end %></div>
+                          <div class="pdf-signature-line"></div>
+                          <p>Sales Signature</p>
+                        <% else %>
+                          <div class="pdf-signature-area"></div>
+                        <% end %>
+                      </td>
+                      <td>
+                        <% if buyer_signature_enabled %>
+                          <div class="pdf-signature-area"></div>
+                          <div class="pdf-signature-line"></div>
+                          <p>Buyer Signature</p>
+                        <% else %>
+                          <div class="pdf-signature-area"></div>
+                        <% end %>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              <% else %>
+                <div class="pdf-section-endline"></div>
+              <% end %>
+            </div>
+          </div>
         </section>
       <% end %>
     </section>
   <% end %>
-  <% if @template.show_saas_branding %>
-    <p class="quote-public-footnote"><%= @template.saas_branding_footer_text %></p>
-  <% end %>
+
 </article>

@@ -70,6 +70,7 @@ gem "rack-attack"
 # PDF generation
 gem "prawn"
 gem "prawn-table"
+gem "grover"
 gem "wicked_pdf"
 
 # Excel export

@@ -195,7 +195,9 @@ module Dashboard
 
     def latest_quotes_for(customer)
       active_quotes = Array(customer.quotes).reject do |quote|
-        (quote.respond_to?(:archived?) && quote.archived?) || (quote.respond_to?(:deleted?) && quote.deleted?)
+        (quote.respond_to?(:archived?) && quote.archived?) ||
+          (quote.respond_to?(:deleted?) && quote.deleted?) ||
+          (quote.respond_to?(:pi_document?) && quote.pi_document?)
       end
 
       active_quotes

@@ -46,7 +46,11 @@
             <div class="product-gallery-toolbar">
               <p class="product-media-label"><%= t("products.view.form.gallery") %></p>
               <div class="product-gallery-toolbar-actions">
-                <button type="button" class="<%= ui_button_classes(:secondary, "product-ghost-btn") %>" id="product_gallery_select_all_<%= form_key %>"><%= t("products.view.form.select_all") %></button>
+                <button type="button"
+                        class="<%= ui_button_classes(:secondary, "product-ghost-btn") %>"
+                        id="product_gallery_select_all_<%= form_key %>"
+                        data-label-select-all="<%= t("products.view.form.select_all") %>"
+                        data-label-deselect-all="<%= t("products.view.form.deselect_all", default: "取消全选") %>"><%= t("products.view.form.select_all") %></button>
                 <button type="button" class="<%= ui_button_classes(:danger, "product-ghost-btn") %>" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled><%= t("products.view.form.delete_selected") %></button>
               </div>
             </div>
@@ -54,12 +58,16 @@
             <div class="product-gallery-grid">
               <% product.gallery_images.attachments.each do |attachment| %>
                 <% is_main = product.image.attached? && product.image.blob_id == attachment.blob_id %>
-                <article class="product-gallery-item">
+                <article class="product-gallery-item" data-attachment-id="<%= attachment.id %>">
                   <div class="product-gallery-media">
-                    <label class="product-gallery-select-toggle" title="<%= t("products.view.form.select_image") %>">
-                      <input type="checkbox" class="product-gallery-select-input" value="<%= attachment.id %>">
+                    <button type="button"
+                            class="product-gallery-select-toggle js-product-gallery-select"
+                            data-attachment-id="<%= attachment.id %>"
+                            data-selected="false"
+                            aria-pressed="false"
+                            title="<%= t("products.view.form.select_image") %>">
                       <span class="product-gallery-select-indicator"></span>
-                    </label>
+                    </button>
 
                     <% if is_main %>
                       <div class="product-gallery-thumb-wrap is-current">
@@ -256,6 +264,8 @@
   (() => {
     const selectedCountLabel = "<%= j t("products.view.form.selected_count", count: "%{count}") %>";
     const deleteSelectedConfirmLabel = "<%= j t("products.view.form.delete_selected_confirm", count: "%{count}") %>";
+    const selectAllLabel = "<%= j t("products.view.form.select_all") %>";
+    const deselectAllLabel = "<%= j t("products.view.form.deselect_all", default: "取消全选") %>";
     const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
     const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
     const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
@@ -263,32 +273,48 @@
     const selectAllBtn = document.getElementById("product_gallery_select_all_<%= form_key %>");
     const deleteSelectedBtn = document.getElementById("product_gallery_delete_selected_<%= form_key %>");
     const selectedCountEl = document.getElementById("product_gallery_selected_count_<%= form_key %>");
-    const checkboxes = Array.from(document.querySelectorAll(".product-gallery-select-input"));
+    const selectionButtons = Array.from(document.querySelectorAll(".js-product-gallery-select"));
 
-    if (selectAllBtn && deleteSelectedBtn && selectedCountEl && checkboxes.length) {
+    if (selectAllBtn && deleteSelectedBtn && selectedCountEl && selectionButtons.length) {
       const csrf = document.querySelector("meta[name='csrf-token']")?.content || "";
+      const setButtonSelectedState = (button, selected) => {
+        if (!button) return;
+        button.dataset.selected = selected ? "true" : "false";
+        button.setAttribute("aria-pressed", selected ? "true" : "false");
+      };
+      const buttonSelected = (button) => String(button?.dataset?.selected || "false") === "true";
 
       const updateSelectionUi = () => {
-        const selected = checkboxes.filter((input) => input.checked);
-        checkboxes.forEach((input) => {
-          input.closest(".product-gallery-item")?.classList.toggle("is-selected", input.checked);
+        const selected = selectionButtons.filter((button) => buttonSelected(button));
+        selectionButtons.forEach((button) => {
+          button.closest(".product-gallery-item")?.classList.toggle("is-selected", buttonSelected(button));
         });
         selectedCountEl.textContent = selectedCountLabel.replace("%{count}", String(selected.length));
         deleteSelectedBtn.disabled = selected.length === 0;
+        const allSelected = selectionButtons.length > 0 && selected.length === selectionButtons.length;
+        selectAllBtn.textContent = allSelected ? deselectAllLabel : selectAllLabel;
       };
 
-      checkboxes.forEach((input) => {
-        input.addEventListener("change", updateSelectionUi);
+      selectionButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          setButtonSelectedState(button, !buttonSelected(button));
+          updateSelectionUi();
+        });
       });
 
       selectAllBtn.addEventListener("click", () => {
-        const allSelected = checkboxes.every((input) => input.checked);
-        checkboxes.forEach((input) => { input.checked = !allSelected; });
+        const allSelected = selectionButtons.every((button) => buttonSelected(button));
+        selectionButtons.forEach((button) => {
+          setButtonSelectedState(button, !allSelected);
+        });
         updateSelectionUi();
       });
 
       deleteSelectedBtn.addEventListener("click", () => {
-        const selected = checkboxes.filter((input) => input.checked).map((input) => input.value);
+        const selected = selectionButtons
+          .filter((button) => buttonSelected(button))
+          .map((button) => String(button.dataset.attachmentId || "").trim())
+          .filter((value) => value.length > 0);
         if (!selected.length) return;
         if (!window.confirm(deleteSelectedConfirmLabel.replace("%{count}", String(selected.length)))) return;
 
@@ -337,6 +363,8 @@
     const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
     const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
     const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
+    const form = input?.closest("form");
+    const galleryGrid = form?.querySelector(".product-gallery-grid");
     if (!input || !preview || !hidden || input.dataset.previewBound === "true") return;
     input.dataset.previewBound = "true";
     hidden.value = "";
@@ -344,6 +372,16 @@
     const supportsDataTransfer = typeof DataTransfer !== "undefined";
 
     let stagedFiles = [];
+
+    const previewMountTarget = () => galleryGrid || preview;
+
+    const clearRenderedUploadCards = () => {
+      const selector = ".product-upload-preview-item";
+      preview.querySelectorAll(selector).forEach((el) => el.remove());
+      if (galleryGrid) {
+        galleryGrid.querySelectorAll(selector).forEach((el) => el.remove());
+      }
+    };
 
     const syncInputFiles = () => {
       if (!supportsDataTransfer) return false;
@@ -362,7 +400,6 @@
       fileMeta.textContent = filesSelectedText.replace("%{count}", String(stagedFiles.length));
     };
 
-    const form = input.closest("form");
     if (form && form.dataset.gallerySyncBound !== "true") {
       form.dataset.gallerySyncBound = "true";
       form.addEventListener("submit", () => {
@@ -372,8 +409,15 @@
 
     const markSelected = (index) => {
       hidden.value = String(index);
-      preview.querySelectorAll(".product-upload-preview-item").forEach((el) => {
+      const mountTarget = previewMountTarget();
+      mountTarget.querySelectorAll(".product-upload-preview-item").forEach((el) => {
         el.classList.toggle("is-selected", Number(el.dataset.index) === index);
+        const toggle = el.querySelector(".js-upload-preview-select");
+        const selected = Number(el.dataset.index) === index;
+        if (toggle) {
+          toggle.dataset.selected = selected ? "true" : "false";
+          toggle.setAttribute("aria-pressed", selected ? "true" : "false");
+        }
       });
     };
 
@@ -384,39 +428,52 @@
     };
 
     const renderPreview = () => {
-      preview.innerHTML = "";
+      clearRenderedUploadCards();
       if (!stagedFiles.length) {
         hidden.value = "";
         preview.hidden = true;
         updateFileMeta();
         return;
       }
+      const mountTarget = previewMountTarget();
 
       stagedFiles.forEach((file, index) => {
-        const item = document.createElement("button");
-        item.type = "button";
-        item.className = "product-upload-preview-item";
+        const item = document.createElement("article");
+        item.className = "product-gallery-item product-upload-preview-item";
         item.dataset.index = String(index);
         item.title = setAsMainImageLabel;
 
+        const media = document.createElement("div");
+        media.className = "product-gallery-media";
+
+        const selectToggle = document.createElement("button");
+        selectToggle.type = "button";
+        selectToggle.className = "product-gallery-select-toggle js-upload-preview-select";
+        selectToggle.dataset.selected = "false";
+        selectToggle.setAttribute("aria-pressed", "false");
+        selectToggle.title = setAsMainImageLabel;
+        selectToggle.innerHTML = '<span class="product-gallery-select-indicator"></span>';
+
+        const imageWrap = document.createElement("div");
+        imageWrap.className = "product-gallery-thumb-wrap";
+
         const img = document.createElement("img");
-        img.className = "product-upload-preview-thumb";
+        img.className = "product-gallery-thumb";
         img.alt = file.name;
         img.src = URL.createObjectURL(file);
         img.onload = () => URL.revokeObjectURL(img.src);
+        imageWrap.appendChild(img);
 
-        const label = document.createElement("span");
-        label.className = "product-upload-preview-label";
-        label.textContent = setAsMainLabel;
+        const badge = document.createElement("span");
+        badge.className = "product-gallery-main-badge";
+        badge.textContent = setAsMainLabel;
 
         const remove = document.createElement("button");
         remove.type = "button";
-        remove.className = "product-upload-preview-remove";
+        remove.className = "product-gallery-delete-icon product-upload-preview-remove";
         remove.textContent = "×";
         remove.title = removeFileLabel;
-        if (!supportsDataTransfer) {
-          remove.hidden = true;
-        }
+        if (!supportsDataTransfer) remove.hidden = true;
         remove.addEventListener("click", (event) => {
           event.stopPropagation();
           if (!supportsDataTransfer) return;
@@ -433,19 +490,26 @@
           renderPreview();
         });
 
-        item.appendChild(img);
-        item.appendChild(label);
-        item.appendChild(remove);
+        media.appendChild(selectToggle);
+        media.appendChild(imageWrap);
+        media.appendChild(remove);
+        media.appendChild(badge);
+        item.appendChild(media);
+
         item.addEventListener("click", () => {
           const current = selectedIndex();
           if (current === index) {
             hidden.value = "";
-            preview.querySelectorAll(".product-upload-preview-item").forEach((el) => el.classList.remove("is-selected"));
+            mountTarget.querySelectorAll(".product-upload-preview-item").forEach((el) => el.classList.remove("is-selected"));
+            mountTarget.querySelectorAll(".js-upload-preview-select").forEach((btn) => {
+              btn.dataset.selected = "false";
+              btn.setAttribute("aria-pressed", "false");
+            });
           } else {
             markSelected(index);
           }
         });
-        preview.appendChild(item);
+        mountTarget.appendChild(item);
       });
 
       const selected = selectedIndex();
@@ -454,7 +518,7 @@
       } else if (!hasDisplayImage) {
         markSelected(0);
       }
-      preview.hidden = false;
+      preview.hidden = galleryGrid ? true : false;
       updateFileMeta();
     };
 

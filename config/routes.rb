@@ -82,6 +82,12 @@ Rails.application.routes.draw do
       patch :set_default
     end
   end
+  resources :quote_presets, except: [ :show ] do
+    member do
+      post :duplicate
+    end
+  end
+  resource :quote_preset_master, only: [ :update ]
   resources :company_documents, only: [ :create, :destroy ]
   resources :product_presets, only: [ :index ]
   resources :spec_presets, except: [ :show ]
@@ -127,6 +133,7 @@ Rails.application.routes.draw do
         patch :mark_outcome
         patch :update_outcome_reason
         patch :update_template
+        post :create_pi
         get :public_preview
         get "export/pdf", action: :export_pdf, as: :export_pdf
         get "export/xlsx", action: :export_xlsx, as: :export_xlsx

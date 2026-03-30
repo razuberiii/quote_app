@@ -6,6 +6,7 @@
 <% days_left_value = quote.valid_until.present? ? (quote.valid_until - Date.current).to_i : nil %>
 <% submit_label = local_assigns[:submit_label].presence || (quote.persisted? ? t("quotes.view.form.update_quote") : t("quotes.view.form.create_quote")) %>
 <% submit_loading_label = quote.persisted? ? t("quotes.view.form.updating") : t("quotes.view.form.creating") %>
+<% pi_mode = quote.pi_document? %>
 <% monetary_error_messages = quote.errors.full_messages.select { |message| message.match?(/unit price|line total|grand total|addon charges|tax amount|shipping amount|discount amount|final amount/i) } %>
 <%
   products_payload = (@products || []).map do |p|
@@ -31,6 +32,52 @@
       image_options: image_attachments
     }
   end.to_json
+  quote_preset_payload = (@quote_presets_by_module || {}).to_json
+  quote_master_preset_payload = if @quote_preset_master.present?
+    QuotePreset::MODULE_KEYS.index_with do |module_key|
+      preset = @quote_preset_master.preset_for(module_key)
+      preset&.id
+    end
+  else
+    {}
+  end.to_json
+  product_picture_options = (@products || []).filter_map do |product|
+    attachments = []
+    attachments << product.image_attachment if product.respond_to?(:image_attachment) && product.image_attachment&.blob.present?
+    attachments.concat(Array(product.try(:gallery_images_attachments)))
+    pictures = attachments.filter_map do |attachment|
+      blob = attachment&.blob
+      next if blob.blank?
+
+      { label: "#{product.name} - #{blob.filename}", blob_id: blob.id.to_s, url: rails_blob_path(blob, only_path: true), source: "product_gallery" }
+    end
+    next if pictures.blank?
+
+    [ product.name, pictures.uniq { |entry| entry[:blob_id] } ]
+  end
+  quote_uploaded_picture_options = quote.quote_items.filter_map do |item|
+    next unless item.item_image.attached?
+
+    blob = item.item_image.blob
+    next if blob.blank? || !blob.persisted?
+    { label: "#{item.description.to_s.truncate(40)} - #{blob.filename}", blob_id: blob.id.to_s, url: rails_blob_path(blob, only_path: true), source: "quote_upload" }
+  end.uniq { |entry| entry[:blob_id] }
+  detail_block_items = quote.detail_pictures_block_data["items"]
+  detail_block_blob_ids = Array(detail_block_items).map { |item| item["image_blob_id"].to_s }.reject(&:blank?).uniq
+  detail_block_blob_map = ActiveStorage::Blob.where(id: detail_block_blob_ids).index_by { |blob| blob.id.to_s }
+  detail_block_picture_options = detail_block_blob_ids.filter_map do |blob_id|
+    blob = detail_block_blob_map[blob_id]
+    next if blob.blank? || !blob.persisted?
+
+    {
+      label: blob.filename.to_s,
+      blob_id: blob.id.to_s,
+      url: rails_blob_path(blob, only_path: true),
+      source: "quote_upload"
+    }
+  end
+  detail_picture_catalog_entries = (quote_uploaded_picture_options + detail_block_picture_options + product_picture_options.flat_map(&:last)).uniq { |entry| entry[:blob_id] }
+  detail_picture_catalog_payload = detail_picture_catalog_entries.to_json
 %>
 
 <div class="quote-edit-shell app-section-stack" id="quote-edit-root" data-has-errors="<%= quote.errors.any? %>">
@@ -80,7 +127,6 @@
     </div>
 
     <%= f.hidden_field :quote_no if quote.quote_no.present? %>
-
     <details class="quote-form-section quote-form-panel quote-form-collapsible" open>
       <summary class="quote-form-section-summary quote-form-section-summary--card">
         <strong><%= t("quotes.view.form.basic_information") %></strong>
@@ -97,7 +143,8 @@
         </div>
         <div>
           <%= f.label :currency %>
-          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD", "MXN", "BRL", "COP", "CLP", "PEN", "ARS" ], {}, { class: ui_input_classes } %>
+          <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD", "MXN", "BRL", "COP", "CLP", "PEN", "ARS" ], {}, { class: ui_input_classes, disabled: pi_mode } %>
+          <%= hidden_field_tag "quote[currency]", quote.currency if pi_mode %>
         </div>
         <div>
           <%= f.label :issued_on, t("quotes.view.form.quote_date") %>
@@ -111,6 +158,7 @@
           <%= f.label :custom_title, t("quotes.view.form.custom_title") %>
           <%= f.text_field :custom_title, placeholder: t("quotes.view.form.custom_title_placeholder"), class: ui_input_classes %>
         </div>
+        <% unless pi_mode %>
         <div>
           <%= f.label :status, t("quotes.view.form.status") %>
           <%= f.hidden_field :status, value: quote.status.presence || "draft" %>
@@ -120,6 +168,7 @@
             <p class="quote-form-hint"><%= t("quotes.view.form.status_locked_draft_hint") %></p>
           </div>
         </div>
+        <% end %>
       </div>
       </div>
     </details>
@@ -130,6 +179,23 @@
         <span class="app-form-section-note"><%= t("quotes.view.form.business_terms_hint") %></span>
       </summary>
       <div class="quote-form-section-body">
+      <% business_presets = Array(@quote_presets_by_module&.dig("business_terms")) %>
+      <% if business_presets.any? %>
+        <div class="quote-form-add-row quote-form-add-row--preset-actions">
+          <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+          <div class="quote-preset-control">
+            <select id="quote-module-preset-business_terms" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+              <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+              <% business_presets.each do |preset| %>
+                <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.business_terms_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+              <% end %>
+            </select>
+            <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="business_terms" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+            </button>
+          </div>
+        </div>
+      <% end %>
       <div class="quote-form-grid">
         <div>
           <%= f.label :payment_term %>
@@ -161,26 +227,59 @@
     </details>
 
     <% advanced_sections_open = quote.advanced_mode? || quote.advanced_sections_have_values? %>
-    <details class="quote-form-section quote-form-panel quote-form-advanced" <%= "open" if advanced_sections_open %>>
+    <% advanced_visibility = quote.advanced_visibility_data(template: quote.template) %>
+    <details class="quote-form-section quote-form-panel quote-form-advanced" <%= "open" if advanced_sections_open %> <%= "hidden" unless advanced_sections_open %>>
       <summary class="quote-form-section-summary">
-        <strong><%= t("quotes.view.form.advanced_quote_sections", default: "Advanced Quote Sections") %></strong>
-        <span class="quote-form-hint"><%= t("quotes.view.form.advanced_quote_sections_hint", default: "Optional for formal and complex quotes. Keep off for daily lightweight quoting.") %></span>
+        <strong><%= t("quotes.view.form.advanced_quote_sections", default: "Extended Quote Modules") %></strong>
+        <span class="quote-form-hint"><%= t("quotes.view.form.advanced_quote_sections_hint", default: "Optional for medium-to-high complexity quotes. Keep off for daily lightweight quoting.") %></span>
       </summary>
       <div class="quote-form-grid mt-3 quote-advanced-master-toggle">
         <div class="quote-form-grid-span-2">
-          <label class="quote-inline-toggle">
-            <%= f.check_box :advanced_mode %>
-            <span><%= t("quotes.view.form.enable_advanced_mode", default: "Enable advanced sections for this quote") %></span>
-          </label>
+          <%= f.hidden_field :advanced_mode, value: (quote.advanced_mode? ? "1" : "0"), class: "js-advanced-mode-input" %>
+          <%= hidden_field_tag "quote[advanced_visibility][show_trade_terms_advanced]", advanced_visibility["show_trade_terms_advanced"] ? "1" : "0", class: "js-advanced-visibility-trade" %>
+          <%= hidden_field_tag "quote[advanced_visibility][show_logistics_block]", advanced_visibility["show_logistics_block"] ? "1" : "0", class: "js-advanced-visibility-logistics" %>
         </div>
       </div>
 
       <% advanced_trade_terms = quote.advanced_trade_terms_data %>
       <% advanced_logistics = quote.advanced_logistics_data %>
+      <% advanced_trade_presets = Array(@quote_presets_by_module&.dig("advanced_trade_terms")) %>
+      <% advanced_logistics_presets = Array(@quote_presets_by_module&.dig("advanced_logistics")) %>
+      <% container_loading_presets = Array(@quote_presets_by_module&.dig("container_loading")) %>
+      <% configuration_presets = Array(@quote_presets_by_module&.dig("configuration_block")) %>
+      <% formal_closing_presets = Array(@quote_presets_by_module&.dig("formal_closing")) %>
+      <% configuration_block = quote.configuration_block_data %>
+      <% configuration_rows = quote_configuration_block_rows(configuration_block) %>
+      <% detail_pictures_block = quote.detail_pictures_block_data %>
+      <% detail_picture_items = quote_detail_picture_items(detail_pictures_block) %>
+      <% detail_pictures_enabled = ActiveModel::Type::Boolean.new.cast(detail_pictures_block["enabled"]) || detail_picture_items.any? %>
+      <% container_loading_block = quote.container_loading_block_data %>
+      <% container_loading_rows = quote_container_loading_rows(container_loading_block) %>
+      <% container_loading_enabled = ActiveModel::Type::Boolean.new.cast(container_loading_block["enabled"]) || container_loading_rows.any? %>
+      <% container_loading_headers = quote_container_loading_headers(container_loading_block) %>
+      <% container_loading_note_enabled = quote_container_loading_note_enabled?(container_loading_block, rows: container_loading_rows) %>
+      <% formal_closing_block = quote.formal_closing_block_data %>
       <div class="quote-form-grid">
         <div class="quote-form-grid-span-2 quote-advanced-subsection-head">
-          <h4><%= t("quotes.view.form.advanced_trade_terms_title", default: "Advanced Trade Terms (Supplement)") %></h4>
+          <h4><%= t("quotes.view.form.advanced_trade_terms_title", default: "Extended Trade Terms (Supplement)") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.commercial_summary_editor_hint", default: "Edit this as the commercial summary module for formal quotes.") %></p>
           <p class="quote-form-hint"><%= t("quotes.view.form.advanced_trade_terms_hint", default: "Existing payment term/trade term stay as primary fields. These are supplemental notes.") %></p>
+          <% if advanced_trade_presets.any? %>
+            <div class="quote-form-add-row quote-form-add-row--preset-actions">
+              <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+              <div class="quote-preset-control">
+                <select id="quote-module-preset-advanced_trade_terms" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                  <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                  <% advanced_trade_presets.each do |preset| %>
+                    <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.advanced_trade_terms_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+                  <% end %>
+                </select>
+                <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="advanced_trade_terms" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
         </div>
         <div>
           <label><%= t("quotes.view.form.hs_code", default: "HS Code") %></label>
@@ -208,7 +307,24 @@
         </div>
 
         <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
-          <h4><%= t("quotes.view.form.advanced_logistics_title", default: "Advanced Logistics (Supplement)") %></h4>
+          <h4><%= t("quotes.view.form.advanced_logistics_title", default: "Extended Logistics (Supplement)") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.logistics_summary_editor_hint", default: "Edit this as the logistics summary module for formal quotes.") %></p>
+          <% if advanced_logistics_presets.any? %>
+            <div class="quote-form-add-row quote-form-add-row--preset-actions">
+              <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+              <div class="quote-preset-control">
+                <select id="quote-module-preset-advanced_logistics" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                  <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                  <% advanced_logistics_presets.each do |preset| %>
+                    <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.advanced_logistics_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+                  <% end %>
+                </select>
+                <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="advanced_logistics" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
         </div>
         <div>
           <label><%= t("quotes.view.form.container_type", default: "Container Type") %></label>
@@ -224,8 +340,232 @@
         </div>
         <div class="quote-form-grid-span-2">
           <label><%= t("quotes.view.form.container_loading_note", default: "Container Loading Note") %></label>
+          <p class="quote-form-hint"><%= t("quotes.view.form.container_loading_editor_hint", default: "Use matrix rows first. This note is fallback narrative when no valid rows are provided.") %></p>
           <%= text_area_tag "quote[advanced_logistics][container_loading_note]", advanced_logistics["container_loading_note"], rows: 2, class: ui_input_classes %>
         </div>
+
+        <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
+          <h4><%= t("quote_document.sections.container_loading", default: "Container Loading") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.container_loading_matrix_editor_hint", default: "Lightweight matrix rows. If empty, output falls back to Container Loading Note narrative.") %></p>
+          <% if container_loading_presets.any? %>
+            <div class="quote-form-add-row quote-form-add-row--preset-actions">
+              <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+              <div class="quote-preset-control">
+                <select id="quote-module-preset-container_loading" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                  <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                  <% container_loading_presets.each do |preset| %>
+                    <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.container_loading_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+                  <% end %>
+                </select>
+                <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="container_loading" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
+          <div class="quote-advanced-module-row quote-advanced-module-row--loading quote-advanced-module-row--headers">
+            <%= text_field_tag "quote[container_loading_block][headers][variant]", container_loading_headers[:variant], maxlength: Quote::MAX_CONTAINER_LOADING_HEADER_LENGTH, class: ui_input_classes("js-container-loading-header-variant"), placeholder: t("quotes.view.form.container_loading_variant_placeholder", default: "Variant / Version") %>
+            <%= text_field_tag "quote[container_loading_block][headers][container_type]", container_loading_headers[:container_type], maxlength: Quote::MAX_CONTAINER_LOADING_HEADER_LENGTH, class: ui_input_classes("js-container-loading-header-type"), placeholder: t("quotes.view.form.container_loading_type_placeholder", default: "Container Type") %>
+            <%= text_field_tag "quote[container_loading_block][headers][capacity]", container_loading_headers[:capacity], maxlength: Quote::MAX_CONTAINER_LOADING_HEADER_LENGTH, class: ui_input_classes("js-container-loading-header-capacity"), placeholder: t("quotes.view.form.container_loading_capacity_placeholder", default: "Capacity") %>
+            <%= text_field_tag "quote[container_loading_block][headers][note]", container_loading_headers[:note], maxlength: Quote::MAX_CONTAINER_LOADING_HEADER_LENGTH, class: ui_input_classes("js-container-loading-header-note"), placeholder: t("quote_document.labels.note", default: "Note") %>
+          </div>
+          <%= hidden_field_tag "quote[container_loading_block][note_enabled]", "0" %>
+          <label><%= check_box_tag "quote[container_loading_block][note_enabled]", "1", container_loading_note_enabled, class: "js-container-loading-note-enabled" %> <%= t("quotes.view.form.container_loading_note_column_toggle", default: "Enable notes column") %></label>
+          <datalist id="container-loading-variant-options">
+            <% Quote::CONTAINER_LOADING_VARIANT_PRESET_OPTIONS.each do |option| %>
+              <option value="<%= option %>"></option>
+            <% end %>
+          </datalist>
+          <datalist id="container-loading-type-options">
+            <% Quote::CONTAINER_LOADING_TYPE_PRESET_OPTIONS.each do |option| %>
+              <option value="<%= option %>"></option>
+            <% end %>
+          </datalist>
+          <datalist id="container-loading-capacity-options">
+            <% Quote::CONTAINER_LOADING_CAPACITY_PRESET_OPTIONS.each do |option| %>
+              <option value="<%= option %>"></option>
+            <% end %>
+          </datalist>
+          <%= hidden_field_tag "quote[container_loading_block][enabled]", (container_loading_enabled ? "1" : "0"), class: "js-container-loading-enabled" %>
+          <div class="quote-advanced-module-list js-container-loading-rows"
+               data-name-prefix="quote[container_loading_block][rows]"
+               data-empty-label="<%= t("quotes.view.form.container_loading_matrix_empty_label", default: "No valid rows, output will use narrative fallback if provided.") %>">
+            <% if container_loading_rows.any? %>
+              <% container_loading_rows.each_with_index do |row, idx| %>
+                <div class="quote-advanced-module-row quote-advanced-module-row--loading js-container-loading-row" data-index="<%= idx %>">
+                  <%= text_field_tag "quote[container_loading_block][rows][#{idx}][variant]", row[:variant], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-container-loading-variant"), list: "container-loading-variant-options", placeholder: t("quotes.view.form.container_loading_variant_placeholder", default: "Variant / Version") %>
+                  <%= text_field_tag "quote[container_loading_block][rows][#{idx}][container_type]", row[:container_type], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-container-loading-type"), list: "container-loading-type-options", placeholder: t("quotes.view.form.container_loading_type_placeholder", default: "Container Type") %>
+                  <%= text_field_tag "quote[container_loading_block][rows][#{idx}][capacity]", row[:capacity], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-container-loading-capacity"), list: "container-loading-capacity-options", placeholder: t("quotes.view.form.container_loading_capacity_placeholder", default: "Capacity") %>
+                  <%= text_field_tag "quote[container_loading_block][rows][#{idx}][note]", row[:note], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-container-loading-note"), placeholder: t("quotes.view.form.container_loading_note_placeholder", default: "Note (optional)"), hidden: !container_loading_note_enabled %>
+                  <%= hidden_field_tag "quote[container_loading_block][rows][#{idx}][position]", row[:position].presence || (idx + 1), class: "js-container-loading-position" %>
+                  <button type="button" class="quote-kv-remove js-container-loading-row-remove" aria-label="<%= t("quotes.view.form.remove", default: "Remove") %>">&times;</button>
+                </div>
+              <% end %>
+            <% end %>
+            <p class="quote-form-hint js-container-loading-empty" <%= "hidden" if container_loading_rows.any? %>><%= t("quotes.view.form.container_loading_matrix_empty_label", default: "No valid rows, output will use narrative fallback if provided.") %></p>
+          </div>
+          <button type="button" class="quote-kv-add js-container-loading-row-add"><%= t("quotes.view.form.add_container_loading_row", default: "Add Loading Row") %></button>
+        </div>
+
+        <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
+          <h4><%= t("quote_document.sections.configuration", default: "Configuration") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.configuration_editor_hint", default: "Lightweight key-value rows for formal quote configuration summary.") %></p>
+          <% if configuration_presets.any? %>
+            <div class="quote-form-add-row quote-form-add-row--preset-actions">
+              <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+              <div class="quote-preset-control">
+                <select id="quote-module-preset-configuration_block" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                  <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                  <% configuration_presets.each do |preset| %>
+                    <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.configuration_block_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+                  <% end %>
+                </select>
+                <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="configuration_block" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
+          <div class="quote-advanced-module-list js-configuration-rows"
+               data-name-prefix="quote[configuration_block][rows]"
+               data-empty-label="<%= t("quotes.view.form.configuration_empty_label", default: "No valid rows, this block stays hidden in output.") %>">
+            <% if configuration_rows.any? %>
+              <% configuration_rows.each_with_index do |row, idx| %>
+                <div class="quote-advanced-module-row js-configuration-row" data-index="<%= idx %>">
+                  <%= text_field_tag "quote[configuration_block][rows][#{idx}][label]", row[:label], class: ui_input_classes("js-config-label"), placeholder: t("quotes.view.form.configuration_label_placeholder", default: "Label") %>
+                  <%= text_field_tag "quote[configuration_block][rows][#{idx}][value]", row[:value], class: ui_input_classes("js-config-value"), placeholder: t("quotes.view.form.configuration_value_placeholder", default: "Value") %>
+                  <%= hidden_field_tag "quote[configuration_block][rows][#{idx}][position]", row[:position].presence || (idx + 1), class: "js-config-position" %>
+                  <button type="button" class="quote-kv-remove js-config-row-remove" aria-label="<%= t("quotes.view.form.remove", default: "Remove") %>">&times;</button>
+                </div>
+              <% end %>
+            <% end %>
+            <p class="quote-form-hint js-configuration-empty" <%= "hidden" if configuration_rows.any? %>><%= t("quotes.view.form.configuration_empty_label", default: "No valid rows, this block stays hidden in output.") %></p>
+          </div>
+          <button type="button" class="quote-kv-add js-config-row-add"><%= t("quotes.view.form.add_configuration_row", default: "Add Configuration Row") %></button>
+        </div>
+
+        <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
+          <h4><%= t("quote_document.sections.detail_pictures", default: "Detail Pictures") %></h4>
+          <p class="quote-form-hint"><%= t("quotes.view.form.detail_pictures_editor_hint", default: "Select from product gallery or upload quote images in batch, then preview before saving.") %></p>
+          <div class="quote-detail-gallery-toolbar">
+            <button type="button" class="quote-kv-add js-open-detail-gallery"><%= t("quotes.view.form.open_selected_product_gallery", default: "Open Selected Product Gallery") %></button>
+          </div>
+          <div class="quote-detail-gallery-picker js-detail-gallery-picker" hidden>
+            <div class="quote-detail-gallery-picker-head">
+              <p class="quote-form-hint"><%= t("quotes.view.form.selected_product_gallery_hint", default: "Only shows images from products currently selected in quote items.") %></p>
+              <div class="quote-detail-gallery-actions">
+                <button type="button"
+                        class="quote-kv-open js-detail-gallery-select-all"
+                        data-label-select-all="<%= t("quotes.view.form.select_all", default: "Select All") %>"
+                        data-label-deselect-all="<%= t("quotes.view.form.deselect_all", default: "Deselect All") %>"><%= t("quotes.view.form.select_all", default: "Select All") %></button>
+              </div>
+            </div>
+            <div class="quote-detail-gallery-grid js-detail-gallery-grid"></div>
+            <p class="quote-form-hint js-detail-gallery-empty" hidden><%= t("quotes.view.form.selected_product_gallery_empty", default: "No gallery images found for currently selected products.") %></p>
+          </div>
+          <%= hidden_field_tag "quote[detail_pictures_block][enabled]", (detail_pictures_enabled ? "1" : "0"), class: "js-detail-pictures-enabled" %>
+          <div class="quote-advanced-module-batch-upload">
+            <label><%= t("quotes.view.form.detail_picture_batch_upload_label", default: "Upload quote images (batch)") %></label>
+            <%= file_field_tag "quote[detail_pictures_batch_uploads][]",
+                               multiple: true,
+                               accept: "image/png,image/jpeg,image/webp,image/gif",
+                               class: "#{ui_input_classes} js-detail-pictures-batch-upload" %>
+            <p class="quote-form-hint"><%= t("quotes.view.form.detail_picture_batch_upload_hint", default: "You can select multiple images at once.") %></p>
+          </div>
+          <div class="quote-advanced-module-list quote-advanced-module-list--detail-pictures js-detail-picture-rows"
+               data-name-prefix="quote[detail_pictures_block][items]"
+               data-empty-label="<%= t("quotes.view.form.detail_pictures_empty_label", default: "No pictures selected, this block stays hidden in output.") %>">
+            <div class="quote-detail-batch-preview js-detail-batch-preview" hidden></div>
+            <% if detail_picture_items.any? %>
+              <% detail_picture_items.each_with_index do |item, idx| %>
+                <div class="quote-advanced-module-row quote-advanced-module-row--picture js-detail-picture-row" data-index="<%= idx %>" data-blob-id="<%= item[:image_blob_id] %>">
+                  <%= hidden_field_tag "quote[detail_pictures_block][items][#{idx}][source]", item[:source].presence || "product_gallery", class: "js-detail-picture-source" %>
+                  <%= hidden_field_tag "quote[detail_pictures_block][items][#{idx}][image_blob_id]", item[:image_blob_id], class: "js-detail-picture-blob" %>
+                  <div class="quote-detail-item-preview js-detail-picture-preview"></div>
+                  <p class="quote-detail-item-name js-detail-picture-name"></p>
+                  <%= text_field_tag "quote[detail_pictures_block][items][#{idx}][caption]", item[:caption], class: ui_input_classes("js-detail-picture-caption"), placeholder: t("quotes.view.form.detail_picture_caption_placeholder", default: "Caption (optional)") %>
+                  <%= hidden_field_tag "quote[detail_pictures_block][items][#{idx}][position]", item[:position].presence || (idx + 1), class: "js-detail-picture-position" %>
+                  <button type="button" class="quote-kv-remove js-detail-picture-row-remove" aria-label="<%= t("quotes.view.form.remove", default: "Remove") %>">&times;</button>
+                </div>
+              <% end %>
+            <% end %>
+            <p class="quote-form-hint js-detail-pictures-empty" <%= "hidden" if detail_picture_items.any? %>><%= t("quotes.view.form.detail_pictures_empty_label", default: "No pictures selected, this block stays hidden in output.") %></p>
+          </div>
+        </div>
+
+        <% if Quote.column_names.include?("formal_closing_block") %>
+          <div class="quote-form-grid-span-2 quote-advanced-subsection-head quote-advanced-subsection-head--logistics">
+            <h4><%= t("quote_document.sections.formal_closing", default: "Formal Closing") %></h4>
+            <p class="quote-form-hint"><%= t("quotes.view.form.formal_closing_hint", default: "Use for settlement closure and signature placeholders, mainly for PI profile output.") %></p>
+            <% if formal_closing_presets.any? %>
+              <div class="quote-form-add-row quote-form-add-row--preset-actions">
+                <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.preset_selector_hint", default: "Choosing a preset will overwrite this module's content. Click × to clear.") %></p>
+                <div class="quote-preset-control">
+                  <select id="quote-module-preset-formal_closing" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                    <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                    <% formal_closing_presets.each do |preset| %>
+                      <option value="<%= preset[:id] || preset["id"] %>" <%= "selected" if @quote_preset_master&.formal_closing_preset_id.to_i == (preset[:id] || preset["id"]).to_i %>><%= preset[:name] || preset["name"] %></option>
+                    <% end %>
+                  </select>
+                  <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="formal_closing" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+                  </button>
+                </div>
+              </div>
+            <% end %>
+            <%= hidden_field_tag "quote[seller_signature_image_blob_signed_id]", "", class: "js-formal-closing-seller-signature-blob-id" %>
+            <%= hidden_field_tag "quote[seller_stamp_image_blob_signed_id]", "", class: "js-formal-closing-seller-stamp-blob-id" %>
+            <%= hidden_field_tag "quote[remove_seller_signature_image]", "0", class: "js-formal-closing-seller-signature-remove" %>
+            <%= hidden_field_tag "quote[remove_seller_stamp_image]", "0", class: "js-formal-closing-seller-stamp-remove" %>
+          </div>
+          <div>
+            <label><%= t("quote_document.labels.pi_number", default: "PI #") %></label>
+            <%= text_field_tag "quote[formal_closing_block][pi_number]", formal_closing_block["pi_number"], class: ui_input_classes, placeholder: "PI-2026-001" %>
+          </div>
+          <div>
+            <label><%= t("quotes.view.show.field_labels.delivery", default: "Delivery Time") %></label>
+            <%= text_field_tag "quote[formal_closing_block][delivery_time]", formal_closing_block["delivery_time"], class: ui_input_classes %>
+          </div>
+          <div>
+            <label><%= t("quote_document.labels.trade_terms", default: "Trade Terms") %></label>
+            <%= text_field_tag "quote[formal_closing_block][trade_term]", formal_closing_block["trade_term"], class: ui_input_classes %>
+          </div>
+          <div>
+            <label><%= t("quote_document.labels.payment_terms", default: "Payment Terms") %></label>
+            <%= text_field_tag "quote[formal_closing_block][payment_term]", formal_closing_block["payment_term"], class: ui_input_classes %>
+          </div>
+          <div class="quote-form-grid-span-2">
+            <label><%= t("quote_document.labels.bank_route", default: "Bank Route") %></label>
+            <%= text_area_tag "quote[formal_closing_block][bank_route]", formal_closing_block["bank_route"], rows: 2, class: ui_input_classes %>
+          </div>
+          <div class="quote-form-grid-span-2">
+            <label><%= t("quote_document.labels.beneficiary_details", default: "Beneficiary Details") %></label>
+            <%= text_area_tag "quote[formal_closing_block][beneficiary_details]", formal_closing_block["beneficiary_details"], rows: 2, class: ui_input_classes %>
+          </div>
+          <div class="quote-form-grid-span-2">
+            <label><%= t("quote_document.labels.remittance_note", default: "Remittance Note") %></label>
+            <%= text_area_tag "quote[formal_closing_block][remittance_note]", formal_closing_block["remittance_note"], rows: 2, class: ui_input_classes %>
+          </div>
+          <div>
+            <label><%= t("quotes.view.form.seller_signature_image", default: "Seller Signature Image") %></label>
+            <%= file_field_tag "quote[seller_signature_image]", accept: "image/png,image/jpeg,image/webp,image/gif,image/svg+xml", class: ui_input_classes("js-formal-closing-seller-signature-upload") %>
+            <div class="quote-form-hint js-formal-closing-seller-signature-preview-wrap quote-signature-image-preview" <%= "hidden" unless quote.seller_signature_image.attached? %>>
+              <img src="<%= quote.seller_signature_image.attached? ? url_for(quote.seller_signature_image) : "" %>" alt="<%= t("quote_document.labels.seller_signature_line", default: "Seller Signature") %>" class="quote-sales-signature-image js-formal-closing-seller-signature-preview" <%= "hidden" unless quote.seller_signature_image.attached? %>>
+              <button type="button" class="quote-signature-image-remove js-formal-closing-seller-signature-remove-btn" aria-label="<%= t("quotes.view.form.remove_seller_signature_image", default: "Remove seller signature image") %>">&times;</button>
+            </div>
+          </div>
+          <div>
+            <label><%= t("quotes.view.form.seller_stamp_image", default: "Seller Stamp Image") %></label>
+            <%= file_field_tag "quote[seller_stamp_image]", accept: "image/png,image/jpeg,image/webp,image/gif,image/svg+xml", class: ui_input_classes("js-formal-closing-seller-stamp-upload") %>
+            <div class="quote-form-hint js-formal-closing-seller-stamp-preview-wrap quote-signature-image-preview" <%= "hidden" unless quote.seller_stamp_image.attached? %>>
+              <img src="<%= quote.seller_stamp_image.attached? ? url_for(quote.seller_stamp_image) : "" %>" alt="<%= t("quote_document.labels.seller_stamp_line", default: "Seller Stamp") %>" class="quote-sales-signature-image js-formal-closing-seller-stamp-preview" <%= "hidden" unless quote.seller_stamp_image.attached? %>>
+              <button type="button" class="quote-signature-image-remove js-formal-closing-seller-stamp-remove-btn" aria-label="<%= t("quotes.view.form.remove_seller_stamp_image", default: "Remove seller stamp image") %>">&times;</button>
+            </div>
+          </div>
+          <div class="quote-form-grid-span-2">
+            <label><%= check_box_tag "quote[formal_closing_block][buyer_signature_line_enabled]", "1", ActiveModel::Type::Boolean.new.cast(formal_closing_block["buyer_signature_line_enabled"]) %> <%= t("quote_document.labels.buyer_signature_line", default: "Show Buyer Signature Line") %></label>
+          </div>
+        <% end %>
       </div>
     </details>
 
@@ -303,24 +643,24 @@
           <div>
             <%= f.label :tax_amount, t("quotes.view.form.tax_vat") %>
             <div class="quote-money-input">
-              <%= f.number_field :tax_amount, step: 0.01, class: ui_input_classes("js-tax-input") %>
+              <%= f.number_field :tax_amount, step: 0.01, class: ui_input_classes("js-tax-input"), readonly: pi_mode %>
             </div>
           </div>
           <div>
             <%= f.label :shipping_amount, t("quotes.view.form.shipping_handling") %>
             <div class="quote-money-input">
-              <%= f.number_field :shipping_amount, step: 0.01, class: ui_input_classes("js-shipping-input") %>
+              <%= f.number_field :shipping_amount, step: 0.01, class: ui_input_classes("js-shipping-input"), readonly: pi_mode %>
             </div>
           </div>
           <div class="quote-discount-row js-discount-row" <%= "hidden" unless quote.discount_amount.to_d.positive? %>>
             <%= f.label :discount_amount, t("quotes.view.form.discount") %>
             <div class="quote-money-input">
-              <%= f.number_field :discount_amount, step: 0.01, class: ui_input_classes("js-discount-input") %>
+              <%= f.number_field :discount_amount, step: 0.01, class: ui_input_classes("js-discount-input"), readonly: pi_mode %>
             </div>
-            <button type="button" class="quote-inline-link js-remove-discount"><%= t("quotes.view.form.remove_discount") %></button>
+            <button type="button" class="quote-inline-link js-remove-discount" <%= "hidden" if pi_mode %>><%= t("quotes.view.form.remove_discount") %></button>
           </div>
         </div>
-        <button type="button" class="quote-inline-link js-add-discount" <%= "hidden" if quote.discount_amount.to_d.positive? %>><%= t("quotes.view.form.add_discount") %></button>
+        <button type="button" class="quote-inline-link js-add-discount" <%= "hidden" if quote.discount_amount.to_d.positive? || pi_mode %>><%= t("quotes.view.form.add_discount") %></button>
       </div>
 
       <aside class="quote-live-totals">
@@ -343,14 +683,34 @@
         <span class="app-form-section-note"><%= t("quotes.view.form.quote_items_hint") %></span>
       </summary>
       <div class="quote-form-section-body">
-      <p class="quote-form-hint">
-        <%= t("quotes.view.form.quote_item_hint_1") %>
-      </p>
-      <p class="quote-form-hint">
-        <%= t("quotes.view.form.quote_item_hint_2") %>
-      </p>
-      <p class="quote-form-hint"><%= t("quotes.view.form.quote_item_hint_3") %></p>
-      <p class="quote-form-hint"><%= t("quotes.view.form.quote_item_hint_4") %></p>
+      <% fee_item_presets = Array(@quote_presets_by_module&.dig("standard_fee_items")) %>
+      <% fee_items_preset_settings_path = quote_presets_path(module_key: "standard_fee_items") %>
+      <div class="quote-form-add-row quote-form-add-row--preset-actions">
+        <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="toggle-quote-advanced-mode"><%= t("quotes.view.form.enable_extended_quote_info", default: "Enable Extended Quote Info") %></button>
+        <div class="js-fee-preset-controls" <%= "hidden" unless advanced_sections_open %>>
+          <% if fee_item_presets.any? %>
+            <p class="quote-form-hint quote-preset-control-hint"><%= t("quotes.view.form.standard_fee_items_selector_hint", settings_path: fee_items_preset_settings_path, default: "Select standard logistics fee preset (Templates / Quote Presets / Standard Fee Items).") %></p>
+            <div class="quote-preset-control">
+              <select id="quote-module-preset-standard_fee_items" class="<%= ui_input_classes %> quote-inline-select" data-searchable-select="true" data-search-placeholder="<%= t("quotes.view.form.select_preset", default: "Search preset") %>">
+                <option value=""><%= t("quotes.view.form.select_preset", default: "Select preset") %></option>
+                <% fee_item_presets.each do |preset| %>
+                  <% preset_payload = preset[:payload] || preset["payload"] || {} %>
+                  <option value="<%= preset[:id] || preset["id"] %>" data-payload="<%= preset_payload.to_json %>"><%= preset[:name] || preset["name"] %></option>
+                <% end %>
+              </select>
+              <button type="button" class="quote-preset-clear-btn js-clear-module-preset" data-module-key="standard_fee_items" aria-label="<%= t("quotes.view.form.clear_selected_preset", default: "Clear selected preset") %>">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6L18 18M18 6L6 18" /></svg>
+              </button>
+            </div>
+          <% else %>
+            <p class="quote-form-hint quote-form-hint-warning">
+              <%= t("quotes.view.form.standard_fee_items_not_configured", default: "Standard logistics fee preset is not configured.") %>
+              <%= link_to t("quotes.view.form.configure_standard_fee_items", default: "Configure now"), fee_items_preset_settings_path, class: "quote-kv-add" %>
+            </p>
+          <% end %>
+        </div>
+        <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="insert-quote-fee-items" <%= "hidden" unless advanced_sections_open %> <%= "disabled" unless fee_item_presets.any? %>><%= t("quotes.view.form.insert_standard_fee_items", default: "Insert Standard Logistics Fee Items") %></button>
+      </div>
       <p class="quote-form-hint quote-form-hint-warning" id="quote-currency-mismatch-warning" hidden>
         <%= t("quotes.view.form.currency_mismatch_warning") %>
       </p>
@@ -381,6 +741,7 @@
             <tbody id="quote-items-body">
               <%= f.fields_for :quote_items do |item_fields| %>
                 <% item = item_fields.object %>
+                <% item_image_attached = item.item_image.attached? && item.item_image.blob&.persisted? %>
                 <% product_name = item.product&.name.presence || item.description.to_s %>
                 <tr class="quote-item-row">
                   <td class="quote-col-product" data-label="<%= t("quotes.view.form.product_name") %>">
@@ -391,6 +752,7 @@
                     <div class="js-product-feedback product-feedback" aria-live="polite"></div>
                     <%= item_fields.hidden_field :id if item.persisted? %>
                     <%= item_fields.hidden_field :product_id, class: "js-product-id" %>
+                    <%= item_fields.hidden_field :item_type, class: "js-item-type" %>
                     <%= item_fields.hidden_field :item_image_blob_id, value: "", class: "js-item-image-blob-id" %>
                     <%= item_fields.hidden_field :remove_item_image, value: "0", class: "js-remove-item-image" %>
                     <div class="quote-item-image-tools">
@@ -399,7 +761,7 @@
                         class="quote-kv-open js-open-image-editor"
                         data-label-add="<%= t("quotes.view.form.add_image") %>"
                         data-label-change="<%= t("quotes.view.form.change_image") %>"
-                      ><%= item.item_image.attached? ? t("quotes.view.form.change_image") : t("quotes.view.form.add_image") %></button>
+                      ><%= item_image_attached ? t("quotes.view.form.change_image") : t("quotes.view.form.add_image") %></button>
                     </div>
                     <div class="quote-kv-editor js-item-image-editor" data-kind="image" hidden>
                       <div class="quote-kv-editor-head">
@@ -408,14 +770,14 @@
                       </div>
                       <div class="quote-item-image-gallery js-item-image-gallery"></div>
                       <p class="quote-form-hint js-item-image-gallery-empty" hidden><%= t("quotes.view.form.product_gallery_empty") %></p>
-                      <div class="quote-item-image-current js-item-image-current<%= ' is-empty' unless item.item_image.attached? %>">
+                      <div class="quote-item-image-current js-item-image-current<%= ' is-empty' unless item_image_attached %>">
                         <p class="quote-item-image-current-label"><%= t("quotes.view.form.current_selected_image") %></p>
-                        <% if item.item_image.attached? %>
+                        <% if item_image_attached %>
                           <%= image_tag item.item_image, class: "quote-item-current-thumb js-item-image-thumb", alt: t("quotes.view.form.item_image_preview") %>
                         <% else %>
                           <img src="" class="quote-item-current-thumb js-item-image-thumb" alt="<%= t("quotes.view.form.item_image_preview") %>" hidden>
                         <% end %>
-                        <span class="quote-form-hint js-item-image-empty-hint" <%= "hidden" if item.item_image.attached? %>><%= t("quotes.view.form.no_image_selected") %></span>
+                        <span class="quote-form-hint js-item-image-empty-hint" <%= "hidden" if item_image_attached %>><%= t("quotes.view.form.no_image_selected") %></span>
                       </div>
                       <div class="quote-item-image-upload">
                         <%= item_fields.file_field :item_image, accept: "image/png,image/jpeg,image/webp,image/gif", class: "quote-item-image-upload-input js-item-image-upload" %>
@@ -529,7 +891,7 @@
         </div>
 
         <div class="quote-form-add-row">
-          <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="add-quote-item"><%= t("quotes.view.form.add_item") %></button>
+          <button type="button" class="<%= "#{ui_button_classes(:secondary)} quote-add-item-btn" %>" id="add-quote-item" <%= "disabled" if pi_mode %>><%= t("quotes.view.form.add_item") %></button>
         </div>
       </div>
       </div>
@@ -559,10 +921,18 @@
     const wrapper = pickActiveElement("#quote-items-wrapper");
     const form = pickActiveElement("#quote-form");
     if (!wrapper || !root) return;
+    const piMode = <%= pi_mode ? "true" : "false" %>;
 
     const products = JSON.parse(wrapper.dataset.products || "[]");
+    const quotePresetsPayload = <%= raw(quote_preset_payload) %>;
+    const quoteMasterPresetMap = <%= raw(quote_master_preset_payload) %>;
     const body = wrapper.querySelector("#quote-items-body");
-    const addBtn = document.getElementById("add-quote-item");
+    const advancedDetails = root.querySelector("details.quote-form-advanced");
+    const advancedModeInput = form?.querySelector(".js-advanced-mode-input");
+    const addBtn = form?.querySelector("#add-quote-item") || document.getElementById("add-quote-item");
+    const advancedModeToggleBtn = form?.querySelector("#toggle-quote-advanced-mode") || document.getElementById("toggle-quote-advanced-mode");
+    const insertFeeItemsBtn = form?.querySelector("#insert-quote-fee-items");
+    const feePresetControls = form?.querySelector(".js-fee-preset-controls");
     const statusInput = document.querySelector("[name='quote[status]']");
     const currencyInput = document.querySelector("[name='quote[currency]']");
     const validUntilInput = document.querySelector("[name='quote[valid_until]']");
@@ -579,6 +949,19 @@
     const discountRow = document.querySelector(".js-discount-row");
     const addDiscountBtn = document.querySelector(".js-add-discount");
     const removeDiscountBtn = document.querySelector(".js-remove-discount");
+    const modulePresetSelects = Array.from(form?.querySelectorAll("select[id^='quote-module-preset-']") || []);
+    const formalClosingSellerSignatureBlobInput = form?.querySelector(".js-formal-closing-seller-signature-blob-id");
+    const formalClosingSellerStampBlobInput = form?.querySelector(".js-formal-closing-seller-stamp-blob-id");
+    const formalClosingSellerSignatureUploadInput = form?.querySelector(".js-formal-closing-seller-signature-upload");
+    const formalClosingSellerStampUploadInput = form?.querySelector(".js-formal-closing-seller-stamp-upload");
+    const formalClosingSellerSignatureRemoveInput = form?.querySelector(".js-formal-closing-seller-signature-remove");
+    const formalClosingSellerStampRemoveInput = form?.querySelector(".js-formal-closing-seller-stamp-remove");
+    const formalClosingSellerSignatureRemoveBtn = form?.querySelector(".js-formal-closing-seller-signature-remove-btn");
+    const formalClosingSellerStampRemoveBtn = form?.querySelector(".js-formal-closing-seller-stamp-remove-btn");
+    const formalClosingSellerSignaturePreviewWrap = form?.querySelector(".js-formal-closing-seller-signature-preview-wrap");
+    const formalClosingSellerStampPreviewWrap = form?.querySelector(".js-formal-closing-seller-stamp-preview-wrap");
+    const formalClosingSellerSignaturePreview = form?.querySelector(".js-formal-closing-seller-signature-preview");
+    const formalClosingSellerStampPreview = form?.querySelector(".js-formal-closing-seller-stamp-preview");
 
     const statusText = document.getElementById("quote-summary-status-text");
     const statusBadge = document.getElementById("quote-summary-status-badge");
@@ -601,6 +984,58 @@
     const submitButton = form?.querySelector("input[type='submit'], button[type='submit']");
     const clientErrorBox = form?.querySelector(".js-quote-client-error");
     const clientErrorList = form?.querySelector(".js-quote-client-error-list");
+    const advancedTradeVisibilityInput = form?.querySelector(".js-advanced-visibility-trade");
+    const advancedLogisticsVisibilityInput = form?.querySelector(".js-advanced-visibility-logistics");
+    const detailPicturesEnabledInput = form?.querySelector(".js-detail-pictures-enabled");
+    const containerLoadingEnabledInput = form?.querySelector(".js-container-loading-enabled");
+    const containerLoadingNoteEnabledInput = form?.querySelector(".js-container-loading-note-enabled");
+
+    const enforcePiReadonlyMode = () => {
+      if (!piMode || !form) return;
+
+      [
+        "[name='quote[currency]']",
+        "[name='quote[tax_amount]']",
+        "[name='quote[shipping_amount]']",
+        "[name='quote[discount_amount]']",
+        "[name='quote[advanced_mode]']"
+      ].forEach((selector) => {
+        form.querySelectorAll(selector).forEach((input) => {
+          input.readOnly = true;
+          input.disabled = true;
+        });
+      });
+
+      form.querySelectorAll("[name*='quote[quote_items_attributes]']").forEach((input) => {
+        input.readOnly = true;
+        input.disabled = true;
+      });
+
+      form.querySelectorAll(".js-remove-item, .quote-item-image-upload-input, .js-add-discount, .js-remove-discount").forEach((control) => {
+        control.disabled = true;
+      });
+
+      if (addBtn) addBtn.disabled = true;
+      if (insertFeeItemsBtn) insertFeeItemsBtn.disabled = true;
+    };
+    const configurationRowsContainer = form?.querySelector(".js-configuration-rows");
+    const detailPictureRowsContainer = form?.querySelector(".js-detail-picture-rows");
+    const detailPictureBatchUploadInput = form?.querySelector(".js-detail-pictures-batch-upload");
+    const detailBatchPreview = form?.querySelector(".js-detail-batch-preview");
+    const detailGalleryToggleBtn = form?.querySelector(".js-open-detail-gallery");
+    const detailGalleryPicker = form?.querySelector(".js-detail-gallery-picker");
+    const detailGalleryGrid = form?.querySelector(".js-detail-gallery-grid");
+    const detailGalleryEmpty = form?.querySelector(".js-detail-gallery-empty");
+    const detailGallerySelectAllBtn = form?.querySelector(".js-detail-gallery-select-all");
+    const containerLoadingRowsContainer = form?.querySelector(".js-container-loading-rows");
+    const addConfigurationRowBtn = form?.querySelector(".js-config-row-add");
+    const addContainerLoadingRowBtn = form?.querySelector(".js-container-loading-row-add");
+    const detailPictureCatalog = <%= raw detail_picture_catalog_payload %>;
+    const enableExtendedLabel = "<%= j t('quotes.view.form.enable_extended_quote_info', default: 'Enable Extended Quote Info') %>";
+    const disableExtendedLabel = "<%= j t('quotes.view.form.disable_extended_quote_info', default: 'Disable Extended Quote Info') %>";
+    const quotePersisted = <%= quote.persisted? ? "true" : "false" %>;
+    const detailGallerySelectAllLabel = detailGallerySelectAllBtn?.dataset?.labelSelectAll || "<%= j t('quotes.view.form.select_all', default: 'Select All') %>";
+    const detailGalleryDeselectAllLabel = detailGallerySelectAllBtn?.dataset?.labelDeselectAll || "<%= j t('quotes.view.form.deselect_all', default: 'Deselect All') %>";
 
     const statusLabels = {
       draft: "<%= j(t('quotes.view.form.status_options.draft')) %>",
@@ -679,6 +1114,104 @@
       return Number.isFinite(number) ? number : 0;
     }
 
+    function parseLooseNumber(value) {
+      if (value === null || value === undefined) return Number.NaN;
+      const normalized = String(value).replace(/\u00a0/g, " ").replace(/,/g, "").trim();
+      if (!normalized) return Number.NaN;
+      return Number(normalized);
+    }
+
+    function parseFeePresetRows(presetPayload) {
+      if (!presetPayload || typeof presetPayload !== "object") return [];
+      const rawRows = presetPayload.rows;
+      const rows = Array.isArray(rawRows) ? rawRows : (rawRows && typeof rawRows === "object" ? Object.values(rawRows) : []);
+      return rows
+        .map((row) => {
+          const name = String(row?.name || "").trim();
+          const unitPriceNumber = parseLooseNumber(row?.unit_price);
+          const quantityNumber = parseLooseNumber(row?.quantity ?? 1);
+          if (!name || !Number.isFinite(unitPriceNumber) || !Number.isFinite(quantityNumber) || quantityNumber <= 0 || unitPriceNumber < 0) return null;
+          return {
+            item_type: "fee_custom",
+            title: name,
+            description: name,
+            unit_price: unitPriceNumber.toFixed(2),
+            quantity: Math.floor(quantityNumber)
+          };
+        })
+        .filter(Boolean);
+    }
+
+    function normalizePresetText(value) {
+      return String(value || "")
+        .replace(/\u00a0/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    }
+
+    function searchableInputForSelect(select) {
+      if (!select) return null;
+      const wrapper = select.previousElementSibling;
+      if (!wrapper) return null;
+      if (!wrapper.querySelector) return null;
+      return wrapper.querySelector("input[type='text']");
+    }
+
+    function feePresetSelectNode() {
+      const activeForm = insertFeeItemsBtn?.closest("form") || form || pickActiveElement("#quote-form");
+      return activeForm?.querySelector("#quote-module-preset-standard_fee_items") || null;
+    }
+
+    function syncSearchableSelectInput(select) {
+      if (!select) return;
+      const input = searchableInputForSelect(select);
+      if (!input) return;
+      if (String(select.value || "").trim().length === 0) {
+        input.value = "";
+        return;
+      }
+      const selected = Array.from(select.options || []).find((option) => String(option.value || "") === String(select.value || ""));
+      input.value = selected ? String(selected.textContent || "").trim() : "";
+    }
+
+    function resolveSelectValueFromSearchInput(select) {
+      if (!select) return;
+      if (String(select.value || "").trim().length > 0) return;
+      const input = searchableInputForSelect(select);
+      const typed = normalizePresetText(input?.value);
+      if (!typed) return;
+      const matched = Array.from(select.options || []).find((option) => normalizePresetText(option.textContent) === typed);
+      if (!matched) return;
+      select.value = String(matched.value || "");
+      syncSearchableSelectInput(select);
+    }
+
+    function resolveSelectedFeePreset() {
+      const result = { status: "not_selected", preset: null, rows: [] };
+      const standardFeePresetSelect = feePresetSelectNode();
+      if (!standardFeePresetSelect) return result;
+      resolveSelectValueFromSearchInput(standardFeePresetSelect);
+      const selectedId = String(standardFeePresetSelect.value || "").trim();
+      if (!selectedId) return result;
+      const selectedOption = Array.from(standardFeePresetSelect.options || []).find((option) => String(option.value || "").trim() === selectedId) || null;
+      if (!selectedOption) return result;
+      let selectedPayload = {};
+      const payloadText = selectedOption.dataset?.payload;
+      if (payloadText) {
+        try {
+          selectedPayload = JSON.parse(payloadText);
+        } catch (_error) {
+          selectedPayload = {};
+        }
+      }
+      const rows = parseFeePresetRows(selectedPayload);
+      result.preset = { id: selectedId, name: String(selectedOption.textContent || "").trim(), payload: selectedPayload };
+      result.rows = rows;
+      result.status = rows.length > 0 ? "selected" : "selected_but_no_rows";
+      return result;
+    }
+
     function parseAddonTotal(text) {
       return String(text || "").split(/\r?\n/).reduce((sum, line) => {
         const parts = line.split(/[:=：]/, 2);
@@ -731,6 +1264,610 @@
         .replace(/&#10;|&#x0a;|&#13;|&#x0d;/gi, "\n")
         .replace(/\r\n?/g, "\n")
         .trim();
+    }
+
+    function advancedModeEnabled() {
+      return String(advancedModeInput?.value || "0") === "1";
+    }
+
+    function setAdvancedMode(enabled, options = {}) {
+      if (!advancedModeInput) return;
+      advancedModeInput.value = enabled ? "1" : "0";
+
+      if (advancedDetails) {
+        advancedDetails.hidden = !enabled;
+        advancedDetails.open = enabled;
+      }
+
+      if (insertFeeItemsBtn) insertFeeItemsBtn.hidden = !enabled;
+      if (feePresetControls) feePresetControls.hidden = !enabled;
+      if (advancedModeToggleBtn) advancedModeToggleBtn.textContent = enabled ? disableExtendedLabel : enableExtendedLabel;
+
+      if (!enabled) {
+        if (advancedTradeVisibilityInput) advancedTradeVisibilityInput.value = "0";
+        if (advancedLogisticsVisibilityInput) advancedLogisticsVisibilityInput.value = "0";
+      } else {
+        if (advancedTradeVisibilityInput) advancedTradeVisibilityInput.value = "1";
+        if (advancedLogisticsVisibilityInput) advancedLogisticsVisibilityInput.value = "1";
+      }
+    }
+
+    function setEmptyHintVisibility(container, rowSelector, hintSelector) {
+      if (!container) return;
+      const hint = container.querySelector(hintSelector);
+      if (!hint) return;
+      const rows = Array.from(container.querySelectorAll(rowSelector));
+      hint.hidden = rows.length > 0;
+    }
+
+    function refreshConfigurationRows() {
+      if (!configurationRowsContainer) return;
+      const rows = Array.from(configurationRowsContainer.querySelectorAll(".js-configuration-row"));
+      rows.forEach((row, index) => {
+        row.dataset.index = String(index);
+        row.querySelectorAll("input[name]").forEach((input) => {
+          input.name = input.name
+            .replace(/quote\[configuration_block\]\[rows\]\[[^\]]+\]/, `quote[configuration_block][rows][${index}]`);
+        });
+        const positionInput = row.querySelector(".js-config-position");
+        if (positionInput) positionInput.value = String(index + 1);
+      });
+      const hasValidRow = rows.some((row) => {
+        const label = row.querySelector(".js-config-label")?.value?.trim() || "";
+        const value = row.querySelector(".js-config-value")?.value?.trim() || "";
+        return label.length > 0 && value.length > 0;
+      });
+      setEmptyHintVisibility(configurationRowsContainer, ".js-configuration-row", ".js-configuration-empty");
+    }
+
+    function refreshDetailPictureRows() {
+      if (!detailPictureRowsContainer) return;
+      const rows = Array.from(detailPictureRowsContainer.querySelectorAll(".js-detail-picture-row"));
+      rows.forEach((row, index) => {
+        row.dataset.index = String(index);
+        row.querySelectorAll("input[name], select[name]").forEach((input) => {
+          input.name = input.name
+            .replace(/quote\[detail_pictures_block\]\[items\]\[[^\]]+\]/, `quote[detail_pictures_block][items][${index}]`);
+        });
+        const positionInput = row.querySelector(".js-detail-picture-position");
+        if (positionInput) positionInput.value = String(index + 1);
+        const blobId = row.querySelector(".js-detail-picture-blob")?.value?.trim() || "";
+        row.dataset.blobId = blobId;
+      });
+      const batchUploadCount = detailPictureBatchUploadInput?.files?.length || 0;
+      const hasAnyPicture = rows.some((row) => {
+        const blobId = row.querySelector(".js-detail-picture-blob")?.value?.trim() || "";
+        return blobId.length > 0;
+      }) || batchUploadCount > 0;
+      if (detailPicturesEnabledInput) detailPicturesEnabledInput.value = hasAnyPicture ? "1" : "0";
+      setEmptyHintVisibility(detailPictureRowsContainer, ".js-detail-picture-row", ".js-detail-pictures-empty");
+      rows.forEach((row) => renderDetailPicturePreview(row));
+      syncDetailGallerySelectionStateFromRows();
+    }
+
+    function refreshContainerLoadingRows() {
+      if (!containerLoadingRowsContainer) return;
+      const noteEnabled = !!containerLoadingNoteEnabledInput?.checked;
+      const noteHeader = form?.querySelector(".js-container-loading-header-note")?.value?.trim() || "<%= j t("quote_document.labels.note", default: "Note") %>";
+      const rows = Array.from(containerLoadingRowsContainer.querySelectorAll(".js-container-loading-row"));
+      rows.forEach((row, index) => {
+        row.dataset.index = String(index);
+        row.querySelectorAll("input[name]").forEach((input) => {
+          input.name = input.name
+            .replace(/quote\[container_loading_block\]\[rows\]\[[^\]]+\]/, `quote[container_loading_block][rows][${index}]`);
+        });
+        const positionInput = row.querySelector(".js-container-loading-position");
+        if (positionInput) positionInput.value = String(index + 1);
+        const noteInput = row.querySelector(".js-container-loading-note");
+        if (noteInput) {
+          noteInput.hidden = !noteEnabled;
+          noteInput.placeholder = noteHeader || "<%= j t("quotes.view.form.container_loading_note_placeholder", default: "Note (optional)") %>";
+        }
+      });
+
+      const hasValidRow = rows.some((row) => {
+        const variant = row.querySelector(".js-container-loading-variant")?.value?.trim() || "";
+        const containerType = row.querySelector(".js-container-loading-type")?.value?.trim() || "";
+        const capacity = row.querySelector(".js-container-loading-capacity")?.value?.trim() || "";
+        const note = noteEnabled ? (row.querySelector(".js-container-loading-note")?.value?.trim() || "") : "";
+        return variant.length > 0 || containerType.length > 0 || capacity.length > 0 || (noteEnabled && note.length > 0);
+      });
+      if (containerLoadingEnabledInput) containerLoadingEnabledInput.value = hasValidRow ? "1" : "0";
+      setEmptyHintVisibility(containerLoadingRowsContainer, ".js-container-loading-row", ".js-container-loading-empty");
+    }
+
+    function newConfigurationRowHtml(index) {
+      return `
+        <div class="quote-advanced-module-row js-configuration-row" data-index="${index}">
+          <input type="text" class="app-ui-input js-config-label" name="quote[configuration_block][rows][${index}][label]" placeholder="${escapeAttr("<%= j t("quotes.view.form.configuration_label_placeholder", default: "Label") %>")}">
+          <input type="text" class="app-ui-input js-config-value" name="quote[configuration_block][rows][${index}][value]" placeholder="${escapeAttr("<%= j t("quotes.view.form.configuration_value_placeholder", default: "Value") %>")}">
+          <input type="hidden" class="js-config-position" name="quote[configuration_block][rows][${index}][position]" value="${index + 1}">
+          <button type="button" class="quote-kv-remove js-config-row-remove" aria-label="${escapeAttr("<%= j t("quotes.view.form.remove", default: "Remove") %>")}">&times;</button>
+        </div>
+      `;
+    }
+
+    function newDetailPictureRowHtml(index) {
+      return `
+        <div class="quote-advanced-module-row quote-advanced-module-row--picture js-detail-picture-row" data-index="${index}" data-blob-id="">
+          <input type="hidden" class="js-detail-picture-source" name="quote[detail_pictures_block][items][${index}][source]" value="product_gallery">
+          <input type="hidden" class="js-detail-picture-blob" name="quote[detail_pictures_block][items][${index}][image_blob_id]" value="">
+          <div class="quote-detail-item-preview js-detail-picture-preview"></div>
+          <p class="quote-detail-item-name js-detail-picture-name"></p>
+          <input type="text" class="app-ui-input js-detail-picture-caption" name="quote[detail_pictures_block][items][${index}][caption]" placeholder="${escapeAttr("<%= j t("quotes.view.form.detail_picture_caption_placeholder", default: "Caption (optional)") %>")}">
+          <input type="hidden" class="js-detail-picture-position" name="quote[detail_pictures_block][items][${index}][position]" value="${index + 1}">
+          <button type="button" class="quote-kv-remove js-detail-picture-row-remove" aria-label="${escapeAttr("<%= j t("quotes.view.form.remove", default: "Remove") %>")}">&times;</button>
+        </div>
+      `;
+    }
+
+    function detailPictureUrlFromBlobId(blobId) {
+      const targetId = String(blobId || "").trim();
+      if (!targetId) return "";
+
+      const entry = detailPictureCatalog.find((item) => String(item.blob_id || "") === targetId);
+      if (entry?.url) return entry.url;
+
+      return "";
+    }
+
+    function detailPictureLabelFromBlobId(blobId) {
+      const targetId = String(blobId || "").trim();
+      if (!targetId) return "";
+      const entry = detailPictureCatalog.find((item) => String(item.blob_id || "") === targetId);
+      return entry?.label || "";
+    }
+
+    function currentSelectedProductIds() {
+      return activeQuoteItemRows()
+        .map((row) => String(row.querySelector(".js-product-id")?.value || "").trim())
+        .filter((id) => id.length > 0);
+    }
+
+    function detailGalleryEntriesFromSelectedProducts() {
+      const selectedIds = new Set(currentSelectedProductIds());
+      if (!selectedIds.size) return [];
+
+      return products
+        .filter((product) => selectedIds.has(String(product.id)))
+        .flatMap((product) => {
+          const options = Array.isArray(product.image_options) ? product.image_options : [];
+          return options.map((entry) => ({
+            productName: product.name || "",
+            blobId: String(entry.blob_id || "").trim(),
+            url: String(entry.url || "").trim(),
+            label: String(entry.label || "").trim()
+          })).filter((entry) => entry.blobId && entry.url);
+        });
+    }
+
+    function existingDetailPictureBlobIds() {
+      if (!detailPictureRowsContainer) return new Set();
+      return new Set(
+        Array.from(detailPictureRowsContainer.querySelectorAll(".js-detail-picture-blob"))
+          .map((input) => String(input.value || "").trim())
+          .filter((value) => value.length > 0)
+      );
+    }
+
+    function setDetailGalleryCardSelectedState(card, selected) {
+      if (!card) return;
+      card.classList.toggle("is-selected", selected);
+      card.setAttribute("aria-pressed", selected ? "true" : "false");
+    }
+
+    function refreshDetailGallerySelectAllLabel() {
+      if (!detailGalleryGrid || !detailGallerySelectAllBtn) return;
+      const cards = Array.from(detailGalleryGrid.querySelectorAll(".js-detail-gallery-card"));
+      const selectedCount = cards.filter((card) => card.classList.contains("is-selected")).length;
+      const allSelected = cards.length > 0 && selectedCount === cards.length;
+      detailGallerySelectAllBtn.textContent = allSelected ? detailGalleryDeselectAllLabel : detailGallerySelectAllLabel;
+      detailGallerySelectAllBtn.disabled = cards.length === 0;
+    }
+
+    function syncDetailGallerySelectionStateFromRows() {
+      if (!detailGalleryGrid) return;
+      const selectedBlobIds = existingDetailPictureBlobIds();
+      detailGalleryGrid.querySelectorAll(".js-detail-gallery-card").forEach((card) => {
+        const blobId = String(card.dataset.blobId || "").trim();
+        setDetailGalleryCardSelectedState(card, blobId && selectedBlobIds.has(blobId));
+      });
+      refreshDetailGallerySelectAllLabel();
+    }
+
+    function renderSelectedProductGallery() {
+      if (!detailGalleryGrid || !detailGalleryEmpty) return;
+      const entries = detailGalleryEntriesFromSelectedProducts();
+      detailGalleryGrid.innerHTML = "";
+      if (!entries.length) {
+        detailGalleryEmpty.hidden = false;
+        refreshDetailGallerySelectAllLabel();
+        return;
+      }
+
+      detailGalleryEmpty.hidden = true;
+      const deduped = [];
+      const seen = new Set();
+      entries.forEach((entry) => {
+        if (seen.has(entry.blobId)) return;
+        seen.add(entry.blobId);
+        deduped.push(entry);
+      });
+
+      const existingIds = existingDetailPictureBlobIds();
+      detailGalleryGrid.innerHTML = deduped.map((entry) => {
+        const selectedClass = existingIds.has(entry.blobId) ? "is-selected" : "";
+        const ariaPressed = existingIds.has(entry.blobId) ? "true" : "false";
+        return `
+          <button type="button" class="quote-detail-gallery-card js-detail-gallery-card ${selectedClass}" data-blob-id="${escapeAttr(entry.blobId)}" aria-pressed="${ariaPressed}">
+            <span class="quote-detail-gallery-selected-indicator" aria-hidden="true"></span>
+            <img src="${escapeAttr(entry.url)}" alt="${escapeAttr(entry.productName)}" class="quote-detail-gallery-image">
+            <span class="quote-detail-gallery-meta">${escapeHtml(entry.productName)} · ${escapeHtml(entry.label || "Image")}</span>
+          </button>
+        `;
+      }).join("");
+      refreshDetailGallerySelectAllLabel();
+    }
+
+    function addDetailPictureRowWithBlob(blobId) {
+      if (!detailPictureRowsContainer) return;
+      const existingIds = existingDetailPictureBlobIds();
+      if (existingIds.has(blobId)) return;
+
+      const index = detailPictureRowsContainer.querySelectorAll(".js-detail-picture-row").length;
+      detailPictureRowsContainer.insertAdjacentHTML("beforeend", newDetailPictureRowHtml(index));
+      const newRow = detailPictureRowsContainer.querySelectorAll(".js-detail-picture-row")[index];
+      const blobInput = newRow?.querySelector(".js-detail-picture-blob");
+      if (blobInput) blobInput.value = blobId;
+      const sourceInput = newRow?.querySelector(".js-detail-picture-source");
+      if (sourceInput) sourceInput.value = "product_gallery";
+    }
+
+    function removeDetailPictureRowByBlob(blobId) {
+      if (!detailPictureRowsContainer) return;
+      const target = Array.from(detailPictureRowsContainer.querySelectorAll(".js-detail-picture-row"))
+        .find((row) => String(row.querySelector(".js-detail-picture-blob")?.value || "").trim() === String(blobId || "").trim());
+      target?.remove();
+    }
+
+    function renderDetailPicturePreview(row) {
+      if (!row) return;
+      const preview = row.querySelector(".js-detail-picture-preview");
+      const nameEl = row.querySelector(".js-detail-picture-name");
+      if (!preview) return;
+
+      const blobId = row.querySelector(".js-detail-picture-blob")?.value?.trim() || "";
+      const imageUrl = detailPictureUrlFromBlobId(blobId);
+      const imageLabel = detailPictureLabelFromBlobId(blobId);
+      if (!imageUrl) {
+        preview.innerHTML = "";
+        preview.classList.remove("is-active");
+        if (nameEl) nameEl.textContent = "";
+        return;
+      }
+
+      preview.innerHTML = `<img src="${escapeAttr(imageUrl)}" alt="detail preview" class="quote-detail-item-preview-image">`;
+      preview.classList.add("is-active");
+      if (nameEl) nameEl.textContent = imageLabel;
+    }
+
+    function renderDetailBatchPreview() {
+      if (!detailBatchPreview || !detailPictureBatchUploadInput) return;
+      const files = Array.from(detailPictureBatchUploadInput.files || []);
+      if (!files.length) {
+        detailBatchPreview.hidden = true;
+        detailBatchPreview.innerHTML = "";
+        return;
+      }
+
+      detailBatchPreview.hidden = false;
+      detailBatchPreview.innerHTML = files.slice(0, 12).map((file, index) => {
+        const url = URL.createObjectURL(file);
+        return `
+          <figure class="quote-advanced-module-row quote-advanced-module-row--picture quote-detail-batch-preview-item" data-upload-index="${index}">
+            <div class="quote-detail-item-preview is-active">
+              <img src="${escapeAttr(url)}" alt="${escapeAttr(file.name)}" class="quote-detail-item-preview-image">
+            </div>
+            <figcaption class="quote-detail-item-name">${escapeHtml(file.name)}</figcaption>
+            <input type="text" class="app-ui-input quote-detail-batch-caption-input" name="quote[detail_pictures_batch_captions][${index}]" placeholder="${escapeAttr("<%= j t("quotes.view.form.detail_picture_caption_placeholder", default: "Caption (optional)") %>")}">
+            <button type="button" class="quote-kv-remove js-detail-batch-remove" data-upload-index="${index}" aria-label="${escapeAttr("<%= j t("quotes.view.form.remove", default: "Remove") %>")}">&times;</button>
+          </figure>
+        `;
+      }).join("");
+    }
+
+    function removeBatchUploadAt(index) {
+      if (!detailPictureBatchUploadInput) return;
+      const files = Array.from(detailPictureBatchUploadInput.files || []);
+      if (index < 0 || index >= files.length) return;
+      files.splice(index, 1);
+      const transfer = new DataTransfer();
+      files.forEach((file) => transfer.items.add(file));
+      detailPictureBatchUploadInput.files = transfer.files;
+      renderDetailBatchPreview();
+      refreshDetailPictureRows();
+    }
+
+    function newContainerLoadingRowHtml(index) {
+      const noteEnabled = !!containerLoadingNoteEnabledInput?.checked;
+      const noteHeader = form?.querySelector(".js-container-loading-header-note")?.value?.trim() || "<%= j t("quote_document.labels.note", default: "Note") %>";
+      return `
+        <div class="quote-advanced-module-row quote-advanced-module-row--loading js-container-loading-row" data-index="${index}">
+          <input type="text" class="app-ui-input js-container-loading-variant" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" list="container-loading-variant-options" name="quote[container_loading_block][rows][${index}][variant]" placeholder="${escapeAttr("<%= j t("quotes.view.form.container_loading_variant_placeholder", default: "Variant / Version") %>")}">
+          <input type="text" class="app-ui-input js-container-loading-type" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" list="container-loading-type-options" name="quote[container_loading_block][rows][${index}][container_type]" placeholder="${escapeAttr("<%= j t("quotes.view.form.container_loading_type_placeholder", default: "Container Type") %>")}">
+          <input type="text" class="app-ui-input js-container-loading-capacity" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" list="container-loading-capacity-options" name="quote[container_loading_block][rows][${index}][capacity]" placeholder="${escapeAttr("<%= j t("quotes.view.form.container_loading_capacity_placeholder", default: "Capacity") %>")}">
+          <input type="text" class="app-ui-input js-container-loading-note" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" name="quote[container_loading_block][rows][${index}][note]" placeholder="${escapeAttr(noteHeader || "<%= j t("quotes.view.form.container_loading_note_placeholder", default: "Note (optional)") %>")}" ${noteEnabled ? "" : "hidden"}>
+          <input type="hidden" class="js-container-loading-position" name="quote[container_loading_block][rows][${index}][position]" value="${index + 1}">
+          <button type="button" class="quote-kv-remove js-container-loading-row-remove" aria-label="${escapeAttr("<%= j t("quotes.view.form.remove", default: "Remove") %>")}">&times;</button>
+        </div>
+      `;
+    }
+
+    function selectedPreset(moduleKey) {
+      const select = document.getElementById(`quote-module-preset-${moduleKey}`);
+      resolveSelectValueFromSearchInput(select);
+      const presetId = String(select?.value || "").trim();
+      if (!presetId) return null;
+
+      const moduleEntries = Array.isArray(quotePresetsPayload?.[moduleKey]) ? quotePresetsPayload[moduleKey] : [];
+      return moduleEntries.find((entry) => String(entry.id) === presetId) || null;
+    }
+
+    function setFieldValue(selector, value) {
+      const input = form?.querySelector(selector);
+      if (!input) return;
+      input.value = String(value ?? "");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function setCheckboxValue(selector, enabled) {
+      const input = form?.querySelector(selector);
+      if (!input) return;
+      input.checked = !!enabled;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function setFormalClosingImage(kind, payload = {}) {
+      const isSignature = kind === "signature";
+      const blobInput = isSignature ? formalClosingSellerSignatureBlobInput : formalClosingSellerStampBlobInput;
+      const removeInput = isSignature ? formalClosingSellerSignatureRemoveInput : formalClosingSellerStampRemoveInput;
+      const previewWrap = isSignature ? formalClosingSellerSignaturePreviewWrap : formalClosingSellerStampPreviewWrap;
+      const previewImage = isSignature ? formalClosingSellerSignaturePreview : formalClosingSellerStampPreview;
+      const imageUrl = String(payload?.imageUrl || "").trim();
+      const blobSignedId = String(payload?.blobSignedId || "").trim();
+      const markRemoved = payload?.markRemoved === true;
+
+      if (blobInput) blobInput.value = blobSignedId;
+      if (removeInput) removeInput.value = markRemoved ? "1" : "0";
+      if (!previewWrap || !previewImage) return;
+
+      if (imageUrl) {
+        previewWrap.hidden = false;
+        previewImage.hidden = false;
+        previewImage.src = imageUrl;
+      } else {
+        previewImage.src = "";
+        previewImage.hidden = true;
+        previewWrap.hidden = true;
+      }
+    }
+
+    function applyBusinessTermsPreset(payload) {
+      setFieldValue("[name='quote[payment_term]']", payload.payment_term);
+      setFieldValue("[name='quote[trade_term]']", payload.trade_term);
+      setFieldValue("[name='quote[delivery_notes]']", payload.delivery_notes);
+      setFieldValue("[name='quote[terms_text]']", payload.terms_text);
+      setFieldValue("[name='quote[scope_of_supply]']", payload.scope_of_supply);
+    }
+
+    function applyAdvancedTradePreset(payload) {
+      Object.entries(payload || {}).forEach(([key, value]) => {
+        setFieldValue(`[name='quote[advanced_trade_terms][${CSS.escape(key)}]']`, value);
+      });
+    }
+
+    function applyAdvancedLogisticsPreset(payload) {
+      Object.entries(payload || {}).forEach(([key, value]) => {
+        setFieldValue(`[name='quote[advanced_logistics][${CSS.escape(key)}]']`, value);
+      });
+    }
+
+    function applyConfigurationPreset(payload) {
+      const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+      if (configurationRowsContainer) {
+        configurationRowsContainer.querySelectorAll(".js-configuration-row").forEach((row) => row.remove());
+        rows.forEach((row, index) => {
+          configurationRowsContainer.insertAdjacentHTML("beforeend", newConfigurationRowHtml(index));
+          const target = configurationRowsContainer.querySelector(`.js-configuration-row[data-index='${index}']`);
+          target?.querySelector(".js-config-label")?.setAttribute("value", String(row.label || ""));
+          target?.querySelector(".js-config-value")?.setAttribute("value", String(row.value || ""));
+          const labelInput = target?.querySelector(".js-config-label");
+          const valueInput = target?.querySelector(".js-config-value");
+          if (labelInput) labelInput.value = String(row.label || "");
+          if (valueInput) valueInput.value = String(row.value || "");
+        });
+      }
+      refreshConfigurationRows();
+    }
+
+    function applyContainerLoadingPreset(payload) {
+      const headers = payload?.headers || {};
+      setFieldValue("[name='quote[container_loading_block][headers][variant]']", headers.variant);
+      setFieldValue("[name='quote[container_loading_block][headers][container_type]']", headers.container_type);
+      setFieldValue("[name='quote[container_loading_block][headers][capacity]']", headers.capacity);
+      setFieldValue("[name='quote[container_loading_block][headers][note]']", headers.note);
+
+      const rows = Array.isArray(payload?.rows) ? payload.rows : [];
+      if (containerLoadingRowsContainer) {
+        containerLoadingRowsContainer.querySelectorAll(".js-container-loading-row").forEach((row) => row.remove());
+        rows.forEach((row, index) => {
+          containerLoadingRowsContainer.insertAdjacentHTML("beforeend", newContainerLoadingRowHtml(index));
+          const target = containerLoadingRowsContainer.querySelector(`.js-container-loading-row[data-index='${index}']`);
+          if (!target) return;
+          const variantInput = target.querySelector(".js-container-loading-variant");
+          const typeInput = target.querySelector(".js-container-loading-type");
+          const capacityInput = target.querySelector(".js-container-loading-capacity");
+          const noteInput = target.querySelector(".js-container-loading-note");
+          if (variantInput) variantInput.value = String(row.variant || "");
+          if (typeInput) typeInput.value = String(row.container_type || "");
+          if (capacityInput) capacityInput.value = String(row.capacity || "");
+          if (noteInput) noteInput.value = String(row.note || "");
+        });
+      }
+
+      const noteEnabled = payload?.note_enabled !== false;
+      if (containerLoadingNoteEnabledInput) containerLoadingNoteEnabledInput.checked = noteEnabled;
+      if (containerLoadingEnabledInput) {
+        const enabled = payload?.enabled === true || rows.length > 0;
+        containerLoadingEnabledInput.value = enabled ? "1" : "0";
+      }
+      refreshContainerLoadingRows();
+    }
+
+    function applyFormalClosingPreset(payload) {
+      setFieldValue("[name='quote[formal_closing_block][pi_number]']", payload.pi_number);
+      setFieldValue("[name='quote[formal_closing_block][delivery_time]']", payload.delivery_time);
+      setFieldValue("[name='quote[formal_closing_block][trade_term]']", payload.trade_term);
+      setFieldValue("[name='quote[formal_closing_block][payment_term]']", payload.payment_term);
+      setFieldValue("[name='quote[formal_closing_block][bank_route]']", payload.bank_route);
+      setFieldValue("[name='quote[formal_closing_block][beneficiary_details]']", payload.beneficiary_details);
+      setFieldValue("[name='quote[formal_closing_block][remittance_note]']", payload.remittance_note);
+      setCheckboxValue("[name='quote[formal_closing_block][buyer_signature_line_enabled]']", payload.buyer_signature_line_enabled);
+      setFormalClosingImage("signature", {
+        imageUrl: payload.seller_signature_image_url,
+        blobSignedId: payload.seller_signature_blob_signed_id
+      });
+      setFormalClosingImage("stamp", {
+        imageUrl: payload.seller_stamp_image_url,
+        blobSignedId: payload.seller_stamp_blob_signed_id
+      });
+    }
+
+    function clearModulePresetContent(moduleKey, options = {}) {
+      switch (moduleKey) {
+        case "business_terms":
+          applyBusinessTermsPreset({});
+          break;
+        case "advanced_trade_terms":
+          applyAdvancedTradePreset({
+            hs_code: "",
+            warranty_scope_note: "",
+            support_scope_note: "",
+            validity_clause_note: "",
+            delivery_commitment_note: "",
+            payment_clause_note: ""
+          });
+          break;
+        case "advanced_logistics":
+          applyAdvancedLogisticsPreset({
+            container_type: "",
+            freight_note: "",
+            shipping_scope_note: "",
+            container_loading_note: ""
+          });
+          break;
+        case "container_loading":
+          applyContainerLoadingPreset({
+            headers: { variant: "", container_type: "", capacity: "", note: "" },
+            note_enabled: true,
+            rows: []
+          });
+          break;
+        case "configuration_block":
+          applyConfigurationPreset({ rows: [] });
+          break;
+        case "formal_closing":
+          applyFormalClosingPreset({
+            pi_number: "",
+            delivery_time: "",
+            trade_term: "",
+            payment_term: "",
+            bank_route: "",
+            beneficiary_details: "",
+            remittance_note: "",
+            buyer_signature_line_enabled: false,
+            seller_signature_image_url: "",
+            seller_signature_blob_signed_id: "",
+            seller_stamp_image_url: "",
+            seller_stamp_blob_signed_id: ""
+          });
+          if (formalClosingSellerSignatureRemoveInput) formalClosingSellerSignatureRemoveInput.value = "1";
+          if (formalClosingSellerStampRemoveInput) formalClosingSellerStampRemoveInput.value = "1";
+          break;
+        case "standard_fee_items":
+          activeQuoteItemRows().forEach((row) => {
+            const itemType = String(row.querySelector(".js-item-type")?.value || "").trim();
+            if (itemType !== "fee_custom") return;
+            const rowIdInput = row.querySelector("input[name*='[id]']");
+            const destroyField = row.querySelector(".js-destroy-flag");
+            const persisted = Boolean(rowIdInput?.value);
+            if (!persisted) {
+              row.remove();
+              return;
+            }
+            if (destroyField) destroyField.value = "1";
+            row.style.display = "none";
+          });
+          updateTotalsUI();
+          applyStatusUI();
+          break;
+        default:
+          break;
+      }
+
+      if (!options.silent) {
+        window.showAppToast?.("<%= j t('quotes.view.form.preset_cleared', default: 'Preset selection cleared.') %>", "success");
+      }
+    }
+
+    function applyModulePreset(moduleKey, options = {}) {
+      const preset = selectedPreset(moduleKey);
+      if (!preset) return;
+      const payload = preset.payload || {};
+
+      if (moduleKey !== "business_terms") {
+        setAdvancedMode(true);
+      }
+
+      switch (moduleKey) {
+        case "business_terms":
+          applyBusinessTermsPreset(payload);
+          break;
+        case "advanced_trade_terms":
+          applyAdvancedTradePreset(payload);
+          break;
+        case "advanced_logistics":
+          applyAdvancedLogisticsPreset(payload);
+          break;
+        case "container_loading":
+          applyContainerLoadingPreset(payload);
+          break;
+        case "configuration_block":
+          applyConfigurationPreset(payload);
+          break;
+        case "formal_closing":
+          applyFormalClosingPreset(payload);
+          break;
+        case "standard_fee_items":
+          break;
+        default:
+          break;
+      }
+
+      if (!options.silent && moduleKey !== "standard_fee_items") {
+        window.showAppToast?.("<%= j t('quotes.view.form.preset_applied', default: 'Preset applied.') %>", "success");
+      }
+    }
+
+    function applyDefaultAdvancedPresets() {
+      [ "advanced_trade_terms", "advanced_logistics", "container_loading", "configuration_block", "formal_closing" ].forEach((moduleKey) => {
+        const select = document.getElementById(`quote-module-preset-${moduleKey}`);
+        if (!select) return;
+        const hasSelection = String(select.value || "").trim().length > 0;
+        if (!hasSelection) return;
+        applyModulePreset(moduleKey, { silent: true });
+      });
     }
 
     function isDestroyedRow(row) {
@@ -822,6 +1959,9 @@
       if (liveSavedRow) liveSavedRow.hidden = !hasDiscount;
       toggleDiscountVisibility(hasDiscount || discountEnabled);
       refreshCurrencyMismatchWarning();
+      if (detailGalleryPicker && !detailGalleryPicker.hidden) {
+        renderSelectedProductGallery();
+      }
       return totals;
     }
 
@@ -1119,6 +2259,13 @@
       if (!dropdown) return;
       const searchBox = row.querySelector(".product-search");
       if (!searchBox) return;
+      const optionCount = dropdown.querySelectorAll(".js-product-option").length;
+
+      if (optionCount <= 5) {
+        dropdown.classList.remove("open-up");
+        dropdown.style.maxHeight = "";
+        return;
+      }
 
       dropdown.classList.remove("open-up");
       dropdown.style.maxHeight = "";
@@ -1147,6 +2294,10 @@
       const productFeedback = row.querySelector(".js-product-feedback");
       const rowIdInput = row.querySelector("input[name$='[id]']");
       const productIdInput = row.querySelector(".js-product-id");
+      const itemTypeInput = row.querySelector(".js-item-type");
+      const productCell = row.querySelector(".quote-col-product");
+      const specCell = row.querySelector(".quote-col-specs");
+      const addonCell = row.querySelector(".quote-col-addons");
       const descInput = row.querySelector(".js-description");
       const priceInput = row.querySelector(".js-unit-price");
       const removeBtn = row.querySelector(".js-remove-item");
@@ -1164,6 +2315,7 @@
       const openSpecBtn = row.querySelector(".js-open-spec-editor");
       const openAddonBtn = row.querySelector(".js-open-addon-editor");
       const openImageBtn = row.querySelector(".js-open-image-editor");
+      const imageTools = row.querySelector(".quote-item-image-tools");
       const itemImageBlobIdInput = row.querySelector(".js-item-image-blob-id");
       const removeItemImageInput = row.querySelector(".js-remove-item-image");
       const itemImageUploadInput = row.querySelector(".js-item-image-upload");
@@ -1181,6 +2333,41 @@
       let activeOptionIndex = -1;
       const imageTriggerLabelAdd = openImageBtn?.dataset.labelAdd || uiText.addImage;
       const imageTriggerLabelChange = openImageBtn?.dataset.labelChange || uiText.changeImage;
+
+      function feeItemType(value) {
+        return String(value || "").trim().toLowerCase().startsWith("fee_");
+      }
+
+      function refreshRowItemTypeUI() {
+        const isFeeItem = feeItemType(itemTypeInput?.value);
+        row.classList.toggle("quote-item-row--fee", isFeeItem);
+
+        if (productCell) {
+          productCell.colSpan = isFeeItem ? 3 : 1;
+        }
+        if (specCell) {
+          specCell.hidden = isFeeItem;
+        }
+        if (addonCell) {
+          addonCell.hidden = isFeeItem;
+        }
+
+        if (specPresetSelect) specPresetSelect.disabled = isFeeItem;
+        if (addonPresetSelect) addonPresetSelect.disabled = isFeeItem;
+        if (openImageBtn) openImageBtn.disabled = isFeeItem;
+        if (imageTools) imageTools.hidden = isFeeItem;
+        if (imageEditor) imageEditor.hidden = isFeeItem;
+
+        if (isFeeItem) {
+          closeEditor(specsEditor);
+          closeEditor(addonEditor);
+          closeEditor(imageEditor);
+          if (itemImageBlobIdInput) itemImageBlobIdInput.value = "";
+          if (removeItemImageInput) removeItemImageInput.value = "1";
+          if (itemImageUploadInput) itemImageUploadInput.value = "";
+          setImagePreview("");
+        }
+      }
 
       function closeEditor(editor) {
         if (!editor) return;
@@ -1437,6 +2624,7 @@
         if (!selected) return;
         const previousProductId = String(productIdInput.value || "");
         productIdInput.value = selected.id;
+        if (itemTypeInput) itemTypeInput.value = "product_main";
         const quoteCurrency = currentCurrency();
         const productCurrency = (selected.currency || "").trim().toUpperCase();
         const isCurrencyMismatch = quoteCurrency && productCurrency && quoteCurrency !== productCurrency;
@@ -1465,6 +2653,7 @@
         } else {
           setFeedback("", "");
         }
+        refreshRowItemTypeUI();
       }
 
       function syncProduct() {
@@ -1499,6 +2688,7 @@
           }
         }
         updateTotalsUI();
+        refreshRowItemTypeUI();
       }
 
       if (productNameInput) {
@@ -1558,6 +2748,9 @@
 
       if (priceInput) {
         priceInput.addEventListener("input", updateTotalsUI);
+      }
+      if (itemTypeInput) {
+        itemTypeInput.addEventListener("change", refreshRowItemTypeUI);
       }
       if (qtyInput) {
         qtyInput.addEventListener("input", updateTotalsUI);
@@ -1873,6 +3066,7 @@
       } else {
         setImagePreview("");
       }
+      refreshRowItemTypeUI();
 
       row.querySelectorAll(".js-kv-close").forEach((btn) => {
         btn.addEventListener("click", (event) => {
@@ -2011,18 +3205,26 @@
       }
     }
 
-    function addRow() {
+    function addRow(preset = {}) {
       const index = rowCounter++;
+      const presetTitle = String(preset.title || preset.description || "").trim();
+      const presetDescription = String(preset.description || presetTitle).trim();
+      const presetSpecs = normalizeSpecificationText(preset.specifications_text || "");
+      const presetAddons = normalizeSpecificationText(preset.addon_charges_text || "");
+      const presetUnitPrice = String(preset.unit_price || "").trim();
+      const presetQuantity = parseInteger(preset.quantity || 1) > 0 ? parseInteger(preset.quantity || 1) : 1;
+      const presetItemType = String(preset.item_type || "product_main").trim() || "product_main";
       const tr = document.createElement("tr");
       tr.className = "quote-item-row is-new";
       tr.innerHTML = `
         <td class="quote-col-product">
           <div class="product-search">
-            <input type="text" class="js-product-name app-ui-input" placeholder="${escapeHtml(uiText.typeToSearchProduct)}">
+            <input type="text" class="js-product-name app-ui-input" value="${escapeAttr(presetTitle)}" placeholder="${escapeHtml(uiText.typeToSearchProduct)}">
             <div class="js-product-dropdown"></div>
           </div>
           <div class="js-product-feedback product-feedback" aria-live="polite"></div>
           <input type="hidden" name="quote[quote_items_attributes][${index}][product_id]" class="js-product-id">
+          <input type="hidden" name="quote[quote_items_attributes][${index}][item_type]" class="js-item-type" value="${escapeAttr(presetItemType)}">
           <input type="hidden" name="quote[quote_items_attributes][${index}][item_image_blob_id]" class="js-item-image-blob-id" value="">
           <input type="hidden" name="quote[quote_items_attributes][${index}][remove_item_image]" class="js-remove-item-image" value="0">
           <div class="quote-item-image-tools">
@@ -2052,13 +3254,13 @@
               <button type="button" class="quote-kv-clear js-item-image-remove">${escapeHtml(uiText.removeImage)}</button>
             </div>
           </div>
-          <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description">
+          <input type="hidden" name="quote[quote_items_attributes][${index}][description]" class="js-description" value="${escapeAttr(presetDescription)}">
         </td>
         <td class="quote-col-specs">
           <select class="js-spec-preset-select quote-inline-select app-ui-input" data-default-id="">
             <option value="">${escapeHtml(uiText.customSpecs)}</option>
           </select>
-          <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V" hidden></textarea>
+          <textarea rows="2" class="js-specifications sr-only-input" name="quote[quote_items_attributes][${index}][specifications_text]" placeholder="Power: 5kW&#10;Voltage: 220V" hidden>${escapeHtml(presetSpecs)}</textarea>
           <div class="quote-kv-summary js-spec-summary"
                data-controller="sortable"
                data-sortable-enabled-value="true"
@@ -2090,7 +3292,7 @@
           <select class="js-addon-preset-select quote-inline-select app-ui-input" data-default-id="">
             <option value="">${escapeHtml(uiText.customAddOns)}</option>
           </select>
-          <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120" hidden></textarea>
+          <textarea rows="2" class="js-addon-charges sr-only-input" name="quote[quote_items_attributes][${index}][addon_charges_text]" placeholder="Packaging: 30&#10;Installation: 120" hidden>${escapeHtml(presetAddons)}</textarea>
           <div class="quote-kv-summary js-addon-summary"
                data-controller="sortable"
                data-sortable-enabled-value="true"
@@ -2119,10 +3321,10 @@
           </div>
         </td>
         <td class="quote-col-price">
-          <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price app-ui-input" placeholder="0.00">
+          <input type="number" step="0.01" name="quote[quote_items_attributes][${index}][unit_price]" class="js-unit-price app-ui-input" placeholder="0.00" value="${escapeAttr(presetUnitPrice)}">
         </td>
         <td class="quote-col-qty">
-          <input type="number" min="1" value="1" name="quote[quote_items_attributes][${index}][quantity]" class="js-quantity app-ui-input">
+          <input type="number" min="1" value="${escapeAttr(String(presetQuantity))}" name="quote[quote_items_attributes][${index}][quantity]" class="js-quantity app-ui-input">
         </td>
         <td class="quote-col-remove">
           <input type="hidden" name="quote[quote_items_attributes][${index}][_destroy]" value="0" class="js-destroy-flag">
@@ -2138,6 +3340,235 @@
 
     activeQuoteItemRows().forEach(bindRow);
     if (addBtn) addBtn.addEventListener("click", addRow);
+    if (advancedModeToggleBtn) {
+      advancedModeToggleBtn.addEventListener("click", () => {
+        const nextEnabled = !advancedModeEnabled();
+        setAdvancedMode(nextEnabled);
+        if (nextEnabled) {
+          applyDefaultAdvancedPresets();
+          window.showAppToast?.("<%= j t("quotes.view.form.extended_scenario_applied", default: "Extended modules enabled.") %>", "success");
+        } else {
+          window.showAppToast?.("<%= j t("quotes.view.form.extended_scenario_disabled", default: "Extended modules disabled.") %>", "success");
+        }
+      });
+    }
+    if (insertFeeItemsBtn) {
+      insertFeeItemsBtn.addEventListener("click", () => {
+        const feePresetResult = resolveSelectedFeePreset();
+        if (feePresetResult.status !== "selected") {
+          const message = feePresetResult.status === "selected_but_no_rows"
+            ? "<%= j t('quotes.view.form.standard_fee_items_empty_rows', default: 'Selected preset has no valid fee rows. Configure rows in Quote Presets / Standard Fee Items.') %>"
+            : "<%= j t('quotes.view.form.standard_fee_items_not_selected', default: 'Select a standard logistics fee preset first') %>";
+          window.showAppToast?.(message, "warn");
+          return;
+        }
+        feePresetResult.rows.forEach((feeItem) => addRow(feeItem));
+      });
+    }
+
+    Object.entries(quoteMasterPresetMap || {}).forEach(([moduleKey, presetId]) => {
+      const select = form?.querySelector(`#quote-module-preset-${moduleKey}`);
+      if (!select || !presetId) return;
+      if (String(select.value || "").trim() !== "") return;
+      select.value = String(presetId);
+      syncSearchableSelectInput(select);
+    });
+    const standardFeePresetSelect = feePresetSelectNode();
+    if (standardFeePresetSelect && String(standardFeePresetSelect.value || "").trim() === "") {
+      const firstOption = Array.from(standardFeePresetSelect.options || []).find((option) => String(option.value || "").trim() !== "");
+      if (firstOption) {
+        standardFeePresetSelect.value = firstOption.value;
+        syncSearchableSelectInput(standardFeePresetSelect);
+      }
+    }
+
+    if (!quotePersisted) {
+      if (String(form?.querySelector("#quote-module-preset-business_terms")?.value || "").trim()) {
+        applyModulePreset("business_terms", { silent: true });
+      }
+      if (advancedModeEnabled()) {
+        applyDefaultAdvancedPresets();
+      }
+    }
+
+    modulePresetSelects.forEach((select) => {
+      select.addEventListener("change", () => {
+        const moduleKey = String(select.id || "").replace("quote-module-preset-", "").trim();
+        if (!moduleKey) return;
+        if (String(select.value || "").trim().length === 0) {
+          clearModulePresetContent(moduleKey);
+          return;
+        }
+        applyModulePreset(moduleKey);
+      });
+    });
+
+    if (formalClosingSellerSignatureUploadInput) {
+      formalClosingSellerSignatureUploadInput.addEventListener("change", () => {
+        if (formalClosingSellerSignatureBlobInput) formalClosingSellerSignatureBlobInput.value = "";
+        if (formalClosingSellerSignatureRemoveInput) formalClosingSellerSignatureRemoveInput.value = "0";
+        const file = formalClosingSellerSignatureUploadInput.files?.[0];
+        if (!file) return;
+        const previewUrl = URL.createObjectURL(file);
+        setFormalClosingImage("signature", { imageUrl: previewUrl, blobSignedId: "" });
+      });
+    }
+    if (formalClosingSellerStampUploadInput) {
+      formalClosingSellerStampUploadInput.addEventListener("change", () => {
+        if (formalClosingSellerStampBlobInput) formalClosingSellerStampBlobInput.value = "";
+        if (formalClosingSellerStampRemoveInput) formalClosingSellerStampRemoveInput.value = "0";
+        const file = formalClosingSellerStampUploadInput.files?.[0];
+        if (!file) return;
+        const previewUrl = URL.createObjectURL(file);
+        setFormalClosingImage("stamp", { imageUrl: previewUrl, blobSignedId: "" });
+      });
+    }
+    formalClosingSellerSignatureRemoveBtn?.addEventListener("click", () => {
+      if (formalClosingSellerSignatureUploadInput) formalClosingSellerSignatureUploadInput.value = "";
+      if (formalClosingSellerSignatureBlobInput) formalClosingSellerSignatureBlobInput.value = "";
+      setFormalClosingImage("signature", { imageUrl: "", blobSignedId: "", markRemoved: true });
+    });
+    formalClosingSellerStampRemoveBtn?.addEventListener("click", () => {
+      if (formalClosingSellerStampUploadInput) formalClosingSellerStampUploadInput.value = "";
+      if (formalClosingSellerStampBlobInput) formalClosingSellerStampBlobInput.value = "";
+      setFormalClosingImage("stamp", { imageUrl: "", blobSignedId: "", markRemoved: true });
+    });
+
+    form?.addEventListener("click", (event) => {
+      const clearBtn = event.target.closest(".js-clear-module-preset");
+      if (!clearBtn) return;
+      const moduleKey = String(clearBtn.dataset.moduleKey || "").trim();
+      if (!moduleKey) return;
+      const select = form?.querySelector(`#quote-module-preset-${moduleKey}`);
+      if (select) {
+        select.value = "";
+        syncSearchableSelectInput(select);
+        select.dispatchEvent(new CustomEvent("searchable-select:reset", { bubbles: true }));
+      }
+      clearModulePresetContent(moduleKey, { silent: false });
+    });
+
+    if (addConfigurationRowBtn && configurationRowsContainer) {
+      addConfigurationRowBtn.addEventListener("click", () => {
+        const index = configurationRowsContainer.querySelectorAll(".js-configuration-row").length;
+        configurationRowsContainer.insertAdjacentHTML("beforeend", newConfigurationRowHtml(index));
+        refreshConfigurationRows();
+      });
+      configurationRowsContainer.addEventListener("click", (event) => {
+        const removeBtn = event.target.closest(".js-config-row-remove");
+        if (!removeBtn) return;
+        removeBtn.closest(".js-configuration-row")?.remove();
+        refreshConfigurationRows();
+      });
+      configurationRowsContainer.addEventListener("input", refreshConfigurationRows);
+      configurationRowsContainer.addEventListener("change", refreshConfigurationRows);
+    }
+
+    if (detailPictureRowsContainer) {
+      detailPictureRowsContainer.addEventListener("click", (event) => {
+        const removeBtn = event.target.closest(".js-detail-picture-row-remove");
+        if (!removeBtn) return;
+        const row = removeBtn.closest(".js-detail-picture-row");
+        const blobId = String(row?.querySelector(".js-detail-picture-blob")?.value || "").trim();
+        row?.remove();
+        if (blobId && detailGalleryGrid) {
+          const galleryCard = detailGalleryGrid.querySelector(`.js-detail-gallery-card[data-blob-id='${CSS.escape(blobId)}']`);
+          if (galleryCard) setDetailGalleryCardSelectedState(galleryCard, false);
+        }
+        refreshDetailPictureRows();
+      });
+      detailPictureRowsContainer.addEventListener("input", refreshDetailPictureRows);
+      detailPictureRowsContainer.addEventListener("change", refreshDetailPictureRows);
+    }
+
+    if (detailPictureBatchUploadInput) {
+      detailPictureBatchUploadInput.addEventListener("change", () => {
+        renderDetailBatchPreview();
+        refreshDetailPictureRows();
+      });
+    }
+    if (detailBatchPreview) {
+      detailBatchPreview.addEventListener("click", (event) => {
+        const removeBtn = event.target.closest(".js-detail-batch-remove");
+        if (!removeBtn) return;
+        const index = parseInt(removeBtn.dataset.uploadIndex || "-1", 10);
+        if (!Number.isFinite(index) || index < 0) return;
+        removeBatchUploadAt(index);
+      });
+    }
+
+    if (detailGalleryToggleBtn && detailGalleryPicker) {
+      detailGalleryToggleBtn.addEventListener("click", () => {
+        const nextHidden = !detailGalleryPicker.hidden;
+        detailGalleryPicker.hidden = nextHidden;
+        if (!nextHidden) renderSelectedProductGallery();
+      });
+    }
+
+    if (detailGallerySelectAllBtn && detailGalleryGrid) {
+      detailGallerySelectAllBtn.addEventListener("click", () => {
+        const cards = Array.from(detailGalleryGrid.querySelectorAll(".js-detail-gallery-card"));
+        if (!cards.length) return;
+        const shouldSelectAll = cards.some((card) => !card.classList.contains("is-selected"));
+        cards.forEach((card) => {
+          const blobId = String(card.dataset.blobId || "").trim();
+          if (!blobId) return;
+          setDetailGalleryCardSelectedState(card, shouldSelectAll);
+          if (shouldSelectAll) {
+            addDetailPictureRowWithBlob(blobId);
+          } else {
+            removeDetailPictureRowByBlob(blobId);
+          }
+        });
+        refreshDetailPictureRows();
+      });
+    }
+
+    if (detailGalleryGrid) {
+      detailGalleryGrid.addEventListener("click", (event) => {
+        const card = event.target.closest(".js-detail-gallery-card");
+        if (!card) return;
+        const blobId = String(card.dataset.blobId || "").trim();
+        if (!blobId) return;
+        const nextSelected = !card.classList.contains("is-selected");
+        if (nextSelected) {
+          addDetailPictureRowWithBlob(blobId);
+        } else {
+          removeDetailPictureRowByBlob(blobId);
+        }
+        setDetailGalleryCardSelectedState(card, nextSelected);
+        refreshDetailPictureRows();
+      });
+    }
+
+    if (addContainerLoadingRowBtn && containerLoadingRowsContainer) {
+      addContainerLoadingRowBtn.addEventListener("click", () => {
+        const index = containerLoadingRowsContainer.querySelectorAll(".js-container-loading-row").length;
+        containerLoadingRowsContainer.insertAdjacentHTML("beforeend", newContainerLoadingRowHtml(index));
+        refreshContainerLoadingRows();
+      });
+      containerLoadingRowsContainer.addEventListener("click", (event) => {
+        const removeBtn = event.target.closest(".js-container-loading-row-remove");
+        if (!removeBtn) return;
+        removeBtn.closest(".js-container-loading-row")?.remove();
+        refreshContainerLoadingRows();
+      });
+      containerLoadingRowsContainer.addEventListener("input", refreshContainerLoadingRows);
+      containerLoadingRowsContainer.addEventListener("change", refreshContainerLoadingRows);
+    }
+    if (containerLoadingNoteEnabledInput) {
+      containerLoadingNoteEnabledInput.addEventListener("change", refreshContainerLoadingRows);
+    }
+    [
+      form?.querySelector(".js-container-loading-header-variant"),
+      form?.querySelector(".js-container-loading-header-type"),
+      form?.querySelector(".js-container-loading-header-capacity"),
+      form?.querySelector(".js-container-loading-header-note")
+    ].forEach((input) => {
+      if (!input) return;
+      input.addEventListener("input", refreshContainerLoadingRows);
+      input.addEventListener("change", refreshContainerLoadingRows);
+    });
 
     [taxInput, shippingInput, discountInput, currencyInput].forEach((input) => {
       if (!input) return;
@@ -2187,9 +3618,16 @@
       validUntilInput.addEventListener("change", updateExpirySummary);
     }
 
+    enforcePiReadonlyMode();
     updateTotalsUI();
     updateExpirySummary();
     applyStatusUI();
+    setAdvancedMode(advancedModeEnabled());
+    refreshConfigurationRows();
+    refreshDetailPictureRows();
+    renderDetailBatchPreview();
+    renderSelectedProductGallery();
+    refreshContainerLoadingRows();
 
     if (form && submitButton) {
       form.querySelectorAll("input, select, textarea").forEach((field) => {
@@ -2198,6 +3636,9 @@
       });
 
       form.addEventListener("submit", (event) => {
+        refreshConfigurationRows();
+        refreshDetailPictureRows();
+        refreshContainerLoadingRows();
         const invalidFields = Array.from(form.querySelectorAll(":invalid")).filter((field) => !field.disabled && field.offsetParent !== null);
         if (invalidFields.length > 0) {
           event.preventDefault();

@@ -96,6 +96,29 @@ class RevisionDepthAnalyticsServiceTest < ActiveSupport::TestCase
     assert_equal [ 1, 2 ], result.map { |r| r[:revision_number] }
   end
 
+  test "win_rate_by_revision excludes pi documents" do
+    source = make_quote(quote_no: "QT-DEPTH-PI-SOURCE", status: "won")
+    Quote.create!(
+      company: @company,
+      customer: @customer,
+      template: source.template,
+      source_quote: source,
+      quote_no: "QT-DEPTH-PI-DOC",
+      revision_number: 1,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "lost",
+      loss_reason: "other",
+      loss_reason_detail: "pi doc",
+      quote_items_attributes: [ { description: "PI line", unit_price: 100, quantity: 1 } ]
+    )
+
+    result = RevisionDepthAnalyticsService.new(company: @company).win_rate_by_revision
+
+    assert_equal 1, result.sum { |row| row[:total] }
+    assert_equal 1, result.sum { |row| row[:wins] }
+  end
+
   private
 
   def make_quote(company: @company, customer: @customer, quote_no: nil, **attrs)

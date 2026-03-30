@@ -90,7 +90,6 @@ class QuoteTemplatesController < ApplicationController
       :show_pdf_revision_summary,
       :show_excel_revision_summary,
       :excel_show_grid_lines,
-      :enable_advanced_by_default,
       :closing_message,
       :show_currency,
       :show_valid_until,
@@ -117,8 +116,6 @@ class QuoteTemplatesController < ApplicationController
       :pi_title,
       :pi_number_label,
       :pi_footer_note,
-      advanced_defaults: {},
-      advanced_visibility_defaults: {}
     )
   end
 
@@ -168,7 +165,6 @@ class QuoteTemplatesController < ApplicationController
       show_pdf_revision_summary: true,
       show_excel_revision_summary: true,
       excel_show_grid_lines: false,
-      enable_advanced_by_default: false,
       closing_message: QuoteTemplate::DEFAULT_CLOSING_MESSAGE,
       show_currency: true,
       show_valid_until: true,
@@ -178,8 +174,6 @@ class QuoteTemplatesController < ApplicationController
       show_notes: true,
       show_scope_of_supply: false,
       default_scope_of_supply_content: "",
-      advanced_defaults: {},
-      advanced_visibility_defaults: {},
       show_watermark: false,
       watermark_text: "",
       watermark_opacity: 12,

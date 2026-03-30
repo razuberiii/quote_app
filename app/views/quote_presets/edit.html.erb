@@ -1,0 +1,13 @@
+<div class="app-section-stack">
+  <section class="quote-form-panel quote-form-section">
+    <div class="quote-form-section-summary quote-form-section-summary--card">
+      <strong><%= t("quote_presets.edit.title", default: "Edit Quote Preset") %></strong>
+    </div>
+    <div class="quote-form-section-body">
+      <%= render "form", quote_preset: @quote_preset, form_url: quote_preset_path(@quote_preset) %>
+      <div class="quote-form-add-row">
+        <%= link_to t("quote_presets.edit.back", default: "Back to Presets"), quote_presets_path(module_key: @active_module_key), class: ui_button_classes(:secondary) %>
+      </div>
+    </div>
+  </section>
+</div>

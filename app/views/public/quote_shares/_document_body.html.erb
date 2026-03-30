@@ -1,0 +1,515 @@
+<% source_snapshot = local_assigns[:snapshot].is_a?(Hash) ? local_assigns[:snapshot] : nil %>
+<% preview_mode = ActiveModel::Type::Boolean.new.cast(local_assigns[:preview_mode]) %>
+<% show_public_actions = ActiveModel::Type::Boolean.new.cast(local_assigns[:show_public_actions]) %>
+<% decision_state = local_assigns[:decision_state].to_s %>
+<% status_message = local_assigns[:status_message].to_s.presence %>
+<% has_newer_revision = ActiveModel::Type::Boolean.new.cast(local_assigns[:has_newer_revision]) %>
+<% latest_share_url = local_assigns[:latest_share_url] %>
+<% share = local_assigns[:share] %>
+<% revision_reason_options = Array(local_assigns[:revision_reason_options]) %>
+<% quote_deleted = ActiveModel::Type::Boolean.new.cast(local_assigns[:quote_deleted]) %>
+<% quote_reopened = ActiveModel::Type::Boolean.new.cast(local_assigns[:quote_reopened]) %>
+<% seller_signature_image_url = local_assigns[:seller_signature_image_url].to_s.presence %>
+<% seller_stamp_image_url = local_assigns[:seller_stamp_image_url].to_s.presence %>
+<% watermark_text = local_assigns[:watermark_text].to_s.strip.presence %>
+<% watermark_image_url = local_assigns[:watermark_image_url].to_s.strip.presence %>
+<% quote_number_text = source_snapshot ? quote_document_number_value_from_snapshot(source_snapshot, document_kind).to_s : quote_document_number_value(quote, document_kind).to_s %>
+<% title_text = quote_public_title(snapshot: source_snapshot, quote: quote, document_kind: document_kind) %>
+<% hero_meta_rows = quote_public_secondary_meta(snapshot: source_snapshot, quote: quote, template: template, document_kind: document_kind, include_status: false) %>
+<% scope_text = source_snapshot ? source_snapshot["scope_of_supply"].to_s : quote.scope_of_supply.to_s %>
+<% scope_nodes = quote_scope_list_nodes(scope_text) %>
+<% footer_note = template.resolved_footer_note(document_kind) %>
+<% formal_closing_block = source_snapshot ? (source_snapshot["formal_closing_block"].is_a?(Hash) ? source_snapshot["formal_closing_block"] : {}) : quote.formal_closing_block_data %>
+<% formal_closing_settlement_rows = quote_formal_closing_settlement_rows(formal_closing_block, quote: quote, document_kind: document_kind) %>
+<% formal_closing_signature_flags = quote_formal_closing_signature_flags(formal_closing_block, has_seller_signature_image: seller_signature_image_url.present?, has_seller_stamp_image: seller_stamp_image_url.present?) %>
+<% show_formal_closing_section = quote_show_formal_closing_block?(formal_closing_block, quote: quote, document_kind: document_kind, has_seller_signature_image: seller_signature_image_url.present?, has_seller_stamp_image: seller_stamp_image_url.present?) %>
+<% show_scope_of_supply = document_kind != "pi" && template.show_scope_of_supply && scope_nodes.any? %>
+
+<% company_address = quote.company.address.to_s.strip %>
+<% company_phone = quote.company.phone.to_s.strip %>
+<% company_email = quote.company.email.to_s.strip %>
+<% company_website = quote.company.website.to_s.strip %>
+<% buyer_company = source_snapshot ? source_snapshot["customer_name"].to_s.strip : quote.customer.name.to_s.strip %>
+<% buyer_contact = source_snapshot ? source_snapshot["customer_contact_name"].to_s.strip : quote.customer.contact_name.to_s.strip %>
+<% buyer_email = source_snapshot ? source_snapshot["customer_email"].to_s.strip : quote.customer.email.to_s.strip %>
+<% buyer_phone = source_snapshot ? source_snapshot["customer_phone"].to_s.strip : quote.customer.formatted_phone.to_s.strip %>
+<% buyer_address = source_snapshot ? source_snapshot["customer_address"].to_s.strip : quote.customer.address.to_s.strip %>
+
+<% quote_items =
+     if source_snapshot
+       Array(source_snapshot["quote_items"]).map do |item|
+         item_hash = item.is_a?(Hash) ? item.stringify_keys : {}
+         {
+           name: item_hash["product_name"].to_s.squish.presence || item_hash["description"].to_s.squish.presence || t("quote_document.labels.item"),
+           description: item_hash["description"].to_s.squish,
+           quantity: item_hash["quantity"],
+           unit_price: item_hash["unit_price"],
+          amount: item_hash["amount"],
+          image: item_hash["product_image_path"],
+           item_type: item_hash["item_type"].to_s,
+           specs: quote_public_snapshot_item_specs(item_hash),
+           addons: quote_public_snapshot_item_addons(item_hash)
+         }
+       end
+     else
+      quote.quote_items.ordered.map do |item|
+        {
+          name: item.product&.name.presence || item.description.presence || t("quote_document.labels.item"),
+          description: item.description.to_s.squish,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          amount: item.line_total,
+          image: item.effective_image_attachment,
+          item_type: item.item_type.to_s,
+          specs: item.specification_pairs,
+          addons: item.addon_charge_entries
+        }
+      end
+     end %>
+
+<% subtotal =
+     if source_snapshot
+       quote_items.sum { |item| item[:amount].to_d }
+     else
+       quote.subtotal.to_d
+     end %>
+<% tax = (source_snapshot ? source_snapshot["tax_amount"] : quote.tax_amount).to_d %>
+<% shipping = (source_snapshot ? source_snapshot["shipping_amount"] : quote.shipping_amount).to_d %>
+<% discount = (source_snapshot ? source_snapshot["discount_amount"] : quote.discount_amount).to_d %>
+<% has_discount = discount.positive? %>
+<% grand_total = subtotal + tax + shipping - discount %>
+
+<% advanced_mode = source_snapshot ? ActiveModel::Type::Boolean.new.cast(source_snapshot["advanced_mode"]) : quote.advanced_mode %>
+<% advanced_trade_terms = source_snapshot ? quote_normalized_supplementary_hash(source_snapshot["advanced_trade_terms"], section: :trade_terms) : quote.advanced_trade_terms_data %>
+<% advanced_logistics = source_snapshot ? quote_normalized_supplementary_hash(source_snapshot["advanced_logistics"], section: :logistics) : quote.advanced_logistics_data %>
+<% configuration_rows = quote_configuration_block_rows(source_snapshot ? (source_snapshot["configuration_block"].is_a?(Hash) ? source_snapshot["configuration_block"] : {}) : quote.configuration_block_data) %>
+<% detail_pictures_block = source_snapshot ? (source_snapshot["detail_pictures_block"].is_a?(Hash) ? source_snapshot["detail_pictures_block"] : {}) : quote.detail_pictures_block_data %>
+<% detail_picture_cards = quote_detail_picture_items(detail_pictures_block).filter_map { |item| (src = quote_detail_picture_image_src(item)).present? ? item.merge(image_src: src) : nil } %>
+<% visibility_map = source_snapshot ? (source_snapshot["advanced_visibility"].is_a?(Hash) ? source_snapshot["advanced_visibility"] : {}) : quote.advanced_visibility_data(template: template) %>
+<% show_trade_terms_advanced = advanced_mode && (visibility_map.key?("show_trade_terms_advanced") ? ActiveModel::Type::Boolean.new.cast(visibility_map["show_trade_terms_advanced"]) : advanced_trade_terms.any?) %>
+<% show_logistics_block = advanced_mode && (visibility_map.key?("show_logistics_block") ? ActiveModel::Type::Boolean.new.cast(visibility_map["show_logistics_block"]) : advanced_logistics.any?) %>
+<% trade_rows = quote_commercial_summary_rows(advanced_trade_terms, summary_max_chars: 180) %>
+<% logistics_rows = quote_logistics_summary_rows(advanced_logistics, summary_max_chars: 220) %>
+<% commercial_note_rows = quote_module_truncated_narrative_rows(trade_rows) %>
+<% logistics_note_rows = quote_module_truncated_narrative_rows(logistics_rows) %>
+<% container_loading_block = source_snapshot ? (source_snapshot["container_loading_block"].is_a?(Hash) ? source_snapshot["container_loading_block"] : {}) : quote.container_loading_block_data %>
+<% container_loading_rows = quote_container_loading_rows(container_loading_block) %>
+<% container_loading_headers = quote_container_loading_headers(container_loading_block) %>
+<% container_loading_note_enabled = quote_container_loading_note_enabled?(container_loading_block, rows: container_loading_rows) %>
+<% container_loading_show_note_column = quote_container_loading_note_column?(container_loading_rows, note_enabled: container_loading_note_enabled) %>
+<% container_loading_note = quote_container_loading_note(advanced_logistics) %>
+<% show_configuration = advanced_mode && configuration_rows.any? %>
+<% show_detail_pictures = advanced_mode && ActiveModel::Type::Boolean.new.cast(detail_pictures_block["enabled"]) && detail_picture_cards.any? %>
+<% show_container_loading = show_logistics_block && ((ActiveModel::Type::Boolean.new.cast(container_loading_block["enabled"]) && container_loading_rows.any?) || container_loading_note.present?) %>
+<% terms_lines = [] %>
+<% if template.show_terms_section %>
+  <% payment_term_value = source_snapshot ? source_snapshot["payment_term"] : quote.payment_term %>
+  <% trade_term_value = source_snapshot ? source_snapshot["trade_term"] : quote.trade_term %>
+  <% terms_text_value = source_snapshot ? source_snapshot["terms_text"] : quote.terms_text %>
+  <% legal_disclaimer_value = source_snapshot ? source_snapshot["legal_disclaimer"] : quote.legal_disclaimer %>
+  <% delivery_notes_value = source_snapshot ? source_snapshot["delivery_notes"] : quote.delivery_notes %>
+  <% terms_lines << [ t("quote_document.labels.payment_terms"), payment_term_value ] if template.show_payment_term && payment_term_value.present? %>
+  <% terms_lines << [ t("quote_document.labels.trade_terms"), trade_term_value ] if trade_term_value.present? %>
+  <% terms_lines << [ t("quote_document.labels.terms"), terms_text_value ] if terms_text_value.present? %>
+  <% terms_lines << [ t("quote_document.labels.legal_disclaimer"), legal_disclaimer_value ] if legal_disclaimer_value.present? %>
+  <% terms_lines << [ t("quote_document.labels.delivery_notes"), delivery_notes_value ] if delivery_notes_value.present? %>
+<% end %>
+
+<article class="quote-document public-quote-document public-quote-themed public-quote-v2 public-layout-<%= template.layout_type %> public-density-<%= template.layout_density.presence || 'standard' %><%= ' quote-watermarked' if watermark_text.present? || watermark_image_url.present? %>"
+         <%= watermark_text.present? ? "data-watermark=\"#{h(watermark_text)}\"" : "" %>>
+  <% if watermark_image_url.present? %>
+    <img src="<%= watermark_image_url %>" alt="<%= t('quote_document.labels.watermark', default: 'Watermark') %>" class="quote-public-watermark-image">
+  <% end %>
+
+  <% if quote_deleted %>
+    <div class="quote-public-system-banner is-danger"><%= t("public_quote_shares.system.quote_inactive") %></div>
+  <% elsif quote_reopened %>
+    <div class="quote-public-system-banner is-warning"><%= t("public_quote_shares.system.quote_updating") %></div>
+  <% end %>
+
+  <header class="quote-public-hero">
+    <div class="quote-public-hero-main">
+      <p class="quote-public-hero-eyebrow"><%= template.resolved_document_title(document_kind).titleize %></p>
+      <h1><%= title_text %></h1>
+      <div class="quote-public-hero-meta">
+        <% hero_meta_rows.each do |row| %>
+          <span><strong><%= row[:label] %>:</strong> <%= row[:value] %></span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="quote-public-hero-side">
+      <% if template.show_logo && quote.company.logo.attached? %>
+        <%= image_tag quote.company.logo, class: "quote-public-hero-logo", alt: quote.company.name %>
+      <% else %>
+        <span class="quote-public-hero-mark"><%= quote.company.name %></span>
+      <% end %>
+
+      <div class="quote-public-hero-actions no-print">
+        <% if show_public_actions && decision_state == "active" && share.present? %>
+          <button type="button" class="quote-public-action-btn quote-public-action-btn--primary js-open-accept-request"><%= t("public_quote_shares.actions.accept_quote", default: "Accept Quotation") %></button>
+          <button type="button" class="quote-public-action-btn js-open-revision-request"><%= t("public_quote_shares.actions.request_revision", default: "Request Revision") %></button>
+        <% end %>
+        <button type="button" class="<%= ui_button_classes(:secondary, "quote-utility-btn") %>" onclick="window.print()"><%= t("public_quote_shares.actions.print", default: "Print") %></button>
+      </div>
+    </div>
+  </header>
+
+  <section class="quote-public-facts">
+    <article class="quote-public-fact-card">
+      <h3><%= t("quote_document.labels.seller") %></h3>
+      <dl>
+        <div><dt><%= t("quote_document.labels.company", default: "Company") %></dt><dd><%= quote.company.name %></dd></div>
+        <% sales_owner = source_snapshot ? (source_snapshot["sales_owner_name"].presence || source_snapshot["customer_owner_name"].presence) : (template.show_customer_owner && Customer.internal_owner_enabled? ? quote.customer.internal_owner_display_name.presence : nil) %>
+        <% if sales_owner.present? && sales_owner != "-" %><div><dt><%= t("quote_document.labels.sales_owner") %></dt><dd><%= sales_owner %></dd></div><% end %>
+        <% if company_address.present? %><div><dt><%= t("quote_document.labels.address", default: "Address") %></dt><dd><%= company_address %></dd></div><% end %>
+        <% if company_phone.present? %><div><dt><%= t("quote_document.labels.phone", default: "Phone") %></dt><dd><%= company_phone %></dd></div><% end %>
+        <% if company_email.present? %><div><dt><%= t("quote_document.labels.email", default: "Email") %></dt><dd><%= company_email %></dd></div><% end %>
+        <% if company_website.present? %><div><dt><%= t("quote_document.labels.website", default: "Website") %></dt><dd><%= company_website %></dd></div><% end %>
+      </dl>
+    </article>
+
+    <article class="quote-public-fact-card">
+      <h3><%= t("quote_document.labels.buyer") %></h3>
+      <dl>
+        <% if buyer_company.present? %><div><dt><%= t("quote_document.labels.company", default: "Company") %></dt><dd><%= buyer_company %></dd></div><% end %>
+        <% if buyer_contact.present? %><div><dt><%= t("quote_document.labels.primary_contact", default: "Primary Contact") %></dt><dd><%= buyer_contact %></dd></div><% end %>
+        <% if buyer_email.present? %><div><dt><%= t("quote_document.labels.email", default: "Email") %></dt><dd><%= buyer_email %></dd></div><% end %>
+        <% if buyer_phone.present? %><div><dt><%= t("quote_document.labels.phone", default: "Phone") %></dt><dd><%= buyer_phone %></dd></div><% end %>
+        <% if buyer_address.present? %><div><dt><%= t("quote_document.labels.address", default: "Address") %></dt><dd><%= buyer_address %></dd></div><% end %>
+      </dl>
+    </article>
+
+    <article class="quote-public-fact-card">
+      <h3><%= t("quote_document.labels.quote_info", default: "Quote Info") %></h3>
+      <dl>
+        <div><dt><%= template.resolved_document_number_label(document_kind) %></dt><dd><%= quote_number_text %></dd></div>
+        <% issued_on_value = source_snapshot ? source_snapshot["issued_on"].to_s.squish : quote.issued_on&.strftime("%Y-%m-%d").to_s %>
+        <% if issued_on_value.present? %><div><dt><%= document_kind == "pi" ? t("quote_document.labels.pi_date") : t("quote_document.labels.quote_date") %></dt><dd><%= issued_on_value %></dd></div><% end %>
+        <% valid_until_value = source_snapshot ? source_snapshot["valid_until"].to_s.squish : quote.valid_until&.strftime("%Y-%m-%d").to_s %>
+        <% if template.show_valid_until && valid_until_value.present? %><div><dt><%= t("quote_document.labels.valid_until") %></dt><dd><%= valid_until_value %></dd></div><% end %>
+        <% currency_value = source_snapshot ? source_snapshot["currency"].to_s.squish : quote.currency.to_s.squish %>
+        <% if template.show_currency && currency_value.present? %><div><dt><%= t("quote_document.labels.currency") %></dt><dd><%= currency_value %></dd></div><% end %>
+        <% trade_term_value = source_snapshot ? source_snapshot["trade_term"].to_s.squish : quote.trade_term.to_s.squish %>
+        <% if trade_term_value.present? %><div><dt><%= t("quote_document.labels.trade_terms") %></dt><dd><%= trade_term_value %></dd></div><% end %>
+      </dl>
+    </article>
+  </section>
+
+  <section class="quote-public-core">
+    <div class="table-responsive quote-public-core-table">
+      <table class="quote-items-table quote-doc-table">
+        <colgroup>
+          <col class="quote-col-description">
+          <col class="quote-col-qty">
+          <col class="quote-col-money">
+          <col class="quote-col-money">
+        </colgroup>
+        <thead>
+          <tr>
+            <th><%= t("quote_document.labels.item", default: "Item") %></th>
+            <th class="quote-col-right"><%= t("quote_document.labels.qty", default: "Qty") %></th>
+            <th class="quote-col-right quote-col-money"><%= t("quote_document.labels.unit_price", default: "Unit Price") %></th>
+            <th class="quote-col-right quote-col-money"><%= t("quote_document.labels.line_total", default: "Line Total") %></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% quote_items.each do |item| %>
+            <% optional_description = item[:description].presence if item[:description].present? && item[:description] != item[:name] %>
+            <% fee_like_row = item[:item_type].to_s.start_with?("fee_") %>
+            <% has_inline_image = template.show_product_images && !fee_like_row && item[:image].present? %>
+            <tr class="<%= fee_like_row ? 'quote-public-row--charge' : 'quote-public-row--product' %>">
+              <td>
+                <div class="quote-item-desc quote-item-desc--public <%= 'has-inline-image' if has_inline_image %>">
+                  <% if has_inline_image %>
+                    <% image_render_source = item[:image] %>
+                    <% if image_render_source.respond_to?(:attached?) && image_render_source.attached? && image_render_source.respond_to?(:variant) %>
+                      <% image_render_source = image_render_source.variant(resize_to_limit: [136, 136]) %>
+                    <% end %>
+                    <span class="quote-public-item-image-wrap">
+                      <%= image_tag image_render_source, class: "quote-item-image quote-public-item-image", alt: item[:name], loading: "lazy" %>
+                    </span>
+                  <% end %>
+                  <div class="quote-item-desc-content">
+                    <div class="quote-item-desc-main"><%= item[:name] %></div>
+                    <% if optional_description.present? %><p class="quote-item-desc-optional"><%= optional_description %></p><% end %>
+                    <% if item[:specs].any? %>
+                      <div class="quote-item-desc-group">
+                        <p class="quote-item-desc-group-label"><%= source_snapshot&.dig("spec_label").presence || template.spec_label.presence || t("quote_document.labels.spec", default: "Spec") %></p>
+                        <ul>
+                          <% item[:specs].each do |pair| %>
+                            <li><strong><%= pair[:key] %></strong><span><%= pair[:value] %></span></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    <% end %>
+                    <% if item[:addons].any? %>
+                      <div class="quote-item-desc-group quote-item-desc-group--addon">
+                        <p class="quote-item-desc-group-label"><%= source_snapshot&.dig("addon_label").presence || template.addon_label.presence || t("quote_document.labels.addon", default: "Add-on") %></p>
+                        <ul>
+                          <% item[:addons].each do |entry| %>
+                            <li><strong><%= entry[:name] %></strong><span><%= quote_money(entry[:amount], (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></span></li>
+                          <% end %>
+                        </ul>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+              </td>
+              <td class="quote-col-right"><%= item[:quantity] %></td>
+              <td class="quote-col-right quote-col-money"><%= quote_money(item[:unit_price], (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></td>
+              <td class="quote-col-right quote-col-money"><%= quote_money(item[:amount], (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <footer class="quote-public-core-footer">
+      <aside class="quote-public-settlement quote-public-settlement--footer">
+        <h3><%= t("quote_document.sections.settlement_summary", default: "Settlement Summary") %></h3>
+        <p><span><%= t("quote_document.labels.subtotal") %></span><strong><%= quote_money(subtotal, (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></strong></p>
+        <% if template.show_tax %><p><span><%= t("quote_document.labels.tax_vat") %></span><strong><%= quote_money(tax, (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></strong></p><% end %>
+        <% if template.show_shipping %><p><span><%= t("quote_document.labels.shipping") %></span><strong><%= quote_money(shipping, (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></strong></p><% end %>
+        <% if has_discount %><p><span><%= t("quote_document.labels.discount") %></span><strong>-<%= quote_money(discount, (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></strong></p><% end %>
+        <p class="is-grand"><span><%= t("quote_document.labels.grand_total") %></span><strong><%= quote_money(grand_total, (source_snapshot ? source_snapshot["currency"] : quote.currency), show_symbol: template.show_currency) %></strong></p>
+      </aside>
+    </footer>
+  </section>
+
+  <% if show_trade_terms_advanced && trade_rows.any? %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= quote_trade_terms_section_title %></h3>
+      <dl><% trade_rows.each do |row| %><div><dt><%= row[:label] %></dt><dd><%= row[:value] %></dd></div><% end %></dl>
+    </section>
+  <% end %>
+  <% if show_configuration %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= t("quote_document.sections.configuration", default: "Configuration") %></h3>
+      <dl><% configuration_rows.each do |row| %><div><dt><%= row[:label] %></dt><dd><%= row[:value] %></dd></div><% end %></dl>
+    </section>
+  <% end %>
+  <% if show_detail_pictures %>
+    <section class="quote-section-block quote-section-block--gallery" data-product-lightbox-scope>
+      <h3><%= t("quote_document.sections.detail_pictures", default: "Detail Pictures") %></h3>
+      <div class="quote-detail-pictures-grid">
+        <% detail_picture_cards.each do |item| %>
+          <figure class="quote-detail-picture-card">
+            <button type="button" class="quote-detail-picture-zoom" data-product-lightbox-trigger data-full-src="<%= item[:image_src] %>" data-alt="Detail picture <%= item[:position] %>">
+              <img src="<%= item[:image_src] %>" alt="Detail picture <%= item[:position] %>" class="quote-detail-picture-image">
+            </button>
+            <% if item[:caption].present? %><figcaption class="quote-detail-picture-caption"><%= item[:caption] %></figcaption><% end %>
+          </figure>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+  <% if show_logistics_block && logistics_rows.any? %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= quote_logistics_section_title %></h3>
+      <dl><% logistics_rows.each do |row| %><div><dt><%= row[:label] %></dt><dd><%= row[:value] %></dd></div><% end %></dl>
+    </section>
+  <% end %>
+  <% if show_container_loading %>
+    <section class="quote-section-block quote-section-block--container-loading">
+      <h3><%= quote_container_loading_section_title %></h3>
+      <% if container_loading_rows.any? %>
+        <table class="quote-mini-table quote-mini-table--container-loading">
+          <thead>
+            <tr>
+              <th><%= container_loading_headers[:variant] %></th>
+              <th><%= container_loading_headers[:container_type] %></th>
+              <th><%= container_loading_headers[:capacity] %></th>
+              <% if container_loading_show_note_column %><th><%= container_loading_headers[:note] %></th><% end %>
+            </tr>
+          </thead>
+          <tbody>
+            <% container_loading_rows.each do |row| %>
+              <tr>
+                <td><%= row[:variant].presence || "-" %></td>
+                <td><%= row[:container_type].presence || "-" %></td>
+                <td><%= row[:capacity].presence || "-" %></td>
+                <% if container_loading_show_note_column %><td><%= row[:note].presence || "-" %></td><% end %>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      <% elsif container_loading_note.present? %>
+        <p><%= container_loading_note %></p>
+      <% end %>
+    </section>
+  <% end %>
+  <% if show_scope_of_supply %>
+    <section class="quote-section-block quote-section-block--scope quote-public-scope-list">
+      <h3><%= template.resolved_scope_of_supply_label %></h3>
+      <ul>
+        <% scope_nodes.each do |node| %>
+          <li class="is-level-<%= node[:level] %>"><%= node[:text] %></li>
+        <% end %>
+      </ul>
+    </section>
+  <% end %>
+  <% if show_trade_terms_advanced && commercial_note_rows.any? %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= t("quote_document.sections.commercial_notes", default: "Commercial Notes") %></h3>
+      <dl>
+        <% commercial_note_rows.each do |row| %>
+          <div>
+            <dt><%= row[:label] %></dt>
+            <dd><%= row[:value] %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+  <% if show_logistics_block && logistics_note_rows.any? %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= t("quote_document.sections.logistics_notes", default: "Logistics Notes") %></h3>
+      <dl>
+        <% logistics_note_rows.each do |row| %>
+          <div>
+            <dt><%= row[:label] %></dt>
+            <dd><%= row[:value] %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+  <% if terms_lines.any? %>
+    <section class="quote-section-block quote-public-facts-block">
+      <h3><%= t("quote_document.sections.terms_and_conditions") %></h3>
+      <dl>
+        <% terms_lines.each do |label, value| %>
+          <div>
+            <dt><%= label %></dt>
+            <dd><%= value %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </section>
+  <% end %>
+
+  <% if show_formal_closing_section %>
+    <section class="quote-section-block quote-section-block--formal-closing quote-public-signoff">
+      <h3><%= t("quote_document.sections.formal_closing", default: "Formal Closing") %></h3>
+      <% if formal_closing_settlement_rows.any? %>
+        <dl class="quote-public-signoff-facts">
+          <% formal_closing_settlement_rows.each do |row| %>
+            <div><dt><%= row[:label] %></dt><dd><%= row[:value] %></dd></div>
+          <% end %>
+        </dl>
+      <% end %>
+      <% if formal_closing_signature_flags[:seller_stamp_enabled] || formal_closing_signature_flags[:seller_signature_enabled] || formal_closing_signature_flags[:buyer_signature_line_enabled] %>
+        <div class="quote-public-signoff-signatures">
+          <div class="quote-public-signoff-media">
+            <% if formal_closing_signature_flags[:seller_stamp_enabled] && seller_stamp_image_url.present? %>
+              <figure>
+                <figcaption><%= t("quote_document.labels.seller_stamp_line", default: "Seller Stamp") %></figcaption>
+                <img src="<%= seller_stamp_image_url %>" alt="<%= t("quote_document.labels.seller_stamp_line", default: "Seller Stamp") %>" class="quote-sales-signature-image">
+              </figure>
+            <% end %>
+            <% if formal_closing_signature_flags[:seller_signature_enabled] && seller_signature_image_url.present? %>
+              <figure>
+                <figcaption><%= t("quote_document.labels.seller_signature_line", default: "Seller Signature") %></figcaption>
+                <img src="<%= seller_signature_image_url %>" alt="<%= t("quote_document.labels.seller_signature_line", default: "Seller Signature") %>" class="quote-sales-signature-image">
+              </figure>
+            <% end %>
+          </div>
+          <% if formal_closing_signature_flags[:buyer_signature_line_enabled] %>
+            <div class="quote-public-signoff-buyer-line">
+              <span><%= t("quote_document.labels.buyer_signature_line", default: "Buyer Signature") %></span>
+              <div class="quote-public-signoff-placeholder"></div>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+  <% end %>
+
+  <% if footer_note.present? %>
+    <section class="quote-section-block quote-public-tail">
+      <h3><%= t("quote_document.sections.footer", default: "Footer") %></h3>
+      <%= simple_format(footer_note) %>
+    </section>
+  <% end %>
+
+  <section class="no-print quote-public-system">
+    <% if preview_mode %>
+      <h3><%= t("public_quote_shares.preview_mode.title") %></h3>
+      <p><%= t("public_quote_shares.preview_mode.body") %></p>
+    <% elsif quote.pi_document? %>
+      <h3><%= t("quotes.view.show.related_documents_title") %></h3>
+      <p><%= t("public_quote_shares.pi_document_notice", default: "This PI link is document-only. Contact your sales representative for any changes.") %></p>
+    <% else %>
+      <h3><%= t("public_quote_shares.system.next_step", default: "Decision Status") %></h3>
+      <% if has_newer_revision %>
+        <p class="is-warning">
+          <%= t("public_quote_shares.system.newer_revision", default: "A newer revision is available.") %>
+          <% if latest_share_url.present? %><%= link_to t("public_quote_shares.system.open_latest", default: "Open latest revision"), latest_share_url, class: "quote-back-link-inline" %><% end %>
+        </p>
+      <% end %>
+      <% if status_message.present? %><p><%= status_message %></p><% end %>
+      <% if decision_state == "accepted" %>
+        <p class="is-success"><%= t("public_quote_shares.system.accepted_on", default: "Quotation Accepted on %{time}", time: quote.accepted_at&.strftime("%Y-%m-%d %H:%M")) %></p>
+      <% elsif decision_state == "changes_requested" %>
+        <p class="is-warning"><%= t("public_quote_shares.system.revision_requested_on", default: "Revision Requested on %{time}", time: quote.changes_requested_at&.strftime("%Y-%m-%d %H:%M")) %></p>
+      <% elsif decision_state == "active" %>
+        <p><%= t("public_quote_shares.decision_intro_active", default: "Review this quotation and choose how you want to proceed.") %></p>
+      <% else %>
+        <p><%= t("public_quote_shares.system.not_actionable", default: "This revision is not currently open for public decision.") %></p>
+      <% end %>
+    <% end %>
+  </section>
+
+  <% if template.show_saas_branding %>
+    <p class="quote-public-footnote"><%= template.saas_branding_footer_text %></p>
+  <% end %>
+</article>
+
+<% if show_public_actions && decision_state == "active" && share.present? %>
+  <div class="quote-revision-modal js-accept-modal" hidden>
+    <div class="quote-revision-modal-backdrop js-close-accept-request"></div>
+    <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="accept-request-title">
+      <div class="quote-revision-modal-head">
+        <h4 id="accept-request-title"><%= t("public_quote_shares.actions.confirm_accept", default: "Confirm Acceptance") %></h4>
+        <button type="button" class="quote-revision-modal-close js-close-accept-request" aria-label="<%= t("actions.close", default: "Close") %>">x</button>
+      </div>
+      <p class="quote-revision-modal-hint"><%= t("public_quote_shares.actions.confirm_accept_hint", default: "Please confirm that you want to accept this quotation.") %></p>
+      <%= form_with url: accept_public_quote_share_path(share.token), method: :post, local: true, html: { class: "quote-public-inline-form quote-decision-accept" } do %>
+        <div class="quote-public-revision-form-actions">
+          <button type="submit"><%= t("public_quote_shares.actions.confirm_accept_submit", default: "Confirm Acceptance") %></button>
+          <button type="button" class="quote-decision-cancel js-close-accept-request"><%= t("actions.cancel", default: "Cancel") %></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+  <div class="quote-revision-modal js-revision-modal" hidden>
+    <div class="quote-revision-modal-backdrop js-close-revision-request"></div>
+    <div class="quote-revision-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="revision-request-title">
+      <div class="quote-revision-modal-head">
+        <h4 id="revision-request-title"><%= t("public_quote_shares.actions.request_revision", default: "Request Revision") %></h4>
+        <button type="button" class="quote-revision-modal-close js-close-revision-request" aria-label="<%= t("actions.close", default: "Close") %>">x</button>
+      </div>
+      <%= form_with url: request_revision_public_quote_share_path(share.token), method: :post, local: true, html: { class: "quote-public-revision-form js-revision-request-form" } do |f| %>
+        <p class="quote-revision-modal-hint"><%= t("public_quote_shares.actions.request_revision_hint", default: "Select a reason, then add optional details.") %></p>
+        <div class="quote-revision-reason-grid">
+          <% revision_reason_options.each_with_index do |(value, label), idx| %>
+            <% input_id = "revision_reason_#{idx}" %>
+            <label class="quote-revision-reason-option" for="<%= input_id %>">
+              <%= radio_button_tag :request_reason, value, idx.zero?, id: input_id %>
+              <span><%= label %></span>
+            </label>
+          <% end %>
+        </div>
+        <div class="quote-revision-custom">
+          <%= f.label :client_message, t("public_quote_shares.actions.custom_details", default: "Custom details (optional)") %>
+          <%= f.text_area :client_message, rows: 3, maxlength: Quote::MAX_CHANGES_REQUEST_MESSAGE_LENGTH, placeholder: t("public_quote_shares.actions.custom_details_placeholder", default: "Describe specific changes if needed"), class: ui_input_classes %>
+        </div>
+        <div class="quote-public-revision-form-actions">
+          <button type="submit"><%= t("public_quote_shares.actions.confirm_revision_submit", default: "Confirm Revision Request") %></button>
+          <button type="button" class="quote-decision-cancel js-close-revision-request"><%= t("actions.cancel", default: "Cancel") %></button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

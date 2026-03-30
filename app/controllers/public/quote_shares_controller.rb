@@ -122,6 +122,7 @@ module Public
 
     def allow_public_accept_action?
       quote = @share.quote
+      return false if quote.pi_document?
       return false if quote.expired_by_date?
       return false if quote.workflow_state == "expired"
       return false unless allow_public_action_base?(quote)
@@ -131,6 +132,7 @@ module Public
 
     def allow_public_revision_action?
       quote = @share.quote
+      return false if quote.pi_document?
       return false unless allow_public_action_base?(quote)
 
       quote.expired_by_date? || %w[sent viewed negotiating expired].include?(quote.status.to_s)

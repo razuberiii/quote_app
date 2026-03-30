@@ -85,6 +85,29 @@ class DealOutcomeAnalyticsServiceTest < ActiveSupport::TestCase
     assert_equal I18n.t("analytics.reason_labels.win.buyer_relationship"), result[:win_reasons].first[:label]
   end
 
+  test "summary excludes pi documents" do
+    source = make_won("price_accepted")
+    Quote.create!(
+      company: @company,
+      customer: @customer,
+      template: source.template,
+      source_quote: source,
+      quote_no: "QT-OUTCOME-PI-#{SecureRandom.hex(4).upcase}",
+      revision_number: 1,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "won",
+      win_reason: "buyer_relationship",
+      win_reason_detail: "pi should be excluded",
+      quote_items_attributes: [ { description: "PI line", unit_price: 100, quantity: 1 } ]
+    )
+
+    result = DealOutcomeAnalyticsService.new(company: @company).summary
+
+    assert_equal 1, result[:win_reasons].sum { |row| row[:count] }
+    assert_equal I18n.t("analytics.reason_labels.win.price_accepted"), result[:win_reasons].first[:label]
+  end
+
   private
 
   def make_won(win_reason, detail: "good deal")

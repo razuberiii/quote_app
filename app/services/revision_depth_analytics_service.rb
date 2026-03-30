@@ -14,8 +14,7 @@ class RevisionDepthAnalyticsService
   #   ...
   # ]
   def win_rate_by_revision
-    rows = Quote
-      .where(company_id: @company.id)
+    rows = base_quotes
       .where(status: %w[won lost])
       .group(:revision_number)
       .select("revision_number, COUNT(*) AS total, SUM(CASE WHEN status = 'won' THEN 1 ELSE 0 END) AS wins")
@@ -38,11 +37,14 @@ class RevisionDepthAnalyticsService
   # Returns a simple distribution of all quote counts by revision_number (regardless of outcome).
   # { 1 => 58, 2 => 31, 3 => 12 }
   def revision_depth_distribution
-    Quote
-      .where(company_id: @company.id)
+    base_quotes
       .group(:revision_number)
       .count
       .sort
       .to_h
+  end
+
+  def base_quotes
+    @base_quotes ||= Quote.where(company_id: @company.id).excluding_pi_documents
   end
 end

@@ -103,61 +103,30 @@ class QuoteTest < ActiveSupport::TestCase
     assert_equal "Faster Delivery", quote.display_win_reason
   end
 
-  test "advanced visibility derives from template defaults and explicit quote flags" do
-    template = quote_templates(:one)
-    template.update!(
-      enable_advanced_by_default: true,
-      advanced_defaults: { "trade_terms_hs_code" => "8703.10" },
-      advanced_visibility_defaults: {}
-    )
-
+  test "advanced visibility derives from quote values and explicit quote flags only" do
     quote = Quote.new(
       company: companies(:one),
       customer: customers(:one),
-      template: template,
-      currency: "USD",
-      issued_on: Date.current,
-      status: "draft"
-    )
-    quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
-
-    visibility = quote.advanced_visibility_data(template: template)
-    assert_equal true, visibility["show_trade_terms_advanced"]
-    assert_equal false, visibility["show_logistics_block"]
-    assert_not quote.advanced_section_enabled?("show_trade_terms_advanced", template: template)
-
-    quote.advanced_mode = true
-    quote.advanced_visibility = { "show_logistics_block" => true }
-    visibility = quote.advanced_visibility_data(template: template)
-    assert_equal true, visibility["show_trade_terms_advanced"]
-    assert_equal true, visibility["show_logistics_block"]
-    assert quote.advanced_section_enabled?("show_trade_terms_advanced", template: template)
-    assert quote.advanced_section_enabled?("show_logistics_block", template: template)
-  end
-
-  test "explicitly cleared advanced value blocks template default refill" do
-    template = quote_templates(:one)
-    template.update!(
-      enable_advanced_by_default: true,
-      advanced_defaults: { "trade_terms_hs_code" => "8703.10" },
-      advanced_visibility_defaults: {}
-    )
-
-    quote = Quote.new(
-      company: companies(:one),
-      customer: customers(:one),
-      template: template,
+      template: quote_templates(:one),
       currency: "USD",
       issued_on: Date.current,
       status: "draft",
-      advanced_trade_terms: { "hs_code" => "" }
+      advanced_trade_terms: { "hs_code" => "8703.10" }
     )
     quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
 
-    quote.apply_template_advanced_defaults!
+    visibility = quote.advanced_visibility_data
+    assert_equal true, visibility["show_trade_terms_advanced"]
+    assert_equal false, visibility["show_logistics_block"]
+    assert_not quote.advanced_section_enabled?("show_trade_terms_advanced")
 
-    assert_equal "", quote.advanced_trade_terms["hs_code"]
-    assert_equal({}, quote.advanced_trade_terms_data)
+    quote.advanced_mode = true
+    quote.advanced_visibility = { "show_logistics_block" => true }
+    visibility = quote.advanced_visibility_data
+    assert_equal true, visibility["show_trade_terms_advanced"]
+    assert_equal true, visibility["show_logistics_block"]
+    assert quote.advanced_section_enabled?("show_trade_terms_advanced")
+    assert quote.advanced_section_enabled?("show_logistics_block")
   end
 
   test "advanced section open state follows normalized non-empty values only" do
@@ -180,5 +149,239 @@ class QuoteTest < ActiveSupport::TestCase
     assert quote.advanced_sections_have_values?
     assert_equal({ "container_type" => "40HQ" }, quote.advanced_logistics_data)
     assert_equal({}, quote.advanced_trade_terms_data)
+  end
+
+  test "quote does not inject demo defaults when fields are blank" do
+    quote = Quote.new(
+      company: companies(:one),
+      customer: customers(:one),
+      template: quote_templates(:one),
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft"
+    )
+    quote.quote_items.build(description: "Item A", quantity: 1, unit_price: 100)
+
+    assert quote.valid?
+    assert_nil quote.payment_term
+    assert_nil quote.scope_of_supply
+    assert_equal false, quote.advanced_mode
+  end
+
+  test "pi document detection treats source-linked quote as pi profile" do
+    source_quote = quotes(:one)
+    pi_quote = Quote.create!(
+      company: source_quote.company,
+      customer: source_quote.customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft",
+      quote_items_attributes: [ { description: "PI Line", unit_price: 100, quantity: 1 } ]
+    )
+
+    assert pi_quote.pi_document?
+    assert_not pi_quote.can_generate_pi?
+  end
+
+  test "source quote can only have one pi quote" do
+    source_quote = quotes(:one)
+    Quote.create!(
+      company: source_quote.company,
+      customer: source_quote.customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft",
+      quote_items_attributes: [ { description: "PI One", unit_price: 100, quantity: 1 } ]
+    )
+
+    duplicate = Quote.new(
+      company: source_quote.company,
+      customer: source_quote.customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft"
+    )
+    duplicate.quote_items.build(description: "PI Two", unit_price: 120, quantity: 1)
+
+    assert_not duplicate.valid?
+    assert_includes duplicate.errors[:source_quote_id], "has already been taken"
+  end
+
+  test "pi quote can still be edited when status is not draft" do
+    source_quote = quotes(:one)
+    pi_quote = Quote.create!(
+      company: source_quote.company,
+      customer: source_quote.customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "sent",
+      quote_items_attributes: [ { description: "PI editable", unit_price: 100, quantity: 1 } ]
+    )
+
+    assert pi_quote.pi_document?
+    assert pi_quote.can_edit_revision?
+  end
+
+  test "excluding_pi_documents scope keeps only operational quote documents" do
+    source_quote = quotes(:one)
+    pi_quote = Quote.create!(
+      company: source_quote.company,
+      customer: source_quote.customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      currency: "USD",
+      issued_on: Date.current,
+      status: "draft",
+      quote_items_attributes: [ { description: "PI scope", unit_price: 100, quantity: 1 } ]
+    )
+
+    scoped_ids = source_quote.company.quotes.excluding_pi_documents.pluck(:id)
+
+    assert_includes scoped_ids, source_quote.id
+    assert_not_includes scoped_ids, pi_quote.id
+  end
+
+  test "configuration block follows quote override and explicit empty protects against lower layers" do
+    quote = quotes(:one)
+    quote.configuration_block = {
+      "rows" => [],
+      "notes" => ""
+    }
+
+    product_block = {
+      "rows" => [ { "label" => "Motor", "value" => "72V 7.5kW", "source" => "product", "position" => 1 } ],
+      "notes" => "Product fallback note"
+    }
+
+    resolved = quote.configuration_block_data(product_block: product_block, fallback_block: {})
+
+    assert_equal [], resolved["rows"]
+    assert_nil resolved["notes"]
+  end
+
+  test "detail pictures block keeps quote-specific items over product defaults" do
+    quote = quotes(:one)
+    quote.detail_pictures_block = {
+      "enabled" => true,
+      "items" => [
+        { "image_blob_id" => "9001", "caption" => "Quote specific", "source" => "quote_upload", "position" => 1 }
+      ]
+    }
+
+    product_block = {
+      "enabled" => true,
+      "items" => [
+        { "image_blob_id" => "3001", "caption" => "Product image", "source" => "product_gallery", "position" => 1 }
+      ]
+    }
+
+    resolved = quote.detail_pictures_block_data(product_block: product_block)
+
+    assert_equal true, resolved["enabled"]
+    assert_equal "9001", resolved["items"].first["image_blob_id"]
+    assert_equal "quote_upload", resolved["items"].first["source"]
+  end
+
+  test "configuration block keeps minimal label-value-position rows only" do
+    quote = quotes(:one)
+    quote.configuration_block = {
+      "enabled" => true,
+      "rows" => [
+        { "label" => "Motor", "value" => "72V", "position" => 2 },
+        { "label" => "", "value" => "invalid", "position" => 1 },
+        { "key" => "Controller", "value" => "Curtis", "position" => 1 }
+      ]
+    }
+
+    assert quote.valid?
+    rows = quote.configuration_block_data["rows"]
+    assert_equal 2, rows.size
+    assert_equal "Controller", rows.first["label"]
+    assert_equal "Motor", rows.last["label"]
+  end
+
+  test "detail pictures block supports mixed sources with unified order" do
+    quote = quotes(:one)
+    blob_a = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("a"), filename: "a.png", content_type: "image/png")
+    blob_b = ActiveStorage::Blob.create_and_upload!(io: StringIO.new("b"), filename: "b.png", content_type: "image/png")
+
+    quote.detail_pictures_block = {
+      "enabled" => true,
+      "items" => [
+        { "image_blob_id" => blob_b.id.to_s, "caption" => "Quote Upload", "source" => "quote_upload", "position" => 2 },
+        { "image_blob_id" => blob_a.id.to_s, "caption" => "Product Gallery", "source" => "product_gallery", "position" => 1 }
+      ]
+    }
+
+    assert quote.valid?
+    items = quote.detail_pictures_block_data["items"]
+    assert_equal 2, items.size
+    assert_equal "product_gallery", items.first["source"]
+    assert_equal "quote_upload", items.last["source"]
+  end
+
+  test "detail pictures block validates max item count" do
+    quote = quotes(:one)
+    quote.detail_pictures_block = {
+      "enabled" => true,
+      "items" => Array.new(Quote::MAX_DETAIL_PICTURES_ITEMS + 1) do |idx|
+        { "image_blob_id" => (idx + 1).to_s, "caption" => "Image #{idx}", "source" => "quote_upload", "position" => idx + 1 }
+      end
+    }
+
+    assert_not quote.valid?
+    assert_includes quote.errors[:detail_pictures_block], "items exceed limit (#{Quote::MAX_DETAIL_PICTURES_ITEMS})"
+  end
+
+  test "detail pictures block validates referenced blob existence" do
+    quote = quotes(:one)
+    quote.detail_pictures_block = {
+      "enabled" => true,
+      "items" => [
+        { "image_blob_id" => "999999", "caption" => "Missing image", "source" => "quote_upload", "position" => 1 }
+      ]
+    }
+
+    assert_not quote.valid?
+    assert_includes quote.errors[:detail_pictures_block], "contains missing images"
+  end
+
+  test "container loading block keeps lightweight rows sorted by position" do
+    quote = quotes(:one)
+    quote.container_loading_block = {
+      "enabled" => true,
+      "rows" => [
+        { "variant" => "14 seats with windows", "container_type" => "40HQ", "capacity" => "2 units", "note" => "", "position" => 2 },
+        { "variant" => "14 seats without windows", "container_type" => "40HQ", "capacity" => "4 units", "note" => "", "position" => 1 },
+        { "variant" => "", "container_type" => "", "capacity" => "", "note" => "", "position" => 3 }
+      ]
+    }
+
+    assert quote.valid?
+    rows = quote.container_loading_block_data["rows"]
+    assert_equal 2, rows.size
+    assert_equal "14 seats without windows", rows.first["variant"]
+    assert_equal "14 seats with windows", rows.last["variant"]
+  end
+
+  test "container loading block validates max row count" do
+    quote = quotes(:one)
+    quote.container_loading_block = {
+      "enabled" => true,
+      "rows" => Array.new(Quote::MAX_CONTAINER_LOADING_ROWS + 1) do |idx|
+        { "variant" => "Variant #{idx}", "container_type" => "40HQ", "capacity" => "2", "note" => "", "position" => idx + 1 }
+      end
+    }
+
+    assert_not quote.valid?
+    assert_includes quote.errors[:container_loading_block], "rows exceed limit (#{Quote::MAX_CONTAINER_LOADING_ROWS})"
   end
 end

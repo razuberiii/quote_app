@@ -118,4 +118,35 @@ class QuoteItemTest < ActiveSupport::TestCase
     assert item.item_image.attached?
     assert_equal "product_gallery", item.image_source
   end
+
+  test "defaults item_type to product_main" do
+    item = QuoteItem.create!(
+      quote: quotes(:one),
+      description: "Default type item",
+      unit_price: 100,
+      quantity: 1
+    )
+
+    assert_equal "product_main", item.item_type
+    assert_not item.fee_item?
+  end
+
+  test "ordered puts product rows before fee rows" do
+    quote = quotes(:one)
+    quote.quote_items.create!(
+      description: "Port Service Fee",
+      unit_price: 80,
+      quantity: 1,
+      item_type: "fee_port_service"
+    )
+    quote.quote_items.create!(
+      description: "Main Vehicle",
+      unit_price: 1000,
+      quantity: 1,
+      item_type: "product_main"
+    )
+
+    ordered_types = quote.quote_items.ordered.map(&:item_type)
+    assert_equal "product_main", ordered_types.first
+  end
 end

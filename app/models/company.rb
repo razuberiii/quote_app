@@ -17,6 +17,8 @@ class Company < ApplicationRecord
   has_many :products, dependent: :destroy
   has_many :spec_presets, dependent: :destroy
   has_many :addon_presets, dependent: :destroy
+  has_many :quote_presets, dependent: :destroy
+  has_one :quote_preset_master, dependent: :destroy
   has_many :quote_templates, dependent: :destroy
   has_many :quote_reason_options, dependent: :destroy
   has_many :company_documents, dependent: :destroy
@@ -26,6 +28,7 @@ class Company < ApplicationRecord
   validate :logo_constraints
 
   after_create :ensure_quote_template!
+  after_create :ensure_quote_preset_samples!
   before_validation :apply_default_settings
 
   def default_quote_template
@@ -34,6 +37,15 @@ class Company < ApplicationRecord
 
   def quote_template
     default_quote_template
+  end
+
+  def quote_preset_limit_per_module
+    users.where(
+      "role = :admin_role OR (role = :vip_role AND (vip_expires_at IS NULL OR vip_expires_at > :now))",
+      admin_role: User.roles[:admin],
+      vip_role: User.roles[:vip],
+      now: Time.current
+    ).exists? ? 50 : 10
   end
 
   def quote_template_or_default
@@ -65,6 +77,10 @@ class Company < ApplicationRecord
     ensure_default_template!
   end
 
+  def ensure_quote_preset_samples!
+    QuotePresetSampleSeeder.seed_for!(self)
+  end
+
   def build_default_template
     quote_templates.build(default_quote_template_attributes.merge(default_template: true))
   end
@@ -88,9 +104,6 @@ class Company < ApplicationRecord
       show_notes: true,
       show_scope_of_supply: false,
       default_scope_of_supply_content: "",
-      enable_advanced_by_default: false,
-      advanced_defaults: {},
-      advanced_visibility_defaults: {},
       show_terms_section: true,
       show_customer_owner: true,
       amount_decimals: 2,

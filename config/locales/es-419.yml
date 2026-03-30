@@ -83,10 +83,55 @@ es-419:
     product_presets: Preajustes
     presets: Preajustes
     template: Plantilla
+    quote_presets: Preajustes de cotización
     team: Equipo
     admin: Administración
     start_free: Comenzar gratis
     login: Iniciar sesión
+  quote_presets:
+    modules:
+      standard_fee_items: Cargos logísticos estándar
+    index:
+      hint: Administra preajustes por módulo y el mapeo maestro a nivel empresa.
+      module_limit_hint: "Límite de preajustes por módulo: %{limit}."
+      new_title: Crear preajuste
+      list_title: Biblioteca de preajustes
+      duplicate: Duplicar
+      delete_confirm: ¿Eliminar este preajuste?
+      empty: Aún no hay preajustes en este módulo.
+      master_title: Preajuste maestro
+      master_hint: Mapeo maestro único por empresa para el auto-relleno de cotizaciones.
+      master_enabled: Habilitar auto-relleno del preajuste maestro
+      none: Ninguno
+      save_master: Guardar mapeo maestro
+      yes: Sí
+      no: No
+    form:
+      module: Módulo
+      name: Nombre del preajuste
+      position: Orden
+      position_help: Los valores más pequeños aparecen primero.
+      active: Activo
+      enabled: Habilitado
+      save: Guardar preajuste
+      variant_header: Encabezado de versión
+      container_type_header: Encabezado de tipo de contenedor
+      capacity_header: Encabezado de capacidad
+      note_header: Encabezado de nota
+      seller_signature_image: Imagen de firma del vendedor
+      seller_stamp_image: Imagen de sello del vendedor
+      remove_existing_seller_signature_image: Eliminar imagen existente de firma del vendedor
+      remove_existing_seller_stamp_image: Eliminar imagen existente de sello del vendedor
+    flash:
+      created: Preajuste de cotización creado.
+      updated: Preajuste de cotización actualizado.
+      deleted: Preajuste de cotización eliminado.
+      duplicated: Preajuste de cotización duplicado.
+      master_updated: Mapeo maestro de preajustes actualizado.
+      module_limit_reached: "Se alcanzó el límite de preajustes de %{module} (%{limit})."
+    edit:
+      title: Editar preajuste de cotización
+      back: Volver a preajustes
   account:
     menu: Cuenta
     settings: Configuración
@@ -636,6 +681,9 @@ es-419:
           discount_amount: Descuento
           grand_total: Total general
       show:
+        disclosure:
+          more_count: "Más %{count}"
+          collapse: "Contraer"
         advanced_trade_terms: Términos comerciales complementarios
         advanced_logistics: Envío y logística
         supplementary_trade_terms: Términos comerciales complementarios
@@ -754,8 +802,7 @@ es-419:
           close_reason_modal: Cerrar ventana de motivo
           fill_win_reason_hint: Registra por qué se ganó esta cotización para detectar patrones repetibles.
           fill_loss_reason_hint: Registra por qué se perdió esta cotización para mejorar precio, posicionamiento y tiempos.
-          switch_to_quotation: Cambiar a cotización
-          switch_to_pi: Cambiar a PI
+          create_pi: Crear PI
           send_reminder: Enviar recordatorio
           close_verification: Cerrar verificación
           verify_before_reminder: Verifica antes de enviar el recordatorio
@@ -792,6 +839,10 @@ es-419:
           latest: Más reciente
           archive_revision: Archivar V%{revision}
           archive_confirm: "¿Archivar revisión V%{revision} del historial?"
+        related_documents_title: Documentos relacionados
+        related_documents_hint: Consulta la relación entre esta cotización y su documento PI.
+        source_quote: Cotización origen
+        derived_pi_list: Documentos PI generados
       form:
         updating: Actualizando...
         creating: Creando...
@@ -813,7 +864,7 @@ es-419:
         template: Plantilla
         search_template: Buscar plantilla
         quote_date: Fecha de cotización
-        custom_title: Título de cotización personalizado (opcional)
+        custom_title: Título personalizado (opcional)
         custom_title_placeholder: Proyecto Falcon - Paquete de equipos del segundo trimestre
         status_locked_draft: El estado de la cotización no se edita directamente dentro del formulario.
         status_locked_draft_hint: Usa las acciones del detalle para pasarla a enviada, en negociación, ganada o perdida.
@@ -827,24 +878,34 @@ es-419:
           expired: Expirado
         business_terms: Términos comerciales
         business_terms_hint: Agrega los términos que el comprador revisará junto con el precio.
-        advanced_quote_sections: Secciones avanzadas de cotización
-        advanced_quote_sections_hint: Opcional para cotizaciones formales y complejas. Para cotizaciones diarias, mantenlo desactivado.
-        enable_advanced_mode: Activar secciones avanzadas para esta cotización
-        advanced_trade_terms_title: Términos comerciales avanzados (suplemento)
+        advanced_quote_sections: Módulos extendidos de cotización
+        advanced_quote_sections_hint: Opcional para cotizaciones de complejidad media-alta. Para cotizaciones diarias, mantenlo desactivado.
+        enable_advanced_mode: Activar módulos extendidos para esta cotización
+        advanced_trade_terms_title: Términos comerciales extendidos (suplemento)
+        commercial_summary_editor_hint: Edita esta sección como el módulo de resumen comercial para cotizaciones formales.
         advanced_trade_terms_hint: Los campos principales de pago/comercio siguen siendo la base. Aquí solo van notas suplementarias.
-        show_advanced_trade_terms: Mostrar términos comerciales avanzados
+        show_advanced_trade_terms: Mostrar sección de términos comerciales extendidos
         hs_code: Código HS
         warranty_scope_note: Nota de alcance de garantía
         support_scope_note: Nota de alcance de soporte
         validity_clause_note: Nota de cláusula de vigencia
         delivery_commitment_note: Nota de compromiso de entrega
         payment_clause_note: Nota de cláusula de pago
-        advanced_logistics_title: Logística avanzada (suplemento)
-        show_advanced_logistics: Mostrar logística avanzada
+        advanced_logistics_title: Logística extendida (suplemento)
+        logistics_summary_editor_hint: Edita esta sección como el módulo de resumen logístico para cotizaciones formales.
+        show_advanced_logistics: Mostrar sección de logística extendida
         container_type: Tipo de contenedor
         freight_note: Nota de flete
         shipping_scope_note: Nota de alcance de envío
         container_loading_note: Nota de carga en contenedor
+        container_loading_editor_hint: Usa primero las filas de matriz. Esta nota solo se usa como narrativa de respaldo cuando no hay filas válidas.
+        container_loading_matrix_editor_hint: Filas ligeras de matriz. Si está vacío, la salida vuelve a la narrativa de Nota de carga en contenedor.
+        container_loading_matrix_empty_label: Sin filas válidas, la salida usará la narrativa de respaldo si existe.
+        container_loading_variant_placeholder: Variante / Versión
+        container_loading_type_placeholder: Tipo de contenedor
+        container_loading_capacity_placeholder: Capacidad
+        container_loading_note_placeholder: Nota (opcional)
+        add_container_loading_row: Agregar fila de carga
         payment_term_placeholder: 30% de anticipo, 70% antes del envío
         trade_terms: Términos comerciales
         trade_terms_placeholder: FOB / CIF / EXW
@@ -953,6 +1014,43 @@ es-419:
         no_exact_match_saved_as_custom: No hubo coincidencia exacta de producto. Se guardó como artículo personalizado.
         remove_item: Eliminar artículo
         add_item: Añadir artículo
+        enable_extended_quote_info: Activar información de cotización extendida
+        disable_extended_quote_info: Cancelar información de cotización extendida
+        apply_formal_scenario: Aplicar escenario extendido de equipo y contenedor
+        extended_scenario_applied: Se aplicó el preset de escenario extendido.
+        extended_scenario_disabled: Se desactivó la información de cotización extendida.
+        insert_main_equipment_item: Insertar artículo principal de equipo
+        insert_standard_fee_items: Insertar cargos logísticos estándar
+        standard_fee_items_not_configured: El preset de cargos logísticos estándar no está configurado.
+        configure_standard_fee_items: Configurar ahora
+        standard_fee_items_not_selected: Selecciona primero un preset de cargos logísticos estándar
+        preset_selector_hint: Selecciona el preajuste del módulo (configurar en Plantillas / Preajustes de cotización).
+        standard_fee_items_selector_hint: Selecciona el preajuste de cargos logísticos estándar (configurar en Plantillas / Preajustes de cotización / Cargos logísticos estándar).
+        clear_selected_preset: Limpiar preajuste seleccionado
+        preset_cleared: Se limpió la selección del preajuste.
+        standard_fee_items_empty_rows: El preajuste seleccionado no tiene filas de cargos válidas. Configura filas en Preajustes de cotización / Cargos logísticos estándar.
+        configuration_editor_hint: Usa filas ligeras de clave-valor para el resumen de configuración formal.
+        configuration_empty_label: Si no hay filas válidas, este bloque se oculta en la salida.
+        configuration_label_placeholder: Etiqueta
+        configuration_value_placeholder: Valor
+        add_configuration_row: Agregar fila de configuración
+        detail_pictures_editor_hint: Selecciona desde la galería del producto o sube imágenes de cotización en lote, con vista previa antes de guardar.
+        detail_pictures_empty_label: Si no hay imágenes, este bloque se oculta en la salida.
+        open_selected_product_gallery: Abrir galería de productos seleccionados
+        selected_product_gallery_hint: Solo muestra imágenes de los productos actualmente seleccionados en las líneas de cotización.
+        selected_product_gallery_empty: No se encontraron imágenes de galería para los productos seleccionados.
+        deselect_all: Deseleccionar todo
+        insert_selected_images: Insertar imágenes seleccionadas
+        detail_picture_batch_upload_label: Subir imágenes de cotización (lote)
+        detail_picture_batch_upload_hint: Puedes seleccionar varias imágenes a la vez.
+        detail_picture_source_product: Galería de producto
+        detail_picture_source_quote: Carga de cotización
+        detail_picture_caption_placeholder: Leyenda (opcional)
+        add_detail_picture_row: Agregar imagen de detalle
+        seller_signature_image: Imagen de firma del vendedor
+        seller_stamp_image: Imagen de sello del vendedor
+        remove_seller_signature_image: Eliminar imagen de firma del vendedor
+        remove_seller_stamp_image: Eliminar imagen de sello del vendedor
         update_quote: Actualizar cotización
         create_quote: Crear cotización
     flash:
@@ -995,6 +1093,10 @@ es-419:
       quote_reopened: Cotización reabierta para edición.
       reason_updated: Motivo actualizado.
       reason_update_not_available: Solo se puede actualizar el motivo en cotizaciones ganadas o perdidas.
+      pi_generation_not_available: No se puede generar PI para esta cotización.
+      pi_created: PI creado desde la cotización.
+      pi_opened_existing: Esta cotización ya tiene un PI. Se abrió el PI existente.
+      pi_create_failed: "No se pudo crear PI: %{errors}"
     logic:
       decision_review:
         recommended_move:
@@ -1953,6 +2055,7 @@ es-419:
         files_selected: "%{count} archivos seleccionados"
         gallery: Galería
         select_all: Seleccionar todo
+        deselect_all: Deseleccionar todo
         delete_selected: Eliminar seleccionados
         selected_count: "%{count} seleccionados"
         select_image: Seleccionar imagen
@@ -2180,11 +2283,11 @@ es-419:
         show_pdf_revision_summary: Mostrar resumen de revisión en PDF
         show_excel_revision_summary: Mostrar resumen de revisión en Excel
         show_excel_gridlines: Mostrar líneas de cuadrícula de Excel
-        advanced_defaults_group: Valores predeterminados avanzados (opt-in)
-        advanced_defaults_group_hint: Valores de baja frecuencia y alto valor, solo para cotizaciones formales.
-        enable_advanced_by_default: Activar modo avanzado por defecto para cotizaciones de esta plantilla
-        show_trade_terms_advanced: Mostrar términos comerciales avanzados
-        show_logistics_block: Mostrar logística avanzada
+        advanced_defaults_group: Valores predeterminados extendidos (opt-in)
+        advanced_defaults_group_hint: Valores de baja frecuencia y alto valor, solo para cotizaciones extendidas.
+        enable_advanced_by_default: Activar modo extendido por defecto para cotizaciones de esta plantilla
+        show_trade_terms_advanced: Mostrar términos comerciales extendidos
+        show_logistics_block: Mostrar logística extendida
         advanced_defaults_trade_group: Términos comerciales (suplemento)
         advanced_defaults_trade_hint: Solo notas suplementarias. Los campos estándar de pago/comercio siguen como semántica principal.
         advanced_defaults_logistics_group: Logística (suplemento)
@@ -2277,6 +2380,13 @@ es-419:
       pi: PI
     sections:
       terms_and_conditions: Términos y condiciones
+      settlement_summary: Resumen de liquidación
+      configuration: Configuración
+      detail_pictures: Imágenes de detalle
+      container_loading: Carga en contenedor
+      formal_closing: Cierre formal
+      commercial_notes: Notas comerciales
+      logistics_notes: Notas logísticas
       scope_of_supply: Alcance de suministro
       company_credentials: Credenciales de la empresa
       footer: Pie de página
@@ -2306,7 +2416,9 @@ es-419:
       phone: Teléfono
       tax_id: ID fiscal
       address: Dirección
+      website: Sitio web
       quote_info: Información de cotización
+      version: Versión
       title: Título
       contact: Contacto
       items: Artículos
@@ -2330,7 +2442,15 @@ es-419:
       terms: Términos
       legal_disclaimer: Aviso legal
       delivery_notes: Notas de entrega
+      note: Nota
       notes: Notas
+      additional_notes: Notas adicionales
+      bank_route: Ruta bancaria
+      beneficiary_details: Datos del beneficiario
+      remittance_note: Nota de remesa
+      seller_signature_line: Firma del vendedor
+      seller_stamp_line: Sello del vendedor
+      buyer_signature_line: Firma del comprador
       authorized_by: Autorizado por
       sales_signature: Firma de ventas
       spec: Especificación
@@ -2789,11 +2909,32 @@ es-419:
       bot_verification_required: Se requiere verificación de bot
       bot_verification_failed: La verificación de bot falló. Por favor, intente de nuevo.
   public_quote_shares:
+    actions:
+      print: Imprimir
+      accept_quote: Aceptar cotización
+      request_revision: Solicitar revisión
+      confirm_accept: Confirmar aceptación
+      confirm_accept_hint: Confirma que deseas aceptar esta cotización.
+      confirm_accept_submit: Confirmar aceptación
+      request_revision_hint: Selecciona un motivo y agrega detalles opcionales.
+      custom_details: Detalles personalizados (opcional)
+      custom_details_placeholder: Describe los cambios específicos si es necesario
+      confirm_revision_submit: Confirmar solicitud de revisión
+    system:
+      quote_inactive: Esta cotización ya no es accionable. Contacta a tu representante para la versión más reciente.
+      quote_updating: Esta cotización está siendo actualizada por el vendedor. Contacta a tu representante para la última versión.
+      next_step: Estado de decisión
+      newer_revision: Hay una revisión más reciente disponible.
+      open_latest: Abrir la revisión más reciente
+      accepted_on: Cotización aceptada el %{time}
+      revision_requested_on: Revisión solicitada el %{time}
+      not_actionable: Esta revisión no está abierta para decisión pública.
     flash:
       revision_not_actionable: Esta revisión ya no es procesable.
       quotation_accepted: Cotización aceptada. Gracias.
       revision_request_sent: Solicitud de revisión enviada.
     decision_intro_active: Revisa esta cotización y elige cómo deseas continuar.
+    pi_document_notice: Este enlace PI es solo de lectura y exportación. Contacta a tu representante comercial para cambios.
     preview_mode:
       title: Modo de vista previa
       body: Solo salida renderizada. Todas las acciones públicas están deshabilitadas en el modo de vista previa.

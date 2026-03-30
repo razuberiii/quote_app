@@ -372,12 +372,17 @@
 
     const collabPanelSelector = ".quote-collab-panel[data-collab-key]";
     const collabStoragePrefix = `quote:collab-panel:${window.location.pathname}:`;
+    const inlineDisclosureSelector = "details[data-inline-disclosure-key]";
+    const inlineDisclosureStoragePrefix = `quote:inline-disclosure:${window.location.pathname}:`;
     const hasOpenBlockingModal = () => {
       const blockingModalOpen = Array.from(document.querySelectorAll(".quote-turnstile-modal, .quote-reason-options-modal")).some((modal) => !modal.hidden);
       if (blockingModalOpen) return true;
 
       const sharePanelOpen = Array.from(document.querySelectorAll(".share-link-panel")).some((panel) => !panel.hidden);
       if (sharePanelOpen) return true;
+
+      const inlineDisclosureOpen = Array.from(document.querySelectorAll(inlineDisclosureSelector)).some((block) => block.open);
+      if (inlineDisclosureOpen) return true;
 
       return Array.from(document.querySelectorAll(".quote-toolbar-export")).some((menu) => menu.hasAttribute("open"));
     };
@@ -400,6 +405,24 @@
       } catch (_) {
       }
     };
+    const readPersistedDisclosureState = (disclosureKey) => {
+      if (!disclosureKey) return null;
+      try {
+        const raw = window.sessionStorage.getItem(`${inlineDisclosureStoragePrefix}${disclosureKey}`);
+        if (raw === "true") return true;
+        if (raw === "false") return false;
+        return null;
+      } catch (_) {
+        return null;
+      }
+    };
+    const persistDisclosureState = (disclosureKey, open) => {
+      if (!disclosureKey) return;
+      try {
+        window.sessionStorage.setItem(`${inlineDisclosureStoragePrefix}${disclosureKey}`, open ? "true" : "false");
+      } catch (_) {
+      }
+    };
 
     // Snapshot the live <details>.open states BEFORE async refresh.
     const snapshotCollabPanels = () => {
@@ -410,6 +433,17 @@
         const panelKey = panel.dataset.collabKey;
         if (!panelKey) return;
         snapshot[panelKey] = panel.open;
+      });
+      return snapshot;
+    };
+    const snapshotInlineDisclosures = () => {
+      const c = getContainer();
+      if (!c) return {};
+      const snapshot = {};
+      c.querySelectorAll(inlineDisclosureSelector).forEach((block) => {
+        const disclosureKey = block.dataset.inlineDisclosureKey;
+        if (!disclosureKey) return;
+        snapshot[disclosureKey] = block.open;
       });
       return snapshot;
     };
@@ -438,6 +472,33 @@
 
         if (snapshotValue === false || persistedValue === false) {
           panel.removeAttribute("open");
+        }
+      });
+    };
+    const bindInlineDisclosures = (snapshot = null) => {
+      const container = getContainer();
+      if (!container) return;
+      container.querySelectorAll(inlineDisclosureSelector).forEach((block) => {
+        const disclosureKey = block.dataset.inlineDisclosureKey;
+        if (!disclosureKey) return;
+
+        if (block.dataset.bound !== "true") {
+          block.dataset.bound = "true";
+          block.addEventListener("toggle", () => {
+            persistDisclosureState(disclosureKey, block.open);
+          });
+        }
+
+        const snapshotValue = snapshot && Object.prototype.hasOwnProperty.call(snapshot, disclosureKey) ? snapshot[disclosureKey] : null;
+        const persistedValue = snapshotValue === null ? readPersistedDisclosureState(disclosureKey) : null;
+
+        if (snapshotValue === true || persistedValue === true) {
+          block.setAttribute("open", "");
+          return;
+        }
+
+        if (snapshotValue === false || persistedValue === false) {
+          block.removeAttribute("open");
         }
       });
     };
@@ -487,6 +548,7 @@
 
       // Snapshot the live <details>.open states before async fetch.
       const collabSnapshot = snapshotCollabPanels();
+      const disclosureSnapshot = snapshotInlineDisclosures();
 
       inFlight = true;
       try {
@@ -504,6 +566,7 @@
           Turbo.renderStreamMessage(streamHtml);
           window.requestAnimationFrame(() => {
             bindCollabPanels(collabSnapshot);
+            bindInlineDisclosures(disclosureSnapshot);
             syncRefreshEligibility();
           });
         }
@@ -524,5 +587,6 @@
     intervalId = window.setInterval(() => refreshQuoteState(false), 15000);
 
     bindCollabPanels();
+    bindInlineDisclosures();
   })();
 </script>

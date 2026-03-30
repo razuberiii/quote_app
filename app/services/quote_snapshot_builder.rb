@@ -16,6 +16,16 @@ class QuoteSnapshotBuilder
     snapshot["advanced_trade_terms"] = @quote.advanced_trade_terms_data
     snapshot["advanced_logistics"] = @quote.advanced_logistics_data
     snapshot["advanced_visibility"] = @quote.advanced_visibility_data
+    snapshot["configuration_block"] = @quote.configuration_block_data
+    snapshot["detail_pictures_block"] = @quote.detail_pictures_block_data
+    snapshot["container_loading_block"] = @quote.container_loading_block_data
+    snapshot["formal_closing_block"] = @quote.formal_closing_block_data
+    snapshot["seller_signature_image_url"] = if @quote.respond_to?(:seller_signature_image) && @quote.seller_signature_image.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(@quote.seller_signature_image, only_path: true)
+    end
+    snapshot["seller_stamp_image_url"] = if @quote.respond_to?(:seller_stamp_image) && @quote.seller_stamp_image.attached?
+      Rails.application.routes.url_helpers.rails_blob_path(@quote.seller_stamp_image, only_path: true)
+    end
     snapshot["spec_label"] = @quote.resolved_spec_label
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title

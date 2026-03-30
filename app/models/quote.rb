@@ -23,36 +23,55 @@ class Quote < ApplicationRecord
     shipping_scope_note
     container_loading_note
   ].freeze
-  TEMPLATE_ADVANCED_TRADE_DEFAULT_KEYS = %w[
-    trade_terms_hs_code
-    trade_terms_warranty_scope_note
-    trade_terms_support_scope_note
-    trade_terms_validity_clause_note
-    trade_terms_delivery_commitment_note
-    trade_terms_payment_clause_note
-  ].freeze
-  TEMPLATE_ADVANCED_LOGISTICS_DEFAULT_KEYS = %w[
-    logistics_freight_note
-    logistics_container_type
-    logistics_shipping_scope_note
-    logistics_container_loading_note
-  ].freeze
-  TEMPLATE_ADVANCED_DEFAULT_FIELD_MAPPINGS = {
-    "trade_terms_hs_code" => [ :trade_terms, "hs_code" ],
-    "trade_terms_warranty_scope_note" => [ :trade_terms, "warranty_scope_note" ],
-    "trade_terms_support_scope_note" => [ :trade_terms, "support_scope_note" ],
-    "trade_terms_validity_clause_note" => [ :trade_terms, "validity_clause_note" ],
-    "trade_terms_delivery_commitment_note" => [ :trade_terms, "delivery_commitment_note" ],
-    "trade_terms_payment_clause_note" => [ :trade_terms, "payment_clause_note" ],
-    "logistics_freight_note" => [ :logistics, "freight_note" ],
-    "logistics_container_type" => [ :logistics, "container_type" ],
-    "logistics_shipping_scope_note" => [ :logistics, "shipping_scope_note" ],
-    "logistics_container_loading_note" => [ :logistics, "container_loading_note" ]
-  }.freeze
   ADVANCED_VISIBILITY_KEYS = %w[
     show_trade_terms_advanced
     show_logistics_block
   ].freeze
+  BUSINESS_PRESET_KEYS = %w[
+    payment_term
+    trade_term
+    delivery_notes
+    terms_text
+    scope_of_supply
+  ].freeze
+  CONFIGURATION_BLOCK_ROW_SOURCES = %w[quote product fallback].freeze
+  DETAIL_PICTURES_ITEM_SOURCES = %w[quote_upload product_gallery fallback].freeze
+  MAX_CONFIGURATION_BLOCK_ROWS = 30
+  MAX_DETAIL_PICTURES_ITEMS = 24
+  MAX_CONTAINER_LOADING_ROWS = 12
+  MAX_CONTAINER_LOADING_HEADER_LENGTH = 40
+  MAX_CONFIGURATION_LABEL_LENGTH = 120
+  MAX_CONFIGURATION_VALUE_LENGTH = 500
+  MAX_CONFIGURATION_NOTES_LENGTH = 2000
+  MAX_DETAIL_PICTURE_CAPTION_LENGTH = 180
+  MAX_CONTAINER_LOADING_CELL_LENGTH = 240
+  MAX_FORMAL_CLOSING_FIELD_LENGTH = 1200
+  FORMAL_CLOSING_IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif image/svg+xml].freeze
+  MAX_FORMAL_CLOSING_IMAGE_SIZE = 5.megabytes
+  CONTAINER_LOADING_VARIANT_PRESET_OPTIONS = [
+    "14 seats without windows",
+    "14 seats with windows",
+    "17 seats without windows",
+    "17 seats with windows"
+  ].freeze
+  CONTAINER_LOADING_TYPE_PRESET_OPTIONS = [
+    "20GP",
+    "40GP",
+    "40HQ",
+    "45HQ"
+  ].freeze
+  CONTAINER_LOADING_CAPACITY_PRESET_OPTIONS = [
+    "1 unit",
+    "2 units",
+    "3 units",
+    "4 units"
+  ].freeze
+  DEFAULT_CONTAINER_LOADING_HEADERS = {
+    "variant" => "Variant / Version",
+    "container_type" => "Container Type",
+    "capacity" => "Capacity",
+    "note" => "Note"
+  }.freeze
   STATUSES = %w[draft sent viewed negotiating won lost expired pending].freeze
   OPEN_STATUSES = %w[draft sent viewed negotiating pending].freeze
   AUTO_VIEW_STATUSES = %w[draft sent pending].freeze
@@ -107,9 +126,13 @@ class Quote < ApplicationRecord
   belongs_to :company
   belongs_to :customer
   belongs_to :template, class_name: "QuoteTemplate", optional: true
+  belongs_to :source_quote, class_name: "Quote", optional: true
+  has_many :derived_quotes, class_name: "Quote", foreign_key: :source_quote_id, dependent: :nullify
   has_many :customer_follow_up_events, dependent: :nullify
   has_many :quote_items, dependent: :destroy
   has_many :quote_shares, dependent: :destroy
+  has_one_attached :seller_signature_image
+  has_one_attached :seller_stamp_image
   accepts_nested_attributes_for :quote_items,
                                 allow_destroy: true,
                                 reject_if: lambda { |attrs|
@@ -150,6 +173,16 @@ class Quote < ApplicationRecord
   validate :grand_total_fits_storage_precision
   validate :valid_until_cannot_be_in_the_past
   validate :total_text_budget_within_limit
+  validate :configuration_block_within_limit
+  validate :detail_pictures_block_within_limit
+  validate :configuration_block_value_lengths
+  validate :detail_pictures_block_item_constraints
+  validate :container_loading_block_within_limit
+  validate :container_loading_block_value_lengths
+  validate :formal_closing_block_value_lengths
+  validate :seller_signature_image_constraints
+  validate :seller_stamp_image_constraints
+  validates :source_quote_id, uniqueness: true, allow_nil: true, if: -> { self.class.column_names.include?("source_quote_id") }
 
   scope :latest_versions, -> {
   select("DISTINCT ON (quote_no) *")
@@ -160,6 +193,9 @@ class Quote < ApplicationRecord
     scope = scope.where(archived_at: nil) if column_names.include?("archived_at")
     scope = scope.where(deleted_at: nil) if column_names.include?("deleted_at")
     scope
+  }
+  scope :excluding_pi_documents, -> {
+    column_names.include?("source_quote_id") ? where(source_quote_id: nil) : all
   }
 
   scope :search, ->(query) {
@@ -221,7 +257,10 @@ class Quote < ApplicationRecord
   end
 
   def can_edit_revision?
-    !archived? && draft? && latest_revision_for_quote_no?
+    return false if archived?
+    return false unless latest_revision_for_quote_no?
+
+    draft? || pi_document?
   end
 
   def can_create_new_revision?
@@ -255,6 +294,14 @@ class Quote < ApplicationRecord
     !latest_revision_for_quote_no?
   end
 
+  def seller_signature_image_constraints
+    validate_formal_closing_image_constraints(:seller_signature_image)
+  end
+
+  def seller_stamp_image_constraints
+    validate_formal_closing_image_constraints(:seller_stamp_image)
+  end
+
   def can_delete_quote_family?
     return false if deleted?
     return false if archived?
@@ -270,8 +317,16 @@ class Quote < ApplicationRecord
       changes_requested_at.blank?
   end
 
-  def can_switch_document?
-    !archived? && workflow_state == "accepted" && latest_revision_for_quote_no?
+  def pi_document?
+    template&.document_kind.to_s == "proforma_invoice" || source_quote_id.present?
+  end
+
+  def can_generate_pi?
+    return false if archived?
+    return false unless latest_revision_for_quote_no?
+    return false if pi_document?
+
+    true
   end
 
   def can_send_reminder?
@@ -421,52 +476,146 @@ class Quote < ApplicationRecord
     advanced_trade_terms_data.any? || advanced_logistics_data.any?
   end
 
-  def apply_template_advanced_defaults!(template: self.template)
-    return if template.blank?
-    return unless template.enable_advanced_by_default?
+  def configuration_block_state(product_block: nil, fallback_block: nil)
+    resolve_quote_level_block(
+      quote_block: normalized_configuration_block(configuration_block, keep_blank: true),
+      lower_priority_blocks: [
+        normalized_configuration_block(product_block, keep_blank: true),
+        normalized_configuration_block(fallback_block, keep_blank: true)
+      ]
+    )
+  end
 
-    self.advanced_mode = true if advanced_mode.nil? || advanced_mode == false
-    trade_terms_state = advanced_trade_terms_state
-    logistics_state = advanced_logistics_state
-    visibility_state = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+  def configuration_block_data(product_block: nil, fallback_block: nil)
+    state = configuration_block_state(product_block: product_block, fallback_block: fallback_block)
+    enabled = ActiveModel::Type::Boolean.new.cast(state["enabled"])
+    rows = normalize_configuration_rows(state["rows"])
+    notes = state["notes"].to_s.squish
 
-    template.advanced_defaults_data.each do |default_key, raw_value|
-      value = raw_value.to_s.squish
-      next if value.blank?
+    result = {
+      "enabled" => enabled,
+      "rows" => rows
+    }
+    result["notes"] = notes if notes.present?
+    result
+  end
 
-      mapped = TEMPLATE_ADVANCED_DEFAULT_FIELD_MAPPINGS[default_key.to_s]
-      next if mapped.blank?
+  def detail_pictures_block_state(product_block: nil, fallback_block: nil)
+    resolve_quote_level_block(
+      quote_block: normalized_detail_pictures_block(detail_pictures_block, keep_blank: true),
+      lower_priority_blocks: [
+        normalized_detail_pictures_block(product_block, keep_blank: true),
+        normalized_detail_pictures_block(fallback_block, keep_blank: true)
+      ]
+    )
+  end
 
-      target, target_key = mapped
-      case target
-      when :trade_terms
-        trade_terms_state[target_key] = value unless trade_terms_state.key?(target_key)
-      when :logistics
-        logistics_state[target_key] = value unless logistics_state.key?(target_key)
-      end
+  def detail_pictures_block_data(product_block: nil, fallback_block: nil)
+    state = detail_pictures_block_state(product_block: product_block, fallback_block: fallback_block)
+    enabled = ActiveModel::Type::Boolean.new.cast(state["enabled"])
+    items = normalize_detail_picture_items(state["items"])
+
+    {
+      "enabled" => enabled,
+      "items" => items
+    }
+  end
+
+  def container_loading_block_state(product_block: nil, fallback_block: nil)
+    unless self.class.column_names.include?("container_loading_block")
+      return {
+        "enabled" => false,
+        "headers" => DEFAULT_CONTAINER_LOADING_HEADERS.dup,
+        "note_enabled" => true,
+        "rows" => []
+      }
     end
 
-    template.advanced_visibility_defaults_data.each do |key, value|
-      next unless ADVANCED_VISIBILITY_KEYS.include?(key)
-      next if visibility_state.key?(key)
+    resolve_quote_level_block(
+      quote_block: normalized_container_loading_block(container_loading_block, keep_blank: true),
+      lower_priority_blocks: [
+        normalized_container_loading_block(product_block, keep_blank: true),
+        normalized_container_loading_block(fallback_block, keep_blank: true)
+      ]
+    )
+  end
 
-      visibility_state[key] = ActiveModel::Type::Boolean.new.cast(value)
+  def container_loading_block_data(product_block: nil, fallback_block: nil)
+    unless self.class.column_names.include?("container_loading_block")
+      return {
+        "enabled" => false,
+        "headers" => DEFAULT_CONTAINER_LOADING_HEADERS.dup,
+        "note_enabled" => true,
+        "rows" => []
+      }
     end
 
-    self.advanced_trade_terms = trade_terms_state
-    self.advanced_logistics = logistics_state
-    self.advanced_visibility = visibility_state
+    state = container_loading_block_state(product_block: product_block, fallback_block: fallback_block)
+    enabled = ActiveModel::Type::Boolean.new.cast(state["enabled"])
+    headers = normalized_container_loading_headers(state["headers"])
+    note_enabled = if state.key?("note_enabled")
+      ActiveModel::Type::Boolean.new.cast(state["note_enabled"])
+    else
+      true
+    end
+    rows = normalize_container_loading_rows(state["rows"])
+
+    {
+      "enabled" => enabled,
+      "headers" => headers,
+      "note_enabled" => note_enabled,
+      "rows" => rows
+    }
+  end
+
+  def formal_closing_block_state
+    unless self.class.column_names.include?("formal_closing_block")
+      return {}
+    end
+
+    normalized_formal_closing_block(formal_closing_block, keep_blank: true)
+  end
+
+  def formal_closing_block_data
+    unless self.class.column_names.include?("formal_closing_block")
+      return {}
+    end
+
+    state = formal_closing_block_state
+    result = {}
+    if state.key?("buyer_signature_line_enabled")
+      result["buyer_signature_line_enabled"] = ActiveModel::Type::Boolean.new.cast(state["buyer_signature_line_enabled"])
+    end
+    %w[
+      pi_number
+      payment_term
+      trade_term
+      delivery_time
+      bank_route
+      beneficiary_details
+      remittance_note
+    ].each do |key|
+      value = state[key].to_s.squish
+      result[key] = value if value.present?
+    end
+    result
+  end
+
+  def document_number_for(kind)
+    normalized_kind = template&.normalize_document_kind(kind) || "quote"
+    return quote_no unless normalized_kind == "pi"
+
+    formal_pi_number = formal_closing_block_data["pi_number"].to_s.squish
+    formal_pi_number.presence || quote_no
   end
 
   def advanced_visibility_data(template: self.template)
     quote_flags = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
-    template_flags = template&.advanced_visibility_defaults_data || {}
-    trade_terms_present = advanced_trade_terms_data.any? || template_advanced_defaults_present?(template, TEMPLATE_ADVANCED_TRADE_DEFAULT_KEYS)
-    logistics_present = advanced_logistics_data.any? || template_advanced_defaults_present?(template, TEMPLATE_ADVANCED_LOGISTICS_DEFAULT_KEYS)
+    trade_terms_present = advanced_trade_terms_data.any?
+    logistics_present = advanced_logistics_data.any?
 
     ADVANCED_VISIBILITY_KEYS.index_with do |key|
       next true if quote_flags[key] == true
-      next true if template_flags[key] == true
 
       case key
       when "show_trade_terms_advanced" then trade_terms_present
@@ -525,6 +674,10 @@ class Quote < ApplicationRecord
     revision_attrs[:advanced_trade_terms] = advanced_trade_terms_state if self.class.column_names.include?("advanced_trade_terms")
     revision_attrs[:advanced_logistics] = advanced_logistics_state if self.class.column_names.include?("advanced_logistics")
     revision_attrs[:advanced_visibility] = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS) if self.class.column_names.include?("advanced_visibility")
+    revision_attrs[:configuration_block] = configuration_block_state if self.class.column_names.include?("configuration_block")
+    revision_attrs[:detail_pictures_block] = detail_pictures_block_state if self.class.column_names.include?("detail_pictures_block")
+    revision_attrs[:container_loading_block] = container_loading_block_state if self.class.column_names.include?("container_loading_block")
+    revision_attrs[:formal_closing_block] = formal_closing_block_state if self.class.column_names.include?("formal_closing_block")
     revision = self.class.new(revision_attrs)
 
     item_columns = QuoteItem.column_names
@@ -610,6 +763,10 @@ class Quote < ApplicationRecord
     self.advanced_trade_terms = {} if advanced_trade_terms.blank?
     self.advanced_logistics = {} if advanced_logistics.blank?
     self.advanced_visibility = {} if advanced_visibility.blank?
+    self.configuration_block = {} if configuration_block.blank? && self.class.column_names.include?("configuration_block")
+    self.detail_pictures_block = {} if detail_pictures_block.blank? && self.class.column_names.include?("detail_pictures_block")
+    self.container_loading_block = {} if container_loading_block.blank? && self.class.column_names.include?("container_loading_block")
+    self.formal_closing_block = {} if formal_closing_block.blank? && self.class.column_names.include?("formal_closing_block")
   end
 
   def normalize_status
@@ -725,6 +882,14 @@ class Quote < ApplicationRecord
     total_chars += changes_request_message.to_s.length
     total_chars += advanced_trade_terms_data.values.join.length
     total_chars += advanced_logistics_data.values.join.length
+    total_chars += configuration_block_data["rows"].sum { |row| row["label"].to_s.length + row["value"].to_s.length }
+    total_chars += configuration_block_data["notes"].to_s.length
+    total_chars += detail_pictures_block_data["items"].sum { |item| item["caption"].to_s.length }
+    total_chars += container_loading_block_data["rows"].sum do |row|
+      row["variant"].to_s.length + row["container_type"].to_s.length + row["capacity"].to_s.length + row["note"].to_s.length
+    end
+    total_chars += container_loading_block_data["headers"].values.join.length
+    total_chars += formal_closing_block_data.values.join.length if self.class.column_names.include?("formal_closing_block")
 
     quote_items.reject(&:marked_for_destruction?).each do |item|
       total_chars += item.description.to_s.length
@@ -746,6 +911,367 @@ class Quote < ApplicationRecord
     self.advanced_trade_terms = normalized_advanced_hash(advanced_trade_terms, allowed_keys: ADVANCED_TRADE_TERMS_KEYS, keep_blank: true)
     self.advanced_logistics = normalized_advanced_hash(advanced_logistics, allowed_keys: ADVANCED_LOGISTICS_KEYS, keep_blank: true)
     self.advanced_visibility = normalized_boolean_hash(advanced_visibility, allowed_keys: ADVANCED_VISIBILITY_KEYS)
+    self.configuration_block = normalized_configuration_block(configuration_block, keep_blank: true) if self.class.column_names.include?("configuration_block")
+    self.detail_pictures_block = normalized_detail_pictures_block(detail_pictures_block, keep_blank: true) if self.class.column_names.include?("detail_pictures_block")
+    self.container_loading_block = normalized_container_loading_block(container_loading_block, keep_blank: true) if self.class.column_names.include?("container_loading_block")
+    self.formal_closing_block = normalized_formal_closing_block(formal_closing_block, keep_blank: true) if self.class.column_names.include?("formal_closing_block")
+  end
+
+  def normalized_configuration_block(raw, keep_blank: false)
+    source = normalize_hash_source(raw)
+    result = {}
+
+    if source.key?("rows") || source.key?(:rows)
+      rows = normalize_configuration_rows(source["rows"] || source[:rows])
+      result["rows"] = rows if rows.any? || keep_blank
+    elsif keep_blank
+      result["rows"] = []
+    end
+
+    if source.key?("notes") || source.key?(:notes)
+      notes = (source["notes"] || source[:notes]).to_s.squish
+      result["notes"] = keep_blank ? notes : notes.presence
+    elsif keep_blank
+      result["notes"] = ""
+    end
+    result.compact
+  end
+
+  def normalized_detail_pictures_block(raw, keep_blank: false)
+    source = normalize_hash_source(raw)
+    result = {}
+    if source.key?("enabled") || source.key?(:enabled)
+      result["enabled"] = ActiveModel::Type::Boolean.new.cast(source["enabled"] || source[:enabled])
+    elsif keep_blank
+      result["enabled"] = false
+    end
+
+    if source.key?("items") || source.key?(:items)
+      items = normalize_detail_picture_items(source["items"] || source[:items])
+      result["items"] = items if items.any? || keep_blank
+    elsif keep_blank
+      result["items"] = []
+    end
+    result
+  end
+
+  def normalized_container_loading_block(raw, keep_blank: false)
+    source = normalize_hash_source(raw)
+    result = {}
+    if source.key?("enabled") || source.key?(:enabled)
+      result["enabled"] = ActiveModel::Type::Boolean.new.cast(source["enabled"] || source[:enabled])
+    elsif keep_blank
+      result["enabled"] = false
+    end
+
+    if source.key?("headers") || source.key?(:headers)
+      result["headers"] = normalized_container_loading_headers(source["headers"] || source[:headers])
+    elsif keep_blank
+      result["headers"] = DEFAULT_CONTAINER_LOADING_HEADERS.dup
+    end
+
+    if source.key?("note_enabled") || source.key?(:note_enabled)
+      result["note_enabled"] = ActiveModel::Type::Boolean.new.cast(source["note_enabled"] || source[:note_enabled])
+    elsif keep_blank
+      result["note_enabled"] = true
+    end
+
+    if source.key?("rows") || source.key?(:rows)
+      rows = normalize_container_loading_rows(source["rows"] || source[:rows])
+      result["rows"] = rows if rows.any? || keep_blank
+    elsif keep_blank
+      result["rows"] = []
+    end
+    result
+  end
+
+  def normalized_formal_closing_block(raw, keep_blank: false)
+    source = normalize_hash_source(raw)
+    result = {}
+
+    if source.key?("buyer_signature_line_enabled") || source.key?(:buyer_signature_line_enabled)
+      result["buyer_signature_line_enabled"] = ActiveModel::Type::Boolean.new.cast(source["buyer_signature_line_enabled"] || source[:buyer_signature_line_enabled])
+    elsif keep_blank
+      result["buyer_signature_line_enabled"] = false
+    end
+
+    %w[
+      pi_number
+      payment_term
+      trade_term
+      delivery_time
+      bank_route
+      beneficiary_details
+      remittance_note
+    ].each do |key|
+      if source.key?(key) || source.key?(key.to_sym)
+        cleaned = (source[key] || source[key.to_sym]).to_s.squish
+        result[key] = keep_blank ? cleaned : cleaned.presence
+      elsif keep_blank
+        result[key] = ""
+      end
+    end
+
+    result.compact
+  end
+
+  def normalize_configuration_rows(raw_rows)
+    rows =
+      if raw_rows.is_a?(Array)
+        raw_rows
+      elsif raw_rows.is_a?(Hash)
+        raw_rows.values
+      else
+        []
+      end
+    rows.filter_map do |row|
+      source = normalize_hash_source(row)
+      label = (source["label"] || source[:label] || source["key"] || source[:key]).to_s.squish
+      value = (source["value"] || source[:value]).to_s.squish
+      next if label.blank? || value.blank?
+
+      source_name = (source["source"] || source[:source]).to_s.squish
+      source_name = "quote" unless CONFIGURATION_BLOCK_ROW_SOURCES.include?(source_name)
+      {
+        "label" => label,
+        "value" => value,
+        "source" => source_name,
+        "position" => (source["position"] || source[:position]).to_i
+      }
+    end.sort_by { |row| [ row["position"], row["label"] ] }
+  end
+
+  def normalize_detail_picture_items(raw_items)
+    items =
+      if raw_items.is_a?(Array)
+        raw_items
+      elsif raw_items.is_a?(Hash)
+        raw_items.values
+      else
+        []
+      end
+    items.filter_map do |item|
+      source = normalize_hash_source(item)
+      image_blob_id = (source["image_blob_id"] || source[:image_blob_id]).to_s.squish
+      next if image_blob_id.blank?
+
+      source_name = (source["source"] || source[:source]).to_s.squish
+      source_name = "quote_upload" unless DETAIL_PICTURES_ITEM_SOURCES.include?(source_name)
+      {
+        "image_blob_id" => image_blob_id,
+        "caption" => (source["caption"] || source[:caption]).to_s.squish,
+        "source" => source_name,
+        "position" => (source["position"] || source[:position]).to_i
+      }
+    end.sort_by { |item| [ item["position"], item["image_blob_id"] ] }
+  end
+
+  def normalize_container_loading_rows(raw_rows)
+    rows =
+      if raw_rows.is_a?(Array)
+        raw_rows
+      elsif raw_rows.is_a?(Hash)
+        raw_rows.values
+      else
+        []
+      end
+
+    rows.filter_map do |row|
+      source = normalize_hash_source(row)
+      variant = (source["variant"] || source[:variant]).to_s.squish
+      container_type = (source["container_type"] || source[:container_type]).to_s.squish
+      capacity = (source["capacity"] || source[:capacity]).to_s.squish
+      note = (source["note"] || source[:note]).to_s.squish
+      next if variant.blank? && container_type.blank? && capacity.blank? && note.blank?
+
+      {
+        "variant" => variant,
+        "container_type" => container_type,
+        "capacity" => capacity,
+        "note" => note,
+        "position" => (source["position"] || source[:position]).to_i
+      }
+    end.sort_by { |row| [ row["position"], row["variant"], row["container_type"] ] }
+  end
+
+  def resolve_quote_level_block(quote_block:, lower_priority_blocks:)
+    resolved = {}
+    [ quote_block, *lower_priority_blocks.compact ].each do |block|
+      block_hash = normalize_hash_source(block)
+      next if block_hash.empty?
+
+      block_hash.each do |key, value|
+        next if resolved.key?(key.to_s)
+
+        resolved[key.to_s] = value
+      end
+    end
+    resolved
+  end
+
+  def normalized_container_loading_headers(raw_headers)
+    source = normalize_hash_source(raw_headers)
+    DEFAULT_CONTAINER_LOADING_HEADERS.each_with_object({}) do |(key, fallback), acc|
+      raw_value = source[key] || source[key.to_sym]
+      cleaned = raw_value.to_s.squish
+      cleaned = fallback if cleaned.blank?
+      acc[key] = cleaned.first(MAX_CONTAINER_LOADING_HEADER_LENGTH)
+    end
+  end
+
+  def normalize_hash_source(raw)
+    if raw.respond_to?(:to_unsafe_h)
+      raw.to_unsafe_h
+    elsif raw.is_a?(Hash)
+      raw
+    else
+      {}
+    end
+  end
+
+  def configuration_block_within_limit
+    rows = configuration_block_data["rows"]
+    return if rows.size <= MAX_CONFIGURATION_BLOCK_ROWS
+
+    errors.add(:configuration_block, "rows exceed limit (#{MAX_CONFIGURATION_BLOCK_ROWS})")
+  end
+
+  def detail_pictures_block_within_limit
+    items = detail_pictures_block_data["items"]
+    return if items.size <= MAX_DETAIL_PICTURES_ITEMS
+
+    errors.add(:detail_pictures_block, "items exceed limit (#{MAX_DETAIL_PICTURES_ITEMS})")
+  end
+
+  def configuration_block_value_lengths
+    rows = configuration_block_data["rows"]
+    rows.each do |row|
+      if row["label"].to_s.length > MAX_CONFIGURATION_LABEL_LENGTH
+        errors.add(:configuration_block, "label is too long (maximum is #{MAX_CONFIGURATION_LABEL_LENGTH} characters)")
+        break
+      end
+      if row["value"].to_s.length > MAX_CONFIGURATION_VALUE_LENGTH
+        errors.add(:configuration_block, "value is too long (maximum is #{MAX_CONFIGURATION_VALUE_LENGTH} characters)")
+        break
+      end
+    end
+
+    notes = configuration_block_data["notes"].to_s
+    if notes.length > MAX_CONFIGURATION_NOTES_LENGTH
+      errors.add(:configuration_block, "notes are too long (maximum is #{MAX_CONFIGURATION_NOTES_LENGTH} characters)")
+    end
+  end
+
+  def detail_pictures_block_item_constraints
+    items = detail_pictures_block_data["items"]
+    return if items.blank?
+
+    duplicates = items.group_by { |item| item["image_blob_id"].to_s }.select { |_blob_id, rows| rows.size > 1 }.keys
+    if duplicates.any?
+      errors.add(:detail_pictures_block, "contains duplicate images")
+      return
+    end
+
+    blobs = ActiveStorage::Blob.where(id: items.map { |item| item["image_blob_id"] }).index_by { |blob| blob.id.to_s }
+    missing = items.map { |item| item["image_blob_id"].to_s }.reject { |id| blobs.key?(id) }
+    if missing.any?
+      errors.add(:detail_pictures_block, "contains missing images")
+      return
+    end
+
+    items.each do |item|
+      caption = item["caption"].to_s
+      if caption.length > MAX_DETAIL_PICTURE_CAPTION_LENGTH
+        errors.add(:detail_pictures_block, "caption is too long (maximum is #{MAX_DETAIL_PICTURE_CAPTION_LENGTH} characters)")
+        break
+      end
+
+      blob = blobs[item["image_blob_id"].to_s]
+      next if blob.blank?
+
+      unless blob.content_type.to_s.start_with?("image/")
+        errors.add(:detail_pictures_block, "must reference image files only")
+        break
+      end
+      if blob.byte_size.to_i > QuoteItem::MAX_IMAGE_SIZE
+        max_mb = QuoteItem::MAX_IMAGE_SIZE / 1.megabyte
+        errors.add(:detail_pictures_block, "image must be smaller than #{max_mb}MB")
+        break
+      end
+    end
+  end
+
+  def container_loading_block_within_limit
+    return unless self.class.column_names.include?("container_loading_block")
+
+    rows = container_loading_block_data["rows"]
+    return if rows.size <= MAX_CONTAINER_LOADING_ROWS
+
+    errors.add(:container_loading_block, "rows exceed limit (#{MAX_CONTAINER_LOADING_ROWS})")
+  end
+
+  def container_loading_block_value_lengths
+    return unless self.class.column_names.include?("container_loading_block")
+
+    headers = container_loading_block_data["headers"]
+    headers.each_value do |value|
+      if value.to_s.length > MAX_CONTAINER_LOADING_HEADER_LENGTH
+        errors.add(:container_loading_block, "header is too long (maximum is #{MAX_CONTAINER_LOADING_HEADER_LENGTH} characters)")
+        break
+      end
+    end
+
+    rows = container_loading_block_data["rows"]
+    rows.each do |row|
+      if row["variant"].to_s.length > MAX_CONTAINER_LOADING_CELL_LENGTH
+        errors.add(:container_loading_block, "variant is too long (maximum is #{MAX_CONTAINER_LOADING_CELL_LENGTH} characters)")
+        break
+      end
+      if row["container_type"].to_s.length > MAX_CONTAINER_LOADING_CELL_LENGTH
+        errors.add(:container_loading_block, "container_type is too long (maximum is #{MAX_CONTAINER_LOADING_CELL_LENGTH} characters)")
+        break
+      end
+      if row["capacity"].to_s.length > MAX_CONTAINER_LOADING_CELL_LENGTH
+        errors.add(:container_loading_block, "capacity is too long (maximum is #{MAX_CONTAINER_LOADING_CELL_LENGTH} characters)")
+        break
+      end
+      if row["note"].to_s.length > MAX_CONTAINER_LOADING_CELL_LENGTH
+        errors.add(:container_loading_block, "note is too long (maximum is #{MAX_CONTAINER_LOADING_CELL_LENGTH} characters)")
+        break
+      end
+    end
+  end
+
+  def formal_closing_block_value_lengths
+    return unless self.class.column_names.include?("formal_closing_block")
+
+    payload = formal_closing_block_data
+    %w[
+      pi_number
+      payment_term
+      trade_term
+      delivery_time
+      bank_route
+      beneficiary_details
+      remittance_note
+    ].each do |key|
+      next unless payload[key].to_s.length > MAX_FORMAL_CLOSING_FIELD_LENGTH
+
+      errors.add(:formal_closing_block, "#{key} is too long (maximum is #{MAX_FORMAL_CLOSING_FIELD_LENGTH} characters)")
+      break
+    end
+  end
+
+  def validate_formal_closing_image_constraints(name)
+    attachment = public_send(name)
+    return unless attachment.attached?
+
+    if !FORMAL_CLOSING_IMAGE_CONTENT_TYPES.include?(attachment.blob.content_type)
+      errors.add(name, "must be an image (PNG, JPG, WEBP, GIF, or SVG)")
+    end
+    if attachment.blob.byte_size > MAX_FORMAL_CLOSING_IMAGE_SIZE
+      errors.add(name, "must be smaller than #{MAX_FORMAL_CLOSING_IMAGE_SIZE / 1.megabyte}MB")
+    end
   end
 
   def normalized_advanced_hash(raw, allowed_keys:, keep_blank: false)
@@ -786,13 +1312,6 @@ class Quote < ApplicationRecord
 
       acc[key] = caster.cast(source[key] || source[key.to_sym])
     end
-  end
-
-  def template_advanced_defaults_present?(template, keys)
-    defaults = template&.advanced_defaults_data
-    return false unless defaults.is_a?(Hash)
-
-    keys.any? { |key| defaults[key].to_s.strip.present? }
   end
 
   def reason_values_are_allowed

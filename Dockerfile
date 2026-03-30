@@ -20,6 +20,7 @@ ARG WKHTMLTOX_VERSION=0.12.6.1-3
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y \
       ca-certificates \
+      chromium \
       curl \
       fontconfig \
       fonts-ipafont-gothic \
@@ -57,6 +58,9 @@ ENV RAILS_ENV="production" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development:test" \
     LD_PRELOAD="/usr/local/lib/libjemalloc.so" \
+    CHROME_BIN="/usr/bin/chromium" \
+    GROVER_NO_SANDBOX="true" \
+    QUOTE_PDF_ENGINE="grover" \
     QUOTE_PDF_FONT_PATH="/usr/share/fonts/opentype/ipafont-gothic/ipag.ttf" \
     WKHTMLTOPDF_PATH="/usr/bin/wkhtmltopdf"
 

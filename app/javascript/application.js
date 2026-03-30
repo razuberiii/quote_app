@@ -244,7 +244,7 @@ const bindSearchableSelects = () => {
 
       const list = document.createElement("div");
       list.className =
-        "absolute z-20 hidden max-h-72 w-full overflow-y-auto rounded-b-md border border-t-0 border-slate-200 bg-white shadow-lg";
+        "absolute z-20 hidden w-full rounded-b-md border border-t-0 border-slate-200 bg-white shadow-lg";
 
       const findOptionByValue = (value) =>
         options.find((option) => option.value === value);
@@ -353,8 +353,16 @@ const bindSearchableSelects = () => {
         if (!filtered.length) {
           const empty = document.createElement("div");
           empty.className = "px-3 py-2 text-sm text-slate-500";
-          empty.textContent = "No matching timezone";
+          empty.textContent = "No matching option";
           list.appendChild(empty);
+        }
+
+        if (filtered.length > 7) {
+          list.style.maxHeight = "260px";
+          list.style.overflowY = "auto";
+        } else {
+          list.style.maxHeight = "";
+          list.style.overflowY = "visible";
         }
 
         if (list.firstChild && list.firstChild.classList) {
@@ -366,15 +374,23 @@ const bindSearchableSelects = () => {
 
       input.addEventListener("focus", () => renderList(input.value));
       input.addEventListener("input", () => renderList(input.value));
+      select.addEventListener("searchable-select:reset", () => {
+        input.value = "";
+        input.dataset.manualChanged = "false";
+        renderList("");
+      });
       input.addEventListener("keydown", (event) => {
         if (event.key === "Escape") closeList();
       });
       input.addEventListener("blur", () => {
         window.setTimeout(() => {
+          if (document.activeElement === input) return;
           const exact = options.find((option) => option.text === input.value);
           if (exact) {
-            select.value = exact.value;
-            select.dispatchEvent(new Event("change", { bubbles: true }));
+            if (select.value !== exact.value) {
+              select.value = exact.value;
+              select.dispatchEvent(new Event("change", { bubbles: true }));
+            }
           } else {
             const current = findOptionByValue(select.value);
             input.value = current ? current.text : "";
@@ -445,35 +461,90 @@ if (!window.__searchableSelectStreamBound) {
   });
 }
 
+const productLightboxText = () => {
+  const isChinese = (document.documentElement.lang || "").toLowerCase().startsWith("zh");
+  if (isChinese) {
+    return {
+      previewLabel: "图片预览",
+      closeLabel: "关闭",
+      loadFailed: "图片加载失败，请稍后重试。",
+    };
+  }
+
+  return {
+    previewLabel: "Image preview",
+    closeLabel: "Close",
+    loadFailed: "Unable to load image. Please try again.",
+  };
+};
+
+const ensureGlobalProductLightbox = () => {
+  let lightbox = document.querySelector("[data-global-product-lightbox]");
+  if (lightbox) return lightbox;
+
+  const text = productLightboxText();
+  lightbox = document.createElement("div");
+  lightbox.className = "product-lightbox";
+  lightbox.hidden = true;
+  lightbox.dataset.globalProductLightbox = "true";
+  lightbox.innerHTML = `
+    <div class="product-lightbox-backdrop" data-product-lightbox-close></div>
+    <div class="product-lightbox-dialog" role="dialog" aria-modal="true" aria-label="${text.previewLabel}">
+      <button type="button" class="product-lightbox-close" aria-label="${text.closeLabel}" data-product-lightbox-close>&times;</button>
+      <img src="" alt="" class="product-lightbox-image" data-product-lightbox-image>
+      <p class="product-lightbox-status" data-product-lightbox-status hidden>${text.loadFailed}</p>
+    </div>
+  `;
+  document.body.appendChild(lightbox);
+  return lightbox;
+};
+
 const getProductLightboxElements = () => {
-  const lightbox = document.querySelector("[data-product-lightbox]");
-  const previewImage =
-    lightbox && lightbox.querySelector("[data-product-lightbox-image]");
-  if (!lightbox || !previewImage) return null;
-  return { lightbox, previewImage };
+  const lightbox = ensureGlobalProductLightbox();
+  const previewImage = lightbox.querySelector("[data-product-lightbox-image]");
+  const statusText = lightbox.querySelector("[data-product-lightbox-status]");
+  if (!previewImage || !statusText) return null;
+  return { lightbox, previewImage, statusText };
 };
 
 const closeProductLightbox = () => {
   const elements = getProductLightboxElements();
   if (!elements) return;
-  const { lightbox, previewImage } = elements;
+  const { lightbox, previewImage, statusText } = elements;
 
   lightbox.hidden = true;
+  lightbox.dataset.state = "idle";
   previewImage.src = "";
   previewImage.alt = "";
+  statusText.hidden = true;
   document.body.style.overflow = "";
 };
 
 const openProductLightbox = (src, alt = "") => {
-  if (!src) return;
+  const imageSrc = String(src || "").trim();
+  if (!imageSrc) return;
+
   const elements = getProductLightboxElements();
   if (!elements) return;
-  const { lightbox, previewImage } = elements;
+  const { lightbox, previewImage, statusText } = elements;
 
-  previewImage.src = src;
+  lightbox.dataset.state = "loading";
+  statusText.hidden = true;
+  previewImage.src = "";
   previewImage.alt = alt;
   lightbox.hidden = false;
   document.body.style.overflow = "hidden";
+
+  const preloader = new Image();
+  preloader.onload = () => {
+    previewImage.src = imageSrc;
+    lightbox.dataset.state = "ready";
+  };
+  preloader.onerror = () => {
+    lightbox.dataset.state = "error";
+    statusText.hidden = false;
+  };
+  preloader.src = imageSrc;
 };
 
 if (!window.__productLightboxListenersBound) {
@@ -484,14 +555,17 @@ if (!window.__productLightboxListenersBound) {
     if (trigger) {
       openProductLightbox(
         trigger.dataset.fullSrc,
-        trigger.dataset.alt || "Product image",
+        trigger.dataset.alt || trigger.querySelector("img")?.alt || "Product image",
       );
       return;
     }
 
     const elements = getProductLightboxElements();
     if (!elements || elements.lightbox.hidden) return;
-    if (event.target.closest("[data-product-lightbox-close]")) {
+    if (
+      event.target.closest("[data-product-lightbox-close]") ||
+      event.target === elements.lightbox
+    ) {
       closeProductLightbox();
     }
   });

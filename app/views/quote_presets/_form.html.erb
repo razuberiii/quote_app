@@ -1,0 +1,411 @@
+<% module_key = quote_preset.module_key.presence_in(QuotePreset::MODULE_KEYS) || QuotePreset::MODULE_KEYS.first %>
+
+<%= form_with model: quote_preset, url: form_url, html: { data: { quote_preset_form: "1", module_key: module_key } } do |f| %>
+  <%= f.hidden_field :module_key, value: module_key %>
+
+  <% if quote_preset.errors.any? %>
+    <div class="error-messages">
+      <h2><%= t("quotes.view.form.error_summary", count: quote_preset.errors.count, default: "%{count} errors prevented saving") %></h2>
+      <ul>
+        <% quote_preset.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="quote-form-grid">
+    <div>
+      <%= f.label :name, t("quote_presets.form.name", default: "Preset Name") %>
+      <%= f.text_field :name, maxlength: QuotePreset::MAX_NAME_LENGTH, class: ui_input_classes, required: true %>
+    </div>
+    <div>
+      <%= f.label :position, t("quote_presets.form.position", default: "Position") %>
+      <%= f.number_field :position, class: ui_input_classes, min: 0, step: 1 %>
+      <p class="quote-form-hint"><%= t("quote_presets.form.position_help", default: "Smaller numbers appear first in module preset lists.") %></p>
+    </div>
+  </div>
+
+  <div class="quote-form-section quote-form-panel">
+    <div class="quote-form-section-body">
+      <% case module_key %>
+      <% when "business_terms" %>
+        <div class="quote-form-grid">
+          <div><label><%= t("quote_document.labels.payment_terms", default: "Payment Terms") %></label><%= text_field_tag "quote_preset[payload][payment_term]", quote_preset.payload_data["payment_term"], class: ui_input_classes %></div>
+          <div><label><%= t("quote_document.labels.trade_terms", default: "Trade Terms") %></label><%= text_field_tag "quote_preset[payload][trade_term]", quote_preset.payload_data["trade_term"], class: ui_input_classes %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quote_document.labels.delivery_notes", default: "Delivery Notes") %></label><%= text_area_tag "quote_preset[payload][delivery_notes]", quote_preset.payload_data["delivery_notes"], rows: 2, class: ui_input_classes %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quote_document.labels.terms", default: "Terms") %></label><%= text_area_tag "quote_preset[payload][terms_text]", quote_preset.payload_data["terms_text"], rows: 3, class: ui_input_classes, maxlength: Quote::MAX_TERMS_TEXT_LENGTH %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quotes.view.form.scope_of_supply", default: "Scope of Supply") %></label><%= text_area_tag "quote_preset[payload][scope_of_supply]", quote_preset.payload_data["scope_of_supply"], rows: 3, class: ui_input_classes, maxlength: Quote::MAX_SCOPE_OF_SUPPLY_LENGTH %></div>
+        </div>
+      <% when "advanced_trade_terms" %>
+        <div class="quote-form-grid">
+          <% Quote::ADVANCED_TRADE_TERMS_KEYS.each do |key| %>
+            <div class="quote-form-grid-span-2">
+              <label><%= key.humanize %></label>
+              <%= text_area_tag "quote_preset[payload][#{key}]", quote_preset.payload_data[key], rows: 2, class: ui_input_classes %>
+            </div>
+          <% end %>
+        </div>
+      <% when "advanced_logistics" %>
+        <div class="quote-form-grid">
+          <% Quote::ADVANCED_LOGISTICS_KEYS.each do |key| %>
+            <div class="quote-form-grid-span-2">
+              <label><%= key.humanize %></label>
+              <%= text_area_tag "quote_preset[payload][#{key}]", quote_preset.payload_data[key], rows: 2, class: ui_input_classes %>
+            </div>
+          <% end %>
+        </div>
+      <% when "standard_fee_items" %>
+        <% rows_source = quote_preset.payload_data["rows"] %>
+        <% rows = rows_source.is_a?(Hash) ? rows_source.values : Array(rows_source) %>
+        <% rows = [ {} ] if rows.blank? %>
+        <div class="app-section-stack">
+          <div class="quote-advanced-module-list js-preset-fee-rows">
+            <% rows.each_with_index do |row, idx| %>
+              <% row_hash = row.is_a?(Hash) ? row : {} %>
+              <div class="quote-advanced-module-row js-preset-fee-row" data-index="<%= idx %>" style="display:grid; gap:12px; grid-template-columns:1fr 180px 120px auto; align-items:end;">
+                <%= text_field_tag "quote_preset[payload][rows][#{idx}][name]", row_hash["name"], class: ui_input_classes("js-preset-fee-name"), maxlength: QuotePreset::MAX_FEE_ITEM_NAME_LENGTH, placeholder: t("quote_presets.form.fee_item_name", default: "Fee Item Name") %>
+                <%= number_field_tag "quote_preset[payload][rows][#{idx}][unit_price]", row_hash["unit_price"], class: ui_input_classes("js-preset-fee-price"), step: "0.01", min: "0", placeholder: "0.00" %>
+                <%= number_field_tag "quote_preset[payload][rows][#{idx}][quantity]", (row_hash["quantity"].presence || 1), class: ui_input_classes("js-preset-fee-qty"), min: "1", step: "1", placeholder: "1" %>
+                <%= hidden_field_tag "quote_preset[payload][rows][#{idx}][position]", (row_hash["position"].presence || (idx + 1)), class: "js-preset-fee-position" %>
+                <button type="button" class="quote-kv-remove js-preset-fee-remove" aria-label="<%= t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+              </div>
+            <% end %>
+          </div>
+          <div class="quote-form-add-row">
+            <button type="button" class="quote-kv-add js-preset-fee-add"><%= t("quote_presets.form.add_fee_item_row", default: "Add Fee Item Row") %></button>
+          </div>
+        </div>
+      <% when "container_loading" %>
+        <% headers = quote_preset.payload_data["headers"].is_a?(Hash) ? quote_preset.payload_data["headers"] : Quote::DEFAULT_CONTAINER_LOADING_HEADERS %>
+        <% rows_source = quote_preset.payload_data["rows"] %>
+        <% rows = rows_source.is_a?(Hash) ? rows_source.values : Array(rows_source) %>
+        <% rows = [ {} ] if rows.blank? %>
+        <% note_enabled = quote_preset.payload_data.fetch("note_enabled", true) %>
+        <div class="app-section-stack">
+          <div class="quote-form-grid" style="margin-bottom: 0;">
+            <div class="quote-form-grid-span-2">
+              <%= hidden_field_tag "quote_preset[payload][note_enabled]", "0" %>
+              <label><%= check_box_tag "quote_preset[payload][note_enabled]", "1", note_enabled, class: "js-preset-note-enabled" %> <%= t("quotes.view.form.container_loading_note_column_toggle", default: "Enable notes column") %></label>
+            </div>
+          </div>
+
+          <div class="js-preset-loading-headers" style="display:grid; gap:12px; grid-template-columns:<%= note_enabled ? 'repeat(4,minmax(0,1fr))' : 'repeat(3,minmax(0,1fr))' %>;">
+            <div><label><%= t("quote_presets.form.variant_header", default: "Variant Header") %></label><%= text_field_tag "quote_preset[payload][headers][variant]", headers["variant"], maxlength: QuotePreset::MAX_HEADER_LENGTH, class: ui_input_classes %></div>
+            <div><label><%= t("quote_presets.form.container_type_header", default: "Container Type Header") %></label><%= text_field_tag "quote_preset[payload][headers][container_type]", headers["container_type"], maxlength: QuotePreset::MAX_HEADER_LENGTH, class: ui_input_classes %></div>
+            <div><label><%= t("quote_presets.form.capacity_header", default: "Capacity Header") %></label><%= text_field_tag "quote_preset[payload][headers][capacity]", headers["capacity"], maxlength: QuotePreset::MAX_HEADER_LENGTH, class: ui_input_classes %></div>
+            <div class="js-preset-note-header-wrap" <%= 'hidden' unless note_enabled %>><label><%= t("quote_presets.form.note_header", default: "Note Header") %></label><%= text_field_tag "quote_preset[payload][headers][note]", headers["note"], maxlength: QuotePreset::MAX_HEADER_LENGTH, class: ui_input_classes %></div>
+          </div>
+
+          <div class="quote-advanced-module-list js-preset-loading-rows" data-note-enabled="<%= note_enabled ? '1' : '0' %>">
+            <% if rows.any? %>
+              <% rows.each_with_index do |row, idx| %>
+                <% row_hash = row.is_a?(Hash) ? row : {} %>
+                <div class="quote-advanced-module-row quote-advanced-module-row--loading js-preset-loading-row" data-index="<%= idx %>" style="display:grid; gap:12px; grid-template-columns:<%= note_enabled ? 'repeat(4,minmax(0,1fr)) auto' : 'repeat(3,minmax(0,1fr)) auto' %>; align-items:end;">
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][variant]", row_hash["variant"], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-preset-loading-variant"), placeholder: t("quotes.view.form.container_loading_variant_placeholder", default: "Variant / Version") %>
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][container_type]", row_hash["container_type"], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-preset-loading-type"), placeholder: t("quotes.view.form.container_loading_type_placeholder", default: "Container Type") %>
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][capacity]", row_hash["capacity"], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-preset-loading-capacity"), placeholder: t("quotes.view.form.container_loading_capacity_placeholder", default: "Capacity") %>
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][note]", row_hash["note"], maxlength: Quote::MAX_CONTAINER_LOADING_CELL_LENGTH, class: ui_input_classes("js-preset-loading-note"), placeholder: t("quotes.view.form.container_loading_note_placeholder", default: "Note (optional)"), hidden: !note_enabled %>
+                  <%= hidden_field_tag "quote_preset[payload][rows][#{idx}][position]", (row_hash["position"].presence || (idx + 1)), class: "js-preset-loading-position" %>
+                  <button type="button" class="quote-kv-remove js-preset-loading-remove" aria-label="<%= t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="quote-form-add-row">
+            <button type="button" class="quote-kv-add js-preset-loading-add"><%= t("quotes.view.form.add_container_loading_row", default: "Add Loading Row") %></button>
+          </div>
+        </div>
+      <% when "configuration_block" %>
+        <% rows_source = quote_preset.payload_data["rows"] %>
+        <% rows = rows_source.is_a?(Hash) ? rows_source.values : Array(rows_source) %>
+        <% rows = [ {} ] if rows.blank? %>
+        <div class="app-section-stack">
+          <div class="quote-advanced-module-list js-preset-configuration-rows">
+            <% if rows.any? %>
+              <% rows.each_with_index do |row, idx| %>
+                <% row_hash = row.is_a?(Hash) ? row : {} %>
+                <div class="quote-advanced-module-row js-preset-configuration-row" data-index="<%= idx %>" style="display:grid; gap:12px; grid-template-columns:1fr 1fr auto; align-items:end;">
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][label]", row_hash["label"], class: ui_input_classes("js-preset-config-label"), maxlength: Quote::MAX_CONFIGURATION_LABEL_LENGTH, placeholder: t("quotes.view.form.configuration_label_placeholder", default: "Label") %>
+                  <%= text_field_tag "quote_preset[payload][rows][#{idx}][value]", row_hash["value"], class: ui_input_classes("js-preset-config-value"), maxlength: Quote::MAX_CONFIGURATION_VALUE_LENGTH, placeholder: t("quotes.view.form.configuration_value_placeholder", default: "Value") %>
+                  <%= hidden_field_tag "quote_preset[payload][rows][#{idx}][position]", (row_hash["position"].presence || (idx + 1)), class: "js-preset-config-position" %>
+                  <button type="button" class="quote-kv-remove js-preset-configuration-remove" aria-label="<%= t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="quote-form-add-row">
+            <button type="button" class="quote-kv-add js-preset-configuration-add"><%= t("quotes.view.form.add_configuration_row", default: "Add Configuration Row") %></button>
+          </div>
+        </div>
+      <% when "formal_closing" %>
+        <div class="quote-form-grid">
+          <div><label><%= t("quote_document.labels.pi_number", default: "PI #") %></label><%= text_field_tag "quote_preset[payload][pi_number]", quote_preset.payload_data["pi_number"], class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div><label><%= t("quotes.view.show.field_labels.delivery", default: "Delivery Time") %></label><%= text_field_tag "quote_preset[payload][delivery_time]", quote_preset.payload_data["delivery_time"], class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div><label><%= t("quote_document.labels.trade_terms", default: "Trade Terms") %></label><%= text_field_tag "quote_preset[payload][trade_term]", quote_preset.payload_data["trade_term"], class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div><label><%= t("quote_document.labels.payment_terms", default: "Payment Terms") %></label><%= text_field_tag "quote_preset[payload][payment_term]", quote_preset.payload_data["payment_term"], class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quote_document.labels.bank_route", default: "Bank Route") %></label><%= text_area_tag "quote_preset[payload][bank_route]", quote_preset.payload_data["bank_route"], rows: 2, class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quote_document.labels.beneficiary_details", default: "Beneficiary Details") %></label><%= text_area_tag "quote_preset[payload][beneficiary_details]", quote_preset.payload_data["beneficiary_details"], rows: 2, class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div class="quote-form-grid-span-2"><label><%= t("quote_document.labels.remittance_note", default: "Remittance Note") %></label><%= text_area_tag "quote_preset[payload][remittance_note]", quote_preset.payload_data["remittance_note"], rows: 2, class: ui_input_classes, maxlength: Quote::MAX_FORMAL_CLOSING_FIELD_LENGTH %></div>
+          <div class="quote-form-grid-span-2">
+            <%= hidden_field_tag "quote_preset[payload][buyer_signature_line_enabled]", "0" %>
+            <label><%= check_box_tag "quote_preset[payload][buyer_signature_line_enabled]", "1", quote_preset.payload_data["buyer_signature_line_enabled"] %> <%= t("quote_document.labels.buyer_signature_line", default: "Buyer Signature Line") %></label>
+          </div>
+          <div>
+            <label><%= t("quote_presets.form.seller_signature_image", default: "Seller Signature Image") %></label>
+            <%= f.file_field :seller_signature_image, accept: "image/png,image/jpeg,image/webp,image/gif,image/svg+xml", class: ui_input_classes("js-preset-seller-signature-upload") %>
+            <%= hidden_field_tag "quote_preset[remove_seller_signature_image]", "0", class: "js-preset-seller-signature-remove" %>
+            <div class="quote-form-hint js-preset-seller-signature-preview-wrap quote-signature-image-preview" <%= "hidden" unless quote_preset.seller_signature_image.attached? %>>
+              <img src="<%= quote_preset.seller_signature_image.attached? ? url_for(quote_preset.seller_signature_image) : "" %>" alt="<%= t("quote_document.labels.seller_signature_line", default: "Seller Signature") %>" class="quote-sales-signature-image js-preset-seller-signature-preview" <%= "hidden" unless quote_preset.seller_signature_image.attached? %>>
+              <button type="button" class="quote-signature-image-remove js-preset-seller-signature-remove-btn" aria-label="<%= t("quote_presets.form.remove_existing_seller_signature_image", default: "Remove existing seller signature image") %>">&times;</button>
+            </div>
+          </div>
+          <div>
+            <label><%= t("quote_presets.form.seller_stamp_image", default: "Seller Stamp Image") %></label>
+            <%= f.file_field :seller_stamp_image, accept: "image/png,image/jpeg,image/webp,image/gif,image/svg+xml", class: ui_input_classes("js-preset-seller-stamp-upload") %>
+            <%= hidden_field_tag "quote_preset[remove_seller_stamp_image]", "0", class: "js-preset-seller-stamp-remove" %>
+            <div class="quote-form-hint js-preset-seller-stamp-preview-wrap quote-signature-image-preview" <%= "hidden" unless quote_preset.seller_stamp_image.attached? %>>
+              <img src="<%= quote_preset.seller_stamp_image.attached? ? url_for(quote_preset.seller_stamp_image) : "" %>" alt="<%= t("quote_document.labels.seller_stamp_line", default: "Seller Stamp") %>" class="quote-sales-signature-image js-preset-seller-stamp-preview" <%= "hidden" unless quote_preset.seller_stamp_image.attached? %>>
+              <button type="button" class="quote-signature-image-remove js-preset-seller-stamp-remove-btn" aria-label="<%= t("quote_presets.form.remove_existing_seller_stamp_image", default: "Remove existing seller stamp image") %>">&times;</button>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="quote-form-add-row">
+    <%= f.submit t("quote_presets.form.save", default: "Save Preset"), class: ui_button_classes(:primary) %>
+  </div>
+<% end %>
+
+<script>
+  (function() {
+    const forms = Array.from(document.querySelectorAll("form[data-quote-preset-form='1']"));
+    if (!forms.length) return;
+
+    forms.forEach((form) => {
+      const moduleKey = String(form.dataset.moduleKey || "").trim();
+      if (!moduleKey) return;
+
+      function refreshConfigurationRows() {
+        const container = form.querySelector(".js-preset-configuration-rows");
+        if (!container) return;
+
+        const rows = Array.from(container.querySelectorAll(".js-preset-configuration-row"));
+        rows.forEach((row, index) => {
+          row.dataset.index = String(index);
+          row.querySelectorAll("input[name]").forEach((input) => {
+            input.name = input.name.replace(/quote_preset\[payload\]\[rows\]\[[^\]]+\]/, `quote_preset[payload][rows][${index}]`);
+          });
+          const pos = row.querySelector(".js-preset-config-position");
+          if (pos) pos.value = String(index + 1);
+        });
+      }
+
+      function newConfigurationRow(index) {
+        return `
+          <div class="quote-advanced-module-row js-preset-configuration-row" data-index="${index}" style="display:grid; gap:12px; grid-template-columns:1fr 1fr auto; align-items:end;">
+            <input type="text" class="app-ui-input js-preset-config-label" maxlength="<%= Quote::MAX_CONFIGURATION_LABEL_LENGTH %>" name="quote_preset[payload][rows][${index}][label]" placeholder="<%= j t("quotes.view.form.configuration_label_placeholder", default: "Label") %>">
+            <input type="text" class="app-ui-input js-preset-config-value" maxlength="<%= Quote::MAX_CONFIGURATION_VALUE_LENGTH %>" name="quote_preset[payload][rows][${index}][value]" placeholder="<%= j t("quotes.view.form.configuration_value_placeholder", default: "Value") %>">
+            <input type="hidden" class="js-preset-config-position" name="quote_preset[payload][rows][${index}][position]" value="${index + 1}">
+            <button type="button" class="quote-kv-remove js-preset-configuration-remove" aria-label="<%= j t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+          </div>
+        `;
+      }
+
+      function refreshLoadingRows() {
+        const container = form.querySelector(".js-preset-loading-rows");
+        if (!container) return;
+
+        const noteEnabled = !!form.querySelector(".js-preset-note-enabled")?.checked;
+        const headers = form.querySelector(".js-preset-loading-headers");
+        const noteHeaderWrap = form.querySelector(".js-preset-note-header-wrap");
+        if (headers) {
+          headers.style.gridTemplateColumns = noteEnabled ? "repeat(4,minmax(0,1fr))" : "repeat(3,minmax(0,1fr))";
+        }
+        if (noteHeaderWrap) noteHeaderWrap.hidden = !noteEnabled;
+        container.dataset.noteEnabled = noteEnabled ? "1" : "0";
+
+        const rows = Array.from(container.querySelectorAll(".js-preset-loading-row"));
+        rows.forEach((row, index) => {
+          row.dataset.index = String(index);
+          row.style.gridTemplateColumns = noteEnabled ? "repeat(4,minmax(0,1fr)) auto" : "repeat(3,minmax(0,1fr)) auto";
+          row.querySelectorAll("input[name]").forEach((input) => {
+            input.name = input.name.replace(/quote_preset\[payload\]\[rows\]\[[^\]]+\]/, `quote_preset[payload][rows][${index}]`);
+          });
+          const pos = row.querySelector(".js-preset-loading-position");
+          if (pos) pos.value = String(index + 1);
+          const noteInput = row.querySelector(".js-preset-loading-note");
+          if (noteInput) noteInput.hidden = !noteEnabled;
+        });
+      }
+
+      function refreshFeeRows() {
+        const container = form.querySelector(".js-preset-fee-rows");
+        if (!container) return;
+
+        const rows = Array.from(container.querySelectorAll(".js-preset-fee-row"));
+        rows.forEach((row, index) => {
+          row.dataset.index = String(index);
+          row.querySelectorAll("input[name]").forEach((input) => {
+            input.name = input.name.replace(/quote_preset\[payload\]\[rows\]\[[^\]]+\]/, `quote_preset[payload][rows][${index}]`);
+          });
+          const pos = row.querySelector(".js-preset-fee-position");
+          if (pos) pos.value = String(index + 1);
+        });
+      }
+
+      function newFeeRow(index) {
+        return `
+          <div class="quote-advanced-module-row js-preset-fee-row" data-index="${index}" style="display:grid; gap:12px; grid-template-columns:1fr 180px 120px auto; align-items:end;">
+            <input type="text" class="app-ui-input js-preset-fee-name" maxlength="<%= QuotePreset::MAX_FEE_ITEM_NAME_LENGTH %>" name="quote_preset[payload][rows][${index}][name]" placeholder="<%= j t("quote_presets.form.fee_item_name", default: "Fee Item Name") %>">
+            <input type="number" class="app-ui-input js-preset-fee-price" step="0.01" min="0" name="quote_preset[payload][rows][${index}][unit_price]" placeholder="0.00">
+            <input type="number" class="app-ui-input js-preset-fee-qty" min="1" step="1" name="quote_preset[payload][rows][${index}][quantity]" value="1" placeholder="1">
+            <input type="hidden" class="js-preset-fee-position" name="quote_preset[payload][rows][${index}][position]" value="${index + 1}">
+            <button type="button" class="quote-kv-remove js-preset-fee-remove" aria-label="<%= j t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+          </div>
+        `;
+      }
+
+      function newLoadingRow(index, noteEnabled) {
+        const noteInput = `<input type="text" class="app-ui-input js-preset-loading-note" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" name="quote_preset[payload][rows][${index}][note]" placeholder="<%= j t("quotes.view.form.container_loading_note_placeholder", default: "Note (optional)") %>" ${noteEnabled ? "" : "hidden"}>`;
+        return `
+          <div class="quote-advanced-module-row quote-advanced-module-row--loading js-preset-loading-row" data-index="${index}" style="display:grid; gap:12px; grid-template-columns:${noteEnabled ? "repeat(4,minmax(0,1fr)) auto" : "repeat(3,minmax(0,1fr)) auto"}; align-items:end;">
+            <input type="text" class="app-ui-input js-preset-loading-variant" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" name="quote_preset[payload][rows][${index}][variant]" placeholder="<%= j t("quotes.view.form.container_loading_variant_placeholder", default: "Variant / Version") %>">
+            <input type="text" class="app-ui-input js-preset-loading-type" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" name="quote_preset[payload][rows][${index}][container_type]" placeholder="<%= j t("quotes.view.form.container_loading_type_placeholder", default: "Container Type") %>">
+            <input type="text" class="app-ui-input js-preset-loading-capacity" maxlength="<%= Quote::MAX_CONTAINER_LOADING_CELL_LENGTH %>" name="quote_preset[payload][rows][${index}][capacity]" placeholder="<%= j t("quotes.view.form.container_loading_capacity_placeholder", default: "Capacity") %>">
+            ${noteInput}
+            <input type="hidden" class="js-preset-loading-position" name="quote_preset[payload][rows][${index}][position]" value="${index + 1}">
+            <button type="button" class="quote-kv-remove js-preset-loading-remove" aria-label="<%= j t('quotes.view.form.remove', default: 'Remove') %>">&times;</button>
+          </div>
+        `;
+      }
+
+      if (moduleKey === "configuration_block") {
+        const rows = form.querySelector(".js-preset-configuration-rows");
+        const addBtn = form.querySelector(".js-preset-configuration-add");
+        if (rows && addBtn) {
+          addBtn.addEventListener("click", () => {
+            const index = rows.querySelectorAll(".js-preset-configuration-row").length;
+            rows.insertAdjacentHTML("beforeend", newConfigurationRow(index));
+            refreshConfigurationRows();
+          });
+          rows.addEventListener("click", (event) => {
+            const removeBtn = event.target.closest(".js-preset-configuration-remove");
+            if (!removeBtn) return;
+            removeBtn.closest(".js-preset-configuration-row")?.remove();
+            refreshConfigurationRows();
+          });
+          refreshConfigurationRows();
+        }
+      }
+
+      if (moduleKey === "container_loading") {
+        const rows = form.querySelector(".js-preset-loading-rows");
+        const addBtn = form.querySelector(".js-preset-loading-add");
+        const noteEnabled = form.querySelector(".js-preset-note-enabled");
+        if (rows && addBtn) {
+          addBtn.addEventListener("click", () => {
+            const index = rows.querySelectorAll(".js-preset-loading-row").length;
+            rows.insertAdjacentHTML("beforeend", newLoadingRow(index, !!noteEnabled?.checked));
+            refreshLoadingRows();
+          });
+          rows.addEventListener("click", (event) => {
+            const removeBtn = event.target.closest(".js-preset-loading-remove");
+            if (!removeBtn) return;
+            removeBtn.closest(".js-preset-loading-row")?.remove();
+            refreshLoadingRows();
+          });
+          noteEnabled?.addEventListener("change", refreshLoadingRows);
+          refreshLoadingRows();
+        }
+      }
+
+      if (moduleKey === "standard_fee_items") {
+        const rows = form.querySelector(".js-preset-fee-rows");
+        const addBtn = form.querySelector(".js-preset-fee-add");
+        if (rows && addBtn) {
+          addBtn.addEventListener("click", () => {
+            const index = rows.querySelectorAll(".js-preset-fee-row").length;
+            rows.insertAdjacentHTML("beforeend", newFeeRow(index));
+            refreshFeeRows();
+          });
+          rows.addEventListener("click", (event) => {
+            const removeBtn = event.target.closest(".js-preset-fee-remove");
+            if (!removeBtn) return;
+            removeBtn.closest(".js-preset-fee-row")?.remove();
+            refreshFeeRows();
+          });
+          refreshFeeRows();
+        }
+      }
+
+      if (moduleKey === "formal_closing") {
+        function attachImageSelectionPreview(kind) {
+          const isSignature = kind === "signature";
+          const uploadInput = isSignature ?
+            form.querySelector(".js-preset-seller-signature-upload") :
+            form.querySelector(".js-preset-seller-stamp-upload");
+          const previewWrap = isSignature ?
+            form.querySelector(".js-preset-seller-signature-preview-wrap") :
+            form.querySelector(".js-preset-seller-stamp-preview-wrap");
+          const previewImage = isSignature ?
+            form.querySelector(".js-preset-seller-signature-preview") :
+            form.querySelector(".js-preset-seller-stamp-preview");
+          const removeInput = isSignature ?
+            form.querySelector(".js-preset-seller-signature-remove") :
+            form.querySelector(".js-preset-seller-stamp-remove");
+          const removeBtn = isSignature ?
+            form.querySelector(".js-preset-seller-signature-remove-btn") :
+            form.querySelector(".js-preset-seller-stamp-remove-btn");
+          if (!uploadInput || !previewWrap || !previewImage || !removeBtn) return;
+
+          const persistedSrc = previewImage.getAttribute("src") || "";
+          let selectedObjectUrl = null;
+
+          function revokeObjectUrl() {
+            if (!selectedObjectUrl) return;
+            URL.revokeObjectURL(selectedObjectUrl);
+            selectedObjectUrl = null;
+          }
+
+          function clearSelection(markRemoved = false) {
+            uploadInput.value = "";
+            revokeObjectUrl();
+            if (persistedSrc && !markRemoved) {
+              previewImage.src = persistedSrc;
+              previewImage.hidden = false;
+              previewWrap.hidden = false;
+            } else {
+              previewImage.src = "";
+              previewImage.hidden = true;
+              previewWrap.hidden = true;
+            }
+            if (removeInput) removeInput.value = markRemoved ? "1" : "0";
+          }
+
+          uploadInput.addEventListener("change", () => {
+            const file = uploadInput.files?.[0];
+            if (!file) {
+              clearSelection(false);
+              return;
+            }
+
+            if (removeInput) removeInput.value = "0";
+            revokeObjectUrl();
+            selectedObjectUrl = URL.createObjectURL(file);
+            previewImage.src = selectedObjectUrl;
+            previewImage.hidden = false;
+            previewWrap.hidden = false;
+          });
+
+          removeBtn.addEventListener("click", () => clearSelection(true));
+        }
+
+        attachImageSelectionPreview("signature");
+        attachImageSelectionPreview("stamp");
+      }
+    });
+  })();
+</script>

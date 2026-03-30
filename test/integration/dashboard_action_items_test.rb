@@ -48,27 +48,33 @@ class DashboardActionItemsTest < ActionDispatch::IntegrationTest
       customer_level: "normal"
     )
 
-    Quote.create!(
+    won_missing = Quote.create!(
       company: company,
       customer: customer,
       quote_no: "QT-TODO-WON-MISSING",
       revision_number: 1,
       currency: "USD",
       status: "won",
+      win_reason: "price_accepted",
+      win_reason_detail: "seed",
       issued_on: Date.current,
       quote_items_attributes: [ { description: "Won missing", unit_price: 100, quantity: 1 } ]
     )
+    won_missing.update_columns(win_reason: nil, win_reason_detail: nil)
 
-    Quote.create!(
+    lost_missing = Quote.create!(
       company: company,
       customer: customer,
       quote_no: "QT-TODO-LOST-MISSING",
       revision_number: 1,
       currency: "USD",
       status: "lost",
+      loss_reason: "competitor_selected",
+      loss_reason_detail: "seed",
       issued_on: Date.current,
       quote_items_attributes: [ { description: "Lost missing", unit_price: 100, quantity: 1 } ]
     )
+    lost_missing.update_columns(loss_reason: nil, loss_reason_detail: nil)
 
     Quote.create!(
       company: company,
@@ -223,6 +229,47 @@ class DashboardActionItemsTest < ActionDispatch::IntegrationTest
     assert_response :success
 
     assert_select "#quote-todo-section", text: /QT-UNRELATED-NOTVIEWED/
+  end
+
+  test "quote todo excludes pi documents from actionable list" do
+    company = @user.company
+    customer = Customer.create!(
+      company: company,
+      name: "PI Filter Co",
+      status: "new",
+      customer_level: "normal"
+    )
+
+    source_quote = Quote.create!(
+      company: company,
+      customer: customer,
+      quote_no: "QT-PI-SOURCE",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      sent_at: 8.days.ago,
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "Source quote", unit_price: 100, quantity: 1 } ]
+    )
+
+    Quote.create!(
+      company: company,
+      customer: customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      quote_no: "QT-PI-DOC",
+      revision_number: 1,
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "PI document", unit_price: 100, quantity: 1 } ]
+    )
+
+    get dashboard_path(locale: :"zh-CN")
+    assert_response :success
+
+    assert_select "#quote-todo-section", text: /QT-PI-SOURCE/
+    assert_select "#quote-todo-section", text: /QT-PI-DOC/, count: 0
   end
 
   test "dashboard modules hide customer and quotes owned by other user when owner mode enabled" do

@@ -82,10 +82,60 @@ zh-CN:
     product_presets: 预设
     presets: 预设
     template: 模板
+    quote_presets: 报价预设
     team: 团队
     admin: 管理后台
     start_free: 免费开始
     login: 登录
+  quote_presets:
+    modules:
+      standard_fee_items: 标准物流费用项
+    index:
+      hint: 管理模块预设与公司级主预设映射。
+      module_limit_hint: "每个模块预设上限：%{limit}。"
+      new_title: 新建预设
+      create_cta: 新增预设
+      create_cta_for_module: "新增「%{module}」预设"
+      list_title: 预设列表
+      duplicate: 复制
+      delete_confirm: 确认删除该预设？
+      empty: 当前模块暂无预设。
+      master_title: 主预设
+      master_hint: 公司级唯一主预设映射，用于报价自动填充。
+      master_enabled: 启用主预设自动填充
+      none: 无
+      save_master: 保存主预设映射
+      yes: 是
+      no: 否
+    form:
+      module: 模块
+      name: 预设名称
+      position: 排序值
+      position_help: 数值越小越靠前显示。
+      active: 启用
+      enabled: 启用
+      save: 保存预设
+      variant_header: 版本表头
+      container_type_header: 柜型表头
+      capacity_header: 装载能力表头
+      note_header: 备注表头
+      seller_signature_image: 卖方签名图片
+      seller_stamp_image: 卖方盖章图片
+      remove_existing_seller_signature_image: 移除已有卖方签名图片
+      remove_existing_seller_stamp_image: 移除已有卖方盖章图片
+    flash:
+      created: 报价预设已创建。
+      updated: 报价预设已更新。
+      deleted: 报价预设已删除。
+      duplicated: 报价预设已复制。
+      master_updated: 主预设映射已更新。
+      module_limit_reached: "%{module} 预设数量已达上限（%{limit}）。"
+    edit:
+      title: 编辑报价预设
+      back: 返回预设页
+    new:
+      title: 新建报价预设
+      back: 返回预设页
   account:
     menu: 账户
     settings: 设置
@@ -635,6 +685,9 @@ zh-CN:
           discount_amount: 折扣
           grand_total: 总计
       show:
+        disclosure:
+          more_count: "更多 %{count}"
+          collapse: "收起"
         advanced_trade_terms: 贸易条款补充
         advanced_logistics: 运输与物流
         supplementary_trade_terms: 贸易条款补充
@@ -740,8 +793,7 @@ zh-CN:
           close_reason_modal: 关闭原因弹窗
           fill_win_reason_hint: 请补充赢单原因，便于后续识别可复用的成功模式。
           fill_loss_reason_hint: 请补充丢单原因，便于团队优化定价、策略和跟进节奏。
-          switch_to_quotation: 切换为报价单
-          switch_to_pi: 切换为形式发票
+          create_pi: 生成 PI
           send_reminder: 发送提醒
           close_verification: 关闭验证
           verify_before_reminder: 发送提醒前先完成验证
@@ -782,6 +834,10 @@ zh-CN:
           copy_link: 复制分享链接
           title: 分享给客户
           whatsapp_ready: WhatsApp 可发送
+        related_documents_title: 关联文档
+        related_documents_hint: 查看当前报价与 PI 文档的关联关系。
+        source_quote: 来源报价
+        derived_pi_list: 已生成 PI 文档
         history:
           title: 历史记录
           subtitle: 修订轨迹与归档操作
@@ -812,7 +868,7 @@ zh-CN:
         template: 模板
         search_template: 搜索模板
         quote_date: 报价日期
-        custom_title: 自定义报价标题（可选）
+        custom_title: 自定义标题（可选）
         custom_title_placeholder: Project Falcon - Q2 设备方案
         status_locked_draft: 报价状态不在表单内直接修改。
         status_locked_draft_hint: 请返回详情页，通过已发送、谈判中、赢单或丢单等动作推进状态。
@@ -826,24 +882,34 @@ zh-CN:
           expired: 已过期
         business_terms: 商务条款
         business_terms_hint: 记录买家真正会关注的商务条款。
-        advanced_quote_sections: 高级报价区块
-        advanced_quote_sections_hint: 仅用于正式复杂报价场景。日常轻量报价建议保持关闭。
-        enable_advanced_mode: 为当前报价启用高级区块
-        advanced_trade_terms_title: 高级贸易补充条款
+        advanced_quote_sections: 扩展报价模块
+        advanced_quote_sections_hint: 仅用于中高复杂度报价场景。日常轻量报价建议保持关闭。
+        enable_advanced_mode: 为当前报价启用扩展模块
+        advanced_trade_terms_title: 扩展贸易补充条款
+        commercial_summary_editor_hint: 该区按“商务摘要模块”编辑，用于正式报价快读信息。
         advanced_trade_terms_hint: 现有付款条款/贸易术语仍是主字段，这里只承载补充说明。
-        show_advanced_trade_terms: 显示高级贸易补充条款
+        show_advanced_trade_terms: 显示扩展贸易补充条款
         hs_code: HS 编码
         warranty_scope_note: 保修范围补充说明
         support_scope_note: 支持范围补充说明
         validity_clause_note: 有效期补充条款
         delivery_commitment_note: 交付承诺补充条款
         payment_clause_note: 付款补充条款
-        advanced_logistics_title: 高级物流补充信息
-        show_advanced_logistics: 显示高级物流补充信息
+        advanced_logistics_title: 扩展物流补充信息
+        logistics_summary_editor_hint: 该区按“物流摘要模块”编辑，用于正式报价物流条件快读。
+        show_advanced_logistics: 显示扩展物流补充信息
         container_type: 柜型
         freight_note: 运费说明
         shipping_scope_note: 运输范围补充说明
         container_loading_note: 装柜补充说明
+        container_loading_editor_hint: 优先填写装柜矩阵行；无有效行时，才使用本叙述说明作为 fallback。
+        container_loading_matrix_editor_hint: 轻量装柜矩阵行。若为空，输出端会回退到“装柜补充说明”叙述。
+        container_loading_matrix_empty_label: 没有有效装柜行时，若有叙述说明将自动回退使用。
+        container_loading_variant_placeholder: 版本/型号
+        container_loading_type_placeholder: 柜型
+        container_loading_capacity_placeholder: 装柜能力
+        container_loading_note_placeholder: 备注（可选）
+        add_container_loading_row: 添加装柜行
         payment_term_placeholder: 预付 30%，发货前付清 70%
         trade_terms: 贸易术语
         trade_terms_placeholder: FOB / CIF / EXW
@@ -954,6 +1020,43 @@ zh-CN:
         no_exact_match_saved_as_custom: 未找到完全匹配产品，已按自定义项目保存。
         remove_item: 移除项目
         add_item: 添加项目
+        enable_extended_quote_info: 启用扩展报价信息
+        disable_extended_quote_info: 取消扩展报价信息
+        apply_formal_scenario: 应用扩展设备整柜场景
+        extended_scenario_applied: 扩展场景预设已应用。
+        extended_scenario_disabled: 扩展报价信息已关闭。
+        insert_main_equipment_item: 插入设备主商品项
+        insert_standard_fee_items: 插入标准物流费用项
+        standard_fee_items_not_configured: 标准物流费用预设未设置。
+        configure_standard_fee_items: 立即设置
+        standard_fee_items_not_selected: 请先选择一个标准物流费用预设
+        preset_selector_hint: 选择模块预设（在「模板 / 报价预设」中配置）。
+        standard_fee_items_selector_hint: 选择标准物流费用预设（在「模板 / 报价预设 / 标准物流费用项」中配置）。
+        clear_selected_preset: 清空已选预设
+        preset_cleared: 预设已清空。
+        standard_fee_items_empty_rows: 所选预设没有有效费用行，请在「报价预设 / 标准物流费用项」里配置行数据。
+        configuration_editor_hint: 用轻量键值行维护正式报价的配置摘要。
+        configuration_empty_label: 没有有效行时，该模块在输出端会自动隐藏。
+        configuration_label_placeholder: 标签
+        configuration_value_placeholder: 值
+        add_configuration_row: 添加配置行
+        detail_pictures_editor_hint: 可从产品图库选图，或一次批量上传报价图片，保存前可预览。
+        detail_pictures_empty_label: 未选择图片时，该模块在输出端会自动隐藏。
+        open_selected_product_gallery: 打开已选产品图库
+        selected_product_gallery_hint: 仅展示当前报价项里已选择产品的图片。
+        selected_product_gallery_empty: 当前已选产品没有可用图库图片。
+        deselect_all: 取消全选
+        insert_selected_images: 插入已选图片
+        detail_picture_batch_upload_label: 批量上传报价图片
+        detail_picture_batch_upload_hint: 可一次选择多张图片上传。
+        detail_picture_source_product: 产品图库
+        detail_picture_source_quote: 报价上传
+        detail_picture_caption_placeholder: 图片说明（可选）
+        add_detail_picture_row: 添加细节图片
+        seller_signature_image: 卖方签名图片
+        seller_stamp_image: 卖方盖章图片
+        remove_seller_signature_image: 移除卖方签名图片
+        remove_seller_stamp_image: 移除卖方盖章图片
         update_quote: 更新报价
         create_quote: 创建报价
     flash:
@@ -996,6 +1099,10 @@ zh-CN:
       quote_reopened: 报价已重新打开，可继续编辑。
       reason_updated: 成交原因已更新。
       reason_update_not_available: 仅赢单或丢单状态支持补充原因。
+      pi_generation_not_available: 当前报价暂不可生成 PI。
+      pi_created: 已基于当前报价生成 PI。
+      pi_opened_existing: 当前报价已有关联 PI，已为你打开。
+      pi_create_failed: "生成 PI 失败：%{errors}"
     logic:
       decision_review:
         recommended_move:
@@ -1907,6 +2014,7 @@ zh-CN:
         files_selected: 已选择 %{count} 个文件
         gallery: 图库
         select_all: 全选
+        deselect_all: 取消全选
         delete_selected: 删除所选
         selected_count: 已选择 %{count} 张
         select_image: 选择图片
@@ -2182,11 +2290,11 @@ zh-CN:
         show_pdf_revision_summary: 在 PDF 显示修订摘要
         show_excel_revision_summary: 在 Excel 显示修订摘要
         show_excel_gridlines: 显示 Excel 网格线
-        advanced_defaults_group: 高级报价默认值（按需启用）
-        advanced_defaults_group_hint: 仅用于低频高价值的正式报价场景。
-        enable_advanced_by_default: 使用此模板创建报价时默认启用高级模式
-        show_trade_terms_advanced: 显示高级贸易补充条款
-        show_logistics_block: 显示高级物流补充信息
+        advanced_defaults_group: 扩展报价默认值（按需启用）
+        advanced_defaults_group_hint: 仅用于低频高价值的扩展报价场景。
+        enable_advanced_by_default: 使用此模板创建报价时默认启用扩展模式
+        show_trade_terms_advanced: 显示扩展贸易补充条款
+        show_logistics_block: 显示扩展物流补充信息
         advanced_defaults_trade_group: 贸易条款补充
         advanced_defaults_trade_hint: 仅承载补充说明，付款/贸易主字段仍保持主语义。
         advanced_defaults_logistics_group: 物流补充
@@ -2279,6 +2387,13 @@ zh-CN:
       pi: 形式发票
     sections:
       terms_and_conditions: 条款与条件
+      settlement_summary: 结算摘要
+      configuration: 配置摘要
+      detail_pictures: 细节图片
+      container_loading: 装柜说明
+      formal_closing: 正式收尾
+      commercial_notes: 商务补充说明
+      logistics_notes: 物流补充说明
       scope_of_supply: 供货范围
       company_credentials: 公司资质
       footer: 页脚
@@ -2307,7 +2422,9 @@ zh-CN:
       email: 邮箱
       phone: 电话
       address: 地址
+      website: 网站
       quote_info: 报价信息
+      version: 版本
       title: 标题
       contact: 联系人
       items: 项目
@@ -2331,7 +2448,15 @@ zh-CN:
       terms: 条款
       legal_disclaimer: 法律声明
       delivery_notes: 交付说明
+      note: 备注
       notes: 备注
+      additional_notes: 额外说明
+      bank_route: 银行路径
+      beneficiary_details: 收款人信息
+      remittance_note: 汇款备注
+      seller_signature_line: 卖方签名
+      seller_stamp_line: 卖方盖章
+      buyer_signature_line: 买方签名
       authorized_by: 授权人
       sales_signature: 销售签名
       spec: 规格
@@ -2791,11 +2916,32 @@ zh-CN:
       bot_verification_required: 需要完成人机验证
       bot_verification_failed: 人机验证失败，请重试。
   public_quote_shares:
+    actions:
+      print: 打印
+      accept_quote: 接受报价
+      request_revision: 请求修订
+      confirm_accept: 确认接受
+      confirm_accept_hint: 请确认您要接受这份报价。
+      confirm_accept_submit: 确认接受
+      request_revision_hint: 请选择原因，并可补充说明。
+      custom_details: 补充说明（可选）
+      custom_details_placeholder: 如有需要，请描述具体修改点
+      confirm_revision_submit: 确认提交修订请求
+    system:
+      quote_inactive: 此报价已失效，无法继续操作。请联系销售获取最新版本。
+      quote_updating: 卖方正在更新此报价。请联系销售获取最新版本。
+      next_step: 决策状态
+      newer_revision: 有更新的修订版本可用。
+      open_latest: 打开最新修订
+      accepted_on: 已于 %{time} 接受报价
+      revision_requested_on: 已于 %{time} 提交修订请求
+      not_actionable: 当前版本暂不支持公开决策操作。
     flash:
       revision_not_actionable: 该版本当前不可操作。
       quotation_accepted: 报价已接受，感谢确认。
       revision_request_sent: 修订请求已发送。
     decision_intro_active: 请先确认这份报价内容，再选择下一步处理动作。
+    pi_document_notice: 此 PI 链接仅用于文档查看与导出，如需变更请联系销售代表。
     preview_mode:
       title: 预览模式
       body: 仅渲染展示。预览模式下不会触发任何公开动作。

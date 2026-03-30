@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -252,6 +252,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
     t.datetime "created_at", null: false
     t.string "description", null: false
     t.string "image_source", default: "none", null: false
+    t.string "item_type", default: "product_main", null: false
     t.integer "product_id"
     t.integer "quantity", default: 1, null: false
     t.bigint "quote_id", null: false
@@ -260,7 +261,42 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
     t.decimal "unit_price", precision: 15, scale: 4, null: false
     t.datetime "updated_at", null: false
     t.index ["quote_id", "created_at"], name: "index_quote_items_on_quote_id_and_created_at"
+    t.index ["quote_id", "item_type", "created_at"], name: "index_quote_items_on_quote_id_and_item_type_and_created_at"
     t.index ["quote_id"], name: "index_quote_items_on_quote_id"
+  end
+
+  create_table "quote_preset_masters", force: :cascade do |t|
+    t.bigint "advanced_logistics_preset_id"
+    t.bigint "advanced_trade_terms_preset_id"
+    t.bigint "business_terms_preset_id"
+    t.bigint "company_id", null: false
+    t.bigint "configuration_block_preset_id"
+    t.bigint "container_loading_preset_id"
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: true, null: false
+    t.bigint "formal_closing_preset_id"
+    t.datetime "updated_at", null: false
+    t.index ["advanced_logistics_preset_id"], name: "index_quote_preset_masters_on_advanced_logistics_preset_id"
+    t.index ["advanced_trade_terms_preset_id"], name: "index_quote_preset_masters_on_advanced_trade_terms_preset_id"
+    t.index ["business_terms_preset_id"], name: "index_quote_preset_masters_on_business_terms_preset_id"
+    t.index ["company_id"], name: "index_quote_preset_masters_on_company_id", unique: true
+    t.index ["configuration_block_preset_id"], name: "index_quote_preset_masters_on_configuration_block_preset_id"
+    t.index ["container_loading_preset_id"], name: "index_quote_preset_masters_on_container_loading_preset_id"
+    t.index ["formal_closing_preset_id"], name: "index_quote_preset_masters_on_formal_closing_preset_id"
+  end
+
+  create_table "quote_presets", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "module_key", null: false
+    t.string "name", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "module_key", "active"], name: "idx_quote_presets_company_module_active"
+    t.index ["company_id", "module_key", "name"], name: "idx_quote_presets_company_module_name", unique: true
+    t.index ["company_id"], name: "index_quote_presets_on_company_id"
   end
 
   create_table "quote_reason_options", force: :cascade do |t|
@@ -384,14 +420,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
     t.text "changes_request_message"
     t.datetime "changes_requested_at"
     t.bigint "company_id", null: false
+    t.jsonb "configuration_block", default: {}, null: false
+    t.jsonb "container_loading_block", default: {}, null: false
     t.datetime "created_at", null: false
     t.string "currency"
     t.string "custom_title"
     t.bigint "customer_id", null: false
     t.datetime "deleted_at"
     t.text "delivery_notes"
+    t.jsonb "detail_pictures_block", default: {}, null: false
     t.decimal "discount_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.decimal "final_amount", precision: 15, scale: 4
+    t.jsonb "formal_closing_block", default: {}, null: false
     t.date "issued_on"
     t.text "legal_disclaimer"
     t.string "loss_reason"
@@ -411,6 +451,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
     t.text "scope_of_supply"
     t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
+    t.bigint "source_quote_id"
     t.string "spec_label"
     t.string "stalled_reason"
     t.string "stalled_reason_detail"
@@ -434,6 +475,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
     t.index ["deleted_at"], name: "index_quotes_on_deleted_at"
     t.index ["reminder_sent_at"], name: "index_quotes_on_reminder_sent_at"
     t.index ["request_reason"], name: "index_quotes_on_request_reason"
+    t.index ["source_quote_id"], name: "index_quotes_on_source_quote_id_unique", unique: true, where: "(source_quote_id IS NOT NULL)"
     t.index ["template_id"], name: "index_quotes_on_template_id"
   end
 
@@ -525,6 +567,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
   add_foreign_key "products", "companies"
   add_foreign_key "products", "spec_presets", column: "default_spec_preset_id"
   add_foreign_key "quote_items", "quotes"
+  add_foreign_key "quote_preset_masters", "companies"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "advanced_logistics_preset_id"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "advanced_trade_terms_preset_id"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "business_terms_preset_id"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "configuration_block_preset_id"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "container_loading_preset_id"
+  add_foreign_key "quote_preset_masters", "quote_presets", column: "formal_closing_preset_id"
+  add_foreign_key "quote_presets", "companies"
   add_foreign_key "quote_reason_options", "companies"
   add_foreign_key "quote_shares", "companies"
   add_foreign_key "quote_shares", "quotes"
@@ -533,6 +583,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_091000) do
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
   add_foreign_key "quotes", "quote_templates", column: "template_id"
+  add_foreign_key "quotes", "quotes", column: "source_quote_id"
   add_foreign_key "spec_presets", "companies"
   add_foreign_key "team_invitations", "companies"
   add_foreign_key "team_invitations", "users", column: "invited_by_id"

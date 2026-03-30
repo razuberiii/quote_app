@@ -4,7 +4,7 @@ class QuoteFunnelReportService
   end
 
   def call
-    latest_quotes = @company.quotes.not_archived.latest_versions.to_a
+    latest_quotes = base_quotes.latest_versions.to_a
     sent_count = latest_quotes.count { |quote| quote.sent_at.present? }
     viewed_count = latest_quotes.count { |quote| quote.viewed_at.present? || quote.quote_shares.sum(&:view_count).positive? }
     revisions_count = revision_requested_count
@@ -33,19 +33,21 @@ class QuoteFunnelReportService
   end
 
   def revision_requested_count
-    families_with_multiple_revisions = @company.quotes
-      .not_archived
+    families_with_multiple_revisions = base_quotes
       .group(:quote_no)
       .having("COUNT(*) > 1")
       .count
       .keys
 
-    current_revision_requests = @company.quotes
-      .not_archived
+    current_revision_requests = base_quotes
       .latest_versions
       .where.not(changes_requested_at: nil)
       .pluck(:quote_no)
 
     (families_with_multiple_revisions + current_revision_requests).uniq.count
+  end
+
+  def base_quotes
+    @base_quotes ||= @company.quotes.not_archived.excluding_pi_documents
   end
 end

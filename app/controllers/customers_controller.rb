@@ -721,7 +721,8 @@ class CustomersController < ApplicationController
   def active_quotes_collection(quotes)
     Array(quotes).reject do |quote|
       (quote.respond_to?(:archived?) && quote.archived?) ||
-        (quote.respond_to?(:deleted?) && quote.deleted?)
+        (quote.respond_to?(:deleted?) && quote.deleted?) ||
+        (quote.respond_to?(:pi_document?) && quote.pi_document?)
     end
   end
 
@@ -935,7 +936,7 @@ class CustomersController < ApplicationController
     return "archived" if customer.engagement_state.to_s == "archived"
 
     reference_time = reference_date.in_time_zone.end_of_day
-    quote_relation = customer.quotes.not_archived.where("quotes.created_at <= ?", reference_time)
+    quote_relation = customer.quotes.not_archived.excluding_pi_documents.where("quotes.created_at <= ?", reference_time)
     follow_up_relation = customer.customer_follow_up_events.where("contacted_at <= ?", reference_time)
     share_relation = QuoteShare.joins(:quote).where(quotes: { customer_id: customer.id }).where("quote_shares.created_at <= ?", reference_time)
 

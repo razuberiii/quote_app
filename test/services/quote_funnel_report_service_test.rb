@@ -73,6 +73,21 @@ class QuoteFunnelReportServiceTest < ActiveSupport::TestCase
     lost_quote.quote_items.build(description: "Widget D", quantity: 1, unit_price: 9)
     lost_quote.save!
 
+    Quote.create!(
+      company: company,
+      customer: customer,
+      template: sent_quote.template,
+      source_quote: sent_quote,
+      quote_no: "QT-FUNNEL-PI",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      sent_at: 1.day.ago,
+      viewed_at: 1.day.ago,
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "PI only", quantity: 1, unit_price: 20 } ]
+    )
+
     report = QuoteFunnelReportService.new(company: company).call
 
     assert_equal 4, report[:quotes_sent]

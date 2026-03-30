@@ -166,6 +166,22 @@ module ApplicationHelper
     template.signature_name.to_s.strip.presence
   end
 
+  def quote_seller_signature_image_url(quote)
+    return nil unless quote.respond_to?(:seller_signature_image) && quote.seller_signature_image.attached?
+
+    url_for(quote.seller_signature_image)
+  rescue StandardError
+    nil
+  end
+
+  def quote_seller_stamp_image_url(quote)
+    return nil unless quote.respond_to?(:seller_stamp_image) && quote.seller_stamp_image.attached?
+
+    url_for(quote.seller_stamp_image)
+  rescue StandardError
+    nil
+  end
+
   def template_watermark_opacity(template)
     raw = template&.respond_to?(:watermark_opacity) ? template.watermark_opacity : nil
     percent = raw.to_i
@@ -198,6 +214,10 @@ module ApplicationHelper
     when "quote_templates"
       [
         { label: t("nav.template"), path: nil }
+      ]
+    when "quote_presets", "quote_preset_masters"
+      [
+        { label: t("nav.quote_presets"), path: nil }
       ]
     when "team_members"
       [

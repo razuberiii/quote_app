@@ -55,6 +55,7 @@ class ActionItemGenerator
   def current_quotes
     @current_quotes ||= @user.company.quotes
       .not_archived
+      .excluding_pi_documents
       .latest_versions
       .includes(:customer, :quote_shares)
       .to_a

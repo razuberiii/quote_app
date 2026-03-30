@@ -1,0 +1,110 @@
+<%
+  module_labels = {
+    "business_terms" => t("quotes.view.form.business_terms", default: "Business Terms"),
+    "advanced_trade_terms" => t("quotes.view.form.advanced_trade_terms_title", default: "Extended Trade Terms"),
+    "advanced_logistics" => t("quotes.view.form.advanced_logistics_title", default: "Extended Logistics"),
+    "standard_fee_items" => t("quote_presets.modules.standard_fee_items", default: "Standard Fee Items"),
+    "container_loading" => t("quote_document.sections.container_loading", default: "Container Loading"),
+    "configuration_block" => t("quote_document.sections.configuration", default: "Configuration"),
+    "formal_closing" => t("quote_document.sections.formal_closing", default: "Formal Closing")
+  }
+%>
+
+<div class="app-section-stack">
+  <section class="quote-form-panel quote-form-section">
+    <div class="quote-form-section-summary quote-form-section-summary--card">
+      <strong><%= t("nav.quote_presets") %></strong>
+      <span class="app-form-section-note"><%= t("quote_presets.index.hint", default: "Manage module presets and company-level master defaults.") %></span>
+    </div>
+    <div class="quote-form-section-body">
+      <div class="quote-form-add-row">
+        <% QuotePreset::MODULE_KEYS.each do |key| %>
+          <%= link_to module_labels[key], quote_presets_path(module_key: key), class: ["app-ui-button", (@active_module_key == key ? "app-ui-button--primary" : "app-ui-button--ghost")].join(" ") %>
+        <% end %>
+      </div>
+      <div class="quote-form-add-row">
+        <p class="quote-form-hint"><%= t("quote_presets.index.module_limit_hint", limit: current_user.company.quote_preset_limit_per_module, default: "Per module preset limit: %{limit}.") %></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="quote-form-panel quote-form-section">
+    <div class="quote-form-section-summary quote-form-section-summary--card quote-preset-library-head">
+      <div class="quote-preset-library-head-title">
+        <strong><%= t("quote_presets.index.list_title", default: "Preset Library") %></strong>
+        <span class="app-form-section-note"><%= module_labels[@active_module_key] %></span>
+      </div>
+      <%= link_to t("quote_presets.index.create_cta_for_module", module: module_labels[@active_module_key], default: "Create %{module} Preset"), new_quote_preset_path(module_key: @active_module_key), class: ui_button_classes(:primary) %>
+    </div>
+    <div class="quote-form-section-body">
+      <% if @module_presets.any? %>
+        <div class="table-responsive">
+          <table class="app-data-table quote-preset-library-table">
+            <thead>
+              <tr>
+                <th><%= t("quote_presets.form.name", default: "Name") %></th>
+                <th><%= t("quote_presets.form.position", default: "Position") %></th>
+                <th><%= t("quotes.view.form.actions", default: "Actions") %></th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @module_presets.each do |preset| %>
+                <tr>
+                  <td class="quote-preset-name-cell">
+                    <div class="quote-preset-name-stack">
+                      <strong class="quote-preset-name-main"><%= preset.name %></strong>
+                      <span class="quote-preset-name-meta"><%= module_labels[@active_module_key] %></span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="quote-preset-position-pill">#<%= preset.position %></span>
+                  </td>
+                  <td class="quote-preset-actions-cell">
+                    <div class="quote-preset-actions">
+                      <%= link_to t("quotes.view.form.edit", default: "Edit"), edit_quote_preset_path(preset), class: ui_button_classes(:primary) %>
+                      <details class="quote-preset-row-menu">
+                        <summary class="<%= "#{ui_button_classes(:secondary)} quote-preset-row-menu-trigger" %>"><%= t("quote_presets.index.more_actions", default: "More") %></summary>
+                        <div class="quote-preset-row-menu-list">
+                          <%= button_to t("quote_presets.index.duplicate", default: "Duplicate"), duplicate_quote_preset_path(preset), method: :post, class: ui_button_classes(:secondary) %>
+                          <%= button_to t("quotes.view.form.remove", default: "Delete"), quote_preset_path(preset), method: :delete, data: { turbo_confirm: t("quote_presets.index.delete_confirm", default: "Delete this preset?") }, class: ui_button_classes(:danger) %>
+                        </div>
+                      </details>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% else %>
+        <p class="quote-form-hint"><%= t("quote_presets.index.empty", default: "No presets in this module yet.") %></p>
+      <% end %>
+    </div>
+  </section>
+
+  <section class="quote-form-panel quote-form-section">
+    <div class="quote-form-section-summary quote-form-section-summary--card">
+      <strong><%= t("quote_presets.index.master_title", default: "Master Preset") %></strong>
+      <span class="app-form-section-note"><%= t("quote_presets.index.master_hint", default: "One company-level master mapping used for quote auto-fill.") %></span>
+    </div>
+    <div class="quote-form-section-body">
+      <%= form_with model: @quote_preset_master, url: quote_preset_master_path, method: :patch do |f| %>
+        <div class="quote-form-grid">
+          <% QuotePresetMaster::MODULE_PRESET_REFLECTIONS.each do |module_key, assoc_name| %>
+            <div>
+              <label><%= module_labels[module_key] %></label>
+              <% options = @quote_presets.select { |preset| preset.module_key == module_key }.map { |preset| [preset.name, preset.id] } %>
+              <%= select_tag "quote_preset_master[#{assoc_name}_id]",
+                             options_for_select([[t("quote_presets.index.none", default: "None"), ""]] + options, @quote_preset_master.public_send("#{assoc_name}_id")),
+                             class: ui_input_classes,
+                             data: { searchable_select: true, search_placeholder: t("quotes.view.form.select_preset", default: "Search preset") } %>
+            </div>
+          <% end %>
+        </div>
+        <div class="quote-form-add-row">
+          <%= f.submit t("quote_presets.index.save_master", default: "Save Master Mapping"), class: ui_button_classes(:primary) %>
+        </div>
+      <% end %>
+    </div>
+  </section>
+</div>

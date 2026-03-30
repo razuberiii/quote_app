@@ -82,10 +82,60 @@ en:
     product_presets: Presets
     presets: Presets
     template: Template
+    quote_presets: Quote Presets
     team: Team
     admin: Admin
     start_free: Start free
     login: Login
+  quote_presets:
+    modules:
+      standard_fee_items: Standard Fee Items
+    index:
+      hint: Manage module presets and company-level master defaults.
+      module_limit_hint: "Per module preset limit: %{limit}."
+      new_title: Create Preset
+      create_cta: Create Preset
+      create_cta_for_module: "Create %{module} Preset"
+      list_title: Preset Library
+      duplicate: Duplicate
+      delete_confirm: Delete this preset?
+      empty: No presets in this module yet.
+      master_title: Master Preset
+      master_hint: One company-level master mapping used for quote auto-fill.
+      master_enabled: Enable Master Auto-fill
+      none: None
+      save_master: Save Master Mapping
+      yes: Yes
+      no: No
+    form:
+      module: Module
+      name: Preset Name
+      position: Order
+      position_help: Smaller values appear first.
+      active: Active
+      enabled: Enabled
+      save: Save Preset
+      variant_header: Variant Header
+      container_type_header: Container Type Header
+      capacity_header: Capacity Header
+      note_header: Note Header
+      seller_signature_image: Seller Signature Image
+      seller_stamp_image: Seller Stamp Image
+      remove_existing_seller_signature_image: Remove existing seller signature image
+      remove_existing_seller_stamp_image: Remove existing seller stamp image
+    flash:
+      created: Quote preset created.
+      updated: Quote preset updated.
+      deleted: Quote preset deleted.
+      duplicated: Quote preset duplicated.
+      master_updated: Master quote preset updated.
+      module_limit_reached: "%{module} preset limit reached (%{limit})."
+    edit:
+      title: Edit Quote Preset
+      back: Back to Presets
+    new:
+      title: Create Quote Preset
+      back: Back to Presets
   account:
     menu: Account
     settings: Settings
@@ -635,6 +685,9 @@ en:
           discount_amount: Discount
           grand_total: Grand Total
       show:
+        disclosure:
+          more_count: "More %{count}"
+          collapse: "Collapse"
         advanced_trade_terms: Supplementary Trade Terms
         advanced_logistics: Shipping & Logistics
         supplementary_trade_terms: Supplementary Trade Terms
@@ -740,8 +793,7 @@ en:
           close_reason_modal: Close reason dialog
           fill_win_reason_hint: Capture why this quote was won so future reporting can spot repeatable patterns.
           fill_loss_reason_hint: Capture why this quote was lost so the team can improve pricing, positioning, and timing.
-          switch_to_quotation: Switch to Quote
-          switch_to_pi: Switch to PI
+          create_pi: Create PI
           send_reminder: Send reminder
           close_verification: Close verification
           verify_before_reminder: Verify before sending reminder
@@ -782,6 +834,10 @@ en:
           copy_link: Copy public link
           title: Share with customer
           whatsapp_ready: WhatsApp ready
+        related_documents_title: Related Documents
+        related_documents_hint: View the relationship between this quote and its PI document.
+        source_quote: Source Quote
+        derived_pi_list: Generated PI Documents
         history:
           title: History
           subtitle: Revision trail and archive actions
@@ -812,7 +868,7 @@ en:
         template: Template
         search_template: Search template
         quote_date: Quote date
-        custom_title: Custom Quote Title (optional)
+        custom_title: Custom Title (optional)
         custom_title_placeholder: Project Falcon - Q2 Equipment Package
         status_locked_draft: Quote status is not edited directly inside the form.
         status_locked_draft_hint: Use the quote detail actions to move it through sent, negotiating, won, or lost.
@@ -826,24 +882,34 @@ en:
           expired: Expired
         business_terms: Business Terms
         business_terms_hint: Add the terms customers review alongside pricing.
-        advanced_quote_sections: Advanced Quote Sections
-        advanced_quote_sections_hint: Optional for formal and complex quotes. Keep off for daily lightweight quoting.
-        enable_advanced_mode: Enable advanced sections for this quote
-        advanced_trade_terms_title: Advanced Trade Terms (Supplement)
+        advanced_quote_sections: Extended Quote Modules
+        advanced_quote_sections_hint: Optional for medium-to-high complexity quotes. Keep off for daily lightweight quoting.
+        enable_advanced_mode: Enable extended modules for this quote
+        advanced_trade_terms_title: Extended Trade Terms (Supplement)
+        commercial_summary_editor_hint: Edit this as the commercial summary module for formal quotes.
         advanced_trade_terms_hint: Existing payment term/trade term stay as primary fields. These are supplemental notes.
-        show_advanced_trade_terms: Show advanced trade terms section
+        show_advanced_trade_terms: Show extended trade terms section
         hs_code: HS Code
         warranty_scope_note: Warranty Scope Note
         support_scope_note: Support Scope Note
         validity_clause_note: Validity Clause Note
         delivery_commitment_note: Delivery Commitment Note
         payment_clause_note: Payment Clause Note
-        advanced_logistics_title: Advanced Logistics (Supplement)
-        show_advanced_logistics: Show advanced logistics section
+        advanced_logistics_title: Extended Logistics (Supplement)
+        logistics_summary_editor_hint: Edit this as the logistics summary module for formal quotes.
+        show_advanced_logistics: Show extended logistics section
         container_type: Container Type
         freight_note: Freight Note
         shipping_scope_note: Shipping Scope Note
         container_loading_note: Container Loading Note
+        container_loading_editor_hint: Use matrix rows first. This note is fallback narrative when no valid rows are provided.
+        container_loading_matrix_editor_hint: Lightweight matrix rows. If empty, output falls back to Container Loading Note narrative.
+        container_loading_matrix_empty_label: No valid rows, output will use narrative fallback if provided.
+        container_loading_variant_placeholder: Variant / Version
+        container_loading_type_placeholder: Container Type
+        container_loading_capacity_placeholder: Capacity
+        container_loading_note_placeholder: Note (optional)
+        add_container_loading_row: Add Loading Row
         payment_term_placeholder: 30% advance, 70% before shipment
         trade_terms: Trade terms
         trade_terms_placeholder: FOB / CIF / EXW
@@ -954,6 +1020,43 @@ en:
         no_exact_match_saved_as_custom: No exact product match. Saved as custom item.
         remove_item: Remove item
         add_item: Add Item
+        enable_extended_quote_info: Enable Extended Quote Info
+        disable_extended_quote_info: Disable Extended Quote Info
+        apply_formal_scenario: Apply Extended Equipment Container Scenario
+        extended_scenario_applied: Extended scenario preset applied.
+        extended_scenario_disabled: Extended quote info disabled.
+        insert_main_equipment_item: Insert Main Equipment Item
+        insert_standard_fee_items: Insert Standard Logistics Fee Items
+        standard_fee_items_not_configured: Standard logistics fee preset is not configured.
+        configure_standard_fee_items: Configure now
+        standard_fee_items_not_selected: Select a standard logistics fee preset first
+        preset_selector_hint: Select module preset (configure in Templates / Quote Presets).
+        standard_fee_items_selector_hint: Select standard logistics fee preset (configure in Templates / Quote Presets / Standard Fee Items).
+        clear_selected_preset: Clear selected preset
+        preset_cleared: Preset selection cleared.
+        standard_fee_items_empty_rows: The selected preset has no valid fee rows. Configure rows in Quote Presets / Standard Fee Items.
+        configuration_editor_hint: Lightweight key-value rows for formal quote configuration summary.
+        configuration_empty_label: No valid rows, this block stays hidden in output.
+        configuration_label_placeholder: Label
+        configuration_value_placeholder: Value
+        add_configuration_row: Add Configuration Row
+        detail_pictures_editor_hint: Select from product gallery or upload quote images in batch, then preview before saving.
+        detail_pictures_empty_label: No pictures selected, this block stays hidden in output.
+        open_selected_product_gallery: Open Selected Product Gallery
+        selected_product_gallery_hint: Only shows images from products currently selected in quote items.
+        selected_product_gallery_empty: No gallery images found for currently selected products.
+        deselect_all: Deselect all
+        insert_selected_images: Insert Selected Images
+        detail_picture_batch_upload_label: Upload quote images (batch)
+        detail_picture_batch_upload_hint: You can select multiple images at once.
+        detail_picture_source_product: Product Gallery
+        detail_picture_source_quote: Quote Upload
+        detail_picture_caption_placeholder: Caption (optional)
+        add_detail_picture_row: Add Detail Picture
+        seller_signature_image: Seller Signature Image
+        seller_stamp_image: Seller Stamp Image
+        remove_seller_signature_image: Remove seller signature image
+        remove_seller_stamp_image: Remove seller stamp image
         update_quote: Update Quote
         create_quote: Create quote
     flash:
@@ -996,6 +1099,10 @@ en:
       quote_reopened: Quote reopened for editing.
       reason_updated: Deal reason updated.
       reason_update_not_available: Reason update is only available for won or lost quotes.
+      pi_generation_not_available: PI generation is not available for this quote.
+      pi_created: PI created from quote.
+      pi_opened_existing: This quote already has a PI. Opened the existing PI.
+      pi_create_failed: "Unable to create PI: %{errors}"
     logic:
       decision_review:
         recommended_move:
@@ -1907,6 +2014,7 @@ en:
         files_selected: "%{count} files selected"
         gallery: Gallery
         select_all: Select all
+        deselect_all: Deselect all
         delete_selected: Delete selected
         selected_count: "%{count} selected"
         select_image: Select image
@@ -2182,11 +2290,11 @@ en:
         show_pdf_revision_summary: Show revision summary on PDF
         show_excel_revision_summary: Show revision summary on Excel
         show_excel_gridlines: Show Excel gridlines
-        advanced_defaults_group: Advanced quote defaults (opt-in)
-        advanced_defaults_group_hint: Low-frequency, high-value defaults for formal quotes only.
-        enable_advanced_by_default: Enable advanced mode by default for quotes using this template
-        show_trade_terms_advanced: Show advanced trade terms
-        show_logistics_block: Show advanced logistics
+        advanced_defaults_group: Extended quote defaults (opt-in)
+        advanced_defaults_group_hint: Low-frequency, high-value defaults for extended quotes only.
+        enable_advanced_by_default: Enable extended mode by default for quotes using this template
+        show_trade_terms_advanced: Show extended trade terms
+        show_logistics_block: Show extended logistics
         advanced_defaults_trade_group: Trade Terms (Supplement)
         advanced_defaults_trade_hint: Supplemental notes only. Keep standard payment/trade fields as primary semantics.
         advanced_defaults_logistics_group: Logistics (Supplement)
@@ -2279,6 +2387,13 @@ en:
       pi: PI
     sections:
       terms_and_conditions: Terms & Conditions
+      settlement_summary: Settlement Summary
+      configuration: Configuration
+      detail_pictures: Detail Pictures
+      container_loading: Container Loading
+      formal_closing: Formal Closing
+      commercial_notes: Commercial Notes
+      logistics_notes: Logistics Notes
       scope_of_supply: Scope of Supply
       company_credentials: Company Credentials
       footer: Footer
@@ -2307,7 +2422,9 @@ en:
       email: Email
       phone: Phone
       address: Address
+      website: Website
       quote_info: Quote Info
+      version: Version
       title: Title
       contact: Contact
       items: Items
@@ -2331,7 +2448,15 @@ en:
       terms: Terms
       legal_disclaimer: Legal Disclaimer
       delivery_notes: Delivery Notes
+      note: Note
       notes: Notes
+      additional_notes: Additional Notes
+      bank_route: Bank Route
+      beneficiary_details: Beneficiary Details
+      remittance_note: Remittance Note
+      seller_signature_line: Seller Signature
+      seller_stamp_line: Seller Stamp
+      buyer_signature_line: Buyer Signature
       authorized_by: Authorized by
       sales_signature: Sales signature
       spec: Spec
@@ -2791,11 +2916,32 @@ en:
       bot_verification_required: Bot verification is required
       bot_verification_failed: Bot verification failed. Please try again.
   public_quote_shares:
+    actions:
+      print: Print
+      accept_quote: Accept Quotation
+      request_revision: Request Revision
+      confirm_accept: Confirm Acceptance
+      confirm_accept_hint: Please confirm that you want to accept this quotation.
+      confirm_accept_submit: Confirm Acceptance
+      request_revision_hint: Select a reason, then add optional details.
+      custom_details: Custom details (optional)
+      custom_details_placeholder: Describe specific changes if needed
+      confirm_revision_submit: Confirm Revision Request
+    system:
+      quote_inactive: This quote has expired and is no longer actionable. Please contact your sales representative for the latest version.
+      quote_updating: This quote is currently being updated by the seller. Please contact your sales representative for the latest version.
+      next_step: Decision Status
+      newer_revision: A newer revision is available.
+      open_latest: Open latest revision
+      accepted_on: Quotation Accepted on %{time}
+      revision_requested_on: Revision Requested on %{time}
+      not_actionable: This revision is not currently open for public decision.
     flash:
       revision_not_actionable: This revision is no longer actionable.
       quotation_accepted: Quote accepted. Thank you.
       revision_request_sent: Revision request sent.
     decision_intro_active: Review this quotation and choose how you want to proceed.
+    pi_document_notice: This PI link is document-only. Contact your sales representative for any changes.
     preview_mode:
       title: Preview Mode
       body: Rendered output only. All public actions are disabled in preview mode.

@@ -154,7 +154,7 @@ class QuoteExporter
     ].compact_blank.map { |line| pdf_text(line) }.join("\n")
 
     right_lines = [
-      "#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}",
+      "#{@template.resolved_document_number_label(@document_kind)} #{@quote.document_number_for(@document_kind)}",
       "#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d') || '-'}",
       (@template.show_valid_until && @quote.valid_until.present? ? "#{doc_t('labels.valid_until')}: #{@quote.valid_until.strftime('%Y-%m-%d')}" : nil),
       (@template.show_currency ? "#{doc_t('labels.currency')}: #{@quote.currency}" : nil),
@@ -381,9 +381,8 @@ class QuoteExporter
   end
 
   def render_pdf_signature(pdf)
-    signature_image_io = template_signature_image_io
-    signature_name = @template.signature_name.to_s.strip
-    return unless @template.show_signature_block && (signature_image_io.present? || signature_name.present?)
+    signature_image_io = quote_signature_image_io
+    return unless signature_image_io.present?
 
     pdf.move_down 8
     pdf.text "#{doc_t('sections.signature')}:"
@@ -392,7 +391,6 @@ class QuoteExporter
       pdf.image(signature_image_io, fit: [ 180, 60 ], position: :left)
       pdf.move_down 4
     end
-    pdf.text "#{doc_t('labels.authorized_by')}: #{pdf_text(signature_name)}" if signature_name.present?
   end
 
   def render_excel_header(sheet, styles, config)
@@ -411,7 +409,7 @@ class QuoteExporter
       excel_text(@company.website.to_s.strip)
     ]
     right_lines = [
-      excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.quote_no}"),
+      excel_text("#{@template.resolved_document_number_label(@document_kind)} #{@quote.document_number_for(@document_kind)}"),
       (@quote.custom_title.present? ? excel_text("#{doc_t('labels.title')}: #{@quote.custom_title}") : nil),
       excel_text("#{document_date_label}: #{@quote.issued_on&.strftime('%Y-%m-%d')}"),
       (@template.show_valid_until && @quote.valid_until.present? ? excel_text("#{doc_t('labels.valid_until')}: #{@quote.valid_until.strftime('%Y-%m-%d')}") : nil),
@@ -488,33 +486,33 @@ class QuoteExporter
   end
 
   def render_excel_items(sheet, styles)
-    headers = [ doc_t("labels.no"), doc_t("labels.image"), @template.resolved_table_label("description"), @template.resolved_table_label("qty"), @template.resolved_table_label("unit_price"), @template.resolved_table_label("line_total") ]
+    headers = [ doc_t("labels.no"), @template.resolved_table_label("description"), nil, @template.resolved_table_label("qty"), @template.resolved_table_label("unit_price"), @template.resolved_table_label("line_total") ]
     header_styles = [ styles[:header_left], styles[:header_left], styles[:header_left], styles[:header_right], styles[:header_right], styles[:header_right] ]
     sheet.add_row headers, style: header_styles, height: 21
     header_row_index = sheet.rows.size - 1
+    sheet.merge_cells("B#{header_row_index + 1}:C#{header_row_index + 1}")
 
-    image_col_index = 1
     qty_col = 3
     unit_col = 4
     total_col = 5
 
     @quote.quote_items.ordered.each_with_index do |item, idx|
       description_text = excel_item_description_text(item)
-      row = [ idx + 1, "", description_text, item.quantity, item.unit_price.to_f, item.line_total.to_f ]
+      row = [ idx + 1, description_text, nil, item.quantity, item.unit_price.to_f, item.line_total.to_f ]
       alternate = idx.odd?
       row_styles = [
         (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
-        (alternate ? styles[:cell_left_alt] : styles[:cell_left]),
+        (alternate ? styles[:cell_desc_alt] : styles[:cell_desc]),
         (alternate ? styles[:cell_desc_alt] : styles[:cell_desc]),
         (alternate ? styles[:number_alt] : styles[:number]),
         (alternate ? styles[:currency_alt] : styles[:currency]),
         (alternate ? styles[:currency_alt] : styles[:currency])
       ]
 
-      sheet.add_row row, style: row_styles, height: excel_item_row_height(description_text, @template.show_images?)
+      sheet.add_row row, style: row_styles, height: excel_item_row_height(description_text, false)
       row_index = sheet.rows.size - 1
       @excel_row_index_map[item.id] = row_index
-      add_excel_item_image(sheet, item, image_col_index) if @template.show_images?
+      sheet.merge_cells("B#{row_index + 1}:C#{row_index + 1}")
     end
 
     sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 5
@@ -553,112 +551,29 @@ class QuoteExporter
   end
 
   def render_excel_sections(sheet, styles)
-    scope_text = @quote.scope_of_supply.to_s.strip
-    show_scope_of_supply = @document_kind != "pi" && @template.show_scope_of_supply && scope_text.present?
-    if show_scope_of_supply
-      divider_row = sheet.rows.size + 1
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-      add_excel_section_heading(sheet, styles, @template.resolved_scope_of_supply_label)
-      add_excel_section_text_row(sheet, styles, scope_text)
+    trade_rows = @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template) ? advanced_trade_terms_lines : []
+    configuration_rows = excel_configuration_rows
+    detail_rows = excel_detail_picture_rows
+    logistics_rows = if @quote.advanced_section_enabled?("show_logistics_block", template: @template)
+      advanced_logistics_lines.reject { |(label, _)| label == advanced_logistics_label("container_loading_note") }
+    else
+      []
     end
-
-    if @template.show_terms_section
-      terms_rows = []
-      terms_rows << [ doc_t("labels.payment_terms"), @quote.payment_term ] if @template.show_payment_term && @quote.payment_term.present?
-      terms_rows << [ doc_t("labels.trade_terms"), @quote.trade_term ] if @quote.trade_term.present?
-      terms_rows << [ doc_t("labels.terms"), @quote.terms_text ] if @quote.terms_text.present?
-      terms_rows << [ doc_t("labels.legal_disclaimer"), @quote.legal_disclaimer ] if @quote.legal_disclaimer.present?
-      terms_rows << [ doc_t("labels.delivery_notes"), @quote.delivery_notes ] if @quote.delivery_notes.present?
-
-      if terms_rows.any?
-        divider_row = sheet.rows.size + 1
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-        sheet.add_row [ doc_t("sections.terms_and_conditions") ], style: styles[:section]
-        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
-
-        terms_rows.each do |label, value|
-          add_excel_terms_row(sheet, styles, label, value)
-        end
-      end
+    container_loading_rows = if @quote.advanced_section_enabled?("show_logistics_block", template: @template)
+      excel_container_loading_rows
+    else
+      []
     end
+    scope_rows = excel_scope_rows
+    formal_closing_rows = excel_formal_closing_rows
 
-    if @quote.advanced_section_enabled?("show_trade_terms_advanced", template: @template)
-      trade_rows = advanced_trade_terms_lines
-      if trade_rows.any?
-        divider_row = sheet.rows.size + 1
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-        sheet.add_row [ supplementary_trade_terms_title ], style: styles[:section]
-        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
-        trade_rows.each do |label, value|
-          add_excel_terms_row(sheet, styles, label, value)
-        end
-      end
-    end
-
-    if @quote.advanced_section_enabled?("show_logistics_block", template: @template)
-      logistics_rows = advanced_logistics_lines
-      if logistics_rows.any?
-        divider_row = sheet.rows.size + 1
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-        sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-        sheet.add_row [ shipping_and_logistics_title ], style: styles[:section]
-        sheet.merge_cells("A#{sheet.rows.size}:F#{sheet.rows.size}")
-        logistics_rows.each do |label, value|
-          add_excel_terms_row(sheet, styles, label, value)
-        end
-      end
-    end
-
-    if @template.show_notes && @quote.notes.present?
-      sheet.add_row []
-      add_excel_terms_row(sheet, styles, doc_t("labels.notes"), @quote.notes)
-    end
-
-    footer_note = @template.resolved_footer_note(@document_kind)
-    if footer_note.present?
-      divider_row = sheet.rows.size + 1
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-      add_excel_section_heading(sheet, styles, doc_t("sections.footer"))
-      add_excel_section_text_row(sheet, styles, footer_note)
-    end
-
-    signature_name = @template.signature_name.to_s.strip
-    signature_image_path = excel_signature_image_path
-    if @template.show_signature_block && (signature_name.present? || signature_image_path.present?)
-      divider_row = sheet.rows.size + 1
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
-      sheet.merge_cells("A#{divider_row}:F#{divider_row}")
-      sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
-      add_excel_section_heading(sheet, styles, doc_t("sections.signature"))
-
-      if signature_image_path.present?
-        signature_row = sheet.rows.size + 1
-        sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_value]), height: 44
-        signature_width, signature_height = excel_fitted_dimensions(
-          excel_image_dimensions(signature_image_path),
-          max_width: 156,
-          max_height: 40
-        )
-        sheet.add_image(image_src: signature_image_path) do |image|
-          image.start_at(0, signature_row - 1)
-          image.width = signature_width
-          image.height = signature_height
-        end
-      end
-
-      if signature_name.present?
-        add_excel_section_text_row(sheet, styles, "#{doc_t('labels.authorized_by')}: #{signature_name}")
-      end
-    end
+    add_excel_terms_section(sheet, styles, title: "TRADE TERMS", rows: trade_rows) if trade_rows.any?
+    add_excel_terms_section(sheet, styles, title: "CONFIGURATION", rows: configuration_rows) if configuration_rows.any?
+    add_excel_terms_section(sheet, styles, title: "DETAIL PICTURES", rows: detail_rows) if detail_rows.any?
+    add_excel_terms_section(sheet, styles, title: "SHIPPING & LOGISTICS", rows: logistics_rows) if logistics_rows.any?
+    add_excel_container_loading_section(sheet, styles, container_loading_rows) if container_loading_rows.any?
+    add_excel_terms_section(sheet, styles, title: "SCOPE OF SUPPLY", rows: scope_rows) if scope_rows.any?
+    add_excel_terms_section(sheet, styles, title: "FORMAL CLOSING", rows: formal_closing_rows) if formal_closing_rows.any?
   end
 
   def apply_excel_sheet_options(sheet)
@@ -767,7 +682,9 @@ class QuoteExporter
       total_value: styles.add_style(sz: 11, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
       grand_total_label: styles.add_style(b: true, sz: 12, bg_color: grand_total_fill, fg_color: grand_total_text, border: { style: :medium, color: emphasis, edges: [ :top ] }, alignment: { horizontal: :right, vertical: :center }, font_name: font),
       grand_total: styles.add_style(b: true, sz: 13, bg_color: grand_total_fill, fg_color: grand_total_text, border: { style: :medium, color: emphasis, edges: [ :top ] }, format_code: currency_format_code, alignment: { horizontal: :right, vertical: :center }, font_name: font),
-      terms_divider: styles.add_style(border: { style: :thin, color: grid, edges: [ :top ] }, font_name: font)
+      terms_divider: styles.add_style(border: { style: :thin, color: grid, edges: [ :top ] }, font_name: font),
+      section_table_header: styles.add_style(sz: 10, b: true, bg_color: "F3F4F6", fg_color: "1F2937", border: { style: :thin, color: grid, edges: [ :left, :right, :top, :bottom ] }, alignment: { horizontal: :left, vertical: :center }, font_name: font),
+      section_table_cell: styles.add_style(sz: 10, border: { style: :thin, color: grid, edges: [ :left, :right, :bottom ] }, alignment: { horizontal: :left, vertical: :top, wrap_text: true }, font_name: font)
     }
   end
 
@@ -1033,11 +950,12 @@ class QuoteExporter
   def excel_item_description_text(item)
     spec_label = @template.spec_label.to_s.strip.presence || doc_t("labels.spec")
     addon_label = @template.addon_label.to_s.strip.presence || doc_t("labels.addon")
-    title = item.product&.name.presence || item.description.to_s.presence || doc_t("labels.item")
-    title = excel_soft_wrap_text(title)
-    lines = [ title ]
-    if item.description.present? && item.description.to_s != title
-      lines << excel_soft_wrap_text(item.description.to_s)
+    title_source = item.product&.name.to_s
+    description_source = item.description.to_s
+    title = title_source.squish.presence || description_source.squish.presence || doc_t("labels.item")
+    lines = [ excel_soft_wrap_text(title) ]
+    if description_source.squish.present? && excel_normalized_text(description_source) != excel_normalized_text(title)
+      lines << excel_soft_wrap_text(description_source)
     end
     spec_lines = item.specification_pairs.filter_map do |pair|
       key = excel_soft_wrap_text(pair[:key].to_s.strip)
@@ -1062,6 +980,125 @@ class QuoteExporter
       lines.concat(addon_lines)
     end
     lines.join("\n")
+  end
+
+  def excel_normalized_text(text)
+    text.to_s.gsub(/\s+/, " ").strip.downcase
+  end
+
+  def add_excel_section_gap(sheet, styles)
+    divider_row = sheet.rows.size + 1
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], style: Array.new(6, styles[:terms_divider]), height: 4
+    sheet.merge_cells("A#{divider_row}:F#{divider_row}")
+    sheet.add_row [ nil, nil, nil, nil, nil, nil ], height: 4
+  end
+
+  def add_excel_terms_section(sheet, styles, title:, rows:)
+    normalized = Array(rows).filter_map do |label, value|
+      label_text = label.to_s.squish
+      value_text = value.to_s.squish
+      next if label_text.blank? || value_text.blank?
+
+      [ label_text, value_text ]
+    end
+    return if normalized.empty?
+
+    add_excel_section_gap(sheet, styles)
+    add_excel_section_heading(sheet, styles, title)
+    normalized.each do |label, value|
+      add_excel_terms_row(sheet, styles, label, value)
+    end
+  end
+
+  def add_excel_container_loading_section(sheet, styles, rows)
+    normalized_rows = Array(rows).map do |row|
+      row.is_a?(Hash) ? row : {}
+    end.filter do |row|
+      row.values.any? { |value| value.to_s.squish.present? }
+    end
+    return if normalized_rows.empty?
+
+    add_excel_section_gap(sheet, styles)
+    add_excel_section_heading(sheet, styles, "CONTAINER LOADING")
+    header_row = sheet.rows.size + 1
+    sheet.add_row [ "Variant / Trim", "Container Type", "Load Capacity", "Loading Note", nil, nil ],
+                  style: [ styles[:section_table_header], styles[:section_table_header], styles[:section_table_header], styles[:section_table_header], styles[:section_table_header], styles[:section_table_header] ],
+                  height: 19
+    sheet.merge_cells("E#{header_row}:F#{header_row}")
+
+    normalized_rows.each do |row|
+      data_row = sheet.rows.size + 1
+      sheet.add_row [
+        row["variant"].to_s.squish.presence || row[:variant].to_s.squish.presence || "-",
+        row["container_type"].to_s.squish.presence || row[:container_type].to_s.squish.presence || "-",
+        row["capacity"].to_s.squish.presence || row[:capacity].to_s.squish.presence || "-",
+        row["note"].to_s.squish.presence || row[:note].to_s.squish.presence || "-",
+        nil,
+        nil
+      ],
+                    style: [ styles[:section_table_cell], styles[:section_table_cell], styles[:section_table_cell], styles[:section_table_cell], styles[:section_table_cell], styles[:section_table_cell] ],
+                    height: 18
+      sheet.merge_cells("E#{data_row}:F#{data_row}")
+    end
+  end
+
+  def excel_configuration_rows
+    rows = @quote.configuration_block_data.fetch("rows", [])
+    Array(rows).filter_map do |row|
+      source = row.is_a?(Hash) ? row : {}
+      label = source["label"].to_s.squish
+      value = source["value"].to_s.squish
+      next if label.blank? || value.blank?
+
+      [ label, value ]
+    end
+  end
+
+  def excel_detail_picture_rows
+    block = @quote.detail_pictures_block_data
+    return [] unless ActiveModel::Type::Boolean.new.cast(block["enabled"])
+
+    items = Array(block["items"]).map { |item| item.is_a?(Hash) ? item : {} }
+    items.filter_map.with_index(1) do |item, idx|
+      blob_id = item["image_blob_id"].to_s.squish
+      next if blob_id.blank?
+
+      caption = item["caption"].to_s.squish
+      source = item["source"].to_s.squish.presence || "image"
+      label = "Picture #{idx}"
+      value = caption.presence || "#{source.humanize} (##{blob_id})"
+      [ label, value ]
+    end
+  end
+
+  def excel_container_loading_rows
+    block = @quote.container_loading_block_data
+    return [] unless ActiveModel::Type::Boolean.new.cast(block["enabled"])
+
+    Array(block["rows"]).select { |row| row.is_a?(Hash) }
+  end
+
+  def excel_scope_rows
+    return [] unless @document_kind != "pi" && @template.show_scope_of_supply
+
+    scope_text = @quote.scope_of_supply.to_s.strip
+    return [] if scope_text.blank?
+
+    scope_text.split(/\r?\n/).map(&:strip).reject(&:blank?).map.with_index(1) do |line, idx|
+      [ "Item #{idx}", line ]
+    end
+  end
+
+  def excel_formal_closing_rows
+    block = @quote.formal_closing_block_data
+    rows = []
+    rows << [ "Trade Terms", block["trade_term"].to_s.squish.presence || @quote.trade_term.to_s.squish ] if (block["trade_term"].to_s.squish.presence || @quote.trade_term.to_s.squish).present?
+    rows << [ "Payment Terms", block["payment_term"].to_s.squish.presence || @quote.payment_term.to_s.squish ] if (block["payment_term"].to_s.squish.presence || @quote.payment_term.to_s.squish).present?
+    rows << [ "Delivery", block["delivery_time"].to_s.squish.presence || @quote.delivery_notes.to_s.squish ] if (block["delivery_time"].to_s.squish.presence || @quote.delivery_notes.to_s.squish).present?
+    rows << [ "Remittance Note", block["remittance_note"].to_s.squish ] if block["remittance_note"].to_s.squish.present?
+    rows << [ "Bank Route", block["bank_route"].to_s.squish ] if block["bank_route"].to_s.squish.present?
+    rows << [ "Beneficiary", block["beneficiary_details"].to_s.squish ] if block["beneficiary_details"].to_s.squish.present?
+    rows
   end
 
   def excel_wrapped_row_height(texts, width_chars:, min:, line_height:, max:)
@@ -1232,10 +1269,10 @@ class QuoteExporter
     value
   end
 
-  def template_signature_image_io
-    return nil unless @template.respond_to?(:signature_image) && @template.signature_image.attached?
+  def quote_signature_image_io
+    return nil unless @quote.respond_to?(:seller_signature_image) && @quote.seller_signature_image.attached?
 
-    decoded = @template.signature_image.blob.download
+    decoded = @quote.seller_signature_image.blob.download
     return nil if decoded.blank?
 
     io = StringIO.new(decoded)
@@ -1260,9 +1297,9 @@ class QuoteExporter
   end
 
   def excel_signature_image_path
-    return nil unless @template.respond_to?(:signature_image) && @template.signature_image.attached?
+    return nil unless @quote.respond_to?(:seller_signature_image) && @quote.seller_signature_image.attached?
 
-    excel_attachment_path_for(@template.signature_image, basename: "quote_signature")
+    excel_attachment_path_for(@quote.seller_signature_image, basename: "quote_signature")
   end
 
   def excel_attachment_path_for(attachment, basename:)

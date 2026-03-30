@@ -6,8 +6,8 @@ class DealOutcomeAnalyticsService
   # Returns win reason distribution as { reason_key => count }, sorted descending.
   # Example: { "price_accepted" => 14, "buyer_relationship" => 9, "other" => 3 }
   def win_reason_distribution
-    Quote
-      .where(company_id: @company.id, status: "won")
+    base_quotes
+      .where(status: "won")
       .pluck(:win_reason)
       .each_with_object(Hash.new(0)) { |reason, memo| memo[normalize_reason_key(reason)] += 1 }
       .sort_by { |_k, v| -v }
@@ -16,8 +16,8 @@ class DealOutcomeAnalyticsService
 
   # Returns loss reason distribution as { reason_key => count }, sorted descending.
   def loss_reason_distribution
-    Quote
-      .where(company_id: @company.id, status: "lost")
+    base_quotes
+      .where(status: "lost")
       .pluck(:loss_reason)
       .each_with_object(Hash.new(0)) { |reason, memo| memo[normalize_reason_key(reason)] += 1 }
       .sort_by { |_k, v| -v }
@@ -28,8 +28,8 @@ class DealOutcomeAnalyticsService
   # Trims, downcases, groups by normalized text → count.
   # Returns [] if none.
   def loss_other_breakdown(limit: 20)
-    Quote
-      .where(company_id: @company.id, status: "lost", loss_reason: "other")
+    base_quotes
+      .where(status: "lost", loss_reason: "other")
       .where.not(loss_reason_detail: [ nil, "" ])
       .pluck(:loss_reason_detail)
       .each_with_object(Hash.new(0)) do |detail, memo|
@@ -96,5 +96,9 @@ class DealOutcomeAnalyticsService
 
   def fallback_reason_label(reason)
     reason.to_s.tr("_", " ").squish.humanize
+  end
+
+  def base_quotes
+    @base_quotes ||= Quote.where(company_id: @company.id).excluding_pi_documents
   end
 end

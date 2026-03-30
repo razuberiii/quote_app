@@ -77,7 +77,21 @@
                 </div>
               </details>
             </li>
-            <%= ui_nav_link t("nav.template"), quote_templates_path, icon: :templates %>
+            <% quote_presets_nav_active = ["quote_presets", "quote_preset_masters"].include?(controller_path) %>
+            <% templates_nav_active = controller_path == "quote_templates" || quote_presets_nav_active %>
+            <li class="nav-group <%= "is-active" if templates_nav_active %>">
+              <details class="nav-group-details">
+                <summary class="app-nav-link nav-group-trigger <%= "is-active" if templates_nav_active %>">
+                  <span class="app-nav-link-icon"><%= ui_nav_icon(:templates) %></span>
+                  <span class="app-nav-link-label"><%= t("nav.template") %></span>
+                  <span class="nav-group-caret" aria-hidden="true">▾</span>
+                </summary>
+                <div class="nav-group-menu app-dropdown-panel">
+                  <%= link_to t("nav.template"), quote_templates_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if controller_path == "quote_templates")].compact.join(" ") %>
+                  <%= link_to t("nav.quote_presets"), quote_presets_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if quote_presets_nav_active)].compact.join(" ") %>
+                </div>
+              </details>
+            </li>
             <% if current_user.can_manage_team? %>
               <%= ui_nav_link t("nav.team"), team_members_path, icon: :team %>
             <% end %>

@@ -18,13 +18,12 @@ class ProductQuoteAnalyticsService
   def product_stats(product_id)
     base = QuoteItem
       .with_product
-      .joins(:quote)
       .where(product_id: product_id)
-      .where(quotes: { company_id: @company.id })
+      .where(quote_id: scoped_quote_ids)
       .in_period(@period_days)
 
     quotes_count = base.count
-    wins_count   = base.where(quotes: { status: "won" }).count
+    wins_count   = base.joins(:quote).where(quotes: { status: "won" }).count
     avg_price    = base.average(:unit_price)&.round(2)
     win_rate     = quotes_count.positive? ? ((wins_count.to_f / quotes_count) * 100).round : nil
 
@@ -38,7 +37,7 @@ class ProductQuoteAnalyticsService
     rows = QuoteItem
       .with_product
       .joins(:quote, :product)
-      .where(quotes: { company_id: @company.id })
+      .where(quotes: { id: scoped_quote_ids })
       .in_period(@period_days)
       .group("quote_items.product_id, products.name")
       .select("product_id, products.name AS product_name, COUNT(*) AS quotes_count, SUM(CASE WHEN quotes.status = 'won' THEN 1 ELSE 0 END) AS wins_count, AVG(quote_items.unit_price) AS avg_price")
@@ -56,5 +55,9 @@ class ProductQuoteAnalyticsService
         win_rate:     win_rate
       }
     end
+  end
+
+  def scoped_quote_ids
+    @scoped_quote_ids ||= Quote.where(company_id: @company.id).excluding_pi_documents.select(:id)
   end
 end

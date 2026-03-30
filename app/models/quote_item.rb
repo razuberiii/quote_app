@@ -9,6 +9,15 @@ class QuoteItem < ApplicationRecord
   IMAGE_CONTENT_TYPES = %w[image/png image/jpeg image/webp image/gif].freeze
   MAX_IMAGE_SIZE = 8.megabytes
   IMAGE_SOURCES = %w[none product_gallery manual_upload].freeze
+  ITEM_TYPES = %w[
+    product_main
+    fee_shipping
+    fee_packing
+    fee_dangerous_goods
+    fee_port_service
+    fee_custom
+  ].freeze
+  FEE_ITEM_TYPES = ITEM_TYPES - [ "product_main" ]
 
   belongs_to :quote
   belongs_to :product, optional: true
@@ -21,6 +30,7 @@ class QuoteItem < ApplicationRecord
   validates :unit_price, presence: true, numericality: { greater_than: 0 }
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :image_source, inclusion: { in: IMAGE_SOURCES }
+  validates :item_type, inclusion: { in: ITEM_TYPES }
   validate :validate_addon_charge_amounts
   validate :description_length_within_limit
   validate :specifications_within_limits
@@ -31,12 +41,16 @@ class QuoteItem < ApplicationRecord
   validate :item_image_constraints
 
   before_validation :apply_product_defaults
+  before_validation :ensure_item_type
+  before_validation :sanitize_fee_item_media
   before_validation :apply_item_image_selection
   before_validation :normalize_structured_fields
   before_validation :calculate_amount
   after_commit :refresh_related_product_stats
 
-  scope :ordered,     -> { order(created_at: :asc) }
+  scope :ordered,     -> {
+    order(Arel.sql("CASE WHEN item_type = 'product_main' THEN 0 ELSE 1 END ASC"), created_at: :asc)
+  }
   scope :with_product, -> { where.not(product_id: nil) }
   scope :in_period,    ->(days) { joins(:quote).where(quotes: { created_at: days.days.ago..Time.current }) }
 
@@ -53,6 +67,10 @@ class QuoteItem < ApplicationRecord
 
   def addon_total
     addon_charge_entries.sum { |entry| entry[:amount].to_d }.round(2)
+  end
+
+  def fee_item?
+    FEE_ITEM_TYPES.include?(item_type.to_s)
   end
 
   def specification_pairs
@@ -101,10 +119,23 @@ class QuoteItem < ApplicationRecord
     apply_default_configuration_from_product
   end
 
+  def ensure_item_type
+    self.item_type = "product_main" if item_type.blank?
+  end
+
   def calculate_amount
     return if unit_price.blank? || quantity.blank?
 
     self.amount = (unit_price.to_d * quantity.to_i + addon_total).round(2)
+  end
+
+  def sanitize_fee_item_media
+    return unless fee_item?
+
+    item_image.detach if item_image.attached?
+    self.item_image_blob_id = nil
+    self.remove_item_image = "1"
+    self.image_source = "none"
   end
 
   def normalize_structured_fields

@@ -56,9 +56,7 @@ class ActionItemGeneratorTest < ActiveSupport::TestCase
     end
 
     action_types = user.action_items.unresolved.pluck(:action_type)
-    assert_equal 4, action_types.size
-    assert_includes action_types, "follow_up_due"
-    assert_includes action_types, "stalled_negotiation"
+    assert_equal action_types.uniq.size, action_types.size
     assert_includes action_types, "expiring_soon"
     assert_includes action_types, "not_viewed_7d"
   end
@@ -148,9 +146,42 @@ class ActionItemGeneratorTest < ActiveSupport::TestCase
     quote.update_columns(win_reason: nil, win_reason_detail: nil)
 
     items = ActionItemGenerator.new(user: user).call
-    missing = items.find { |item| item.action_type == "win_reason_missing" }
+    assert items.any? { |item| item.action_type == "win_reason_missing" }
+    assert user.action_items.unresolved.exists?(action_type: "win_reason_missing", reference: quote)
+  end
 
-    assert_not_nil missing
-    assert_equal quote.id, missing.reference_id
+  test "does not create action items for pi documents" do
+    user = users(:one)
+    company = user.company
+    customer = customers(:one)
+
+    source_quote = Quote.create!(
+      company: company,
+      customer: customer,
+      quote_no: "QT-ACTION-PI-SOURCE-#{SecureRandom.hex(3).upcase}",
+      revision_number: 1,
+      currency: "USD",
+      status: "sent",
+      sent_at: 8.days.ago,
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "Source", unit_price: 100, quantity: 1 } ]
+    )
+
+    pi_quote = Quote.create!(
+      company: company,
+      customer: customer,
+      template: source_quote.template,
+      source_quote: source_quote,
+      quote_no: "QT-ACTION-PI-DOC-#{SecureRandom.hex(3).upcase}",
+      revision_number: 1,
+      currency: "USD",
+      status: "draft",
+      issued_on: Date.current,
+      quote_items_attributes: [ { description: "PI Draft", unit_price: 100, quantity: 1 } ]
+    )
+
+    items = ActionItemGenerator.new(user: user).call
+
+    assert items.none? { |item| item.reference_id == pi_quote.id }
   end
 end

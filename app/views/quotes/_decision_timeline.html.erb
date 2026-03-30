@@ -35,9 +35,13 @@
   </div>
 
   <% if hidden_events.any? %>
-    <details class="quote-decision-more">
-      <summary><%= t("quotes.view.decision_timeline.show_older_events", count: hidden_events.size) %></summary>
-      <div class="quote-decision-list is-secondary">
+    <details class="quote-inline-disclosure quote-inline-disclosure--timeline" data-inline-disclosure-key="decision-timeline-more">
+      <summary class="quote-inline-disclosure-summary">
+        <span class="quote-inline-disclosure-label quote-inline-disclosure-label--more"><%= quote_inline_disclosure_more_label(hidden_events.size) %></span>
+        <span class="quote-inline-disclosure-label quote-inline-disclosure-label--collapse"><%= quote_inline_disclosure_collapse_label %></span>
+        <span class="quote-inline-disclosure-caret" aria-hidden="true"></span>
+      </summary>
+      <div class="quote-decision-list is-secondary quote-inline-disclosure-body">
         <% hidden_events.each do |event| %>
           <article class="quote-decision-item is-<%= event[:kind] %>">
             <div class="quote-decision-dot" aria-hidden="true"></div>

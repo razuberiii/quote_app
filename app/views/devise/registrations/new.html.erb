@@ -35,6 +35,12 @@
           <% end %>
 
           <div>
+            <%= f.label :username, "Username" %>
+            <%= f.text_field :username, required: true, minlength: 3, maxlength: 32, pattern: "[A-Za-z0-9_]+", autocomplete: "username", class: ui_input_classes %>
+            <small>3–32 letters, numbers, or underscores. You can use this to log in.</small>
+          </div>
+
+          <div>
             <%= f.label :email, t("users.registrations.view.new.email") %>
             <%= f.email_field :email, autofocus: true, autocomplete: "email", class: ui_input_classes %>
           </div>

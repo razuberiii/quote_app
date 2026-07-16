@@ -257,8 +257,9 @@ class ApplicationController < ActionController::Base
   end
 
   def configure_permitted_parameters
-    profile_keys = [ :avatar, :remove_avatar, :full_name, :contact_phone, :job_title, :time_zone, :language ]
-    devise_parameter_sanitizer.permit(:sign_up, keys: [ :avatar, :full_name, :time_zone, :language ])
+    profile_keys = [ :avatar, :remove_avatar, :username, :full_name, :contact_phone, :job_title, :time_zone, :language ]
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :username, :avatar, :full_name, :time_zone, :language ])
+    devise_parameter_sanitizer.permit(:sign_in, keys: [ :login ])
     devise_parameter_sanitizer.permit(:account_update, keys: profile_keys)
   end
 

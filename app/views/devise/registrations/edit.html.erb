@@ -29,6 +29,12 @@
     </div>
 
     <div>
+      <%= f.label :username, "Username" %>
+      <p class="team-members-hint">Used for sign-in and visible inside your workspace.</p>
+      <%= f.text_field :username, required: true, minlength: 3, maxlength: 32, class: ui_input_classes %>
+    </div>
+
+    <div>
       <%= f.label :full_name, t("users.registrations.view.edit.display_name") %>
       <p class="team-members-hint"><%= t("users.registrations.view.edit.display_name_hint") %></p>
       <%= f.text_field :full_name, placeholder: t("users.registrations.view.edit.display_name_placeholder"), class: ui_input_classes %>

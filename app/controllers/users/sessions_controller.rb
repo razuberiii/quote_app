@@ -1,6 +1,14 @@
 module Users
   class SessionsController < Devise::SessionsController
     def create
+      # Keep existing clients and password managers that still submit `email`
+      # compatible while the UI moves to the unified login field.
+      login = params.dig(:user, :login).presence || params.dig(:user, :email).to_s
+      if login.present? && !login.include?("@")
+        params[:user][:email] = User.where("LOWER(username) = ?", login.strip.downcase).pick(:email) || login
+      else
+        params[:user][:email] = login
+      end
       self.resource = warden.authenticate!(auth_options)
 
       # Check if email is verified

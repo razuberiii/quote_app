@@ -1,4 +1,5 @@
 class User < ApplicationRecord
+  attr_writer :login
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -13,6 +14,9 @@ class User < ApplicationRecord
   enum :status, { active: 0, suspended: 1 }, default: :active
   enum :company_role, { owner: 0, admin: 1, member: 2 }, default: :member, prefix: :company
   validates :language, inclusion: { in: %w[en zh-CN es-419] }, allow_blank: true
+  validates :username, presence: true, length: { in: 3..32 },
+    format: { with: /\A[a-zA-Z0-9_]+\z/, message: "may contain only letters, numbers, and underscores" },
+    uniqueness: { case_sensitive: false }
 
   belongs_to :company
   has_many :action_items, dependent: :destroy
@@ -22,6 +26,8 @@ class User < ApplicationRecord
   has_one_attached :avatar
   before_validation :ensure_company, on: :create
   before_validation :assign_company_role, on: :create
+  before_validation :assign_default_username, on: :create
+  before_validation :normalize_username
   validate :avatar_constraints
 
   def can_create_customer?
@@ -77,6 +83,16 @@ class User < ApplicationRecord
     active?
   end
 
+  def login
+    @login || username || email
+  end
+
+  def self.find_for_database_authentication(warden_conditions)
+    conditions = warden_conditions.dup
+    login = (conditions.delete(:login).presence || conditions.delete(:email)).to_s.strip.downcase
+    where(conditions).where("LOWER(username) = :value OR LOWER(email) = :value", value: login).first
+  end
+
   def move_to_personal_company!
     transaction do
       personal_company = Company.create!(name: "#{email}'s Company")
@@ -85,6 +101,17 @@ class User < ApplicationRecord
   end
 
   private
+
+  def assign_default_username
+    return if username.present?
+
+    base = email.to_s.split("@").first.to_s.gsub(/[^a-zA-Z0-9_]/, "_").downcase.presence || "user"
+    self.username = User.where("LOWER(username) = ?", base).exists? ? "#{base}_#{SecureRandom.hex(3)}" : base
+  end
+
+  def normalize_username
+    self.username = username.to_s.strip.downcase
+  end
 
   def ensure_company
     self.company ||= Company.create!(name: "My Company")

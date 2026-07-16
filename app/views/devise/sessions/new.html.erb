@@ -17,8 +17,8 @@
 
         <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "app-form-stack" }) do |f| %>
           <div>
-            <%= f.label :email, t("users.sessions.view.new.email") %>
-            <%= f.email_field :email, autofocus: true, autocomplete: "email", class: ui_input_classes %>
+            <%= f.label :login, "Email or username" %>
+            <%= f.text_field :login, autofocus: true, autocomplete: "username", class: ui_input_classes %>
           </div>
 
           <div>

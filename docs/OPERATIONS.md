@@ -11,3 +11,6 @@ Rollback: `RUBUSOO_IMAGE=rubusoo:<previous-sha> docker compose --env-file .env.p
 Current database backup: `/opt/data/quoteapp/backups/post-migration-20260716T020658Z.dump`. Nginx backup: `/root/nginx-conf-backups/20260716T021026Z`.
 
 Health: `curl -fsS http://127.0.0.1:3848/up`.
+# Transactional email
+
+Production email uses Resend SMTP when `RESEND_API_KEY` is configured. `MAILER_FROM` must belong to a verified Resend domain. For the current deployment the verified domain is `rubusoo.com`; secrets remain only in `.env.production`.

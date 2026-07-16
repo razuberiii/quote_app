@@ -8,7 +8,7 @@ No gate is reported as passed until its command has actually completed. Demo wri
 
 - Rails: 224 runs, 946 assertions, 0 failures, 0 errors, 0 skips.
 - Brakeman 8.0.4: 0 security warnings.
-- Production Docker image `rubusoo:63c805c`: built successfully for arm64.
+- Production Docker image: built successfully for arm64 and tagged with the deployment commit.
 - Migration `20260716000000`: completed in production.
 - Live checks: `/`, `/pricing`, `/buyer-demo`, and `/up` returned HTTP 200 through Cloudflare and HTTPS.
 - Chromium: 1440×1100 marketing page and 390×844 live Buyer Room captured under `tmp/review_shots/20260716`.

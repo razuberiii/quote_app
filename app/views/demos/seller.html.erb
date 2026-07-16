@@ -1,1 +1,20 @@
-<main class="rubusoo-page"><header class="page-heading"><p class="eyebrow">Seller demo</p><h1>Everything that needs your attention, in one place.</h1><p>This isolated walkthrough shows inquiry review, Quote Studio, revisions, buyer activity, acceptance and PI conversion.</p></header><a class="button button--primary" href="/demo">Open guided seller workspace</a></main>
+<main class="rb-page">
+  <header class="rb-page-head">
+    <div><p class="eyebrow">Interactive product tour</p><h1>See the full deal from both sides.</h1></div>
+    <p>No account, no setup, no empty dashboard. Choose a perspective and walk through a realistic export quotation flow.</p>
+  </header>
+  <div class="rb-demo-choice">
+    <%= link_to demo_path, class: "rb-demo-card" do %>
+      <span class="rb-demo-number">01 · SELLER WORKSPACE</span>
+      <h2>Run the deal.</h2>
+      <p>Review an inquiry, create a quotation, track revisions and buyer activity, then turn acceptance into a proforma invoice.</p>
+      <span class="rb-demo-arrow">↗</span>
+    <% end %>
+    <%= link_to buyer_demo_path, class: "rb-demo-card" do %>
+      <span class="rb-demo-number">02 · BUYER ROOM</span>
+      <h2>Make the decision.</h2>
+      <p>Review products and commercial terms, ask a question, request a change, and accept the exact revision.</p>
+      <span class="rb-demo-arrow">↗</span>
+    <% end %>
+  </div>
+</main>

@@ -1,10 +1,10 @@
 # Rubusoo design system
 
-The commercial product uses one visual language: **Modern Export Editorial**. New product surfaces use `app/assets/stylesheets/rubusoo.css`; legacy selectors in `components.css` and `public_quote.css` are migration-only and must not be introduced into new pages.
+The commercial product uses one visual language: **Rubusoo Deal Workspace**. It is a warm, high-contrast green system with compact controls, editorial display type, low-radius white work surfaces, and coral used only for deal attention. New product surfaces use `app/assets/stylesheets/rubusoo.css`; legacy selectors in `components.css` and `public_quote.css` are migration-only and must not be introduced into new pages.
 
-Core tokens are `--canvas`, `--paper`, `--ink`, `--muted`, `--line`, `--brand`, `--action`, `--success`, and `--danger`. Brand red is reserved for identity and editorial emphasis. Interactive actions use blue.
+Core tokens are the `--rb-*` family, with compatibility aliases for `--canvas`, `--paper`, `--ink`, `--muted`, `--line`, `--brand`, `--action`, `--success`, and `--danger`. Interactive actions use Rubusoo green; coral is reserved for deal attention and editorial punctuation.
 
-Canonical primitives are `.button` with `--primary`, `--secondary`, `--ghost`, and `--full` modifiers; `.input`; `.textarea`; `.field-label`; `.status`; `.rubusoo-dialog`; `.brand`; `.eyebrow`; and `.section-kicker`. Buyer-facing structures use the `buyer-` prefix, inquiry workflow uses `inquiry-`, and authenticated product pages use `rubusoo-`. Do not add Bootstrap/Tailwind dashboard patterns, generic cards, large radii, gradients, glass effects, or alternate button/input systems.
+Canonical primitives are `.button` with `--primary`, `--secondary`, `--ghost`, and `--full` modifiers; `.input`; `.textarea`; `.field-label`; `.status`; `.rubusoo-dialog`; `.brand`; `.eyebrow`; and `.section-kicker`. Marketing campaign structures use `marketing-`; pricing and guided demo structures use `rb-`; buyer-facing structures use `buyer-`; inquiry workflow uses `inquiry-`; and authenticated product pages use `rubusoo-`. Do not add Bootstrap-style dashboard patterns, generic utility-card grids, decorative glass effects, or alternate button/input systems.
 
 Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bottom action bar. All focusable controls require a visible blue focus ring. Amounts use tabular numerals. Customer-facing long values must wrap safely.
 

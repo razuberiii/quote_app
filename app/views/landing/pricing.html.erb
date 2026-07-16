@@ -1,1 +1,36 @@
-<main class="rubusoo-page"><header class="page-heading"><p class="eyebrow">Simple pricing</p><h1>Start closing before you start paying.</h1><p>Fourteen days free. No card required. Every plan keeps sent Buyer Rooms available.</p></header><div class="pricing-grid"><section><h2>Trial</h2><strong>$0</strong><p>14 days · 5 sent quotes</p><%= link_to "Start free", new_user_registration_path, class: "button button--secondary" %></section><section><h2>Solo</h2><strong>$15/mo</strong><p>1 user · 30 sent quotes</p><%= user_signed_in? ? button_to("Choose Solo", billing_checkout_path(plan: "solo"), class: "button button--primary") : link_to("Start free", new_user_registration_path, class: "button button--primary") %></section><section><h2>Pro</h2><strong>$29/mo</strong><p>3 users · 150 sent quotes</p><%= user_signed_in? ? button_to("Choose Pro", billing_checkout_path(plan: "pro"), class: "button button--primary") : link_to("Start free", new_user_registration_path, class: "button button--primary") %></section><section><h2>Business</h2><strong>$69/mo</strong><p>Team controls and assisted import</p><%= link_to "Contact us", contact_path, class: "button button--secondary" %></section></div></main>
+<% content_for :title, "Pricing · Rubusoo" %>
+<main class="rb-page">
+  <header class="rb-page-head">
+    <div>
+      <p class="eyebrow">Simple, honest pricing</p>
+      <h1>Close the first deal before you pay.</h1>
+    </div>
+    <p>Start with every core workflow unlocked. Upgrade when your team and quote volume grow—not because a buyer needs to open a link.</p>
+  </header>
+
+  <% plans = [
+    { name: "Trial", price: "$0", note: "14 days · no card required", features: ["5 sent quotations", "Buyer Rooms", "PDF and Excel export"], action: "Start free", style: :secondary },
+    { name: "Solo", price: "$15", note: "per month · one seller", features: ["30 sent quotations", "Revision history", "Buyer activity signals"], action: "Choose Solo", style: :secondary, plan: "solo" },
+    { name: "Pro", price: "$29", note: "per month · up to 3 users", features: ["150 sent quotations", "Team workspace", "Acceptance and PI conversion"], action: "Choose Pro", style: :secondary, plan: "pro" },
+    { name: "Business", price: "$69", note: "per month · growing teams", features: ["Team controls", "Assisted catalog import", "Priority support"], action: "Talk to us", style: :secondary, contact: true }
+  ] %>
+  <div class="pricing-grid">
+    <% plans.each do |plan| %>
+      <section>
+        <span class="pricing-plan"><%= plan[:name] %></span>
+        <strong class="pricing-price"><%= plan[:price] %></strong>
+        <p class="pricing-description"><%= plan[:note] %></p>
+        <ul class="pricing-features">
+          <% plan[:features].each do |feature| %><li><%= feature %></li><% end %>
+        </ul>
+        <% if plan[:contact] %>
+          <%= link_to plan[:action], contact_path, class: "button button--secondary" %>
+        <% elsif user_signed_in? && plan[:plan] %>
+          <%= button_to plan[:action], billing_checkout_path(plan: plan[:plan]), class: "button button--secondary button--full" %>
+        <% else %>
+          <%= link_to plan[:action], new_user_registration_path, class: "button button--#{plan[:style]}" %>
+        <% end %>
+      </section>
+    <% end %>
+  </div>
+</main>

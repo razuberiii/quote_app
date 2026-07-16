@@ -26,14 +26,13 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="app-root marketing-root flex min-h-screen flex-col bg-[linear-gradient(180deg,#f5f7fb_0%,#eef2f7_100%)] text-slate-950">
-    <div class="relative isolate flex min-h-screen flex-1 flex-col overflow-hidden">
-      <div class="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top_right,rgba(15,23,42,0.14),transparent_38%),radial-gradient(circle_at_top_left,rgba(59,130,246,0.12),transparent_32%)]"></div>
+  <body class="app-root marketing-root">
+    <div class="flex min-h-screen flex-1 flex-col overflow-hidden">
 
       <nav class="navbar">
         <div class="navbar-container">
           <div class="navbar-brand-wrap">
-            <h1><%= link_to t("landing.shared.brand"), localized_root_path(locale: I18n.locale) %></h1>
+            <h1><%= link_to t("landing.shared.brand"), localized_root_path(locale: I18n.locale), aria: { label: "Rubusoo home" } %></h1>
           </div>
 
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-marketing-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
@@ -70,7 +69,7 @@
       </main>
 
       <footer class="public-marketing-footer">
-        <div class="marketing-content-shell py-4">
+        <div class="marketing-content-shell py-8">
           <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
             <p class="m-0 text-sm text-slate-600">
               <%= t("landing.shared.footer.tagline") %>

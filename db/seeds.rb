@@ -64,4 +64,16 @@ end
 
 quote.save!
 
+quote.quote_revisions.find_or_create_by!(number: 1) do |revision|
+  revision.company = company
+  revision.status = "current"
+  revision.currency = quote.currency
+  revision.total = quote.grand_total
+  revision.snapshot = QuoteSnapshotBuilder.new(quote).as_json
+  revision.summary = "Interactive Buyer Room demonstration"
+  revision.secure_token = SecureRandom.urlsafe_base64(32)
+  revision.sent_at = Time.current
+  revision.expires_at = 30.days.from_now
+end
+
 puts "Seeded demo data: #{company.name} / #{customer.name} / #{quote.quote_no}"

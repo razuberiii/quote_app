@@ -24,7 +24,6 @@ services:
     env_file: .env.production
     environment:
       DB_HOST: db
-      SOLID_QUEUE_IN_PUMA: "false"
     volumes:
       - /opt/data/quoteapp/storage:/rails/storage
     ports:
@@ -47,5 +46,5 @@ services:
     volumes:
       - /opt/data/quoteapp/storage:/rails/storage
     depends_on:
-      db: { condition: service_healthy }
+      web: { condition: service_healthy }
     logging: *logging

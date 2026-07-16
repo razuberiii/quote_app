@@ -368,6 +368,17 @@ data-action="click->clipboard#copy"
 - `.product-landing` owns the marketing narrative; `.product-hero__product`, `.feature-extract`, `.feature-studio`, and `.feature-buyer` are product UI compositions, not generic card primitives.
 - Buyer Room is layout-independent: `.buyer-body`, `.buyer-cover`, `.buyer-grid`, `.doc-section`, `.selection-panel`, and `.rubusoo-dialog` provide the complete public baseline before storefront variants.
 
+### Neo Commerce OS visual scope
+
+- `.neo-os` is the sole visual-system boundary for Rubusoo V2. Layouts add one surface modifier: `.neo-os--marketing`, `.neo-os--app`, or `.neo-os--buyer`.
+- Tokens use graphite surfaces with electric blue actions, Rubus red identity, signal green decisions, and cyan data signals. Amounts always use tabular numerals.
+- V2 uses background level, one-pixel dividers, grid and typography for hierarchy. A content region may have one primary border; nested rounded card stacks are prohibited.
+- Standard control radius is `8px`, panels are `10px–12px`, and larger radii are reserved for dialogs only. V2 styles must not use `!important` to defeat legacy rules.
+- Marketing product compositions are connected panels at desktop sizes and become ordinary full-width responsive sections below `760px`; they never use device or browser mockup frames.
+- Seller pages use a graphite OS shell. Quote Studio owns a dark structure rail, a light buyer-facing canvas and a dark command rail.
+- Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.
+- Mobile verification widths are `360px`, `390px`, and `412px`; page gutters are `16px–18px`, never a scaled desktop viewport.
+
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.
 3. Check responsive behavior for edited families.

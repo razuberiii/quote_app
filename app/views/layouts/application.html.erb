@@ -34,7 +34,7 @@
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   </head>
 
-  <body class="app-root"
+  <body class="app-root neo-os neo-os--app page-<%= controller_path.tr('/', '-') %> page-action-<%= action_name %>"
     data-controller="<%= [("shortcuts" if user_signed_in?), "app-shell"].compact.join(" ") %>"
     data-app-shell-dirty-confirm-text-value="<%= t("application.unsaved_changes_confirm", default: "You have unsaved changes. Leave this page?") %>"
     data-app-shell-notification-loading-text-value="<%= t("notifications.loading", default: "Loading notifications...") %>"

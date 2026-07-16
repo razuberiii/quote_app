@@ -1,0 +1,28 @@
+<main class="deal-workspace inbox-page" data-controller="deal-motion">
+  <header class="deal-page-header">
+    <div><p class="eyebrow">Actionable workspace</p><h1>Inbox</h1><p>Only the events that can move a deal forward.</p></div>
+    <div class="deal-header-actions"><%= link_to "Import inquiry", new_inquiry_path, class: "button button--secondary" %><%= link_to "New deal", new_inquiry_path(mode: "manual"), class: "button button--primary" %></div>
+  </header>
+
+  <section class="deal-metrics" aria-label="Deal summary">
+    <article><span>Needs attention</span><strong data-deal-motion-target="number"><%= @metrics[:attention] %></strong></article>
+    <article><span>Live quote value</span><strong data-deal-motion-target="number"><%= current_user.company.default_currency %> <%= number_with_delimiter(@metrics[:live_value]) %></strong></article>
+    <article><span>Accepted</span><strong data-deal-motion-target="number"><%= @metrics[:accepted] %></strong></article>
+    <article><span>Won</span><strong data-deal-motion-target="number"><%= @metrics[:won] %></strong></article>
+  </section>
+
+  <section class="inbox-stream">
+    <header><div><p class="section-kicker">Now</p><h2><%= @attention.size %> deal<%= "s" unless @attention.one? %> need a decision</h2></div><%= link_to "View all deals", deals_path, class: "text-action" %></header>
+    <% @attention.each do |deal, progress| %>
+      <article class="inbox-event" data-deal-motion-target="item">
+        <div class="inbox-event__signal"><i></i><time><%= time_ago_in_words(progress.signal_at || deal.updated_at) %> ago</time></div>
+        <div><span><%= deal.customer&.name || "Buyer to confirm" %></span><h3><%= deal_title(deal) %></h3><p><%= progress.signal %></p></div>
+        <div class="inbox-event__amount"><span><%= progress.stage_label %></span><strong><%= deal.currency %> <%= number_with_delimiter(deal.grand_total) %></strong></div>
+        <%= link_to progress.action_label, deal_action_path(deal, progress), class: "button button--primary" %>
+      </article>
+    <% end %>
+    <% if @attention.empty? %><div class="deal-zero"><span>✓</span><h2>Nothing is blocking a deal.</h2><p>Buyer views and new responses will appear here automatically.</p><%= link_to "Import an inquiry", new_inquiry_path, class: "button button--primary" %></div><% end %>
+  </section>
+
+  <% if @waiting.any? %><section class="waiting-strip"><header><p class="section-kicker">Waiting on buyer</p><h2>Live, but not forgotten</h2></header><div><% @waiting.first(6).each do |deal, progress| %><%= link_to deal_path(deal), class: "waiting-deal" do %><span><%= deal.customer.name %></span><strong><%= deal_title(deal) %></strong><small><%= progress.signal %> · <%= time_ago_in_words(progress.signal_at || deal.updated_at) %> ago</small><% end %><% end %></div></section><% end %>
+</main>

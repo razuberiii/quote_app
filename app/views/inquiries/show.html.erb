@@ -70,7 +70,7 @@
         <div class="inquiry-field-grid"><label class="extracted-field"><span>Buyer questions</span><textarea class="textarea" name="inquiry[extracted_data][questions]"><%= Array(data["questions"]).join("\n") %></textarea></label><label class="extracted-field is-missing"><span>Missing information <em>Needs review</em></span><textarea class="textarea" name="inquiry[extracted_data][missing_information]"><%= Array(data["missing_information"]).join("\n") %></textarea></label></div>
       </div>
 
-      <footer class="inquiry-review__actions"><div><span>Build readiness</span><strong><%= @inquiry.ready_to_build_quote? ? "Ready to build" : "Save and confirm missing commercial fields" %></strong></div><%= f.submit "Save review", class: "button button--secondary" %><%= link_to "Build quote", build_quote_inquiry_path(@inquiry), class: "button button--primary", data: { turbo_method: :post } %></footer>
+      <footer class="inquiry-review__actions"><div><span>Deal readiness</span><strong><%= @inquiry.ready_to_build_quote? ? "Ready to create Deal" : "Save and confirm missing commercial fields" %></strong></div><%= f.submit "Save review", class: "button button--secondary" %><%= link_to "Build Deal", build_quote_inquiry_path(@inquiry), class: "button button--primary", data: { turbo_method: :post } %></footer>
     </section>
   <% end %>
 </main>

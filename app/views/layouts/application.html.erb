@@ -55,7 +55,6 @@
           <% end %>
         </div>
         <% if user_signed_in? %>
-          <% products_nav_active = ["products", "product_presets", "addon_presets", "spec_presets"].include?(controller_path) %>
           <% account_nav_active = ["users/registrations", "company_settings", "team_invitations", "email_changes"].include?(controller_path) %>
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
             <span></span>
@@ -63,37 +62,9 @@
             <span></span>
           </button>
           <ul class="navbar-menu" id="primary-navigation">
-            <%= ui_nav_link "Home", dashboard_path, icon: :dashboard %>
-            <%= ui_nav_link "Quotes", all_quotes_path, icon: :quotes %>
-            <%= ui_nav_link t("nav.customers"), customers_path, icon: :customers %>
-            <li class="nav-group <%= "is-active" if products_nav_active %>">
-              <details class="nav-group-details">
-                <summary class="app-nav-link nav-group-trigger <%= "is-active" if products_nav_active %>">
-                  <span class="app-nav-link-icon"><%= ui_nav_icon(:products) %></span>
-                  <span class="app-nav-link-label">Catalog</span>
-                  <span class="nav-group-caret" aria-hidden="true">▾</span>
-                </summary>
-                <div class="nav-group-menu app-dropdown-panel">
-                  <%= link_to "Catalog", products_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if controller_path == "products")].compact.join(" ") %>
-                  <%= link_to t("nav.presets"), product_presets_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if ["product_presets", "addon_presets", "spec_presets"].include?(controller_path))].compact.join(" ") %>
-                </div>
-              </details>
-            </li>
-            <% quote_presets_nav_active = ["quote_presets", "quote_preset_masters"].include?(controller_path) %>
-            <% templates_nav_active = controller_path == "quote_templates" || quote_presets_nav_active %>
-            <li class="nav-group <%= "is-active" if templates_nav_active %>">
-              <details class="nav-group-details">
-                <summary class="app-nav-link nav-group-trigger <%= "is-active" if templates_nav_active %>">
-                  <span class="app-nav-link-icon"><%= ui_nav_icon(:templates) %></span>
-                  <span class="app-nav-link-label"><%= t("nav.template") %></span>
-                  <span class="nav-group-caret" aria-hidden="true">▾</span>
-                </summary>
-                <div class="nav-group-menu app-dropdown-panel">
-                  <%= link_to t("nav.template"), quote_templates_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if controller_path == "quote_templates")].compact.join(" ") %>
-                  <%= link_to t("nav.quote_presets"), quote_presets_path, class: ["app-dropdown-link", "nav-group-link", ("is-active" if quote_presets_nav_active)].compact.join(" ") %>
-                </div>
-              </details>
-            </li>
+            <%= ui_nav_link "Inbox", inbox_index_path, icon: :dashboard %>
+            <%= ui_nav_link "Deals", deals_path, icon: :quotes %>
+            <%= ui_nav_link "Library", library_path, icon: :products %>
             <%= ui_nav_link "Settings", edit_company_settings_path, icon: :team %>
             <% if current_user.admin? %>
               <%= ui_nav_link t("nav.admin"), admin_root_path, icon: :admin %>
@@ -101,6 +72,9 @@
           </ul>
           <% invite_count = pending_team_invitations_count %>
           <div class="navbar-controls">
+            <%= link_to "Search", deals_path(focus: "search"), class: "app-nav-link neo-global-search" %>
+            <%= link_to "Import inquiry", new_inquiry_path, class: "app-nav-link" %>
+            <%= link_to "New deal", new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
             <div class="account-menu">
                     <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"

@@ -379,6 +379,15 @@ data-action="click->clipboard#copy"
 - Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.
 - Mobile verification widths are `360px`, `390px`, and `412px`; page gutters are `16px–18px`, never a scaled desktop viewport.
 
+### Deal-first workspace
+
+- `.deal-workspace` is the shared page boundary for Inbox, Deals, Deal detail and Library.
+- `.inbox-event`, `.deal-row` and `.deal-primary-action` all render the same `DealProgress` result; visual wording must not invent a second Next action.
+- `.deal-stage--draft|live|accepted|closed` exposes only four stages. Detailed quote states belong in activity signals and conditions.
+- `.deal-tabs` owns Overview, Quote, Conversation, Versions and Documents within one Deal. These are contextual views, not primary navigation.
+- `.deal-motion` uses a short staggered entry animation for actionable Inbox items. Motion is disabled by the global reduced-motion rule.
+- Ordinary Deal surfaces remain graphite. Light surfaces are reserved for Quote Studio canvas, Buyer Room light theme, PI and printable documents.
+
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.
 3. Check responsive behavior for edited families.

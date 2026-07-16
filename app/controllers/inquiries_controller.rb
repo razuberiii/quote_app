@@ -60,7 +60,7 @@ class InquiriesController < ApplicationController
     end
     quote.save!
     @inquiry.update!(status: "converted", customer: customer)
-    redirect_to edit_quote_path(quote), notice: "Draft built. Confirm every price and freight amount before sending."
+    redirect_to edit_quote_path(quote), notice: "Deal created. Complete the interactive quote, then publish Version 1."
   end
 
   private

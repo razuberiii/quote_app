@@ -9,8 +9,8 @@
 <% end %>
 <main class="quote-studio quote-studio--editor">
   <header class="studio-toolbar">
-    <div class="studio-toolbar__identity"><%= link_to "← Quotes", all_quotes_path, class: "studio-back" %><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> <span>Revision <%= @quote.revision_number %></span></h1></div></div>
-    <div class="studio-actions"><span class="studio-save-state">● Saved</span><%= link_to "Preview", public_preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & send", quote_path(@quote), class: "button button--primary" %></div>
+    <div class="studio-toolbar__identity"><%= link_to "← Deal", deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> <span>Working version</span></h1></div></div>
+    <div class="studio-actions"><span class="studio-save-state">● Saved</span><%= link_to "Preview", public_preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & publish", quote_path(@quote), class: "button button--primary" %></div>
   </header>
   <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor" } do |f| %>
     <aside class="studio-structure">

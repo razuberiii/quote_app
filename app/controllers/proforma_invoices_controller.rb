@@ -1,6 +1,6 @@
 class ProformaInvoicesController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_pi, only: %i[show deposit_received pdf]
+  before_action :load_pi, only: %i[show mark_sent deposit_received pdf]
 
   def create
     acceptance = current_user.company.quote_acceptances.find(params.require(:quote_acceptance_id))
@@ -9,6 +9,11 @@ class ProformaInvoicesController < ApplicationController
   end
 
   def show; end
+
+  def mark_sent
+    @pi.update!(sent_at: Time.current)
+    redirect_to deal_path(@pi.quote, tab: "documents"), notice: "PI marked as sent."
+  end
 
   def deposit_received
     @pi.update!(status: "deposit_received", deposit_received_at: Time.current)

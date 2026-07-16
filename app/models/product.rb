@@ -1,4 +1,6 @@
 class Product < ApplicationRecord
+  alias_attribute :currency, :price_currency
+  alias_attribute :base_price, :default_price
   require "cgi"
 
   PRICE_CURRENCIES = %w[USD EUR GBP CNY JPY AUD CAD SGD HKD MXN BRL COP CLP PEN ARS].freeze

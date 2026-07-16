@@ -1,5 +1,7 @@
 class DashboardController < CustomersController
   def index
+    return redirect_to(inbox_index_path) if params[:locale].blank?
+
     Quote.expire_overdue_for_company!(current_user.company_id)
     @onboarding = build_onboarding_progress
     @onboarding_complete = @onboarding.values.all?

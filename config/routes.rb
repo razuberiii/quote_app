@@ -33,7 +33,7 @@ Rails.application.routes.draw do
   get "email-change/confirm/:token", to: "email_changes#confirm", as: :email_change
 
   authenticated :user do
-    root "dashboard#index", as: :authenticated_root
+    root "inbox#index", as: :authenticated_root
   end
 
   unauthenticated do
@@ -58,7 +58,14 @@ Rails.application.routes.draw do
   end
 
   get "dashboard", to: "dashboard#index"
-  get "quotes", to: "quotes#all", as: :all_quotes
+  get "quotes", to: redirect("/deals"), as: :all_quotes
+  resources :inbox, only: :index
+  resources :deals, only: %i[index show] do
+    member do
+      patch "questions/:question_id/reply", action: :reply_question, as: :reply_question
+    end
+  end
+  get "library", to: "library#index", as: :library
   resources :inquiries, only: %i[index new create show update] do
     member { post :build_quote }
   end
@@ -66,6 +73,7 @@ Rails.application.routes.draw do
   resources :proforma_invoices, only: %i[show create] do
     member do
       patch :deposit_received
+      patch :mark_sent
       get :pdf
     end
   end

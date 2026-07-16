@@ -3014,10 +3014,10 @@ en:
           decision: Team knows who needs contact now.
           cta: See customer context
       hero:
-        kicker: QUOTATION MANAGEMENT FOR EXPORT TEAMS
-        title: Make every quote the starting point of a deal.
-        body: Rubusoo keeps quotes, revisions, buyer response, and follow-up in one clear record instead of scattering progress across files and threads.
-        helper: Built for export teams that send quotes, manage changes, and keep deals moving every day.
+        kicker: EVERYTHING FOR CLOSING DEALS
+        title: From messy inquiry to a quote buyers can act on.
+        body: Paste an email, spreadsheet, or chat. Rubusoo turns it into a structured, polished quote your buyer can review, configure, and accept.
+        helper: For exporters, manufacturers, trading companies, and focused B2B sales teams.
         preview_shell_title: Product Preview
         preview_slots:
           - label: Demo Workspace
@@ -3029,9 +3029,9 @@ en:
           - label: Revision / Status
             body: Version changes, status flow, and buyer signals
             slot: hero-revision-status
-        cta_primary: Start free
-        cta_demo: View demo workspace
-        cta_sample: View sample quote
+        cta_primary: Create your first quote
+        cta_demo: Open buyer demo
+        cta_sample: See Quote Studio
         cta_support: No signup required. See the full flow first.
       flow_showcase:
         kicker: ONE RECORD AFTER SEND

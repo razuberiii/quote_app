@@ -1,4 +1,14 @@
-# CSS Manual
+# Rubusoo design system
+
+The commercial product uses one visual language: **Modern Export Editorial**. New product surfaces use `app/assets/stylesheets/rubusoo.css`; legacy selectors in `components.css` and `public_quote.css` are migration-only and must not be introduced into new pages.
+
+Core tokens are `--canvas`, `--paper`, `--ink`, `--muted`, `--line`, `--brand`, `--action`, `--success`, and `--danger`. Brand red is reserved for identity and editorial emphasis. Interactive actions use blue.
+
+Canonical primitives are `.button` with `--primary`, `--secondary`, `--ghost`, and `--full` modifiers; `.input`; `.textarea`; `.field-label`; `.status`; `.rubusoo-dialog`; `.brand`; `.eyebrow`; and `.section-kicker`. Buyer-facing structures use the `buyer-` prefix, inquiry workflow uses `inquiry-`, and authenticated product pages use `rubusoo-`. Do not add Bootstrap/Tailwind dashboard patterns, generic cards, large radii, gradients, glass effects, or alternate button/input systems.
+
+Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bottom action bar. All focusable controls require a visible blue focus ring. Amounts use tabular numerals. Customer-facing long values must wrap safely.
+
+The remainder of this document describes legacy families retained only while old pages are replaced.
 
 This document is the single usage guide for project styling.
 

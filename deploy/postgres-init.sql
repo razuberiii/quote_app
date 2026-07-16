@@ -1,0 +1,3 @@
+CREATE DATABASE quote_app_production_cache OWNER quote_app;
+CREATE DATABASE quote_app_production_queue OWNER quote_app;
+CREATE DATABASE quote_app_production_cable OWNER quote_app;

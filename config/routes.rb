@@ -1,6 +1,19 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
   get "sitemap.xml", to: "sitemaps#show", defaults: { format: :xml }
+  get "pricing", to: "landing#pricing"
+  post "billing/checkout", to: "billing#checkout"
+  post "billing/portal", to: "billing#portal"
+  post "webhooks/stripe", to: "stripe_webhooks#create"
+  get "seller-demo", to: "demos#seller"
+  get "buyer-demo", to: "demos#buyer"
+
+  get "q/:token", to: "buyer_rooms#show", as: :buyer_room
+  scope "q/:token", as: :buyer_room do
+    post "questions", to: "buyer_rooms#question", as: :questions
+    post "request-changes", to: "buyer_rooms#request_changes", as: :request_changes
+    post "accept", to: "buyer_rooms#accept", as: :accept
+  end
 
   devise_for :users, skip: [ :passwords ], controllers: { registrations: "users/registrations", sessions: "users/sessions" }
 
@@ -44,6 +57,17 @@ Rails.application.routes.draw do
   end
 
   get "dashboard", to: "dashboard#index"
+  get "quotes", to: "quotes#all", as: :all_quotes
+  resources :inquiries, only: %i[index new create show update] do
+    member { post :build_quote }
+  end
+  resources :quote_revisions, only: %i[show create]
+  resources :proforma_invoices, only: %i[show create] do
+    member do
+      patch :deposit_received
+      get :pdf
+    end
+  end
   patch "onboarding/dismiss", to: "onboarding#dismiss", as: :dismiss_onboarding
 
   resources :notifications, only: [] do

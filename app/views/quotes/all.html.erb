@@ -1,0 +1,18 @@
+<main class="rubusoo-page quote-index">
+  <header class="page-heading page-heading--actions">
+    <div><p class="eyebrow">Workspace</p><h1>Quotes</h1><p>Every active deal, revision and next step.</p></div>
+    <%= link_to "Import inquiry", new_inquiry_path, class: "button button--secondary" %>
+  </header>
+  <nav class="quote-filters" aria-label="Quote filters"><span class="is-active">Action needed</span><span>In progress</span><span>Accepted</span><span>Closed</span></nav>
+  <section class="quote-list">
+    <% @quotes.each do |quote| %>
+      <%= link_to quote_path(quote), class: "quote-list-row" do %>
+        <span><strong><%= quote.customer&.name || "Unassigned buyer" %></strong><small><%= quote.quote_no %> · Revision <%= quote.revision_number %></small></span>
+        <span><%= quote.status.to_s.humanize %></span>
+        <strong class="money"><%= quote.currency %> <%= number_with_delimiter(quote.grand_total || 0) %></strong>
+        <span><%= quote.next_action.presence || "Review quote" %> →</span>
+      <% end %>
+    <% end %>
+    <% if @quotes.empty? %><div class="empty-state"><h2>Your first quote starts with an inquiry.</h2><%= link_to "Import inquiry", new_inquiry_path, class: "button button--primary" %></div><% end %>
+  </section>
+</main>

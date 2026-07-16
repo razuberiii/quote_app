@@ -1,4 +1,6 @@
 class Company < ApplicationRecord
+  PLANS = %w[trial solo pro business].freeze
+  PLAN_SEND_LIMITS = { "trial" => 5, "solo" => 30, "pro" => 150, "business" => 500 }.freeze
   DEFAULT_REMINDER_EMAIL_SUBJECT = "Reminder: %{quote_no} from %{company_name}".freeze
   DEFAULT_REMINDER_EMAIL_BODY = "This is a reminder that your quotation %{quote_no} from %{company_name} is still awaiting review.".freeze
   DEFAULT_REMINDER_EMAIL_CTA_LABEL = "Open quotation".freeze
@@ -24,12 +26,34 @@ class Company < ApplicationRecord
   has_many :company_documents, dependent: :destroy
   has_many :team_invitations, dependent: :destroy
   has_many :customer_tags, dependent: :destroy
+  has_many :quote_revisions, dependent: :restrict_with_exception
+  has_many :quote_acceptances, dependent: :restrict_with_exception
+  has_many :proforma_invoices, dependent: :restrict_with_exception
+  has_many :buyer_activities, dependent: :restrict_with_exception
+  has_many :inquiries, dependent: :destroy
   has_one_attached :logo
   validate :logo_constraints
 
   after_create :ensure_quote_template!
   after_create :ensure_quote_preset_samples!
   before_validation :apply_default_settings
+  before_validation :initialize_commercial_account, on: :create
+  validates :plan, inclusion: { in: PLANS }, if: -> { has_attribute?(:plan) }
+
+  def send_limit
+    PLAN_SEND_LIMITS.fetch(plan.to_s, 0)
+  end
+
+  def can_send_quote?
+    return false if plan == "trial" && trial_ends_at.present? && trial_ends_at.past?
+    return false unless %w[trialing active].include?(subscription_status.to_s)
+
+    quote_revisions.where(sent_at: billing_period_start..Time.current).count < send_limit
+  end
+
+  def billing_period_start
+    plan == "trial" ? (trial_ends_at || 14.days.from_now) - 14.days : Time.current.beginning_of_month
+  end
 
   def default_quote_template
     quote_templates.find_by(default_template: true)
@@ -75,6 +99,11 @@ class Company < ApplicationRecord
 
   def ensure_quote_template!
     ensure_default_template!
+  end
+
+  def initialize_commercial_account
+    self.slug ||= "#{name.to_s.parameterize.presence || 'workspace'}-#{SecureRandom.hex(3)}"
+    self.trial_ends_at ||= 14.days.from_now
   end
 
   def ensure_quote_preset_samples!

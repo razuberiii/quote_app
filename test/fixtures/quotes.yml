@@ -9,7 +9,7 @@ one:
   unit_price: 9.99
   quantity: 1
   currency: USD
-  valid_until: 2026-03-31
+  valid_until: <%= 30.days.from_now.to_date %>
   payment_term: 30% advance, 70% before shipment
   status: pending
   negotiated: false
@@ -26,7 +26,7 @@ two:
   unit_price: 9.99
   quantity: 1
   currency: USD
-  valid_until: 2026-03-31
+  valid_until: <%= 30.days.from_now.to_date %>
   payment_term: Net 30
   status: pending
   negotiated: false

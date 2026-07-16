@@ -67,6 +67,7 @@ end
 
 gem "devise", "~> 5.0"
 gem "rack-attack"
+gem "stripe", "~> 19.3"
 # PDF generation
 gem "prawn"
 gem "prawn-table"

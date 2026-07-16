@@ -191,7 +191,7 @@ class QuoteRevisionDiffService
       payment_term: "Payment Term",
       trade_term: "Trade Term",
       scope_of_supply: "Scope of Supply",
-      advanced_trade_terms: "Supplementary Trade Terms",
+      advanced_trade_terms: I18n.t("quotes.view.show.supplementary_trade_terms", default: "Supplementary Trade Terms"),
       advanced_logistics: "Shipping & Logistics",
       request_reason: "Request Reason",
       notes: "Notes",
@@ -279,7 +279,7 @@ class QuoteRevisionDiffService
       {
         "hs_code" => I18n.t("quotes.view.form.hs_code", default: "HS Code"),
         "warranty_scope_note" => I18n.t("quotes.view.show.field_labels.warranty", default: "Warranty"),
-        "support_scope_note" => I18n.t("quotes.view.show.field_labels.support", default: "Support"),
+        "support_scope_note" => "Support",
         "validity_clause_note" => I18n.t("quotes.view.show.field_labels.validity", default: "Validity"),
         "delivery_commitment_note" => I18n.t("quotes.view.show.field_labels.delivery", default: "Delivery"),
         "payment_clause_note" => I18n.t("quotes.view.show.field_labels.payment_terms", default: "Payment Terms")

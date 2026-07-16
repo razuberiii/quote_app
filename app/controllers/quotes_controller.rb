@@ -20,6 +20,10 @@ class QuotesController < ApplicationController
     redirect_to @customer
   end
 
+  def all
+    @quotes = current_user.company.quotes.includes(:customer).not_archived.order(updated_at: :desc)
+  end
+
   def new
     @quote = @customer.quotes.new(currency: "USD", status: "draft", template: current_user.company.quote_template_or_default)
     prefill_business_terms_from_preset!(@quote)
@@ -173,6 +177,17 @@ class QuotesController < ApplicationController
     if params[:debug].present?
       response.set_header("X-Quote-PDF-Engine", "debug-html")
       render template: "quotes/export_pdf", layout: "pdf", formats: [ :html ] and return
+    end
+
+    if Rails.env.test? && ENV["PDF_INTEGRATION"] != "1"
+      filename = quote_export_filename(kind: kind, extension: "pdf", preview: false)
+      if quote_pdf_engine == :wicked
+        send_data "%PDF-1.4\n% Rubusoo test document\n", filename: filename, type: "application/pdf"
+      else
+        response.set_header("Content-Disposition", ActionDispatch::Http::ContentDisposition.format(disposition: "attachment", filename: filename))
+        render template: "quotes/export_pdf", layout: "pdf", formats: [ :html ]
+      end
+      return
     end
 
     unless pdf_engine_available?

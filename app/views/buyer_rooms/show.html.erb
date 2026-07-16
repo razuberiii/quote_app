@@ -1,0 +1,80 @@
+<% content_for :title, "#{@revision.quote.quote_no} · #{@revision.company.name}" %>
+<% items = Array(@snapshot["quote_items"]) %>
+<main class="buyer-room" data-controller="buyer-room">
+  <header class="buyer-header">
+    <a class="brand" href="/"><span class="brand-mark">R</span><span>Rubusoo</span></a>
+    <span class="buyer-secure">Secure quotation · Revision <%= @revision.number %></span>
+  </header>
+
+  <% if @state != "normal" %>
+    <section class="state-banner state-banner--<%= @state %>">
+      <strong><%= @state.humanize %></strong>
+      <span><%= @state == "superseded" ? "A newer revision is available. Ask the seller for the current link." : "This quotation is no longer open for changes." %></span>
+    </section>
+  <% end %>
+
+  <section class="buyer-cover">
+    <div>
+      <p class="eyebrow">Prepared for <%= @revision.quote.customer.name %></p>
+      <h1><%= @snapshot["custom_title"].presence || "A clear path to your next order." %></h1>
+      <p class="buyer-intro">Review the products, confirm your preferred selection, and respond directly inside this quotation.</p>
+    </div>
+    <dl class="quote-meta">
+      <div><dt>Seller</dt><dd><%= @revision.company.name %></dd></div>
+      <div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div>
+      <div><dt>Valid until</dt><dd><%= @revision.expires_at&.to_date || "—" %></dd></div>
+      <div><dt>Currency</dt><dd><%= @revision.currency %></dd></div>
+    </dl>
+  </section>
+
+  <div class="buyer-grid">
+    <article class="buyer-document">
+      <section class="doc-section">
+        <p class="section-kicker">01 · Products</p>
+        <h2>What’s included</h2>
+        <div class="product-list">
+          <% items.each_with_index do |item, index| %>
+            <article class="buyer-product">
+              <div class="product-index"><%= (index + 1).to_s.rjust(2, "0") %></div>
+              <div class="product-copy">
+                <h3><%= item["product_name"].presence || item["description"] %></h3>
+                <p><%= item["description"] %></p>
+                <% if Array(item["specifications"]).any? %>
+                  <details><summary>Technical specifications</summary><dl class="spec-list">
+                    <% Array(item["specifications"]).each do |spec| %><div><dt><%= spec["name"] || spec["key"] %></dt><dd><%= spec["value"] %></dd></div><% end %>
+                  </dl></details>
+                <% end %>
+                <button class="text-action" type="button" data-action="buyer-room#openQuestion" data-context="item:<%= index %>">Ask about this product</button>
+              </div>
+              <div class="product-price"><span><%= item["quantity"] %> units</span><strong><%= @revision.currency %> <%= number_with_delimiter(item["amount"] || item["line_total"] || 0) %></strong></div>
+            </article>
+          <% end %>
+        </div>
+      </section>
+
+      <section class="doc-section terms-section"><p class="section-kicker">02 · Commercial terms</p><h2>Delivery and payment</h2>
+        <dl class="terms-grid">
+          <div><dt>Incoterm</dt><dd><%= @snapshot["trade_term"].presence || "To be confirmed" %></dd></div>
+          <div><dt>Payment</dt><dd><%= @snapshot["payment_term"].presence || "To be confirmed" %></dd></div>
+          <div><dt>Delivery</dt><dd><%= @snapshot["delivery_notes"].presence || "As agreed" %></dd></div>
+          <div><dt>Validity</dt><dd><%= @revision.expires_at&.to_date || "—" %></dd></div>
+        </dl>
+      </section>
+    </article>
+
+    <aside class="selection-panel">
+      <p class="section-kicker">Selection summary</p><h2>Revision <%= @revision.number %></h2>
+      <div class="total-row"><span>Total</span><strong><%= @revision.currency %> <%= number_with_delimiter(@revision.total) %></strong></div>
+      <p class="selection-note">Prices are locked to this revision. Selectable configurations appear when enabled by the seller.</p>
+      <% if @revision.actionable? %>
+        <button class="button button--primary button--full" data-action="buyer-room#openAccept">Accept quotation</button>
+        <button class="button button--secondary button--full" data-action="buyer-room#openChanges">Request changes</button>
+        <button class="text-action" data-action="buyer-room#openQuestion">Ask a question</button>
+      <% end %>
+    </aside>
+  </div>
+
+  <dialog class="rubusoo-dialog" data-buyer-room-target="questionDialog"><%= form_with url: buyer_room_questions_path(@revision.secure_token) do |f| %><h2>Ask the seller</h2><input type="hidden" name="context_key" data-buyer-room-target="questionContext"><%= f.text_field :buyer_name, placeholder: "Your name", class: "input" %><%= f.email_field :buyer_email, placeholder: "Work email", class: "input" %><%= f.text_area :body, required: true, placeholder: "What would you like clarified?", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Send question", class: "button button--primary" %></div><% end %></dialog>
+  <dialog class="rubusoo-dialog" data-buyer-room-target="changesDialog"><%= form_with url: buyer_room_request_changes_path(@revision.secure_token) do |f| %><h2>Request an updated quotation</h2><%= f.text_field :buyer_name, placeholder: "Your name", class: "input" %><%= f.email_field :buyer_email, placeholder: "Work email", class: "input" %><%= f.text_area :message, required: true, placeholder: "Describe quantity, specification, delivery, or price changes", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Send request", class: "button button--primary" %></div><% end %></dialog>
+  <dialog class="rubusoo-dialog" data-buyer-room-target="acceptDialog"><%= form_with url: buyer_room_accept_path(@revision.secure_token) do |f| %><h2>Accept this quotation</h2><p>Your acceptance locks this revision and selection as the commercial record.</p><%= f.text_field :name, required: true, placeholder: "Full name", class: "input" %><%= f.email_field :email, required: true, placeholder: "Work email", class: "input" %><%= f.text_field :job_title, placeholder: "Job title (optional)", class: "input" %><%= f.text_field :po_number, placeholder: "PO number (optional)", class: "input" %><%= f.text_area :note, placeholder: "Note (optional)", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Confirm acceptance", class: "button button--primary" %></div><% end %></dialog>
+</main>

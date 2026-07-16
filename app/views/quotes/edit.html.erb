@@ -1,15 +1,8 @@
-<section class="app-page-shell">
-  <header class="app-page-header">
-    <div class="app-page-header-main">
-      <h1><%= t("quotes.view.edit.title") %></h1>
-      <p><%= t("quotes.view.edit.subtitle", quote_no: @quote.quote_no, revision: @quote.revision_number) %></p>
-    </div>
-    <div class="app-page-header-actions">
-      <%= quote_status_badge(@quote.status.presence || "draft") %>
-    </div>
-  </header>
-
-  <%= render "form", quote: @quote, form_model: @quote %>
-
-  <%= link_to t("quotes.view.edit.back_to_quote"), @quote, class: "form-page-back-link form-page-back-link--quote" %>
-</section>
+<main class="quote-studio">
+  <header class="studio-toolbar"><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> · Revision <%= @quote.revision_number %></h1></div><div class="studio-actions"><span>Saved</span><%= link_to "Preview", public_preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Send", quote_path(@quote), class: "button button--primary" %></div></header>
+  <div class="studio-grid">
+    <aside class="studio-structure"><h2>Structure</h2><ol><li>Cover</li><li>Introduction</li><li class="is-active">Products</li><li>Options</li><li>Pricing</li><li>Shipping</li><li>Commercial terms</li><li>Attachments</li><li>Acceptance</li></ol></aside>
+    <section class="studio-canvas"><div class="paper-label">Live document canvas</div><%= render "form", quote: @quote, form_model: @quote %></section>
+    <aside class="studio-summary"><h2>Summary</h2><dl><dt>Customer</dt><dd><%= @quote.customer.name %></dd><dt>Currency</dt><dd><%= @quote.currency %></dd><dt>Total</dt><dd class="money"><%= number_to_currency(@quote.grand_total || 0, unit: "#{@quote.currency} ") %></dd><dt>Valid until</dt><dd><%= @quote.valid_until || "Required" %></dd></dl><div class="studio-readiness"><strong><%= @quote.status.to_s == "ready" ? "Ready to send" : "Needs review" %></strong><p>Prices, freight and commercial terms must have a confirmed source.</p></div></aside>
+  </div>
+</main>

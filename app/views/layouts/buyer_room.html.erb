@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for?(:title) ? yield(:title) : "Quotation · Rubusoo" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="robots" content="noindex,nofollow,noarchive">
+    <%= csrf_meta_tags %>
+    <%= stylesheet_link_tag "rubusoo", "data-turbo-track": "reload" %>
+  </head>
+  <body class="buyer-body"><%= yield %></body>
+</html>

@@ -22,6 +22,8 @@
 .neo-os--app main :is(.app-page-shell,.sales-dashboard,.quotes-page,.customers-page,.products-page) :is(.text-slate-600,.text-slate-500,.text-slate-400){color:#8d96a8}
 .neo-os--app main :is(.app-page-shell,.sales-dashboard,.quotes-page,.customers-page,.products-page) :is(.border-slate-100,.border-slate-200,.border-slate-300){border-color:rgba(255,255,255,.1)}
 .quote-studio--editor .studio-paper .studio-inline-title,.quote-studio--editor .studio-paper .studio-inline-intro{border:0;background:transparent;color:#111722;box-shadow:none}
+@media(max-width:1100px){.neo-os--buyer .buyer-storefront .selection-panel{grid-template-columns:minmax(100px,1fr) 1fr 1fr}.neo-os--buyer .buyer-storefront .selection-panel .button--secondary{display:flex;margin:0;border-color:rgba(255,255,255,.18);font-size:.7rem}.neo-os--buyer .buyer-storefront .selection-panel .button--primary{font-size:.7rem}}
+@media(max-width:420px){.neo-os--buyer .buyer-storefront .selection-panel{gap:6px;padding-inline:10px}.neo-os--buyer .buyer-storefront .selection-panel .total-row{font-size:.72rem}.neo-os--buyer .buyer-storefront .selection-panel .total-row strong{font-size:.82rem}}
 :root {
   --neo-bg:#0b0d12;--neo-surface:#121620;--neo-elevated:#181e2a;--neo-panel:#202737;
   --neo-text:#f4f6fa;--neo-muted:#8d96a8;--neo-dim:#626c80;--neo-line:rgba(255,255,255,.1);

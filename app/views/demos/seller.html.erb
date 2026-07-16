@@ -1,20 +1,12 @@
-<main class="rb-page">
-  <header class="rb-page-head">
-    <div><p class="eyebrow">Interactive product tour</p><h1>See the full deal from both sides.</h1></div>
-    <p>No account, no setup, no empty dashboard. Choose a perspective and walk through a realistic export quotation flow.</p>
-  </header>
-  <div class="rb-demo-choice">
-    <%= link_to demo_path, class: "rb-demo-card" do %>
-      <span class="rb-demo-number">01 · SELLER WORKSPACE</span>
-      <h2>Run the deal.</h2>
-      <p>Review an inquiry, create a quotation, track revisions and buyer activity, then turn acceptance into a proforma invoice.</p>
-      <span class="rb-demo-arrow">↗</span>
-    <% end %>
-    <%= link_to buyer_demo_path, class: "rb-demo-card" do %>
-      <span class="rb-demo-number">02 · BUYER ROOM</span>
-      <h2>Make the decision.</h2>
-      <p>Review products and commercial terms, ask a question, request a change, and accept the exact revision.</p>
-      <span class="rb-demo-arrow">↗</span>
-    <% end %>
-  </div>
+<main class="seller-demo">
+  <header class="seller-demo__mast"><div><p class="eyebrow">Seller Demo · Read-only workspace</p><h1>One export deal, from inquiry to order.</h1><p>Atlas Industrial Supply is preparing a multi-product CIF quotation for Pacific Trading Group.</p></div><div><%= link_to "Experience Buyer Room", buyer_demo_path, class: "button button--primary" %><%= link_to "Start your workspace", new_user_registration_path, class: "button button--secondary" %></div></header>
+  <% if @quote %>
+    <nav class="seller-demo__nav"><a href="#home">Home</a><a href="#inquiry">Inquiry</a><a href="#studio">Quote Studio</a><a href="#revision">Revision</a><a href="#activity">Buyer activity</a><a href="#pi">PI</a></nav>
+    <section id="home" class="seller-demo__section"><header><span>Home</span><h2>The next commercial move is obvious.</h2></header><div class="seller-demo__metrics"><article><span>Open value</span><strong><%= @quote.currency %> <%= number_with_delimiter(@quote.grand_total) %></strong><small>Across the current formal scope</small></article><article><span>Latest revision</span><strong>R<%= @revision&.number || 0 %></strong><small><%= @revision&.status&.humanize || "Draft" %></small></article><article><span>Buyer signals</span><strong><%= @quote.buyer_activities.size %></strong><small>Views, questions and decisions</small></article></div></section>
+    <section id="inquiry" class="seller-demo__section seller-demo__split"><header><span>Inquiry extraction</span><h2>Messy request, reviewable requirements.</h2></header><blockquote>“Please quote 5 hydraulic power units and spare seal kits, 380V / 50Hz, delivery CIF Long Beach. Please confirm packing, lead time and whether the control cabinet supports IP54.”</blockquote><div class="seller-demo__facts"><p><span>Destination</span><strong>Long Beach, United States</strong></p><p><span>Commercial basis</span><strong>CIF · USD</strong></p><p><span>Confirmed</span><strong>380V / 50Hz · 5 units</strong></p><p class="is-warning"><span>Price status</span><strong>Freight required</strong></p></div></section>
+    <section id="studio" class="seller-demo__section"><header><span>Quote Studio</span><h2>A commercial document, not an admin form.</h2></header><div class="seller-demo__studio"><aside><strong>Cover</strong><strong>Products</strong><strong>Options</strong><strong>Pricing</strong><strong>Shipping</strong><strong>Terms</strong><strong>Acceptance</strong></aside><article><p class="eyebrow">Prepared for <%= @quote.customer.name %></p><h3>Hydraulic production package</h3><p>Configured for continuous-duty operation and export delivery to Long Beach.</p><% @quote.quote_items.each do |item| %><div><span><%= item.description %><small><%= item.sku_snapshot.presence || item.product&.sku %> · <%= item.lead_time_snapshot.presence || "20 working days" %></small></span><strong><%= item.quantity %> × <%= @quote.currency %> <%= number_with_delimiter(item.unit_price) %></strong></div><% end %></article><aside><span>Total</span><strong><%= @quote.currency %> <%= number_with_delimiter(@quote.grand_total) %></strong><small>Valid until <%= @quote.valid_until %></small></aside></div></section>
+    <section id="revision" class="seller-demo__section"><header><span>Revision history</span><h2>Every buyer-facing version stays accountable.</h2></header><div class="seller-demo__revision"><article><span>R1 · Superseded</span><strong>Initial equipment scope</strong><p>5 pumps · EXW basis</p></article><b>→</b><article class="is-current"><span>R<%= @revision&.number || 2 %> · Current</span><strong>CIF scope with export packing</strong><p>Freight and spare seal kit added · total updated</p></article></div></section>
+    <section id="activity" class="seller-demo__section"><header><span>Buyer activity</span><h2>Questions arrive with their context.</h2></header><div class="seller-demo__activity"><article><span>Question · Voltage configuration</span><h3>Can the control cabinet be supplied for 380V / 50Hz and IP54?</h3><p>Ethan Miller · Procurement</p></article><article><span>Revision request · Product quantity</span><h3>Please change the main unit quantity from 4 to 5 and keep two spare seal kits.</h3><p>Selection remains separate from the formal revision.</p></article></div></section>
+    <section id="pi" class="seller-demo__section seller-demo__pi"><header><span>Accept to PI</span><h2>The accepted snapshot becomes the order source.</h2></header><div><span>PROFORMA INVOICE</span><strong>PI-2026-0042</strong><p><%= @quote.customer.name %> · <%= @quote.currency %> <%= number_with_delimiter(@quote.grand_total) %></p><small>Awaiting deposit · immutable accepted scope</small></div></section>
+  <% else %><section class="seller-demo__empty"><h2>Demo data is being prepared.</h2><p>Please return in a moment.</p></section><% end %>
 </main>

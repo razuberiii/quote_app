@@ -1,1 +1,76 @@
-<main class="rubusoo-page inquiry-page"><header class="page-heading"><p class="eyebrow">Inquiry review</p><h1>Confirm the request before pricing.</h1></header><div class="inquiry-split"><section class="source-paper"><pre><%= @inquiry.source_text %></pre></section><aside><h2>Structured requirements</h2><div class="review-row"><span>Customer</span><strong class="status status--missing">Missing</strong></div><div class="review-row"><span>Products</span><strong class="status status--missing">Missing</strong></div><div class="review-row"><span>Price</span><strong class="status status--required">Price required</strong></div><div class="review-row"><span>Freight</span><strong class="status status--required">Freight required</strong></div><%= button_to "Build quote", build_quote_inquiry_path(@inquiry), class: "button button--primary button--full" %></aside></div></main>
+<% data = @inquiry.extracted_data.deep_stringify_keys %>
+<% evidence = data.fetch("evidence", {}) %>
+<main class="rubusoo-page inquiry-review">
+  <header class="inquiry-review__header">
+    <div><p class="eyebrow">02 · Review extraction</p><h1>Confirm what the buyer actually asked for.</h1><p>AI suggestions are editable. Source excerpts explain every extracted field; commercial amounts remain blocked until you provide a source.</p></div>
+    <div class="inquiry-review__status"><span class="status-dot"></span><strong><%= @inquiry.status.humanize %></strong><small>Saved <%= time_ago_in_words(@inquiry.updated_at) %> ago</small></div>
+  </header>
+
+  <%= form_with model: @inquiry, class: "inquiry-review__grid" do |f| %>
+    <section class="inquiry-source-panel">
+      <header><div><p class="section-kicker">Original inquiry</p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : @inquiry.source_type.humanize %></h2></div><span>Source of truth</span></header>
+      <div class="inquiry-source-panel__body"><%= simple_format(@inquiry.source_text, {}, wrapper_tag: "div") %></div>
+      <% if @inquiry.source_file.attached? %><footer>Original file retained · <%= number_to_human_size(@inquiry.source_file.byte_size) %></footer><% end %>
+    </section>
+
+    <section class="inquiry-results-panel">
+      <div class="inquiry-review-section">
+        <div class="inquiry-review-section__heading"><span>01</span><div><h2>Buyer & destination</h2><p>Confirm identity and where the goods need to go.</p></div></div>
+        <div class="inquiry-field-grid">
+          <% [["customer", "Customer company"], ["contact_name", "Contact"], ["contact_email", "Email"], ["country", "Country"], ["currency", "Currency"]].each do |key, label| %>
+            <label class="extracted-field <%= data[key].present? ? 'is-confirmed' : 'is-missing' %>">
+              <span><%= label %><em><%= data[key].present? ? "Confirmed" : "Missing" %></em></span>
+              <input class="input" name="inquiry[extracted_data][<%= key %>]" value="<%= data[key] %>" placeholder="Required" />
+              <% if evidence[key].present? %><small>“<%= evidence[key] %>”</small><% else %><small>No source excerpt found</small><% end %>
+            </label>
+          <% end %>
+          <% terms = data.fetch("commercial_terms", {}) %>
+          <% [["destination", "Destination port"], ["incoterm", "Incoterm"], ["delivery", "Delivery requirement"], ["packing", "Packing requirement"]].each do |key, label| %>
+            <label class="extracted-field <%= terms[key].present? ? 'is-uncertain' : 'is-missing' %>">
+              <span><%= label %><em><%= terms[key].present? ? "Uncertain" : "Missing" %></em></span>
+              <input class="input" name="inquiry[extracted_data][commercial_terms][<%= key %>]" value="<%= terms[key] %>" placeholder="Confirm manually" />
+              <small><%= evidence[key].present? ? "“#{evidence[key]}”" : "No source excerpt found" %></small>
+            </label>
+          <% end %>
+          <label class="extracted-field <%= terms["freight_amount"].to_d.positive? ? 'is-confirmed' : 'is-missing' %>"><span>Freight amount <em><%= terms["freight_amount"].to_d.positive? ? "Confirmed" : "Missing" %></em></span><input class="input" type="number" min="0" step="0.01" name="inquiry[extracted_data][commercial_terms][freight_amount]" value="<%= terms["freight_amount"] %>" placeholder="Freight required"><small>AI never supplies this amount.</small></label>
+          <label class="extracted-field <%= terms["freight_source"].present? ? 'is-confirmed' : 'is-missing' %>"><span>Freight source <em><%= terms["freight_source"].present? ? "Confirmed" : "Missing" %></em></span><select class="input" name="inquiry[extracted_data][commercial_terms][freight_source]"><option value="">Select source…</option><% ["freight_forwarder_quote", "carrier_quote", "customer_account", "manually_entered"].each do |source| %><option value="<%= source %>" <%= "selected" if terms["freight_source"] == source %>><%= source.humanize %></option><% end %></select><small>Required for CIF/CFR/DAP/DDP.</small></label>
+        </div>
+      </div>
+
+      <div class="inquiry-review-section">
+        <div class="inquiry-review-section__heading"><span>02</span><div><h2>Products & Catalog matches</h2><p>Select the correct Catalog item or keep a temporary quote-only item.</p></div></div>
+        <div class="inquiry-product-list">
+          <% Array(data["products"]).each_with_index do |product, index| %>
+            <article class="inquiry-product-card">
+              <header><span><%= (index + 1).to_s.rjust(2, "0") %></span><div><input name="inquiry[extracted_data][products][<%= index %>][name]" value="<%= product["name"] %>" class="inquiry-product-card__name" /><small><%= product["evidence"].present? ? "Source: “#{product['evidence']}”" : "No exact source excerpt" %></small></div><strong class="status status--required"><%= product["unit_price"].to_d.positive? ? "Priced" : "Price required" %></strong></header>
+              <div class="inquiry-product-card__facts">
+                <% [["model", "Model"], ["quantity", "Quantity"], ["unit", "Unit"], ["packing", "Packing"]].each do |key, label| %>
+                  <label><span><%= label %></span><input class="input" name="inquiry[extracted_data][products][<%= index %>][<%= key %>]" value="<%= product[key] %>" /></label>
+                <% end %>
+              </div>
+              <div class="inquiry-product-card__specs">
+                <% %w[voltage color material].each do |key| %><label><span><%= key.humanize %></span><input class="input" name="inquiry[extracted_data][products][<%= index %>][specifications][<%= key %>]" value="<%= product.dig('specifications', key) %>" placeholder="Not specified" /></label><% end %>
+              </div>
+              <fieldset class="catalog-match"><legend>Catalog match</legend>
+                <% Array(@catalog_matches[index]).each_with_index do |match, candidate_index| %>
+                  <% catalog_product = match[:product] %>
+                  <label class="catalog-candidate"><input type="radio" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="<%= catalog_product.id %>" <%= "checked" if product["catalog_product_id"].to_i == catalog_product.id || (product["catalog_product_id"].blank? && candidate_index.zero? && match[:score] >= 3) %>><span class="catalog-candidate__visual"><% if catalog_product.display_image.present? %><%= image_tag catalog_product.display_image, alt: "" %><% else %><b><%= catalog_product.name.first %></b><% end %></span><span><strong><%= catalog_product.name %></strong><small><%= catalog_product.sku %> · <%= match[:reasons].join(" · ") %></small></span><em><%= match[:score] >= 5 ? "Best match" : "Candidate" %></em></label>
+                <% end %>
+                <label class="catalog-candidate"><input type="radio" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="" <%= "checked" if product["catalog_product_id"].blank? && Array(@catalog_matches[index]).none? %>><span class="catalog-candidate__visual is-temporary">+</span><span><strong>Temporary item</strong><small>Use only in this quotation; no Catalog record is created.</small></span></label>
+                <label class="catalog-manual"><span>Choose another Catalog item</span><select class="input" name="inquiry[extracted_data][products][<%= index %>][manual_catalog_product_id]" onchange="this.closest('fieldset').querySelectorAll('input[type=radio]').forEach(r=>r.checked=false); this.name=this.name.replace('manual_catalog_product_id','catalog_product_id')"><option value="">Select manually…</option><%= options_from_collection_for_select(@catalog_products, :id, :name) %></select></label>
+              </fieldset>
+              <div class="price-confirmation"><div><p class="section-kicker">Commercial confirmation</p><strong>AI never fills these values</strong></div><label><span>Unit price</span><input class="input money-input" type="number" min="0" step="0.01" name="inquiry[extracted_data][products][<%= index %>][unit_price]" value="<%= product["unit_price"] %>" placeholder="Required"></label><label><span>Price source</span><select class="input" name="inquiry[extracted_data][products][<%= index %>][price_source]"><option value="">Select source…</option><% QuoteItem::PRICE_SOURCES.each do |source| %><option value="<%= source %>" <%= "selected" if product["price_source"] == source %>><%= source.humanize %></option><% end %></select></label><label><span>Buyer control</span><select class="input" name="inquiry[extracted_data][products][<%= index %>][selection_mode]"><% QuoteItem::SELECTION_MODES.each do |mode| %><option value="<%= mode %>" <%= "selected" if product["selection_mode"] == mode %>><%= mode.humanize %></option><% end %></select></label></div>
+            </article>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="inquiry-review-section inquiry-review-section--questions">
+        <div class="inquiry-review-section__heading"><span>03</span><div><h2>Questions & missing information</h2><p>Keep uncertainty visible before pricing and sending.</p></div></div>
+        <div class="inquiry-field-grid"><label class="extracted-field"><span>Buyer questions</span><textarea class="textarea" name="inquiry[extracted_data][questions]"><%= Array(data["questions"]).join("\n") %></textarea></label><label class="extracted-field is-missing"><span>Missing information <em>Needs review</em></span><textarea class="textarea" name="inquiry[extracted_data][missing_information]"><%= Array(data["missing_information"]).join("\n") %></textarea></label></div>
+      </div>
+
+      <footer class="inquiry-review__actions"><div><span>Build readiness</span><strong><%= @inquiry.ready_to_build_quote? ? "Ready to build" : "Save and confirm missing commercial fields" %></strong></div><%= f.submit "Save review", class: "button button--secondary" %><%= link_to "Build quote", build_quote_inquiry_path(@inquiry), class: "button button--primary", data: { turbo_method: :post } %></footer>
+    </section>
+  <% end %>
+</main>

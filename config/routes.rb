@@ -10,6 +10,7 @@ Rails.application.routes.draw do
 
   get "q/:token", to: "buyer_rooms#show", as: :buyer_room
   scope "q/:token", as: :buyer_room do
+    get "quote.pdf", to: "buyer_rooms#pdf", as: :pdf
     post "questions", to: "buyer_rooms#question", as: :questions
     post "request-changes", to: "buyer_rooms#request_changes", as: :request_changes
     post "accept", to: "buyer_rooms#accept", as: :accept

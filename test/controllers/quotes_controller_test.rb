@@ -334,7 +334,8 @@ class QuotesControllerTest < ActionDispatch::IntegrationTest
 
     get edit_quote_url(@quote)
     assert_response :success
-    assert_select "details.quote-form-advanced[open]", 1
+    assert_select ".quote-studio--editor", 1
+    assert_select "#studio-terms", 1
   end
 
   test "internal show uses supplementary wording for advanced sections" do

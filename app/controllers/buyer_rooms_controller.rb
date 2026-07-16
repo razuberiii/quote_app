@@ -2,12 +2,23 @@ class BuyerRoomsController < ApplicationController
   skip_before_action :authenticate_user!
   layout "buyer_room"
   before_action :load_revision
-  before_action :ensure_actionable!, except: :show
+  before_action :ensure_actionable!, except: %i[show pdf]
 
   def show
     @snapshot = @revision.snapshot
     @state = buyer_room_state
     track_view unless params[:preview] == "1"
+  end
+
+  def pdf
+    @snapshot = @revision.snapshot
+    html = render_to_string(template: "buyer_rooms/pdf", layout: "pdf", formats: [:html])
+    pdf = ChromiumPdfRenderer.new(html).render
+    send_data pdf, filename: "#{@revision.quote.quote_no}-R#{@revision.number}.pdf",
+      type: "application/pdf", disposition: "attachment"
+  rescue StandardError => error
+    Rails.logger.error("Buyer PDF failed: #{error.class}: #{error.message}")
+    redirect_to buyer_room_path(@revision.secure_token), alert: "PDF generation is temporarily unavailable."
   end
 
   def question
@@ -18,6 +29,7 @@ class BuyerRoomsController < ApplicationController
       body: params.require(:body), idempotency_key: idempotency_key
     )
     track("question", question.id)
+    Notification.create_quote_revision_requested_notification(@revision.quote)
     redirect_to buyer_room_path(@revision.secure_token, event: "question-sent")
   rescue ActiveRecord::RecordNotUnique
     redirect_to buyer_room_path(@revision.secure_token, event: "question-sent")
@@ -29,8 +41,10 @@ class BuyerRoomsController < ApplicationController
       message: params.require(:message), requested_changes: permitted_selection,
       idempotency_key: idempotency_key
     )
+    request_record.attachment.attach(params[:attachment]) if params[:attachment].present?
     @revision.quote.update!(status: "revision_requested", changes_requested_at: Time.current, changes_request_message: request_record.message)
     track("revision_requested", request_record.id)
+    Notification.create_quote_revision_requested_notification(@revision.quote)
     redirect_to buyer_room_path(@revision.secure_token, event: "changes-requested")
   rescue ActiveRecord::RecordNotUnique
     redirect_to buyer_room_path(@revision.secure_token, event: "changes-requested")
@@ -42,6 +56,7 @@ class BuyerRoomsController < ApplicationController
       selection: permitted_selection, idempotency_key: idempotency_key
     ).call
     track("accepted", acceptance.id)
+    Notification.create_quote_accepted_notification(@revision.quote)
     redirect_to buyer_room_path(@revision.secure_token, event: "accepted")
   rescue QuoteAcceptor::NotActionable => error
     redirect_to buyer_room_path(@revision.secure_token, error: error.message)

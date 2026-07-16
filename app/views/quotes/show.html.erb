@@ -1,4 +1,5 @@
 <section class="app-page-shell">
+  <%= render "commercial_workflow" unless @quote.pi_document? %>
   <% if @just_created %>
     <div class="quote-created-banner js-quote-created-banner">
       <div class="quote-created-banner-body">

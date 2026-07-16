@@ -1,80 +1,47 @@
 <% content_for :title, "#{@revision.quote.quote_no} · #{@revision.company.name}" %>
 <% items = Array(@snapshot["quote_items"]) %>
-<main class="buyer-room" data-controller="buyer-room">
-  <header class="buyer-header">
-    <a class="brand" href="/"><span class="brand-mark">R</span><span>Rubusoo</span></a>
-    <span class="buyer-secure">Secure quotation · Revision <%= @revision.number %></span>
-  </header>
+<% shipping = @snapshot["shipping_amount"].to_d %><% tax = @snapshot["tax_amount"].to_d %><% discount = @snapshot["discount_amount"].to_d %>
+<main class="buyer-room buyer-storefront" data-controller="buyer-room" data-buyer-room-currency-value="<%= @revision.currency %>" data-buyer-room-shipping-value="<%= shipping %>" data-buyer-room-tax-value="<%= tax %>" data-buyer-room-discount-value="<%= discount %>">
+  <header class="buyer-header"><a class="brand" href="#"><span><%= @revision.company.name %></span></a><div class="buyer-header__trust"><span>Secure quotation</span><strong><%= @revision.quote.quote_no %> · Revision <%= @revision.number %></strong></div></header>
 
-  <% if @state != "normal" %>
-    <section class="state-banner state-banner--<%= @state %>">
-      <strong><%= @state.humanize %></strong>
-      <span><%= @state == "superseded" ? "A newer revision is available. Ask the seller for the current link." : "This quotation is no longer open for changes." %></span>
+  <% if @state != "normal" %><section class="state-banner state-banner--<%= @state %>"><strong><%= @state.humanize %></strong><span><%= @state == "accepted" ? "This revision was accepted and is locked as the commercial record." : "This version is read-only. Contact the seller for the latest active quotation." %></span></section><% end %>
+  <% if params[:event] == "accepted" || @state == "accepted" %>
+    <section class="buyer-confirmation"><span>✓</span><p class="eyebrow">Acceptance recorded</p><h1>Thank you. Your decision is now part of the commercial record.</h1><p>The seller has been notified. Keep this link for the accepted revision and proforma invoice follow-up.</p><dl><div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div><div><dt>Revision</dt><dd><%= @revision.number %></dd></div><div><dt>Accepted total</dt><dd><%= @revision.currency %> <%= number_with_delimiter(@revision.quote_acceptance&.total || @revision.total) %></dd></div></dl></section>
+  <% else %>
+    <section class="buyer-cover">
+      <div><p class="eyebrow">Prepared exclusively for <%= @revision.quote.customer.name %></p><h1><%= @snapshot["custom_title"].presence || "The right equipment, clearly proposed." %></h1><p class="buyer-intro"><%= @snapshot["notes"].presence || "Review the proposed products, choose the configuration that fits, and respond directly inside this quotation." %></p><div class="buyer-contact-line"><span>Prepared by</span><strong><%= @revision.company.name %></strong><% if @revision.company.email.present? %><span>·</span><%= mail_to @revision.company.email, @revision.company.email %><% end %></div></div>
+      <dl class="quote-meta"><div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div><div><dt>Revision</dt><dd><%= @revision.number %> · Latest</dd></div><div><dt>Valid until</dt><dd><%= @revision.expires_at&.to_date || "Open" %></dd></div><div><dt>Currency</dt><dd><%= @revision.currency %></dd></div></dl>
     </section>
-  <% end %>
 
-  <section class="buyer-cover">
-    <div>
-      <p class="eyebrow">Prepared for <%= @revision.quote.customer.name %></p>
-      <h1><%= @snapshot["custom_title"].presence || "A clear path to your next order." %></h1>
-      <p class="buyer-intro">Review the products, confirm your preferred selection, and respond directly inside this quotation.</p>
-    </div>
-    <dl class="quote-meta">
-      <div><dt>Seller</dt><dd><%= @revision.company.name %></dd></div>
-      <div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div>
-      <div><dt>Valid until</dt><dd><%= @revision.expires_at&.to_date || "—" %></dd></div>
-      <div><dt>Currency</dt><dd><%= @revision.currency %></dd></div>
-    </dl>
-  </section>
-
-  <div class="buyer-grid">
-    <article class="buyer-document">
-      <section class="doc-section">
-        <p class="section-kicker">01 · Products</p>
-        <h2>What’s included</h2>
-        <div class="product-list">
+    <div class="buyer-grid">
+      <article class="buyer-document">
+        <section class="doc-section buyer-products"><div class="buyer-section-heading"><p class="section-kicker">01 · Proposed equipment</p><h2>Built around your request</h2><p>Product identity and fixed commercial terms belong to this revision. Selectable controls update your working total without altering the seller’s record.</p></div>
           <% items.each_with_index do |item, index| %>
-            <article class="buyer-product">
-              <div class="product-index"><%= (index + 1).to_s.rjust(2, "0") %></div>
-              <div class="product-copy">
-                <h3><%= item["product_name"].presence || item["description"] %></h3>
-                <p><%= item["description"] %></p>
-                <% if Array(item["specifications"]).any? %>
-                  <details><summary>Technical specifications</summary><dl class="spec-list">
-                    <% Array(item["specifications"]).each do |spec| %><div><dt><%= spec["name"] || spec["key"] %></dt><dd><%= spec["value"] %></dd></div><% end %>
-                  </dl></details>
-                <% end %>
-                <button class="text-action" type="button" data-action="buyer-room#openQuestion" data-context="item:<%= index %>">Ask about this product</button>
+            <% selectable = item["selection_mode"] == "selectable" %>
+            <article class="buyer-product buyer-product--visual">
+              <div class="buyer-product__image"><% if item["product_image_path"].present? %><%= image_tag item["product_image_path"], alt: item["product_name"] || item["description"] %><% else %><span><%= (index + 1).to_s.rjust(2,"0") %></span><small>Product image</small><% end %></div>
+              <div class="product-copy"><p class="product-index">Item <%= (index + 1).to_s.rjust(2,"0") %> · <%= item["sku_snapshot"].presence || "Configured product" %></p><h3><%= item["product_name"].presence || item["description"] %></h3><p><%= item["description"] unless item["description"] == item["product_name"] %></p>
+                <% if Array(item["specifications"]).any? %><dl class="buyer-spec-grid"><% Array(item["specifications"]).each do |spec| %><div><dt><%= spec["key"] || spec[:key] || spec["name"] %></dt><dd><%= spec["value"] || spec[:value] %></dd><button type="button" data-action="buyer-room#openQuestion" data-context="spec:<%= index %>:<%= spec['key'] || spec[:key] %>" data-context-label="<%= item['product_name'] || item['description'] %> · <%= spec['key'] || spec[:key] %>">Ask</button></div><% end %></dl><% end %>
+                <div class="buyer-product__controls"><label><span>Quantity <%= selectable ? "· selectable" : "· fixed" %></span><input type="number" min="1" value="<%= item['quantity'] %>" <%= "readonly" unless selectable %> data-buyer-room-target="quantity" data-index="<%= index %>" data-unit-price="<%= item['unit_price'] %>" data-action="input->buyer-room#recalculate"></label><div><span>Unit price</span><strong><%= @revision.currency %> <%= number_with_delimiter(item["unit_price"]) %></strong></div><div><span>Lead time</span><strong><%= item["lead_time_snapshot"].presence || "As stated below" %></strong></div></div>
+                <% if Array(item["addon_charges"]).any? %><fieldset class="buyer-accessories"><legend>Optional accessories</legend><% Array(item["addon_charges"]).each do |addon| %><label><input type="checkbox" value="<%= index %>:<%= addon['name'] || addon[:name] %>" data-buyer-room-target="accessory" data-price="<%= addon['amount'] || addon[:amount] %>" data-action="change->buyer-room#recalculate"><span><strong><%= addon["name"] || addon[:name] %></strong><small>＋ <%= @revision.currency %> <%= number_with_delimiter(addon["amount"] || addon[:amount]) %></small></span></label><% end %></fieldset><% end %>
+                <button class="text-action" type="button" data-action="buyer-room#openQuestion" data-context="product:<%= index %>" data-context-label="<%= item['product_name'] || item['description'] %>">Ask about this product</button>
               </div>
-              <div class="product-price"><span><%= item["quantity"] %> units</span><strong><%= @revision.currency %> <%= number_with_delimiter(item["amount"] || item["line_total"] || 0) %></strong></div>
             </article>
           <% end %>
-        </div>
-      </section>
+        </section>
 
-      <section class="doc-section terms-section"><p class="section-kicker">02 · Commercial terms</p><h2>Delivery and payment</h2>
-        <dl class="terms-grid">
-          <div><dt>Incoterm</dt><dd><%= @snapshot["trade_term"].presence || "To be confirmed" %></dd></div>
-          <div><dt>Payment</dt><dd><%= @snapshot["payment_term"].presence || "To be confirmed" %></dd></div>
-          <div><dt>Delivery</dt><dd><%= @snapshot["delivery_notes"].presence || "As agreed" %></dd></div>
-          <div><dt>Validity</dt><dd><%= @revision.expires_at&.to_date || "—" %></dd></div>
-        </dl>
-      </section>
-    </article>
+        <% if items.any? { |item| Array(item["addon_charges"]).any? } %><section class="doc-section buyer-plans"><div class="buyer-section-heading"><p class="section-kicker">02 · Choose a scope</p><h2>Three clear ways to proceed</h2></div><div class="buyer-plan-grid"><button type="button" data-buyer-room-target="plan" data-plan="essential" data-action="buyer-room#selectPlan"><span>Essential</span><strong>Core equipment</strong><small>No optional accessories</small></button><button type="button" class="is-selected" data-buyer-room-target="plan" data-plan="recommended" data-action="buyer-room#selectPlan"><span>Recommended</span><strong>Your working selection</strong><small>Balanced for the stated requirement</small><em>Seller’s choice</em></button><button type="button" data-buyer-room-target="plan" data-plan="complete" data-action="buyer-room#selectPlan"><span>Complete</span><strong>All accessories</strong><small>Maximum operating readiness</small></button></div></section><% end %>
 
-    <aside class="selection-panel">
-      <p class="section-kicker">Selection summary</p><h2>Revision <%= @revision.number %></h2>
-      <div class="total-row"><span>Total</span><strong><%= @revision.currency %> <%= number_with_delimiter(@revision.total) %></strong></div>
-      <p class="selection-note">Prices are locked to this revision. Selectable configurations appear when enabled by the seller.</p>
-      <% if @revision.actionable? %>
-        <button class="button button--primary button--full" data-action="buyer-room#openAccept">Accept quotation</button>
-        <button class="button button--secondary button--full" data-action="buyer-room#openChanges">Request changes</button>
-        <button class="text-action" data-action="buyer-room#openQuestion">Ask a question</button>
-      <% end %>
-    </aside>
-  </div>
+        <section class="doc-section buyer-commercial"><div class="buyer-section-heading"><p class="section-kicker">03 · Shipping & commercial terms</p><h2>Everything behind the total</h2></div><dl class="terms-grid"><div><dt>Incoterm</dt><dd><%= @snapshot["trade_term"].presence || "To be confirmed" %></dd></div><div><dt>Payment</dt><dd><%= @snapshot["payment_term"].presence || "To be confirmed" %></dd></div><div><dt>Delivery</dt><dd><%= @snapshot["delivery_notes"].presence || "As agreed" %></dd></div><div><dt>Validity</dt><dd><%= @revision.expires_at&.to_date || "—" %></dd></div><div><dt>Shipping</dt><dd><%= @revision.currency %> <%= number_with_delimiter(shipping) %></dd></div><div><dt>Packaging</dt><dd><%= items.filter_map { |item| item["packing_snapshot"].presence }.uniq.join(", ").presence || "Export standard" %></dd></div></dl><% if @snapshot["terms_text"].present? %><div class="buyer-terms-copy"><%= simple_format(@snapshot["terms_text"]) %></div><% end %><button class="text-action" type="button" data-action="buyer-room#openQuestion" data-context="term:commercial" data-context-label="Commercial terms">Ask about these terms</button></section>
+      </article>
 
-  <dialog class="rubusoo-dialog" data-buyer-room-target="questionDialog"><%= form_with url: buyer_room_questions_path(@revision.secure_token) do |f| %><h2>Ask the seller</h2><input type="hidden" name="context_key" data-buyer-room-target="questionContext"><%= f.text_field :buyer_name, placeholder: "Your name", class: "input" %><%= f.email_field :buyer_email, placeholder: "Work email", class: "input" %><%= f.text_area :body, required: true, placeholder: "What would you like clarified?", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Send question", class: "button button--primary" %></div><% end %></dialog>
-  <dialog class="rubusoo-dialog" data-buyer-room-target="changesDialog"><%= form_with url: buyer_room_request_changes_path(@revision.secure_token) do |f| %><h2>Request an updated quotation</h2><%= f.text_field :buyer_name, placeholder: "Your name", class: "input" %><%= f.email_field :buyer_email, placeholder: "Work email", class: "input" %><%= f.text_area :message, required: true, placeholder: "Describe quantity, specification, delivery, or price changes", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Send request", class: "button button--primary" %></div><% end %></dialog>
-  <dialog class="rubusoo-dialog" data-buyer-room-target="acceptDialog"><%= form_with url: buyer_room_accept_path(@revision.secure_token) do |f| %><h2>Accept this quotation</h2><p>Your acceptance locks this revision and selection as the commercial record.</p><%= f.text_field :name, required: true, placeholder: "Full name", class: "input" %><%= f.email_field :email, required: true, placeholder: "Work email", class: "input" %><%= f.text_field :job_title, placeholder: "Job title (optional)", class: "input" %><%= f.text_field :po_number, placeholder: "PO number (optional)", class: "input" %><%= f.text_area :note, placeholder: "Note (optional)", class: "textarea" %><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><%= f.submit "Confirm acceptance", class: "button button--primary" %></div><% end %></dialog>
+      <aside class="selection-panel"><p class="section-kicker">Your selection</p><h2>Decision summary</h2><div class="selection-panel__meta"><span><%= items.size %> product<%= "s" unless items.one? %></span><span>Revision <%= @revision.number %></span></div><div class="selection-lines"><% items.each do |item| %><p><span><%= item["product_name"].presence || item["description"] %><small><%= item["quantity"] %> × <%= @revision.currency %> <%= item["unit_price"] %></small></span></p><% end %><% if shipping.positive? %><p><span>Shipping</span><strong><%= @revision.currency %> <%= number_with_delimiter(shipping) %></strong></p><% end %></div><div class="total-row"><span>Current total<small>Tax and discount included</small></span><strong data-buyer-room-target="total"><%= @revision.currency %> <%= number_with_delimiter(@revision.total) %></strong></div>
+        <% if @revision.actionable? %><button class="button button--primary button--full" data-action="buyer-room#openAccept">Accept quote</button><button class="button button--secondary button--full" data-action="buyer-room#openChanges">Request changes</button><button class="text-action" data-action="buyer-room#openQuestion" data-context="quote" data-context-label="Entire quotation">Ask a question</button><% end %><div class="selection-panel__downloads"><%= link_to "Download PDF", buyer_room_pdf_path(@revision.secure_token), data: { turbo: false } %><a href="#studio-attachments">Attachments</a></div><p class="selection-note">Your working choices do not change the formal Revision. They are locked only when you accept.</p>
+      </aside>
+    </div>
+  <% end %>
+
+  <dialog class="rubusoo-dialog" data-buyer-room-target="questionDialog"><form method="post" action="<%= buyer_room_questions_path(@revision.secure_token) %>"><%= hidden_field_tag :authenticity_token, form_authenticity_token %><input type="hidden" name="context_type" value="quote"><input type="hidden" name="context_key" data-buyer-room-target="questionContext"><p class="section-kicker">Question about</p><h2 class="dialog-context">Entire quotation</h2><label class="field-label">Your name</label><input name="buyer_name" class="input"><label class="field-label">Work email</label><input type="email" name="buyer_email" class="input"><label class="field-label">Question</label><textarea name="body" required class="textarea" placeholder="What would you like the seller to clarify?"></textarea><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><button class="button button--primary">Send question</button></div></form></dialog>
+  <dialog class="rubusoo-dialog" data-buyer-room-target="changesDialog"><form method="post" action="<%= buyer_room_request_changes_path(@revision.secure_token) %>" enctype="multipart/form-data"><%= hidden_field_tag :authenticity_token, form_authenticity_token %><div data-buyer-room-target="selectionCopy"></div><p class="section-kicker">Request a new revision</p><h2>Tell the seller what should change.</h2><p>Your request is recorded separately and never edits this formal quotation.</p><div class="dialog-two"><input name="buyer_name" placeholder="Your name" class="input"><input type="email" name="buyer_email" placeholder="Work email" class="input"></div><textarea name="message" required class="textarea" placeholder="Change quantity, voltage, specification, price, delivery, or another term…"></textarea><label class="dialog-upload">Supporting attachment <input type="file" name="attachment"></label><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><button class="button button--primary">Send request</button></div></form></dialog>
+  <dialog class="rubusoo-dialog" data-buyer-room-target="acceptDialog"><form method="post" action="<%= buyer_room_accept_path(@revision.secure_token) %>"><%= hidden_field_tag :authenticity_token, form_authenticity_token %><div data-buyer-room-target="selectionCopy"></div><p class="section-kicker">Formal acceptance</p><h2>Accept Revision <%= @revision.number %></h2><p>You are accepting this revision and your final selection for <strong data-buyer-room-target="total"></strong>.</p><div class="dialog-two"><input name="name" required placeholder="Full name" class="input"><input type="email" name="email" required placeholder="Work email" class="input"><input name="job_title" placeholder="Job title (optional)" class="input"><input name="po_number" placeholder="PO number (optional)" class="input"></div><textarea name="note" placeholder="Note to the seller (optional)" class="textarea"></textarea><label class="accept-check"><input type="checkbox" required> I confirm I am authorized to accept this commercial quotation.</label><div class="dialog-actions"><button type="button" class="button button--ghost" data-action="buyer-room#close">Cancel</button><button class="button button--primary">Confirm acceptance</button></div></form></dialog>
 </main>

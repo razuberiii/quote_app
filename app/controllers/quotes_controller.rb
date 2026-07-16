@@ -55,6 +55,10 @@ class QuotesController < ApplicationController
   end
 
   def show
+    @commercial_revisions = @quote.quote_revisions.ordered
+    @readiness_issues = QuoteReadinessAudit.new(@quote).issues
+    @buyer_questions = BuyerQuestion.where(quote_revision: @commercial_revisions).order(created_at: :desc)
+    @change_requests = ChangeRequest.where(quote_revision: @commercial_revisions).order(created_at: :desc)
     request.format = :html if request.format.turbo_stream? && params[:format] != "turbo_stream"
     @just_created = params[:created] == "1"
 
@@ -569,6 +573,7 @@ class QuotesController < ApplicationController
       :notes,
       :tax_amount,
       :shipping_amount,
+      :shipping_price_source,
       :discount_amount,
       :terms_text,
       :legal_disclaimer,
@@ -585,7 +590,8 @@ class QuotesController < ApplicationController
       detail_pictures_block: {},
       formal_closing_block: {},
       container_loading_block: {},
-      quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :item_type, :specifications_text, :addon_charges_text, :item_image, :item_image_blob_id, :remove_item_image, :_destroy ]
+      quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity, :item_type, :specifications_text, :addon_charges_text, :item_image, :item_image_blob_id, :remove_item_image,
+        :price_source, :selection_mode, :sku_snapshot, :unit_snapshot, :lead_time_snapshot, :packing_snapshot, :_destroy, { buyer_options: {} } ]
     )
     raw_quote = params[:quote]
     if raw_quote.respond_to?(:to_unsafe_h)

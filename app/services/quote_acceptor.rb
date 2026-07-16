@@ -15,12 +15,13 @@ class QuoteAcceptor
       raise NotActionable, "Only the latest active revision can be accepted" unless @revision.actionable?
       raise NotActionable, "This quote has already been accepted" if existing
 
+      priced = BuyerSelectionPricer.new(revision: @revision, selection: @selection).call
       acceptance = QuoteAcceptance.create!(
         company: @revision.company, quote: @revision.quote, quote_revision: @revision,
         name: @attributes.fetch(:name), email: @attributes.fetch(:email),
         job_title: @attributes[:job_title], po_number: @attributes[:po_number], note: @attributes[:note],
-        selection: @selection, snapshot: @revision.snapshot.merge("buyer_selection" => @selection),
-        total: @revision.total, currency: @revision.currency, idempotency_key: @idempotency_key,
+        selection: priced.selection, snapshot: @revision.snapshot.merge("buyer_selection" => priced.selection, "accepted_total" => priced.total),
+        total: priced.total, currency: @revision.currency, idempotency_key: @idempotency_key,
         accepted_at: Time.current
       )
       @revision.update!(status: "accepted")

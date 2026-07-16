@@ -127,6 +127,7 @@ class Quote < ApplicationRecord
   belongs_to :customer
   belongs_to :template, class_name: "QuoteTemplate", optional: true
   belongs_to :source_quote, class_name: "Quote", optional: true
+  belongs_to :inquiry, optional: true
   has_many :derived_quotes, class_name: "Quote", foreign_key: :source_quote_id, dependent: :nullify
   has_many :customer_follow_up_events, dependent: :nullify
   has_many :quote_items, dependent: :destroy
@@ -264,7 +265,7 @@ class Quote < ApplicationRecord
     return false if archived?
     return false unless latest_revision_for_quote_no?
 
-    draft? || pi_document?
+    draft? || %w[revision_requested negotiating].include?(status.to_s) || pi_document?
   end
 
   def can_create_new_revision?

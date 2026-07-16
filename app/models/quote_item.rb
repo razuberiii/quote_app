@@ -1,4 +1,6 @@
 class QuoteItem < ApplicationRecord
+  PRICE_SOURCES = %w[catalog quantity_tier customer_specific configuration_rule historical_quote manual].freeze
+  SELECTION_MODES = %w[fixed selectable request_only].freeze
   MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
   MAX_DESCRIPTION_LENGTH = 1000
   MAX_SPEC_ROWS = 40
@@ -31,6 +33,8 @@ class QuoteItem < ApplicationRecord
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :image_source, inclusion: { in: IMAGE_SOURCES }
   validates :item_type, inclusion: { in: ITEM_TYPES }
+  validates :price_source, inclusion: { in: PRICE_SOURCES }, if: -> { has_attribute?(:price_source) }
+  validates :selection_mode, inclusion: { in: SELECTION_MODES }, if: -> { has_attribute?(:selection_mode) }
   validate :validate_addon_charge_amounts
   validate :description_length_within_limit
   validate :specifications_within_limits

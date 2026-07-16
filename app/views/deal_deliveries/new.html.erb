@@ -1,0 +1,21 @@
+<main class="deal-workspace channel-flow" data-controller="channel-flow">
+  <header class="channel-flow__header"><div><%= link_to "← Deal", deal_path(@deal), class: "deal-back" %><p class="eyebrow">Published Version <%= @version.number %></p><h1>Deliver without changing the version.</h1><p>Buyer Room is recommended, but email, PDF, Excel, messaging and offline delivery all preserve the same immutable commercial snapshot.</p></div><div class="version-lock"><span>Locked amount</span><strong><%= @version.currency %> <%= number_with_delimiter(@version.total) %></strong><small>Published <%= l(@version.published_at || @version.created_at, format: :long) %></small></div></header>
+
+  <section class="channel-picker" role="list" aria-label="Delivery methods">
+    <% [["buyer_room_link","Buyer Room link","Interactive choices and activity signals"],["email_link_pdf","Email link + PDF","One message, two buyer options"],["email_pdf","Email PDF","Formal attachment without link dependency"],["pdf_download","Download PDF","Export now, optionally record external send"],["excel_export","Export Excel","Structured commercial workbook"],["external","Record external delivery","WhatsApp, WeChat, LINE, phone or in person"],["printed","Printed / offline","Record a physical handoff"]].each do |value,title,detail| %>
+      <button type="button" class="channel-option" data-channel-flow-target="option" data-value="<%= value %>" data-action="channel-flow#select"><span><%= title %></span><small><%= detail %></small></button>
+    <% end %>
+  </section>
+
+  <%= form_with model: @delivery, url: deliver_deal_path(@deal, version_id: @version.id), class: "channel-form", multipart: true do |form| %>
+    <%= form.hidden_field :channel, value: "buyer_room_link", data: { channel_flow_target: "channel" } %>
+    <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+    <div><%= form.label :recipient, "Recipient" %><%= form.text_field :recipient, class: "app-ui-input", placeholder: "buyer@company.com or contact name" %></div>
+    <div data-channel-flow-target="external"><%= form.label :external_channel, "External channel" %><%= form.select :external_channel, VersionDelivery::EXTERNAL_CHANNELS.map { |item| [item.humanize, item] }, { include_blank: "Not applicable" }, class: "app-ui-input" %></div>
+    <div><%= form.label :delivered_at, "Delivery time" %><%= form.datetime_local_field :delivered_at, class: "app-ui-input" %></div>
+    <div><%= form.label :status, "Result" %><%= form.select :status, [["Succeeded","succeeded"],["Failed — needs retry","failed"]], {}, class: "app-ui-input" %></div>
+    <div class="channel-form__wide"><%= form.label :note, "Delivery note" %><%= form.text_area :note, rows: 3, class: "app-ui-input", placeholder: "Message reference, courier details, or why delivery failed" %></div>
+    <div class="channel-form__wide"><%= form.label :evidence, "Evidence file (optional)" %><%= form.file_field :evidence %></div>
+    <footer><div><span>View signal</span><strong data-channel-flow-target="signal">Buyer Room activity available</strong></div><%= form.submit "Record delivery", class: "button button--primary" %></footer>
+  <% end %>
+</main>

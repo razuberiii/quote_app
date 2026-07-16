@@ -1,0 +1,68 @@
+name: Visual Review
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  visual-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: quote_app_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
+    env:
+      RAILS_ENV: test
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/quote_app_test
+      VISUAL_BASE_URL: http://127.0.0.1:3100
+      GITHUB_SHA: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install browser and runtime dependencies
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+      - name: Prepare deterministic visual-review database
+        run: |
+          bundle exec rails db:prepare
+          bundle exec rails tailwindcss:build
+          bundle exec rails visual_review:seed
+      - name: Start Rubusoo test server
+        run: |
+          bundle exec rails server -b 127.0.0.1 -p 3100 > tmp/visual-review-server.log 2>&1 &
+          for attempt in {1..40}; do curl --fail --silent http://127.0.0.1:3100/up && break; sleep 1; done
+      - name: Run visual, motion, quality and accessibility review
+        run: npx playwright test
+      - name: Upload complete visual audit evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: rubusoo-visual-review-${{ github.sha }}
+          path: |
+            tmp/visual-review/
+            tmp/visual-review-server.log
+          retention-days: 30
+          if-no-files-found: warn

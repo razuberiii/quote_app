@@ -63,7 +63,18 @@ Rails.application.routes.draw do
   resources :deals, only: %i[index show] do
     member do
       patch "questions/:question_id/reply", action: :reply_question, as: :reply_question
+      get :deliver, to: "deal_deliveries#new"
+      post :deliver, to: "deal_deliveries#create"
+      get "responses/new", to: "deal_responses#new", as: :new_response
+      post :responses, to: "deal_responses#create"
+      get "acceptance/new", to: "deal_acceptances#new", as: :new_acceptance
+      post :acceptance, to: "deal_acceptances#create"
+      patch :close
+      patch :reopen
     end
+  end
+  resources :final_documents, only: :create do
+    member { patch :mark_sent }
   end
   get "library", to: "library#index", as: :library
   resources :inquiries, only: %i[index new create show update] do

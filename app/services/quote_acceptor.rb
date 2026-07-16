@@ -1,11 +1,12 @@
 class QuoteAcceptor
   class NotActionable < StandardError; end
 
-  def initialize(revision:, attributes:, selection:, idempotency_key:)
+  def initialize(revision:, attributes:, selection:, idempotency_key:, audit_context: {})
     @revision = revision
     @attributes = attributes
     @selection = selection || {}
     @idempotency_key = idempotency_key.presence || SecureRandom.uuid
+    @audit_context = audit_context
   end
 
   def call
@@ -20,7 +21,9 @@ class QuoteAcceptor
         company: @revision.company, quote: @revision.quote, quote_revision: @revision,
         name: @attributes.fetch(:name), email: @attributes.fetch(:email),
         job_title: @attributes[:job_title], po_number: @attributes[:po_number], note: @attributes[:note],
-        selection: priced.selection, snapshot: @revision.snapshot.merge("buyer_selection" => priced.selection, "accepted_total" => priced.total),
+        acceptance_method: "buyer_room", seller_recorded: false,
+        selection: priced.selection, snapshot: @revision.snapshot.merge("buyer_selection" => priced.selection,
+          "accepted_total" => priced.total, "acceptance_audit" => @audit_context),
         total: priced.total, currency: @revision.currency, idempotency_key: @idempotency_key,
         accepted_at: Time.current
       )

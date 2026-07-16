@@ -72,7 +72,7 @@ class Quote < ApplicationRecord
     "capacity" => "Capacity",
     "note" => "Note"
   }.freeze
-  STATUSES = %w[draft ready sent viewed revision_requested negotiating accepted awaiting_deposit won lost expired archived pending].freeze
+  STATUSES = %w[draft ready sent viewed revision_requested negotiating accepted awaiting_deposit won lost cancelled expired archived pending].freeze
   OPEN_STATUSES = %w[draft ready sent viewed revision_requested negotiating accepted awaiting_deposit pending].freeze
   AUTO_VIEW_STATUSES = %w[draft ready sent pending].freeze
   WIN_REASONS = %w[
@@ -136,6 +136,9 @@ class Quote < ApplicationRecord
   has_one :quote_acceptance, dependent: :restrict_with_exception
   has_one :proforma_invoice, dependent: :restrict_with_exception
   has_many :buyer_activities, dependent: :restrict_with_exception
+  has_many :version_deliveries, dependent: :restrict_with_exception
+  has_many :deal_responses, dependent: :restrict_with_exception
+  has_many :final_documents, dependent: :restrict_with_exception
   has_one_attached :seller_signature_image
   has_one_attached :seller_stamp_image
   accepts_nested_attributes_for :quote_items,

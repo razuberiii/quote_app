@@ -387,6 +387,9 @@ data-action="click->clipboard#copy"
 - `.deal-tabs` owns Overview, Quote, Conversation, Versions and Documents within one Deal. These are contextual views, not primary navigation.
 - `.deal-motion` uses a short staggered entry animation for actionable Inbox items. Motion is disabled by the global reduced-motion rule.
 - Ordinary Deal surfaces remain graphite. Light surfaces are reserved for Quote Studio canvas, Buyer Room light theme, PI and printable documents.
+- `.channel-flow` and `.context-form` are the canonical channel-neutral workflow surfaces for Delivery, buyer Response and seller-recorded Acceptance. They use the existing button/input primitives, graphite surface hierarchy and shared motion tokens.
+- `.channel-picker` is a flat connected decision grid, not a card collection. Selecting a channel moves the signal edge and updates whether Buyer Room view activity is available.
+- Delivery/Acceptance forms become one-column, nearly full-width workflows below `900px`; no desktop modal is scaled down on mobile.
 
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.

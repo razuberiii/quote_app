@@ -12,12 +12,16 @@ class RevisionPublisher
 
   def call
     @quote.with_lock do
+      @quote.reload
       validate_workspace!
       validate_readiness!
-      raise PlanLimitReached, "Upgrade your plan to send another quote" unless @quote.company.can_send_quote?
-
       snapshot = QuoteSnapshotBuilder.new(@quote).as_json
       previous = @quote.quote_revisions.ordered.first
+      if previous&.status == "current" && SnapshotDiff.new(previous.snapshot, snapshot).call.empty?
+        return Result.new(previous, buyer_room_url(previous))
+      end
+      raise PlanLimitReached, "Upgrade your plan to publish another Version" unless @quote.company.can_send_quote?
+
       number = previous.present? ? previous.number + 1 : 1
       previous&.update!(status: "superseded", superseded_at: Time.current)
 
@@ -32,16 +36,11 @@ class RevisionPublisher
         diff: previous ? SnapshotDiff.new(previous.snapshot, snapshot).call : {},
         summary: previous ? "Revision #{number} updates the previous quotation." : "Initial quotation.",
         secure_token: SecureRandom.urlsafe_base64(32),
-        sent_at: Time.current,
+        published_at: Time.current,
         expires_at: @quote.valid_until&.end_of_day
       )
-      @quote.update!(status: previous ? "negotiating" : "sent", sent_at: Time.current, studio_state: "sent")
-      url = if @url_options[:host].present?
-        Rails.application.routes.url_helpers.buyer_room_url(revision.secure_token, @url_options)
-      else
-        Rails.application.routes.url_helpers.buyer_room_path(revision.secure_token)
-      end
-      Result.new(revision, url)
+      @quote.update!(status: "ready", studio_state: "published")
+      Result.new(revision, buyer_room_url(revision))
     end
   end
 
@@ -54,5 +53,13 @@ class RevisionPublisher
   def validate_readiness!
     issues = QuoteReadinessAudit.new(@quote).issues
     raise NotReady, issues.join(" · ") if issues.any?
+  end
+
+  def buyer_room_url(revision)
+    if @url_options[:host].present?
+      Rails.application.routes.url_helpers.buyer_room_url(revision.secure_token, @url_options)
+    else
+      Rails.application.routes.url_helpers.buyer_room_path(revision.secure_token)
+    end
   end
 end

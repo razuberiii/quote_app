@@ -1,0 +1,18 @@
+<main class="deal-workspace context-form acceptance-recorder">
+  <header><%= link_to "← Deal", deal_path(@deal), class: "deal-back" %><p class="eyebrow">Immutable commercial evidence</p><h1>Record acceptance</h1><p>Use this when confirmation arrives outside Buyer Room. The Acceptance binds to a Published Version and stores its own snapshot.</p></header>
+  <%= form_with model: @acceptance, url: acceptance_deal_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
+    <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+    <div><%= form.label :quote_revision_id, "Accepted Version" %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| ["Version #{version.number} · #{version.currency} #{version.total}", version.id] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :acceptance_method, "Acceptance method" %><%= form.select :acceptance_method, QuoteAcceptance::METHODS.reject { |item| item == "buyer_room" }.map { |item| [item.humanize, item] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :name, "Accepted by" %><%= form.text_field :name, required: true, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_company, "Buyer company" %><%= form.text_field :buyer_company, class: "app-ui-input" %></div>
+    <div><%= form.label :email, "Contact email" %><%= form.email_field :email, class: "app-ui-input" %></div>
+    <div><%= form.label :accepted_at, "Acceptance time" %><%= form.datetime_local_field :accepted_at, required: true, class: "app-ui-input" %></div>
+    <div><%= form.label :po_number, "PO number" %><%= form.text_field :po_number, class: "app-ui-input" %></div>
+    <div class="acceptance-difference"><%= form.label :has_differences do %><%= form.check_box :has_differences %><span>Evidence differs from the Published Version</span><% end %><small>Differences remain visible and cannot be represented as an exact acceptance.</small></div>
+    <div class="context-form__wide"><%= form.label :evidence_summary, "Evidence summary" %><%= form.text_field :evidence_summary, class: "app-ui-input", placeholder: "Email subject, message timestamp, signed document reference…" %></div>
+    <div class="context-form__wide"><%= form.label :note, "Seller note" %><%= form.text_area :note, rows: 4, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :evidence_files, "Evidence files" %><%= form.file_field :evidence_files, multiple: true %></div>
+    <footer class="context-form__wide"><div><span>Record type</span><strong>Seller-recorded acceptance</strong></div><%= form.submit "Lock acceptance", class: "button button--primary" %></footer>
+  <% end %>
+</main>

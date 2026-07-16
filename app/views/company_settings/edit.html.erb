@@ -100,6 +100,17 @@
       <p class="team-members-hint"><%= t("company_settings.view.edit.section_branding_behavior_hint") %></p>
     </div>
 
+    <div class="settings-section-title settings-grid-span-2">Deal completion</div>
+    <div>
+      <%= f.label :default_final_document_type, "Default final document" %>
+      <%= f.select :default_final_document_type, FinalDocument::TYPES.map { |type| [type.humanize, type] }, {}, class: ui_input_classes %>
+    </div>
+    <div class="settings-checkbox-grid">
+      <label><%= f.check_box :require_final_document %> Require a final document after Acceptance</label>
+      <label><%= f.check_box :require_deposit_workflow %> Require payment / deposit confirmation</label>
+      <p class="team-members-hint">Leave both off to allow an accepted Deal to close as won immediately.</p>
+    </div>
+
     <div class="settings-grid-span-2 <%= 'settings-field-error' if @company.errors[:logo].any? %>">
       <div class="company-logo-row">
         <% has_logo = @company.logo.attached? && @company.logo.blob&.persisted? %>

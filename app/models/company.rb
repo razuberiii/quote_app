@@ -30,6 +30,9 @@ class Company < ApplicationRecord
   has_many :quote_acceptances, dependent: :restrict_with_exception
   has_many :proforma_invoices, dependent: :restrict_with_exception
   has_many :buyer_activities, dependent: :restrict_with_exception
+  has_many :version_deliveries, dependent: :restrict_with_exception
+  has_many :deal_responses, dependent: :restrict_with_exception
+  has_many :final_documents, dependent: :restrict_with_exception
   has_many :inquiries, dependent: :destroy
   has_one_attached :logo
   validate :logo_constraints
@@ -48,7 +51,7 @@ class Company < ApplicationRecord
     return false if plan == "trial" && trial_ends_at.present? && trial_ends_at.past?
     return false unless %w[trialing active].include?(subscription_status.to_s)
 
-    quote_revisions.where(sent_at: billing_period_start..Time.current).count < send_limit
+    quote_revisions.where("COALESCE(published_at, sent_at) BETWEEN ? AND ?", billing_period_start, Time.current).count < send_limit
   end
 
   def billing_period_start

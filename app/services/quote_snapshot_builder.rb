@@ -4,7 +4,13 @@ class QuoteSnapshotBuilder
   end
 
   def as_json
-    snapshot = @quote.as_json
+    snapshot = @quote.attributes.except(
+      "internal_note", "next_action", "follow_up_on", "status", "studio_state", "sent_at", "viewed_at",
+      "accepted_at", "changes_requested_at", "won_at", "lost_at", "archived_at", "deleted_at",
+      "win_reason", "win_reason_detail", "loss_reason", "loss_reason_detail", "stalled_reason",
+      "stalled_reason_detail", "created_at", "updated_at", "lock_version"
+    )
+    snapshot.delete_if { |key, _value| key.end_with?("_at") }
     snapshot["customer_name"] = @quote.customer.name
     snapshot["customer_contact_name"] = @quote.customer.contact_name
     snapshot["customer_address"] = @quote.customer.address
@@ -29,12 +35,9 @@ class QuoteSnapshotBuilder
     snapshot["spec_label"] = @quote.resolved_spec_label
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title
-    snapshot["accepted_at"] = @quote.accepted_at
-    snapshot["changes_requested_at"] = @quote.changes_requested_at
-    snapshot["request_reason"] = @quote.request_reason
     snapshot["quote_items"] = @quote.quote_items.ordered.map { |item| build_quote_item_snapshot(item) }
     add_sales_owner(snapshot)
-    snapshot
+    JSON.parse(JSON.generate(snapshot))
   end
 
   private

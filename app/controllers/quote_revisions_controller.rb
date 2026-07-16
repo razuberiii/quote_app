@@ -8,7 +8,7 @@ class QuoteRevisionsController < ApplicationController
   def create
     quote = current_user.company.quotes.find(params.require(:quote_id))
     result = RevisionPublisher.new(quote: quote, actor: current_user, url_options: { host: request.host, protocol: request.protocol }).call
-    redirect_to quote_revision_path(result.revision), notice: "Revision #{result.revision.number} is live. Copy the Buyer Room link when you are ready to send it."
+    redirect_to deliver_deal_path(quote, version_id: result.revision.id), notice: "Version #{result.revision.number} is frozen. Choose how to deliver it."
   rescue RevisionPublisher::NotReady, RevisionPublisher::PlanLimitReached => error
     redirect_to edit_quote_path(quote), alert: error.message
   end

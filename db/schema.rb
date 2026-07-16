@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_172000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -79,11 +79,62 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
   end
 
+  create_table "buyer_activities", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "deduplication_key", null: false
+    t.string "kind", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "quote_id", null: false
+    t.bigint "quote_revision_id"
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "deduplication_key"], name: "idx_buyer_activities_dedup", unique: true
+    t.index ["company_id"], name: "index_buyer_activities_on_company_id"
+    t.index ["quote_id"], name: "index_buyer_activities_on_quote_id"
+    t.index ["quote_revision_id"], name: "index_buyer_activities_on_quote_revision_id"
+  end
+
+  create_table "buyer_questions", force: :cascade do |t|
+    t.text "body", null: false
+    t.string "buyer_email"
+    t.string "buyer_name"
+    t.bigint "company_id", null: false
+    t.string "context_key"
+    t.string "context_type", default: "quote", null: false
+    t.datetime "created_at", null: false
+    t.string "idempotency_key", null: false
+    t.bigint "quote_revision_id", null: false
+    t.datetime "replied_at"
+    t.text "seller_reply"
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_buyer_questions_on_company_id"
+    t.index ["quote_revision_id", "idempotency_key"], name: "idx_buyer_questions_idempotency", unique: true
+    t.index ["quote_revision_id"], name: "index_buyer_questions_on_quote_revision_id"
+  end
+
+  create_table "change_requests", force: :cascade do |t|
+    t.string "buyer_email"
+    t.string "buyer_name"
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "idempotency_key", null: false
+    t.text "message", null: false
+    t.bigint "quote_revision_id", null: false
+    t.jsonb "requested_changes", default: {}, null: false
+    t.string "status", default: "open", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_change_requests_on_company_id"
+    t.index ["quote_revision_id", "idempotency_key"], name: "idx_change_requests_idempotency", unique: true
+    t.index ["quote_revision_id"], name: "index_change_requests_on_quote_revision_id"
+  end
+
   create_table "companies", force: :cascade do |t|
     t.string "address"
     t.string "brand_color", default: "#1F4E79"
+    t.string "business_type"
     t.datetime "created_at", null: false
     t.string "default_currency", default: "USD"
+    t.string "default_final_document_type", default: "order_confirmation", null: false
     t.string "default_payment_term"
     t.decimal "default_tax_rate", precision: 6, scale: 2, default: "0.0", null: false
     t.string "default_trade_term"
@@ -92,13 +143,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.string "legal_name"
     t.string "name"
     t.string "phone"
+    t.string "plan", default: "trial", null: false
+    t.string "quote_language", default: "en", null: false
     t.text "registration_details"
     t.string "registration_number"
     t.text "reminder_email_body"
     t.string "reminder_email_cta_label"
     t.string "reminder_email_subject"
+    t.boolean "require_deposit_workflow", default: false, null: false
+    t.boolean "require_final_document", default: false, null: false
+    t.string "slug"
+    t.string "stripe_customer_id"
+    t.string "stripe_subscription_id"
+    t.string "subscription_status", default: "trialing", null: false
+    t.datetime "trial_ends_at"
     t.datetime "updated_at", null: false
     t.string "website"
+    t.index ["slug"], name: "index_companies_on_slug", unique: true
+    t.index ["stripe_customer_id"], name: "index_companies_on_stripe_customer_id", unique: true, where: "(stripe_customer_id IS NOT NULL)"
   end
 
   create_table "company_documents", force: :cascade do |t|
@@ -181,6 +243,70 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["manual_engagement_override"], name: "index_customers_on_manual_engagement_override"
   end
 
+  create_table "deal_responses", force: :cascade do |t|
+    t.text "body"
+    t.string "buyer_email"
+    t.string "buyer_name"
+    t.bigint "company_id", null: false
+    t.string "context_key"
+    t.string "context_type", default: "quote", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "difference_review", default: {}, null: false
+    t.jsonb "extracted_changes", default: {}, null: false
+    t.string "idempotency_key", null: false
+    t.string "kind", null: false
+    t.bigint "quote_id", null: false
+    t.bigint "quote_revision_id", null: false
+    t.datetime "received_at", null: false
+    t.bigint "recorded_by_id"
+    t.string "source", null: false
+    t.string "status", default: "open", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_deal_responses_on_company_id"
+    t.index ["quote_id", "idempotency_key"], name: "idx_deal_responses_idempotency", unique: true
+    t.index ["quote_id"], name: "index_deal_responses_on_quote_id"
+    t.index ["quote_revision_id"], name: "index_deal_responses_on_quote_revision_id"
+    t.index ["recorded_by_id"], name: "index_deal_responses_on_recorded_by_id"
+  end
+
+  create_table "final_documents", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "currency", null: false
+    t.string "document_type", null: false
+    t.string "number", null: false
+    t.bigint "quote_acceptance_id", null: false
+    t.bigint "quote_id", null: false
+    t.datetime "sent_at"
+    t.jsonb "snapshot", default: {}, null: false
+    t.string "status", default: "draft", null: false
+    t.string "title", null: false
+    t.decimal "total", precision: 15, scale: 4, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "number"], name: "index_final_documents_on_company_id_and_number", unique: true
+    t.index ["company_id"], name: "index_final_documents_on_company_id"
+    t.index ["created_by_id"], name: "index_final_documents_on_created_by_id"
+    t.index ["quote_acceptance_id"], name: "index_final_documents_on_quote_acceptance_id"
+    t.index ["quote_id"], name: "index_final_documents_on_quote_id"
+  end
+
+  create_table "inquiries", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.bigint "customer_id"
+    t.jsonb "extracted_data", default: {}, null: false
+    t.jsonb "field_states", default: {}, null: false
+    t.text "source_text"
+    t.string "source_type", default: "manual", null: false
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_inquiries_on_company_id"
+    t.index ["created_by_id"], name: "index_inquiries_on_created_by_id"
+    t.index ["customer_id"], name: "index_inquiries_on_customer_id"
+  end
+
   create_table "notifications", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.jsonb "data", default: {}, comment: "Contextual data: quote_id, quote_no, customer_name, etc"
@@ -245,20 +371,80 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["won_count"], name: "index_products_on_won_count"
   end
 
+  create_table "proforma_invoices", force: :cascade do |t|
+    t.datetime "cancelled_at"
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "currency", null: false
+    t.datetime "deposit_received_at"
+    t.string "number", null: false
+    t.bigint "quote_acceptance_id", null: false
+    t.bigint "quote_id", null: false
+    t.datetime "sent_at"
+    t.jsonb "snapshot", default: {}, null: false
+    t.string "status", default: "awaiting_deposit", null: false
+    t.decimal "total", precision: 15, scale: 4, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id", "number"], name: "index_proforma_invoices_on_company_id_and_number", unique: true
+    t.index ["company_id"], name: "index_proforma_invoices_on_company_id"
+    t.index ["created_by_id"], name: "index_proforma_invoices_on_created_by_id"
+    t.index ["quote_acceptance_id"], name: "index_proforma_invoices_on_quote_acceptance_id", unique: true
+    t.index ["quote_id"], name: "index_proforma_invoices_on_quote_id"
+  end
+
+  create_table "quote_acceptances", force: :cascade do |t|
+    t.string "acceptance_method", default: "buyer_room", null: false
+    t.datetime "accepted_at", null: false
+    t.string "buyer_company"
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "currency", null: false
+    t.jsonb "difference_review", default: {}, null: false
+    t.string "email", null: false
+    t.string "evidence_summary"
+    t.boolean "has_differences", default: false, null: false
+    t.string "idempotency_key", null: false
+    t.string "job_title"
+    t.string "name", null: false
+    t.text "note"
+    t.string "po_number"
+    t.bigint "quote_id", null: false
+    t.bigint "quote_revision_id", null: false
+    t.bigint "recorded_by_id"
+    t.jsonb "selection", default: {}, null: false
+    t.boolean "seller_recorded", default: false, null: false
+    t.jsonb "snapshot", default: {}, null: false
+    t.decimal "total", precision: 15, scale: 4, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_quote_acceptances_on_company_id"
+    t.index ["quote_id", "idempotency_key"], name: "idx_quote_acceptances_idempotency", unique: true
+    t.index ["quote_id"], name: "index_quote_acceptances_on_quote_id"
+    t.index ["quote_revision_id"], name: "index_quote_acceptances_on_quote_revision_id", unique: true
+    t.index ["recorded_by_id"], name: "index_quote_acceptances_on_recorded_by_id"
+  end
+
   create_table "quote_items", force: :cascade do |t|
     t.jsonb "addon_charges", default: [], null: false
     t.jsonb "addon_snapshot", default: [], null: false
     t.decimal "amount", precision: 15, scale: 4
+    t.jsonb "buyer_options", default: {}, null: false
     t.datetime "created_at", null: false
     t.string "description", null: false
     t.string "image_source", default: "none", null: false
     t.string "item_type", default: "product_main", null: false
+    t.string "lead_time_snapshot"
+    t.string "packing_snapshot"
+    t.string "price_source", default: "manual", null: false
     t.integer "product_id"
     t.integer "quantity", default: 1, null: false
     t.bigint "quote_id", null: false
+    t.string "selection_mode", default: "fixed", null: false
+    t.string "sku_snapshot"
     t.jsonb "spec_snapshot", default: [], null: false
     t.jsonb "specifications", default: [], null: false
     t.decimal "unit_price", precision: 15, scale: 4, null: false
+    t.string "unit_snapshot"
     t.datetime "updated_at", null: false
     t.index ["quote_id", "created_at"], name: "index_quote_items_on_quote_id_and_created_at"
     t.index ["quote_id", "item_type", "created_at"], name: "index_quote_items_on_quote_id_and_item_type_and_created_at"
@@ -311,6 +497,33 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["company_id", "kind", "active", "position"], name: "idx_quote_reason_options_company_kind_order"
     t.index ["company_id", "kind", "key"], name: "idx_quote_reason_options_company_kind_key", unique: true
     t.index ["company_id"], name: "index_quote_reason_options_on_company_id"
+  end
+
+  create_table "quote_revisions", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "currency", null: false
+    t.jsonb "diff", default: {}, null: false
+    t.datetime "expires_at"
+    t.integer "number", null: false
+    t.datetime "published_at"
+    t.bigint "quote_id", null: false
+    t.datetime "revoked_at"
+    t.string "secure_token", null: false
+    t.datetime "sent_at"
+    t.jsonb "snapshot", default: {}, null: false
+    t.string "status", default: "draft", null: false
+    t.text "summary"
+    t.datetime "superseded_at"
+    t.decimal "total", precision: 15, scale: 4, null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_quote_revisions_on_company_id"
+    t.index ["created_by_id"], name: "index_quote_revisions_on_created_by_id"
+    t.index ["quote_id", "number"], name: "index_quote_revisions_on_quote_id_and_number", unique: true
+    t.index ["quote_id", "status"], name: "index_quote_revisions_on_quote_id_and_status"
+    t.index ["quote_id"], name: "index_quote_revisions_on_quote_id"
+    t.index ["secure_token"], name: "index_quote_revisions_on_secure_token", unique: true
   end
 
   create_table "quote_shares", force: :cascade do |t|
@@ -431,13 +644,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.jsonb "detail_pictures_block", default: {}, null: false
     t.decimal "discount_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.decimal "final_amount", precision: 15, scale: 4
+    t.date "follow_up_on"
     t.jsonb "formal_closing_block", default: {}, null: false
+    t.bigint "inquiry_id"
+    t.text "internal_note"
     t.date "issued_on"
+    t.string "language", default: "en", null: false
     t.text "legal_disclaimer"
     t.string "loss_reason"
     t.string "loss_reason_detail"
     t.datetime "lost_at"
     t.boolean "negotiated"
+    t.string "next_action"
     t.text "notes"
     t.string "payment_term"
     t.string "product_name"
@@ -451,11 +669,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.text "scope_of_supply"
     t.datetime "sent_at"
     t.decimal "shipping_amount", precision: 15, scale: 4, default: "0.0", null: false
+    t.string "shipping_price_source"
     t.bigint "source_quote_id"
     t.string "spec_label"
     t.string "stalled_reason"
     t.string "stalled_reason_detail"
     t.string "status"
+    t.string "studio_state", default: "draft", null: false
     t.decimal "tax_amount", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "template_id"
     t.text "terms_text"
@@ -473,6 +693,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["company_id"], name: "index_quotes_on_company_id"
     t.index ["customer_id"], name: "index_quotes_on_customer_id"
     t.index ["deleted_at"], name: "index_quotes_on_deleted_at"
+    t.index ["inquiry_id"], name: "index_quotes_on_inquiry_id"
     t.index ["reminder_sent_at"], name: "index_quotes_on_reminder_sent_at"
     t.index ["request_reason"], name: "index_quotes_on_request_reason"
     t.index ["source_quote_id"], name: "index_quotes_on_source_quote_id_unique", unique: true, where: "(source_quote_id IS NOT NULL)"
@@ -487,6 +708,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "name"], name: "index_spec_presets_on_company_id_and_name", unique: true
     t.index ["company_id"], name: "index_spec_presets_on_company_id"
+  end
+
+  create_table "subscription_events", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.string "event_type", null: false
+    t.jsonb "payload", default: {}, null: false
+    t.datetime "processed_at"
+    t.string "provider_event_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_subscription_events_on_company_id"
+    t.index ["provider_event_id"], name: "index_subscription_events_on_provider_event_id", unique: true
   end
 
   create_table "team_invitations", force: :cascade do |t|
@@ -532,7 +765,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.integer "status", default: 0, null: false
     t.string "time_zone"
     t.datetime "updated_at", null: false
+    t.string "username", null: false
     t.datetime "vip_expires_at"
+    t.index "lower((username)::text)", name: "index_users_on_lower_username", unique: true
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["company_role"], name: "index_users_on_company_role"
     t.index ["email"], name: "index_users_on_email", unique: true
@@ -544,11 +779,39 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
     t.index ["vip_expires_at"], name: "index_users_on_vip_expires_at"
   end
 
+  create_table "version_deliveries", force: :cascade do |t|
+    t.string "channel", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.datetime "delivered_at", null: false
+    t.string "external_channel"
+    t.string "idempotency_key", null: false
+    t.text "note"
+    t.bigint "quote_id", null: false
+    t.bigint "quote_revision_id", null: false
+    t.string "recipient"
+    t.string "status", default: "succeeded", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_version_deliveries_on_company_id"
+    t.index ["created_by_id"], name: "index_version_deliveries_on_created_by_id"
+    t.index ["quote_id"], name: "index_version_deliveries_on_quote_id"
+    t.index ["quote_revision_id", "idempotency_key"], name: "idx_version_deliveries_idempotency", unique: true
+    t.index ["quote_revision_id"], name: "index_version_deliveries_on_quote_revision_id"
+  end
+
   add_foreign_key "action_items", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addon_presets", "companies"
   add_foreign_key "audit_logs", "users", column: "actor_id"
+  add_foreign_key "buyer_activities", "companies"
+  add_foreign_key "buyer_activities", "quote_revisions"
+  add_foreign_key "buyer_activities", "quotes"
+  add_foreign_key "buyer_questions", "companies"
+  add_foreign_key "buyer_questions", "quote_revisions"
+  add_foreign_key "change_requests", "companies"
+  add_foreign_key "change_requests", "quote_revisions"
   add_foreign_key "company_documents", "companies"
   add_foreign_key "customer_follow_up_events", "customers"
   add_foreign_key "customer_follow_up_events", "quotes"
@@ -558,6 +821,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
   add_foreign_key "customer_tags", "companies"
   add_foreign_key "customers", "companies"
   add_foreign_key "customers", "users", column: "internal_owner_id"
+  add_foreign_key "deal_responses", "companies"
+  add_foreign_key "deal_responses", "quote_revisions"
+  add_foreign_key "deal_responses", "quotes"
+  add_foreign_key "deal_responses", "users", column: "recorded_by_id"
+  add_foreign_key "final_documents", "companies"
+  add_foreign_key "final_documents", "quote_acceptances"
+  add_foreign_key "final_documents", "quotes"
+  add_foreign_key "final_documents", "users", column: "created_by_id"
+  add_foreign_key "inquiries", "companies"
+  add_foreign_key "inquiries", "customers"
+  add_foreign_key "inquiries", "users", column: "created_by_id"
   add_foreign_key "notifications", "users"
   add_foreign_key "product_addon_presets", "addon_presets"
   add_foreign_key "product_addon_presets", "products"
@@ -566,6 +840,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
   add_foreign_key "products", "addon_presets", column: "default_addon_preset_id"
   add_foreign_key "products", "companies"
   add_foreign_key "products", "spec_presets", column: "default_spec_preset_id"
+  add_foreign_key "proforma_invoices", "companies"
+  add_foreign_key "proforma_invoices", "quote_acceptances"
+  add_foreign_key "proforma_invoices", "quotes"
+  add_foreign_key "proforma_invoices", "users", column: "created_by_id"
+  add_foreign_key "quote_acceptances", "companies"
+  add_foreign_key "quote_acceptances", "quote_revisions"
+  add_foreign_key "quote_acceptances", "quotes"
+  add_foreign_key "quote_acceptances", "users", column: "recorded_by_id"
   add_foreign_key "quote_items", "quotes"
   add_foreign_key "quote_preset_masters", "companies"
   add_foreign_key "quote_preset_masters", "quote_presets", column: "advanced_logistics_preset_id"
@@ -576,16 +858,25 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_27_093000) do
   add_foreign_key "quote_preset_masters", "quote_presets", column: "formal_closing_preset_id"
   add_foreign_key "quote_presets", "companies"
   add_foreign_key "quote_reason_options", "companies"
+  add_foreign_key "quote_revisions", "companies"
+  add_foreign_key "quote_revisions", "quotes"
+  add_foreign_key "quote_revisions", "users", column: "created_by_id"
   add_foreign_key "quote_shares", "companies"
   add_foreign_key "quote_shares", "quotes"
   add_foreign_key "quote_templates", "companies"
   add_foreign_key "quote_view_events", "quote_shares"
   add_foreign_key "quotes", "companies"
   add_foreign_key "quotes", "customers"
+  add_foreign_key "quotes", "inquiries"
   add_foreign_key "quotes", "quote_templates", column: "template_id"
   add_foreign_key "quotes", "quotes", column: "source_quote_id"
   add_foreign_key "spec_presets", "companies"
+  add_foreign_key "subscription_events", "companies"
   add_foreign_key "team_invitations", "companies"
   add_foreign_key "team_invitations", "users", column: "invited_by_id"
   add_foreign_key "users", "companies"
+  add_foreign_key "version_deliveries", "companies"
+  add_foreign_key "version_deliveries", "quote_revisions"
+  add_foreign_key "version_deliveries", "quotes"
+  add_foreign_key "version_deliveries", "users", column: "created_by_id"
 end

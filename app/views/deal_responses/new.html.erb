@@ -1,0 +1,17 @@
+<main class="deal-workspace context-form">
+  <header><%= link_to "← Conversation", deal_path(@deal, tab: "conversation"), class: "deal-back" %><p class="eyebrow">Channel-neutral response</p><h1>Add buyer response</h1><p>Record email, returned files, PO, messaging or phone feedback against one immutable Version. Nothing here overwrites it.</p></header>
+  <%= form_with model: @response, url: responses_deal_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
+    <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
+    <div><%= form.label :quote_revision_id, "Published Version" %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| ["Version #{version.number} · #{version.currency} #{version.total}", version.id] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :kind, "Response type" %><%= form.select :kind, DealResponse::KINDS.map { |kind| [kind.humanize, kind] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :source, "Source channel" %><%= form.select :source, DealResponse::SOURCES.map { |source| [source.humanize, source] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :received_at, "Received at" %><%= form.datetime_local_field :received_at, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_name, "Buyer contact" %><%= form.text_field :buyer_name, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_email, "Buyer email" %><%= form.email_field :buyer_email, class: "app-ui-input" %></div>
+    <div><%= form.label :context_type, "Context" %><%= form.select :context_type, DealResponse::CONTEXT_TYPES.map { |type| [type.humanize, type] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :context_key, "Product / fee / term reference" %><%= form.text_field :context_key, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :body, "What did the buyer say or change?" %><%= form.text_area :body, rows: 5, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :attachment, "Returned file, PO, PDF or evidence" %><%= form.file_field :attachment %><small>Spreadsheet formulas are treated as untrusted input and never executed.</small></div>
+    <footer class="context-form__wide"><%= form.submit "Add to Conversation", class: "button button--primary" %></footer>
+  <% end %>
+</main>

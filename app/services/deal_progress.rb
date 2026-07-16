@@ -23,14 +23,37 @@ class DealProgress
     elsif @quote.quote_items.empty?
       result("draft", "Draft", "match_products", "Match products", true, "Products need confirmation", @quote.updated_at)
     elsif readiness_issues.any?
-      label = readiness_issues.any? { |issue| issue.to_s.downcase.include?("price") } ? "Add missing prices" : "Complete quote"
+      text = readiness_issues.join(" ").downcase
+      label = if text.include?("price")
+        "Add missing prices"
+      elsif text.include?("freight") || text.include?("shipping")
+        "Add freight"
+      else
+        "Complete quote"
+      end
       result("draft", "Draft", label.parameterize(separator: "_"), label, true, readiness_issues.first, @quote.updated_at)
+    elsif published_version && !published_version.delivered?
+      result("draft", "Draft", "choose_delivery", "Choose delivery method", true, "Published Version is ready to deliver", published_version.published_at || published_version.created_at)
     else
       result("draft", "Draft", "publish", "Publish quote", true, "Ready to publish", @quote.updated_at)
     end
   end
 
   def live_progress
+    failed = @quote.version_deliveries.where(status: "failed").order(delivered_at: :desc).first
+    latest_success = @quote.version_deliveries.where(status: "succeeded").maximum(:delivered_at)
+    return result("live", "Live", "retry_delivery", "Retry delivery", true, "Latest delivery failed", failed.delivered_at) if failed && (latest_success.blank? || failed.delivered_at > latest_success)
+
+    response = @quote.deal_responses.where(status: "open").order(received_at: :desc).first
+    if response
+      action = case response.kind
+      when "returned_excel", "returned_pdf", "buyer_file" then [ "review_returned_file", "Review returned file" ]
+      when "purchase_order" then [ "review_po", "Review PO differences" ]
+      when "email_reply", "external_message", "phone_note" then [ "record_acceptance", "Review buyer response" ]
+      else [ "prepare_update", "Prepare update" ]
+      end
+      return result("live", "Live", action.first, action.last, true, response.kind.humanize, response.received_at)
+    end
     question = questions.where(replied_at: nil).order(created_at: :desc).first
     return result("live", "Live", "reply", "Reply to buyer", true, "Buyer asked a question", question.created_at) if question
 
@@ -46,12 +69,20 @@ class DealProgress
   end
 
   def accepted_progress
-    pi = @quote.proforma_invoice
-    return result("accepted", "Accepted", "generate_pi", "Generate PI", true, "Acceptance recorded", @quote.quote_acceptance&.accepted_at) unless pi
-    return result("accepted", "Accepted", "send_pi", "Send PI", true, "PI is ready", pi.created_at) unless pi.sent_at?
-    return result("accepted", "Accepted", "confirm_deposit", "Confirm deposit", true, "Awaiting deposit", pi.sent_at) unless pi.deposit_received_at?
-
-    result("accepted", "Accepted", "close_won", "Close as won", true, "Deposit received", pi.deposit_received_at)
+    document = @quote.final_documents.order(created_at: :desc).first
+    company = @quote.company
+    if company.require_final_document? && document.blank?
+      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Acceptance recorded", @quote.quote_acceptance&.accepted_at)
+    end
+    if document && !document.sent_at?
+      return result("accepted", "Accepted", "send_final_document", "Send final document", true, "Final document is ready", document.created_at)
+    end
+    if company.require_deposit_workflow?
+      pi = @quote.proforma_invoice
+      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Deposit workflow requires a PI", @quote.quote_acceptance&.accepted_at) unless pi
+      return result("accepted", "Accepted", "confirm_payment", "Confirm payment", true, "Awaiting payment", pi.sent_at || pi.created_at) unless pi.deposit_received_at?
+    end
+    result("accepted", "Accepted", "close_won", "Close as won", true, "Commercial acceptance is complete", @quote.quote_acceptance&.accepted_at)
   end
 
   def result(stage, stage_label, action_key, action_label, attention, signal, signal_at)
@@ -71,7 +102,7 @@ class DealProgress
   end
 
   def live?
-    @quote.quote_revisions.exists? || %w[sent viewed revision_requested negotiating expired].include?(@quote.status)
+    @quote.version_deliveries.where(status: "succeeded").exists? || %w[sent viewed revision_requested negotiating expired].include?(@quote.status)
   end
 
   def accepted?
@@ -79,7 +110,11 @@ class DealProgress
   end
 
   def closed?
-    %w[won lost archived].include?(@quote.status) || (@quote.respond_to?(:deleted_at) && @quote.deleted_at.present?)
+    %w[won lost cancelled archived].include?(@quote.status) || (@quote.respond_to?(:deleted_at) && @quote.deleted_at.present?)
+  end
+
+  def published_version
+    @published_version ||= @quote.quote_revisions.ordered.first
   end
 
   def closed_signal

@@ -6,12 +6,13 @@ module DealsHelper
   def deal_action_path(deal, progress)
     case progress.action_key
     when "review_inquiry" then deal.inquiry ? inquiry_path(deal.inquiry) : edit_quote_path(deal)
-    when "confirm_buyer", "match_products", "add_missing_prices", "complete_quote" then edit_quote_path(deal)
+    when "confirm_buyer", "match_products", "add_missing_prices", "add_freight", "complete_quote" then edit_quote_path(deal)
     when "publish" then quote_path(deal)
     when "reply" then deal_path(deal, tab: "conversation")
-    when "prepare_version" then quote_path(deal, anchor: "buyer-inbox")
-    when "generate_pi", "send_pi" then deal_path(deal, tab: "documents")
-    when "confirm_deposit" then deal.proforma_invoice ? proforma_invoice_path(deal.proforma_invoice) : deal_path(deal)
+    when "choose_delivery", "retry_delivery" then deliver_deal_path(deal, version_id: deal.quote_revisions.maximum(:id))
+    when "review_returned_file", "review_po", "record_acceptance", "prepare_update", "prepare_version" then deal_path(deal, tab: "conversation")
+    when "generate_final_document", "send_final_document" then deal_path(deal, tab: "documents")
+    when "confirm_payment" then deal.proforma_invoice ? proforma_invoice_path(deal.proforma_invoice) : deal_path(deal)
     else deal_path(deal)
     end
   end

@@ -53,7 +53,8 @@ class BuyerRoomsController < ApplicationController
   def accept
     acceptance = QuoteAcceptor.new(
       revision: @revision, attributes: accept_params.to_h.symbolize_keys,
-      selection: permitted_selection, idempotency_key: idempotency_key
+      selection: permitted_selection, idempotency_key: idempotency_key,
+      audit_context: { "ip_hash" => Digest::SHA256.hexdigest(request.remote_ip.to_s), "user_agent" => request.user_agent.to_s.first(500) }
     ).call
     track("accepted", acceptance.id)
     Notification.create_quote_accepted_notification(@revision.quote)

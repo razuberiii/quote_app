@@ -1,1 +1,34 @@
-<main class="rubusoo-page inquiry-page"><header class="page-heading"><p class="eyebrow">Import inquiry</p><h1>Turn a messy request into a confirmed quote.</h1><p>Paste an email or chat. Rubusoo extracts requirements—not prices. Every commercial amount still needs your confirmation.</p></header><%= form_with model: @inquiry, class: "inquiry-split" do |f| %><section><label class="field-label">Source type</label><%= f.select :source_type, %w[email chat text manual], {}, class: "input" %><label class="field-label">Original inquiry</label><%= f.text_area :source_text, rows: 18, required: true, placeholder: "Paste the buyer's message here…", class: "textarea textarea--source" %></section><aside class="inquiry-guidance"><h2>What happens next</h2><ol><li>Extract buyer and product requirements</li><li>Flag missing or conflicting details</li><li>Match possible Catalog items</li><li>Confirm prices and freight manually</li></ol><%= f.submit "Review extracted requirements", class: "button button--primary" %></aside><% end %></main>
+<main class="rubusoo-page inquiry-import">
+  <header class="page-heading inquiry-import__heading">
+    <p class="eyebrow">01 · Import inquiry</p>
+    <h1>Bring the messy request.<br>Leave with a quote plan.</h1>
+    <p>Paste the buyer’s message or upload the file they sent. Rubusoo extracts requirements and evidence—never prices.</p>
+  </header>
+
+  <%= form_with model: @inquiry, class: "inquiry-import__workspace", multipart: true do |f| %>
+    <section class="inquiry-import__composer">
+      <div class="inquiry-import__source-tabs" role="group" aria-label="Inquiry source">
+        <% [["email", "Email"], ["chat", "Chat"], ["text", "Plain text"], ["manual", "Manual"]].each do |value, label| %>
+          <label><%= f.radio_button :source_type, value, checked: value == "email" %><span><%= label %></span></label>
+        <% end %>
+      </div>
+      <%= f.text_area :source_text, rows: 18, placeholder: "Paste the complete buyer inquiry here…\n\nExample: Please quote 12 hydraulic power units, 380V / 50Hz, CIF Jebel Ali…", class: "textarea inquiry-import__textarea" %>
+      <div class="inquiry-import__upload">
+        <div><strong>Or upload the source file</strong><span>PDF, XLSX, CSV, or TXT · the original is retained for audit</span></div>
+        <%= f.file_field :source_file, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", class: "inquiry-import__file" %>
+      </div>
+    </section>
+
+    <aside class="inquiry-import__rail">
+      <p class="section-kicker">What Rubusoo will do</p>
+      <ol class="inquiry-import__steps">
+        <li><span>01</span><div><strong>Read the request</strong><small>Keep the original text and file intact.</small></div></li>
+        <li><span>02</span><div><strong>Extract with evidence</strong><small>Every result stays traceable to the source.</small></div></li>
+        <li><span>03</span><div><strong>Match your Catalog</strong><small>You decide which product is correct.</small></div></li>
+        <li><span>04</span><div><strong>Flag commercial gaps</strong><small>Prices and freight always need a source.</small></div></li>
+      </ol>
+      <div class="inquiry-import__promise"><strong>Rubusoo does not guess money.</strong><p>Missing price, freight, tax, lead time, or configuration charges remain visibly blocked.</p></div>
+      <%= f.submit "Extract requirements", class: "button button--primary button--full" %>
+    </aside>
+  <% end %>
+</main>

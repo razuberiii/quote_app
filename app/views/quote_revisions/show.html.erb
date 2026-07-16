@@ -1,0 +1,18 @@
+<% changes = Array(@revision.diff) %>
+<% previous = @revision.quote.quote_revisions.where("number < ?", @revision.number).ordered.first %>
+<main class="rubusoo-page revision-page">
+  <header class="revision-header"><div><p class="eyebrow">Revision history</p><h1>What changed in Revision <%= @revision.number %></h1><p><%= @revision.summary %></p></div><div class="revision-header__amount"><span>Current total</span><strong><%= @revision.currency %> <%= number_with_delimiter(@revision.total) %></strong><small><%= @revision.status.humanize %> · <%= @revision.sent_at&.to_date %></small></div></header>
+  <% if previous %><div class="revision-compare-bar"><span>Revision <%= previous.number %><small><%= previous.sent_at&.to_date %></small></span><b>→</b><span class="is-current">Revision <%= @revision.number %><small><%= @revision.sent_at&.to_date %></small></span><%= link_to "Open Buyer Room", buyer_room_path(@revision.secure_token, preview: 1), class: "button button--secondary", target: "_blank" %></div><% end %>
+  <section class="revision-diff">
+    <% if changes.any? %>
+      <% changes.each do |change| %>
+        <% field = change["field"] || change[:field] %><% before_value = change["before"] || change[:before] %><% after_value = change["after"] || change[:after] %>
+        <article class="revision-change"><header><span><%= field.to_s.humanize %></span><em>Changed</em></header>
+          <% if field.to_s == "quote_items" %>
+            <% before_items = Array(before_value); after_items = Array(after_value) %><div class="revision-item-diff"><div><strong>Previous</strong><% before_items.each do |item| %><p><span><%= item["product_name"] || item["description"] %></span><small><%= item["quantity"] %> × <%= @revision.currency %> <%= item["unit_price"] %></small></p><% end %></div><div class="is-after"><strong>Revision <%= @revision.number %></strong><% after_items.each do |item| %><p><span><%= item["product_name"] || item["description"] %></span><small><%= item["quantity"] %> × <%= @revision.currency %> <%= item["unit_price"] %></small></p><% end %></div></div>
+          <% else %><div class="revision-values"><div><span>Before</span><p><%= before_value.presence || "Not provided" %></p></div><div class="is-after"><span>After</span><p><%= after_value.presence || "Removed" %></p></div></div><% end %>
+        </article>
+      <% end %>
+    <% else %><div class="revision-empty"><span>✓</span><h2>Initial commercial version</h2><p>This is the first immutable Revision sent to the buyer.</p></div><% end %>
+  </section>
+</main>

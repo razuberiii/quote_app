@@ -6,7 +6,9 @@ class RubusooCommercialFlowTest < ActiveSupport::TestCase
     @company.update!(plan: "pro", subscription_status: "active", trial_ends_at: 10.days.from_now)
     @user = users(:one)
     @quote = quotes(:one)
-    @quote.update!(status: "draft", valid_until: 30.days.from_now)
+    @quote.update!(status: "draft", valid_until: 30.days.from_now,
+      trade_term: "CIF Hamburg", payment_term: "30% deposit, 70% before shipment",
+      shipping_amount: 350, shipping_price_source: "freight_forwarder_quote")
   end
 
   test "publishing creates immutable current revision and supersedes previous" do

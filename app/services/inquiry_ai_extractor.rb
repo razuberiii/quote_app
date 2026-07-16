@@ -8,16 +8,22 @@ class InquiryAiExtractor
     You extract B2B export-sales inquiries into structured data. Never invent prices,
     freight, product identifiers, or buyer details. Preserve the source language in
     free-text values. Return JSON only with this exact top-level shape:
+    Each extracted value that is present must include a short verbatim source excerpt
+    in the evidence object. Use null rather than guessing. The exact top-level shape is:
     {
-      "customer": string|null,
+      "customer": string|null, "country": string|null,
       "contact_name": string|null,
       "contact_email": string|null,
       "currency": string|null,
-      "products": [{"name": string, "quantity": number|null, "unit": string|null,
-                    "specifications": [{"name": string, "value": string}], "notes": string|null}],
+      "products": [{"name": string, "model": string|null, "quantity": number|null, "unit": string|null,
+                    "specifications": {"voltage": string|null, "color": string|null, "material": string|null},
+                    "packing": string|null, "notes": string|null, "evidence": string}],
       "commercial_terms": {"incoterm": string|null, "destination": string|null,
-                           "payment": string|null, "delivery": string|null},
-      "questions": [string]
+                           "payment": string|null, "delivery": string|null, "packing": string|null},
+      "questions": [string], "missing_information": [string],
+      "evidence": {"customer": string|null, "contact_name": string|null, "contact_email": string|null,
+                   "country": string|null, "currency": string|null, "destination": string|null,
+                   "incoterm": string|null, "delivery": string|null, "packing": string|null}
     }
     Add concise questions for information needed to prepare a reliable quotation.
   PROMPT
@@ -52,7 +58,7 @@ class InquiryAiExtractor
     body = JSON.parse(response.body)
     raise ResponseError, body.dig("error", "message").presence || "AI provider returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
 
-    content = body.dig("choices", 0, "message", "content")
+    content = body.dig("choices", 0, "message", "content").to_s.sub(/\A```(?:json)?\s*/i, "").sub(/\s*```\z/, "")
     normalize(JSON.parse(content))
   rescue JSON::ParserError => error
     raise ResponseError, "AI provider returned invalid JSON: #{error.message}"
@@ -68,21 +74,28 @@ class InquiryAiExtractor
 
       {
         "name" => product["name"].to_s,
+        "model" => product["model"].presence,
         "quantity" => product["quantity"],
         "unit" => product["unit"].presence,
-        "specifications" => Array(product["specifications"]).select { |spec| spec.is_a?(Hash) && spec["name"].present? },
-        "notes" => product["notes"].presence
+        "specifications" => product["specifications"].is_a?(Hash) ? product["specifications"].compact_blank : {},
+        "packing" => product["packing"].presence,
+        "notes" => product["notes"].presence,
+        "evidence" => product["evidence"].presence,
+        "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil
       }
     end
 
     {
       "customer" => data["customer"].presence,
+      "country" => data["country"].presence,
       "contact_name" => data["contact_name"].presence,
       "contact_email" => data["contact_email"].presence,
       "currency" => data["currency"].presence&.upcase,
       "products" => products,
       "commercial_terms" => data["commercial_terms"].is_a?(Hash) ? data["commercial_terms"] : {},
-      "questions" => Array(data["questions"]).filter_map(&:presence)
+      "questions" => Array(data["questions"]).filter_map(&:presence),
+      "missing_information" => Array(data["missing_information"]).filter_map(&:presence),
+      "evidence" => data["evidence"].is_a?(Hash) ? data["evidence"] : {}
     }
   end
 end

@@ -8,6 +8,14 @@ Canonical primitives are `.button` with `--primary`, `--secondary`, `--ghost`, a
 
 Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bottom action bar. All focusable controls require a visible blue focus ring. Amounts use tabular numerals. Customer-facing long values must wrap safely.
 
+Inquiry import and review use the `inquiry-import__*` and `inquiry-review__*` families. The review is evidence-led: source content remains in a sticky paper panel, extracted fields use quiet inline status text, Catalog candidates are rows rather than generic cards, and all monetary confirmation is grouped in a dark commercial band. On narrow screens the source becomes a bounded preview above the editable results.
+
+Quote Studio uses `quote-studio--editor` with three true functional columns. The center `studio-paper` is the buyer document itself and owns inline editing; the left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface.
+
+Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.
+
+Revision comparison uses paired `revision-values` and `revision-item-diff` columns; never expose raw snapshot JSON. PI uses the print-safe `pi-document` hierarchy and must always render from the immutable acceptance snapshot.
+
 The remainder of this document describes legacy families retained only while old pages are replaced.
 
 This document is the single usage guide for project styling.
@@ -348,6 +356,28 @@ data-action="click->clipboard#copy"
 - CSS hooks in `components.css`: `turbo-frame.is-content-loading`, `turbo-frame.is-content-enter`
 
 ## 11. PR Checklist
+
+### Commercial PDF document
+
+- `.commercial-pdf` is the snapshot-only quotation PDF family used by Buyer Room downloads.
+- `.pi-document` is the immutable acceptance/PI document family and must remain print-safe.
+- Totals and commercial term blocks use `break-inside: avoid`; internal notes never enter either document.
+- `.commercial-flow` is the seller-side readiness/revision/activity handoff placed above legacy document tools.
+- `.buyer-inbox` groups contextual buyer questions, revision requests, and immutable acceptance actions.
+- `.seller-demo` is the public, read-only commercial-flow tour; its sections mirror real seller concepts and collapse to a single mobile column.
+- `.product-landing` owns the marketing narrative; `.product-hero__product`, `.feature-extract`, `.feature-studio`, and `.feature-buyer` are product UI compositions, not generic card primitives.
+- Buyer Room is layout-independent: `.buyer-body`, `.buyer-cover`, `.buyer-grid`, `.doc-section`, `.selection-panel`, and `.rubusoo-dialog` provide the complete public baseline before storefront variants.
+
+### Neo Commerce OS visual scope
+
+- `.neo-os` is the sole visual-system boundary for Rubusoo V2. Layouts add one surface modifier: `.neo-os--marketing`, `.neo-os--app`, or `.neo-os--buyer`.
+- Tokens use graphite surfaces with electric blue actions, Rubus red identity, signal green decisions, and cyan data signals. Amounts always use tabular numerals.
+- V2 uses background level, one-pixel dividers, grid and typography for hierarchy. A content region may have one primary border; nested rounded card stacks are prohibited.
+- Standard control radius is `8px`, panels are `10px–12px`, and larger radii are reserved for dialogs only. V2 styles must not use `!important` to defeat legacy rules.
+- Marketing product compositions are connected panels at desktop sizes and become ordinary full-width responsive sections below `760px`; they never use device or browser mockup frames.
+- Seller pages use a graphite OS shell. Quote Studio owns a dark structure rail, a light buyer-facing canvas and a dark command rail.
+- Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.
+- Mobile verification widths are `360px`, `390px`, and `412px`; page gutters are `16px–18px`, never a scaled desktop viewport.
 
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.

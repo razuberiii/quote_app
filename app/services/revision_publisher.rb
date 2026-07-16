@@ -52,7 +52,7 @@ class RevisionPublisher
   end
 
   def validate_readiness!
-    invalid_item = @quote.quote_items.any? { |item| item.description.blank? || item.quantity.to_i <= 0 || item.unit_price.nil? }
-    raise NotReady, "Product, quantity, price, currency and validity must be confirmed" if invalid_item || @quote.currency.blank? || @quote.valid_until.blank?
+    issues = QuoteReadinessAudit.new(@quote).issues
+    raise NotReady, issues.join(" · ") if issues.any?
   end
 end

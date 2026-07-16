@@ -3,6 +3,8 @@ class Inquiry < ApplicationRecord
   belongs_to :company
   belongs_to :customer, optional: true
   belongs_to :created_by, class_name: "User", optional: true
+  has_one_attached :source_file
+  has_one :quote, dependent: :nullify
   validates :source_type, inclusion: { in: %w[email chat text excel pdf manual] }
 
   def manually_extract!
@@ -24,5 +26,17 @@ class Inquiry < ApplicationRecord
     }
     self.status = "review"
     save!
+  end
+
+  def catalog_matches
+    InquiryCatalogMatcher.new(self).call
+  end
+
+  def ready_to_build_quote?
+    products = Array(extracted_data["products"])
+    terms = extracted_data["commercial_terms"] || {}
+    freight_ready = !terms["incoterm"].to_s.match?(/CIF|CFR|DAP|DDP/i) || (terms["freight_amount"].to_d.positive? && terms["freight_source"].present?)
+    extracted_data["customer"].present? && extracted_data["currency"].present? && freight_ready && products.any? &&
+      products.all? { |product| product["name"].present? && product["quantity"].to_d.positive? && product["unit_price"].to_d.positive? && product["price_source"].present? }
   end
 end

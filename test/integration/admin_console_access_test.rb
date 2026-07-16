@@ -24,17 +24,23 @@ class AdminConsoleAccessTest < ActionDispatch::IntegrationTest
   end
 
   test "admin login redirects to admin dashboard" do
-    post user_session_path, params: { user: { email: @admin.email, password: "password123" } }
+    post user_session_path, params: { user: { login: @admin.email, password: "password123" } }
 
     assert_redirected_to admin_root_path
     @admin.reload
     assert @admin.last_login_at.present?
   end
 
+  test "admin can login with username" do
+    post user_session_path, params: { user: { login: @admin.username, password: "password123" } }
+
+    assert_redirected_to admin_root_path
+  end
+
   test "suspended user cannot login" do
     @member.update!(status: :suspended)
 
-    post user_session_path, params: { user: { email: @member.email, password: "password123" } }
+    post user_session_path, params: { user: { login: @member.email, password: "password123" } }
 
     assert_redirected_to suspended_path
   end

@@ -11,4 +11,18 @@ class Inquiry < ApplicationRecord
     self.status = "review"
     save!
   end
+
+  def extract_requirements!
+    data = InquiryAiExtractor.new.extract(source_text: source_text, source_type: source_type)
+    terms = data["commercial_terms"]
+    self.extracted_data = data.merge("raw_requirements" => source_text.to_s)
+    self.field_states = {
+      "customer" => data["customer"].present? ? "confirmed" : "missing",
+      "products" => data["products"].any? ? "uncertain" : "missing",
+      "price" => "missing",
+      "freight" => terms["incoterm"].present? && terms["destination"].present? ? "uncertain" : "missing"
+    }
+    self.status = "review"
+    save!
+  end
 end

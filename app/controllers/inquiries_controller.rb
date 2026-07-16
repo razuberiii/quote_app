@@ -13,8 +13,12 @@ class InquiriesController < ApplicationController
   def create
     @inquiry = current_user.company.inquiries.new(inquiry_params.merge(created_by: current_user))
     @inquiry.save!
-    @inquiry.manually_extract!
-    redirect_to @inquiry
+    @inquiry.extract_requirements!
+    redirect_to @inquiry, notice: "Inquiry extracted. Confirm every field before building the quotation."
+  rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError => error
+    @inquiry&.manually_extract!
+    Rails.logger.warn("Inquiry AI extraction failed: #{error.class}: #{error.message}")
+    redirect_to @inquiry, alert: "AI extraction is temporarily unavailable. The inquiry was saved for manual review."
   end
 
   def show; end

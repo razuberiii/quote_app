@@ -15,6 +15,7 @@ namespace :app do
     user.password_confirmation = password
     user.username = username
     user.role = :admin
+    user.email_verified_at ||= Time.current
     user.save!
 
     puts "Ensured admin user: #{user.email} (id=#{user.id})"

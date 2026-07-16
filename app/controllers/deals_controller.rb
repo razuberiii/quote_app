@@ -12,7 +12,7 @@ class DealsController < ApplicationController
         term:
       ).distinct
     end
-    @deals = rows.map { |quote| [quote, DealProgress.new(quote).call] }
+    @deals = rows.map { |quote| [ quote, DealProgress.new(quote).call ] }
     @groups = {
       "Needs attention" => @deals.select { |_quote, progress| progress.attention && !%w[accepted closed].include?(progress.stage) },
       "Waiting on buyer" => @deals.select { |_quote, progress| progress.stage == "live" && !progress.attention },

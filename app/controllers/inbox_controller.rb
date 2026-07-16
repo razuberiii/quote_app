@@ -1,6 +1,6 @@
 class InboxController < ApplicationController
   def index
-    @deals = deal_scope.map { |quote| [quote, DealProgress.new(quote).call] }
+    @deals = deal_scope.map { |quote| [ quote, DealProgress.new(quote).call ] }
     @attention = @deals.select { |_quote, progress| progress.attention }
     @waiting = @deals.select { |_quote, progress| progress.stage == "live" && !progress.attention }
     @metrics = {

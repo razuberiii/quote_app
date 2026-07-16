@@ -39,9 +39,9 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.datetime :expires_at
       t.timestamps
     end
-    add_index :quote_revisions, [:quote_id, :number], unique: true
+    add_index :quote_revisions, [ :quote_id, :number ], unique: true
     add_index :quote_revisions, :secure_token, unique: true
-    add_index :quote_revisions, [:quote_id, :status]
+    add_index :quote_revisions, [ :quote_id, :status ]
 
     create_table :buyer_questions do |t|
       t.references :company, null: false, foreign_key: true
@@ -56,7 +56,7 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.string :idempotency_key, null: false
       t.timestamps
     end
-    add_index :buyer_questions, [:quote_revision_id, :idempotency_key], unique: true, name: "idx_buyer_questions_idempotency"
+    add_index :buyer_questions, [ :quote_revision_id, :idempotency_key ], unique: true, name: "idx_buyer_questions_idempotency"
 
     create_table :change_requests do |t|
       t.references :company, null: false, foreign_key: true
@@ -69,7 +69,7 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.string :idempotency_key, null: false
       t.timestamps
     end
-    add_index :change_requests, [:quote_revision_id, :idempotency_key], unique: true, name: "idx_change_requests_idempotency"
+    add_index :change_requests, [ :quote_revision_id, :idempotency_key ], unique: true, name: "idx_change_requests_idempotency"
 
     create_table :quote_acceptances do |t|
       t.references :company, null: false, foreign_key: true
@@ -88,7 +88,7 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.datetime :accepted_at, null: false
       t.timestamps
     end
-    add_index :quote_acceptances, [:quote_id, :idempotency_key], unique: true, name: "idx_quote_acceptances_idempotency"
+    add_index :quote_acceptances, [ :quote_id, :idempotency_key ], unique: true, name: "idx_quote_acceptances_idempotency"
 
     create_table :proforma_invoices do |t|
       t.references :company, null: false, foreign_key: true
@@ -105,7 +105,7 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.datetime :cancelled_at
       t.timestamps
     end
-    add_index :proforma_invoices, [:company_id, :number], unique: true
+    add_index :proforma_invoices, [ :company_id, :number ], unique: true
 
     create_table :buyer_activities do |t|
       t.references :company, null: false, foreign_key: true
@@ -116,7 +116,7 @@ class CreateRubusooCommercialCore < ActiveRecord::Migration[8.1]
       t.string :deduplication_key, null: false
       t.timestamps
     end
-    add_index :buyer_activities, [:company_id, :deduplication_key], unique: true, name: "idx_buyer_activities_dedup"
+    add_index :buyer_activities, [ :company_id, :deduplication_key ], unique: true, name: "idx_buyer_activities_dedup"
 
     create_table :inquiries do |t|
       t.references :company, null: false, foreign_key: true

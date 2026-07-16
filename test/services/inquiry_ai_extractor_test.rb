@@ -18,7 +18,7 @@ class InquiryAiExtractorTest < ActiveSupport::TestCase
       content = @content
       connection.define_singleton_method(:request) do |request|
         @captured_request = request
-        FakeSuccess.new({ choices: [{ message: { content: content.to_json } }] }.to_json)
+        FakeSuccess.new({ choices: [ { message: { content: content.to_json } } ] }.to_json)
       end
       yield connection
     end
@@ -27,9 +27,9 @@ class InquiryAiExtractorTest < ActiveSupport::TestCase
   test "normalizes a structured inquiry without inventing commercial amounts" do
     provider = FakeHttp.new({
       "customer" => "Pacific Trading", "currency" => "usd",
-      "products" => [{ "name" => "Pump HZ-240", "quantity" => 5, "unit" => "pcs" }],
+      "products" => [ { "name" => "Pump HZ-240", "quantity" => 5, "unit" => "pcs" } ],
       "commercial_terms" => { "destination" => "Long Beach" },
-      "questions" => ["Which voltage is required?"]
+      "questions" => [ "Which voltage is required?" ]
     })
 
     result = InquiryAiExtractor.new(api_key: "test", base_url: "https://example.test/v1", http_client: provider)

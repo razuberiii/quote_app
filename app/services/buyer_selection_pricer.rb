@@ -20,7 +20,7 @@ class BuyerSelectionPricer
       item["unit_price"].to_d * quantity + selected.sum { |addon| (addon["amount"] || addon[:amount]).to_d }
     end
     total = items_total + @revision.snapshot["shipping_amount"].to_d + @revision.snapshot["tax_amount"].to_d - @revision.snapshot["discount_amount"].to_d
-    Result.new(normalized, [total, 0].max.round(2))
+    Result.new(normalized, [ total, 0 ].max.round(2))
   end
 
   private

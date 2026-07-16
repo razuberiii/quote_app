@@ -10,8 +10,8 @@ class ChromiumPdfRenderer
   end
 
   def render
-    Tempfile.create(["rubusoo-document", ".html"]) do |source|
-      Tempfile.create(["rubusoo-document", ".pdf"]) do |output|
+    Tempfile.create([ "rubusoo-document", ".html" ]) do |source|
+      Tempfile.create([ "rubusoo-document", ".pdf" ]) do |output|
         source.binmode
         source.write(@html)
         source.flush

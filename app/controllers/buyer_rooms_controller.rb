@@ -12,7 +12,7 @@ class BuyerRoomsController < ApplicationController
 
   def pdf
     @snapshot = @revision.snapshot
-    html = render_to_string(template: "buyer_rooms/pdf", layout: "pdf", formats: [:html])
+    html = render_to_string(template: "buyer_rooms/pdf", layout: "pdf", formats: [ :html ])
     pdf = ChromiumPdfRenderer.new(html).render
     send_data pdf, filename: "#{@revision.quote.quote_no}-R#{@revision.number}.pdf",
       type: "application/pdf", disposition: "attachment"

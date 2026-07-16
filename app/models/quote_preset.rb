@@ -218,9 +218,9 @@ class QuotePreset < ApplicationRecord
           },
           "note_enabled" => if source.key?("note_enabled")
             ActiveModel::Type::Boolean.new.cast(source["note_enabled"])
-          else
+                            else
             true
-          end,
+                            end,
           "rows" => rows_from_payload(source["rows"]).filter_map do |row|
             next unless row.is_a?(Hash)
 

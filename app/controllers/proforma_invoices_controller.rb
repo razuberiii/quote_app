@@ -22,7 +22,7 @@ class ProformaInvoicesController < ApplicationController
   end
 
   def pdf
-    html = render_to_string(template: "proforma_invoices/pdf", layout: "pdf", formats: [:html])
+    html = render_to_string(template: "proforma_invoices/pdf", layout: "pdf", formats: [ :html ])
     binary = ChromiumPdfRenderer.new(html).render
     send_data binary, filename: "#{@pi.number}.pdf", type: "application/pdf", disposition: "attachment"
   end

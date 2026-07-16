@@ -16,7 +16,7 @@ class AddChannelNeutralDealFlow < ActiveRecord::Migration[8.1]
       t.string :idempotency_key, null: false
       t.timestamps
     end
-    add_index :version_deliveries, [:quote_revision_id, :idempotency_key], unique: true,
+    add_index :version_deliveries, [ :quote_revision_id, :idempotency_key ], unique: true,
       name: "idx_version_deliveries_idempotency"
 
     create_table :deal_responses do |t|
@@ -38,7 +38,7 @@ class AddChannelNeutralDealFlow < ActiveRecord::Migration[8.1]
       t.string :idempotency_key, null: false
       t.timestamps
     end
-    add_index :deal_responses, [:quote_id, :idempotency_key], unique: true,
+    add_index :deal_responses, [ :quote_id, :idempotency_key ], unique: true,
       name: "idx_deal_responses_idempotency"
 
     change_table :quote_acceptances, bulk: true do |t|
@@ -66,7 +66,7 @@ class AddChannelNeutralDealFlow < ActiveRecord::Migration[8.1]
       t.datetime :sent_at
       t.timestamps
     end
-    add_index :final_documents, [:company_id, :number], unique: true
+    add_index :final_documents, [ :company_id, :number ], unique: true
 
     change_table :companies, bulk: true do |t|
       t.string :default_final_document_type, null: false, default: "order_confirmation"

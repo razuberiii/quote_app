@@ -6,7 +6,7 @@ class BillingController < ApplicationController
     raise "Stripe is not configured" if ENV["STRIPE_SECRET_KEY"].blank? || price_id.blank?
     Stripe.api_key = ENV.fetch("STRIPE_SECRET_KEY")
     session = Stripe::Checkout::Session.create(mode: "subscription", customer_email: current_user.email,
-      line_items: [{ price: price_id, quantity: 1 }], client_reference_id: current_user.company_id,
+      line_items: [ { price: price_id, quantity: 1 } ], client_reference_id: current_user.company_id,
       metadata: { plan: params[:plan] }, subscription_data: { metadata: { plan: params[:plan] } },
       success_url: pricing_url(checkout: "success"), cancel_url: pricing_url(checkout: "cancelled"))
     redirect_to session.url, allow_other_host: true

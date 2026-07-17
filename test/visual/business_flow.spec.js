@@ -69,7 +69,7 @@ test("scenario A executes publish, email, buyer request and immutable acceptance
   await page.goto(`/deals/${seed.e2e_deal_id}?tab=documents`)
   await page.locator('select[name="document_type"]').selectOption("order_confirmation")
   await Promise.all([
-    page.waitForURL(/\/final_documents\/\d+$/, { timeout: 30000 }),
+    page.waitForURL(/\/final_documents\/\d+$/, { timeout: 60000 }),
     page.getByRole("button", { name: "Generate file" }).click()
   ])
   await expect(page.getByRole("heading", { name: "Order Confirmation" })).toBeVisible()

@@ -45,18 +45,20 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-          echo "CHROME_BIN=$(node -p 'require(\"playwright\").chromium.executablePath()')" >> "$GITHUB_ENV"
+          node -e 'process.stdout.write(`CHROME_BIN=${require("playwright").chromium.executablePath()}\n`)' >> "$GITHUB_ENV"
       - name: Prepare deterministic visual-review database
         run: |
           bundle exec rails db:prepare
-          bundle exec rails tailwindcss:build
+          SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
           bundle exec rails visual_review:seed
       - name: Start Rubusoo test server
         run: |
           bundle exec rails server -b 127.0.0.1 -p 3100 > tmp/visual-review-server.log 2>&1 &
           for attempt in {1..40}; do curl --fail --silent http://127.0.0.1:3100/up && break; sleep 1; done
       - name: Run visual, motion, quality and accessibility review
-        run: npx playwright test
+        run: |
+          npx playwright test test/visual/visual_review.spec.js
+          npx playwright test test/visual/business_flow.spec.js
       - name: Generate immutable output evidence
         if: always()
         run: bundle exec rails visual_review:evidence

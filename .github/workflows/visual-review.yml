@@ -59,18 +59,22 @@ jobs:
           for attempt in {1..40}; do curl --fail --silent http://127.0.0.1:3100/up && break; sleep 1; done
       - name: Run visual, motion, quality and accessibility review
         run: |
-          npx playwright test test/visual/visual_review.spec.js
-          npx playwright test test/visual/full_site_audit.spec.js
-          npx playwright test test/visual/signature_motion.spec.js
-          npx playwright test test/visual/business_flow.spec.js
+          status=0
+          for suite in visual_review full_site_audit signature_motion business_flow; do
+            npx playwright test "test/visual/${suite}.spec.js" || status=1
+          done
+          exit "$status"
       - name: Build full-site contact sheets
         if: always()
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick
           mkdir -p tmp/visual-review/contact-sheets
-          montage tmp/visual-review/full-site/screenshots/*-1440.png -thumbnail '360x240^' -gravity north -extent 360x240 -tile 4x -geometry +12+24 -background '#080a0f' -fill white -pointsize 12 -set label '%t' tmp/visual-review/contact-sheets/desktop.jpg
+          mapfile -t desktop_shots < <(find tmp/visual-review/full-site/screenshots -type f -name '*-1440.png' ! -name 'long-quote-*' | sort)
           mapfile -t mobile_shots < <(find tmp/visual-review/full-site/screenshots -type f \( -name '*-390.png' -o -name '*-360.png' -o -name '*-412.png' \) ! -name 'long-quote-*' | sort)
+          test "${#desktop_shots[@]}" -gt 0
+          test "${#mobile_shots[@]}" -gt 0
+          montage "${desktop_shots[@]}" -thumbnail '360x240^' -gravity north -extent 360x240 -tile 4x -geometry +12+24 -background '#080a0f' -fill white -pointsize 12 -set label '%t' tmp/visual-review/contact-sheets/desktop.jpg
           montage "${mobile_shots[@]}" -thumbnail '190x340^' -gravity north -extent 190x340 -tile 6x -geometry +12+24 -background '#080a0f' -fill white -pointsize 12 -set label '%t' tmp/visual-review/contact-sheets/mobile.jpg
       - name: Generate immutable output evidence
         if: always()

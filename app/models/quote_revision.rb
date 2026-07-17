@@ -19,8 +19,12 @@ class QuoteRevision < ApplicationRecord
 
   scope :ordered, -> { order(number: :desc) }
 
+  before_update :prevent_published_content_mutation
+
+  IMMUTABLE_ATTRIBUTES = %w[snapshot currency total number published_at quote_id company_id].freeze
+
   def delivered?
-    version_deliveries.where(status: "succeeded").exists?
+    version_deliveries.where(status: %w[sent succeeded externally_sent]).exists?
   end
 
   def actionable?
@@ -32,6 +36,13 @@ class QuoteRevision < ApplicationRecord
   end
 
   private
+
+  def prevent_published_content_mutation
+    return if published_at_was.blank?
+    changed = IMMUTABLE_ATTRIBUTES & changes.keys
+    errors.add(:base, "Published Version content is immutable (#{changed.join(', ')})") if changed.any?
+    throw(:abort) if changed.any?
+  end
 
   def company_matches_quote
     errors.add(:company, "must match quote workspace") if quote && company_id != quote.company_id

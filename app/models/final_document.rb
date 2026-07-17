@@ -6,10 +6,14 @@ class FinalDocument < ApplicationRecord
   belongs_to :quote
   belongs_to :quote_acceptance
   belongs_to :created_by, class_name: "User", optional: true
+  has_one_attached :file
+  has_many :version_deliveries, through: :quote, source: :version_deliveries
 
   validates :document_type, inclusion: { in: TYPES }
   validates :status, inclusion: { in: STATUSES }
   validates :title, :number, :currency, presence: true
   validates :number, uniqueness: { scope: :company_id }
   validates :total, numericality: { greater_than_or_equal_to: 0 }
+
+  delegate :quote_revision, to: :quote_acceptance
 end

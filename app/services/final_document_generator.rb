@@ -14,14 +14,23 @@ class FinalDocumentGenerator
   def call
     raise ActiveRecord::RecordNotFound unless @actor.company_id == @acceptance.company_id
     existing = @acceptance.final_documents.find_by(document_type: @document_type, status: %w[draft sent])
-    return existing if existing
+    return existing if existing&.file&.attached?
     title = @document_type == "custom" ? @custom_title.to_s.strip : TITLES.fetch(@document_type)
     raise ArgumentError, "Document title is required" if title.blank?
     sequence = @acceptance.company.final_documents.count + 1
-    @acceptance.company.final_documents.create!(
+    document = existing || @acceptance.company.final_documents.create!(
       quote: @acceptance.quote, quote_acceptance: @acceptance, created_by: @actor,
       document_type: @document_type, title:, number: "FD-#{Time.current.year}-#{sequence.to_s.rjust(4, '0')}",
       currency: @acceptance.currency, total: @acceptance.total, snapshot: @acceptance.snapshot.deep_dup
     )
+    html = ApplicationController.render(template: "final_documents/pdf", layout: "pdf", formats: [ :html ], assigns: { document: })
+    binary = ChromiumPdfRenderer.new(html).render
+    filename = "#{document.number}-#{document.document_type.dasherize}.pdf"
+    document.file.attach(io: StringIO.new(binary), filename:, content_type: "application/pdf")
+    document.update!(generated_at: Time.current, file_name: filename, file_size: binary.bytesize)
+    document
+  rescue StandardError => error
+    document&.update_columns(error_message: error.message.to_s.first(1_000), updated_at: Time.current)
+    raise
   end
 end

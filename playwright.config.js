@@ -8,6 +8,7 @@ module.exports = defineConfig({
   workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"], ["html", { outputFolder: "tmp/visual-review/html-report", open: "never" }]],
+  snapshotPathTemplate: "{testDir}/../../docs/visual-review/current/{arg}{ext}",
   use: {
     baseURL: process.env.VISUAL_BASE_URL || "http://127.0.0.1:3100",
     browserName: "chromium",

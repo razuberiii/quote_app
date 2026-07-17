@@ -40,9 +40,10 @@ class DealProgress
   end
 
   def live_progress
-    failed = @quote.version_deliveries.where(status: "failed").order(delivered_at: :desc).first
-    latest_success = @quote.version_deliveries.where(status: "succeeded").maximum(:delivered_at)
-    return result("live", "Live", "retry_delivery", "Retry delivery", true, "Latest delivery failed", failed.delivered_at) if failed && (latest_success.blank? || failed.delivered_at > latest_success)
+    failed = @quote.version_deliveries.where(status: "failed").order(created_at: :desc).first
+    latest_success = @quote.version_deliveries.where(status: %w[sent succeeded externally_sent]).maximum(:delivered_at)
+    failed_at = failed&.delivered_at || failed&.created_at
+    return result("live", "Live", "retry_delivery", "Retry delivery", true, "Latest delivery failed", failed_at) if failed && (latest_success.blank? || failed_at > latest_success)
 
     response = @quote.deal_responses.where(status: "open").order(received_at: :desc).first
     if response
@@ -102,7 +103,7 @@ class DealProgress
   end
 
   def live?
-    @quote.version_deliveries.where(status: "succeeded").exists? || %w[sent viewed revision_requested negotiating expired].include?(@quote.status)
+    @quote.version_deliveries.where(status: %w[sent succeeded externally_sent]).exists? || %w[sent viewed revision_requested negotiating expired].include?(@quote.status)
   end
 
   def accepted?

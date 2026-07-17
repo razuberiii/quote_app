@@ -10,7 +10,7 @@
   <% else %>
     <section class="buyer-cover">
       <div><p class="eyebrow">Prepared exclusively for <%= @revision.quote.customer.name %></p><h1><%= @snapshot["custom_title"].presence || "The right equipment, clearly proposed." %></h1><p class="buyer-intro"><%= @snapshot["notes"].presence || "Review the proposed products, choose the configuration that fits, and respond directly inside this quotation." %></p><div class="buyer-contact-line"><span>Prepared by</span><strong><%= @revision.company.name %></strong><% if @revision.company.email.present? %><span>·</span><%= mail_to @revision.company.email, @revision.company.email %><% end %></div></div>
-      <dl class="quote-meta"><div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div><div><dt>Revision</dt><dd><%= @revision.number %> · Latest</dd></div><div><dt>Valid until</dt><dd><%= @revision.expires_at&.to_date || "Open" %></dd></div><div><dt>Currency</dt><dd><%= @revision.currency %></dd></div></dl>
+      <dl class="quote-meta"><div><dt>Quote</dt><dd><%= @revision.quote.quote_no %></dd></div><div><dt>Revision</dt><dd><%= @revision.number %> · <%= @revision.actionable? ? "Latest" : @state.humanize %></dd></div><div><dt>Valid until</dt><dd><%= @revision.expires_at&.to_date || "Open" %></dd></div><div><dt>Currency</dt><dd><%= @revision.currency %></dd></div></dl>
     </section>
 
     <div class="buyer-grid">

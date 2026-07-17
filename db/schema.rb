@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_172000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -275,6 +275,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_172000) do
     t.bigint "created_by_id"
     t.string "currency", null: false
     t.string "document_type", null: false
+    t.text "error_message"
+    t.string "file_name"
+    t.bigint "file_size"
+    t.datetime "generated_at"
     t.string "number", null: false
     t.bigint "quote_acceptance_id", null: false
     t.bigint "quote_id", null: false
@@ -780,24 +784,34 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_172000) do
   end
 
   create_table "version_deliveries", force: :cascade do |t|
+    t.string "cc"
     t.string "channel", null: false
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
     t.bigint "created_by_id"
-    t.datetime "delivered_at", null: false
+    t.datetime "delivered_at"
+    t.text "error_message"
+    t.string "execution_type", default: "system", null: false
     t.string "external_channel"
+    t.string "file_name"
+    t.bigint "file_size"
+    t.datetime "generated_at"
     t.string "idempotency_key", null: false
+    t.text "message_body"
     t.text "note"
     t.bigint "quote_id", null: false
     t.bigint "quote_revision_id", null: false
     t.string "recipient"
-    t.string "status", default: "succeeded", null: false
+    t.bigint "retry_of_id"
+    t.string "status", default: "queued", null: false
+    t.string "subject"
     t.datetime "updated_at", null: false
     t.index ["company_id"], name: "index_version_deliveries_on_company_id"
     t.index ["created_by_id"], name: "index_version_deliveries_on_created_by_id"
     t.index ["quote_id"], name: "index_version_deliveries_on_quote_id"
     t.index ["quote_revision_id", "idempotency_key"], name: "idx_version_deliveries_idempotency", unique: true
     t.index ["quote_revision_id"], name: "index_version_deliveries_on_quote_revision_id"
+    t.index ["retry_of_id"], name: "index_version_deliveries_on_retry_of_id"
   end
 
   add_foreign_key "action_items", "users"
@@ -879,4 +893,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_172000) do
   add_foreign_key "version_deliveries", "quote_revisions"
   add_foreign_key "version_deliveries", "quotes"
   add_foreign_key "version_deliveries", "users", column: "created_by_id"
+  add_foreign_key "version_deliveries", "version_deliveries", column: "retry_of_id"
 end

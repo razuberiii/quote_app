@@ -14,7 +14,7 @@ npx playwright install chromium
 npx playwright test
 ```
 
-To refresh the committed baseline, run Playwright with `UPDATE_VISUAL_BASELINE=1`. Review every changed image before committing it.
+To refresh the committed baseline, run Playwright with both `UPDATE_VISUAL_BASELINE=1` and `--update-snapshots`. A normal run uses `toHaveScreenshot` against the committed PNGs and fails when the pixel-difference ratio exceeds 1.5%. Review every expected/actual/diff image before committing a baseline update; CI never overwrites it.
 
 ## Audit data
 
@@ -45,7 +45,7 @@ Open the repository’s **Actions → Visual Review → latest successful run**,
 
 - `manifest.json`: route, scenario, viewport, motion mode, fixture, expected stage and expected Next action.
 - `accessibility-and-quality.json`: axe results, horizontal overflow and broken-image checks.
-- `business-flow-report.json`: scenarios A–E and their evidence.
+- `business-flow-report.json` and `business-flow-executed.json`: rendered-state evidence and operations completed by the browser flow.
 - `test-results/`: Playwright videos and failure traces.
 
-Color contrast is recorded separately from blocking axe checks because branded Buyer Room themes may intentionally vary; critical and serious structural accessibility violations fail the workflow. JavaScript console errors and failed same-origin requests are captured by Playwright’s test failure artifacts and server log.
+Color contrast remains enabled and critical or serious axe violations fail the workflow. JavaScript console errors and failed same-origin requests are captured by Playwright’s test failure artifacts and server log.

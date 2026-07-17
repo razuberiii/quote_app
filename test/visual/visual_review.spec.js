@@ -26,6 +26,9 @@ async function capture(page, name, route, scenario, viewport, options = {}) {
   const file = `${name}.png`
   const target = path.join(output, "screenshots", file)
   await page.screenshot({ path: target, fullPage: true })
+  if (options.baseline !== false) {
+    await expect(page).toHaveScreenshot([file], { fullPage: true, animations: "disabled", maxDiffPixelRatio: 0.015 })
+  }
   if (process.env.UPDATE_VISUAL_BASELINE === "1" && options.baseline !== false) fs.copyFileSync(target, path.join(baseline, file))
   const overflowDetails = await page.evaluate(() => ({
     overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
@@ -60,7 +63,7 @@ async function login(page) {
 }
 
 async function audit(page, name) {
-  const result = await new AxeBuilder({ page }).disableRules(["color-contrast"]).analyze()
+  const result = await new AxeBuilder({ page }).analyze()
   quality.push({ name, accessibility_violations: result.violations.map(item => ({ id: item.id, impact: item.impact, nodes: item.nodes.length })) })
   expect(result.violations.filter(item => ["critical", "serious"].includes(item.impact)), `${name} serious accessibility violations`).toEqual([])
 }
@@ -98,9 +101,9 @@ test("seller Deal workspace desktop", async ({ page }) => {
   await capture(page, "seller-library-formats", "/library?section=presets", "quote-formats", { width: 1440, height: 900 })
   await capture(page, "seller-settings", "/company_settings/edit", "completion-settings", { width: 1440, height: 900 })
   await capture(page, "seller-smart-intake", "/inquiries/new", "smart-intake", { width: 1440, height: 900 })
-  await capture(page, "seller-quote-studio", `/quotes/${seed.deal_id}/edit`, "working-draft", { width: 1440, height: 900 })
+  await capture(page, "seller-quote-studio", `/quotes/${seed.edge_deals.no_image}/edit`, "working-draft", { width: 1440, height: 900 })
   await audit(page, "quote studio")
-  business.push({ scenario: "A", result: "pass", evidence: ["seller-versions.png", "seller-conversation.png", "buyer-room-desktop.png"] })
+  business.push({ scenario: "visual-workspace", result: test.info().status, evidence: ["seller-versions.png", "seller-conversation.png", "buyer-room-desktop.png"] })
 })
 
 test("seller workspace real mobile reflow", async ({ page }) => {
@@ -145,12 +148,8 @@ test("edge conditions remain explicit", async ({ page }) => {
   await capture(page, "edge-po-difference", `/deals/${seed.deal_id}?tab=conversation`, "po-difference", { width: 1440, height: 900 })
   await capture(page, "edge-old-version", `/q/${seed.old_buyer_token}`, "superseded-version", { width: 1440, height: 900 })
   await capture(page, "edge-closed-deal", `/deals/${seed.edge_deals.closed}`, "closed-deal", { width: 1440, height: 900 }, { stage: "Closed", action: "View deal" })
-  business.push(
-    { scenario: "B", result: "pass", evidence: ["seller-delivery-chooser.png", "seller-record-acceptance.png"] },
-    { scenario: "C", result: "covered-by-service-and-ui", evidence: ["seller-conversation.png"] },
-    { scenario: "D", result: "pass", evidence: ["edge-po-difference.png", "seller-version-diff.png"] },
-    { scenario: "E", result: "pass", evidence: ["edge-closed-deal.png"] }
-  )
+  business.push({ scenario: "edge-state-rendering", result: test.info().status,
+    evidence: ["edge-po-difference.png", "edge-delivery-failure.png", "edge-closed-deal.png"] })
 })
 
 test.use({ reducedMotion: "reduce" })

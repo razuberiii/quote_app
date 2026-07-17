@@ -1,13 +1,13 @@
 <% data = @inquiry.extracted_data.deep_stringify_keys %>
 <% evidence = data.fetch("evidence", {}) %>
-<main class="rubusoo-page inquiry-review">
+<main class="rubusoo-page inquiry-review" data-controller="intake-motion">
   <header class="inquiry-review__header">
     <div><p class="eyebrow">02 · Review extraction</p><h1>Confirm what the buyer actually asked for.</h1><p>AI suggestions are editable. Source excerpts explain every extracted field; commercial amounts remain blocked until you provide a source.</p></div>
     <div class="inquiry-review__status"><span class="status-dot"></span><strong><%= @inquiry.status.humanize %></strong><small>Saved <%= time_ago_in_words(@inquiry.updated_at) %> ago</small></div>
   </header>
 
   <%= form_with model: @inquiry, class: "inquiry-review__grid" do |f| %>
-    <section class="inquiry-source-panel">
+    <section class="inquiry-source-panel" data-intake-motion-target="source">
       <header><div><p class="section-kicker">Original inquiry</p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : @inquiry.source_type.humanize %></h2></div><span>Source of truth</span></header>
       <div class="inquiry-source-panel__body"><%= simple_format(@inquiry.source_text, {}, wrapper_tag: "div") %></div>
       <% if @inquiry.source_file.attached? %><footer>Original file retained · <%= number_to_human_size(@inquiry.source_file.byte_size) %></footer><% end %>
@@ -18,7 +18,7 @@
         <div class="inquiry-review-section__heading"><span>01</span><div><h2>Buyer & destination</h2><p>Confirm identity and where the goods need to go.</p></div></div>
         <div class="inquiry-field-grid">
           <% [["customer", "Customer company"], ["contact_name", "Contact"], ["contact_email", "Email"], ["country", "Country"], ["currency", "Currency"]].each do |key, label| %>
-            <label class="extracted-field <%= data[key].present? ? 'is-confirmed' : 'is-missing' %>">
+            <label class="extracted-field <%= data[key].present? ? 'is-confirmed' : 'is-missing' %>" data-intake-motion-target="field" data-action="click->intake-motion#focusSource">
               <span><%= label %><em><%= data[key].present? ? "Confirmed" : "Missing" %></em></span>
               <input class="input" name="inquiry[extracted_data][<%= key %>]" value="<%= data[key] %>" placeholder="Required" />
               <% if evidence[key].present? %><small>“<%= evidence[key] %>”</small><% else %><small>No source excerpt found</small><% end %>
@@ -26,7 +26,7 @@
           <% end %>
           <% terms = data.fetch("commercial_terms", {}) %>
           <% [["destination", "Destination port"], ["incoterm", "Incoterm"], ["delivery", "Delivery requirement"], ["packing", "Packing requirement"]].each do |key, label| %>
-            <label class="extracted-field <%= terms[key].present? ? 'is-uncertain' : 'is-missing' %>">
+            <label class="extracted-field <%= terms[key].present? ? 'is-uncertain' : 'is-missing' %>" data-intake-motion-target="field" data-action="click->intake-motion#focusSource">
               <span><%= label %><em><%= terms[key].present? ? "Uncertain" : "Missing" %></em></span>
               <input class="input" name="inquiry[extracted_data][commercial_terms][<%= key %>]" value="<%= terms[key] %>" placeholder="Confirm manually" />
               <small><%= evidence[key].present? ? "“#{evidence[key]}”" : "No source excerpt found" %></small>
@@ -70,7 +70,7 @@
         <div class="inquiry-field-grid"><label class="extracted-field"><span>Buyer questions</span><textarea class="textarea" name="inquiry[extracted_data][questions]"><%= Array(data["questions"]).join("\n") %></textarea></label><label class="extracted-field is-missing"><span>Missing information <em>Needs review</em></span><textarea class="textarea" name="inquiry[extracted_data][missing_information]"><%= Array(data["missing_information"]).join("\n") %></textarea></label></div>
       </div>
 
-      <footer class="inquiry-review__actions"><div><span>Deal readiness</span><strong><%= @inquiry.ready_to_build_quote? ? "Ready to create Deal" : "Save and confirm missing commercial fields" %></strong></div><%= f.submit "Save review", class: "button button--secondary" %><%= link_to "Build Deal", build_quote_inquiry_path(@inquiry), class: "button button--primary", data: { turbo_method: :post } %></footer>
+      <footer class="inquiry-review__actions"><div><span>Deal readiness</span><strong><%= @inquiry.ready_to_build_quote? ? "Ready to create Deal" : "Save and confirm missing commercial fields" %></strong></div><%= f.submit "Save review", class: "button button--secondary" %><%= link_to "Build Deal", build_quote_inquiry_path(@inquiry), class: "button button--primary", data: { turbo_method: :post, intake_motion_target: "build", action: "intake-motion#build" } %></footer>
     </section>
   <% end %>
 </main>

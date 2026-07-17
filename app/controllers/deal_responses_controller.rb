@@ -21,6 +21,21 @@ class DealResponsesController < ApplicationController
     render :new, status: :unprocessable_entity
   end
 
+  def apply
+    response = @deal.deal_responses.find(params[:response_id])
+    raise ActionController::BadRequest, "Only reviewed differences can be applied" if response.difference_review["changes"].blank?
+    WorkingUpdateApplier.new(response:, selected_paths: params[:selected_paths]).call
+    redirect_to edit_quote_path(@deal, applied_response_id: response.id), notice: "Selected buyer changes are highlighted in the Working update draft."
+  end
+
+  def disposition
+    response = @deal.deal_responses.find(params[:response_id])
+    status = params.require(:status).presence_in(%w[reviewed evidence_only])
+    raise ActionController::BadRequest, "Invalid response disposition" unless status
+    response.update!(status:)
+    redirect_to deal_path(@deal, tab: "conversation"), notice: status == "evidence_only" ? "Kept as evidence; the published Version was not changed." : "Response review completed."
+  end
+
   private
 
   def load_deal

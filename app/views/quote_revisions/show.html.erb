@@ -1,18 +1,14 @@
-<% changes = Array(@revision.diff) %>
 <% previous = @revision.quote.quote_revisions.where("number < ?", @revision.number).ordered.first %>
-<main class="rubusoo-page revision-page">
-  <header class="revision-header"><div><p class="eyebrow">Revision history</p><h1>What changed in Revision <%= @revision.number %></h1><p><%= @revision.summary %></p></div><div class="revision-header__amount"><span>Current total</span><strong><%= @revision.currency %> <%= number_with_delimiter(@revision.total) %></strong><small><%= @revision.status.humanize %> · <%= @revision.sent_at&.to_date %></small></div></header>
-  <% if previous %><div class="revision-compare-bar"><span>Revision <%= previous.number %><small><%= previous.sent_at&.to_date %></small></span><b>→</b><span class="is-current">Revision <%= @revision.number %><small><%= @revision.sent_at&.to_date %></small></span><%= link_to "Open Buyer Room", buyer_room_path(@revision.secure_token, preview: 1), class: "button button--secondary", target: "_blank" %></div><% end %>
-  <section class="revision-diff">
-    <% if changes.any? %>
-      <% changes.each do |change| %>
-        <% field = change["field"] || change[:field] %><% before_value = change["before"] || change[:before] %><% after_value = change["after"] || change[:after] %>
-        <article class="revision-change"><header><span><%= field.to_s.humanize %></span><em>Changed</em></header>
-          <% if field.to_s == "quote_items" %>
-            <% before_items = Array(before_value); after_items = Array(after_value) %><div class="revision-item-diff"><div><strong>Previous</strong><% before_items.each do |item| %><p><span><%= item["product_name"] || item["description"] %></span><small><%= item["quantity"] %> × <%= @revision.currency %> <%= item["unit_price"] %></small></p><% end %></div><div class="is-after"><strong>Revision <%= @revision.number %></strong><% after_items.each do |item| %><p><span><%= item["product_name"] || item["description"] %></span><small><%= item["quantity"] %> × <%= @revision.currency %> <%= item["unit_price"] %></small></p><% end %></div></div>
-          <% else %><div class="revision-values"><div><span>Before</span><p><%= before_value.presence || "Not provided" %></p></div><div class="is-after"><span>After</span><p><%= after_value.presence || "Removed" %></p></div></div><% end %>
-        </article>
-      <% end %>
-    <% else %><div class="revision-empty"><span>✓</span><h2>Initial commercial version</h2><p>This is the first immutable Revision sent to the buyer.</p></div><% end %>
+<% semantic = RevisionSemanticDiff.new(previous:, current: @revision).call %>
+<main class="rubusoo-page revision-page semantic-diff">
+  <header class="revision-header"><div><p class="eyebrow">Version intelligence</p><h1>Version <%= previous&.number || 0 %> → <%= @revision.number %></h1><p><%= @revision.summary %></p></div><div class="revision-header__amount"><span>Total change</span><strong><%= semantic.total_delta.negative? ? "−" : "+" %><%= @revision.currency %> <%= number_with_delimiter(semantic.total_delta.abs) %></strong><small><%= semantic.product_changes.size + semantic.commercial_changes.size %> semantic change groups</small></div></header>
+  <div class="revision-compare-bar"><span>Version <%= previous&.number || "Initial" %><small><%= previous&.published_at&.to_date %></small></span><b>→</b><span class="is-current">Version <%= @revision.number %><small><%= @revision.published_at&.to_date %></small></span><%= link_to "Open Buyer Room", buyer_room_path(@revision.secure_token, preview: 1), class: "button button--secondary", target: "_blank" %></div>
+  <section class="semantic-diff__section"><header><p class="section-kicker">Product changes</p><h2>What changed in the offer</h2></header>
+    <% semantic.product_changes.each do |change| %><article class="semantic-change semantic-change--<%= change[:kind] %>"><div class="semantic-change__identity"><span><%= change[:kind].humanize %></span><strong><%= change[:name] %></strong></div><div class="semantic-fields"><% change[:fields].each do |field| %><div><strong><%= field[:label] %></strong><del><%= field[:before].presence || "Not included" %></del><b>→</b><ins><%= field[:after].presence || "Removed" %></ins></div><% end %></div></article><% end %>
+    <% if semantic.product_changes.empty? %><p class="semantic-diff__unchanged">No product identity, quantity, price, configuration or accessory changes.</p><% end %>
+  </section>
+  <section class="semantic-diff__section"><header><p class="section-kicker">Commercial changes</p><h2>Terms and settlement</h2></header>
+    <div class="semantic-commercial"><% semantic.commercial_changes.each do |field| %><article><strong><%= field[:label] %></strong><del><%= field[:before].presence || "Not provided" %></del><b>→</b><ins><%= field[:after].presence || "Removed" %></ins></article><% end %></div>
+    <% if semantic.commercial_changes.empty? %><p class="semantic-diff__unchanged">Commercial terms are unchanged.</p><% end %>
   </section>
 </main>

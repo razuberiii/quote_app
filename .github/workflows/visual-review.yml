@@ -45,6 +45,7 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
+          echo "CHROME_BIN=$(node -e \"console.log(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
       - name: Prepare deterministic visual-review database
         run: |
           bundle exec rails db:prepare
@@ -56,6 +57,9 @@ jobs:
           for attempt in {1..40}; do curl --fail --silent http://127.0.0.1:3100/up && break; sleep 1; done
       - name: Run visual, motion, quality and accessibility review
         run: npx playwright test
+      - name: Generate immutable output evidence
+        if: always()
+        run: bundle exec rails visual_review:evidence
       - name: Upload complete visual audit evidence
         if: always()
         uses: actions/upload-artifact@v5

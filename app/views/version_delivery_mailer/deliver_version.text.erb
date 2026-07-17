@@ -1,0 +1,5 @@
+<%= @delivery.message_body %>
+
+<% if %w[email_link email_link_pdf].include?(@delivery.channel) %>Open secure Buyer Room — Version <%= @revision.number %>: <%= @buyer_room_url %><% end %>
+
+Quote <%= @revision.quote.quote_no %> · Version <%= @revision.number %> · <%= @revision.currency %> <%= @revision.total %>

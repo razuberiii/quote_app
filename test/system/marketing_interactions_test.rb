@@ -14,25 +14,10 @@ class MarketingInteractionsTest < ApplicationSystemTestCase
       timeout: 120
     }
 
-  test "quote revision control switches versions" do
-    visit "/quote-revision-control"
-
-    assert_selector "#quote-version-panel-v3", visible: true
-    find("#quote-version-tab-v1").click
-
-    assert_selector "#quote-version-panel-v1", visible: true
-    assert_selector "#quote-version-tab-v1[aria-selected='true']"
-    assert_selector "#quote-version-panel-v3", visible: :hidden
-  end
-
-  test "homepage flow switches panels" do
+  test "homepage presents the channel-neutral Deal story" do
     visit "/"
-
-    assert_selector "#homepage-flow-panel-sent", visible: true
-    find("#homepage-flow-tab-follow_up").click
-
-    assert_selector "#homepage-flow-panel-follow_up", visible: true
-    assert_selector "#homepage-flow-tab-follow_up[aria-selected='true']"
-    assert_selector "#homepage-flow-panel-sent", visible: :hidden
+    assert_text "From messy inquiry"
+    assert_text "Buyer Room"
+    assert_link "Open live demo"
   end
 end

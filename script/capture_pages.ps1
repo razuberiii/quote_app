@@ -1,4 +1,4 @@
-#  .\script\capture_pages.ps1 -LoginEmail "710006009@qq.com" -LoginPassword "123456" -Locale "zh-CN"
+#  .\script\capture_pages.ps1 -LoginEmail "demo@example.com" -LoginPassword "replace-me" -Locale "zh-CN"
 param(
   [string]$BaseUrl = "http://127.0.0.1:3000",
   [string]$LoginEmail = "",

@@ -31,11 +31,12 @@ class VisualReviewSeeder
     version_one, version_two = seed_versions(deal, user)
     seed_channel_history(deal, version_two, user)
     edge_deals = seed_edge_deals(company, buyer, products, user)
+    e2e_deal = company.quotes.find_by(quote_no: "VR-E2E-001") || build_deal(company, buyer, products.first(2), "VR-E2E-001")
     payload = {
       "email" => user.email, "password" => PASSWORD, "deal_id" => deal.id,
       "version_one_id" => version_one.id, "version_two_id" => version_two.id,
       "buyer_token" => version_two.secure_token, "old_buyer_token" => version_one.secure_token,
-      "edge_deals" => edge_deals.transform_values(&:id)
+      "e2e_deal_id" => e2e_deal.id, "edge_deals" => edge_deals.transform_values(&:id)
     }
     FileUtils.mkdir_p(Rails.root.join("tmp"))
     Rails.root.join("tmp/visual_review_seed.json").write(JSON.pretty_generate(payload))
@@ -74,13 +75,14 @@ class VisualReviewSeeder
     return [ deal.quote_revisions.find_by(number: 1), deal.quote_revisions.find_by(number: 2) ] if deal.quote_revisions.count >= 2
     first = RevisionPublisher.new(quote: deal, actor: user).call.revision
     first.version_deliveries.create!(company: deal.company, quote: deal, created_by: user, channel: "email_link_pdf",
-      recipient: deal.customer.email, delivered_at: Time.zone.parse("2026-07-16 09:30"), idempotency_key: "visual-v1-email")
+      recipient: deal.customer.email, status: "sent", execution_type: "system",
+      delivered_at: Time.zone.parse("2026-07-16 09:30"), idempotency_key: "visual-v1-email")
     deal.quote_items.first.update!(quantity: 2)
     deal.update!(shipping_amount: 5_200, status: "draft")
     second = RevisionPublisher.new(quote: deal, actor: user).call.revision
     second.version_deliveries.create!(company: deal.company, quote: deal, created_by: user, channel: "external",
       external_channel: "whatsapp", recipient: "Anna Keller", note: "Version 2 sent in buyer procurement group",
-      delivered_at: Time.zone.parse("2026-07-16 11:45"), idempotency_key: "visual-v2-whatsapp")
+      status: "externally_sent", execution_type: "manual", delivered_at: Time.zone.parse("2026-07-16 11:45"), idempotency_key: "visual-v2-whatsapp")
     deal.update!(status: "sent", sent_at: Time.zone.parse("2026-07-16 11:45"))
     [ first, second ]
   end
@@ -96,7 +98,11 @@ class VisualReviewSeeder
       response.company = deal.company; response.quote_revision = version; response.recorded_by = user
       response.kind = "purchase_order"; response.source = "purchase_order"; response.buyer_name = "Anna Keller"
       response.body = "PO HPG-7742 · total USD 148250 · delivery CIF Hamburg"; response.received_at = Time.zone.parse("2026-07-16 13:10")
-      response.difference_review = { "severity" => "material_difference", "review_required" => true }
+      response.difference_review = { "severity" => "material_difference", "review_required" => true,
+        "po_number" => "HPG-7742", "changes" => [
+          { "kind" => "changed", "path" => "items.0.quantity", "old" => 2, "new" => 3, "material" => true },
+          { "kind" => "changed", "path" => "payment_term", "old" => "30% deposit, 70% before shipment", "new" => "Net 45", "material" => true }
+        ] }
     end
   end
 

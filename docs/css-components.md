@@ -1,6 +1,6 @@
 # Rubusoo design system
 
-The commercial product uses one visual language: **Rubusoo Deal Workspace**. It is a warm, high-contrast green system with compact controls, editorial display type, low-radius white work surfaces, and coral used only for deal attention. New product surfaces use `app/assets/stylesheets/rubusoo.css`; legacy selectors in `components.css` and `public_quote.css` are migration-only and must not be introduced into new pages.
+The commercial product uses one visual language: **Rubusoo Neo Commerce OS**. Seller workflows use a five-level graphite system (`Canvas`, `Shell`, `Surface`, `Elevated`, `Signal`) with Electric Blue for action, Rubus Red for attention, Signal Green for confirmed outcomes, precise typography, and compact controls. Light surfaces are reserved for buyer-facing or immutable document semantics. New product surfaces use `app/assets/stylesheets/rubusoo.css`; legacy selectors in `components.css` and `public_quote.css` are migration-only and must not be introduced into new pages.
 
 Core tokens are the `--rb-*` family, with compatibility aliases for `--canvas`, `--paper`, `--ink`, `--muted`, `--line`, `--brand`, `--action`, `--success`, and `--danger`. Interactive actions use Rubusoo green; coral is reserved for deal attention and editorial punctuation.
 
@@ -15,6 +15,8 @@ Quote Studio uses `quote-studio--editor` with three true functional columns. The
 Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.
 
 Revision comparison uses paired `revision-values` and `revision-item-diff` columns; never expose raw snapshot JSON. PI uses the print-safe `pi-document` hierarchy and must always render from the immutable acceptance snapshot.
+
+Delivery, response review, and document evidence use the `channel-flow`, `response-review`, and `documents-hub` families. System-executed delivery must never expose a user-selectable success state. Returned file differences are compact semantic rows, and unsafe workbook cells use a dedicated non-actionable signal. The Documents hub groups Published quote files, Buyer files, and Final documents without introducing a global Files module.
 
 The remainder of this document describes legacy families retained only while old pages are replaced.
 

@@ -1,0 +1,44 @@
+<main class="deal-workspace final-document-page">
+  <header>
+    <%= link_to "← Documents", deal_path(@document.quote, tab: "documents"), class: "deal-back" %>
+    <p class="eyebrow"><%= @document.document_type.humanize %> · immutable Acceptance output</p>
+    <h1><%= @document.title %></h1>
+    <p><%= @document.number %> · Accepted Version <%= @document.quote_revision.number %> · <%= @document.currency %> <%= number_with_delimiter(@document.total) %></p>
+  </header>
+
+  <section class="document-command-grid">
+    <article>
+      <span>Status</span>
+      <strong><%= @document.status.humanize %></strong>
+      <small>Generated <%= @document.generated_at ? l(@document.generated_at, format: :long) : "in progress" %> · <%= number_to_human_size(@document.file_size) %></small>
+      <div>
+        <%= link_to "Preview PDF", pdf_final_document_path(@document, preview: 1), target: "_blank", class: "button button--secondary" %>
+        <%= link_to "Download", pdf_final_document_path(@document), class: "button button--primary" %>
+      </div>
+    </article>
+
+    <%= form_with url: email_final_document_path(@document), class: "document-email-form" do |form| %>
+      <h2>Send final document</h2>
+      <%= form.label :recipient %>
+      <%= form.email_field :recipient, value: @document.quote.customer.email, required: true %>
+      <%= form.label :cc %>
+      <%= form.text_field :cc %>
+      <%= form.label :subject %>
+      <%= form.text_field :subject, value: "#{@document.title} #{@document.number}", required: true %>
+      <%= form.label :message_body, "Message" %>
+      <%= form.text_area :message_body, value: "Please find the #{@document.title.downcase} attached.", rows: 5, required: true %>
+      <%= form.submit "Send file", class: "button button--primary" %>
+    <% end %>
+
+    <aside>
+      <h2>Commercial source</h2>
+      <dl>
+        <dt>Acceptance</dt><dd><%= @document.quote_acceptance.acceptance_method.humanize %></dd>
+        <dt>Accepted by</dt><dd><%= @document.quote_acceptance.name %></dd>
+        <dt>Version</dt><dd><%= @document.quote_revision.number %></dd>
+        <dt>Snapshot</dt><dd>Locked</dd>
+      </dl>
+      <%= button_to "Mark externally sent", mark_sent_final_document_path(@document), method: :patch, class: "button button--secondary" unless @document.sent_at? %>
+    </aside>
+  </section>
+</main>

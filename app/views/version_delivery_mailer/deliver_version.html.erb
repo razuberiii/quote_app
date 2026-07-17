@@ -1,0 +1,5 @@
+<p><%= simple_format(@delivery.message_body) %></p>
+<% if %w[email_link email_link_pdf].include?(@delivery.channel) %>
+  <p><%= link_to "Open secure Buyer Room — Version #{@revision.number}", @buyer_room_url %></p>
+<% end %>
+<p><small>Quote <%= @revision.quote.quote_no %> · Version <%= @revision.number %> · <%= @revision.currency %> <%= @revision.total %></small></p>

@@ -40,9 +40,22 @@ async function capture(page, name, route, scenario, viewport, options = {}) {
   }))
   const overflow = overflowDetails.overflow
   const brokenImages = await page.locator("img").evaluateAll(images => images.filter(image => image.getAttribute("src")?.trim() && image.complete && image.naturalWidth === 0).map(image => image.src))
+  const mobileTypography = viewport.width <= 412 ? await page.evaluate(() => {
+    const headings = [...document.querySelectorAll("h1")].filter(element => element.getBoundingClientRect().width > 0)
+    const controls = [...document.querySelectorAll("input, textarea, select, button")].filter(element => element.getBoundingClientRect().width > 0)
+    return {
+      largestHeadingPx: Math.max(0, ...headings.map(element => parseFloat(getComputedStyle(element).fontSize))),
+      oversizedControls: controls.map(element => ({ tag: element.tagName, width: Math.round(element.getBoundingClientRect().width) }))
+        .filter(element => element.width > document.documentElement.clientWidth)
+    }
+  }) : null
   quality.push({ name, route, ...overflowDetails, brokenImages })
   expect(overflow, `${name} has horizontal overflow: ${JSON.stringify(overflowDetails.offenders)}`).toBeFalsy()
   expect(brokenImages, `${name} has broken images`).toEqual([])
+  if (mobileTypography) {
+    expect(mobileTypography.largestHeadingPx, `${name} uses an oversized mobile heading`).toBeLessThanOrEqual(64)
+    expect(mobileTypography.oversizedControls, `${name} has controls wider than the viewport`).toEqual([])
+  }
   manifest.push({
     commit_sha: process.env.GITHUB_SHA || execSync("git rev-parse HEAD", { cwd: root }).toString().trim(),
     generated_at: new Date().toISOString(), application_version: "Rubusoo Deal Workspace",
@@ -114,6 +127,7 @@ test("seller workspace real mobile reflow", async ({ page }) => {
   await capture(page, "seller-conversation-mobile", `${deal}?tab=conversation`, "mobile-conversation", { width: 390, height: 844 })
   await capture(page, "seller-acceptance-mobile", `${deal}/acceptance/new?version_id=${seed.version_two_id}`, "mobile-external-acceptance", { width: 390, height: 844 })
   await capture(page, "seller-delivery-mobile", `${deal}/deliver?version_id=${seed.version_two_id}`, "mobile-delivery", { width: 412, height: 915 })
+  await capture(page, "seller-smart-intake-mobile", "/inquiries/new", "mobile-smart-intake", { width: 390, height: 844 })
 })
 
 test("Buyer Room current, selection and acceptance", async ({ page }) => {

@@ -380,6 +380,7 @@ data-action="click->clipboard#copy"
 - Seller pages use a graphite OS shell. Quote Studio owns a dark structure rail, a light buyer-facing canvas and a dark command rail.
 - Quote Studio kickers on graphite surfaces use the accessible signal-blue token (`#8aa7ff`); darker document-blue is reserved for light canvas surfaces.
 - Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.
+- Buyer Room light surfaces use document-blue (`#315fdc`) and dark Rubus red (`#b8244c`) for small signal text; cyan and bright red are reserved for graphite surfaces so WCAG contrast remains intact.
 - Mobile verification widths are `360px`, `390px`, and `412px`; page gutters are `16px–18px`, never a scaled desktop viewport.
 
 ### Deal-first workspace

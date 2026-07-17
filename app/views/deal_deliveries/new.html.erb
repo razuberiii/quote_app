@@ -7,7 +7,7 @@
     <% end %>
   </section>
 
-  <%= form_with model: @delivery, url: deliver_deal_path(@deal, version_id: @version.id), class: "channel-form", multipart: true do |form| %>
+  <%= form_with model: @delivery, url: deliver_deal_path(@deal, version_id: @version.id), class: "channel-form", multipart: true, data: { action: "turbo:submit-start->channel-flow#sending turbo:submit-end->channel-flow#finished" } do |form| %>
     <%= form.hidden_field :channel, value: "buyer_room_link", data: { channel_flow_target: "channel" } %>
     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
 
@@ -33,6 +33,6 @@
       <div class="channel-form__wide"><%= form.label :evidence, "Evidence file" %><%= form.file_field :evidence %></div>
     </section>
 
-    <footer><div><span>Activity signal</span><strong data-channel-flow-target="signal">Buyer Room activity available</strong></div><%= form.submit "Deliver Version", class: "button button--primary", data: { channel_flow_target: "submit" } %></footer>
+    <footer><div><span>Delivery state</span><strong data-channel-flow-target="signal">Ready to prepare</strong></div><%= form.submit "Deliver Version", class: "button button--primary", data: { channel_flow_target: "submit" } %></footer>
   <% end %>
 </main>

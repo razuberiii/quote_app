@@ -14,6 +14,8 @@ npx playwright install chromium
 npx playwright test
 ```
 
+`full_site_audit.spec.js` is the authenticated crawler. It visits public identity pages, every Deal tab, all Library sections, Settings/Team/Invitations, dialogs, edge states, and priority mobile widths. It writes 91 direct browser captures plus `full-site/page-inventory.md` and `full-site/visual-audit-report.json`. The workflow then builds fixed-cell desktop and mobile contact sheets; these must be inspected before updating a baseline.
+
 To refresh the committed baseline, run Playwright with both `UPDATE_VISUAL_BASELINE=1` and `--update-snapshots`. A normal run uses `toHaveScreenshot` against the committed PNGs and fails when the pixel-difference ratio exceeds 1.5%. Review every expected/actual/diff image before committing a baseline update; CI never overwrites it.
 
 ## Audit data
@@ -33,7 +35,7 @@ No production customer, uploads, credentials, API keys, logs or database backups
 - Seller: Inbox, Deals, Overview, Smart Intake, Quote Studio, Delivery chooser, Conversation, Versions, diff, Documents, external Acceptance, Library and Settings.
 - Buyer: live Buyer Room, configuration, change request and Acceptance on desktop and real 360/390/412 widths.
 - Edge cases: missing price, no image, 50 items, delivery failure, PO difference, superseded Version and closed Deal.
-- Motion: normal mode plus `prefers-reduced-motion: reduce`; the reduced-motion test still submits the same channel actions.
+- Motion: `signature_motion.spec.js` records the homepage transformation, Smart Intake evidence/Studio price feedback, Delivery/Buyer response transition, and a `prefers-reduced-motion: reduce` run. The reduced-motion path retains the same content and controls.
 
 The committed baseline is intentionally compressed. Browser videos are generated from real Playwright sessions and exist only in the GitHub Actions Artifact to avoid growing Git history.
 
@@ -47,5 +49,7 @@ Open the repository’s **Actions → Visual Review → latest successful run**,
 - `accessibility-and-quality.json`: axe results, horizontal overflow and broken-image checks.
 - `business-flow-report.json` and `business-flow-executed.json`: rendered-state evidence and operations completed by the browser flow.
 - `test-results/`: Playwright videos and failure traces.
+- `motion/`: named WebM recordings of real state transitions, not page-load-only videos.
+- `full-site/`: the page inventory, audit findings, all desktop/mobile captures, and both contact sheets.
 
 Color contrast remains enabled and critical or serious axe violations fail the workflow. JavaScript console errors and failed same-origin requests are captured by Playwright’s test failure artifacts and server log.

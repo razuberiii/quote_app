@@ -4,6 +4,14 @@ export default class extends Controller {
   static targets = ["quantity", "price", "shipping", "discount", "tax", "total", "saveState"]
   connect() { this.recalculate() }
   dirty() { this.saveStateTarget.textContent = "● Unsaved changes"; this.saveStateTarget.classList.add("is-dirty"); this.recalculate() }
+  saving() { this.saveStateTarget.textContent = "● Saving…"; this.saveStateTarget.classList.remove("is-saved"); this.saveStateTarget.classList.add("is-saving") }
+  saved(event) {
+    this.saveStateTarget.classList.remove("is-saving")
+    if (!event.detail.success) { this.saveStateTarget.textContent = "● Save failed"; this.saveStateTarget.classList.add("is-dirty"); return }
+    this.saveStateTarget.textContent = "● Saved"
+    this.saveStateTarget.classList.remove("is-dirty")
+    this.saveStateTarget.classList.add("is-saved")
+  }
   duplicateItem(event) {
     const item = event.currentTarget.closest(".studio-product")
     if (!item) return

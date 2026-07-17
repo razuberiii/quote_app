@@ -12,7 +12,7 @@
     <div class="studio-toolbar__identity"><%= link_to "← Deal", deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> <span>Working version</span></h1></div></div>
     <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● Saved</span><%= link_to "Preview", public_preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & publish", quote_path(@quote), class: "button button--primary" %></div>
   </header>
-  <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor" } do |f| %>
+  <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor", data: { action: "turbo:submit-start->studio-motion#saving turbo:submit-end->studio-motion#saved" } } do |f| %>
     <aside class="studio-structure">
       <div><p class="section-kicker">Structure</p><h2>Buyer decision path</h2></div>
       <nav class="studio-outline">

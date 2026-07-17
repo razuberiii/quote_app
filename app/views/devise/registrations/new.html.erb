@@ -2,8 +2,8 @@
   <div class="marketing-auth-grid">
     <div class="marketing-auth-intro">
       <p class="app-section-caption uppercase tracking-[0.16em]"><%= t("users.registrations.view.new.title") %></p>
-      <h1 class="marketing-auth-title"><%= t("users.registrations.view.new.title") %></h1>
-      <p class="marketing-auth-body">Create your workspace and start building quotes with structured revisions, buyer links, and follow-up context.</p>
+      <h1 class="marketing-auth-title">Build your first Deal.</h1>
+      <p class="marketing-auth-body">Turn a real buyer request into a controlled, deliverable quote before you configure anything else.</p>
     </div>
 
     <%= render "components/ui/card", class: "app-surface marketing-auth-card" do %>
@@ -75,21 +75,21 @@
   </div>
 
   <!-- Verification Modal -->
-  <div id="signup-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-    <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-      <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;"><%= t("users.registrations.view.new.security_verification") %></h3>
-      <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;"><%= t("users.registrations.view.new.complete_verification") %></p>
+  <div id="signup-verification-modal" class="neo-modal" hidden>
+    <div class="neo-modal__panel neo-modal__panel--compact">
+      <h3><%= t("users.registrations.view.new.security_verification") %></h3>
+      <p><%= t("users.registrations.view.new.complete_verification") %></p>
       
-      <div id="signup-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
+      <div id="signup-turnstile-loading" class="neo-modal__state">
         <p><%= t("users.registrations.view.new.loading_verification") %></p>
       </div>
       
-      <div id="signup-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
+      <div id="signup-turnstile-container" class="neo-modal__state" hidden>
         <div class="cf-turnstile"></div>
       </div>
       
-      <div id="signup-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-        <p style="color: #28a745; font-size: 16px; margin: 0;"><%= t("users.registrations.view.new.verified_submitting") %></p>
+      <div id="signup-turnstile-success" class="neo-modal__state neo-modal__state--success" hidden>
+        <p><%= t("users.registrations.view.new.verified_submitting") %></p>
       </div>
     </div>
   </div>
@@ -137,10 +137,10 @@
         verificationComplete = false;
         turnstileResponse.value = ''; // Clear any old token
         submitBtn.disabled = true; // CRITICAL: Disable button immediately when opening modal
-        modal.style.display = 'flex';
-        loadingDiv.style.display = 'block';
-        containerDiv.style.display = 'none';
-        successDiv.style.display = 'none';
+        modal.hidden = false;
+        loadingDiv.hidden = false;
+        containerDiv.hidden = true;
+        successDiv.hidden = true;
         
         // Wait for Turnstile API to load, then render
         setTimeout(renderTurnstile, 300);
@@ -155,8 +155,8 @@
         }
 
         // Hide loading, show container
-        loadingDiv.style.display = 'none';
-        containerDiv.style.display = 'block';
+        loadingDiv.hidden = true;
+        containerDiv.hidden = false;
 
         const widget = containerDiv.querySelector('.cf-turnstile');
         
@@ -174,13 +174,13 @@
             verificationComplete = true;
             
             // Show success message
-            containerDiv.style.display = 'none';
-            successDiv.style.display = 'block';
+            containerDiv.hidden = true;
+            successDiv.hidden = false;
             
             // Auto-submit after 1 second
             setTimeout(() => {
               isSubmitting = true;
-              modal.style.display = 'none';
+              modal.hidden = true;
               signupForm.submit();
             }, 1000);
           }
@@ -191,7 +191,7 @@
       // Close modal on background click (only if verification isn't complete)
       modal.addEventListener('click', function(e) {
         if (e.target === modal && !verificationComplete) {
-          modal.style.display = 'none';
+          modal.hidden = true;
           turnstileResponse.value = ''; // Clear incomplete verification
           submitBtn.disabled = false; // Re-enable button
           submitBtn.textContent = createAccountLabel;

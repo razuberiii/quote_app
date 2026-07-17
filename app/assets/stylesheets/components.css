@@ -6257,16 +6257,16 @@ kbd.app-shortcut-badge {
   text-align: center;
 }
 .app-surface {
-  border-color: rgba(226, 232, 240, 0.92) !important;
-  border-radius: 20px !important;
-  background: var(--ui-surface-bg) !important;
-  box-shadow: var(--ui-shadow) !important;
+  border-color: rgba(226, 232, 240, 0.92);
+  border-radius: 20px;
+  background: var(--ui-surface-bg);
+  box-shadow: var(--ui-shadow);
 }
 .app-table-surface {
-  border-radius: 20px !important;
-  border-color: rgba(226, 232, 240, 0.92) !important;
-  background: #ffffff !important;
-  box-shadow: var(--ui-shadow) !important;
+  border-radius: 20px;
+  border-color: rgba(226, 232, 240, 0.92);
+  background: #ffffff;
+  box-shadow: var(--ui-shadow);
 }
 .app-table-surface table {
   background: transparent;
@@ -6526,39 +6526,39 @@ kbd.app-shortcut-badge {
 .marketing-root .marketing-hero-card {
   position: relative;
   overflow: hidden;
-  border-color: rgba(221, 229, 238, 0.95) !important;
+  border-color: rgba(221, 229, 238, 0.95);
   background:
     radial-gradient(
       circle at top center,
       rgba(226, 236, 247, 0.62),
       transparent 42%
     ),
-    rgba(255, 255, 255, 0.84) !important;
+    rgba(255, 255, 255, 0.84);
   box-shadow:
     0 24px 56px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.82) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 .marketing-root .marketing-hero-card::after {
   content: none;
 }
 .marketing-root .marketing-section-card {
-  padding: 1.5rem !important;
-  border-color: rgba(221, 229, 238, 0.88) !important;
-  background: rgba(255, 255, 255, 0.76) !important;
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.05) !important;
+  padding: 1.5rem;
+  border-color: rgba(221, 229, 238, 0.88);
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.05);
 }
 .marketing-root .marketing-hero-shell {
-  padding: clamp(1.4rem, 1rem + 1.4vw, 2.4rem) !important;
-  border-radius: 30px !important;
-  border-color: rgba(218, 228, 238, 0.92) !important;
+  padding: clamp(1.4rem, 1rem + 1.4vw, 2.4rem);
+  border-radius: 30px;
+  border-color: rgba(218, 228, 238, 0.92);
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0.92),
     rgba(248, 251, 255, 0.9)
-  ) !important;
+  );
   box-shadow:
     0 28px 64px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.88) !important;
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
 }
 .marketing-root .marketing-hero-shell--crm,
 .marketing-root .marketing-hero-shell--boundary {
@@ -7785,7 +7785,7 @@ kbd.app-shortcut-badge {
   }
   .marketing-root .marketing-section-card,
   .marketing-root .marketing-hero-shell {
-    border-radius: 24px !important;
+    border-radius: 24px;
   }
   .marketing-root .marketing-perspective-stage {
     padding: 1.15rem 1.15rem 1.2rem;
@@ -13925,18 +13925,18 @@ body.app-root[data-controller~="shortcuts"] .app-surface,
 body.app-root[data-controller~="shortcuts"] .app-table-surface,
 body.app-root[data-controller~="shortcuts"] .team-members-panel,
 body.app-root[data-controller~="shortcuts"] .settings-header-card {
-  border-color: #e2e8f0 !important;
-  border-radius: 16px !important;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  border-color: #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 
 body.app-root[data-controller~="shortcuts"] .app-surface .app-surface,
 body.app-root[data-controller~="shortcuts"] .app-surface .app-table-surface,
 body.app-root[data-controller~="shortcuts"] .app-table-surface .app-surface,
 body.app-root[data-controller~="shortcuts"] .app-table-surface .app-table-surface {
-  border-color: #e8eef5 !important;
-  border-radius: 12px !important;
-  box-shadow: none !important;
+  border-color: #e8eef5;
+  border-radius: 12px;
+  box-shadow: none;
 }
 
 body.app-root[data-controller~="shortcuts"] .app-ui-button {
@@ -14139,18 +14139,18 @@ body.app-root[data-controller~="shortcuts"] .app-page-shell--form .app-page-head
 }
 
 body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-header-card {
-  border-radius: 14px !important;
-  box-shadow: none !important;
+  border-radius: 14px;
+  box-shadow: none;
 }
 
 body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel {
-  border-radius: 14px !important;
-  box-shadow: none !important;
+  border-radius: 14px;
+  box-shadow: none;
 }
 
 body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .team-members-panel--secondary {
   background: #fcfdff;
-  border-color: #e8eef5 !important;
+  border-color: #e8eef5;
 }
 
 body.app-root[data-controller~="shortcuts"] .app-page-shell--settings-form .settings-subsection {
@@ -16695,6 +16695,3 @@ body.app-root[data-controller~="shortcuts"] .sales-dashboard .dashboard-onboardi
     grid-column: auto;
   }
 }
-
-
-

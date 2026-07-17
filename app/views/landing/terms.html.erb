@@ -7,37 +7,25 @@
       tag: :h1,
       title_class: "max-w-none" %>
 
-    <div class="mt-6 grid gap-4 text-sm leading-7 text-slate-700">
-      <p class="m-0 text-slate-500"><%= t("landing.view.terms.last_updated") %></p>
+    <div class="legal-copy">
+      <p class="legal-copy__updated"><%= t("landing.view.terms.last_updated") %></p>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.acceptance.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.acceptance.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.acceptance.title") %></h2><p><%= t("landing.view.terms.sections.acceptance.body") %></p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.account.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.account.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.account.title") %></h2><p><%= t("landing.view.terms.sections.account.body") %></p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.usage.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.usage.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.usage.title") %></h2><p><%= t("landing.view.terms.sections.usage.body") %></p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.availability.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.availability.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.availability.title") %></h2><p><%= t("landing.view.terms.sections.availability.body") %></p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.liability.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.liability.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.liability.title") %></h2><p><%= t("landing.view.terms.sections.liability.body") %></p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-4">
-        <h2 class="m-0 text-lg font-semibold text-slate-900"><%= t("landing.view.terms.sections.contact.title") %></h2>
-        <p class="mt-2 mb-0"><%= t("landing.view.terms.sections.contact.body") %></p>
+      <section class="legal-section"><h2><%= t("landing.view.terms.sections.contact.title") %></h2><p><%= t("landing.view.terms.sections.contact.body") %></p>
       </section>
     </div>
   <% end %>

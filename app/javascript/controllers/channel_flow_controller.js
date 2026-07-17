@@ -25,4 +25,23 @@ export default class extends Controller {
     this.copyTarget.select()
     this.element.dispatchEvent(new CustomEvent("rubusoo:signal", { bubbles: true, detail: { message: "Secure link copied" } }))
   }
+
+  sending() {
+    this.signalTarget.textContent = "Queued · Preparing output…"
+    this.element.classList.add("is-delivering")
+    this.submitTarget.disabled = true
+    this.submitTarget.dataset.originalLabel = this.submitTarget.value || this.submitTarget.textContent
+    if (this.submitTarget instanceof HTMLInputElement) this.submitTarget.value = "Sending…"
+    else this.submitTarget.textContent = "Sending…"
+  }
+
+  finished(event) {
+    if (event.detail.success) return
+    this.element.classList.remove("is-delivering")
+    this.element.classList.add("has-delivery-failure")
+    this.signalTarget.textContent = "Failed · Retry available"
+    this.submitTarget.disabled = false
+    if (this.submitTarget instanceof HTMLInputElement) this.submitTarget.value = "Retry delivery"
+    else this.submitTarget.textContent = "Retry delivery"
+  }
 }

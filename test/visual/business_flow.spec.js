@@ -1,6 +1,7 @@
 const { test, expect } = require("@playwright/test")
 const fs = require("fs")
 const path = require("path")
+const ExcelJS = require("exceljs")
 
 const root = path.resolve(__dirname, "../..")
 const seed = JSON.parse(fs.readFileSync(path.join(root, "tmp/visual_review_seed.json"), "utf8"))
@@ -16,9 +17,9 @@ async function login(page) {
 
 test("scenario A executes publish, email, buyer request and immutable acceptance", async ({ page, context }) => {
   await login(page)
-  const publish = await context.request.post("/quote_revisions", { form: { quote_id: seed.e2e_deal_id } })
-  expect(publish.ok()).toBeTruthy()
-  await page.goto(publish.url())
+  await page.goto(`/quotes/${seed.e2e_deal_id}/edit`)
+  await page.getByRole("link", { name: "Review & publish" }).click()
+  await page.getByRole("button", { name: "Publish Revision 1" }).click()
   await expect(page.getByText(/Published Version 1/).first()).toBeVisible()
 
   await page.locator('.channel-option[data-value="email_link"]').click()
@@ -43,14 +44,12 @@ test("scenario A executes publish, email, buyer request and immutable acceptance
   await expect(page).toHaveURL(/event=changes-requested/)
 
   await page.goto(`/deals/${seed.e2e_deal_id}`)
-  await expect(page.getByRole("heading", { name: "Prepare new version" })).toBeVisible()
+  await expect(page.getByText("Prepare new version", { exact: true }).first()).toBeVisible()
   await page.goto(`/quotes/${seed.e2e_deal_id}/edit`)
   await page.locator('input[name$="[quantity]"]').first().fill("3")
   await page.getByRole("button", { name: "Save quote" }).click()
   await expect(page.getByRole("button", { name: "Publish Revision 2" })).toBeVisible()
-  const publishUpdate = await context.request.post("/quote_revisions", { form: { quote_id: seed.e2e_deal_id } })
-  expect(publishUpdate.ok()).toBeTruthy()
-  await page.goto(publishUpdate.url())
+  await page.getByRole("button", { name: "Publish Revision 2" }).click()
   await expect(page.getByText(/Published Version 2/).first()).toBeVisible()
   const versionTwoRoomUrl = await page.locator(".delivery-link-row input").inputValue()
 
@@ -83,5 +82,52 @@ test("scenario A executes publish, email, buyer request and immutable acceptance
   fs.writeFileSync(path.join(output, "business-flow-executed.json"), JSON.stringify({
     scenario: "A", result: "passed", operations: ["publish_v1", "email_link", "buyer_request", "working_update", "publish_v2", "old_version_read_only", "acceptance", "order_confirmation", "close_won"],
     deal_id: seed.e2e_deal_id, executed_at: new Date().toISOString()
+  }, null, 2))
+})
+
+test("returned Excel executes download, edit, upload, review, apply and publish V2", async ({ page }) => {
+  await login(page)
+  const dealId = seed.e2e_excel_deal_id
+  await page.goto(`/quotes/${dealId}/edit`)
+  await page.getByRole("link", { name: "Review & publish" }).click()
+  await page.getByRole("button", { name: "Publish Revision 1" }).click()
+  await page.locator('.channel-option[data-value="excel_export"]').click()
+  await page.getByRole("button", { name: "Generate file" }).click()
+  await expect(page).toHaveURL(new RegExp(`/deals/${dealId}.*tab=documents`))
+
+  const downloadPromise = page.waitForEvent("download")
+  await page.getByRole("link", { name: "Download" }).first().click()
+  const download = await downloadPromise
+  const originalPath = path.join(output, "returned-excel-original.xlsx")
+  await download.saveAs(originalPath)
+  const workbook = new ExcelJS.Workbook()
+  await workbook.xlsx.readFile(originalPath)
+  const sheet = workbook.getWorksheet("Published quote")
+  const headerRow = sheet.getRow(5)
+  const quantityColumn = headerRow.values.findIndex(value => value === "Quantity")
+  const priceColumn = headerRow.values.findIndex(value => value === "Unit_price")
+  sheet.getRow(6).getCell(quantityColumn).value = 4
+  sheet.getRow(6).getCell(priceColumn).value = 49_250
+  const modifiedPath = path.join(output, "returned-excel-buyer-modified.xlsx")
+  await workbook.xlsx.writeFile(modifiedPath)
+
+  await page.goto(`/deals/${dealId}/responses/new`)
+  await page.locator('select[name="deal_response[kind]"]').selectOption("returned_excel")
+  await page.locator('select[name="deal_response[source]"]').selectOption("excel")
+  await page.locator('input[name="deal_response[attachment]"]').setInputFiles(modifiedPath)
+  await page.getByRole("button", { name: "Add to Conversation" }).click()
+  await expect(page.getByText("Structured review")).toBeVisible()
+  await expect(page.locator('.response-change strong').filter({ hasText: /quantity/i }).first()).toBeVisible()
+  await page.screenshot({ path: path.join(output, "returned-excel-review.png"), fullPage: true })
+  await page.getByRole("button", { name: "Apply selected changes to Working draft" }).click()
+  await expect(page).toHaveURL(new RegExp(`/quotes/${dealId}/edit`))
+  await expect(page.locator('input[name$="[quantity]"][value="4"]')).toHaveCount(1)
+  await page.getByRole("button", { name: "Save quote" }).click()
+  await page.getByRole("button", { name: "Publish Revision 2" }).click()
+  await expect(page.getByText(/Published Version 2/).first()).toBeVisible()
+
+  fs.writeFileSync(path.join(output, "returned-excel-flow.json"), JSON.stringify({
+    scenario: "returned_excel", result: "passed", deal_id: dealId,
+    assertions: ["downloaded_v1", "modified_quantity_and_price", "uploaded", "diff_visible", "applied_to_draft", "published_v2"]
   }, null, 2))
 })

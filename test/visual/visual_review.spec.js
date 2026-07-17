@@ -112,7 +112,8 @@ test("seller Deal workspace desktop", async ({ page }) => {
   await capture(page, "seller-library-products", "/library?section=products", "library-products", { width: 1440, height: 900 })
   await capture(page, "seller-library-formats", "/library?section=presets", "quote-formats", { width: 1440, height: 900 })
   await capture(page, "seller-settings", "/company_settings/edit", "completion-settings", { width: 1440, height: 900 })
-  await capture(page, "seller-smart-intake", "/inquiries/new", "smart-intake", { width: 1440, height: 900 })
+  await capture(page, "seller-inquiry-import", "/inquiries/new", "inquiry-import", { width: 1440, height: 900 })
+  await capture(page, "seller-smart-intake", `/inquiries/${seed.inquiry_id}`, "smart-intake-review", { width: 1440, height: 900 })
   await capture(page, "seller-quote-studio", `/quotes/${seed.edge_deals.no_image}/edit`, "working-draft", { width: 1440, height: 900 })
   await audit(page, "quote studio")
   business.push({ scenario: "visual-workspace", result: test.info().status, evidence: ["seller-versions.png", "seller-conversation.png", "buyer-room-desktop.png"] })
@@ -127,7 +128,7 @@ test("seller workspace real mobile reflow", async ({ page }) => {
   await capture(page, "seller-conversation-mobile", `${deal}?tab=conversation`, "mobile-conversation", { width: 390, height: 844 })
   await capture(page, "seller-acceptance-mobile", `${deal}/acceptance/new?version_id=${seed.version_two_id}`, "mobile-external-acceptance", { width: 390, height: 844 })
   await capture(page, "seller-delivery-mobile", `${deal}/deliver?version_id=${seed.version_two_id}`, "mobile-delivery", { width: 412, height: 915 })
-  await capture(page, "seller-smart-intake-mobile", "/inquiries/new", "mobile-smart-intake", { width: 390, height: 844 })
+  await capture(page, "seller-smart-intake-mobile", `/inquiries/${seed.inquiry_id}`, "mobile-smart-intake", { width: 390, height: 844 })
 })
 
 test("Buyer Room current, selection and acceptance", async ({ page }) => {

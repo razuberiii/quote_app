@@ -21,14 +21,22 @@ class PublishedWorkbookParser
       quote_rows = sheets.find { |data| data.dig(0, 0) == "Rubusoo Published Version" } || []
       metadata_rows = sheets.find { |data| data.any? { |row| row[0] == "version_id" } } || []
       metadata = metadata_rows.to_h { |row| [ row[0].to_s, row[1] ] }
-      header_index = quote_rows.index { |row| row[0] == "Item" }
-      item_rows = header_index ? quote_rows.drop(header_index + 1).take_while { |row| row[0].present? } : []
+      header_index = quote_rows.index { |row| %w[Item Line_ID].include?(row[0]) }
+      commercial_labels = [ "Shipping amount", "Discount amount", "Tax amount", "Total", "Incoterm", "Payment terms", "Delivery terms" ]
+      item_rows = if header_index
+        quote_rows.drop(header_index + 1).take_while { |row| row[0].present? && commercial_labels.exclude?(row[0].to_s) }
+      else
+        []
+      end
       items = item_rows.map do |row|
-        { "row" => row[0].to_i, "sku" => row[1].to_s, "description" => row[2].to_s,
+        { "line_id" => row[0].to_s, "row" => row[0].to_s, "sku" => row[1].to_s, "description" => row[2].to_s,
           "specifications" => row[3].to_s, "quantity" => row[4].to_d, "unit" => row[5].to_s,
           "unit_price" => row[6].to_d, "discount" => row[7].to_d, "amount" => row[8].to_d }
       end
-      commercial = quote_rows.filter_map { |row| [ row[0].to_s, row[1] ] if %w[Shipping Discount Tax Total Incoterm Payment\ terms Delivery\ terms].include?(row[0].to_s) }.to_h
+      commercial = quote_rows.filter_map do |row|
+        label = row[0].to_s.sub(/ amount\z/, "")
+        [ label, row[1] ] if %w[Shipping Discount Tax Total Incoterm Payment\ terms Delivery\ terms].include?(label)
+      end.to_h
       unsafe = @unsafe_cells || []
       Result.new(metadata, items, commercial, unsafe)
     end

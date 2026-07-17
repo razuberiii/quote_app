@@ -32,11 +32,15 @@ class VisualReviewSeeder
     seed_channel_history(deal, version_two, user)
     edge_deals = seed_edge_deals(company, buyer, products, user)
     e2e_deal = company.quotes.find_by(quote_no: "VR-E2E-001") || build_deal(company, buyer, products.first(2), "VR-E2E-001")
+    e2e_excel_deal = company.quotes.find_by(quote_no: "VR-E2E-XLSX") || build_deal(company, buyer, products.first(2), "VR-E2E-XLSX")
+    inquiry = seed_inquiry(company, user, products)
     payload = {
       "email" => user.email, "password" => PASSWORD, "deal_id" => deal.id,
       "version_one_id" => version_one.id, "version_two_id" => version_two.id,
       "buyer_token" => version_two.secure_token, "old_buyer_token" => version_one.secure_token,
-      "e2e_deal_id" => e2e_deal.id, "edge_deals" => edge_deals.transform_values(&:id)
+      "e2e_deal_id" => e2e_deal.id, "e2e_excel_deal_id" => e2e_excel_deal.id,
+      "inquiry_id" => inquiry.id,
+      "edge_deals" => edge_deals.transform_values(&:id)
     }
     FileUtils.mkdir_p(Rails.root.join("tmp"))
     Rails.root.join("tmp/visual_review_seed.json").write(JSON.pretty_generate(payload))
@@ -44,6 +48,29 @@ class VisualReviewSeeder
   end
 
   private
+
+  def seed_inquiry(company, user, products)
+    inquiry = company.inquiries.find_or_initialize_by(source_type: "email", source_text: "Hello, please quote 2 CNC fiber laser cells and 3 servo feeding lines for our Hamburg plant. Power is 380V / 50Hz / 3 phase. We need CIF Hamburg, export plywood cases and delivery before October. Please confirm commissioning and spare parts availability.")
+    inquiry.created_by = user
+    inquiry.status = "review"
+    inquiry.extracted_data = {
+      "customer" => "Helix Process GmbH", "contact_name" => "Anna Keller", "contact_email" => "anna@helix-hamburg.example",
+      "country" => "Germany", "currency" => "USD",
+      "commercial_terms" => { "destination" => "Hamburg", "incoterm" => "CIF Hamburg", "delivery" => "Before October", "packing" => "Export plywood cases", "freight_amount" => nil, "freight_source" => nil },
+      "products" => [
+        { "name" => products[0].name, "model" => products[0].sku, "quantity" => 2, "unit" => "set", "unit_price" => nil,
+          "evidence" => "2 CNC fiber laser cells", "catalog_product_id" => products[0].id, "specifications" => { "voltage" => "380V / 50Hz / 3 phase" } },
+        { "name" => products[1].name, "model" => products[1].sku, "quantity" => 3, "unit" => "set", "unit_price" => nil,
+          "evidence" => "3 servo feeding lines", "catalog_product_id" => products[1].id, "specifications" => { "voltage" => "380V / 50Hz / 3 phase" } }
+      ],
+      "questions" => [ "Can commissioning be included?", "Which spare parts are recommended?" ],
+      "missing_information" => [ "Freight quote", "Confirmed delivery date" ],
+      "evidence" => { "customer" => "our Hamburg plant", "destination" => "CIF Hamburg", "incoterm" => "CIF Hamburg", "delivery" => "before October", "packing" => "export plywood cases" }
+    }
+    inquiry.field_states = { "customer" => "confirmed", "products" => "matched", "price" => "missing", "freight" => "missing" }
+    inquiry.save!
+    inquiry
+  end
 
   def seed_products(company)
     [

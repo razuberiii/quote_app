@@ -76,6 +76,7 @@ gem "prawn"
 gem "prawn-table"
 gem "grover"
 gem "wicked_pdf"
+gem "pdf-reader"
 
 # Excel export
 gem "axlsx"

@@ -14,7 +14,7 @@
   </header>
   <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor" } do |f| %>
     <aside class="studio-structure">
-      <div><p class="section-kicker">Document structure</p><h2>Build the buyer’s decision path.</h2></div>
+      <div><p class="section-kicker">Structure</p><h2>Buyer decision path</h2></div>
       <nav class="studio-outline">
         <% [["cover","Cover"],["introduction","Introduction"],["products","Products"],["options","Options"],["pricing","Pricing"],["shipping","Shipping"],["terms","Commercial terms"],["attachments","Attachments"],["acceptance","Acceptance"]].each_with_index do |(anchor,label), index| %>
           <a href="#studio-<%= anchor %>" class="<%= 'is-active' if anchor == 'products' %>"><span><%= (index + 1).to_s.rjust(2,"0") %></span><strong><%= label %></strong><em><%= %w[products pricing].include?(anchor) && missing.any? ? "Needs review" : "On" %></em></a>
@@ -29,7 +29,7 @@
         <section id="studio-cover" class="studio-cover">
           <div class="studio-cover__brand"><span><%= @quote.company.name.first %></span><strong><%= @quote.company.name %></strong></div>
           <p class="section-kicker">Prepared for <%= @quote.customer.name %></p>
-          <%= f.text_field :custom_title, class: "studio-inline-title", placeholder: "A clear proposal for your next order" %>
+          <%= f.text_area :custom_title, rows: 2, class: "studio-inline-title", placeholder: "A clear proposal for your next order" %>
           <%= f.text_area :notes, rows: 3, class: "studio-inline-intro", placeholder: "Write a short introduction for the buyer. Internal notes belong outside the document." %>
           <dl class="studio-cover__meta"><div><dt>Quote</dt><dd><%= @quote.quote_no %></dd></div><div><dt><%= f.label :issued_on, "Issued" %></dt><dd><%= f.date_field :issued_on %></dd></div><div><dt><%= f.label :valid_until, "Valid until" %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div><div><dt><%= f.label :currency %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div></dl>
         </section>
@@ -40,6 +40,7 @@
             <%= f.fields_for :quote_items do |item_fields| %>
               <% item = item_fields.object %>
               <article class="studio-product">
+                <div class="studio-product__tools"><button type="button" data-action="studio-motion#duplicateItem">Duplicate</button><label><%= item_fields.check_box :_destroy %><span>Remove</span></label></div>
                 <% product_image = item.effective_image_attachment %><div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span><%= item.description.to_s.first || "P" %></span><small>Add image</small><% end %></div>
                 <div class="studio-product__content">
                   <div class="studio-product__top"><div><%= item_fields.text_field :description, class: "studio-product__name", placeholder: "Product name" %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / model" %><%= item_fields.text_field :unit_snapshot, placeholder: "Unit" %></div></div><label class="studio-mode"><span>Buyer control</span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [mode.humanize,mode] } %></label></div>
@@ -50,7 +51,7 @@
               </article>
             <% end %>
           </div>
-          <button type="button" class="studio-add-product">＋ Add from Catalog or create temporary item</button>
+          <button type="button" class="studio-add-product" data-action="studio-motion#newItem">＋ Add a temporary item</button>
         </section>
 
         <section id="studio-pricing" class="studio-pricing">

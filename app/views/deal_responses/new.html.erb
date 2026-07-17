@@ -11,7 +11,7 @@
     <div><%= form.label :context_type, "Context" %><%= form.select :context_type, DealResponse::CONTEXT_TYPES.map { |type| [type.humanize, type] }, {}, class: "app-ui-input" %></div>
     <div><%= form.label :context_key, "Product / fee / term reference" %><%= form.text_field :context_key, class: "app-ui-input" %></div>
     <div class="context-form__wide"><%= form.label :body, "What did the buyer say or change?" %><%= form.text_area :body, rows: 5, class: "app-ui-input" %></div>
-    <div class="context-form__wide"><%= form.label :attachment, "Returned file, PO, PDF or evidence" %><%= form.file_field :attachment %><small>Spreadsheet formulas are treated as untrusted input and never executed.</small></div>
+    <div class="context-form__wide"><%= form.label :attachment, "Returned file, PO, PDF or evidence" %><%= form.file_field :attachment, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain" %><small>PDF, XLSX, CSV and TXT are parsed as untrusted evidence. Spreadsheet formulas are never executed.</small></div>
     <footer class="context-form__wide"><%= form.submit "Add to Conversation", class: "button button--primary" %></footer>
   <% end %>
 </main>

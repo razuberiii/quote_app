@@ -28,13 +28,13 @@ class PublishedVersionFileGenerator
     sheet.add_row [ "Deal ID", @revision.quote_id, "Version ID", @revision.id, "Quote", safe(@revision.quote.quote_no), "Version", @revision.number ]
     sheet.add_row [ "Buyer", safe(@revision.snapshot["customer_name"]), "Currency", safe(@revision.currency), "Published", @revision.published_at.iso8601 ]
     sheet.add_row []
-    sheet.add_row %w[Item SKU Description Specifications Quantity Unit Unit_price Discount Amount], style: header
+    sheet.add_row %w[Line_ID SKU Description Specifications Quantity Unit Unit_price Discount Amount], style: header
     Array(@revision.snapshot["quote_items"]).each_with_index do |item, index|
       quantity = item["quantity"].to_d
       unit_price = item["unit_price"].to_d
       discount = item["discount_amount"].to_d
       specs = Array(item["specifications"]).map { |spec| "#{spec['key'] || spec['name']}: #{spec['value']}" }.join(" | ")
-      sheet.add_row [ index + 1, safe(item["sku_snapshot"]), safe(item["description"]), safe(specs), quantity,
+      sheet.add_row [ item["id"].presence || "line-#{index + 1}", safe(item["sku_snapshot"]), safe(item["description"]), safe(specs), quantity,
         safe(item["unit_snapshot"]), unit_price, discount, (quantity * unit_price) - discount ],
         style: [ nil, nil, nil, nil, nil, nil, money, money, money ]
     end

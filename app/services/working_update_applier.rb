@@ -24,11 +24,11 @@ class WorkingUpdateApplier
   end
 
   def apply(entry)
-    if (match = entry["path"].match(/\Aitems\.(\d+)\z/))
-      return apply_item_change(entry, match[1].to_i)
+    if (match = entry["path"].match(/\Aitems\.(\d+|new_\d+)\z/))
+      return apply_item_change(entry, match[1].to_s.start_with?("new_") ? nil : match[1].to_i)
     end
     if (match = entry["path"].match(/\Aitems\.(\d+)\.(.+)\z/))
-      item = @quote.quote_items.ordered[match[1].to_i]
+      item = @quote.quote_items.find_by(id: entry["item_id"]) || @quote.quote_items.ordered[match[1].to_i]
       return unless item
       attribute = { "sku" => :sku_snapshot, "unit" => :unit_snapshot, "discount" => :discount_amount,
         "specifications" => :specifications_text }.fetch(match[2], match[2]).to_sym
@@ -42,7 +42,7 @@ class WorkingUpdateApplier
 
   def apply_item_change(entry, index)
     if entry["kind"] == "removed"
-      @quote.quote_items.ordered[index]&.destroy!
+      @quote.quote_items.ordered[index]&.destroy! if index
     elsif entry["kind"] == "added"
       source = entry["new"].to_h
       @quote.quote_items.create!(

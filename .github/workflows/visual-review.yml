@@ -49,6 +49,7 @@ jobs:
           node -e 'process.stdout.write(`CHROME_BIN=${require("playwright").chromium.executablePath()}\n`)' >> "$GITHUB_ENV"
       - name: Prepare deterministic visual-review database
         run: |
+          mkdir -p tmp/storage tmp/visual-review
           bundle exec rails db:prepare
           SECRET_KEY_BASE_DUMMY=1 bundle exec rails assets:precompile
           bundle exec rails visual_review:seed
@@ -63,6 +64,15 @@ jobs:
       - name: Generate immutable output evidence
         if: always()
         run: bundle exec rails visual_review:evidence
+      - name: Verify audit evidence is substantive
+        if: always()
+        run: |
+          test -s tmp/visual-review/generated/po-comparison-report.json
+          test -s tmp/visual-review/generated/returned-excel-difference-report.json
+          test -n "$(find tmp/visual-review/generated -name '*.pdf' -size +1000c -print -quit)"
+          test -n "$(find tmp/visual-review/generated -name '*.xlsx' -size +1000c -print -quit)"
+          ruby -rjson -e 'abort "empty PO diff" if JSON.parse(File.read("tmp/visual-review/generated/po-comparison-report.json"))["changes"].to_a.empty?'
+          ruby -rjson -e 'abort "empty Excel diff" if JSON.parse(File.read("tmp/visual-review/generated/returned-excel-difference-report.json"))["changes"].to_a.empty?'
       - name: Upload complete visual audit evidence
         if: always()
         uses: actions/upload-artifact@v5
@@ -72,4 +82,4 @@ jobs:
             tmp/visual-review/
             tmp/visual-review-server.log
           retention-days: 30
-          if-no-files-found: warn
+          if-no-files-found: error

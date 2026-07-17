@@ -14,7 +14,9 @@ export default class extends Controller {
     this.externalTarget.hidden = !external
     this.emailTarget.hidden = !option.dataset.value.startsWith("email")
     this.linkTarget.hidden = option.dataset.value !== "buyer_room_link"
-    this.submitTarget.textContent = external ? "Record external delivery" : option.dataset.value.includes("download") || option.dataset.value.includes("export") ? "Generate file" : "Deliver Version"
+    const submitLabel = external ? "Record external delivery" : option.dataset.value.includes("download") || option.dataset.value.includes("export") ? "Generate file" : "Deliver Version"
+    if (this.submitTarget instanceof HTMLInputElement) this.submitTarget.value = submitLabel
+    else this.submitTarget.textContent = submitLabel
     this.signalTarget.textContent = option.dataset.value.includes("link") ? "Buyer Room activity available" : "View status unavailable"
   }
 

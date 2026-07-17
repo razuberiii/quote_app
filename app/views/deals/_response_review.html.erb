@@ -3,6 +3,8 @@
   <header>
     <div><span>Structured review</span><strong><%= review['severity'].to_s.humanize %></strong></div>
     <% if review['po_number'].present? %><small>PO <%= review['po_number'] %></small><% end %>
+    <% if review['attachment_filename'].present? %><small><%= review['attachment_filename'] %> · <%= review['parser'].to_s.humanize %></small><% end %>
+    <% if review['parser_error'].present? %><small class="response-review__warning">The attachment could not be parsed: <%= review['parser_error'] %>. Keep it as evidence or request a clearer file.</small><% end %>
     <% if review['source_valid'] == false %><small class="response-review__warning">Source identifiers do not match this Version. Review only—automatic apply is blocked.</small><% end %>
   </header>
   <% if review['unsafe_cells'].present? %>
@@ -13,7 +15,7 @@
       <% review['changes'].each do |change| %>
         <label class="response-change response-change--<%= change['kind'] %>">
           <%= check_box_tag "selected_paths[]", change['path'], change['kind'] != 'unsafe', disabled: review['source_valid'] == false %>
-          <span><em><%= change['kind'].humanize %></em><strong><%= change['path'].to_s.gsub('.', ' › ').humanize %></strong><small><del><%= change['old'].is_a?(Hash) ? change['old'].to_json : change['old'] %></del><b>→</b><ins><%= change['new'].is_a?(Hash) ? change['new'].to_json : change['new'] %></ins></small></span>
+          <span><em><%= change['kind'].humanize %><%= " · #{change['match_confidence'].to_s.humanize} match" if change['match_confidence'].present? %></em><strong><%= change['path'].to_s.gsub('.', ' › ').humanize %></strong><small><del><%= change['old'].is_a?(Hash) ? change['old'].to_json : change['old'] %></del><b>→</b><ins><%= change['new'].is_a?(Hash) ? change['new'].to_json : change['new'] %></ins></small></span>
         </label>
       <% end %>
       <div class="response-review__actions"><%= submit_tag "Apply selected changes to Working draft", class: "button button--primary", disabled: review['source_valid'] == false %><%= link_to "Keep as evidence only", response_disposition_deal_path(@deal, response_id: response.id, status: "evidence_only"), data: { turbo_method: :patch }, class: "button button--ghost" %></div>

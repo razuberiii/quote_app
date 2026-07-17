@@ -136,6 +136,16 @@ class ChannelNeutralDealFlowTest < ActiveSupport::TestCase
     end
     package.workbook.add_worksheet(name: "Rubusoo metadata") do |sheet|
       sheet.add_row [ "deal_id", @quote.id ]; sheet.add_row [ "version_id", @version.id ]
+      canonical = lambda do |value|
+        if value.is_a?(Hash)
+          value.keys.sort.to_h { |key| [ key, canonical.call(value[key]) ] }
+        elsif value.is_a?(Array)
+          value.map { |entry| canonical.call(entry) }
+        else
+          value
+        end
+      end
+      sheet.add_row [ "secure_fingerprint", Digest::SHA256.hexdigest(canonical.call(@version.snapshot).to_json) ]
     end
     response = @quote.deal_responses.new(company: @company, quote_revision: @version, recorded_by: @user,
       kind: "returned_excel", source: "excel", received_at: Time.current, idempotency_key: SecureRandom.uuid)

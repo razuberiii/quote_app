@@ -12,13 +12,16 @@ class PurchaseOrderComparator
 
   def call
     po = parse(@response.body.to_s)
+    attachment_data = PurchaseOrderAttachmentParser.new(@response.attachment).call
+    po = po.deep_merge(attachment_data) { |_key, body_value, attachment_value| attachment_value.presence || body_value }
     changes = compare_items(Array(po["items"])) + compare_commercial(po)
     severity = severity_for(po, changes)
     {
       "po_number" => po["po_number"], "buyer" => po["buyer"], "severity" => severity,
       "changes" => changes, "review_required" => severity != "exact_match",
       "quoted_total" => @revision.total.to_s("F"), "stated_total" => po["total"].to_s,
-      "parser" => po.delete("_parser")
+      "parser" => po.delete("_parser"), "parser_error" => po.delete("_error"),
+      "attachment_filename" => @response.attachment.filename.to_s.presence
     }
   end
 
@@ -34,7 +37,8 @@ class PurchaseOrderComparator
       normalized = key.downcase.gsub(/[^a-z0-9]+/, "_").delete_suffix("_")
       values[normalized] = value if value.present?
     end
-    values["total"] ||= body[/\b(?:grand\s+total|total|amount)\s*[:=]?\s*[A-Z]{0,3}\s*([\d,.]+)/i, 1].to_s.delete(",")
+    extracted_total = body[/\b(?:grand\s+total|total|amount)\s*[:=]?\s*[A-Z]{0,3}\s*([\d,.]+)/i, 1].to_s.delete(",").presence
+    values["total"] ||= extracted_total
     values["currency"] ||= body[/\b(USD|EUR|GBP|CNY|JPY|AUD|CAD|SGD|HKD)\b/i, 1]&.upcase
     values["_parser"] = "key_value_text"
     values
@@ -45,21 +49,37 @@ class PurchaseOrderComparator
     return [] if items.empty?
 
     keys = %w[sku description quantity unit unit_price amount specifications]
-    max = [ expected.length, items.length ].max
-    max.flat_map do |index|
-      old_item, new_item = expected[index], items[index]&.deep_stringify_keys
-      if old_item.blank?
-        [ change("added", "items.#{index}", nil, new_item, true) ]
-      elsif new_item.blank?
-        [ change("removed", "items.#{index}", item_summary(old_item), nil, true) ]
-      else
+    matched = []
+    changes = items.each_with_index.flat_map do |raw_item, returned_index|
+      new_item = raw_item.deep_stringify_keys
+      match = match_item(expected, new_item, matched)
+      if match
+        index, old_item, confidence = match
+        matched << index
         keys.filter_map do |field|
           old_value = item_value(old_item, field)
           new_value = new_item[field]
-          change("changed", "items.#{index}.#{field}", old_value, new_value, material_item_field?(field)) unless new_value.nil? || equivalent?(old_value, new_value)
+          change("changed", "items.#{index}.#{field}", old_value, new_value, material_item_field?(field), confidence) unless new_value.nil? || equivalent?(old_value, new_value)
         end
+      else
+        [ change("added", "items.new_#{returned_index}", nil, new_item, true, "unmatched") ]
       end
     end
+    expected.each_with_index { |item, index| changes << change("removed", "items.#{index}", item_summary(item), nil, true, "not_returned") unless matched.include?(index) }
+    changes
+  end
+
+  def match_item(expected, returned, used)
+    candidates = expected.each_with_index.reject { |_item, index| used.include?(index) }
+    sku = returned["sku"].to_s
+    exact_sku = candidates.find { |item, _index| sku.present? && item["sku_snapshot"].to_s.casecmp?(sku) }
+    return [ exact_sku[1], exact_sku[0], "sku" ] if exact_sku
+    model = returned["model"].to_s
+    model_match = candidates.find { |item, _index| model.present? && [ item["sku_snapshot"], item["description"] ].compact.any? { |value| value.to_s.downcase.include?(model.downcase) } }
+    return [ model_match[1], model_match[0], "model" ] if model_match
+    descriptive = candidates.find { |item, _index| item["description"].to_s.squish.casecmp?(returned["description"].to_s.squish) && returned["description"].present? }
+    return [ descriptive[1], descriptive[0], "description" ] if descriptive
+    nil
   end
 
   def compare_commercial(po)
@@ -71,7 +91,7 @@ class PurchaseOrderComparator
   end
 
   def severity_for(po, changes)
-    return "review_required" if po.except("_parser").values.compact_blank.empty?
+    return "review_required" if po["_error"].present? || po.except("_parser", "_error").values.compact_blank.empty?
     return "exact_match" if changes.empty?
     changes.any? { |entry| entry["material"] } ? "material_difference" : "minor_difference"
   end
@@ -96,8 +116,9 @@ class PurchaseOrderComparator
     end
   end
 
-  def change(kind, path, old_value, new_value, material)
-    { "kind" => kind, "path" => path, "old" => old_value, "new" => new_value, "material" => material, "selected" => true }
+  def change(kind, path, old_value, new_value, material, confidence = nil)
+    { "kind" => kind, "path" => path, "old" => old_value, "new" => new_value,
+      "material" => material, "match_confidence" => confidence, "selected" => true }
   end
 
   def item_summary(item)

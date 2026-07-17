@@ -31,6 +31,7 @@ jobs:
       DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/quote_app_test
       VISUAL_BASE_URL: http://127.0.0.1:3100
       GITHUB_SHA: ${{ github.sha }}
+      RAILS_SERVE_STATIC_FILES: "1"
 
     steps:
       - uses: actions/checkout@v5

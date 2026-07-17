@@ -18,6 +18,7 @@ class MarketingInteractionsTest < ApplicationSystemTestCase
     visit "/"
     assert_text "From messy inquiry"
     assert_text "Buyer Room"
-    assert_link "Open live demo"
+    assert_link "Try the Seller Demo"
+    assert_link "Experience Buyer Room"
   end
 end

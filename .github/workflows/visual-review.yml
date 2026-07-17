@@ -45,7 +45,7 @@ jobs:
         run: |
           npm ci
           npx playwright install --with-deps chromium
-          echo "CHROME_BIN=$(node -e \"console.log(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+          echo "CHROME_BIN=$(node -p 'require(\"playwright\").chromium.executablePath()')" >> "$GITHUB_ENV"
       - name: Prepare deterministic visual-review database
         run: |
           bundle exec rails db:prepare

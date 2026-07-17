@@ -378,6 +378,7 @@ data-action="click->clipboard#copy"
 - Standard control radius is `8px`, panels are `10px–12px`, and larger radii are reserved for dialogs only. V2 styles must not use `!important` to defeat legacy rules.
 - Marketing product compositions are connected panels at desktop sizes and become ordinary full-width responsive sections below `760px`; they never use device or browser mockup frames.
 - Seller pages use a graphite OS shell. Quote Studio owns a dark structure rail, a light buyer-facing canvas and a dark command rail.
+- Quote Studio kickers on graphite surfaces use the accessible signal-blue token (`#8aa7ff`); darker document-blue is reserved for light canvas surfaces.
 - Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.
 - Mobile verification widths are `360px`, `390px`, and `412px`; page gutters are `16px–18px`, never a scaled desktop viewport.
 

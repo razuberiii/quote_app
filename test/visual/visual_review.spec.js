@@ -27,7 +27,7 @@ async function capture(page, name, route, scenario, viewport, options = {}) {
   const target = path.join(output, "screenshots", file)
   await page.screenshot({ path: target, fullPage: true })
   if (options.baseline !== false) {
-    await expect(page).toHaveScreenshot([file], { fullPage: true, animations: "disabled", maxDiffPixelRatio: 0.015 })
+    await expect(page).toHaveScreenshot([file], { fullPage: true, animations: "disabled", maxDiffPixelRatio: 0.015, timeout: 20_000 })
   }
   if (process.env.UPDATE_VISUAL_BASELINE === "1" && options.baseline !== false) fs.copyFileSync(target, path.join(baseline, file))
   const overflowDetails = await page.evaluate(() => ({

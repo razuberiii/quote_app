@@ -64,7 +64,7 @@ class ProductCatalogParser
     price = decimal(data["explicit_price"])
     data.slice("name", "sku", "model", "category", "description", "unit", "moq", "lead_time", "packing", "currency")
       .merge("explicit_price" => price, "confidence" => 0.92,
-             "evidence" => [{ "source" => source, "location" => location }])
+             "evidence" => [ { "source" => source, "location" => location } ])
   end
 
   def neutralize(value, source, row, column, warnings)

@@ -23,13 +23,9 @@ class MarketingScreenshotsTest < ApplicationSystemTestCase
 
   PAGES = [
     { slug: "home", path: "/" },
-    { slug: "resources", path: "/resources" },
-    { slug: "quotation-software", path: "/foreign-trade-quotation-software" },
-    { slug: "quotation-crm", path: "/quotation-crm-for-export-teams" },
-    { slug: "version-control", path: "/quote-revision-control" },
-    { slug: "shared-quotation", path: "/buyer-facing-quotation-link" },
-    { slug: "vs-excel", path: "/quotation-software-vs-excel" },
-    { slug: "vs-erp", path: "/quotation-software-vs-erp" }
+    { slug: "pricing", path: "/pricing" },
+    { slug: "seller-demo", path: "/seller-demo" },
+    { slug: "buyer-demo", path: "/buyer-demo" }
   ].freeze
 
   test "capture marketing pages across common breakpoints" do

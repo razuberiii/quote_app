@@ -3,6 +3,7 @@ module StructuredSchemas
   def self.nullable_number = { "type" => [ "number", "null" ] }
   def self.array(items) = { "type" => "array", "items" => items }
   def self.object(properties, required) = { "type" => "object", "additionalProperties" => false, "required" => required, "properties" => properties }
+  def self.specifications = array(object({ "name" => { "type" => "string" }, "value" => nullable_string }, %w[name value]))
 
   VERSION = "2026-07-18".freeze
 
@@ -16,7 +17,7 @@ module StructuredSchemas
       "products" => array(object({
         "name" => { "type" => "string" }, "model" => nullable_string,
         "quantity" => nullable_number, "unit" => nullable_string,
-        "specifications" => { "type" => "object", "additionalProperties" => { "type" => [ "string", "null" ] } },
+        "specifications" => specifications,
         "packing" => nullable_string, "lead_time" => nullable_string,
         "image_candidates" => array({ "type" => "string" }), "catalog_candidates" => array({ "type" => "string" }),
         "confidence" => { "type" => "number", "minimum" => 0, "maximum" => 1 },
@@ -42,9 +43,9 @@ module StructuredSchemas
       "products" => array(object({
         "name" => { "type" => "string" }, "sku" => nullable_string, "model" => nullable_string,
         "category" => nullable_string, "description" => nullable_string, "unit" => nullable_string,
-        "specifications" => { "type" => "object", "additionalProperties" => { "type" => [ "string", "null" ] } },
+        "specifications" => specifications,
         "variants" => array(object({ "name" => { "type" => "string" }, "sku" => nullable_string,
-          "specifications" => { "type" => "object", "additionalProperties" => { "type" => [ "string", "null" ] } },
+          "specifications" => specifications,
           "explicit_price" => nullable_number, "currency" => nullable_string },
           %w[name sku specifications explicit_price currency])), "moq" => nullable_number, "lead_time" => nullable_string,
         "packing" => nullable_string, "weight" => nullable_string, "dimensions" => nullable_string,

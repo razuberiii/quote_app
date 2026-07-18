@@ -9,7 +9,7 @@ class StructuredAiClient
 
   def initialize(company:, source_record:, analysis_type:, schema:, system_prompt:,
     api_key: ENV["OPENAI_API_KEY"], base_url: ENV.fetch("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-    model: ENV.fetch("OPENAI_MODEL", "gpt-5.5"), http_client: Net::HTTP)
+    model: ENV.fetch("OPENAI_MODEL", "gpt-5.6-luna"), http_client: Net::HTTP)
     @company = company; @source_record = source_record; @analysis_type = analysis_type
     @schema = schema; @system_prompt = system_prompt; @api_key = api_key.to_s
     @base_url = base_url.to_s.delete_suffix("/"); @model = model; @http_client = http_client

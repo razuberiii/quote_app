@@ -52,6 +52,8 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     package.serialize(file.path)
     upload = Rack::Test::UploadedFile.new(file.path, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", original_filename: "unknown.xlsx")
 
+    original_api_key = ENV["OPENAI_API_KEY"]
+    ENV["OPENAI_API_KEY"] = nil
     post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
 
     batch = @user.company.product_import_batches.order(:id).last
@@ -60,6 +62,7 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "pending", batch.product_import_candidates.first.decision
     assert_equal "failed", batch.processing_report.first["status"]
   ensure
+    ENV["OPENAI_API_KEY"] = original_api_key
     file&.close!
   end
 end

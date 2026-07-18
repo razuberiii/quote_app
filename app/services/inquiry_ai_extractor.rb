@@ -7,7 +7,7 @@ class InquiryAiExtractor
     Never infer or estimate price, freight, tax, insurance, exchange rate, duty, lead
     time, company facts, or product identity. Use null for unknown values. Every
     non-null candidate must cite an evidence id whose excerpt is copied from the
-    source. confidence describes extraction certainty, not commercial validity.
+    source. specifications must use a [{name, value}] array. confidence describes extraction certainty, not commercial validity.
   PROMPT
 
   def initialize(inquiry: nil, **client_options)
@@ -41,7 +41,8 @@ class InquiryAiExtractor
     products = Array(data["products"]).map do |product|
       evidence = Array(product["evidence_ids"]).filter_map { |id| evidence_by_id[id]&.dig("excerpt") }.join(" · ")
       product.slice("name", "model", "quantity", "unit", "specifications", "packing", "lead_time", "confidence", "evidence_ids")
-        .merge("evidence" => evidence.presence, "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil)
+        .merge("specifications" => specification_hash(product["specifications"]),
+          "evidence" => evidence.presence, "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil)
     end
     field_evidence = Array(data["evidence"]).each_with_object({}) do |item, result|
       key = item["field_path"].to_s.split(".").last
@@ -56,5 +57,12 @@ class InquiryAiExtractor
       "warnings" => data["warnings"], "evidence" => field_evidence,
       "evidence_records" => data["evidence"]
     }
+  end
+
+  def specification_hash(value)
+    Array(value).each_with_object({}) do |row, result|
+      name = row["name"].to_s.strip
+      result[name] = row["value"] if name.present? && row["value"].present?
+    end
   end
 end

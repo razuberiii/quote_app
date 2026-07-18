@@ -1,12 +1,13 @@
 <%= render "shared/settings_header", title: t("users.registrations.view.edit.header_title"), section: :account %>
 
-<section class="team-members-panel">
+<div class="account-settings-layout">
+<section class="team-members-panel account-settings-layout__profile">
   <h2><%= t("users.registrations.view.edit.personal_profile") %></h2>
   <p class="team-members-hint"><%= t("users.registrations.view.edit.profile_hint") %></p>
-  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_profile", method: :put, multipart: true, class: "app-form-stack", data: { turbo: false, dirty_guard: true } }) do |f| %>
+  <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { id: "edit_user_profile", method: :put, multipart: true, class: "app-form-stack account-profile-form", data: { turbo: false, dirty_guard: true } }) do |f| %>
     <%= render "devise/shared/error_messages", resource: resource %>
 
-    <div class="account-avatar-row">
+    <div class="account-avatar-row account-profile-form__wide">
       <% has_avatar = resource.avatar.attached? && resource.avatar.blob&.persisted? %>
       <label class="account-avatar-preview account-avatar-preview-trigger" for="user_avatar_upload">
         <% if has_avatar %>
@@ -28,7 +29,7 @@
       </div>
     </div>
 
-    <div>
+    <div class="account-profile-form__wide">
       <%= f.label :username, t("users.registrations.view.edit.username") %>
       <p class="team-members-hint"><%= t("users.registrations.view.edit.username_hint") %></p>
       <%= f.text_field :username, required: true, minlength: 3, maxlength: 32, class: ui_input_classes %>
@@ -50,7 +51,7 @@
       <%= f.text_field :job_title, placeholder: t("users.registrations.view.edit.job_title_placeholder"), class: ui_input_classes %>
     </div>
 
-    <div>
+    <div class="account-profile-form__wide">
       <%= f.label :time_zone, t("users.registrations.view.edit.time_zone") %>
       <%= f.select :time_zone,
                    time_zone_options_for_select,
@@ -59,11 +60,11 @@
     </div>
 
     <%= f.hidden_field :email, value: resource.email %>
-    <%= f.submit t("users.registrations.view.edit.update_profile"), class: "app-ui-button app-ui-button--primary" %>
+    <%= f.submit t("users.registrations.view.edit.update_profile"), class: "app-ui-button app-ui-button--primary account-profile-form__wide" %>
   <% end %>
 </section>
 
-<section class="team-members-panel">
+<section class="team-members-panel account-settings-layout__security">
   <h2><%= t("users.registrations.view.edit.security_settings") %></h2>
   <p class="team-members-hint"><%= t("users.registrations.view.edit.security_settings_hint") %></p>
 
@@ -106,13 +107,14 @@
   <% end %>
 </section>
 
-<section class="team-members-panel">
+<section class="team-members-panel account-settings-layout__invitations">
   <h2><%= t("users.registrations.view.edit.company_invitations") %></h2>
   <p class="team-members-hint">
     <%= t("users.registrations.view.edit.pending_invitations", count: pending_team_invitations_count) %>
     <%= link_to t("users.registrations.view.edit.open_invitations"), team_invitations_path %>
   </p>
 </section>
+</div>
 <!-- Email Change Modal -->
 <div id="email-change-modal" class="neo-modal" hidden>
   <div class="neo-modal__panel">

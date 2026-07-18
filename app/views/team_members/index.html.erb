@@ -1,6 +1,7 @@
 <%= render "shared/settings_header", title: t("team_members.view.index.header_title"), section: :team %>
 
 <section class="app-page-shell app-page-shell--settings-form team-admin-shell">
+  <div class="team-admin-shell__top">
   <article class="app-surface team-members-panel">
     <div class="app-section-heading">
       <h2><%= t("team_members.view.index.overview_title") %></h2>
@@ -38,6 +39,7 @@
       <%= f.submit t("team_members.view.index.create_invitation"), class: ui_button_classes(:primary, "team-invite-submit") %>
     <% end %>
   </article>
+  </div>
 
   <article class="app-table-surface team-members-panel team-members-panel--secondary">
     <div class="app-section-heading">

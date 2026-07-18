@@ -18,6 +18,10 @@ Catalog review uses `.import-coverage*` for the page/Sheet processing ledger and
 
 Settings upload controls and account secondary actions remain dark operating-surface controls. Native file selector buttons are normalized inside `.upload-control`; white legacy upload and security buttons are not permitted.
 
+### Motion direction
+
+The shared motion grammar mirrors the Remotion timeline rules while remaining native CSS/Stimulus in the live Rails UI. Use one normalized progress curve: `--motion-crisp: cubic-bezier(.16,1,.3,1)` for entrances, `--motion-editorial` for quiet status breathing, and `--motion-pop` only for small brand emphasis. Page scenes enter once, sibling sections use bounded 55–70ms sequencing, and persistent motion is limited to live/confirmed status signals. Buttons may use the shared light sweep, rows may translate at most 4px on hover, and inputs use a focus glow without layout movement. Every motion selector must have a `prefers-reduced-motion` opt-out. Remotion itself is reserved for rendered product-story video assets; it is not a runtime dependency for ordinary controls.
+
 Quote Studio uses `quote-studio--editor` with three true functional columns. The center `studio-paper` is the buyer document itself and owns inline editing; the left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface.
 
 Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.
@@ -402,6 +406,13 @@ data-action="click->clipboard#copy"
 - `.channel-flow` and `.context-form` are the canonical channel-neutral workflow surfaces for Delivery, buyer Response and seller-recorded Acceptance. They use the existing button/input primitives, graphite surface hierarchy and shared motion tokens.
 - `.channel-picker` is a flat connected decision grid, not a card collection. Selecting a channel moves the signal edge and updates whether Buyer Room view activity is available.
 - Delivery/Acceptance forms become one-column, nearly full-width workflows below `900px`; no desktop modal is scaled down on mobile.
+
+### Settings workspace
+
+- Desktop settings are composed workspaces, not mobile cards stretched to fill the viewport.
+- `.account-settings-layout` keeps profile editing primary and places security/invitations in a supporting rail.
+- `.team-admin-shell__top` pairs team overview and invitation controls above the dense member tables.
+- Both structures intentionally collapse to one column at `900px`; mobile primary actions use the available width.
 
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.

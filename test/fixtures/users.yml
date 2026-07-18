@@ -4,6 +4,7 @@ one:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   company: one
   company_role: owner
+  language: en
   email_verified_at: <%= 1.day.ago %>
 
 two:
@@ -12,4 +13,5 @@ two:
   encrypted_password: <%= Devise::Encryptor.digest(User, "password123") %>
   company: two
   company_role: owner
+  language: en
   email_verified_at: <%= 1.day.ago %>

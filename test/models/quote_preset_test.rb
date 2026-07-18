@@ -81,7 +81,7 @@ class QuotePresetTest < ActiveSupport::TestCase
       payload: {}
     )
     assert_not blocked.valid?
-    assert_includes blocked.errors.full_messages.join, "limit"
+    assert_includes blocked.errors.full_messages.join, "上限"
   end
 
   test "module preset limit for vip company is 50" do

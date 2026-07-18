@@ -8,11 +8,11 @@ class DealWorkspaceControllerTest < ActionDispatch::IntegrationTest
   test "primary deal workspace pages render" do
     get inbox_index_path
     assert_response :success
-    assert_select "h1", "Inbox"
+    assert_select ".deal-page-header h1", "Inbox"
 
     get deals_path
     assert_response :success
-    assert_select "h1", "Deals"
+    assert_select ".deal-page-header h1", "Deals"
 
     get deal_path(quotes(:one))
     assert_response :success
@@ -21,7 +21,7 @@ class DealWorkspaceControllerTest < ActionDispatch::IntegrationTest
 
     get library_path
     assert_response :success
-    assert_select "h1", "Library"
+    assert_select ".deal-page-header h1", "Library"
   end
 
   test "legacy quote list leads to deal workspace" do

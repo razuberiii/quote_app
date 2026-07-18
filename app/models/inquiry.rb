@@ -8,8 +8,19 @@ class Inquiry < ApplicationRecord
   validates :source_type, inclusion: { in: %w[email chat text excel csv pdf image manual] }
 
   def manually_extract!
-    self.extracted_data = { "raw_requirements" => source_text.to_s, "products" => [], "questions" => [] }
-    self.field_states = { "customer" => "missing", "products" => "missing", "price" => "missing", "freight" => "missing" }
+    candidates = InquiryDeterministicParser.new(source_text).call
+    self.extracted_data = {
+      "raw_requirements" => source_text.to_s,
+      "customer" => candidates["customer"], "contact_name" => candidates["contact_name"],
+      "contact_email" => candidates["contact_email"], "currency" => candidates["currency"],
+      "products" => candidates["products"] || [], "questions" => [],
+      "commercial_terms" => { "incoterm" => candidates["incoterm"], "destination" => candidates["destination"] }.compact,
+      "evidence" => { "customer" => candidates["customer"], "contact_name" => candidates["contact_name"],
+        "contact_email" => candidates["contact_email"], "incoterm" => candidates["incoterm"], "destination" => candidates["destination"] }.compact,
+      "warnings" => [ "AI 未完成，本页显示确定性识别候选；请逐项确认。" ]
+    }
+    self.field_states = { "customer" => candidates["customer"].present? ? "uncertain" : "missing",
+      "products" => candidates["products"].present? ? "uncertain" : "missing", "price" => "missing", "freight" => "missing" }
     self.status = "review"
     save!
   end

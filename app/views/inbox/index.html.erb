@@ -1,6 +1,6 @@
 <main class="deal-workspace inbox-page" data-controller="deal-motion">
   <header class="deal-page-header">
-    <div><p class="eyebrow">Actionable workspace</p><h1>Inbox</h1><p>Only the events that can move a deal forward.</p></div>
+    <div><p class="eyebrow"><%= t("self_service.inbox.eyebrow") %></p><h1><%= t("self_service.inbox.title") %></h1><p><%= t("self_service.inbox.subtitle") %></p></div>
     <div class="deal-header-actions"><%= link_to "Import inquiry", new_inquiry_path, class: "button button--secondary" %><%= link_to "New deal", new_inquiry_path(mode: "manual"), class: "button button--primary" %></div>
   </header>
 

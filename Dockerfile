@@ -32,7 +32,7 @@ ENV RAILS_ENV=production \
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
     apt-get update && apt-get install -y --no-install-recommends \
-      chromium curl fonts-noto-cjk libjemalloc2 libpq5 libvips poppler-utils && \
+      chromium curl fonts-noto-cjk libjemalloc2 libpq5 libvips poppler-utils tesseract-ocr tesseract-ocr-chi-sim && \
     ln -s /usr/lib/$(uname -m)-linux-gnu/libjemalloc.so.2 /usr/local/lib/libjemalloc.so.2 && \
     rm -rf /var/lib/apt/lists/*
 ENV LD_PRELOAD=/usr/local/lib/libjemalloc.so.2

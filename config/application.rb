@@ -28,8 +28,8 @@ module QuoteApp
     config.eager_load_paths << Rails.root.join("app/presenters")
 
     config.i18n.load_path += Dir[Rails.root.join("config/locales/**/*.{rb,yml}")]
-    config.i18n.available_locales = [ :en, :"zh-CN", :"es-419" ]
-    config.i18n.default_locale = :en
-    config.i18n.fallbacks = [ :en ]
+    config.i18n.available_locales = [ :"zh-CN", :en ]
+    config.i18n.default_locale = :"zh-CN"
+    config.i18n.fallbacks = { en: [ :"zh-CN" ], :"zh-CN" => [ :en ] }
   end
 end

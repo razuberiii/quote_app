@@ -1,74 +1,75 @@
 <% missing = [] %>
-<% missing << "Customer" if @quote.customer.blank? %>
-<% missing << "Currency" if @quote.currency.blank? %>
-<% missing << "Validity" if @quote.valid_until.blank? %>
-<% missing << "Commercial terms" if @quote.payment_term.blank? || @quote.trade_term.blank? %>
+<% missing << t("self_service.studio.customer") if @quote.customer.blank? %>
+<% missing << t("self_service.studio.currency") if @quote.currency.blank? %>
+<% missing << t("self_service.studio.validity") if @quote.valid_until.blank? %>
+<% missing << t("self_service.studio.terms") if @quote.payment_term.blank? || @quote.trade_term.blank? %>
 <% @quote.quote_items.each_with_index do |item, index| %>
-  <% missing << "Item #{index + 1} price" unless item.unit_price.to_d.positive? %>
-  <% missing << "Item #{index + 1} verified price source" if item.respond_to?(:price_source) && (item.price_source.blank? || item.price_source == "unpriced") %>
+  <% missing << t("self_service.studio.item_price", number: index + 1) unless item.unit_price.to_d.positive? %>
+  <% missing << t("self_service.studio.item_source", number: index + 1) if item.respond_to?(:price_source) && (item.price_source.blank? || item.price_source == "unpriced") %>
 <% end %>
 <main class="quote-studio quote-studio--editor" data-controller="studio-motion">
   <header class="studio-toolbar">
-    <div class="studio-toolbar__identity"><%= link_to "← Deal", deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> <span>Working version</span></h1></div></div>
-    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● Saved</span><%= link_to "Preview", preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & publish", quote_path(@quote), class: "button button--primary" %></div>
+    <div class="studio-toolbar__identity"><%= link_to t("self_service.studio.back"), deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow"><%= t("self_service.studio.title") %></p><h1><%= @quote.quote_no %> <span><%= t("self_service.studio.working") %></span></h1></div></div>
+    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● <%= t("self_service.studio.saved") %></span><%= link_to t("self_service.studio.preview"), preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to t("self_service.studio.review_publish"), quote_path(@quote), class: "button button--primary" %></div>
   </header>
   <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor", data: { action: "turbo:submit-start->studio-motion#saving turbo:submit-end->studio-motion#saved" } } do |f| %>
     <aside class="studio-structure">
-      <div><p class="section-kicker">Structure</p><h2>Buyer decision path</h2></div>
+      <div><p class="section-kicker"><%= t("self_service.studio.structure") %></p><h2><%= t("self_service.studio.decision_path") %></h2></div>
       <nav class="studio-outline">
-        <% [["cover","Cover"],["introduction","Introduction"],["products","Products"],["options","Options"],["pricing","Pricing"],["shipping","Shipping"],["terms","Commercial terms"],["attachments","Attachments"],["acceptance","Acceptance"]].each_with_index do |(anchor,label), index| %>
-          <a href="#studio-<%= anchor %>" class="<%= 'is-active' if anchor == 'products' %>"><span><%= (index + 1).to_s.rjust(2,"0") %></span><strong><%= label %></strong><em><%= %w[products pricing].include?(anchor) && missing.any? ? "Needs review" : "On" %></em></a>
+        <% %w[cover introduction products options pricing shipping terms attachments acceptance].each_with_index do |anchor, index| %>
+          <% label = t("self_service.studio.sections.#{anchor}") %>
+          <a href="#studio-<%= anchor %>" class="<%= 'is-active' if anchor == 'products' %>"><span><%= (index + 1).to_s.rjust(2,"0") %></span><strong><%= label %></strong><em><%= %w[products pricing].include?(anchor) && missing.any? ? t("self_service.studio.needs_review") : t("self_service.studio.enabled") %></em></a>
         <% end %>
       </nav>
-      <button type="button" class="studio-add-section">＋ Add section</button>
+      <button type="button" class="studio-add-section"><%= t("self_service.studio.add_section") %></button>
     </aside>
 
-    <section class="studio-canvas" aria-label="Live buyer document canvas">
-      <% if @quote.errors.any? %><div class="studio-error"><strong>Resolve these issues before saving</strong><%= @quote.errors.full_messages.to_sentence %></div><% end %>
+    <section class="studio-canvas" aria-label="<%= t("self_service.studio.canvas_label") %>">
+      <% if @quote.errors.any? %><div class="studio-error"><strong><%= t("self_service.studio.resolve_errors") %></strong><%= @quote.errors.full_messages.to_sentence %></div><% end %>
       <article class="studio-paper">
         <section id="studio-cover" class="studio-cover">
           <div class="studio-cover__brand"><span><%= @quote.company.name.first %></span><strong><%= @quote.company.name %></strong></div>
-          <p class="section-kicker">Prepared for <%= @quote.customer.name %></p>
-          <%= f.text_area :custom_title, rows: 2, class: "studio-inline-title", placeholder: "A clear proposal for your next order" %>
-          <%= f.text_area :notes, rows: 3, class: "studio-inline-intro", placeholder: "Write a short introduction for the buyer. Internal notes belong outside the document." %>
-          <dl class="studio-cover__meta"><div><dt>Quote</dt><dd><%= @quote.quote_no %></dd></div><div><dt><%= f.label :issued_on, "Issued" %></dt><dd><%= f.date_field :issued_on %></dd></div><div><dt><%= f.label :valid_until, "Valid until" %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div><div><dt><%= f.label :currency %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div></dl>
+          <p class="section-kicker"><%= t("self_service.studio.prepared_for", buyer: @quote.customer.name) %></p>
+          <%= f.text_area :custom_title, rows: 2, class: "studio-inline-title", placeholder: t("self_service.studio.title_placeholder") %>
+          <%= f.text_area :notes, rows: 3, class: "studio-inline-intro", placeholder: t("self_service.studio.intro_placeholder") %>
+          <dl class="studio-cover__meta"><div><dt><%= t("self_service.studio.quote") %></dt><dd><%= @quote.quote_no %></dd></div><div><dt><%= f.label :issued_on, t("self_service.studio.issued") %></dt><dd><%= f.date_field :issued_on %></dd></div><div><dt><%= f.label :valid_until, t("self_service.studio.valid_until") %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div><div><dt><%= f.label :currency, t("self_service.studio.currency") %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div></dl>
         </section>
 
         <section id="studio-products" class="studio-products">
-          <div class="studio-paper__heading"><p class="section-kicker">01 · Products</p><h2>Products proposed</h2><p>Click into any value. What you see here mirrors the buyer-facing hierarchy.</p></div>
+          <div class="studio-paper__heading"><p class="section-kicker"><%= t("self_service.studio.products_kicker") %></p><h2><%= t("self_service.studio.products_title") %></h2><p><%= t("self_service.studio.products_help") %></p></div>
           <div class="studio-product-list">
             <%= f.fields_for :quote_items do |item_fields| %>
               <% item = item_fields.object %>
               <article class="studio-product">
-                <div class="studio-product__tools"><button type="button" data-action="studio-motion#duplicateItem">Duplicate</button><label><%= item_fields.check_box :_destroy %><span>Remove</span></label></div>
-                <% product_image = item.effective_image_attachment %><div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span><%= item.description.to_s.first || "P" %></span><small>Add image</small><% end %></div>
+                <div class="studio-product__tools"><button type="button" data-action="studio-motion#duplicateItem"><%= t("self_service.studio.duplicate") %></button><label><%= item_fields.check_box :_destroy %><span><%= t("self_service.studio.remove") %></span></label></div>
+                <% product_image = item.effective_image_attachment %><div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span><%= item.description.to_s.first || "P" %></span><small><%= t("self_service.studio.add_image") %></small><% end %></div>
                 <div class="studio-product__content">
-                  <div class="studio-product__top"><div><%= item_fields.text_field :description, class: "studio-product__name", placeholder: "Product name" %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / model" %><%= item_fields.text_field :unit_snapshot, placeholder: "Unit" %></div></div><label class="studio-mode"><span>Buyer control</span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [mode.humanize,mode] } %></label></div>
-                  <label class="studio-block-field"><span>Description & included content</span><%= item_fields.text_area :specifications_text, rows: 4, placeholder: "Power: 5.5 kW\nVoltage: 380V / 50Hz\nMaterial: Stainless steel" %></label>
-                  <div class="studio-product__commercial"><label><span>Quantity</span><%= item_fields.number_field :quantity, min: 1, data: { studio_motion_target: "quantity", action: "input->studio-motion#dirty" } %></label><label><span>Unit price</span><%= item_fields.number_field :unit_price, min: 0, step: 0.01, data: { studio_motion_target: "price", action: "input->studio-motion#dirty" } %></label><label><span>Price source</span><%= item_fields.select :price_source, QuoteItem::PRICE_SOURCES.map { |source| [source.humanize,source] } %></label><div><span>Line total</span><strong><%= @quote.currency %> <%= number_with_delimiter(item.line_total) %></strong></div></div>
-                  <details class="studio-product__details"><summary>Options, packing & delivery</summary><div><label class="studio-block-field"><span>Accessories / add-ons</span><%= item_fields.text_area :addon_charges_text, rows: 2, placeholder: "Spare seal kit: 120\nRemote controller: 85" %></label><label><span>MOQ</span><input value="<%= item.product&.moq %>" disabled></label><label><span>Lead time</span><%= item_fields.text_field :lead_time_snapshot, placeholder: "20 working days" %></label><label><span>Packing</span><%= item_fields.text_field :packing_snapshot, placeholder: "Export plywood case" %></label></div></details>
+                  <div class="studio-product__top"><div><%= item_fields.text_field :description, class: "studio-product__name", placeholder: t("self_service.studio.product_name") %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / Model" %><%= item_fields.text_field :unit_snapshot, placeholder: t("self_service.studio.unit") %></div></div><label class="studio-mode"><span><%= t("self_service.studio.buyer_control") %></span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [t("self_service.review.selection_modes.#{mode}"),mode] } %></label></div>
+                  <label class="studio-block-field"><span><%= t("self_service.studio.description") %></span><%= item_fields.text_area :specifications_text, rows: 4, placeholder: "功率：5.5 kW\n电压：380V / 50Hz\n材质：不锈钢" %></label>
+                  <div class="studio-product__commercial"><label><span><%= t("self_service.studio.quantity") %></span><%= item_fields.number_field :quantity, min: 1, data: { studio_motion_target: "quantity", action: "input->studio-motion#dirty" } %></label><label><span><%= t("self_service.studio.unit_price") %></span><%= item_fields.number_field :unit_price, min: 0, step: 0.01, data: { studio_motion_target: "price", action: "input->studio-motion#dirty" } %></label><label><span><%= t("self_service.studio.price_source") %></span><%= item_fields.select :price_source, QuoteItem::PRICE_SOURCES.map { |source| [t("self_service.review.price_sources.#{source}"),source] } %></label><div><span><%= t("self_service.studio.line_total") %></span><strong><%= @quote.currency %> <%= number_with_delimiter(item.line_total) %></strong></div></div>
+                  <details class="studio-product__details"><summary><%= t("self_service.studio.options") %></summary><div><label class="studio-block-field"><span><%= t("self_service.studio.addons") %></span><%= item_fields.text_area :addon_charges_text, rows: 2, placeholder: "备用密封套件：120\n遥控器：85" %></label><label><span>MOQ</span><input value="<%= item.product&.moq %>" disabled></label><label><span><%= t("self_service.studio.lead_time") %></span><%= item_fields.text_field :lead_time_snapshot, placeholder: "20 个工作日" %></label><label><span><%= t("self_service.studio.packing") %></span><%= item_fields.text_field :packing_snapshot, placeholder: "出口胶合板箱" %></label></div></details>
                 </div>
               </article>
             <% end %>
           </div>
-          <button type="button" class="studio-add-product" data-action="studio-motion#newItem">＋ Add a temporary item</button>
+          <button type="button" class="studio-add-product" data-action="studio-motion#newItem"><%= t("self_service.studio.add_temp") %></button>
         </section>
 
         <section id="studio-pricing" class="studio-pricing">
-          <div><p class="section-kicker">02 · Commercial summary</p><h2>Price & delivery</h2></div>
-          <div class="studio-pricing__grid"><label><span>Shipping / freight</span><%= f.number_field :shipping_amount, min: 0, step: 0.01, data: { studio_motion_target: "shipping", action: "input->studio-motion#dirty" } %></label><label><span>Freight source</span><%= f.select :shipping_price_source, [["Select source…", ""], ["Freight forwarder quote", "freight_forwarder_quote"], ["Carrier quote", "carrier_quote"], ["Customer account", "customer_account"], ["Manually entered", "manually_entered"]] %></label><label><span>Discount</span><%= f.number_field :discount_amount, min: 0, step: 0.01, data: { studio_motion_target: "discount", action: "input->studio-motion#dirty" } %></label><label><span>Tax</span><%= f.number_field :tax_amount, min: 0, step: 0.01, data: { studio_motion_target: "tax", action: "input->studio-motion#dirty" } %></label><div class="studio-grand-total"><span>Quotation total</span><strong><%= @quote.currency %> <b data-studio-motion-target="total"><%= number_with_delimiter(@quote.grand_total) %></b></strong></div></div>
+          <div><p class="section-kicker"><%= t("self_service.studio.commercial_kicker") %></p><h2><%= t("self_service.studio.pricing_title") %></h2></div>
+          <div class="studio-pricing__grid"><label><span><%= t("self_service.studio.shipping") %></span><%= f.number_field :shipping_amount, min: 0, step: 0.01, data: { studio_motion_target: "shipping", action: "input->studio-motion#dirty" } %></label><label><span><%= t("self_service.studio.freight_source") %></span><%= f.select :shipping_price_source, [[t("self_service.studio.select_source"), ""], ["货代报价", "freight_forwarder_quote"], ["承运商报价", "carrier_quote"], ["买家账号", "customer_account"], ["手工录入", "manually_entered"]] %></label><label><span><%= t("self_service.studio.discount") %></span><%= f.number_field :discount_amount, min: 0, step: 0.01, data: { studio_motion_target: "discount", action: "input->studio-motion#dirty" } %></label><label><span><%= t("self_service.studio.tax") %></span><%= f.number_field :tax_amount, min: 0, step: 0.01, data: { studio_motion_target: "tax", action: "input->studio-motion#dirty" } %></label><div class="studio-grand-total"><span><%= t("self_service.studio.total") %></span><strong><%= @quote.currency %> <b data-studio-motion-target="total"><%= number_with_delimiter(@quote.grand_total) %></b></strong></div></div>
         </section>
 
-        <section id="studio-terms" class="studio-terms"><div class="studio-paper__heading"><p class="section-kicker">03 · Commercial terms</p><h2>The terms behind the price</h2></div><div class="studio-terms__grid"><label><span>Payment</span><%= f.text_field :payment_term, placeholder: "30% deposit, 70% before shipment" %></label><label><span>Incoterm</span><%= f.text_field :trade_term, placeholder: "CIF Jebel Ali" %></label><label><span>Shipping & delivery</span><%= f.text_area :delivery_notes, rows: 3 %></label><label><span>Terms & conditions</span><%= f.text_area :terms_text, rows: 3 %></label></div></section>
+        <section id="studio-terms" class="studio-terms"><div class="studio-paper__heading"><p class="section-kicker"><%= t("self_service.studio.terms_kicker") %></p><h2><%= t("self_service.studio.terms_title") %></h2></div><div class="studio-terms__grid"><label><span><%= t("self_service.studio.payment") %></span><%= f.text_field :payment_term, placeholder: "30% 订金，70% 发货前付清" %></label><label><span><%= t("self_service.studio.incoterm") %></span><%= f.text_field :trade_term, placeholder: "CIF Jebel Ali" %></label><label><span><%= t("self_service.studio.shipping_delivery") %></span><%= f.text_area :delivery_notes, rows: 3 %></label><label><span><%= t("self_service.studio.terms_conditions") %></span><%= f.text_area :terms_text, rows: 3 %></label></div></section>
       </article>
     </section>
 
     <aside class="studio-summary">
-      <p class="section-kicker">Quote summary</p><h2><%= @quote.customer.name %></h2>
-      <dl><div><dt>Currency</dt><dd><%= @quote.currency %></dd></div><div><dt>Items</dt><dd><%= @quote.quote_items.size %></dd></div><div><dt>Subtotal</dt><dd><%= number_to_currency(@quote.subtotal, unit: "#{@quote.currency} ") %></dd></div><div><dt>Fees</dt><dd><%= number_to_currency(@quote.shipping_amount.to_d + @quote.tax_amount.to_d, unit: "#{@quote.currency} ") %></dd></div><div class="is-total"><dt>Total</dt><dd><%= number_to_currency(@quote.grand_total, unit: "#{@quote.currency} ") %></dd></div><div><dt>Valid until</dt><dd><%= @quote.valid_until || "Required" %></dd></div></dl>
-      <section class="studio-readiness <%= 'is-ready' if missing.empty? %>"><strong><%= missing.empty? ? "Ready for review" : "#{missing.size} checks remaining" %></strong><% if missing.any? %><ul><% missing.first(6).each do |entry| %><li><%= entry %></li><% end %></ul><% else %><p>Required commercial data is present. Preview the buyer experience before sending.</p><% end %></section>
-      <%= f.submit "Save quote", class: "button button--primary button--full" %><%= link_to "Preview Buyer Room", preview_quote_path(@quote), class: "button button--secondary button--full", target: "_blank" %>
-      <p class="studio-summary__note">Sending creates an immutable Revision. Internal notes are never included.</p>
+      <p class="section-kicker"><%= t("self_service.studio.summary") %></p><h2><%= @quote.customer.name %></h2>
+      <dl><div><dt><%= t("self_service.studio.currency") %></dt><dd><%= @quote.currency %></dd></div><div><dt><%= t("self_service.studio.items") %></dt><dd><%= @quote.quote_items.size %></dd></div><div><dt><%= t("self_service.studio.subtotal") %></dt><dd><%= number_to_currency(@quote.subtotal, unit: "#{@quote.currency} ") %></dd></div><div><dt><%= t("self_service.studio.fees") %></dt><dd><%= number_to_currency(@quote.shipping_amount.to_d + @quote.tax_amount.to_d, unit: "#{@quote.currency} ") %></dd></div><div class="is-total"><dt><%= t("self_service.studio.total") %></dt><dd><%= number_to_currency(@quote.grand_total, unit: "#{@quote.currency} ") %></dd></div><div><dt><%= t("self_service.studio.valid_until") %></dt><dd><%= @quote.valid_until || t("self_service.studio.required") %></dd></div></dl>
+      <section class="studio-readiness <%= 'is-ready' if missing.empty? %>"><strong><%= missing.empty? ? t("self_service.studio.ready") : t("self_service.studio.checks", count: missing.size) %></strong><% if missing.any? %><ul><% missing.first(6).each do |entry| %><li><%= entry %></li><% end %></ul><% else %><p><%= t("self_service.studio.ready_help") %></p><% end %></section>
+      <%= f.submit t("self_service.studio.save"), class: "button button--primary button--full" %><%= link_to t("self_service.studio.preview_room"), preview_quote_path(@quote), class: "button button--secondary button--full", target: "_blank" %>
+      <p class="studio-summary__note"><%= t("self_service.studio.immutable_note") %></p>
     </aside>
   <% end %>
 </main>

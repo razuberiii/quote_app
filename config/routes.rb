@@ -39,9 +39,9 @@ Rails.application.routes.draw do
   unauthenticated do
     root "landing#index"
   end
-  get ":locale", to: "landing#index", as: :localized_root, constraints: { locale: /en|zh-CN|es-419/ }
+  get ":locale", to: "landing#index", as: :localized_root, constraints: { locale: /en|zh-CN/ }
 
-  scope "(:locale)", locale: /en|zh-CN|es-419/ do
+  scope "(:locale)", locale: /en|zh-CN/ do
     get "contact", to: "landing#contact"
     get "privacy", to: "landing#privacy"
     get "terms", to: "landing#terms"

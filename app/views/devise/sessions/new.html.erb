@@ -4,20 +4,20 @@
   <div class="marketing-auth-grid">
     <div class="marketing-auth-intro">
       <p class="app-section-caption uppercase tracking-[0.16em]"><%= t("users.sessions.view.new.title") %></p>
-      <h1 class="marketing-auth-title">Welcome back.</h1>
-      <p class="marketing-auth-body">Continue the Deal, deliver the next Version, or respond while buyer intent is still fresh.</p>
+      <h1 class="marketing-auth-title"><%= t("self_service.auth.welcome") %></h1>
+      <p class="marketing-auth-body"><%= t("self_service.auth.welcome_body") %></p>
     </div>
 
     <%= render "components/ui/card", class: "app-surface marketing-auth-card" do %>
       <div class="app-section-stack gap-5">
         <div class="app-section-stack gap-2">
           <h2 class="marketing-auth-card-title"><%= t("users.sessions.view.new.title") %></h2>
-          <p class="app-subtle-note">Use your Rubusoo account to open the workspace.</p>
+          <p class="app-subtle-note"><%= t("self_service.auth.login_help") %></p>
         </div>
 
         <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "app-form-stack" }) do |f| %>
           <div>
-            <%= f.label :login, "Email or username" %>
+            <%= f.label :login, t("self_service.auth.login_identity") %>
             <%= f.text_field :login, autofocus: true, autocomplete: "username", class: ui_input_classes %>
           </div>
 

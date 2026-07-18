@@ -1,0 +1,342 @@
+zh-CN:
+  self_service:
+    auth:
+      welcome: 欢迎回来
+      welcome_body: 继续推进 Deal、交付最新 Version，或在买家意向仍清晰时及时回应。
+      login_help: 使用 Rubusoo 账号进入工作台。
+      login_identity: 邮箱或用户名
+      signup_title: 创建你的第一笔 Deal
+      signup_body: 先把一份真实买家询盘变成可交付报价，其他设置可以稍后完成。
+      signup_help: 创建账号后直接进入内部工作台。
+      username: 用户名
+      username_help: 3–32 位字母、数字或下划线；登录时可替代邮箱。
+    inbox:
+      eyebrow: 待处理工作台
+      title: Inbox
+      subtitle: 这里只保留真正能推动成交的事项。
+    intake:
+      eyebrow: 01 · 导入询盘
+      title: 把买家需求整理成一笔可控的 Deal
+      subtitle: 粘贴完整消息或上传原文件。Rubusoo 会识别买家、商品和要求，再由你确认。
+      source: 询盘来源
+      email: 邮件
+      chat: 聊天记录
+      text: 普通文字
+      manual: 手工录入
+      placeholder: "在这里粘贴完整询盘……\n\n例如：请报价 12 台液压动力单元，380V / 50Hz，CIF Jebel Ali。"
+      upload: 或上传原始文件
+      upload_help: PDF、XLSX、CSV 或 TXT · 原文件会被保留
+      what_happens: 接下来会发生什么
+      step_read: 读取并保留原始内容
+      step_read_help: 原文始终是可核对的事实来源。
+      step_extract: 提取候选并标注证据
+      step_extract_help: 每个候选都可以回看来源。
+      step_confirm: 只确认现在必需的信息
+      step_confirm_help: 买家、币种、商品和数量确认后即可创建 Working draft。
+      step_price: 发布前再补价格
+      step_price_help: 价格和运费必须有可靠来源。
+      no_guess: Rubusoo 不会猜金额
+      no_guess_help: 缺失的价格和运费会保持可见，直到你亲自补充。
+      submit: 提取询盘要求
+      extracted: 已完成结构化提取。请核对每项候选后再创建 Deal。
+      fallback: AI 分析暂时未完成。原始询盘已保存，并已生成确定性候选；你可以继续人工核对。
+      review_saved: 已保存询盘核对结果。
+      build_blocked: 创建 Working draft 前，请先确认买家、币种、商品名称和数量。价格与运费可以稍后在 Quote Studio 补齐。
+      deal_created: "已创建包含 %{count} 件商品的 Deal。发布 Version 1 前请补齐可靠价格与运费。"
+    priority:
+      title: 任务优先级
+      now: 现在必须完成
+      later: 报价前完成
+      before_publish: 发布前补
+      recommended: 建议补充
+      optional: 可以忽略
+    review:
+      eyebrow: 02 · 核对询盘
+      title: 先确认买家真正需要什么
+      description: AI 只提供可编辑候选。每个结果都能回看原文；价格、运费与商业决定必须由你确认。
+      saved: 已自动保存
+      saved_ago: "%{time}前更新"
+      current_step: 当前最重要的一步
+      ready_title: 已具备创建 Deal 的条件
+      ready_body: 可以先创建 Working draft，价格与运费在发布前补齐即可。
+      original: 原始询盘
+      source_truth: 核对依据
+      file_retained: "已保留原始文件 · %{size}"
+      buyer_heading: 买家与目的地
+      buyer_help: 确认买家身份与货物目的地。
+      customer: 买家公司
+      contact: 联系人
+      email: 邮箱
+      country: 国家
+      currency: 币种
+      destination: 目的港
+      incoterm: Incoterm
+      delivery: 交付要求
+      packing: 包装要求
+      confirmed: 已确认
+      uncertain: 待确认
+      missing: 缺失
+      required: 必填
+      manual: 请人工确认
+      no_evidence: 未找到对应原文摘录
+      freight: 运费
+      freight_source: 运费来源
+      freight_help: CIF、CFR、DAP、DDP 发布前必须补齐。
+      ai_no_amount: AI 不会填写该金额。
+      products_heading: 商品与 Library 匹配
+      products_help: 选择正确的 Library 商品，或保留为本 Deal 临时商品。
+      model: 型号
+      quantity: 数量
+      unit: 单位
+      voltage: 电压
+      color: 颜色
+      material: 材质
+      source: 来源
+      no_exact_source: 未找到精确原文摘录
+      priced: 已补价格
+      price_required: 待补价格
+      catalog_match: Library 匹配
+      best_match: 最佳匹配
+      candidate: 候选
+      deal_only: Deal-only 商品
+      deal_only_help: 仅用于本次 Deal，不会写入 Library。
+      choose_other: 选择其他 Library 商品
+      select_manual: 手工选择……
+      commercial: 商业信息确认
+      ai_never_price: AI 永远不会填写这些金额
+      unit_price: 单价
+      price_source: 价格来源
+      buyer_control: 买家可操作范围
+      questions_heading: 问题与缺失信息
+      questions_help: 在定价和发送前保留所有不确定项。
+      buyer_questions: 买家问题
+      missing_information: 缺失信息
+      needs_review: 需要核对
+      readiness: Deal 创建条件
+      ready: 已可创建 Deal；价格稍后补
+      not_ready: 先确认买家、币种、商品和数量
+      save_review: 保存核对结果
+      build_deal: 创建 Deal
+      price_sources:
+        unpriced: 待补价格
+        catalog: Library 基础价
+        quantity_tier: 数量阶梯价
+        customer_specific: 买家专属价
+        configuration_rule: 配置规则
+        historical_quote: 历史报价
+        manual: 手工录入
+      selection_modes:
+        fixed: 固定
+        selectable: 买家可选择
+        request_only: 仅可请求修改
+      freight_sources:
+        freight_forwarder_quote: 货代报价
+        carrier_quote: 承运商报价
+        customer_account: 买家账号
+        manually_entered: 手工录入
+    studio:
+      customer: 买家
+      currency: 币种
+      validity: 有效期
+      terms: 商务条款
+      item_price: "商品 %{number} 的单价"
+      item_source: "商品 %{number} 的价格来源"
+      back: ← Deal
+      title: 报价工作台
+      working: Working draft
+      saved: 已保存
+      preview: 预览
+      review_publish: 检查并发布
+      structure: 报价结构
+      decision_path: 买家的阅读与决策顺序
+      needs_review: 待确认
+      enabled: 已启用
+      add_section: ＋ 添加模块
+      canvas_label: 买家最终看到的报价画布
+      resolve_errors: 保存前请处理这些问题
+      prepared_for: 为 %{buyer} 准备
+      title_placeholder: 为本次采购准备的清晰方案
+      intro_placeholder: 简短介绍本次方案。内部备注不会出现在买家报价中。
+      quote: 报价编号
+      issued: 报价日期
+      valid_until: 有效期至
+      products_kicker: 01 · 商品
+      products_title: 本次推荐商品
+      products_help: 直接编辑画布中的内容；这里的层级与买家页面一致。
+      duplicate: 复制
+      remove: 删除
+      add_image: 添加图片
+      product_name: 商品名称
+      unit: 单位
+      buyer_control: 买家可操作范围
+      description: 描述与包含内容
+      quantity: 数量
+      unit_price: 单价
+      price_source: 价格来源
+      line_total: 行小计
+      options: 配置、包装与交付
+      addons: 配件 / 加购项
+      lead_time: 交期
+      packing: 包装
+      add_temp: ＋ 添加 Deal-only 商品
+      commercial_kicker: 02 · 商务汇总
+      pricing_title: 价格与交付
+      shipping: 运费
+      freight_source: 运费来源
+      select_source: 选择来源……
+      discount: 折扣
+      tax: 税费
+      total: 报价总额
+      terms_kicker: 03 · 商务条款
+      terms_title: 金额背后的交易条件
+      payment: 付款条件
+      incoterm: Incoterm
+      shipping_delivery: 运输与交付
+      terms_conditions: 条款与条件
+      summary: 报价摘要
+      items: 商品数
+      subtotal: 商品小计
+      fees: 费用
+      required: 必填
+      ready: 可以进入发布检查
+      checks: "还有 %{count} 项需确认"
+      ready_help: 必要商业信息已具备。发送前请预览买家体验。
+      save: 保存报价
+      preview_room: 预览 Buyer Room
+      immutable_note: 发布会创建不可变 Version；内部备注永远不会发送给买家。
+      sections:
+        cover: 封面
+        introduction: 介绍
+        products: 商品
+        options: 配置
+        pricing: 价格
+        shipping: 运输
+        terms: 商务条款
+        attachments: 附件
+        acceptance: 接受
+    publish:
+      back: ← Deal
+      eyebrow: Working draft · 发布检查
+      buyer_required: 需要确认买家
+      continue: 继续编辑
+      ready_signal: 可以固化
+      blocked_signal: 暂不能发布
+      ready_title: 创建不可变 Version
+      blocked_title: 先补齐商业依据
+      description: Published Version 会冻结买家、商品、价格、条款和输出设置；之后修改 Working draft 不会改变它。
+      resolve: 返回 Quote Studio 处理
+      preview: 预览 Buyer Room
+      button: "发布 Version %{number}"
+      ledger: Version 记录
+      history: 正式版本历史
+      empty: 尚未发布任何正式内容。
+    readiness:
+      customer: 缺少买家
+      currency: 缺少币种
+      validity: 缺少有效期
+      payment: 缺少付款条件
+      incoterm: 缺少 Incoterm
+      freight: "%{term} 报价必须填写运费"
+      freight_source: 缺少运费来源
+      product: 至少添加一件商品
+      item_name: "商品 %{number}：缺少商品名称"
+      item_quantity: "商品 %{number}：缺少数量"
+      item_price: "商品 %{number}：缺少单价"
+      item_source: "商品 %{number}：缺少可靠价格来源"
+      item_config: "商品 %{number}：配置价格需要确认"
+      total: 报价总额必须大于零
+      placeholder: 请删除占位或测试内容
+    delivery:
+      back: ← Deal
+      eyebrow: "Published Version %{number} · 已锁定"
+      title: 交付同一份不可变商业记录
+      subtitle: Email、PDF、XLSX 和 Buyer Room 都来自当前 Version snapshot；外部渠道单独登记。
+      locked_amount: 锁定金额
+      published: "发布于 %{time}"
+      methods: 交付方式
+      buyer_room: Buyer Room 链接
+      buyer_room_help: 复制、预览或通过邮件发送安全链接
+      email_link: 邮件发送链接
+      email_link_help: 编辑邮件并发送 Buyer Room 链接
+      email_pdf: 邮件发送 PDF
+      email_pdf_help: 生成并附加当前 Version PDF
+      email_both: 邮件发送链接 + PDF
+      email_both_help: 从同一 snapshot 发送两种输出
+      pdf: 生成 PDF
+      pdf_help: 预览和下载，但不自动视为已交付
+      excel: 生成 XLSX
+      excel_help: 生成可追踪 Version 的结构化工作簿
+      external: 登记外部交付
+      external_help: WhatsApp、WeChat、LINE、电话或当面
+      printed: 打印 / 线下
+      printed_help: 登记实体文件交付
+      secure_room: "安全 Buyer Room · Version %{number}"
+      active: 有效
+      revoked: 已撤销
+      copy: 复制链接
+      open: 打开预览
+      revoke: 撤销链接
+      regenerate: 重新生成链接
+      recipient: 收件人
+      cc: 抄送
+      cc_help: 可选；多个地址用逗号分隔
+      subject: 主题
+      message: 邮件正文
+      source: 附件与链接来源
+      frozen: "Published Version %{number}"
+      not_draft: "%{currency} %{total} · 不是 Working draft"
+      external_channel: 外部渠道
+      contact: 收件人 / 联系人
+      actual_time: 实际交付时间
+      evidence_note: 外部交付证据说明
+      evidence_file: 证据文件
+      state: 交付状态
+      ready: 可以开始准备
+      submit: 交付 Version
+    catalog_import:
+      eyebrow: Library · 受控导入
+      title: 审核一份产品目录
+      subtitle: Rubusoo 先生成可审核候选；未经你确认，不会写入 Library。
+      file_title: 上传 Catalog 来源
+      file_help: CSV 和 XLSX 优先确定性解析；PDF、扫描件和图片仅在必要时使用 OCR 与结构化分析。
+      analyze: 分析文件
+      guardrails: 导入保护
+      rule_formula: 公式型单元格会被中和，不会执行。
+      rule_price: 来源没有价格，就保持缺失。
+      rule_review: AI 永远不会直接写入 Library。
+    catalog_review:
+      eyebrow: Catalog 审核
+      title: 识别到 %{count} 个商品候选
+      subtitle: 核对商品身份、来源证据和价格来源；保存审核并不等于写入 Library。
+      now: 为每个候选选择新建、合并、Variant 或忽略
+      later: 在具体 Deal 中再次确认实际报价价格
+      warnings: 需要注意
+      empty_title: 没有识别到可靠的商品候选
+      empty_body: 原文件已经保留。你可以重试、手工录入，或直接使用 Deal-only item 继续报价。
+      start_deal: 继续导入询盘
+      no_sku: 未提供 SKU
+      name: 商品名称
+      description: 描述
+      unit: 单位
+      category: 分类
+      currency: 币种
+      lead_time: 交期
+      packing: 包装
+      price: 来源明确的价格
+      price_missing: 来源未说明
+      evidence: 来源证据
+      decision: 处理方式
+      existing: 可能重复的已有商品
+      no_match: 没有匹配商品
+      save: 保存审核
+      apply: 应用已确认候选
+      status:
+        review: 待审核
+        applied: 已应用
+        failed: 分析失败
+      decisions:
+        pending: 稍后决定
+        create: 新建商品
+        merge: 合并到已有商品
+        variant: 创建为 Variant
+        ignore: 忽略

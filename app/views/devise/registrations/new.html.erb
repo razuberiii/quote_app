@@ -2,15 +2,15 @@
   <div class="marketing-auth-grid">
     <div class="marketing-auth-intro">
       <p class="app-section-caption uppercase tracking-[0.16em]"><%= t("users.registrations.view.new.title") %></p>
-      <h1 class="marketing-auth-title">Build your first Deal.</h1>
-      <p class="marketing-auth-body">Turn a real buyer request into a controlled, deliverable quote before you configure anything else.</p>
+      <h1 class="marketing-auth-title"><%= t("self_service.auth.signup_title") %></h1>
+      <p class="marketing-auth-body"><%= t("self_service.auth.signup_body") %></p>
     </div>
 
     <%= render "components/ui/card", class: "app-surface marketing-auth-card" do %>
       <div class="app-section-stack gap-5">
         <div class="app-section-stack gap-2">
           <h2 class="marketing-auth-card-title"><%= t("users.registrations.view.new.title") %></h2>
-          <p class="app-subtle-note">Set up your account to open the internal workspace.</p>
+          <p class="app-subtle-note"><%= t("self_service.auth.signup_help") %></p>
         </div>
 
         <% if @validation_error.present? %>
@@ -35,9 +35,9 @@
           <% end %>
 
           <div>
-            <%= f.label :username, "Username" %>
+            <%= f.label :username, t("self_service.auth.username") %>
             <%= f.text_field :username, required: true, minlength: 3, maxlength: 32, pattern: "[A-Za-z0-9_]+", autocomplete: "username", class: ui_input_classes %>
-            <small>3–32 letters, numbers, or underscores. You can use this to log in.</small>
+            <small><%= t("self_service.auth.username_help") %></small>
           </div>
 
           <div>

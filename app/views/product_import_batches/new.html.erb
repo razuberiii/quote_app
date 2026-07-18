@@ -1,5 +1,9 @@
 <main class="deal-workspace catalog-import">
-  <header class="deal-page-header"><div><p class="eyebrow">Library · controlled import</p><h1>Review a product catalog</h1><p>Rubusoo extracts candidates first. Nothing enters Library until you approve it.</p></div></header>
-  <%= form_with model: @batch, class: "import-dropzone" do |form| %><div><strong>CSV or text-based PDF</strong><p>CSV is parsed deterministically. PDF content is preserved for review and never creates products silently.</p></div><%= form.file_field :source_files, multiple: true, accept: ".csv,.pdf" %><%= form.submit "Analyze files", class: "button button--primary" %><% end %>
-  <aside class="import-guardrails"><span>Import guardrails</span><ul><li>Formula-like cells are neutralized.</li><li>Missing prices stay missing.</li><li>Matches are suggestions, not automatic merges.</li></ul></aside>
+  <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_import.eyebrow", default: "Library · controlled import") %></p><h1><%= t("self_service.catalog_import.title", default: "Review a product catalog") %></h1><p><%= t("self_service.catalog_import.subtitle", default: "Rubusoo creates review candidates first. Nothing enters Library until you approve it.") %></p></div></header>
+  <%= form_with model: @batch, class: "import-dropzone" do |form| %>
+    <div><strong><%= t("self_service.catalog_import.file_title", default: "Upload catalog sources") %></strong><p><%= t("self_service.catalog_import.file_help", default: "CSV and XLSX are parsed deterministically. PDF, scans and images use OCR and structured analysis only when necessary.") %></p></div>
+    <%= form.file_field :source_files, multiple: true, accept: ".csv,.xlsx,.pdf,.png,.jpg,.jpeg,.webp" %>
+    <%= form.submit t("self_service.catalog_import.analyze", default: "Analyze files"), class: "button button--primary" %>
+  <% end %>
+  <aside class="import-guardrails"><span><%= t("self_service.catalog_import.guardrails", default: "Import guardrails") %></span><ul><li><%= t("self_service.catalog_import.rule_formula", default: "Formula cells are neutralized.") %></li><li><%= t("self_service.catalog_import.rule_price", default: "Missing prices stay missing.") %></li><li><%= t("self_service.catalog_import.rule_review", default: "AI never writes directly to Library.") %></li></ul></aside>
 </main>

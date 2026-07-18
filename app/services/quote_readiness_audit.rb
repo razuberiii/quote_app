@@ -7,29 +7,31 @@ class QuoteReadinessAudit
 
   def issues
     [].tap do |list|
-      list << "Customer is required" if @quote.customer.blank?
-      list << "Currency is required" if @quote.currency.blank?
-      list << "Validity date is required" if @quote.valid_until.blank?
-      list << "Payment terms are required" if @quote.payment_term.blank?
-      list << "Incoterm is required" if @quote.trade_term.blank?
+      list << t(:customer) if @quote.customer.blank?
+      list << t(:currency) if @quote.currency.blank?
+      list << t(:validity) if @quote.valid_until.blank?
+      list << t(:payment) if @quote.payment_term.blank?
+      list << t(:incoterm) if @quote.trade_term.blank?
       if @quote.trade_term.to_s.match?(/CIF|CFR|DAP|DDP/i)
-        list << "Freight is required for #{@quote.trade_term}" unless @quote.shipping_amount.to_d.positive?
-        list << "Freight source is required" if @quote.respond_to?(:shipping_price_source) && @quote.shipping_price_source.blank?
+        list << t(:freight, term: @quote.trade_term) unless @quote.shipping_amount.to_d.positive?
+        list << t(:freight_source) if @quote.respond_to?(:shipping_price_source) && @quote.shipping_price_source.blank?
       end
-      list << "Add at least one product" if @quote.quote_items.empty?
+      list << t(:product) if @quote.quote_items.empty?
       @quote.quote_items.each_with_index do |item, index|
-        label = "Item #{index + 1}"
-        list << "#{label}: product name is required" if item.description.blank?
-        list << "#{label}: quantity is required" unless item.quantity.to_i.positive?
-        list << "#{label}: price is required" unless item.unit_price.to_d.positive?
+        number = index + 1
+        list << t(:item_name, number:) if item.description.blank?
+        list << t(:item_quantity, number:) unless item.quantity.to_i.positive?
+        list << t(:item_price, number:) unless item.unit_price.to_d.positive?
         if item.respond_to?(:price_source) && (item.price_source.blank? || item.price_source == "unpriced")
-          list << "#{label}: a verified price source is required"
+          list << t(:item_source, number:)
         end
-        list << "#{label}: configuration price requires confirmation" if item.addon_charge_entries.any? { |addon| addon[:amount].blank? }
+        list << t(:item_config, number:) if item.addon_charge_entries.any? { |addon| addon[:amount].blank? }
       end
-      list << "Quotation total must be greater than zero" unless @quote.grand_total.to_d.positive?
+      list << t(:total) unless @quote.grand_total.to_d.positive?
       public_text = [ @quote.custom_title, @quote.notes, @quote.terms_text, @quote.delivery_notes, *@quote.quote_items.map(&:description) ].compact.join(" ")
-      list << "Remove placeholder or test content" if public_text.match?(PLACEHOLDER_PATTERN)
+      list << t(:placeholder) if public_text.match?(PLACEHOLDER_PATTERN)
     end.uniq
   end
+
+  def t(key, **options) = I18n.t("self_service.readiness.#{key}", **options)
 end

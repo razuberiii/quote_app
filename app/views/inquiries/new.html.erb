@@ -1,34 +1,11 @@
 <main class="rubusoo-page inquiry-import">
-  <header class="page-heading inquiry-import__heading">
-    <p class="eyebrow">01 · Import inquiry</p>
-    <h1>Turn the request into a controlled deal.</h1>
-    <p>Paste the buyer’s message or upload their file. Rubusoo extracts requirements with evidence and leaves commercial unknowns visibly unresolved.</p>
-  </header>
-
+  <header class="page-heading inquiry-import__heading"><p class="eyebrow"><%= t("self_service.intake.eyebrow", default: "01 · Import inquiry") %></p><h1><%= t("self_service.intake.title", default: "Turn the buyer request into a controlled Deal") %></h1><p><%= t("self_service.intake.subtitle", default: "Paste the complete message or upload the original file. Rubusoo identifies buyer, products and requirements, then asks you to confirm them.") %></p></header>
   <%= form_with model: @inquiry, class: "inquiry-import__workspace", multipart: true do |f| %>
     <section class="inquiry-import__composer">
-      <div class="inquiry-import__source-tabs" role="group" aria-label="Inquiry source">
-        <% [["email", "Email"], ["chat", "Chat"], ["text", "Plain text"], ["manual", "Manual"]].each do |value, label| %>
-          <label><%= f.radio_button :source_type, value, checked: value == "email" %><span><%= label %></span></label>
-        <% end %>
-      </div>
-      <%= f.text_area :source_text, rows: 18, placeholder: "Paste the complete buyer inquiry here…\n\nExample: Please quote 12 hydraulic power units, 380V / 50Hz, CIF Jebel Ali…", class: "textarea inquiry-import__textarea" %>
-      <div class="inquiry-import__upload">
-        <div><strong>Or upload the source file</strong><span>PDF, XLSX, CSV, or TXT · the original is retained for audit</span></div>
-        <%= f.file_field :source_file, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", class: "inquiry-import__file" %>
-      </div>
+      <div class="inquiry-import__source-tabs" role="group" aria-label="<%= t("self_service.intake.source", default: "Inquiry source") %>"><% [["email", t("self_service.intake.email", default: "Email")], ["chat", t("self_service.intake.chat", default: "Chat")], ["text", t("self_service.intake.text", default: "Plain text")], ["manual", t("self_service.intake.manual", default: "Manual")]].each do |value, label| %><label><%= f.radio_button :source_type, value, checked: value == "email" %><span><%= label %></span></label><% end %></div>
+      <%= f.text_area :source_text, rows: 18, placeholder: t("self_service.intake.placeholder", default: "Paste the complete buyer inquiry here…"), class: "textarea inquiry-import__textarea" %>
+      <div class="inquiry-import__upload"><div><strong><%= t("self_service.intake.upload", default: "Or upload the original file") %></strong><span><%= t("self_service.intake.upload_help", default: "PDF, XLSX, CSV or TXT · the original is retained") %></span></div><%= f.file_field :source_file, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", class: "inquiry-import__file" %></div>
     </section>
-
-    <aside class="inquiry-import__rail">
-      <p class="section-kicker">What Rubusoo will do</p>
-      <ol class="inquiry-import__steps">
-        <li><span>01</span><div><strong>Read the request</strong><small>Keep the original text and file intact.</small></div></li>
-        <li><span>02</span><div><strong>Extract with evidence</strong><small>Every result stays traceable to the source.</small></div></li>
-        <li><span>03</span><div><strong>Match your Catalog</strong><small>You decide which product is correct.</small></div></li>
-        <li><span>04</span><div><strong>Flag commercial gaps</strong><small>Prices and freight always need a source.</small></div></li>
-      </ol>
-      <div class="inquiry-import__promise"><strong>Rubusoo does not guess money.</strong><p>Missing price, freight, tax, lead time, or configuration charges remain visibly blocked.</p></div>
-      <%= f.submit "Extract requirements", class: "button button--primary button--full" %>
-    </aside>
+    <aside class="inquiry-import__rail"><p class="section-kicker"><%= t("self_service.intake.what_happens", default: "What happens next") %></p><ol class="inquiry-import__steps"><li><span>01</span><div><strong><%= t("self_service.intake.step_read", default: "Read and preserve the source") %></strong><small><%= t("self_service.intake.step_read_help", default: "The original remains the source of truth.") %></small></div></li><li><span>02</span><div><strong><%= t("self_service.intake.step_extract", default: "Extract candidates with evidence") %></strong><small><%= t("self_service.intake.step_extract_help", default: "You can verify where every candidate came from.") %></small></div></li><li><span>03</span><div><strong><%= t("self_service.intake.step_confirm", default: "Confirm only what is needed now") %></strong><small><%= t("self_service.intake.step_confirm_help", default: "Buyer, currency, product and quantity create the Working draft.") %></small></div></li><li><span>04</span><div><strong><%= t("self_service.intake.step_price", default: "Complete prices before publishing") %></strong><small><%= t("self_service.intake.step_price_help", default: "Price and freight always require a source.") %></small></div></li></ol><div class="inquiry-import__promise"><strong><%= t("self_service.intake.no_guess", default: "Rubusoo never guesses money") %></strong><p><%= t("self_service.intake.no_guess_help", default: "Missing price or freight will stay visible until you provide it.") %></p></div><%= f.submit t("self_service.intake.submit", default: "Extract requirements"), class: "button button--primary button--full" %></aside>
   <% end %>
 </main>

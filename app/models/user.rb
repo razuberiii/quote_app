@@ -13,7 +13,7 @@ class User < ApplicationRecord
   enum :role, { user: 0, vip: 1, admin: 2 }, default: :user
   enum :status, { active: 0, suspended: 1 }, default: :active
   enum :company_role, { owner: 0, admin: 1, member: 2 }, default: :member, prefix: :company
-  validates :language, inclusion: { in: %w[en zh-CN es-419] }, allow_blank: true
+  validates :language, inclusion: { in: %w[zh-CN en] }, allow_blank: true
   validates :username, presence: true, length: { in: 3..32 },
     format: { with: /\A[a-zA-Z0-9_]+\z/, message: "may contain only letters, numbers, and underscores" },
     uniqueness: { case_sensitive: false }
@@ -25,10 +25,15 @@ class User < ApplicationRecord
   has_many :sent_team_invitations, class_name: "TeamInvitation", foreign_key: :invited_by_id, dependent: :destroy
   has_one_attached :avatar
   before_validation :ensure_company, on: :create
+  before_validation :assign_default_language, on: :create
   before_validation :assign_company_role, on: :create
   before_validation :assign_default_username, on: :create
   before_validation :normalize_username
   validate :avatar_constraints
+
+  def assign_default_language
+    self.language ||= "zh-CN"
+  end
 
   def can_create_customer?
     return true if company_unlimited_plan?

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_015000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -170,7 +170,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_015000) do
     t.string "name"
     t.string "phone"
     t.string "plan", default: "trial", null: false
-    t.string "quote_language", default: "en", null: false
+    t.string "quote_language", default: "zh-CN", null: false
     t.text "registration_details"
     t.string "registration_number"
     t.text "reminder_email_body"
@@ -723,7 +723,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_015000) do
     t.bigint "inquiry_id"
     t.text "internal_note"
     t.date "issued_on"
-    t.string "language", default: "en", null: false
+    t.string "language", default: "zh-CN", null: false
     t.text "legal_disclaimer"
     t.string "loss_reason"
     t.string "loss_reason_detail"
@@ -828,7 +828,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_015000) do
     t.string "encrypted_password", default: "", null: false
     t.string "full_name"
     t.string "job_title"
-    t.string "language"
+    t.string "language", default: "zh-CN"
     t.datetime "last_active_at"
     t.datetime "last_login_at"
     t.string "pending_email"

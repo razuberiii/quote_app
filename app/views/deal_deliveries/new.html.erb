@@ -1,8 +1,9 @@
 <main class="deal-workspace channel-flow" data-controller="channel-flow">
-  <header class="channel-flow__header"><div><%= link_to "← Deal", deal_path(@deal), class: "deal-back" %><p class="eyebrow">Published Version <%= @version.number %> · locked</p><h1>Deliver one immutable commercial record.</h1><p>Email, PDF, Excel and Buyer Room are generated from this Version snapshot. External channels are recorded separately.</p></div><div class="version-lock"><span>Locked amount</span><strong><%= @version.currency %> <%= number_with_delimiter(@version.total) %></strong><small>Published <%= l(@version.published_at, format: :long) %></small></div></header>
+  <header class="channel-flow__header"><div><%= link_to t("self_service.delivery.back"), deal_path(@deal), class: "deal-back" %><p class="eyebrow"><%= t("self_service.delivery.eyebrow", number: @version.number) %></p><h1><%= t("self_service.delivery.title") %></h1><p><%= t("self_service.delivery.subtitle") %></p></div><div class="version-lock"><span><%= t("self_service.delivery.locked_amount") %></span><strong><%= @version.currency %> <%= number_with_delimiter(@version.total) %></strong><small><%= t("self_service.delivery.published", time: l(@version.published_at, format: :long)) %></small></div></header>
 
-  <section class="channel-picker" role="list" aria-label="Delivery methods">
-    <% [["buyer_room_link","Buyer Room link","Copy, preview or email the secure link"],["email_link","Email link","Send an editable message with Buyer Room link"],["email_pdf","Email PDF","Generate and attach the Version PDF"],["email_link_pdf","Email link + PDF","Send both outputs from one snapshot"],["pdf_download","Generate PDF","Preview and download without claiming delivery"],["excel_export","Generate Excel","Structured, traceable Version workbook"],["external","External delivery","WhatsApp, WeChat, LINE, phone or in person"],["printed","Printed / offline","Record a physical handoff"]].each do |value,title,detail| %>
+  <section class="channel-picker" role="list" aria-label="<%= t("self_service.delivery.methods") %>">
+    <% [["buyer_room_link","buyer_room"],["email_link","email_link"],["email_pdf","email_pdf"],["email_link_pdf","email_both"],["pdf_download","pdf"],["excel_export","excel"],["external","external"],["printed","printed"]].each do |value,key| %>
+      <% title = t("self_service.delivery.#{key}"); detail = t("self_service.delivery.#{key}_help") %>
       <button type="button" class="channel-option" data-channel-flow-target="option" data-value="<%= value %>" data-action="channel-flow#select"><span><%= title %></span><small><%= detail %></small></button>
     <% end %>
   </section>
@@ -12,27 +13,27 @@
     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
 
     <section class="channel-form__wide delivery-link-panel" data-channel-flow-target="link">
-      <div><span>Secure Buyer Room · Version <%= @version.number %></span><strong><%= @version.revoked_at? ? "Revoked" : "Active" %></strong></div>
-      <div class="delivery-link-row"><input readonly value="<%= buyer_room_url(@version.secure_token) %>" data-channel-flow-target="copy"><button type="button" class="button button--secondary" data-action="channel-flow#copy">Copy link</button><%= link_to "Open preview", buyer_room_path(@version.secure_token, preview: 1), target: "_blank", class: "button button--secondary" %></div>
-      <div><%= link_to(@version.revoked_at? ? "Regenerate link" : "Revoke link", version_link_deal_path(@deal, version_id: @version.id, link_action: @version.revoked_at? ? "regenerate" : "revoke"), data: { turbo_method: :patch }, class: "text-action") %></div>
+      <div><span><%= t("self_service.delivery.secure_room", number: @version.number) %></span><strong><%= @version.revoked_at? ? t("self_service.delivery.revoked") : t("self_service.delivery.active") %></strong></div>
+      <div class="delivery-link-row"><input readonly value="<%= buyer_room_url(@version.secure_token) %>" data-channel-flow-target="copy"><button type="button" class="button button--secondary" data-action="channel-flow#copy"><%= t("self_service.delivery.copy") %></button><%= link_to t("self_service.delivery.open"), buyer_room_path(@version.secure_token, preview: 1), target: "_blank", class: "button button--secondary" %></div>
+      <div><%= link_to(@version.revoked_at? ? t("self_service.delivery.regenerate") : t("self_service.delivery.revoke"), version_link_deal_path(@deal, version_id: @version.id, link_action: @version.revoked_at? ? "regenerate" : "revoke"), data: { turbo_method: :patch }, class: "text-action") %></div>
     </section>
 
     <section class="channel-form__wide delivery-email-panel" data-channel-flow-target="email" hidden>
-      <div><%= form.label :recipient, "Recipient", for: "delivery_email_recipient" %><%= form.email_field :recipient, id: "delivery_email_recipient", class: "app-ui-input", required: true %></div>
-      <div><%= form.label :cc, "CC" %><%= form.text_field :cc, class: "app-ui-input", placeholder: "Optional, comma separated" %></div>
-      <div class="channel-form__wide"><%= form.label :subject %><%= form.text_field :subject, class: "app-ui-input", required: true %></div>
-      <div class="channel-form__wide"><%= form.label :message_body, "Message" %><%= form.text_area :message_body, rows: 7, class: "app-ui-input", required: true %></div>
-      <aside><span>Attachment and link source</span><strong>Published Version <%= @version.number %></strong><small>USD <%= number_with_delimiter(@version.total) %> · not the Working draft</small></aside>
+      <div><%= form.label :recipient, t("self_service.delivery.recipient"), for: "delivery_email_recipient" %><%= form.email_field :recipient, id: "delivery_email_recipient", class: "app-ui-input", required: true %></div>
+      <div><%= form.label :cc, t("self_service.delivery.cc") %><%= form.text_field :cc, class: "app-ui-input", placeholder: t("self_service.delivery.cc_help") %></div>
+      <div class="channel-form__wide"><%= form.label :subject, t("self_service.delivery.subject") %><%= form.text_field :subject, class: "app-ui-input", required: true %></div>
+      <div class="channel-form__wide"><%= form.label :message_body, t("self_service.delivery.message") %><%= form.text_area :message_body, rows: 7, class: "app-ui-input", required: true %></div>
+      <aside><span><%= t("self_service.delivery.source") %></span><strong><%= t("self_service.delivery.frozen", number: @version.number) %></strong><small><%= t("self_service.delivery.not_draft", currency: @version.currency, total: number_with_delimiter(@version.total)) %></small></aside>
     </section>
 
     <section class="channel-form__wide delivery-external-panel" data-channel-flow-target="external" hidden>
-      <div><%= form.label :external_channel, "External channel" %><%= form.select :external_channel, VersionDelivery::EXTERNAL_CHANNELS.map { |item| [ item.humanize, item ] }, {}, class: "app-ui-input" %></div>
-      <div><%= form.label :recipient, "Recipient / contact", for: "delivery_external_recipient" %><%= form.text_field :recipient, id: "delivery_external_recipient", class: "app-ui-input" %></div>
-      <div><%= form.label :delivered_at, "Actual delivery time" %><%= form.datetime_local_field :delivered_at, class: "app-ui-input" %></div>
-      <div class="channel-form__wide"><%= form.label :note, "External evidence note" %><%= form.text_area :note, rows: 3, class: "app-ui-input" %></div>
-      <div class="channel-form__wide"><%= form.label :evidence, "Evidence file" %><%= form.file_field :evidence %></div>
+      <div><%= form.label :external_channel, t("self_service.delivery.external_channel") %><%= form.select :external_channel, VersionDelivery::EXTERNAL_CHANNELS.map { |item| [ item.humanize, item ] }, {}, class: "app-ui-input" %></div>
+      <div><%= form.label :recipient, t("self_service.delivery.contact"), for: "delivery_external_recipient" %><%= form.text_field :recipient, id: "delivery_external_recipient", class: "app-ui-input" %></div>
+      <div><%= form.label :delivered_at, t("self_service.delivery.actual_time") %><%= form.datetime_local_field :delivered_at, class: "app-ui-input" %></div>
+      <div class="channel-form__wide"><%= form.label :note, t("self_service.delivery.evidence_note") %><%= form.text_area :note, rows: 3, class: "app-ui-input" %></div>
+      <div class="channel-form__wide"><%= form.label :evidence, t("self_service.delivery.evidence_file") %><%= form.file_field :evidence %></div>
     </section>
 
-    <footer><div><span>Delivery state</span><strong data-channel-flow-target="signal">Ready to prepare</strong></div><%= form.submit "Deliver Version", class: "button button--primary", data: { channel_flow_target: "submit" } %></footer>
+    <footer><div><span><%= t("self_service.delivery.state") %></span><strong data-channel-flow-target="signal"><%= t("self_service.delivery.ready") %></strong></div><%= form.submit t("self_service.delivery.submit"), class: "button button--primary", data: { channel_flow_target: "submit" } %></footer>
   <% end %>
 </main>

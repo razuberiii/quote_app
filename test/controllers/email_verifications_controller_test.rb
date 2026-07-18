@@ -38,7 +38,7 @@ class EmailVerificationsControllerTest < ActionDispatch::IntegrationTest
 
     body = JSON.parse(response.body)
     assert_equal true, body["success"]
-    assert_match(/If an account with that email exists/i, body["message"])
+    assert_match(/如果该邮箱对应账户存在/, body["message"])
   ensure
     ENV["SKIP_TURNSTILE_VERIFICATION"] = previous
   end

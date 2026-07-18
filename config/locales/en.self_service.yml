@@ -1,0 +1,45 @@
+en:
+  self_service:
+    auth:
+      welcome: Welcome back.
+      welcome_body: Continue the Deal, deliver the next Version, or respond while buyer intent is still fresh.
+      login_help: Use your Rubusoo account to open the workspace.
+      login_identity: Email or username
+      signup_title: Build your first Deal.
+      signup_body: Turn a real buyer request into a controlled, deliverable quote before you configure anything else.
+      signup_help: Set up your account to open the internal workspace.
+      username: Username
+      username_help: 3–32 letters, numbers, or underscores. You can use this to log in.
+    inbox:
+      eyebrow: Actionable workspace
+      title: Inbox
+      subtitle: Only the events that can move a deal forward.
+    studio:
+      review_publish: Review & publish
+      save: Save quote
+      preview: Preview
+      preview_room: Preview Buyer Room
+      saved: Saved
+    publish:
+      button: "Publish Version %{number}"
+      preview: Preview Buyer Room
+      continue: Continue editing
+    delivery:
+      submit: Deliver Version
+      ready: Ready to prepare
+    readiness:
+      customer: Customer is required
+      currency: Currency is required
+      validity: Validity date is required
+      payment: Payment terms are required
+      incoterm: Incoterm is required
+      freight: "Freight is required for %{term}"
+      freight_source: Freight source is required
+      product: Add at least one product
+      item_name: "Item %{number}: product name is required"
+      item_quantity: "Item %{number}: quantity is required"
+      item_price: "Item %{number}: price is required"
+      item_source: "Item %{number}: a verified price source is required"
+      item_config: "Item %{number}: configuration price requires confirmation"
+      total: Quotation total must be greater than zero
+      placeholder: Remove placeholder or test content

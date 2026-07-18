@@ -18,27 +18,33 @@ class InquiriesController < ApplicationController
       @inquiry.update!(source_text: InquirySourceReader.new(@inquiry.source_file).call, source_type: inferred_source_type)
     end
     @inquiry.extract_requirements!
-    redirect_to @inquiry, notice: "Inquiry extracted. Confirm every field before building the quotation."
+    redirect_to @inquiry, notice: t("self_service.intake.extracted")
   rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError, InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile => error
     @inquiry&.manually_extract!
     Rails.logger.warn("Inquiry AI extraction failed: #{error.class}: #{error.message}")
-    redirect_to @inquiry, alert: "#{error.message} The inquiry was saved and can be completed manually."
+    redirect_to @inquiry, alert: t("self_service.intake.fallback")
   end
 
   def show
     @catalog_matches = @inquiry.catalog_matches
     @catalog_products = current_user.company.products.order(:name)
+    @guidance = InquiryGuidance.new(@inquiry)
   end
 
   def update
     data = reviewed_data
     @inquiry.update!(inquiry_params.except(:extracted_data).merge(extracted_data: data, field_states: reviewed_states(data)))
-    redirect_to @inquiry, notice: "Inquiry review saved."
+    return build_quote if params[:build_deal].present?
+    redirect_to @inquiry, notice: t("self_service.intake.review_saved")
   end
 
   def build_quote
+    if params[:inquiry].present? && @inquiry.extracted_data.blank?
+      data = reviewed_data
+      @inquiry.update!(inquiry_params.except(:extracted_data).merge(extracted_data: data, field_states: reviewed_states(data)))
+    end
     unless @inquiry.ready_to_build_quote?
-      redirect_to @inquiry, alert: "Confirm the buyer, currency, product names and quantities before building the Working draft. Prices and freight can be completed in Quote Studio."
+      redirect_to @inquiry, alert: t("self_service.intake.build_blocked")
       return
     end
     data = @inquiry.extracted_data
@@ -60,7 +66,7 @@ class InquiriesController < ApplicationController
     end
     quote.save!
     @inquiry.update!(status: "converted", customer: customer)
-    redirect_to edit_quote_path(quote), notice: "Deal created with #{quote.quote_items.count} item(s). Add reliable prices and freight before publishing Version 1."
+    redirect_to edit_quote_path(quote), notice: t("self_service.intake.deal_created", count: quote.quote_items.count)
   end
 
   private

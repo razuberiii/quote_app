@@ -14,6 +14,10 @@ Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bott
 
 Inquiry import and review use the `inquiry-import__*` and `inquiry-review__*` families. The review is evidence-led: source content remains in a sticky paper panel, extracted fields use quiet inline status text, Catalog candidates are rows rather than generic cards, and all monetary confirmation is grouped in a dark commercial band. On narrow screens the source becomes a bounded preview above the editable results.
 
+Catalog review uses `.import-coverage*` for the page/Sheet processing ledger and `.candidate-*` for human decisions. Failed or unrecognized ranges remain visible above candidates. Account security overlays use the shared `.neo-modal` panel, field, state, and action families; inline light modal styling is prohibited.
+
+Settings upload controls and account secondary actions remain dark operating-surface controls. Native file selector buttons are normalized inside `.upload-control`; white legacy upload and security buttons are not permitted.
+
 Quote Studio uses `quote-studio--editor` with three true functional columns. The center `studio-paper` is the buyer document itself and owns inline editing; the left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface.
 
 Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.

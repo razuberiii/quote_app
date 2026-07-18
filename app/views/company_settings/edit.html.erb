@@ -1,93 +1,93 @@
 <section class="workspace-page settings-workspace">
   <header class="workspace-heading workspace-heading--split">
-    <div><span class="eyebrow">Workspace control</span><h1>Settings</h1><p>Identity, commercial defaults and close policy for every Deal.</p></div>
+    <div><span class="eyebrow"><%= t("settings_workspace.eyebrow") %></span><h1><%= t("settings_workspace.title") %></h1><p><%= t("settings_workspace.subtitle") %></p></div>
   </header>
 
-  <nav class="settings-rail" aria-label="Settings sections">
-    <%= link_to "Workspace", edit_company_settings_path, class: "is-active" %>
-    <%= link_to "Account", edit_user_registration_path %>
-    <%= link_to "Team", team_members_path %>
-    <%= link_to "Invitations", team_invitations_path %>
+  <nav class="settings-rail" aria-label="<%= t("settings_workspace.navigation") %>">
+    <%= link_to t("settings_workspace.tabs.workspace"), edit_company_settings_path, class: "is-active" %>
+    <%= link_to t("settings_workspace.tabs.account"), edit_user_registration_path %>
+    <%= link_to t("settings_workspace.tabs.team"), team_members_path %>
+    <%= link_to t("settings_workspace.tabs.invitations"), team_invitations_path %>
   </nav>
 
   <% if @company.errors.any? || @template.errors.any? %>
-    <section class="form-message form-message--error" role="alert"><strong>Settings were not saved.</strong><p><%= (@company.errors.full_messages + @template.errors.full_messages).to_sentence %></p></section>
+    <section class="form-message form-message--error" role="alert"><strong><%= t("settings_workspace.not_saved") %></strong><p><%= (@company.errors.full_messages + @template.errors.full_messages).to_sentence %></p></section>
   <% end %>
 
   <%= form_with model: @company, url: company_settings_path, method: :patch, local: true, multipart: true, class: "settings-editor", data: { dirty_guard: true } do |form| %>
-    <header class="settings-editor__bar"><div><span class="eyebrow">Workspace profile</span><strong><%= @company.name %></strong></div><%= form.submit "Save changes", class: "control control--primary" %></header>
+    <header class="settings-editor__bar"><div><span class="eyebrow"><%= t("settings_workspace.profile") %></span><strong><%= @company.name %></strong></div><%= form.submit t("settings_workspace.save"), class: "control control--primary" %></header>
 
     <section class="field-section">
-      <header><span>01</span><div><h2>Seller identity</h2><p>Used in Buyer Room, exported quotes and final documents.</p></div></header>
+      <header><span>01</span><div><h2><%= t("settings_workspace.identity.title") %></h2><p><%= t("settings_workspace.identity.help") %></p></div></header>
       <div class="field-grid field-grid--two">
-        <label class="field"><span>Trading name</span><%= form.text_field :name %></label>
-        <label class="field"><span>Legal name</span><%= form.text_field :legal_name %></label>
-        <label class="field"><span>Registration number</span><%= form.text_field :registration_number %></label>
-        <label class="field"><span>Website</span><%= form.url_field :website, placeholder: "https://" %></label>
-        <label class="field"><span>Commercial email</span><%= form.email_field :email %></label>
-        <label class="field"><span>Phone</span><%= form.telephone_field :phone %></label>
-        <label class="field field--span-two"><span>Registered address</span><%= form.text_area :address, rows: 3 %></label>
-        <label class="field field--span-two"><span>Registration details</span><%= form.text_area :registration_details, rows: 3 %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.trading_name") %></span><%= form.text_field :name %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.legal_name") %></span><%= form.text_field :legal_name %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.registration_number") %></span><%= form.text_field :registration_number %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.website") %></span><%= form.url_field :website, placeholder: "https://" %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.email") %></span><%= form.email_field :email %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.phone") %></span><%= form.telephone_field :phone %></label>
+        <label class="field field--span-two"><span><%= t("settings_workspace.fields.address") %></span><%= form.text_area :address, rows: 3 %></label>
+        <label class="field field--span-two"><span><%= t("settings_workspace.fields.registration_details") %></span><%= form.text_area :registration_details, rows: 3 %></label>
       </div>
     </section>
 
     <section class="field-section">
-      <header><span>02</span><div><h2>Commercial defaults</h2><p>Starting values for a Working draft. Published Versions remain immutable.</p></div></header>
+      <header><span>02</span><div><h2><%= t("settings_workspace.commercial.title") %></h2><p><%= t("settings_workspace.commercial.help") %></p></div></header>
       <div class="field-grid field-grid--two">
-        <label class="field"><span>Currency</span><%= form.select :default_currency, %w[USD EUR GBP CNY JPY CAD AUD SGD AED] %></label>
-        <label class="field"><span>Validity in days</span><%= form.number_field :default_validity_days, min: 1 %></label>
-        <label class="field"><span>Trade term</span><%= form.text_field :default_trade_term, placeholder: "FOB Shanghai" %></label>
-        <label class="field"><span>Payment term</span><%= form.text_field :default_payment_term, placeholder: "30% deposit, 70% before shipment" %></label>
-        <label class="field"><span>Default tax rate</span><%= form.number_field :default_tax_rate, min: 0, step: 0.01 %></label>
-        <label class="field"><span>Default final document</span><%= form.select :default_final_document_type, FinalDocument::TYPES.map { |type| [type.humanize, type] } %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.currency") %></span><%= form.select :default_currency, %w[USD EUR GBP CNY JPY CAD AUD SGD AED] %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.validity") %></span><%= form.number_field :default_validity_days, min: 1 %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.trade_term") %></span><%= form.text_field :default_trade_term, placeholder: "FOB Shanghai" %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.payment_term") %></span><%= form.text_field :default_payment_term, placeholder: "30% deposit, 70% before shipment" %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.tax_rate") %></span><%= form.number_field :default_tax_rate, min: 0, step: 0.01 %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.final_document") %></span><%= form.select :default_final_document_type, FinalDocument::TYPES.map { |type| [t("settings_workspace.document_types.#{type}", default: type.humanize), type] } %></label>
       </div>
     </section>
 
     <section class="field-section">
-      <header><span>03</span><div><h2>Close policy</h2><p>Only require steps that your real sales process uses.</p></div></header>
+      <header><span>03</span><div><h2><%= t("settings_workspace.close.title") %></h2><p><%= t("settings_workspace.close.help") %></p></div></header>
       <div class="choice-stack">
-        <label class="choice-row"><%= form.check_box :require_final_document %><span><strong>Require a final document</strong><small>Generate PI, Order Confirmation or another accepted document before closing.</small></span></label>
-        <label class="choice-row"><%= form.check_box :require_deposit_workflow %><span><strong>Require payment confirmation</strong><small>Keep accepted Deals open until a deposit or payment is recorded.</small></span></label>
+        <label class="choice-row"><%= form.check_box :require_final_document %><span><strong><%= t("settings_workspace.close.require_document") %></strong><small><%= t("settings_workspace.close.require_document_help") %></small></span></label>
+        <label class="choice-row"><%= form.check_box :require_deposit_workflow %><span><strong><%= t("settings_workspace.close.require_payment") %></strong><small><%= t("settings_workspace.close.require_payment_help") %></small></span></label>
       </div>
     </section>
 
     <section class="field-section">
-      <header><span>04</span><div><h2>Brand and output</h2><p>Brand signals applied to Buyer Room and formal documents.</p></div></header>
+      <header><span>04</span><div><h2><%= t("settings_workspace.brand.title") %></h2><p><%= t("settings_workspace.brand.help") %></p></div></header>
       <div class="field-grid field-grid--two">
-        <label class="field"><span>Brand signal color</span><%= form.color_field :brand_color %></label>
-        <label class="upload-control"><span>Company logo</span><small>Transparent PNG or SVG preferred</small><%= form.file_field :logo, accept: "image/*" %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.brand_color") %></span><%= form.color_field :brand_color %></label>
+        <label class="upload-control"><span><%= t("settings_workspace.fields.logo") %></span><small><%= t("settings_workspace.fields.logo_help") %></small><%= form.file_field :logo, accept: "image/*" %></label>
         <div class="choice-stack field--span-two">
-          <% [["template_show_logo","Show logo"],["template_show_images","Show product imagery"],["template_show_terms_section","Show commercial terms"],["template_show_notes","Show buyer-facing notes"],["template_show_payment_term","Show payment terms"],["template_show_customer_owner","Show Deal owner"]].each do |key, label| %>
+          <% %w[logo images terms_section notes payment_term customer_owner].each do |field| %><% key = "template_show_#{field}" %>
             <%= hidden_field_tag "company[#{key}]", "0" %>
-            <label class="choice-row choice-row--compact"><%= check_box_tag "company[#{key}]", "1", @template.public_send(key.delete_prefix("template_")) %><span><strong><%= label %></strong></span></label>
+            <label class="choice-row choice-row--compact"><%= check_box_tag "company[#{key}]", "1", @template.public_send(key.delete_prefix("template_")) %><span><strong><%= t("settings_workspace.brand.show_#{field}") %></strong></span></label>
           <% end %>
         </div>
       </div>
     </section>
 
     <section class="field-section">
-      <header><span>05</span><div><h2>Follow-up email</h2><p>Reusable language for a Deal follow-up, editable again before sending.</p></div></header>
+      <header><span>05</span><div><h2><%= t("settings_workspace.follow_up.title") %></h2><p><%= t("settings_workspace.follow_up.help") %></p></div></header>
       <div class="field-grid">
-        <label class="field"><span>Subject</span><%= form.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %></label>
-        <label class="field"><span>Message</span><%= form.text_area :reminder_email_body, rows: 5, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %></label>
-        <label class="field"><span>CTA label</span><%= form.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.subject") %></span><%= form.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.message") %></span><%= form.text_area :reminder_email_body, rows: 5, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.cta") %></span><%= form.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %></label>
       </div>
     </section>
 
-    <footer class="resource-editor__footer"><span>Changes affect new Working drafts unless explicitly applied elsewhere.</span><%= form.submit "Save changes", class: "control control--primary" %></footer>
+    <footer class="resource-editor__footer"><span><%= t("settings_workspace.save_help") %></span><%= form.submit t("settings_workspace.save"), class: "control control--primary" %></footer>
   <% end %>
 
   <section class="settings-documents">
-    <header><span class="eyebrow">Seller evidence</span><h2>Company documents</h2><p>Credentials available when a Deal needs them.</p></header>
+    <header><span class="eyebrow"><%= t("settings_workspace.documents.eyebrow") %></span><h2><%= t("settings_workspace.documents.title") %></h2><p><%= t("settings_workspace.documents.help") %></p></header>
     <%= form_with model: @company_document, url: company_documents_path, local: true, multipart: true, class: "document-upload-row" do |document_form| %>
-      <label class="field"><span>Title</span><%= document_form.text_field :title, placeholder: "Company profile" %></label>
-      <label class="field"><span>Type</span><%= document_form.select :document_type, CompanyDocument::DOCUMENT_TYPES.map { |value| [value.humanize, value] } %></label>
-      <label class="upload-control"><span>Choose file</span><%= document_form.file_field :file %></label>
-      <%= document_form.submit "Upload", class: "control" %>
+      <label class="field"><span><%= t("settings_workspace.documents.name") %></span><%= document_form.text_field :title, placeholder: t("settings_workspace.documents.placeholder") %></label>
+      <label class="field"><span><%= t("settings_workspace.documents.type") %></span><%= document_form.select :document_type, CompanyDocument::DOCUMENT_TYPES.map { |value| [t("settings_workspace.document_types.#{value}", default: value.humanize), value] } %></label>
+      <label class="upload-control"><span><%= t("settings_workspace.documents.choose") %></span><%= document_form.file_field :file %></label>
+      <%= document_form.submit t("settings_workspace.documents.upload"), class: "control" %>
     <% end %>
     <div class="settings-document-list">
-      <% @company_documents.each do |document| %><article><div><strong><%= document.title %></strong><span><%= document.document_type_label %></span></div><% if document.file.attached? %><%= link_to document.file.filename.to_s, rails_blob_path(document.file, disposition: "attachment") %><% end %><%= button_to "Remove", company_document_path(document), method: :delete, class: "control control--quiet", data: { turbo_confirm: "Remove this document?" } %></article><% end %>
-      <% if @company_documents.empty? %><p class="empty-line">No company documents yet. Add them when a Deal needs supporting credentials.</p><% end %>
+      <% @company_documents.each do |document| %><article><div><strong><%= document.title %></strong><span><%= document.document_type_label %></span></div><% if document.file.attached? %><%= link_to document.file.filename.to_s, rails_blob_path(document.file, disposition: "attachment") %><% end %><%= button_to t("settings_workspace.documents.remove"), company_document_path(document), method: :delete, class: "control control--quiet", data: { turbo_confirm: t("settings_workspace.documents.remove_confirm") } %></article><% end %>
+      <% if @company_documents.empty? %><p class="empty-line"><%= t("settings_workspace.documents.empty") %></p><% end %>
     </div>
   </section>
 </section>

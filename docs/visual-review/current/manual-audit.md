@@ -11,9 +11,11 @@ Reviewed against direct browser contact sheets at 1440×900 and 390×844, with p
 | Versions and semantic diff | Pass | Version language is user-facing; additions, removals and commercial changes have distinct signals. |
 | Documents, Delivery and Acceptance | Pass | Dark operational surfaces; document white is reserved for the output itself. |
 | Smart Intake | Pass | Source and controlled result remain visually connected at desktop and stack deliberately on mobile. |
+| Catalog Import review | Needs Review | Page/Sheet coverage, candidate evidence, confidence and explicit human decisions are implemented. Real Provider validation was attempted but the configured upstream was unavailable, so complex semantic extraction is not accepted as complete. |
 | Quote Studio | Pass | Dark structure/command rails frame the light quote document; mobile uses one active editing surface. |
 | Library and product source | Pass | Product data is a reusable deal input, not a separate CRM/catalog application. No legacy white form cards remain. |
 | Settings, account, team, invitations | Pass | Shared dark settings shell, compact sections and consistent controls. |
+| Operator Console | Pass | Remains visually separate and only appears for operator accounts; ordinary seller navigation does not expose it. |
 | Buyer Room | Pass | Light commercial micro-site remains intentionally distinct from the seller shell; 360/390/412 widths are usable. |
 | Missing price, failed delivery, closed and long quote | Pass | Conditions remain legible without reverting to legacy alert cards or overflowing horizontally. |
 
@@ -27,7 +29,7 @@ Reviewed against direct browser contact sheets at 1440×900 and 390×844, with p
 
 ## Automated audit result
 
-The authenticated crawler captured 95 page/state/viewport combinations. The reviewed run reported zero horizontal overflow, theme light leaks, clipped text and broken images. The generated inventory and raw report live in the Visual Review artifact under `full-site/`.
+The 2026-07-18 authenticated crawler captured 72 retained page/state/viewport combinations at 1440, 390 and priority 360/412 widths. The corrected run reported zero horizontal overflow, theme light leaks, clipped text and broken images. Catalog Import remains `Needs Review` independently of these layout checks because the required live semantic Provider run did not complete. The generated inventory and raw report live in the Visual Review artifact under `full-site/`.
 
 ## CSS inventory
 

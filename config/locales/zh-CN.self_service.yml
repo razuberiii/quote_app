@@ -1,4 +1,71 @@
 zh-CN:
+  settings_workspace:
+    eyebrow: 工作空间设置
+    title: 设置
+    subtitle: 统一管理每笔交易使用的公司身份、商务默认值和成交规则。
+    navigation: 设置分区
+    tabs: { workspace: 公司, account: 账户, team: 团队, invitations: 邀请 }
+    not_saved: 设置未保存。
+    profile: 公司资料
+    save: 保存更改
+    save_help: 更改默认影响新建的 Working draft；已发布版本不会被改写。
+    identity: { title: 卖方身份, help: 用于买家空间、报价导出和最终文件。 }
+    commercial: { title: 商务默认值, help: 新 Working draft 的起始值；已发布版本保持不可变。 }
+    close:
+      title: 成交规则
+      help: 只启用真实销售流程需要的步骤。
+      require_document: 必须生成最终文件
+      require_document_help: 成交前生成形式发票、订单确认或其他双方接受的文件。
+      require_payment: 必须确认收款
+      require_payment_help: 收到定金或款项前，让已接受的交易保持待完成状态。
+    brand:
+      title: 品牌与输出
+      help: 应用于买家空间和正式文件的品牌信息。
+      show_logo: 显示 Logo
+      show_images: 显示商品图片
+      show_terms_section: 显示商务条款
+      show_notes: 显示买家备注
+      show_payment_term: 显示付款条款
+      show_customer_owner: 显示交易负责人
+    follow_up: { title: 跟进邮件, help: 可复用的交易跟进文案，发送前仍可编辑。 }
+    fields:
+      trading_name: 对外名称
+      legal_name: 法定名称
+      registration_number: 注册编号
+      website: 网站
+      email: 商务邮箱
+      phone: 电话
+      address: 注册地址
+      registration_details: 注册信息
+      currency: 默认币种
+      validity: 有效天数
+      trade_term: 贸易条款
+      payment_term: 付款条款
+      tax_rate: 默认税率
+      final_document: 默认最终文件
+      brand_color: 品牌强调色
+      logo: 公司 Logo
+      logo_help: 建议使用透明 PNG 或 SVG
+      subject: 主题
+      message: 正文
+      cta: 按钮文字
+    documents:
+      eyebrow: 卖方凭证
+      title: 公司文件
+      help: 在交易需要时提供的公司资质和证明。
+      name: 名称
+      placeholder: 公司简介
+      type: 类型
+      choose: 选择文件
+      upload: 上传
+      remove: 移除
+      remove_confirm: 确定移除这份文件？
+      empty: 暂无公司文件。可在交易需要证明材料时补充。
+    document_types:
+      proforma_invoice: 形式发票
+      order_confirmation: 订单确认
+      company_profile: 公司简介
+      registration: 注册证明
   self_service:
     auth:
       welcome: 欢迎回来
@@ -305,6 +372,15 @@ zh-CN:
       rule_price: 来源没有价格，就保持缺失。
       rule_review: AI 永远不会直接写入 Library。
     catalog_review:
+      coverage_eyebrow: 处理范围
+      coverage_title: 每个页面与 Sheet 的处理结果
+      coverage_summary: 共 %{count} 个范围，%{incomplete} 个需要人工处理
+      range_status:
+        recognized: 已识别
+        extracted: 已读取
+        unrecognized: 未识别
+        failed: 处理失败
+      match_suggestion: "SKU 与“%{product}”一致，建议合并；请由你确认，不会自动选择。"
       eyebrow: Catalog 审核
       title: 识别到 %{count} 个商品候选
       subtitle: 核对商品身份、来源证据和价格来源；保存审核并不等于写入 Library。

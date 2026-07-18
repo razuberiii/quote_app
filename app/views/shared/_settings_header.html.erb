@@ -1,25 +1,15 @@
-<section class="settings-header-card">
-  <div class="settings-header-top">
-    <h1><%= title %></h1>
-    <div class="settings-company-pill">
-      <span class="settings-company-label"><%= t("settings.company") %></span>
-      <strong><%= current_user.company.name %></strong>
-    </div>
-  </div>
-
-  <p class="settings-header-meta">
-    <%= t("settings.signed_in_as") %> <strong><%= current_user.email %></strong>
-    · <%= t("settings.company_role") %>: <span class="role-badge role-badge-<%= current_user.company_role %>"><%= current_user.company_role.capitalize %></span>
-  </p>
-
-  <nav class="settings-nav" aria-label="<%= t("settings.navigation_label") %>">
-    <%= link_to t("settings.account"), edit_user_registration_path, class: "settings-nav-link #{'is-active' if section == :account}" %>
+<section class="workspace-page settings-workspace settings-workspace--header">
+  <header class="workspace-heading workspace-heading--split">
+    <div><span class="eyebrow"><%= t("settings.current_company") %> · <%= current_user.company.name %></span><h1><%= title %></h1><p><%= t("settings.context", email: current_user.email, role: t("settings.roles.#{current_user.company_role}", default: current_user.company_role.to_s.humanize)) %></p></div>
+  </header>
+  <nav class="settings-rail" aria-label="<%= t("settings.navigation_label") %>">
+    <%= link_to t("settings.account"), edit_user_registration_path, class: ("is-active" if section == :account) %>
     <% if current_user.can_manage_templates? %>
-      <%= link_to t("settings.company"), edit_company_settings_path, class: "settings-nav-link #{'is-active' if section == :company}" %>
+      <%= link_to t("settings.company"), edit_company_settings_path, class: ("is-active" if section == :company) %>
     <% end %>
-    <%= link_to t("settings.invitations"), team_invitations_path, class: "settings-nav-link #{'is-active' if section == :invitations}" %>
+    <%= link_to t("settings.invitations"), team_invitations_path, class: ("is-active" if section == :invitations) %>
     <% if current_user.can_manage_team? %>
-      <%= link_to t("settings.team"), team_members_path, class: "settings-nav-link #{'is-active' if section == :team}" %>
+      <%= link_to t("settings.team"), team_members_path, class: ("is-active" if section == :team) %>
     <% end %>
   </nav>
 </section>

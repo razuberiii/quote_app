@@ -1,4 +1,22 @@
 en:
+  settings_workspace:
+    eyebrow: Workspace settings
+    title: Settings
+    subtitle: Manage seller identity, commercial defaults and close policy for every Deal.
+    navigation: Settings sections
+    tabs: { workspace: Company, account: Account, team: Team, invitations: Invitations }
+    not_saved: Settings were not saved.
+    profile: Company profile
+    save: Save changes
+    save_help: Changes affect new Working drafts; published Versions are not rewritten.
+    identity: { title: Seller identity, help: Used in Buyer Room, exported quotes and final documents. }
+    commercial: { title: Commercial defaults, help: Starting values for new Working drafts; published Versions remain immutable. }
+    close: { title: Close policy, help: Only require steps your sales process uses., require_document: Require a final document, require_document_help: Generate an accepted formal document before closing., require_payment: Require payment confirmation, require_payment_help: Keep accepted Deals open until payment is recorded. }
+    brand: { title: Brand and output, help: Brand signals used in Buyer Room and formal documents., show_logo: Show logo, show_images: Show product imagery, show_terms_section: Show commercial terms, show_notes: Show buyer-facing notes, show_payment_term: Show payment terms, show_customer_owner: Show Deal owner }
+    follow_up: { title: Follow-up email, help: Reusable Deal follow-up copy that remains editable before sending. }
+    fields: { trading_name: Trading name, legal_name: Legal name, registration_number: Registration number, website: Website, email: Commercial email, phone: Phone, address: Registered address, registration_details: Registration details, currency: Currency, validity: Validity in days, trade_term: Trade term, payment_term: Payment term, tax_rate: Default tax rate, final_document: Default final document, brand_color: Brand signal color, logo: Company logo, logo_help: Transparent PNG or SVG preferred, subject: Subject, message: Message, cta: CTA label }
+    documents: { eyebrow: Seller evidence, title: Company documents, help: Credentials available when a Deal needs them., name: Title, placeholder: Company profile, type: Type, choose: Choose file, upload: Upload, remove: Remove, remove_confirm: Remove this document?, empty: No company documents yet. Add them when a Deal needs supporting credentials. }
+    document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration }
   self_service:
     auth:
       welcome: Welcome back.

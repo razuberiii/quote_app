@@ -59,19 +59,19 @@
             <span></span>
           </button>
           <ul class="navbar-menu" id="primary-navigation">
-            <%= ui_nav_link "Inbox", inbox_index_path, icon: :dashboard %>
-            <%= ui_nav_link "Deals", deals_path, icon: :quotes %>
-            <%= ui_nav_link "Library", library_path, icon: :products %>
-            <%= ui_nav_link "Settings", edit_company_settings_path, icon: :team %>
+            <%= ui_nav_link t("nav.inbox"), inbox_index_path, icon: :dashboard %>
+            <%= ui_nav_link t("nav.deals"), deals_path, icon: :quotes %>
+            <%= ui_nav_link t("nav.library"), library_path, icon: :products %>
+            <%= ui_nav_link t("nav.settings"), edit_company_settings_path, icon: :team %>
             <% if current_user.admin? %>
               <%= ui_nav_link t("nav.admin"), admin_root_path, icon: :admin %>
             <% end %>
           </ul>
           <% invite_count = pending_team_invitations_count %>
           <div class="navbar-controls">
-            <%= link_to "Search", deals_path(focus: "search"), class: "app-nav-link neo-global-search" %>
-            <%= link_to "Import inquiry", new_inquiry_path, class: "app-nav-link" %>
-            <%= link_to "New deal", new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
+            <%= link_to t("nav.search"), deals_path(focus: "search"), class: "app-nav-link neo-global-search" %>
+            <%= link_to t("nav.import_inquiry"), new_inquiry_path, class: "app-nav-link" %>
+            <%= link_to t("nav.new_deal"), new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
             <div class="account-menu">
                     <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"

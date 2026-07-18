@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -384,6 +384,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_090000) do
     t.datetime "created_at", null: false
     t.bigint "created_by_id"
     t.string "input_fingerprint", null: false
+    t.jsonb "processing_report", default: [], null: false
     t.string "status", default: "review", null: false
     t.datetime "updated_at", null: false
     t.jsonb "warnings", default: [], null: false
@@ -420,7 +421,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_090000) do
     t.datetime "created_at", null: false
     t.bigint "default_addon_preset_id"
     t.jsonb "default_addons", default: [], null: false
-    t.decimal "default_price", precision: 15, scale: 4, default: "0.0", null: false
+    t.decimal "default_price", precision: 15, scale: 4
     t.bigint "default_spec_preset_id"
     t.text "default_specification"
     t.jsonb "default_specs", default: [], null: false

@@ -8,4 +8,8 @@ class ProductImportBatch < ApplicationRecord
 
   validates :status, inclusion: { in: STATUSES }
   validates :input_fingerprint, presence: true
+
+  def incomplete_ranges
+    Array(processing_report).select { |range| range["status"].in?(%w[unrecognized failed]) }
+  end
 end

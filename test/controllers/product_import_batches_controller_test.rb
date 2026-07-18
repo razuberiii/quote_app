@@ -26,6 +26,7 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     batch = @user.company.product_import_batches.order(:id).last
     assert_redirected_to product_import_batch_path(batch)
     assert_equal 2, batch.product_import_candidates.size
+    assert batch.product_import_candidates.all? { |candidate| candidate.decision == "pending" }
     assert_equal "Sheet 1 · A2:F2", batch.product_import_candidates.first.evidence.first["location"]
 
     first = batch.product_import_candidates.first
@@ -33,8 +34,31 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
       first.id.to_s => { decision: "create", candidate_data: first.candidate_data.merge("name" => "HPU 380 Confirmed") }
     } }
     assert_redirected_to library_path
-    assert_equal 2, @user.company.products.count
+    assert_equal 1, @user.company.products.count
     assert @user.company.products.exists?(name: "HPU 380 Confirmed")
+    assert_equal 2460, @user.company.products.find_by!(name: "HPU 380 Confirmed").default_price
+  ensure
+    file&.close!
+  end
+
+
+  test "unknown XLSX keeps deterministic candidates when semantic provider fails" do
+    file = Tempfile.new([ "unknown-supplier", ".xlsx" ])
+    package = Axlsx::Package.new
+    package.workbook.add_worksheet do |sheet|
+      sheet.add_row [ "Product", "Odd commercial column" ]
+      sheet.add_row [ "Dosing pump", "contact supplier" ]
+    end
+    package.serialize(file.path)
+    upload = Rack::Test::UploadedFile.new(file.path, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", original_filename: "unknown.xlsx")
+
+    post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+
+    batch = @user.company.product_import_batches.order(:id).last
+    assert_redirected_to product_import_batch_path(batch)
+    assert_equal [ "Dosing pump" ], batch.product_import_candidates.map { |candidate| candidate.candidate_data["name"] }
+    assert_equal "pending", batch.product_import_candidates.first.decision
+    assert_equal "failed", batch.processing_report.first["status"]
   ensure
     file&.close!
   end

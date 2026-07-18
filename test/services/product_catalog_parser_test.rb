@@ -34,6 +34,8 @@ class ProductCatalogParserTest < ActiveSupport::TestCase
     assert_equal 2460.0, result.products.first["explicit_price"]
     assert_nil result.products.second["explicit_price"]
     assert_equal "Sheet 1 · A2:F2", result.products.first.dig("evidence", 0, "location")
+    assert_not result.ai_required
+    assert_equal "recognized", result.processing_report.first["status"]
   ensure
     file&.close!
   end
@@ -67,7 +69,26 @@ class ProductCatalogParserTest < ActiveSupport::TestCase
     assert_includes result.ai_input, "第 2 页"
     assert_includes result.ai_input, "HPU-380"
     assert_includes result.ai_input, "GDP-40"
+    assert result.ai_required
+    assert_equal [ "第 1 页", "第 2 页" ], result.processing_report.map { |range| range["location"] }
     assert result.warnings.any? { |warning| warning.include?("不会自动入库") }
+  ensure
+    file&.close!
+  end
+
+
+  test "unknown XLSX remains eligible for semantic analysis even when a deterministic row looks usable" do
+    require "axlsx"
+    file = Tempfile.new([ "unknown-layout", ".xlsx" ])
+    package = Axlsx::Package.new
+    package.workbook.add_worksheet do |sheet|
+      sheet.add_row [ "Offer", "Ref", "Commercial" ]
+      sheet.add_row [ "Pump X", "PX-1", "USD 1250" ]
+    end
+    package.serialize(file.path)
+    result = ProductCatalogParser.new([ Upload.new("unknown-layout.xlsx", file) ]).call
+    assert result.ai_required
+    assert_equal "ai_required", result.processing_report.first["analysis"]
   ensure
     file&.close!
   end

@@ -16,38 +16,46 @@ class ProductCatalogParser
     "currency" => "currency", "币种" => "currency", "lead time" => "lead_time", "交期" => "lead_time",
     "packing" => "packing", "包装" => "packing"
   }.freeze
-  Result = Data.define(:products, :warnings, :fingerprint, :ai_input)
+  Result = Data.define(:products, :warnings, :fingerprint, :ai_input, :processing_report, :ai_required)
 
   def initialize(files) = @files = Array(files).reject(&:blank?)
 
   def call
-    warnings = []; texts = []
-    products = @files.flat_map { |file| parse(file, warnings, texts) }
+    warnings = []; texts = []; report = []
+    products = @files.flat_map { |file| parse(file, warnings, texts, report) }
     bytes = @files.map { |file| read_bytes(file) }.join
-    Result.new(products:, warnings:, fingerprint: Digest::SHA256.hexdigest(bytes), ai_input: texts.join("\n\n").first(120_000))
+    Result.new(products:, warnings:, fingerprint: Digest::SHA256.hexdigest(bytes),
+      ai_input: texts.join("\n\n").first(120_000), processing_report: report,
+      ai_required: report.any? { |range| range["analysis"] == "ai_required" })
   end
 
   private
 
-  def parse(file, warnings, texts)
+  def parse(file, warnings, texts, report)
     name = file.original_filename.to_s
     case File.extname(name).downcase
-    when ".csv" then parse_csv(read_bytes(file), name, warnings)
-    when ".xlsx" then parse_xlsx(file.tempfile.path, name, warnings, texts)
-    when ".pdf" then parse_pdf(file.tempfile.path, name, warnings, texts)
-    when ".png", ".jpg", ".jpeg", ".webp" then parse_image(file.tempfile.path, name, warnings, texts)
-    else warnings << "#{name}：暂不支持此文件类型。"; []
+    when ".csv" then parse_csv(read_bytes(file), name, warnings, report)
+    when ".xlsx" then parse_xlsx(file.tempfile.path, name, warnings, texts, report)
+    when ".pdf" then parse_pdf(file.tempfile.path, name, warnings, texts, report)
+    when ".png", ".jpg", ".jpeg", ".webp" then parse_image(file.tempfile.path, name, warnings, texts, report)
+    else
+      warnings << "#{name}：暂不支持此文件类型。"
+      report << range(source: name, location: "文件", status: "failed", analysis: "unsupported", detail: "不支持的文件类型")
+      []
     end
   rescue StandardError => error
     warnings << "#{name}：#{error.message}"; []
   end
 
-  def parse_csv(bytes, source, warnings)
+  def parse_csv(bytes, source, warnings, report)
     table = CSV.parse(bytes.encode("UTF-8", invalid: :replace, undef: :replace), headers: true)
-    rows_to_candidates(table.headers, table.map(&:fields), source, "CSV", warnings)
+    products = rows_to_candidates(table.headers, table.map(&:fields), source, "CSV", warnings)
+    report << range(source:, location: "CSV · 2-#{table.size + 1} 行", status: products.any? ? "recognized" : "unrecognized",
+      analysis: "deterministic", detail: "识别 #{products.size} 个商品候选")
+    products
   end
 
-  def parse_xlsx(path, source, warnings, texts)
+  def parse_xlsx(path, source, warnings, texts, report)
     Zip::File.open(path) do |archive|
       shared = shared_strings(archive)
       archive.glob("xl/worksheets/sheet*.xml").sort_by(&:name).flat_map.with_index(1) do |entry, sheet_index|
@@ -70,26 +78,36 @@ class ProductCatalogParser
         next [] if rows.empty?
         label = "Sheet #{sheet_index}"
         texts << "#{source} #{label}\n#{rows.map { |row| row.join(" | ") }.join("\n")}"
-        rows_to_candidates(rows.first, rows.drop(1), source, label, warnings)
+        products = rows_to_candidates(rows.first, rows.drop(1), source, label, warnings)
+        known_template = known_headers?(rows.first)
+        report << range(source:, location: label, status: products.any? ? "recognized" : "unrecognized",
+          analysis: known_template ? "deterministic" : "ai_required",
+          detail: known_template ? "标准字段识别 #{products.size} 个候选" : "未知模板，已读取 #{rows.size} 行并等待语义分析")
+        products
       end
     end
   end
 
-  def parse_pdf(path, source, warnings, texts)
+  def parse_pdf(path, source, warnings, texts, report)
     pages = PDF::Reader.new(path).pages.map(&:text)
     if pages.join.strip.blank?
       pages = ocr_pdf(path)
       warnings << "#{source}：扫描 PDF 已执行 OCR，所有候选都需要人工确认。"
     end
-    pages.each_with_index { |text, index| texts << "#{source} · 第 #{index + 1} 页\n#{text}" }
+    pages.each_with_index do |text, index|
+      texts << "#{source} · 第 #{index + 1} 页\n#{text}"
+      report << range(source:, location: "第 #{index + 1} 页", status: text.present? ? "extracted" : "unrecognized",
+        analysis: "ai_required", detail: text.present? ? "文本已读取，等待商品语义分析" : "没有识别到可读内容")
+    end
     warnings << "#{source}：页面内容将通过结构化分析生成候选，不会自动入库。"
     []
   end
 
-  def parse_image(path, source, warnings, texts)
+  def parse_image(path, source, warnings, texts, report)
     text = ocr_image(path)
     raise "图片中没有识别到可读文字" if text.blank?
     texts << "#{source} · OCR\n#{text}"
+    report << range(source:, location: "整张图片", status: "extracted", analysis: "ai_required", detail: "OCR 已完成，等待商品与图片关联分析")
     warnings << "#{source}：图片 OCR 结果需要逐项核对。"
     []
   end
@@ -103,6 +121,15 @@ class ProductCatalogParser
       next if data["name"].blank?
       candidate(data, source, "#{location} · #{cell_range(row_number, values.length)}")
     end
+  end
+
+  def known_headers?(headers)
+    mapped = Array(headers).map { |header| HEADER_ALIASES[header.to_s.strip.downcase] }.compact
+    mapped.include?("name") && (mapped & %w[sku model description explicit_price]).any?
+  end
+
+  def range(source:, location:, status:, analysis:, detail:)
+    { "source" => source, "location" => location, "status" => status, "analysis" => analysis, "detail" => detail }
   end
 
   def candidate(data, source, location)

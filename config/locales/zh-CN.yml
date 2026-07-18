@@ -75,6 +75,13 @@ zh-CN:
     qty: 数量
     date: 日期
   nav:
+    inbox: 收件箱
+    deals: 交易
+    library: 商品库
+    settings: 设置
+    search: 搜索
+    import_inquiry: 导入询盘
+    new_deal: 新建交易
     home: 首页
     dashboard: 工作台
     customers: 客户
@@ -541,13 +548,19 @@ zh-CN:
     action_item_resolved: 事项已标记为已处理。
   settings:
     company: 公司
+    current_company: 当前公司
     signed_in_as: 当前登录
     company_role: 公司角色
+    context: "%{email} · %{role}"
     navigation_label: 设置导航
     account: 账户
     invitations: 邀请
     team: 团队
     template: 模板
+    roles:
+      owner: 所有者
+      admin: 管理员
+      member: 成员
   quotes:
     errors:
       valid_until_on_or_after_today: 不能早于今天
@@ -2848,6 +2861,8 @@ zh-CN:
           loading_verification: 正在加载验证...
           verified_submitting: ✓ 验证通过，正在提交...
         edit:
+          username: 用户名
+          username_hint: 用于登录，并显示在你的工作空间中。
           header_title: 账户设置
           personal_profile: 个人资料
           profile_hint: 管理你的工作身份信息。仅修改资料时无需进行安全验证。
@@ -2865,6 +2880,10 @@ zh-CN:
           language: 语言
           update_profile: 更新资料
           security_settings: 安全设置
+          security_verification: 安全验证
+          security_verification_hint: 请完成验证后继续
+          verification_loading: 正在加载验证…
+          verification_complete: 验证通过，正在发送…
           security_settings_hint: 在这里修改邮箱或密码。安全更新需要当前密码。
           email_address: 邮箱地址
           change_email: 更改邮箱

@@ -29,8 +29,8 @@
     </div>
 
     <div>
-      <%= f.label :username, "Username" %>
-      <p class="team-members-hint">Used for sign-in and visible inside your workspace.</p>
+      <%= f.label :username, t("users.registrations.view.edit.username") %>
+      <p class="team-members-hint"><%= t("users.registrations.view.edit.username_hint") %></p>
       <%= f.text_field :username, required: true, minlength: 3, maxlength: 32, class: ui_input_classes %>
     </div>
 
@@ -114,43 +114,43 @@
   </p>
 </section>
 <!-- Email Change Modal -->
-<div id="email-change-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; justify-content: center; align-items: center;">
-  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 420px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-    <h3 style="margin: 0 0 10px 0; color: #333;"><%= t("users.registrations.view.edit.change_email_address") %></h3>
-    <p style="margin: 0 0 20px 0; color: #666; font-size: 14px;"><%= t("users.registrations.view.edit.change_email_address_hint") %></p>
+<div id="email-change-modal" class="neo-modal" hidden>
+  <div class="neo-modal__panel">
+    <h3><%= t("users.registrations.view.edit.change_email_address") %></h3>
+    <p><%= t("users.registrations.view.edit.change_email_address_hint") %></p>
 
     <form id="email-change-form">
-      <div style="margin-bottom: 15px;">
-        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;"><%= t("users.registrations.view.edit.new_email_address") %></label>
-        <input type="email" id="new-email-input" required placeholder="<%= t("users.registrations.view.edit.new_email_placeholder") %>" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
+      <div class="field">
+        <label><%= t("users.registrations.view.edit.new_email_address") %></label>
+        <input type="email" id="new-email-input" required placeholder="<%= t("users.registrations.view.edit.new_email_placeholder") %>">
       </div>
 
-      <div style="margin-bottom: 20px;">
-        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #333;"><%= t("users.registrations.view.edit.current_password") %></label>
-        <input type="password" id="current-password-input" required placeholder="<%= t("users.registrations.view.edit.current_password_placeholder") %>" style="width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box;">
-        <p style="margin: 6px 0 0 0; font-size: 0.85em; color: #999;"><%= t("users.registrations.view.edit.password_verify_hint") %></p>
+      <div class="field">
+        <label><%= t("users.registrations.view.edit.current_password") %></label>
+        <input type="password" id="current-password-input" required placeholder="<%= t("users.registrations.view.edit.current_password_placeholder") %>">
+        <p><%= t("users.registrations.view.edit.password_verify_hint") %></p>
       </div>
 
       <div id="email-change-error" style="display: none; margin-bottom: 15px; padding: 12px; background: #fee; border: 1px solid #fcc; border-radius: 4px; color: #c33; font-size: 14px;"></div>
 
       <div id="email-change-success" style="display: none; margin-bottom: 15px; padding: 12px; background: #efe; border: 1px solid #cfc; border-radius: 4px; color: #3c3; font-size: 14px;"></div>
 
-      <div style="display: flex; gap: 10px;">
-        <button type="submit" class="app-ui-button app-ui-button--primary" id="email-change-submit-btn" style="flex: 1;"><%= t("users.registrations.view.edit.send_verification_email") %></button>
-        <button type="button" class="app-ui-button app-ui-button--secondary" id="email-change-cancel-btn" style="flex: 1;"><%= t("users.registrations.view.edit.cancel") %></button>
+      <div class="neo-modal__actions">
+        <button type="submit" class="app-ui-button app-ui-button--primary" id="email-change-submit-btn"><%= t("users.registrations.view.edit.send_verification_email") %></button>
+        <button type="button" class="app-ui-button app-ui-button--secondary" id="email-change-cancel-btn"><%= t("users.registrations.view.edit.cancel") %></button>
       </div>
     </form>
   </div>
 </div>
 
 <!-- Email Change Verification Modal -->
-<div id="email-change-verification-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 10000; justify-content: center; align-items: center;">
-  <div style="background: white; padding: 30px; border-radius: 12px; max-width: 100%; width: 90%; max-width: 380px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
-    <h3 style="margin: 0 0 10px 0; text-align: center; color: #333;">Security Verification</h3>
-    <p style="margin: 0 0 20px 0; text-align: center; color: #666; font-size: 14px;">Please complete the verification to continue</p>
+<div id="email-change-verification-modal" class="neo-modal" hidden>
+  <div class="neo-modal__panel neo-modal__panel--compact">
+    <h3><%= t("users.registrations.view.edit.security_verification") %></h3>
+    <p><%= t("users.registrations.view.edit.security_verification_hint") %></p>
 
     <div id="email-change-turnstile-loading" style="text-align: center; padding: 20px 0; color: #999;">
-      <p>Loading verification...</p>
+      <p><%= t("users.registrations.view.edit.verification_loading") %></p>
     </div>
 
     <div id="email-change-turnstile-container" style="display: none; text-align: center; overflow-x: auto;">
@@ -158,7 +158,7 @@
     </div>
 
     <div id="email-change-turnstile-success" style="display: none; text-align: center; padding: 20px 0;">
-      <p style="color: #28a745; font-size: 16px; margin: 0;">✓ Verified! Sending...</p>
+      <p>✓ <%= t("users.registrations.view.edit.verification_complete") %></p>
     </div>
   </div>
 </div>
@@ -189,7 +189,7 @@
     let turnstileToken = '';
 
     changeEmailBtn.addEventListener('click', function() {
-      emailChangeModal.style.display = 'flex';
+      emailChangeModal.hidden = false;
       newEmailInput.value = '';
       currentPasswordInput.value = '';
       verificationComplete = false;
@@ -199,12 +199,12 @@
     });
 
     cancelBtn.addEventListener('click', function() {
-      emailChangeModal.style.display = 'none';
+      emailChangeModal.hidden = true;
     });
 
     emailChangeModal.addEventListener('click', function(e) {
       if (e.target === emailChangeModal) {
-        emailChangeModal.style.display = 'none';
+        emailChangeModal.hidden = true;
       }
     });
 
@@ -228,7 +228,7 @@
 
       verificationComplete = false;
       turnstileToken = '';
-      verificationModal.style.display = 'flex';
+      verificationModal.hidden = false;
       loadingDiv.style.display = 'block';
       containerDiv.style.display = 'none';
       turnstileSuccessDiv.style.display = 'none';
@@ -261,7 +261,7 @@
           turnstileSuccessDiv.style.display = 'block';
 
           setTimeout(function() {
-            verificationModal.style.display = 'none';
+            verificationModal.hidden = true;
             submitEmailChange(newEmailInput.value.trim(), currentPasswordInput.value, token);
           }, 800);
         }
@@ -299,7 +299,7 @@
           emailChangeForm.reset();
 
           setTimeout(() => {
-            emailChangeModal.style.display = 'none';
+            emailChangeModal.hidden = true;
           }, 3000);
         } else {
           errorDiv.textContent = data.error || 'An error occurred';
@@ -322,7 +322,7 @@
 
     verificationModal.addEventListener('click', function(e) {
       if (e.target === verificationModal && !verificationComplete) {
-        verificationModal.style.display = 'none';
+        verificationModal.hidden = true;
       }
     });
   });

@@ -75,6 +75,13 @@ en:
     qty: Qty
     date: Date
   nav:
+    inbox: Inbox
+    deals: Deals
+    library: Library
+    settings: Settings
+    search: Search
+    import_inquiry: Import inquiry
+    new_deal: New deal
     home: Home
     dashboard: Workspace
     customers: Customers
@@ -541,13 +548,19 @@ en:
     action_item_resolved: Item marked as handled.
   settings:
     company: Company
+    current_company: Current company
     signed_in_as: Signed in as
     company_role: Company role
+    context: "%{email} · %{role}"
     navigation_label: Settings navigation
     account: Account
     invitations: Invitations
     team: Team
     template: Template
+    roles:
+      owner: Owner
+      admin: Administrator
+      member: Member
   quotes:
     errors:
       valid_until_on_or_after_today: must be today or later
@@ -2848,6 +2861,8 @@ en:
           loading_verification: Loading verification...
           verified_submitting: ✓ Verified! Submitting...
         edit:
+          username: Username
+          username_hint: Used for sign-in and shown inside your workspace.
           header_title: Account Settings
           personal_profile: Personal Profile
           profile_hint: Manage your working identity. Security verification is not required for profile-only changes.
@@ -2865,6 +2880,10 @@ en:
           language: Language
           update_profile: Update Profile
           security_settings: Security Settings
+          security_verification: Security verification
+          security_verification_hint: Complete verification to continue
+          verification_loading: Loading verification…
+          verification_complete: Verified, sending…
           security_settings_hint: Change email or password here. Current password is required for security updates.
           email_address: Email Address
           change_email: Change Email

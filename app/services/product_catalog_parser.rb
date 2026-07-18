@@ -5,7 +5,6 @@ require "pdf-reader"
 require "rexml/document"
 require "tmpdir"
 require "zip"
-require "vips"
 
 class ProductCatalogParser
   DANGEROUS_PREFIX = /\A[=+\-@]/
@@ -144,6 +143,8 @@ class ProductCatalogParser
   end
 
   def ocr_pdf(path)
+    require "vips"
+
     Dir.mktmpdir("rubusoo-catalog") do |dir|
       image = Vips::Image.new_from_file(path, dpi: 160, access: :sequential)
       page_height = image.get("page-height")

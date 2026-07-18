@@ -212,12 +212,13 @@ html{scroll-behavior:smooth}.neo-os{margin:0;background:var(--neo-bg);color:var(
 .quote-studio--editor .studio-toolbar__identity h1 span,.quote-studio--editor .studio-outline a em,.quote-studio--editor .studio-summary__note{color:var(--neo-muted)}.quote-studio--editor .studio-paper .section-kicker{color:#315fdc}.quote-studio--editor #studio-pricing .section-kicker{color:#8aa7ff}.quote-studio--editor .studio-mode>span{color:#526174}.quote-studio--editor .studio-product__commercial :is(label>span,div>span){color:#526174}.quote-studio--editor .studio-add-product{color:#526174}.neo-os--app .app-shortcuts-footnote{color:#8d96a8}
 
 /* 2026 product closure: compact work surfaces, document/editor separation, story motion. */
+.neo-os--marketing .product-landing{width:100%;max-width:none;margin:0;padding:0}
 .kinetic-headline__window{position:relative;display:inline-grid;min-width:7.8ch;color:var(--neo-blue);vertical-align:baseline;white-space:nowrap;isolation:isolate}
 .kinetic-headline__window>span{display:block;transform-origin:left center;transition:opacity var(--motion-component) var(--motion-ease-standard),transform var(--motion-component) var(--motion-ease-emphasized),filter var(--motion-component) var(--motion-ease-standard)}
 .kinetic-headline__window>i{position:absolute;width:2px;height:.82em;right:-.12em;bottom:.08em;background:var(--neo-red);opacity:.8;animation:kinetic-caret 1.05s steps(1,end) infinite}
 .kinetic-headline__window.is-changing>span{opacity:0;filter:blur(3px);transform:translateY(-.16em) skewX(-5deg)}
-.product-hero{min-height:min(820px,calc(100vh - 64px));grid-template-columns:minmax(360px,.72fr) minmax(560px,1.28fr);align-items:center;gap:clamp(36px,5vw,88px);padding-block:72px}
-.product-hero__copy h1{max-width:780px;font-size:clamp(3.6rem,6.2vw,6.8rem);line-height:.88}
+.product-hero{display:grid;min-height:min(820px,calc(100vh - 64px));grid-template-columns:minmax(0,650px) minmax(560px,750px);justify-content:center;align-items:center;gap:clamp(36px,5vw,88px);padding-block:72px}
+.product-hero__copy h1{max-width:780px;font-size:clamp(3.6rem,5vw,5.8rem);line-height:.88}
 .product-hero__copy>p{max-width:650px}
 .product-hero__product{position:relative;display:block;min-height:540px;padding:28px;border:1px solid var(--neo-line);background:radial-gradient(circle at 80% 15%,rgba(77,124,255,.12),transparent 34%),#0d1119;overflow:hidden;perspective:1100px}
 .product-hero__product::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 20%,rgba(95,231,237,.045) 46%,transparent 70%);transform:translateX(-100%);animation:story-sweep 8.1s ease-in-out infinite;pointer-events:none}
@@ -232,6 +233,11 @@ html{scroll-behavior:smooth}.neo-os{margin:0;background:var(--neo-bg);color:var(
 .product-hero__product>footer div{display:flex;gap:6px}.product-hero__product>footer button{width:34px;height:30px;border:1px solid var(--neo-line);border-radius:7px;background:transparent;color:var(--neo-text);cursor:pointer}
 .product-story__track{position:absolute;z-index:2;inset:24px 28px auto;height:2px;background:rgba(255,255,255,.08)}
 .product-story__track i{display:block;width:100%;height:100%;transform-origin:left;background:var(--neo-blue);transition:transform 320ms cubic-bezier(.2,.8,.2,1)}
+.product-reveal{opacity:0;transform:translateY(42px);filter:saturate(.72);transition:opacity 680ms var(--motion-crisp),transform 760ms var(--motion-crisp),filter 760ms var(--motion-crisp)}
+.product-reveal.is-revealed{opacity:1;transform:none;filter:none}
+.product-reveal>header>*,.product-reveal>div>*{transition:opacity 620ms var(--motion-crisp),transform 680ms var(--motion-crisp)}
+.product-reveal:not(.is-revealed)>header>*,.product-reveal:not(.is-revealed)>div>*{opacity:0;transform:translateY(18px)}
+.product-reveal.is-revealed>header>*:nth-child(2),.product-reveal.is-revealed>div>*:nth-child(2){transition-delay:70ms}.product-reveal.is-revealed>div>*:nth-child(3){transition-delay:140ms}
 .hero-inquiry mark{background:transparent;color:inherit;box-shadow:inset 0 -.12em rgba(121,242,178,.18)}
 .hero-inquiry.is-active mark{animation:story-evidence 520ms var(--motion-ease-emphasized) both}.hero-inquiry.is-active mark:nth-of-type(2){animation-delay:120ms}.hero-inquiry.is-active mark:nth-of-type(3){animation-delay:240ms}
 .hero-extraction p{opacity:.3;transform:translateX(12px)}.hero-extraction.is-active p{animation:story-row 360ms var(--motion-ease-emphasized) both}.hero-extraction.is-active p:nth-of-type(2){animation-delay:90ms}.hero-extraction.is-active p:nth-of-type(3){animation-delay:180ms}.hero-extraction.is-active .is-missing{animation-name:story-row,story-missing;animation-duration:360ms,620ms;animation-delay:180ms,500ms}
@@ -260,6 +266,7 @@ html{scroll-behavior:smooth}.neo-os{margin:0;background:var(--neo-bg);color:var(
 .studio-product__top>div{min-width:0;flex:1}.studio-product__name{min-width:0;overflow-wrap:anywhere}.studio-product__sku{flex-wrap:wrap}.studio-product__commercial{grid-template-columns:minmax(74px,.7fr) minmax(100px,1fr) minmax(125px,1.2fr) minmax(100px,1fr)}
 .studio-add-product{display:block;text-align:center;text-decoration:none;cursor:pointer}
 
+@media(max-width:1380px){.product-hero{grid-template-columns:1fr 1.1fr}.product-hero__copy h1{font-size:clamp(3.6rem,5.1vw,4.7rem)}}
 @media(max-width:1180px){.product-hero{grid-template-columns:1fr 1.15fr}.studio-grid--editor{grid-template-columns:180px minmax(680px,1fr)}.quote-studio--editor .studio-summary{display:none}}
 @media(max-width:760px){
   .product-hero{display:block;min-height:calc(100svh - 58px);padding:34px 16px 28px}
@@ -281,7 +288,7 @@ html{scroll-behavior:smooth}.neo-os{margin:0;background:var(--neo-bg);color:var(
   .studio-inline-title{font-size:2.35rem}.studio-products,.studio-pricing,.studio-terms,.studio-cover{padding:26px 18px}
   .studio-product{grid-template-columns:1fr;padding-top:48px}.studio-product__visual{height:220px}.studio-product__commercial{grid-template-columns:1fr 1fr}.studio-product__commercial>div{grid-column:1/-1}
 }
-@media(prefers-reduced-motion:reduce){.kinetic-headline__window>i{animation:none}.kinetic-headline__window>span,.product-hero__product>article,.product-story__track i{transition:none}.hero-inquiry.is-active mark,.hero-extraction.is-active p,.hero-room.is-active h2,.hero-room.is-active>div,.hero-room.is-active>p{animation:none}}
+@media(prefers-reduced-motion:reduce){.kinetic-headline__window>i{animation:none}.kinetic-headline__window>span,.product-hero__product>article,.product-story__track i,.product-reveal,.product-reveal>*{transition:none}.hero-inquiry.is-active mark,.hero-extraction.is-active p,.hero-room.is-active h2,.hero-room.is-active>div,.hero-room.is-active>p{animation:none}.product-reveal{opacity:1;transform:none;filter:none}}
 
 /* Settings are an operating surface, never a paper document. */
 .neo-os--app .app-page-shell--settings-form{max-width:1180px;padding-top:22px}

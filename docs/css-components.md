@@ -380,6 +380,7 @@ data-action="click->clipboard#copy"
 - `.buyer-inbox` groups contextual buyer questions, revision requests, and immutable acceptance actions.
 - `.seller-demo` is the public, read-only commercial-flow tour; its sections mirror real seller concepts and collapse to a single mobile column.
 - `.product-landing` owns the marketing narrative; `.product-hero__product`, `.feature-extract`, `.feature-studio`, and `.feature-buyer` are product UI compositions, not generic card primitives.
+- `product-reveal` observes homepage sections and plays their entrance only when they enter the viewport; reduced-motion users receive the final state immediately.
 - Buyer Room is layout-independent: `.buyer-body`, `.buyer-cover`, `.buyer-grid`, `.doc-section`, `.selection-panel`, and `.rubusoo-dialog` provide the complete public baseline before storefront variants.
 
 ### Neo Commerce OS visual scope
@@ -389,6 +390,7 @@ data-action="click->clipboard#copy"
 - V2 uses background level, one-pixel dividers, grid and typography for hierarchy. A content region may have one primary border; nested rounded card stacks are prohibited.
 - Standard control radius is `8px`, panels are `10px–12px`, and larger radii are reserved for dialogs only. V2 styles must not use `!important` to defeat legacy rules.
 - Marketing product compositions are connected panels at desktop sizes and become ordinary full-width responsive sections below `760px`; they never use device or browser mockup frames.
+- `.product-landing` explicitly escapes the legacy `main` max-width because it is nested inside the public layout main; its hero owns a full-width desktop grid and must be checked through `2560px`.
 - Seller pages use a graphite OS shell. Quote Studio owns a dark structure rail, a light buyer-facing canvas and a dark command rail.
 - Quote Studio kickers on graphite surfaces use the accessible signal-blue token (`#8aa7ff`); darker document-blue is reserved for light canvas surfaces.
 - Buyer Room owns a light premium storefront plus graphite selection rail. Below `1100px` the summary becomes a true viewport-bottom action bar and the document receives matching bottom clearance.

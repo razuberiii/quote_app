@@ -17,6 +17,10 @@ class VisualReviewSeeder
     end
     company.update!(plan: "business", subscription_status: "active", require_final_document: false,
       require_deposit_workflow: false, default_final_document_type: "order_confirmation")
+    # Browser visits are real product events. Clear only the test workspace's
+    # view stream so repeated visual runs do not grow the Deal timeline and
+    # invalidate an otherwise identical screenshot.
+    BuyerActivity.where(company: company).delete_all
     user = company.users.find_or_initialize_by(email: "visual@rubusoo.example")
     user.assign_attributes(username: "visual_auditor", password: PASSWORD, password_confirmation: PASSWORD,
       company_role: "owner", email_verified_at: Time.current)
@@ -39,7 +43,7 @@ class VisualReviewSeeder
       "version_one_id" => version_one.id, "version_two_id" => version_two.id,
       "buyer_token" => version_two.secure_token, "old_buyer_token" => version_one.secure_token,
       "e2e_deal_id" => e2e_deal.id, "e2e_excel_deal_id" => e2e_excel_deal.id,
-      "inquiry_id" => inquiry.id,
+      "inquiry_id" => inquiry.id, "product_id" => products.first.id,
       "edge_deals" => edge_deals.transform_values(&:id)
     }
     FileUtils.mkdir_p(Rails.root.join("tmp"))

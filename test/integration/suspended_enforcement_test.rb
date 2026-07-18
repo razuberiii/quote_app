@@ -10,10 +10,10 @@ class SuspendedEnforcementTest < ActionDispatch::IntegrationTest
   test "suspended signed-in user is logged out on next request" do
     @user.update!(status: :suspended)
 
-    get dashboard_path
+    get inbox_index_path
     assert_redirected_to suspended_path
 
-    get dashboard_path
+    get inbox_index_path
     assert_redirected_to new_user_session_path
   end
 end

@@ -1,549 +1,81 @@
-<% form_key = product.new_record? ? "new" : "edit" %>
+<%= form_with model: product, html: { multipart: true, class: "resource-editor" } do |form| %>
+  <% if product.errors.any? %>
+    <section class="form-message form-message--error" role="alert">
+      <strong>Check the highlighted product details.</strong>
+      <p><%= product.errors.full_messages.to_sentence %></p>
+    </section>
+  <% end %>
 
-<%= form_with model: product, html: { multipart: true } do |f| %>
-  <div class="product-edit-layout">
-    <aside class="product-edit-media">
-      <section class="quote-form-section product-edit-panel product-edit-panel--media">
-        <div class="app-form-section-head">
-          <h3><%= t("products.view.form.product_media") %></h3>
-          <p class="app-form-section-note"><%= t("products.view.form.product_media_hint") %></p>
-        </div>
+  <header class="resource-editor__bar">
+    <div>
+      <span class="eyebrow">Library / Products</span>
+      <strong><%= product.new_record? ? "Create a reusable product" : product.name %></strong>
+    </div>
+    <div class="resource-editor__actions">
+      <%= link_to "Cancel", back_path, class: "control control--quiet" %>
+      <%= form.submit submit_label, class: "control control--primary" %>
+    </div>
+  </header>
 
-        <div class="product-main-image-panel">
-          <p class="product-media-label"><%= t("products.view.form.main_image") %></p>
-          <% if product.display_image.present? %>
-            <div class="product-main-image-frame">
-              <%= image_tag product.display_image, class: "product-main-image product-main-image-large product-edit-main-image", alt: t("products.view.form.main_product_image_alt") %>
-            </div>
-          <% else %>
-            <p class="quote-form-hint"><%= t("products.view.form.no_image_hint") %></p>
-          <% end %>
-        </div>
-
-        <div class="product-upload-panel">
-          <%= f.file_field :gallery_images,
-                           accept: "image/*",
-                           multiple: true,
-                           id: "product_gallery_images_#{form_key}",
-                           class: "product-gallery-file-input",
-                           data: { has_display: product.display_image.present? } %>
-          <div class="product-upload-actions">
-            <button type="button"
-                    class="<%= ui_button_classes(:secondary) %>"
-                    onclick="document.getElementById('product_gallery_images_<%= form_key %>').click();">
-              <%= product.new_record? ? t("products.view.form.upload_images") : t("products.view.form.add_more_images") %>
-            </button>
-            <span class="product-upload-file-meta" id="product_gallery_file_meta_<%= form_key %>">
-              <%= t("products.view.form.no_files_selected") %>
-            </span>
-          </div>
-          <%= hidden_field_tag "product[primary_uploaded_image_index]", "", id: "product_primary_uploaded_image_index_#{form_key}" %>
-          <div id="product_gallery_preview_<%= form_key %>" class="product-upload-preview" hidden></div>
-        </div>
-
-        <% if product.gallery_images.attached? %>
-          <div class="product-gallery-editor">
-            <div class="product-gallery-toolbar">
-              <p class="product-media-label"><%= t("products.view.form.gallery") %></p>
-              <div class="product-gallery-toolbar-actions">
-                <button type="button"
-                        class="<%= ui_button_classes(:secondary, "product-ghost-btn") %>"
-                        id="product_gallery_select_all_<%= form_key %>"
-                        data-label-select-all="<%= t("products.view.form.select_all") %>"
-                        data-label-deselect-all="<%= t("products.view.form.deselect_all", default: "取消全选") %>"><%= t("products.view.form.select_all") %></button>
-                <button type="button" class="<%= ui_button_classes(:danger, "product-ghost-btn") %>" id="product_gallery_delete_selected_<%= form_key %>" data-delete-url="<%= bulk_remove_gallery_images_product_path(product) %>" disabled><%= t("products.view.form.delete_selected") %></button>
-              </div>
-            </div>
-            <p class="quote-form-hint" id="product_gallery_selected_count_<%= form_key %>"><%= t("products.view.form.selected_count", count: 0) %></p>
-            <div class="product-gallery-grid">
-              <% product.gallery_images.attachments.each do |attachment| %>
-                <% is_main = product.image.attached? && product.image.blob_id == attachment.blob_id %>
-                <article class="product-gallery-item" data-attachment-id="<%= attachment.id %>">
-                  <div class="product-gallery-media">
-                    <button type="button"
-                            class="product-gallery-select-toggle js-product-gallery-select"
-                            data-attachment-id="<%= attachment.id %>"
-                            data-selected="false"
-                            aria-pressed="false"
-                            title="<%= t("products.view.form.select_image") %>">
-                      <span class="product-gallery-select-indicator"></span>
-                    </button>
-
-                    <% if is_main %>
-                      <div class="product-gallery-thumb-wrap is-current">
-                        <%= image_tag attachment, class: "product-gallery-thumb", alt: t("products.view.form.gallery_image_alt") %>
-                      </div>
-                    <% else %>
-                      <%= link_to set_primary_image_product_path(product, attachment_id: attachment.id), data: { turbo_method: :patch }, class: "product-gallery-thumb-wrap", title: t("products.view.form.set_as_main_image") do %>
-                        <%= image_tag attachment, class: "product-gallery-thumb", alt: t("products.view.form.gallery_image_alt") %>
-                      <% end %>
-                    <% end %>
-
-                    <%= link_to remove_gallery_image_product_path(product, attachment_id: attachment.id),
-                                data: { turbo_method: :delete, turbo_confirm: t("products.view.form.delete_image_confirm") },
-                                class: "product-gallery-delete-icon",
-                                title: t("products.view.form.delete_image"),
-                                aria: { label: t("products.view.form.delete_image") } do %>
-                      ×
-                    <% end %>
-
-                    <% if is_main %>
-                      <span class="product-gallery-main-badge"><%= t("products.view.form.main") %></span>
-                    <% end %>
-                  </div>
-                </article>
-              <% end %>
-            </div>
+  <div class="resource-editor__layout">
+    <aside class="resource-media">
+      <div class="resource-media__preview">
+        <% if product.display_image.present? %>
+          <%= image_tag product.display_image, alt: product.name.presence || "Product image" %>
+        <% else %>
+          <div class="product-visual-placeholder" aria-label="No product image">
+            <span>PRODUCT / MEDIA</span>
+            <strong><%= product.sku.presence || "SKU —" %></strong>
+            <i></i>
           </div>
         <% end %>
-      </section>
+      </div>
+      <label class="upload-control">
+        <span>Upload product images</span>
+        <small>PNG, JPG or WebP · up to 10 MB</small>
+        <%= form.file_field :gallery_images, accept: "image/*", multiple: true %>
+      </label>
+      <% if product.gallery_images.attached? %>
+        <div class="resource-media__gallery">
+          <% product.gallery_images.attachments.each do |image| %>
+            <%= image_tag image, alt: "#{product.name} gallery image" %>
+          <% end %>
+        </div>
+      <% end %>
     </aside>
 
-    <div class="product-edit-content product-edit-stack">
-      <section class="quote-form-section product-edit-panel">
-        <div class="app-form-section-head">
-          <h3><%= t("products.view.form.basic_info") %></h3>
-          <p class="app-form-section-note"><%= t("products.view.form.basic_info_hint") %></p>
-        </div>
-        <div class="quote-form-grid">
-          <div>
-            <%= f.label :name %>
-            <%= f.text_field :name, placeholder: t("products.view.form.product_name"), class: ui_input_classes %>
-          </div>
-          <div>
-            <%= f.label :sku %>
-            <%= f.text_field :sku, placeholder: t("products.view.form.sku_placeholder"), class: ui_input_classes(product.errors[:sku].any? ? "input-error" : nil) %>
-            <% if product.errors[:sku].any? %>
-              <p class="field-error-message"><%= product.errors.full_messages_for(:sku).first %></p>
-            <% end %>
-          </div>
-          <div>
-            <%= f.label :product_category, t("products.view.form.category") %>
-            <%= f.text_field :product_category, placeholder: t("products.view.form.category_placeholder"), class: ui_input_classes %>
-          </div>
-          <div>
-            <%= f.label :unit, t("products.view.form.unit") %>
-            <%= f.text_field :unit, placeholder: t("products.view.form.unit_placeholder"), list: "product_unit_options_#{form_key}", class: ui_input_classes %>
-            <datalist id="product_unit_options_<%= form_key %>">
-              <option value="pcs"></option>
-              <option value="set"></option>
-              <option value="kg"></option>
-              <option value="carton"></option>
-              <option value="box"></option>
-              <option value="meter"></option>
-            </datalist>
-          </div>
+    <div class="resource-fields">
+      <section class="field-section">
+        <header><span>01</span><div><h2>Identity</h2><p>The minimum information needed to match this product from an inquiry.</p></div></header>
+        <div class="field-grid field-grid--two">
+          <label class="field"><span>Name</span><%= form.text_field :name, required: true, placeholder: "Hydraulic press line" %></label>
+          <label class="field"><span>SKU / model</span><%= form.text_field :sku, placeholder: "HP-400T" %></label>
+          <label class="field"><span>Category</span><%= form.text_field :product_category, placeholder: "Machinery / forming" %></label>
+          <label class="field"><span>Sales unit</span><%= form.text_field :unit, placeholder: "set, unit, kg, carton" %></label>
         </div>
       </section>
 
-      <section class="quote-form-section product-edit-panel">
-        <div class="app-form-section-head">
-          <h3><%= t("products.view.form.pricing_business") %></h3>
-          <p class="app-form-section-note"><%= t("products.view.form.pricing_business_hint") %></p>
-        </div>
-        <div class="quote-form-grid">
-          <div>
-            <%= f.label :default_price, t("products.view.form.reference_price") %>
-            <%= f.number_field :default_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
-          </div>
-          <div>
-            <%= f.label :price_currency, t("products.view.form.reference_price_currency") %>
-            <%= f.select :price_currency, Product::PRICE_CURRENCIES, {}, { class: ui_input_classes } %>
-          </div>
-          <div>
-            <%= f.label :cost_price, t("products.view.form.cost_price") %>
-            <%= f.number_field :cost_price, step: 0.01, min: 0, placeholder: "0.00", class: ui_input_classes %>
-            <p class="quote-form-hint product-cost-price-hint"><%= t("products.view.form.cost_price_hint") %></p>
-          </div>
-          <div>
-            <%= f.label :moq, "MOQ" %>
-            <%= f.number_field :moq, min: 0, step: 1, placeholder: "0", class: ui_input_classes %>
-          </div>
-          <div>
-            <%= f.label :lead_time, t("products.view.form.lead_time") %>
-            <%= f.text_field :lead_time, placeholder: t("products.view.form.lead_time_placeholder"), class: ui_input_classes %>
-          </div>
+      <section class="field-section">
+        <header><span>02</span><div><h2>Commercial defaults</h2><p>Reference values only. Every Deal still requires a confirmed price source.</p></div></header>
+        <div class="field-grid field-grid--three">
+          <label class="field"><span>Reference price</span><%= form.number_field :default_price, min: 0, step: 0.01, placeholder: "0.00" %></label>
+          <label class="field"><span>Currency</span><%= form.select :price_currency, Product::PRICE_CURRENCIES %></label>
+          <label class="field"><span>Internal cost</span><%= form.number_field :cost_price, min: 0, step: 0.01, placeholder: "Optional" %></label>
+          <label class="field"><span>MOQ</span><%= form.number_field :moq, min: 0, step: 1, placeholder: "1" %></label>
+          <label class="field field--span-two"><span>Typical lead time</span><%= form.text_field :lead_time, placeholder: "25–30 days after deposit" %></label>
         </div>
       </section>
 
-      <section class="quote-form-section product-edit-panel">
-        <div class="app-form-section-head">
-          <h3><%= t("products.view.form.description") %></h3>
-          <p class="app-form-section-note"><%= t("products.view.form.description_hint") %></p>
-        </div>
-        <div class="quote-form-grid">
-          <div class="quote-form-grid-span-2">
-            <%= f.label :description %>
-            <%= f.text_area :description, rows: 5, placeholder: t("products.view.form.product_description"), class: ui_input_classes %>
-          </div>
-        </div>
+      <section class="field-section">
+        <header><span>03</span><div><h2>Buyer-facing description</h2><p>Clear product context that can flow into a working quote.</p></div></header>
+        <label class="field"><span>Description</span><%= form.text_area :description, rows: 7, placeholder: "What the product is, what is included, and where it fits…" %></label>
       </section>
 
-      <section class="quote-form-section product-edit-panel">
-        <div class="app-form-section-head">
-          <h3><%= t("products.view.form.configurator_presets") %></h3>
-          <p class="app-form-section-note"><%= t("products.view.form.configurator_presets_hint") %></p>
-        </div>
-        <div class="quote-form-grid">
-          <div class="quote-form-grid-span-2">
-            <div class="product-configurator-card">
-              <div class="product-configurator-head">
-                <strong><%= t("products.view.form.bound_spec_presets") %></strong>
-                <%= link_to t("products.view.form.manage_spec_presets"), product_presets_path(anchor: "spec-presets"), class: "quote-kv-add" %>
-              </div>
-              <% if @spec_presets.any? %>
-                <%= hidden_field_tag "product[spec_preset_ids][]", "" %>
-                <div class="product-preset-list">
-                  <% @spec_presets.each do |preset| %>
-                    <label class="product-preset-option">
-                      <%= check_box_tag "product[spec_preset_ids][]", preset.id, product.spec_preset_ids.include?(preset.id) %>
-                      <span>
-                        <strong><%= preset.name %></strong>
-                        <small><%= preset.normalized_entries.first(4).map { |entry| "#{entry[:name]}: #{entry[:value]}" }.join(" • ") %></small>
-                      </span>
-                    </label>
-                  <% end %>
-                </div>
-                <div class="product-configurator-default">
-                  <%= f.label :default_spec_preset_id, t("products.view.form.default_spec_preset") %>
-                  <%= f.select :default_spec_preset_id, options_for_select(@spec_presets.map { |preset| [preset.name, preset.id] }, product.default_spec_preset_id), { include_blank: t("products.view.form.no_default_preset") }, { class: ui_input_classes } %>
-                </div>
-              <% else %>
-                <p class="quote-form-hint"><%= t("products.view.form.no_spec_presets") %></p>
-              <% end %>
-              <% if product.errors[:default_spec_preset].any? %>
-                <p class="field-error-message"><%= product.errors.full_messages_for(:default_spec_preset).first %></p>
-              <% end %>
-            </div>
-          </div>
-
-          <div class="quote-form-grid-span-2">
-            <div class="product-configurator-card">
-              <div class="product-configurator-head">
-                <strong><%= t("products.view.form.bound_addon_presets") %></strong>
-                <%= link_to t("products.view.form.manage_addon_presets"), product_presets_path(anchor: "addon-presets"), class: "quote-kv-add" %>
-              </div>
-              <% if @addon_presets.any? %>
-                <%= hidden_field_tag "product[addon_preset_ids][]", "" %>
-                <div class="product-preset-list">
-                  <% @addon_presets.each do |preset| %>
-                    <label class="product-preset-option">
-                      <%= check_box_tag "product[addon_preset_ids][]", preset.id, product.addon_preset_ids.include?(preset.id) %>
-                      <span>
-                        <strong><%= preset.name %></strong>
-                        <small><%= preset.normalized_entries.first(4).map { |entry| "#{entry[:name]}: #{number_with_precision(entry[:price], precision: 2)}" }.join(" • ") %></small>
-                      </span>
-                    </label>
-                  <% end %>
-                </div>
-                <div class="product-configurator-default">
-                  <%= f.label :default_addon_preset_id, t("products.view.form.default_addon_preset") %>
-                  <%= f.select :default_addon_preset_id, options_for_select(@addon_presets.map { |preset| [preset.name, preset.id] }, product.default_addon_preset_id), { include_blank: t("products.view.form.no_default_preset") }, { class: ui_input_classes } %>
-                </div>
-              <% else %>
-                <p class="quote-form-hint"><%= t("products.view.form.no_addon_presets") %></p>
-              <% end %>
-              <% if product.errors[:default_addon_preset].any? %>
-                <p class="field-error-message"><%= product.errors.full_messages_for(:default_addon_preset).first %></p>
-              <% end %>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <div class="quote-form-submit product-edit-actions">
-        <%= f.submit submit_label, class: ui_button_classes(:primary) %>
-      </div>
-      <%= link_to back_label, back_path, class: "form-page-back-link" %>
     </div>
   </div>
+
+  <footer class="resource-editor__footer">
+    <span>Saved products become available inside Smart Intake and Quote Studio.</span>
+    <%= form.submit submit_label, class: "control control--primary" %>
+  </footer>
 <% end %>
-
-<script>
-  (() => {
-    const selectedCountLabel = "<%= j t("products.view.form.selected_count", count: "%{count}") %>";
-    const deleteSelectedConfirmLabel = "<%= j t("products.view.form.delete_selected_confirm", count: "%{count}") %>";
-    const selectAllLabel = "<%= j t("products.view.form.select_all") %>";
-    const deselectAllLabel = "<%= j t("products.view.form.deselect_all", default: "取消全选") %>";
-    const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
-    const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
-    const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
-
-    const selectAllBtn = document.getElementById("product_gallery_select_all_<%= form_key %>");
-    const deleteSelectedBtn = document.getElementById("product_gallery_delete_selected_<%= form_key %>");
-    const selectedCountEl = document.getElementById("product_gallery_selected_count_<%= form_key %>");
-    const selectionButtons = Array.from(document.querySelectorAll(".js-product-gallery-select"));
-
-    if (selectAllBtn && deleteSelectedBtn && selectedCountEl && selectionButtons.length) {
-      const csrf = document.querySelector("meta[name='csrf-token']")?.content || "";
-      const setButtonSelectedState = (button, selected) => {
-        if (!button) return;
-        button.dataset.selected = selected ? "true" : "false";
-        button.setAttribute("aria-pressed", selected ? "true" : "false");
-      };
-      const buttonSelected = (button) => String(button?.dataset?.selected || "false") === "true";
-
-      const updateSelectionUi = () => {
-        const selected = selectionButtons.filter((button) => buttonSelected(button));
-        selectionButtons.forEach((button) => {
-          button.closest(".product-gallery-item")?.classList.toggle("is-selected", buttonSelected(button));
-        });
-        selectedCountEl.textContent = selectedCountLabel.replace("%{count}", String(selected.length));
-        deleteSelectedBtn.disabled = selected.length === 0;
-        const allSelected = selectionButtons.length > 0 && selected.length === selectionButtons.length;
-        selectAllBtn.textContent = allSelected ? deselectAllLabel : selectAllLabel;
-      };
-
-      selectionButtons.forEach((button) => {
-        button.addEventListener("click", () => {
-          setButtonSelectedState(button, !buttonSelected(button));
-          updateSelectionUi();
-        });
-      });
-
-      selectAllBtn.addEventListener("click", () => {
-        const allSelected = selectionButtons.every((button) => buttonSelected(button));
-        selectionButtons.forEach((button) => {
-          setButtonSelectedState(button, !allSelected);
-        });
-        updateSelectionUi();
-      });
-
-      deleteSelectedBtn.addEventListener("click", () => {
-        const selected = selectionButtons
-          .filter((button) => buttonSelected(button))
-          .map((button) => String(button.dataset.attachmentId || "").trim())
-          .filter((value) => value.length > 0);
-        if (!selected.length) return;
-        if (!window.confirm(deleteSelectedConfirmLabel.replace("%{count}", String(selected.length)))) return;
-
-        const form = document.createElement("form");
-        form.method = "post";
-        form.action = deleteSelectedBtn.dataset.deleteUrl;
-        form.style.display = "none";
-
-        const method = document.createElement("input");
-        method.type = "hidden";
-        method.name = "_method";
-        method.value = "delete";
-        form.appendChild(method);
-
-        if (csrf) {
-          const tokenInput = document.createElement("input");
-          tokenInput.type = "hidden";
-          tokenInput.name = "authenticity_token";
-          tokenInput.value = csrf;
-          form.appendChild(tokenInput);
-        }
-
-        selected.forEach((id) => {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = "attachment_ids[]";
-          input.value = id;
-          form.appendChild(input);
-        });
-
-        document.body.appendChild(form);
-        form.submit();
-      });
-
-      updateSelectionUi();
-    }
-  })();
-
-  (() => {
-    const input = document.getElementById("product_gallery_images_<%= form_key %>");
-    const preview = document.getElementById("product_gallery_preview_<%= form_key %>");
-    const hidden = document.getElementById("product_primary_uploaded_image_index_<%= form_key %>");
-    const fileMeta = document.getElementById("product_gallery_file_meta_<%= form_key %>");
-    const noFilesText = "<%= j t("products.view.form.no_files_selected") %>";
-    const filesSelectedText = "<%= j t("products.view.form.files_selected", count: "%{count}") %>";
-    const setAsMainImageLabel = "<%= j t("products.view.form.set_as_main_image") %>";
-    const setAsMainLabel = "<%= j t("products.view.form.set_as_main") %>";
-    const removeFileLabel = "<%= j t("products.view.form.remove_file") %>";
-    const form = input?.closest("form");
-    const galleryGrid = form?.querySelector(".product-gallery-grid");
-    if (!input || !preview || !hidden || input.dataset.previewBound === "true") return;
-    input.dataset.previewBound = "true";
-    hidden.value = "";
-    const hasDisplayImage = input.dataset.hasDisplay === "true";
-    const supportsDataTransfer = typeof DataTransfer !== "undefined";
-
-    let stagedFiles = [];
-
-    const previewMountTarget = () => galleryGrid || preview;
-
-    const clearRenderedUploadCards = () => {
-      const selector = ".product-upload-preview-item";
-      preview.querySelectorAll(selector).forEach((el) => el.remove());
-      if (galleryGrid) {
-        galleryGrid.querySelectorAll(selector).forEach((el) => el.remove());
-      }
-    };
-
-    const syncInputFiles = () => {
-      if (!supportsDataTransfer) return false;
-      const dt = new DataTransfer();
-      stagedFiles.forEach((file) => dt.items.add(file));
-      input.files = dt.files;
-      return true;
-    };
-
-    const updateFileMeta = () => {
-      if (!fileMeta) return;
-      if (!stagedFiles.length) {
-        fileMeta.textContent = noFilesText;
-        return;
-      }
-      fileMeta.textContent = filesSelectedText.replace("%{count}", String(stagedFiles.length));
-    };
-
-    if (form && form.dataset.gallerySyncBound !== "true") {
-      form.dataset.gallerySyncBound = "true";
-      form.addEventListener("submit", () => {
-        syncInputFiles();
-      });
-    }
-
-    const markSelected = (index) => {
-      hidden.value = String(index);
-      const mountTarget = previewMountTarget();
-      mountTarget.querySelectorAll(".product-upload-preview-item").forEach((el) => {
-        el.classList.toggle("is-selected", Number(el.dataset.index) === index);
-        const toggle = el.querySelector(".js-upload-preview-select");
-        const selected = Number(el.dataset.index) === index;
-        if (toggle) {
-          toggle.dataset.selected = selected ? "true" : "false";
-          toggle.setAttribute("aria-pressed", selected ? "true" : "false");
-        }
-      });
-    };
-
-    const selectedIndex = () => {
-      if (hidden.value === "") return null;
-      const parsed = Number.parseInt(hidden.value, 10);
-      return Number.isInteger(parsed) ? parsed : null;
-    };
-
-    const renderPreview = () => {
-      clearRenderedUploadCards();
-      if (!stagedFiles.length) {
-        hidden.value = "";
-        preview.hidden = true;
-        updateFileMeta();
-        return;
-      }
-      const mountTarget = previewMountTarget();
-
-      stagedFiles.forEach((file, index) => {
-        const item = document.createElement("article");
-        item.className = "product-gallery-item product-upload-preview-item";
-        item.dataset.index = String(index);
-        item.title = setAsMainImageLabel;
-
-        const media = document.createElement("div");
-        media.className = "product-gallery-media";
-
-        const selectToggle = document.createElement("button");
-        selectToggle.type = "button";
-        selectToggle.className = "product-gallery-select-toggle js-upload-preview-select";
-        selectToggle.dataset.selected = "false";
-        selectToggle.setAttribute("aria-pressed", "false");
-        selectToggle.title = setAsMainImageLabel;
-        selectToggle.innerHTML = '<span class="product-gallery-select-indicator"></span>';
-
-        const imageWrap = document.createElement("div");
-        imageWrap.className = "product-gallery-thumb-wrap";
-
-        const img = document.createElement("img");
-        img.className = "product-gallery-thumb";
-        img.alt = file.name;
-        img.src = URL.createObjectURL(file);
-        img.onload = () => URL.revokeObjectURL(img.src);
-        imageWrap.appendChild(img);
-
-        const badge = document.createElement("span");
-        badge.className = "product-gallery-main-badge";
-        badge.textContent = setAsMainLabel;
-
-        const remove = document.createElement("button");
-        remove.type = "button";
-        remove.className = "product-gallery-delete-icon product-upload-preview-remove";
-        remove.textContent = "×";
-        remove.title = removeFileLabel;
-        if (!supportsDataTransfer) remove.hidden = true;
-        remove.addEventListener("click", (event) => {
-          event.stopPropagation();
-          if (!supportsDataTransfer) return;
-          const current = selectedIndex();
-          if (current !== null) {
-            if (current === index) {
-              hidden.value = "";
-            } else if (current > index) {
-              hidden.value = String(current - 1);
-            }
-          }
-          stagedFiles = stagedFiles.filter((_, i) => i !== index);
-          syncInputFiles();
-          renderPreview();
-        });
-
-        media.appendChild(selectToggle);
-        media.appendChild(imageWrap);
-        media.appendChild(remove);
-        media.appendChild(badge);
-        item.appendChild(media);
-
-        item.addEventListener("click", () => {
-          const current = selectedIndex();
-          if (current === index) {
-            hidden.value = "";
-            mountTarget.querySelectorAll(".product-upload-preview-item").forEach((el) => el.classList.remove("is-selected"));
-            mountTarget.querySelectorAll(".js-upload-preview-select").forEach((btn) => {
-              btn.dataset.selected = "false";
-              btn.setAttribute("aria-pressed", "false");
-            });
-          } else {
-            markSelected(index);
-          }
-        });
-        mountTarget.appendChild(item);
-      });
-
-      const selected = selectedIndex();
-      if (selected !== null && selected >= 0 && selected < stagedFiles.length) {
-        markSelected(selected);
-      } else if (!hasDisplayImage) {
-        markSelected(0);
-      }
-      preview.hidden = galleryGrid ? true : false;
-      updateFileMeta();
-    };
-
-    input.addEventListener("change", () => {
-      const newlyPicked = Array.from(input.files || []).filter((file) => file.type.startsWith("image/"));
-      if (!newlyPicked.length) return;
-
-      if (supportsDataTransfer) {
-        const signature = (file) => `${file.name}__${file.size}__${file.lastModified}`;
-        const existingSignatures = new Set(stagedFiles.map(signature));
-        newlyPicked.forEach((file) => {
-          const key = signature(file);
-          if (!existingSignatures.has(key)) {
-            stagedFiles.push(file);
-            existingSignatures.add(key);
-          }
-        });
-        syncInputFiles();
-      } else {
-        stagedFiles = newlyPicked;
-      }
-
-      renderPreview();
-    });
-
-    updateFileMeta();
-  })();
-</script>

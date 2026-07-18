@@ -1,9 +1,8 @@
-<section class="app-page-shell app-page-shell--form app-page-shell--product-form">
-  <header class="app-page-header">
-    <div class="app-page-header-main">
-      <h1><%= t("products.view.edit.title") %></h1>
-      <p><%= t("products.view.edit.subtitle_html", name: @product.name) %></p>
-    </div>
+<section class="workspace-page workspace-page--editor">
+  <header class="workspace-heading">
+    <span class="eyebrow">Library / Products / Edit</span>
+    <h1><%= @product.name %></h1>
+    <p>Reusable source data for matching and quote preparation.</p>
   </header>
 
   <%= render "form",

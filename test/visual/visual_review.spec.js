@@ -18,6 +18,11 @@ if (process.env.UPDATE_VISUAL_BASELINE === "1") fs.mkdirSync(baseline, { recursi
 
 async function capture(page, name, route, scenario, viewport, options = {}) {
   await page.setViewportSize(viewport)
+  // A visual baseline compares layout and art direction, not an arbitrary
+  // frame in the homepage type/delete timeline. Motion has its own recorded
+  // suite; freeze the marketing story through the product's real reduced-
+  // motion path before navigation so consecutive screenshots are identical.
+  if (name.startsWith("homepage-")) await page.emulateMedia({ reducedMotion: "reduce" })
   if (!options.keepPage) {
     await page.goto(route)
     await page.waitForLoadState("networkidle")

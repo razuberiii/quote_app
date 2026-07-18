@@ -1,7 +1,7 @@
 [
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:25.924Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:29.230Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/",
     "scenario": "marketing-product-story",
@@ -15,8 +15,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:29.672Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:32.958Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/",
     "scenario": "marketing-product-story",
@@ -30,8 +30,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:32.087Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:36.143Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/pricing",
     "scenario": "pricing",
@@ -45,8 +45,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:33.892Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:38.271Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/pricing",
     "scenario": "pricing",
@@ -60,8 +60,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:43.824Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:42.758Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/seller-demo",
     "scenario": "seller-demo",
@@ -75,8 +75,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:18:49.391Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:44:46.880Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/buyer-demo",
     "scenario": "buyer-demo",
@@ -90,8 +90,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:02.479Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:00.156Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inbox",
     "scenario": "actionable-inbox",
@@ -105,8 +105,8 @@
     "expected_next_action": "Review PO differences"
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:07.823Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:06.496Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/deals",
     "scenario": "deal-groups",
@@ -120,10 +120,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:13.177Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:11.601Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2",
+    "route": "/deals/1",
     "scenario": "channel-neutral-deal",
     "viewport": "1440x900",
     "locale": "en",
@@ -135,10 +135,10 @@
     "expected_next_action": "Review PO differences"
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:18.685Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:16.862Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2?tab=conversation",
+    "route": "/deals/1?tab=conversation",
     "scenario": "all-channel-response",
     "viewport": "1440x900",
     "locale": "en",
@@ -150,10 +150,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:22.832Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:20.867Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2?tab=versions",
+    "route": "/deals/1?tab=versions",
     "scenario": "published-versions-deliveries",
     "viewport": "1440x900",
     "locale": "en",
@@ -165,10 +165,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:25.880Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:26.653Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/quote_revisions/3",
+    "route": "/quote_revisions/2",
     "scenario": "version-difference",
     "viewport": "1440x900",
     "locale": "en",
@@ -180,10 +180,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:28.753Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:30.008Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2?tab=documents",
+    "route": "/deals/1?tab=documents",
     "scenario": "optional-final-documents",
     "viewport": "1440x900",
     "locale": "en",
@@ -195,10 +195,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:31.611Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:33.043Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2/deliver?version_id=3",
+    "route": "/deals/1/deliver?version_id=2",
     "scenario": "multi-channel-delivery",
     "viewport": "1440x900",
     "locale": "en",
@@ -210,10 +210,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:34.669Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:35.923Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2/acceptance/new?version_id=3",
+    "route": "/deals/1/acceptance/new?version_id=2",
     "scenario": "external-acceptance",
     "viewport": "1440x900",
     "locale": "en",
@@ -225,8 +225,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:37.504Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:39.103Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/library?section=products",
     "scenario": "library-products",
@@ -240,8 +240,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:40.356Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:42.228Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/library?section=presets",
     "scenario": "quote-formats",
@@ -255,8 +255,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:44.069Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:46.583Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/company_settings/edit",
     "scenario": "completion-settings",
@@ -270,8 +270,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:46.973Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:49.681Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inquiries/new",
     "scenario": "inquiry-import",
@@ -285,8 +285,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:19:53.418Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:53.549Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inquiries/1",
     "scenario": "smart-intake-review",
@@ -300,10 +300,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:05.868Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:45:58.726Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/quotes/4/edit",
+    "route": "/quotes/3/edit",
     "scenario": "working-draft",
     "viewport": "1440x900",
     "locale": "en",
@@ -315,8 +315,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:17.517Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:11.127Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inbox",
     "scenario": "mobile-inbox",
@@ -330,8 +330,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:20.797Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:14.673Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inbox",
     "scenario": "mobile-inbox",
@@ -345,10 +345,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:24.392Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:17.675Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2",
+    "route": "/deals/1",
     "scenario": "mobile-deal",
     "viewport": "390x844",
     "locale": "en",
@@ -360,10 +360,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:26.915Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:21.260Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2?tab=conversation",
+    "route": "/deals/1?tab=conversation",
     "scenario": "mobile-conversation",
     "viewport": "390x844",
     "locale": "en",
@@ -375,10 +375,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:29.814Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:24.021Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2/acceptance/new?version_id=3",
+    "route": "/deals/1/acceptance/new?version_id=2",
     "scenario": "mobile-external-acceptance",
     "viewport": "390x844",
     "locale": "en",
@@ -390,10 +390,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:32.456Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:26.878Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2/deliver?version_id=3",
+    "route": "/deals/1/deliver?version_id=2",
     "scenario": "mobile-delivery",
     "viewport": "412x915",
     "locale": "en",
@@ -405,8 +405,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:35.260Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:30.562Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/inquiries/1",
     "scenario": "mobile-smart-intake",
@@ -420,10 +420,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:39.750Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:37.220Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "buyer-room",
     "viewport": "1440x900",
     "locale": "en",
@@ -435,10 +435,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:42.686Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:40.276Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "configuration-change",
     "viewport": "1440x900",
     "locale": "en",
@@ -450,10 +450,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:45.904Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:43.359Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "request-changes",
     "viewport": "1440x900",
     "locale": "en",
@@ -465,10 +465,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:49.447Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:47.620Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "acceptance",
     "viewport": "1440x900",
     "locale": "en",
@@ -480,10 +480,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:51.903Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:52.592Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "mobile-buyer-room",
     "viewport": "360x800",
     "locale": "en",
@@ -495,10 +495,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:54.480Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:56.513Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "mobile-buyer-room",
     "viewport": "390x844",
     "locale": "en",
@@ -510,10 +510,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:20:58.252Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:46:59.315Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "mobile-buyer-room",
     "viewport": "412x915",
     "locale": "en",
@@ -525,10 +525,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:21:00.961Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:47:01.009Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "mobile-request-changes",
     "viewport": "390x844",
     "locale": "en",
@@ -540,10 +540,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:21:03.649Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:47:02.816Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/xGVj2nb-pe5shGhcWfnI3SliWxjTMricmVE5Z5GVINs",
+    "route": "/q/W4QSGJ1dQi8JJda-jtLZPzXFoLvaKuXcOyPtzP6prqk",
     "scenario": "mobile-acceptance",
     "viewport": "390x844",
     "locale": "en",
@@ -555,8 +555,8 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:21:14.018Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:47:11.102Z",
     "application_version": "Rubusoo Deal Workspace",
     "route": "/deals?q=no-such-deal-visual",
     "scenario": "empty-deals",
@@ -570,10 +570,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:21:18.523Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:47:16.614Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/3",
+    "route": "/deals/2",
     "scenario": "missing-price",
     "viewport": "1440x900",
     "locale": "en",
@@ -585,10 +585,10 @@
     "expected_next_action": "Add missing prices"
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:21:22.202Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:47:22.620Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/4",
+    "route": "/deals/3",
     "scenario": "no-product-image",
     "viewport": "1440x900",
     "locale": "en",
@@ -600,10 +600,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:15.027Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:00.799Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/quotes/5/edit",
+    "route": "/quotes/4/edit",
     "scenario": "50-products",
     "viewport": "1440x900",
     "locale": "en",
@@ -615,10 +615,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:21.900Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:04.897Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/6",
+    "route": "/deals/5",
     "scenario": "delivery-failure",
     "viewport": "1440x900",
     "locale": "en",
@@ -630,10 +630,10 @@
     "expected_next_action": "Retry delivery"
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:30.224Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:08.802Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2?tab=conversation",
+    "route": "/deals/1?tab=conversation",
     "scenario": "po-difference",
     "viewport": "1440x900",
     "locale": "en",
@@ -645,10 +645,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:38.805Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:12.944Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/q/j7cU_X_lM7RmbFGVwqhm3juaEj2k_iI3qWv7PGEHRJE",
+    "route": "/q/edK1qcOMP8C5Nwi0HzzwAvUjLyVG6y_B4gDrNTO8lzk",
     "scenario": "superseded-version",
     "viewport": "1440x900",
     "locale": "en",
@@ -660,10 +660,10 @@
     "expected_next_action": null
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:42.710Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:15.905Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/7",
+    "route": "/deals/6",
     "scenario": "closed-deal",
     "viewport": "1440x900",
     "locale": "en",
@@ -675,10 +675,10 @@
     "expected_next_action": "View deal"
   },
   {
-    "commit_sha": "33b7c9a29c66e5aa0134f4d9170413b82e494c0f",
-    "generated_at": "2026-07-17T18:22:48.485Z",
+    "commit_sha": "d974d7ef0e36e51522ba80bddbb1d89c78ce213d",
+    "generated_at": "2026-07-18T00:48:19.407Z",
     "application_version": "Rubusoo Deal Workspace",
-    "route": "/deals/2/deliver?version_id=3",
+    "route": "/deals/1/deliver?version_id=2",
     "scenario": "reduced-motion",
     "viewport": "390x844",
     "locale": "en",

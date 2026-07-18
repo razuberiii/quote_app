@@ -70,11 +70,7 @@ module UiHelper
     request_path = request_path.sub(/\A#{Regexp.escape(locale_prefix)}(?=\/|$)/, "")
     request_path = "/" if request_path.blank?
 
-    is_active = if normalized_path == dashboard_path
-      current_page?(path)
-    else
-      request_path == normalized_path || request_path.start_with?("#{normalized_path}/")
-    end
+    is_active = request_path == normalized_path || request_path.start_with?("#{normalized_path}/")
     content_tag :li do
       link_to path, class: [ "app-nav-link", ("is-active" if is_active) ].compact.join(" ") do
         safe_join(

@@ -157,7 +157,7 @@ module Admin
         }
       )
 
-      redirect_to dashboard_path, notice: t("admin.users.flash.impersonation_started", email: @user.email)
+      redirect_to inbox_index_path, notice: t("admin.users.flash.impersonation_started", email: @user.email)
     end
 
     private

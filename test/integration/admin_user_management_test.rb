@@ -111,7 +111,7 @@ class AdminUserManagementTest < ActionDispatch::IntegrationTest
   test "admin can start and stop impersonation with audit logs" do
     assert_difference("AuditLog.count", 2) do
       post impersonate_admin_user_path(@user)
-      assert_redirected_to dashboard_path
+      assert_redirected_to inbox_index_path
 
       delete admin_impersonation_path
       assert_redirected_to admin_root_path
@@ -159,11 +159,11 @@ class AdminUserManagementTest < ActionDispatch::IntegrationTest
 
   test "impersonation auto-exits to admin when target becomes suspended" do
     post impersonate_admin_user_path(@user)
-    assert_redirected_to dashboard_path
+    assert_redirected_to inbox_index_path
 
     @user.update!(status: :suspended)
 
-    get dashboard_path
+    get inbox_index_path
     assert_redirected_to admin_root_path
   end
 end

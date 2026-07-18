@@ -24,10 +24,11 @@
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
 
-    <%# Canonical CSS path: tailwind + components only. Do not add new global stylesheets for feature/page work. %>
+    <%# Workspace pages are migrating to the isolated Deal-first design foundation. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "rubusoo", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "workspace", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
     <!-- Cloudflare Turnstile -->
@@ -35,15 +36,11 @@
   </head>
 
   <body class="app-root neo-os neo-os--app page-<%= controller_path.tr('/', '-') %> page-action-<%= action_name %>"
-    data-controller="<%= [("shortcuts" if user_signed_in?), "app-shell"].compact.join(" ") %>"
+    data-controller="app-shell"
     data-app-shell-dirty-confirm-text-value="<%= t("application.unsaved_changes_confirm", default: "You have unsaved changes. Leave this page?") %>"
     data-app-shell-notification-loading-text-value="<%= t("notifications.loading", default: "Loading notifications...") %>"
     <% if user_signed_in? %>
       style="--brand-primary: <%= ui_brand_color %>; --brand-on-primary: <%= ui_brand_text_color %>;"
-      data-shortcuts-new-customer-url-value="<%= new_customer_path %>"
-      data-shortcuts-new-product-url-value="<%= new_product_path %>"
-      data-shortcuts-customer-picker-url-value="<%= shortcut_candidates_customers_path %>"
-      data-shortcuts-command-palette-url-value="<%= command_palette_search_path %>"
       data-app-shell-unread-count-url-value="<%= unread_count_notifications_path %>"
     <% end %>>
     <nav class="navbar">
@@ -126,24 +123,6 @@
     </nav>
 
     <main>
-      <% breadcrumbs = app_breadcrumb_items %>
-      <% if breadcrumbs.any? %>
-        <nav class="app-breadcrumb" aria-label="<%= t('application.breadcrumb_aria') %>">
-          <ol class="app-breadcrumb-list">
-            <% breadcrumbs.each_with_index do |item, index| %>
-              <% is_last = index == breadcrumbs.length - 1 %>
-              <li class="app-breadcrumb-item">
-                <% if item[:path].present? && !is_last %>
-                  <%= link_to item[:label], item[:path], class: "app-breadcrumb-link" %>
-                <% else %>
-                  <span class="app-breadcrumb-current"><%= item[:label] %></span>
-                <% end %>
-              </li>
-            <% end %>
-          </ol>
-        </nav>
-      <% end %>
-
       <%= render "layouts/impersonation_banner" %>
 
       <% if notice %>
@@ -154,101 +133,6 @@
       <% end %>
       <%= yield %>
     </main>
-    <% if user_signed_in? %>
-      <%= render "layouts/personal_notes_widget" %>
-    <% end %>
     <div id="app-toast-container" class="app-toast-container" aria-live="polite" aria-atomic="true"></div>
-    <% if user_signed_in? %>
-    <div id="shortcuts-modal" class="app-shortcuts-backdrop" hidden
-         role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title"
-         data-action="click->shortcuts#backdropClick">
-      <div class="app-shortcuts-dialog">
-        <button type="button" class="app-shortcuts-close js-shortcuts-close"
-                data-action="click->shortcuts#closeHelp"
-                aria-label="<%= t('shortcuts.close') %>">&#x2715;</button>
-        <h3 id="shortcuts-modal-title" class="app-shortcuts-title"><%= t('shortcuts.title') %></h3>
-        <div class="app-shortcuts-groups">
-          <section class="app-shortcuts-group">
-            <p class="app-shortcuts-group-title"><%= t('shortcuts.groups.global') %></p>
-            <dl class="app-shortcuts-list">
-              <div class="app-shortcuts-row"><dt><kbd>Cmd/Ctrl + K</kbd></dt><dd><%= t('shortcuts.items.command_palette') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>Shift + C</kbd></dt><dd><%= t('shortcuts.items.new_customer') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>Shift + P</kbd></dt><dd><%= t('shortcuts.items.new_product') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>Shift + Q</kbd></dt><dd><%= t('shortcuts.items.new_quote') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>/</kbd></dt><dd><%= t('shortcuts.items.search') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>?</kbd></dt><dd><%= t('shortcuts.items.help') %></dd></div>
-            </dl>
-          </section>
-
-          <section class="app-shortcuts-group">
-            <p class="app-shortcuts-group-title"><%= t('shortcuts.groups.customer_page') %></p>
-            <dl class="app-shortcuts-list">
-              <div class="app-shortcuts-row"><dt><kbd>Shift + Q</kbd></dt><dd><%= t('shortcuts.items.new_quote_for_current_customer') %></dd></div>
-            </dl>
-          </section>
-
-          <section class="app-shortcuts-group">
-            <p class="app-shortcuts-group-title"><%= t('shortcuts.groups.quote_page') %></p>
-            <dl class="app-shortcuts-list">
-              <div class="app-shortcuts-row"><dt><kbd>Shift + S</kbd></dt><dd><%= t('shortcuts.items.share_quote') %></dd></div>
-            </dl>
-          </section>
-
-          <section class="app-shortcuts-group">
-            <p class="app-shortcuts-group-title"><%= t('shortcuts.groups.lists') %></p>
-            <dl class="app-shortcuts-list">
-              <div class="app-shortcuts-row"><dt><kbd>J / K</kbd></dt><dd><%= t('shortcuts.items.move_list_selection') %></dd></div>
-              <div class="app-shortcuts-row"><dt><kbd>Enter</kbd></dt><dd><%= t('shortcuts.items.open_selected_row') %></dd></div>
-            </dl>
-          </section>
-        </div>
-      </div>
-    </div>
-
-    <div id="shortcut-quote-picker-modal" class="app-shortcuts-backdrop" hidden
-         role="dialog" aria-modal="true" aria-labelledby="shortcut-quote-picker-title"
-         data-action="click->shortcuts#quotePickerBackdropClick">
-      <div class="app-shortcuts-dialog app-shortcuts-dialog--wide">
-        <button type="button" class="app-shortcuts-close"
-                data-action="click->shortcuts#closeQuotePicker"
-                aria-label="<%= t('shortcuts.close') %>">&#x2715;</button>
-        <h3 id="shortcut-quote-picker-title" class="app-shortcuts-title"><%= t('shortcuts.quote_picker.title') %></h3>
-        <p class="app-shortcuts-subtitle"><%= t('shortcuts.quote_picker.subtitle') %></p>
-        <input id="shortcut-quote-customer-search"
-               type="text"
-               class="app-shortcuts-search"
-               placeholder="<%= t('shortcuts.quote_picker.search_placeholder') %>"
-               autocomplete="off"
-               data-action="input->shortcuts#onQuoteSearchInput">
-        <ul id="shortcut-quote-customer-results" class="app-shortcuts-customer-list"></ul>
-        <p id="shortcut-quote-customer-empty" class="app-shortcuts-empty"><%= t('shortcuts.quote_picker.empty') %></p>
-      </div>
-    </div>
-
-    <div id="command-palette-modal" class="app-shortcuts-backdrop" hidden
-         role="dialog" aria-modal="true" aria-labelledby="command-palette-title"
-         data-action="click->shortcuts#commandPaletteBackdropClick">
-      <div class="app-shortcuts-dialog app-shortcuts-dialog--wide">
-        <button type="button" class="app-shortcuts-close"
-                data-action="click->shortcuts#closeCommandPalette"
-                aria-label="<%= t('shortcuts.close') %>">&#x2715;</button>
-        <h3 id="command-palette-title" class="app-shortcuts-title"><%= t('shortcuts.palette.title') %></h3>
-        <input id="command-palette-search"
-               type="text"
-               class="app-shortcuts-search"
-               placeholder="<%= t('shortcuts.palette.placeholder') %>"
-               autocomplete="off"
-               data-action="input->shortcuts#onCommandPaletteInput keydown->shortcuts#onCommandPaletteKeydown">
-        <div id="command-palette-results" class="app-command-palette-results"></div>
-      </div>
-    </div>
-    <% end %>
-    <footer class="global-app-footer">
-      <span class="app-version-pill">v0.94 Beta</span>
-      <% if user_signed_in? %>
-        <span class="app-shortcuts-footnote"><%= t("shortcuts.discoverability") %></span>
-      <% end %>
-    </footer>
-
   </body>
 </html>

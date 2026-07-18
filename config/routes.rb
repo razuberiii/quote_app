@@ -42,22 +42,21 @@ Rails.application.routes.draw do
   get ":locale", to: "landing#index", as: :localized_root, constraints: { locale: /en|zh-CN|es-419/ }
 
   scope "(:locale)", locale: /en|zh-CN|es-419/ do
-    get "demo", to: "landing#demo"
+    get "demo", to: redirect("/seller-demo")
     get "contact", to: "landing#contact"
     get "privacy", to: "landing#privacy"
     get "terms", to: "landing#terms"
-    get "sample-quote", to: "landing#sample_quote"
-    get "foreign-trade-quotation-software", to: "seo#foreign_trade_quotation_software"
-    get "quote-revision-control", to: "seo#quote_revision_control"
-    get "buyer-facing-quotation-link", to: "seo#buyer_facing_quotation_link"
-    get "quotation-software-vs-excel", to: "seo#quotation_software_vs_excel"
-    get "quotation-software-vs-erp", to: "seo#quotation_software_vs_erp"
-    get "quick-export-quotation", to: "seo#quick_export_quotation"
-    get "resources", to: "seo#resources"
+    get "sample-quote", to: redirect("/buyer-demo")
+    get "foreign-trade-quotation-software", to: redirect("/")
+    get "quote-revision-control", to: redirect("/")
+    get "buyer-facing-quotation-link", to: redirect("/")
+    get "quotation-software-vs-excel", to: redirect("/")
+    get "quotation-software-vs-erp", to: redirect("/")
+    get "quick-export-quotation", to: redirect("/")
+    get "resources", to: redirect("/")
     resources :contact_requests, only: [ :create ]
   end
 
-  get "dashboard", to: "dashboard#index"
   get "quotes", to: redirect("/deals"), as: :all_quotes
   resources :inbox, only: :index
   resources :deals, only: %i[index show] do
@@ -122,7 +121,8 @@ Rails.application.routes.draw do
   end
 
   # Product management
-  resources :products do
+  get "products", to: redirect("/library")
+  resources :products, except: :index do
     member do
       patch :set_primary_image
       delete :remove_primary_image
@@ -153,8 +153,6 @@ Rails.application.routes.draw do
   end
   resource :company_settings, only: [ :edit, :update ]
   resources :quote_reason_options, only: [ :create, :destroy ]
-
-  get "command_palette/search", to: "command_palette#search", as: :command_palette_search
 
   resources :customers do
     collection do
@@ -196,12 +194,6 @@ Rails.application.routes.draw do
 
   get "quote/:id/export_pdf", to: "quotes#export_pdf", as: :legacy_export_pdf_quote
   get "quote/:id/export_excel", to: "quotes#export_xlsx", as: :legacy_export_excel_quote
-  resources :action_items, only: [] do
-    member do
-      patch :resolve
-    end
-  end
-
   namespace :admin do
     root "dashboard#index"
     resources :users, only: [ :index, :show ] do

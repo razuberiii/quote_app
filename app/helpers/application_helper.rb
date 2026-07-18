@@ -194,10 +194,6 @@ module ApplicationHelper
     return [] unless user_signed_in?
 
     case controller_path
-    when "dashboard"
-      [
-        { label: t("nav.dashboard"), path: nil }
-      ]
     when "customers"
       [
         { label: t("nav.customers"), path: nil }

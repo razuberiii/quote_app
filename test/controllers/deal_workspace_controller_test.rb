@@ -24,11 +24,24 @@ class DealWorkspaceControllerTest < ActionDispatch::IntegrationTest
     assert_select "h1", "Library"
   end
 
-  test "legacy entries lead to deal workspace" do
-    get dashboard_path
-    assert_redirected_to "/inbox"
-
+  test "legacy quote list leads to deal workspace" do
     get all_quotes_path
     assert_redirected_to "/deals"
+  end
+
+  test "Library product and workspace settings use Deal-first surfaces" do
+    get new_product_path
+    assert_response :success
+    assert_select ".resource-editor"
+    assert_select ".product-edit-panel", count: 0
+
+    get edit_company_settings_path
+    assert_response :success
+    assert_select ".settings-editor"
+    assert_select ".team-members-panel", count: 0
+  end
+
+  test "removed dashboard is not routable" do
+    assert_raises(ActionController::RoutingError) { Rails.application.routes.recognize_path("/dashboard") }
   end
 end

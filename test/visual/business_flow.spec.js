@@ -19,7 +19,7 @@ test("scenario A executes publish, email, buyer request and immutable acceptance
   await login(page)
   await page.goto(`/quotes/${seed.e2e_deal_id}/edit`)
   await page.getByRole("link", { name: "Review & publish" }).click()
-  await page.getByRole("button", { name: "Publish Revision 1" }).click()
+  await page.getByRole("button", { name: "Publish Version 1" }).click()
   await expect(page.getByText(/Published Version 1/).first()).toBeVisible()
 
   await page.locator('.channel-option[data-value="email_link"]').click()
@@ -48,8 +48,8 @@ test("scenario A executes publish, email, buyer request and immutable acceptance
   await page.goto(`/quotes/${seed.e2e_deal_id}/edit`)
   await page.locator('input[name$="[quantity]"]').first().fill("3")
   await page.getByRole("button", { name: "Save quote" }).click()
-  await expect(page.getByRole("button", { name: "Publish Revision 2" })).toBeVisible()
-  await page.getByRole("button", { name: "Publish Revision 2" }).click()
+  await expect(page.getByRole("button", { name: "Publish Version 2" })).toBeVisible()
+  await page.getByRole("button", { name: "Publish Version 2" }).click()
   await expect(page.getByText(/Published Version 2/).first()).toBeVisible()
   const versionTwoRoomUrl = await page.locator(".delivery-link-row input").inputValue()
 
@@ -90,7 +90,7 @@ test("returned Excel executes download, edit, upload, review, apply and publish 
   const dealId = seed.e2e_excel_deal_id
   await page.goto(`/quotes/${dealId}/edit`)
   await page.getByRole("link", { name: "Review & publish" }).click()
-  await page.getByRole("button", { name: "Publish Revision 1" }).click()
+  await page.getByRole("button", { name: "Publish Version 1" }).click()
   await page.locator('.channel-option[data-value="excel_export"]').click()
   await page.getByRole("button", { name: "Generate file" }).click()
   await expect(page).toHaveURL(new RegExp(`/deals/${dealId}.*tab=documents`))
@@ -123,7 +123,7 @@ test("returned Excel executes download, edit, upload, review, apply and publish 
   await expect(page).toHaveURL(new RegExp(`/quotes/${dealId}/edit`))
   await expect(page.locator('input[name$="[quantity]"][value="4"]')).toHaveCount(1)
   await page.getByRole("button", { name: "Save quote" }).click()
-  await page.getByRole("button", { name: "Publish Revision 2" }).click()
+  await page.getByRole("button", { name: "Publish Version 2" }).click()
   await expect(page.getByText(/Published Version 2/).first()).toBeVisible()
 
   fs.writeFileSync(path.join(output, "returned-excel-flow.json"), JSON.stringify({

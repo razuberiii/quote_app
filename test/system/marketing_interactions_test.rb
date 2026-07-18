@@ -16,7 +16,9 @@ class MarketingInteractionsTest < ApplicationSystemTestCase
 
   test "homepage presents the channel-neutral Deal story" do
     visit "/"
-    assert_selector "h1.kinetic-headline", text: /Turn\s+buyer requests\s+into decisions\./
+    assert_selector "h1.kinetic-headline", text: /Turn/
+    assert_selector "h1.kinetic-headline", text: /into decisions\./
+    assert_selector "[data-product-story-target='phrase']", visible: true
     assert_text "Email, Excel, chat or PO goes in."
     assert_text "Buyer Room"
     assert_link "Open live demo"

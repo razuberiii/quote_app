@@ -86,6 +86,7 @@ test("authenticated workspace routes, tabs and overlays", async ({ page }) => {
     ["library-products", "/library?section=products"], ["library-presets", "/library?section=presets"],
     ["library-pricing", "/library?section=pricing"], ["library-content", "/library?section=content"],
     ["library-formats", "/library?section=formats"], ["library-brand", "/library?section=brand"], ["library-output", "/library?section=output"],
+    ["product-source", `/products/${seed.product_id}`], ["product-new", "/products/new"], ["product-edit", `/products/${seed.product_id}/edit`],
     ["settings", "/company_settings/edit"], ["account", "/users/edit"], ["team", "/team_members"], ["invitations", "/team_invitations"],
     ["missing-price", `/deals/${seed.edge_deals.missing_price}`], ["delivery-failed", `/deals/${seed.edge_deals.delivery_failure}`],
     ["closed-deal", `/deals/${seed.edge_deals.closed}`], ["long-quote", `/quotes/${seed.edge_deals.long_quote}/edit`]
@@ -94,10 +95,6 @@ test("authenticated workspace routes, tabs and overlays", async ({ page }) => {
     await page.setViewportSize(viewport)
     for (const [name, route] of routes) { await page.goto(route); await inspect(page, name, viewport) }
     await page.goto("/inbox")
-    await page.keyboard.press("?")
-    await inspect(page, "keyboard-help-dialog", viewport)
-    const closeHelp = page.locator(".js-shortcuts-close")
-    if (await closeHelp.isVisible()) await closeHelp.click()
     const account = page.locator(".account-menu-trigger")
     if (await account.isVisible()) { await account.click(); await inspect(page, "account-menu", viewport) }
   }

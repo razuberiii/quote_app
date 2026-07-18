@@ -14,10 +14,6 @@ production:
     class: QuoteExpiryJob
     schedule: every day at 00:05
 
-  quote_reminder_sweep:
-    class: QuoteReminderJob
-    schedule: every day at 09:00
-
   follow_up_due_notifications:
     class: FollowUpDueNotificationJob
     schedule: every day at 08:30

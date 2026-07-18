@@ -15,7 +15,7 @@ class InboxController < ApplicationController
 
   def deal_scope
     current_user.company.quotes.not_archived.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
-      :proforma_invoice, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).order(updated_at: :desc)
+      :final_documents, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).order(updated_at: :desc)
   end
 
   def sum_for(stage)

@@ -12,7 +12,7 @@ module DealsHelper
     when "choose_delivery", "retry_delivery" then deliver_deal_path(deal, version_id: deal.quote_revisions.maximum(:id))
     when "review_returned_file", "review_po", "record_acceptance", "prepare_update", "prepare_version" then deal_path(deal, tab: "conversation")
     when "generate_final_document", "send_final_document" then deal_path(deal, tab: "documents")
-    when "confirm_payment" then deal.proforma_invoice ? proforma_invoice_path(deal.proforma_invoice) : deal_path(deal)
+    when "confirm_payment" then deal.final_documents.order(created_at: :desc).first ? final_document_path(deal.final_documents.order(created_at: :desc).first) : deal_path(deal)
     else deal_path(deal)
     end
   end

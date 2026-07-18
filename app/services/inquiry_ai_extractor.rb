@@ -1,101 +1,60 @@
-require "net/http"
-
 class InquiryAiExtractor
-  class ConfigurationError < StandardError; end
-  class ResponseError < StandardError; end
+  ConfigurationError = StructuredAiClient::ConfigurationError
+  ResponseError = StructuredAiClient::ResponseError
 
   SYSTEM_PROMPT = <<~PROMPT.freeze
-    You extract B2B export-sales inquiries into structured data. Never invent prices,
-    freight, product identifiers, or buyer details. Preserve the source language in
-    free-text values. Return JSON only with this exact top-level shape:
-    Each extracted value that is present must include a short verbatim source excerpt
-    in the evidence object. Use null rather than guessing. The exact top-level shape is:
-    {
-      "customer": string|null, "country": string|null,
-      "contact_name": string|null,
-      "contact_email": string|null,
-      "currency": string|null,
-      "products": [{"name": string, "model": string|null, "quantity": number|null, "unit": string|null,
-                    "specifications": {"voltage": string|null, "color": string|null, "material": string|null},
-                    "packing": string|null, "notes": string|null, "evidence": string}],
-      "commercial_terms": {"incoterm": string|null, "destination": string|null,
-                           "payment": string|null, "delivery": string|null, "packing": string|null},
-      "questions": [string], "missing_information": [string],
-      "evidence": {"customer": string|null, "contact_name": string|null, "contact_email": string|null,
-                   "country": string|null, "currency": string|null, "destination": string|null,
-                   "incoterm": string|null, "delivery": string|null, "packing": string|null}
-    }
-    Add concise questions for information needed to prepare a reliable quotation.
+    Extract an export-sales inquiry into the supplied JSON Schema. Return JSON only.
+    Never infer or estimate price, freight, tax, insurance, exchange rate, duty, lead
+    time, company facts, or product identity. Use null for unknown values. Every
+    non-null candidate must cite an evidence id whose excerpt is copied from the
+    source. confidence describes extraction certainty, not commercial validity.
   PROMPT
 
-  def initialize(api_key: ENV["OPENAI_API_KEY"], base_url: ENV.fetch("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-    model: ENV.fetch("OPENAI_MODEL", "gpt-5.5"), http_client: Net::HTTP)
-    @api_key = api_key.to_s
-    @base_url = base_url.to_s.delete_suffix("/")
-    @model = model
-    @http_client = http_client
+  def initialize(inquiry: nil, **client_options)
+    @inquiry = inquiry
+    @client_options = client_options
   end
 
-  def extract(source_text:, source_type:)
-    raise ConfigurationError, "AI inquiry extraction is not configured" if @api_key.blank?
-
-    uri = URI("#{@base_url}/chat/completions")
-    request = Net::HTTP::Post.new(uri)
-    request["Authorization"] = "Bearer #{@api_key}"
-    request["Content-Type"] = "application/json"
-    request.body = {
-      model: @model,
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: "Source type: #{source_type}\n\n#{source_text}" }
-      ],
-      max_completion_tokens: 1_500
-    }.to_json
-
-    response = @http_client.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 8, read_timeout: 45) do |http|
-      http.request(request)
-    end
-    body = JSON.parse(response.body)
-    raise ResponseError, body.dig("error", "message").presence || "AI provider returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
-
-    content = body.dig("choices", 0, "message", "content").to_s.sub(/\A```(?:json)?\s*/i, "").sub(/\s*```\z/, "")
-    normalize(JSON.parse(content))
-  rescue JSON::ParserError => error
-    raise ResponseError, "AI provider returned invalid JSON: #{error.message}"
-  rescue Timeout::Error, SocketError, Errno::ECONNREFUSED => error
-    raise ResponseError, "AI provider is unavailable: #{error.class}"
+  def extract(source_text:, source_type:, inquiry: @inquiry)
+    raise ArgumentError, "Inquiry record is required for an auditable AI call" unless inquiry
+    deterministic = InquiryDeterministicParser.new(source_text).call
+    result = StructuredAiClient.new(company: inquiry.company, source_record: inquiry,
+      analysis_type: "inquiry_extraction", schema: StructuredSchemas::INQUIRY,
+      system_prompt: SYSTEM_PROMPT, **@client_options).call("Source type: #{source_type}\nDeterministic candidates (verify against source): #{deterministic.to_json}\n\n#{source_text}")
+    persist_evidence(result.data, result.analysis, inquiry)
+    normalize(result.data)
   end
 
   private
 
-  def normalize(data)
-    products = Array(data["products"]).filter_map do |product|
-      next unless product.is_a?(Hash) && product["name"].present?
-
-      {
-        "name" => product["name"].to_s,
-        "model" => product["model"].presence,
-        "quantity" => product["quantity"],
-        "unit" => product["unit"].presence,
-        "specifications" => product["specifications"].is_a?(Hash) ? product["specifications"].compact_blank : {},
-        "packing" => product["packing"].presence,
-        "notes" => product["notes"].presence,
-        "evidence" => product["evidence"].presence,
-        "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil
-      }
+  def persist_evidence(data, analysis, inquiry)
+    Array(data["evidence"]).each do |item|
+      inquiry.company.evidence_records.find_or_create_by!(source_record: inquiry, evidence_key: item["id"]) do |record|
+        record.ai_analysis = analysis; record.field_path = item["field_path"]
+        record.excerpt = item["excerpt"]; record.locator = { "source" => item["source"], "location" => item["location"] }
+      end
     end
+  end
 
+  def normalize(data)
+    evidence_by_id = Array(data["evidence"]).index_by { |item| item["id"] }
+    products = Array(data["products"]).map do |product|
+      evidence = Array(product["evidence_ids"]).filter_map { |id| evidence_by_id[id]&.dig("excerpt") }.join(" · ")
+      product.slice("name", "model", "quantity", "unit", "specifications", "packing", "lead_time", "confidence", "evidence_ids")
+        .merge("evidence" => evidence.presence, "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil)
+    end
+    field_evidence = Array(data["evidence"]).each_with_object({}) do |item, result|
+      key = item["field_path"].to_s.split(".").last
+      result[key] ||= item["excerpt"]
+    end
     {
-      "customer" => data["customer"].presence,
-      "country" => data["country"].presence,
-      "contact_name" => data["contact_name"].presence,
-      "contact_email" => data["contact_email"].presence,
-      "currency" => data["currency"].presence&.upcase,
-      "products" => products,
-      "commercial_terms" => data["commercial_terms"].is_a?(Hash) ? data["commercial_terms"] : {},
-      "questions" => Array(data["questions"]).filter_map(&:presence),
-      "missing_information" => Array(data["missing_information"]).filter_map(&:presence),
-      "evidence" => data["evidence"].is_a?(Hash) ? data["evidence"] : {}
+      "customer" => data["customer"], "country" => data["country"],
+      "contact_name" => data.dig("contact", "name"), "contact_email" => data.dig("contact", "email"),
+      "currency" => data["currency"]&.upcase, "products" => products,
+      "commercial_terms" => data["commercial_terms"], "questions" => [],
+      "missing_information" => data["missing_fields"], "ambiguities" => data["ambiguities"],
+      "warnings" => data["warnings"], "evidence" => field_evidence,
+      "evidence_records" => data["evidence"]
     }
   end
 end

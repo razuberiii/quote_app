@@ -24,9 +24,8 @@ class Product < ApplicationRecord
   before_validation :normalize_configurator_fields
 
   validates :name, presence: true
-  validates :sku, presence: true
   validates :price_currency, presence: true, inclusion: { in: PRICE_CURRENCIES }
-  validates :default_price, presence: true, numericality: { greater_than: 0 }
+  validates :default_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :cost_price, numericality: { greater_than_or_equal_to: 0 }, allow_blank: true
   validates :moq, numericality: { only_integer: true, greater_than_or_equal_to: 0 }, allow_blank: true
   validate :sku_must_be_unique_within_company

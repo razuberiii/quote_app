@@ -5,12 +5,12 @@
 <% missing << "Commercial terms" if @quote.payment_term.blank? || @quote.trade_term.blank? %>
 <% @quote.quote_items.each_with_index do |item, index| %>
   <% missing << "Item #{index + 1} price" unless item.unit_price.to_d.positive? %>
-  <% missing << "Item #{index + 1} price source" if item.respond_to?(:price_source) && item.price_source.blank? %>
+  <% missing << "Item #{index + 1} verified price source" if item.respond_to?(:price_source) && (item.price_source.blank? || item.price_source == "unpriced") %>
 <% end %>
 <main class="quote-studio quote-studio--editor" data-controller="studio-motion">
   <header class="studio-toolbar">
     <div class="studio-toolbar__identity"><%= link_to "← Deal", deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow">Quote Studio</p><h1><%= @quote.quote_no %> <span>Working version</span></h1></div></div>
-    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● Saved</span><%= link_to "Preview", public_preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & publish", quote_path(@quote), class: "button button--primary" %></div>
+    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● Saved</span><%= link_to "Preview", preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to "Review & publish", quote_path(@quote), class: "button button--primary" %></div>
   </header>
   <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor", data: { action: "turbo:submit-start->studio-motion#saving turbo:submit-end->studio-motion#saved" } } do |f| %>
     <aside class="studio-structure">
@@ -67,7 +67,7 @@
       <p class="section-kicker">Quote summary</p><h2><%= @quote.customer.name %></h2>
       <dl><div><dt>Currency</dt><dd><%= @quote.currency %></dd></div><div><dt>Items</dt><dd><%= @quote.quote_items.size %></dd></div><div><dt>Subtotal</dt><dd><%= number_to_currency(@quote.subtotal, unit: "#{@quote.currency} ") %></dd></div><div><dt>Fees</dt><dd><%= number_to_currency(@quote.shipping_amount.to_d + @quote.tax_amount.to_d, unit: "#{@quote.currency} ") %></dd></div><div class="is-total"><dt>Total</dt><dd><%= number_to_currency(@quote.grand_total, unit: "#{@quote.currency} ") %></dd></div><div><dt>Valid until</dt><dd><%= @quote.valid_until || "Required" %></dd></div></dl>
       <section class="studio-readiness <%= 'is-ready' if missing.empty? %>"><strong><%= missing.empty? ? "Ready for review" : "#{missing.size} checks remaining" %></strong><% if missing.any? %><ul><% missing.first(6).each do |entry| %><li><%= entry %></li><% end %></ul><% else %><p>Required commercial data is present. Preview the buyer experience before sending.</p><% end %></section>
-      <%= f.submit "Save quote", class: "button button--primary button--full" %><%= link_to "Preview Buyer Room", public_preview_quote_path(@quote), class: "button button--secondary button--full", target: "_blank" %>
+      <%= f.submit "Save quote", class: "button button--primary button--full" %><%= link_to "Preview Buyer Room", preview_quote_path(@quote), class: "button button--secondary button--full", target: "_blank" %>
       <p class="studio-summary__note">Sending creates an immutable Revision. Internal notes are never included.</p>
     </aside>
   <% end %>

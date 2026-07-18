@@ -7,19 +7,20 @@
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "rubusoo", "workspace", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="app-root" data-controller="shortcuts">
+  <body class="app-root neo-os neo-os--app" data-controller="shortcuts">
     <nav class="navbar admin-navbar">
       <div class="navbar-container admin-navbar-container">
         <div class="navbar-brand-wrap">
-          <h1><%= link_to t("admin.layout.brand"), admin_root_path %></h1>
+          <h1><%= link_to "R/ OPERATOR", admin_root_path %></h1>
           <span class="navbar-company-context"><%= current_user.email %></span>
         </div>
         <ul class="admin-nav-list">
-          <%= ui_nav_link t("admin.nav.dashboard"), admin_root_path, icon: :dashboard %>
-          <%= ui_nav_link t("admin.nav.users"), admin_users_path, icon: :customers %>
-          <%= ui_nav_link t("admin.nav.audit_logs"), admin_audit_logs_path, icon: :admin %>
+          <%= ui_nav_link "Console", admin_root_path %>
+          <%= ui_nav_link "Accounts", admin_users_path %>
+          <%= ui_nav_link "Audit log", admin_audit_logs_path %>
           <li>
             <%= link_to t("admin.nav.back_to_app"), inbox_index_path, class: "app-nav-link" %>
           </li>

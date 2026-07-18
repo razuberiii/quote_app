@@ -1,6 +1,25 @@
 <main class="deal-workspace library-page">
-  <header class="deal-page-header"><div><p class="eyebrow">Reusable commercial knowledge</p><h1>Library</h1><p>Products, pricing, content and brand assets — available inside every Deal.</p></div><%= link_to "Add product", new_product_path, class: "button button--primary" %></header>
+  <header class="deal-page-header">
+    <div><p class="eyebrow">Reusable commercial knowledge</p><h1>Library</h1><p>Save what earns reuse. A Deal never has to wait for Library setup.</p></div>
+    <div class="library-header-actions"><%= link_to "Import catalog", new_product_import_batch_path, class: "button button--secondary" %><%= link_to "Add product", new_product_path, class: "button button--primary" %></div>
+  </header>
   <nav class="library-tabs"><% [["products","Products"],["presets","Quote presets"],["pricing","Pricing"],["content","Content blocks"],["formats","Formats"],["brand","Brand kit"],["output","Output settings"]].each do |key,label| %><%= link_to label, library_path(section: key), class: ("is-active" if @section == key) %><% end %></nav>
-  <% if @section == "products" %><section class="library-grid"><% @products.each do |product| %><%= link_to product_path(product), class: "library-product" do %><div><% if product.respond_to?(:primary_image) && product.primary_image.attached? %><%= image_tag product.primary_image %><% else %><span><%= product.name.to_s.first %></span><% end %></div><small><%= product.sku %></small><h2><%= product.name %></h2><p><%= product.currency %> <%= number_with_delimiter(product.base_price) if product.respond_to?(:base_price) %> · MOQ <%= product.moq.presence || "—" %></p><% end %><% end %><%= link_to new_product_path, class: "library-add" do %><span>＋</span><strong>Add to Library</strong><small>Products can also be saved from Quote Studio.</small><% end %></section>
-  <% else %><section class="library-resource-list"><% if %w[presets formats].include?(@section) %><% (@quote_presets + @templates).each do |resource| %><article><div><span><%= @section == "formats" ? "Constrained quote format" : resource.class.model_name.human %></span><strong><%= resource.respond_to?(:name) ? resource.name : resource.title %></strong><small><%= @section == "formats" ? "Structure, module order and output visibility — data remains portable" : "Reusable inside Quote Studio" %></small></div><%= link_to "Edit", resource.is_a?(QuoteTemplate) ? edit_quote_template_path(resource) : edit_quote_preset_path(resource), class: "deal-next" %></article><% end %><% else %><div class="library-empty"><span class="eyebrow"><%= @section.humanize %></span><h2>Nothing reusable saved yet</h2><p>Create this resource while preparing a Deal. Rubusoo will offer to save it here without interrupting the quote.</p><dl><div><dt>Where it appears</dt><dd>Smart Intake and Quote Studio</dd></div><div><dt>What happens now</dt><dd>The current Deal can still use one-off content</dd></div></dl><%= link_to "Review workspace defaults", edit_company_settings_path, class: "button button--secondary" %></div><% end %></section><% end %>
+  <% if @section == "products" %>
+    <section class="library-grid">
+      <% @products.each do |product| %><%= link_to product_path(product), class: "library-product" do %>
+        <div><% if product.display_image.present? %><%= image_tag product.display_image %><% else %><span><%= product.name.to_s.first %></span><% end %></div>
+        <small><%= product.sku.presence || "Deal-ready item" %></small><h2><%= product.name %></h2>
+        <p><%= product.default_price.to_d.positive? ? "#{product.currency} #{number_with_delimiter(product.base_price)}" : "Price required" %> · MOQ <%= product.moq.presence || "—" %></p>
+      <% end %><% end %>
+      <%= link_to new_product_path, class: "library-add" do %><span>＋</span><strong>Add to Library</strong><small>Products can also be saved from Quote Studio.</small><% end %>
+    </section>
+  <% else %>
+    <section class="library-resource-list">
+      <% if %w[presets formats].include?(@section) %>
+        <% (@quote_presets + @templates).each do |resource| %><article><div><span><%= @section == "formats" ? "Constrained quote format" : resource.class.model_name.human %></span><strong><%= resource.respond_to?(:name) ? resource.name : resource.title %></strong><small><%= @section == "formats" ? "Structure, module order and output visibility — data remains portable" : "Reusable inside Quote Studio" %></small></div><%= link_to "Edit", resource.is_a?(QuoteTemplate) ? edit_quote_template_path(resource) : edit_quote_preset_path(resource), class: "deal-next" %></article><% end %>
+      <% else %>
+        <div class="library-empty"><span class="eyebrow"><%= @section.humanize %></span><h2>Nothing reusable saved yet</h2><p>Create this resource while preparing a Deal. The current Deal can always use one-off content.</p><dl><div><dt>Where it appears</dt><dd>Smart Intake and Quote Studio</dd></div><div><dt>Setup required</dt><dd>None</dd></div></dl><%= link_to "Review workspace defaults", edit_company_settings_path, class: "button button--secondary" %></div>
+      <% end %>
+    </section>
+  <% end %>
 </main>

@@ -1,4 +1,0 @@
-<main class="rubusoo-page pi-page">
-  <header class="pi-page__toolbar"><div><p class="eyebrow">Accepted order</p><h1><%= @pi.number %></h1></div><div><span class="pi-status"><%= @pi.status.humanize %></span><%= link_to "Download PDF", pdf_proforma_invoice_path(@pi), class: "button button--secondary", data: { turbo: false } %><% if @pi.status == "awaiting_deposit" %><%= button_to "Mark deposit received", deposit_received_proforma_invoice_path(@pi), method: :patch, class: "button button--primary" %><% end %></div></header>
-  <%= render "document", pi: @pi %>
-</main>

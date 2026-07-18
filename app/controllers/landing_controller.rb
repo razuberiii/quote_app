@@ -71,8 +71,8 @@ class LandingController < ApplicationController
   def set_public_paths
     @contact_request ||= ContactRequest.new
     @contact_email = ContactMailer.contact_email_for_environment
-    @demo_path = demo_path
-    @sample_quote_path = sample_quote_path
-    @resources_path = resources_path
+    @demo_path = seller_demo_path
+    @sample_quote_path = buyer_demo_path
+    @resources_path = pricing_path
   end
 end

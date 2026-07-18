@@ -1,5 +1,5 @@
 class QuoteItem < ApplicationRecord
-  PRICE_SOURCES = %w[catalog quantity_tier customer_specific configuration_rule historical_quote manual].freeze
+  PRICE_SOURCES = %w[unpriced catalog quantity_tier customer_specific configuration_rule historical_quote manual].freeze
   SELECTION_MODES = %w[fixed selectable request_only].freeze
   MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
   MAX_DESCRIPTION_LENGTH = 1000
@@ -29,7 +29,7 @@ class QuoteItem < ApplicationRecord
   attr_accessor :item_image_blob_id, :remove_item_image
 
   validates :description, presence: true
-  validates :unit_price, presence: true, numericality: { greater_than: 0 }
+  validates :unit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :quantity, presence: true, numericality: { only_integer: true, greater_than: 0 }
   validates :image_source, inclusion: { in: IMAGE_SOURCES }
   validates :item_type, inclusion: { in: ITEM_TYPES }

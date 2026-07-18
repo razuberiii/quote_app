@@ -1,5 +1,5 @@
 class FinalDocumentsController < ApplicationController
-  before_action :load_document, only: %i[show pdf email mark_sent]
+  before_action :load_document, only: %i[show pdf email mark_sent confirm_payment]
 
   def show; end
 
@@ -36,6 +36,11 @@ class FinalDocumentsController < ApplicationController
   def mark_sent
     @document.update!(status: "sent", sent_at: Time.current)
     redirect_to final_document_path(@document), notice: "External delivery recorded."
+  end
+
+  def confirm_payment
+    @document.update!(payment_received_at: Time.current, payment_note: params[:payment_note].presence)
+    redirect_to deal_path(@document.quote), notice: "Payment confirmed. The Deal can now be closed as won."
   end
 
   private

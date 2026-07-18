@@ -42,9 +42,9 @@ class ContactRequestsController < ApplicationController
   def render_contact_error(status)
     @contact_request ||= ContactRequest.new
     @contact_email = ContactMailer.contact_email_for_environment
-    @demo_path = demo_path
-    @sample_quote_path = sample_quote_path
-    @resources_path = resources_path
+    @demo_path = seller_demo_path
+    @sample_quote_path = buyer_demo_path
+    @resources_path = pricing_path
     template = params[:source_page] == "contact" ? "landing/contact" : "landing/index"
     render template, status: status
   end

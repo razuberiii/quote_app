@@ -36,19 +36,6 @@ class RubusooCommercialFlowTest < ActiveSupport::TestCase
     assert_equal 1, QuoteAcceptance.where(quote: @quote).count
   end
 
-  test "PI generation is idempotent and isolated by workspace" do
-    revision = RevisionPublisher.new(quote: @quote, actor: @user).call.revision
-    acceptance = QuoteAcceptor.new(revision: revision, attributes: { name: "A Buyer", email: "buyer@example.com" }, selection: {}, idempotency_key: "accept-1").call
-    first = ProformaInvoiceGenerator.new(acceptance: acceptance, actor: @user).call
-    second = ProformaInvoiceGenerator.new(acceptance: acceptance.reload, actor: @user).call
-
-    assert_equal first.id, second.id
-    assert_equal acceptance.snapshot, first.snapshot
-    assert_raises(ActiveRecord::RecordNotFound) do
-      ProformaInvoiceGenerator.new(acceptance: acceptance, actor: users(:two)).call
-    end
-  end
-
   test "trial send limit is enforced server side" do
     @company.update!(plan: "trial", subscription_status: "trialing", trial_ends_at: 5.days.from_now)
     5.times do |number|

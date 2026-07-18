@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_18_015000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -64,6 +64,32 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "name"], name: "index_addon_presets_on_company_id_and_name", unique: true
     t.index ["company_id"], name: "index_addon_presets_on_company_id"
+  end
+
+  create_table "ai_analyses", force: :cascade do |t|
+    t.jsonb "accepted_fields", default: [], null: false
+    t.string "analysis_type", null: false
+    t.bigint "company_id", null: false
+    t.jsonb "corrected_fields", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.decimal "estimated_cost", precision: 12, scale: 6
+    t.string "input_fingerprint", null: false
+    t.integer "input_tokens"
+    t.integer "latency_ms"
+    t.string "model", null: false
+    t.integer "output_tokens"
+    t.string "provider", null: false
+    t.jsonb "raw_json", default: {}, null: false
+    t.jsonb "rejected_fields", default: [], null: false
+    t.string "schema_version", null: false
+    t.bigint "source_record_id", null: false
+    t.string "source_record_type", null: false
+    t.string "status", default: "validated", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "validation_result", default: {}, null: false
+    t.index ["company_id", "analysis_type", "input_fingerprint"], name: "idx_ai_analysis_fingerprint"
+    t.index ["company_id"], name: "index_ai_analyses_on_company_id"
+    t.index ["source_record_type", "source_record_id"], name: "index_ai_analyses_on_source_record"
   end
 
   create_table "audit_logs", force: :cascade do |t|
@@ -269,6 +295,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.index ["recorded_by_id"], name: "index_deal_responses_on_recorded_by_id"
   end
 
+  create_table "evidence_records", force: :cascade do |t|
+    t.bigint "ai_analysis_id"
+    t.bigint "company_id", null: false
+    t.decimal "confidence", precision: 5, scale: 4
+    t.datetime "created_at", null: false
+    t.string "evidence_key", null: false
+    t.text "excerpt", null: false
+    t.string "field_path"
+    t.jsonb "locator", default: {}, null: false
+    t.bigint "source_record_id", null: false
+    t.string "source_record_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ai_analysis_id"], name: "index_evidence_records_on_ai_analysis_id"
+    t.index ["company_id"], name: "index_evidence_records_on_company_id"
+    t.index ["source_record_type", "source_record_id"], name: "index_evidence_records_on_source_record"
+  end
+
   create_table "final_documents", force: :cascade do |t|
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
@@ -280,6 +323,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.bigint "file_size"
     t.datetime "generated_at"
     t.string "number", null: false
+    t.text "payment_note"
+    t.datetime "payment_received_at"
     t.bigint "quote_acceptance_id", null: false
     t.bigint "quote_id", null: false
     t.datetime "sent_at"
@@ -334,6 +379,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.index ["product_id"], name: "index_product_addon_presets_on_product_id"
   end
 
+  create_table "product_import_batches", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.string "input_fingerprint", null: false
+    t.string "status", default: "review", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "warnings", default: [], null: false
+    t.index ["company_id"], name: "index_product_import_batches_on_company_id"
+    t.index ["created_by_id"], name: "index_product_import_batches_on_created_by_id"
+  end
+
+  create_table "product_import_candidates", force: :cascade do |t|
+    t.jsonb "candidate_data", default: {}, null: false
+    t.decimal "confidence", precision: 5, scale: 4
+    t.datetime "created_at", null: false
+    t.string "decision", default: "pending", null: false
+    t.jsonb "evidence", default: [], null: false
+    t.bigint "matched_product_id"
+    t.bigint "product_import_batch_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["matched_product_id"], name: "index_product_import_candidates_on_matched_product_id"
+    t.index ["product_import_batch_id"], name: "index_product_import_candidates_on_product_import_batch_id"
+  end
+
   create_table "product_spec_presets", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "product_id", null: false
@@ -350,7 +420,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.datetime "created_at", null: false
     t.bigint "default_addon_preset_id"
     t.jsonb "default_addons", default: [], null: false
-    t.decimal "default_price", precision: 15, scale: 4, null: false
+    t.decimal "default_price", precision: 15, scale: 4, default: "0.0", null: false
     t.bigint "default_spec_preset_id"
     t.text "default_specification"
     t.jsonb "default_specs", default: [], null: false
@@ -362,7 +432,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
     t.string "price_currency", default: "USD", null: false
     t.string "product_category"
     t.integer "quoted_count", default: 0, null: false
-    t.string "sku", null: false
+    t.string "sku"
     t.string "unit"
     t.datetime "updated_at", null: false
     t.integer "won_count", default: 0, null: false
@@ -818,6 +888,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "addon_presets", "companies"
+  add_foreign_key "ai_analyses", "companies"
   add_foreign_key "audit_logs", "users", column: "actor_id"
   add_foreign_key "buyer_activities", "companies"
   add_foreign_key "buyer_activities", "quote_revisions"
@@ -839,6 +910,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
   add_foreign_key "deal_responses", "quote_revisions"
   add_foreign_key "deal_responses", "quotes"
   add_foreign_key "deal_responses", "users", column: "recorded_by_id"
+  add_foreign_key "evidence_records", "ai_analyses"
+  add_foreign_key "evidence_records", "companies"
   add_foreign_key "final_documents", "companies"
   add_foreign_key "final_documents", "quote_acceptances"
   add_foreign_key "final_documents", "quotes"
@@ -849,6 +922,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_16_200000) do
   add_foreign_key "notifications", "users"
   add_foreign_key "product_addon_presets", "addon_presets"
   add_foreign_key "product_addon_presets", "products"
+  add_foreign_key "product_import_batches", "companies"
+  add_foreign_key "product_import_batches", "users", column: "created_by_id"
+  add_foreign_key "product_import_candidates", "product_import_batches"
+  add_foreign_key "product_import_candidates", "products", column: "matched_product_id"
   add_foreign_key "product_spec_presets", "products"
   add_foreign_key "product_spec_presets", "spec_presets"
   add_foreign_key "products", "addon_presets", column: "default_addon_preset_id"

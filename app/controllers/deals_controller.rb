@@ -3,7 +3,7 @@ class DealsController < ApplicationController
 
   def index
     rows = current_user.company.quotes.not_archived.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
-      :proforma_invoice, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).order(updated_at: :desc)
+      :final_documents, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).order(updated_at: :desc)
     rows = rows.where(customer_id: params[:buyer_id]) if params[:buyer_id].present?
     if params[:q].present?
       term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
@@ -30,7 +30,6 @@ class DealsController < ApplicationController
     @deliveries = @deal.version_deliveries.order(delivered_at: :desc)
     @activities = @deal.buyer_activities.order(created_at: :desc).limit(30)
     @acceptance = @deal.quote_acceptance
-    @pi = @deal.proforma_invoice
     @final_documents = @deal.final_documents.order(created_at: :desc)
     @tab = params[:tab].presence_in(%w[overview quote conversation versions documents]) || "overview"
   end
@@ -65,6 +64,6 @@ class DealsController < ApplicationController
 
   def load_deal
     @deal = current_user.company.quotes.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
-      :proforma_invoice, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).find(params[:id])
+      :final_documents, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).find(params[:id])
   end
 end

@@ -79,9 +79,8 @@ class DealProgress
       return result("accepted", "Accepted", "send_final_document", "Send final document", true, "Final document is ready", document.created_at)
     end
     if company.require_deposit_workflow?
-      pi = @quote.proforma_invoice
-      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Deposit workflow requires a PI", @quote.quote_acceptance&.accepted_at) unless pi
-      return result("accepted", "Accepted", "confirm_payment", "Confirm payment", true, "Awaiting payment", pi.sent_at || pi.created_at) unless pi.deposit_received_at?
+      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Payment workflow requires a final document", @quote.quote_acceptance&.accepted_at) unless document
+      return result("accepted", "Accepted", "confirm_payment", "Confirm payment", true, "Awaiting payment", document.sent_at || document.created_at) unless document.payment_received_at?
     end
     result("accepted", "Accepted", "close_won", "Close as won", true, "Commercial acceptance is complete", @quote.quote_acceptance&.accepted_at)
   end

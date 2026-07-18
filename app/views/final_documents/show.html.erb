@@ -39,6 +39,17 @@
         <dt>Snapshot</dt><dd>Locked</dd>
       </dl>
       <%= button_to "Mark externally sent", mark_sent_final_document_path(@document), method: :patch, class: "button button--secondary" unless @document.sent_at? %>
+      <% if @document.company.require_deposit_workflow? && @document.sent_at? %>
+        <% if @document.payment_received_at? %>
+          <p class="final-document-payment is-confirmed">Payment confirmed <%= l(@document.payment_received_at, format: :long) %></p>
+        <% else %>
+          <%= form_with url: confirm_payment_final_document_path(@document), method: :patch, class: "final-document-payment" do |form| %>
+            <%= form.label :payment_note, "Payment reference" %>
+            <%= form.text_field :payment_note, placeholder: "Bank reference or note" %>
+            <%= form.submit "Confirm payment", class: "button button--primary" %>
+          <% end %>
+        <% end %>
+      <% end %>
     </aside>
   </section>
 </main>

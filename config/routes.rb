@@ -42,18 +42,9 @@ Rails.application.routes.draw do
   get ":locale", to: "landing#index", as: :localized_root, constraints: { locale: /en|zh-CN|es-419/ }
 
   scope "(:locale)", locale: /en|zh-CN|es-419/ do
-    get "demo", to: redirect("/seller-demo")
     get "contact", to: "landing#contact"
     get "privacy", to: "landing#privacy"
     get "terms", to: "landing#terms"
-    get "sample-quote", to: redirect("/buyer-demo")
-    get "foreign-trade-quotation-software", to: redirect("/")
-    get "quote-revision-control", to: redirect("/")
-    get "buyer-facing-quotation-link", to: redirect("/")
-    get "quotation-software-vs-excel", to: redirect("/")
-    get "quotation-software-vs-erp", to: redirect("/")
-    get "quick-export-quotation", to: redirect("/")
-    get "resources", to: redirect("/")
     resources :contact_requests, only: [ :create ]
   end
 
@@ -80,24 +71,19 @@ Rails.application.routes.draw do
   resources :final_documents, only: %i[show create] do
     member do
       patch :mark_sent
+      patch :confirm_payment
       get :pdf
       post :email
     end
   end
   get "library", to: "library#index", as: :library
-  resources :inquiries, only: %i[index new create show update] do
+  resources :product_import_batches, path: "library/catalog-imports", only: %i[new create show update] do
+    member { post :apply }
+  end
+  resources :inquiries, only: %i[new create show update] do
     member { post :build_quote }
   end
   resources :quote_revisions, only: %i[show create]
-  resources :proforma_invoices, only: %i[show create] do
-    member do
-      patch :deposit_received
-      patch :mark_sent
-      get :pdf
-    end
-  end
-  patch "onboarding/dismiss", to: "onboarding#dismiss", as: :dismiss_onboarding
-
   resources :notifications, only: [] do
     collection do
       patch :mark_all_read
@@ -107,17 +93,6 @@ Rails.application.routes.draw do
       get :mark_read
       patch :dismiss
     end
-  end
-
-  # Public quote sharing
-  namespace :public do
-    resources :quote_shares, only: [ :show ], param: :token do
-      member do
-        post :accept
-        post :request_revision
-      end
-    end
-    resources :quote_view_events, only: :create
   end
 
   # Product management
@@ -154,46 +129,11 @@ Rails.application.routes.draw do
   resource :company_settings, only: [ :edit, :update ]
   resources :quote_reason_options, only: [ :create, :destroy ]
 
-  resources :customers do
-    collection do
-      get :shortcut_candidates
-    end
-
-    member do
-      patch :pause
-      patch :resume
-      post :mark_follow_up
-      post :schedule_follow_up
-      post :log_follow_up
-      post :send_follow_up_email
-      post :send_follow_up_whatsapp
-      patch :reorder_tags
-    end
-
-    resources :quotes, shallow: true do
-      member do
-        post :duplicate
-        post :archive
-        post :mark_sent
-        post :mark_negotiating
-        post :revert_to_sent
-        post :undo_status_change
-        post :reopen
-        post :share
-        post :send_reminder
-        patch :mark_outcome
-        patch :update_outcome_reason
-        patch :update_template
-        post :create_pi
-        get :public_preview
-        get "export/pdf", action: :export_pdf, as: :export_pdf
-        get "export/xlsx", action: :export_xlsx, as: :export_xlsx
-      end
-    end
+  # A Quote is the private Working draft inside a Deal. Formal output is
+  # available only from an immutable Published Version.
+  resources :quotes, only: %i[show edit update] do
+    member { get :preview }
   end
-
-  get "quote/:id/export_pdf", to: "quotes#export_pdf", as: :legacy_export_pdf_quote
-  get "quote/:id/export_excel", to: "quotes#export_xlsx", as: :legacy_export_excel_quote
   namespace :admin do
     root "dashboard#index"
     resources :users, only: [ :index, :show ] do

@@ -38,7 +38,7 @@ class InquiriesController < ApplicationController
 
   def build_quote
     unless @inquiry.ready_to_build_quote?
-      redirect_to @inquiry, alert: "Confirm the customer, currency, products, quantities, prices, and every price source before building the quote."
+      redirect_to @inquiry, alert: "Confirm the buyer, currency, product names and quantities before building the Working draft. Prices and freight can be completed in Quote Studio."
       return
     end
     data = @inquiry.extracted_data
@@ -54,13 +54,13 @@ class InquiriesController < ApplicationController
     Array(data["products"]).each do |item|
       product = current_user.company.products.find_by(id: item["catalog_product_id"])
       specs = item.fetch("specifications", {}).filter_map { |key, value| { key: key.humanize, value: value } if value.present? }
-      quote.quote_items.build(product: product, description: item["name"], quantity: item["quantity"].to_i, unit_price: item["unit_price"],
-        specifications: specs, price_source: item["price_source"], selection_mode: item["selection_mode"].presence || "fixed",
+      quote.quote_items.build(product: product, description: item["name"], quantity: item["quantity"].to_i, unit_price: item["unit_price"].to_d,
+        specifications: specs, price_source: item["price_source"].presence || "unpriced", selection_mode: item["selection_mode"].presence || "fixed",
         sku_snapshot: product&.sku || item["model"], unit_snapshot: item["unit"], lead_time_snapshot: item["lead_time"], packing_snapshot: item["packing"])
     end
     quote.save!
     @inquiry.update!(status: "converted", customer: customer)
-    redirect_to edit_quote_path(quote), notice: "Deal created. Complete the interactive quote, then publish Version 1."
+    redirect_to edit_quote_path(quote), notice: "Deal created with #{quote.quote_items.count} item(s). Add reliable prices and freight before publishing Version 1."
   end
 
   private

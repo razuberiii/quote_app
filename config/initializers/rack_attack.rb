@@ -49,36 +49,6 @@ class Rack::Attack
     end
   end
 
-  # Throttle quote exports (PDF/XLSX) by IP; these endpoints are CPU/memory expensive.
-  throttle("quote exports by ip", limit: 20, period: 60) do |req|
-    if req.request_method == "GET" &&
-      (req.path.match?(%r{/quotes/\d+/export/(pdf|xlsx)\z}) || req.path.match?(%r{/quote/\d+/export_(pdf|excel)\z}))
-      req.ip
-    end
-  end
-
-  # Throttle follow-up/reminder mail sends by IP to reduce abuse and provider quota burn.
-  throttle("quote email sends by ip", limit: 20, period: 60) do |req|
-    if req.request_method == "POST" &&
-      (req.path.match?(%r{/customers/\d+/send_follow_up_email\z}) || req.path.match?(%r{/quotes/\d+/send_reminder\z}))
-      req.ip
-    end
-  end
-
-  # Throttle public quote action endpoints by IP.
-  throttle("public quote actions by ip", limit: 30, period: 60) do |req|
-    if req.request_method == "POST" && req.path.match?(%r{\A/public/quote_shares/[^/]+/(accept|request_revision)\z})
-      req.ip
-    end
-  end
-
-  # Throttle anonymous quote view-event ingestion by IP.
-  throttle("public quote view events by ip", limit: 240, period: 60) do |req|
-    if req.request_method == "POST" && req.path.match?(%r{\A/public/quote_view_events/[^/]+\z})
-      req.ip
-    end
-  end
-
   # Throttle team invitation creates by IP.
   throttle("team invitations by ip", limit: 20, period: 60) do |req|
     if req.request_method == "POST" && req.path == "/team_invitations"

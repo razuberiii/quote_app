@@ -22,7 +22,9 @@ class QuoteReadinessAudit
         list << "#{label}: product name is required" if item.description.blank?
         list << "#{label}: quantity is required" unless item.quantity.to_i.positive?
         list << "#{label}: price is required" unless item.unit_price.to_d.positive?
-        list << "#{label}: price source is required" if item.respond_to?(:price_source) && item.price_source.blank?
+        if item.respond_to?(:price_source) && (item.price_source.blank? || item.price_source == "unpriced")
+          list << "#{label}: a verified price source is required"
+        end
         list << "#{label}: configuration price requires confirmation" if item.addon_charge_entries.any? { |addon| addon[:amount].blank? }
       end
       list << "Quotation total must be greater than zero" unless @quote.grand_total.to_d.positive?

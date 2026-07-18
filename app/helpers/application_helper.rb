@@ -62,7 +62,6 @@ module ApplicationHelper
     return "noindex,nofollow" if devise_controller?
     return "noindex,nofollow" if controller_path == "email_verifications"
     return "noindex,nofollow" if controller_path == "email_changes"
-    return "noindex,nofollow" if controller_path == "public/quote_shares"
 
     "index,follow"
   end

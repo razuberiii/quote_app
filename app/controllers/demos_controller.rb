@@ -21,7 +21,8 @@ class DemosController < ApplicationController
   private
 
   def demo_company
-    Company.find_by(name: "Atlas Industrial Supply Co.") ||
-      Company.find_by(slug: "visual-review-machinery")
+    return Company.find_by(slug: "visual-review-machinery") if Rails.env.test?
+
+    Company.find_by(name: "Atlas Industrial Supply Co.")
   end
 end

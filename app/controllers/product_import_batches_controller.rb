@@ -79,12 +79,12 @@ class ProductImportBatchesController < ApplicationController
 
   def merge_candidates(deterministic, semantic)
     (deterministic + semantic).each_with_object([]) do |candidate, merged|
-      key = candidate["sku"].presence&.downcase || [candidate["name"].to_s.downcase, candidate["model"].to_s.downcase]
-      existing = merged.find { |item| (item["sku"].presence&.downcase || [item["name"].to_s.downcase, item["model"].to_s.downcase]) == key }
+      key = candidate["sku"].presence&.downcase || [ candidate["name"].to_s.downcase, candidate["model"].to_s.downcase ]
+      existing = merged.find { |item| (item["sku"].presence&.downcase || [ item["name"].to_s.downcase, item["model"].to_s.downcase ]) == key }
       if existing
         candidate.each { |field, value| existing[field] = value if existing[field].blank? && value.present? }
         existing["evidence"] = (Array(existing["evidence"]) + Array(candidate["evidence"])).uniq
-        existing["confidence"] = [existing["confidence"].to_f, candidate["confidence"].to_f].max
+        existing["confidence"] = [ existing["confidence"].to_f, candidate["confidence"].to_f ].max
       else
         merged << candidate.deep_dup
       end

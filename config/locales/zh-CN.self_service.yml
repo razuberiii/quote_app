@@ -750,15 +750,11 @@ zh-CN:
     intake:
       eyebrow: 01 · 创建报价
       title: 从客户消息开始
-      subtitle: 粘贴邮件或聊天记录，也可以上传原文件。系统先整理报价所需信息，你确认后再生成报价草稿。
-      source: 整理方式
-      smart: AI 整理
-      smart_help: 从客户消息和附件中提取报价信息
-      manual_help: 不调用 AI，只用基础规则整理原文
+      subtitle: 粘贴邮件或聊天记录，也可以上传原文件。我们会整理出报价所需信息，你确认后再生成报价草稿。
       email: 邮件
       chat: 聊天记录
       text: 普通文字
-      manual: 基础整理
+      manual: 文本记录
       placeholder: "粘贴客户发来的邮件或聊天记录……\n\n例如：请报价 12 台液压动力单元，380V / 50Hz，CIF Jebel Ali。"
       upload: 上传客户原文件（选填）
       upload_help: 支持 PDF、XLSX、CSV、TXT；原文件会随报价保留
@@ -775,7 +771,7 @@ zh-CN:
       no_guess_help: 未提供的价格和运费保持为空，等你确认。
       submit: 整理并核对
       extracted: 已整理客户消息。请核对关键信息，客户后续回复可继续追加到这里。
-      fallback: AI 整理未完成，客户原文已保留，并已使用基础规则生成待核对内容。
+      fallback: 部分内容未能识别，客户原文已完整保留。请在核对页补充缺少的信息。
       review_saved: 已保存当前核对内容，可稍后继续。
       build_blocked: 创建报价草稿前，请确认买家、币种、商品名称和数量。价格与运费可在报价工作台继续完善。
       deal_created: "已创建包含 %{count} 件商品的报价草稿。请在发布第 1 版前确认价格与运费。"

@@ -8,6 +8,16 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     sign_in @user
   end
 
+  test "new quote has one customer-message intake path" do
+    get new_inquiry_path
+
+    assert_response :success
+    assert_select "input[type='hidden'][name='inquiry[source_type]'][value='email']", 1
+    assert_select ".inquiry-import__source-tabs--mode", 0
+    assert_select "main", text: /从客户消息开始/
+    assert_select "main", text: /基础整理/, count: 0
+  end
+
   test "empty Library does not block a multi item Working draft" do
     inquiry = @user.company.inquiries.create!(created_by: @user, source_type: "email", source_text: <<~TEXT)
       Please quote CIF Jebel Ali for:

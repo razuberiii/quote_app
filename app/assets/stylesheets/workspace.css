@@ -354,12 +354,6 @@
 .neo-os--app .inquiry-import__rail { border-left: 1px solid var(--ws-border); background: var(--ws-surface); color: var(--ws-text); }
 .neo-os--app .inquiry-import__steps li { border-color: var(--ws-border); }
 .neo-os--app .inquiry-import__promise { border-left-color: var(--ws-red); background: color-mix(in srgb,var(--ws-red) 8%,var(--ws-elevated)); }
-.neo-os--app .inquiry-import__source-tabs--mode label { flex: 1 1 220px; }
-.neo-os--app .inquiry-import__source-tabs--mode span { min-height: 72px; padding: 13px 15px; text-align: left; }
-.neo-os--app .inquiry-import__source-tabs--mode :is(strong,small) { display: block; }
-.neo-os--app .inquiry-import__source-tabs--mode strong { color: var(--ws-text); font-size: .78rem; }
-.neo-os--app .inquiry-import__source-tabs--mode small { margin-top: 5px; color: var(--ws-muted); font-size: .65rem; line-height: 1.4; }
-.neo-os--app .inquiry-import__source-tabs--mode input:checked + span { border-color: var(--ws-text); background: var(--ws-elevated); box-shadow: inset 3px 0 var(--ws-red); }
 
 /* Catalog import uses the workspace canvas; the upload control is the only bounded target. */
 .neo-os--app .catalog-import .import-dropzone { margin-top:24px; padding:28px 0; border-color:var(--ws-border); background:transparent; }

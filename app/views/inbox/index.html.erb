@@ -1,7 +1,7 @@
 <main class="deal-workspace inbox-page" data-controller="deal-motion">
   <header class="deal-page-header">
     <div><p class="eyebrow"><%= t("self_service.inbox.eyebrow") %></p><h1><%= t("self_service.inbox.title") %></h1><p><%= t("self_service.inbox.subtitle") %></p></div>
-    <div class="deal-header-actions"><%= link_to t("self_service.inbox.import"), new_inquiry_path, class: "button button--secondary" %><%= link_to t("self_service.inbox.new_deal"), new_inquiry_path(mode: "manual"), class: "button button--primary" %></div>
+    <div class="deal-header-actions"><%= link_to t("self_service.inbox.import"), new_inquiry_path, class: "button button--secondary" %><%= link_to t("self_service.inbox.new_deal"), new_inquiry_path, class: "button button--primary" %></div>
   </header>
 
   <section class="deal-metrics" aria-label="<%= t('self_service.inbox.summary') %>">

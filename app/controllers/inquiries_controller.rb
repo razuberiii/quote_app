@@ -17,7 +17,7 @@ class InquiriesController < ApplicationController
     if @inquiry.source_text.blank? && @inquiry.source_file.attached?
       @inquiry.update!(source_text: InquirySourceReader.new(@inquiry.source_file).call, source_type: inferred_source_type)
     end
-    @inquiry.source_type == "manual" ? @inquiry.manually_extract! : @inquiry.extract_requirements!
+    @inquiry.extract_requirements!
     record_initial_message
     redirect_to @inquiry, notice: t("self_service.intake.extracted")
   rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError, InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile => error

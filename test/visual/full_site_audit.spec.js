@@ -11,11 +11,11 @@ fs.mkdirSync(shots, { recursive: true })
 test.setTimeout(300_000)
 
 async function login(page) {
-  await page.goto("/users/sign_in")
+  await page.goto("/users/sign_in?locale=zh-CN")
   await page.locator('input[name="user[login]"]').fill(seed.email)
   await page.locator('input[name="user[password]"]').fill(seed.password)
   await page.locator('input[type="submit"]').click()
-  await expect(page.getByRole("heading", { name: "Inbox", exact: true })).toBeVisible()
+  await expect(page.locator(".quote-core-index")).toBeVisible()
 }
 
 async function inspect(page, name, viewport) {
@@ -66,7 +66,7 @@ test("public, identity and recovery surfaces", async ({ page }) => {
   const routes = [
     ["home", "/"], ["pricing", "/pricing"], ["seller-demo", "/seller-demo"], ["buyer-demo", "/buyer-demo"],
     ["sign-in", "/users/sign_in"], ["sign-up", "/users/sign_up"], ["email-pending", "/pending-email-verification"],
-    ["contact", "/contact"], ["resources", "/resources"], ["privacy", "/privacy"], ["terms", "/terms"], ["sample-quote", "/sample-quote"]
+    ["contact", "/contact"], ["privacy", "/privacy"], ["terms", "/terms"]
   ]
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport)
@@ -76,25 +76,23 @@ test("public, identity and recovery surfaces", async ({ page }) => {
 
 test("authenticated workspace routes, tabs and overlays", async ({ page }) => {
   await login(page)
-  const deal = `/deals/${seed.deal_id}`
+  const quote = `/quotes/${seed.deal_id}`
   const routes = [
-    ["inbox", "/inbox"], ["deals", "/deals"], ["deal-overview", deal],
-    ["conversation", `${deal}?tab=conversation`], ["versions", `${deal}?tab=versions`], ["documents", `${deal}?tab=documents`],
-    ["version-diff", `/quote_revisions/${seed.version_two_id}`], ["delivery", `${deal}/deliver?version_id=${seed.version_two_id}`],
-    ["acceptance", `${deal}/acceptance/new?version_id=${seed.version_two_id}`], ["smart-intake-import", "/inquiries/new"],
+    ["quotes", "/quotes"], ["quote-overview", quote], ["quote-activity", `${quote}?tab=activity`], ["versions", `${quote}?tab=versions`],
+    ["version-diff", `/quote_revisions/${seed.version_two_id}`], ["delivery", `${quote}/deliver?version_id=${seed.version_two_id}`],
+    ["acceptance", `${quote}/acceptance/new?version_id=${seed.version_two_id}`], ["smart-intake-import", "/inquiries/new"],
     ["smart-intake-review", `/inquiries/${seed.inquiry_id}`], ["quote-studio", `/quotes/${seed.edge_deals.no_image}/edit`],
     ["library-products", "/library?section=products"], ["library-presets", "/library?section=presets"],
-    ["library-pricing", "/library?section=pricing"], ["library-content", "/library?section=content"],
-    ["library-formats", "/library?section=formats"], ["library-brand", "/library?section=brand"], ["library-output", "/library?section=output"],
+    ["document-design", "/document_design/edit"], ["customers", "/customers"], ["AI-import", "/imports"], ["catalog-import", "/library/catalog-imports/new"],
     ["product-source", `/products/${seed.product_id}`], ["product-new", "/products/new"], ["product-edit", `/products/${seed.product_id}/edit`],
-    ["settings", "/company_settings/edit"], ["account", "/users/edit"], ["team", "/team_members"], ["invitations", "/team_invitations"],
-    ["missing-price", `/deals/${seed.edge_deals.missing_price}`], ["delivery-failed", `/deals/${seed.edge_deals.delivery_failure}`],
-    ["closed-deal", `/deals/${seed.edge_deals.closed}`], ["long-quote", `/quotes/${seed.edge_deals.long_quote}/edit`]
+    ["settings", "/company_settings/edit"], ["company-import", "/settings/company-imports/new"], ["account", "/users/edit"], ["team", "/team_members"],
+    ["missing-price", `/quotes/${seed.edge_deals.missing_price}`], ["delivery-failed", `/quotes/${seed.edge_deals.delivery_failure}`],
+    ["closed-quote", `/quotes/${seed.edge_deals.closed}`], ["long-quote", `/quotes/${seed.edge_deals.long_quote}/edit`]
   ]
   for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(viewport)
     for (const [name, route] of routes) { await page.goto(route); await inspect(page, name, viewport) }
-    await page.goto("/inbox")
+    await page.goto("/quotes")
     const account = page.locator(".account-menu-trigger")
     if (await account.isVisible()) { await account.click(); await inspect(page, "account-menu", viewport) }
   }
@@ -104,7 +102,7 @@ test("priority 360 and 412 mobile states", async ({ page }) => {
   await login(page)
   for (const viewport of [{ width: 360, height: 800 }, { width: 412, height: 915 }]) {
     await page.setViewportSize(viewport)
-    for (const [name, route] of [["home-priority", "/"], ["inbox-priority", "/inbox"], ["deal-priority", `/deals/${seed.deal_id}`], ["studio-priority", `/quotes/${seed.edge_deals.no_image}/edit`], ["buyer-priority", `/q/${seed.buyer_token}`]]) {
+    for (const [name, route] of [["home-priority", "/"], ["quotes-priority", "/quotes"], ["quote-priority", `/quotes/${seed.deal_id}`], ["studio-priority", `/quotes/${seed.edge_deals.no_image}/edit`], ["buyer-priority", `/q/${seed.buyer_token}`]]) {
       await page.goto(route); await inspect(page, name, viewport)
     }
   }

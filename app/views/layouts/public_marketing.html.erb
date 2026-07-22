@@ -15,6 +15,7 @@
     <link rel="icon" href="<%= favicon_href %>" type="image/png">
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem("rubusoo-theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -26,7 +27,7 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="app-root marketing-root neo-os neo-os--marketing page-<%= controller_path.tr('/', '-') %> page-action-<%= action_name %>">
+  <body class="app-root marketing-root neo-os neo-os--marketing page-<%= controller_path.tr('/', '-') %> page-action-<%= action_name %>" data-controller="motion-orchestrator theme">
     <div class="flex min-h-screen flex-1 flex-col overflow-hidden">
 
       <nav class="navbar">
@@ -40,6 +41,7 @@
             <span></span>
             <span></span>
           </button>
+          <div class="navbar-drawer">
 
           <ul class="navbar-menu navbar-menu-public" id="public-marketing-navigation">
             <li><%= link_to t("landing.shared.navigation.product"), localized_root_path(locale: I18n.locale, anchor: "product-story") %></li>
@@ -53,6 +55,8 @@
             </div>
             <%= link_to t("landing.shared.navigation.log_in"), new_user_session_path, class: "app-nav-link" %>
             <%= link_to t("landing.shared.navigation.start_free"), new_user_registration_path, class: "app-nav-link navbar-cta-link" %>
+            <%= render "layouts/theme_switch" %>
+          </div>
           </div>
         </div>
       </nav>

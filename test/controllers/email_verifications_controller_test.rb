@@ -54,7 +54,7 @@ class EmailVerificationsControllerTest < ActionDispatch::IntegrationTest
 
     body = JSON.parse(response.body)
     assert_equal true, body["success"]
-    assert_match(/already verified/i, body["message"])
+    assert_equal I18n.t("email_verifications.flash.already_verified"), body["message"]
   ensure
     ENV["SKIP_TURNSTILE_VERIFICATION"] = previous
   end

@@ -1,0 +1,124 @@
+en:
+  self_service:
+    quote_core:
+      delivery_failed_with_reason: "Delivery failed: %{reason}"
+      link_updated: "Customer link updated."
+      delivery_success: "Quote sent."
+      file_generated: "File generated from immutable Version %{number}."
+      delivery_recorded: "Delivery recorded."
+      response_form:
+        back: "← Back to customer activity"
+        eyebrow: "Customer feedback"
+        title: "Record customer feedback"
+        help: "Attach email, files, purchase orders, messages or phone feedback to one Published Version. The original Version never changes."
+        version: "Published Version"
+        version_option: "V%{number} · %{currency} %{total}"
+        type: "Feedback type"
+        source: "Source channel"
+        received_at: "Received at"
+        contact: "Customer contact"
+        email: "Customer email"
+        context: "Applies to"
+        reference: "Product, fee or term reference"
+        body: "What did the customer say or request?"
+        file: "Returned customer file"
+        file_help: "PDF, XLSX, CSV and TXT are parsed as untrusted evidence. Spreadsheet formulas are never executed."
+        submit: "Save customer feedback"
+        kinds: { message: "General feedback", returned_excel: "Returned Excel", purchase_order: "Purchase order", change_request: "Change request", acceptance: "Acceptance" }
+        sources: { email: "Email", excel: "Excel", buyer_room: "Customer page", messaging: "Messaging", phone: "Phone", other: "Other" }
+        contexts: { general: "Whole quote", item: "Product", fee: "Fee", term: "Term", delivery: "Delivery" }
+      acceptance_form:
+        back: "← Back to customer activity"
+        eyebrow: "Commercial confirmation evidence"
+        title: "Record customer confirmation"
+        help: "Use this for confirmation received outside the customer page. Evidence is fixed to the selected Published Version."
+        version: "Confirmed Version"
+        method: "Confirmation method"
+        name: "Confirmed by"
+        company: "Customer company"
+        email: "Contact email"
+        time: "Confirmation time"
+        po: "Purchase order number"
+        differences: "Evidence differs from the Published Version"
+        differences_help: "A differing file remains evidence for review and is not treated as an exact confirmation."
+        evidence: "Evidence summary"
+        evidence_placeholder: "Email subject, message time or signed-file reference"
+        note: "Internal note"
+        files: "Evidence files"
+        record_type: "Record type"
+        record_value: "Seller-recorded customer confirmation"
+        submit: "Lock confirmation record"
+        methods: { email: "Email", purchase_order: "Purchase order", signed_document: "Signed document", phone: "Phone", messaging: "Messaging", other: "Other" }
+      response_review:
+        no_changes: "No reviewed differences are available to apply"
+        applied: "Selected customer changes were copied into the quote draft."
+        invalid_status: "Invalid feedback status"
+        title: "Structured review"
+        parser_error: "The file could not be parsed: %{error}. Keep it as evidence or request a clearer file."
+        source_mismatch: "File identifiers do not match this Version, so automatic apply is blocked."
+        unsafe: "%{count} unsafe cells isolated"
+        unsafe_help: "Formula content was never executed and cannot be applied automatically."
+        formula_ignored: "Formula ignored"
+        apply: "Apply selected changes to quote draft"
+        keep: "Keep as evidence only"
+        exact: "Core commercial content matches the Published Version. The source file remains attached as evidence."
+        severity: { exact_match: "Exact match", changes: "Changes found", warning: "Review needed", unsafe: "Risk detected" }
+  nav:
+    customers: "Customers"
+  settings:
+    document_design: "Document design"
+  document_design:
+    eyebrow: "Customer document system"
+    title: "Document design"
+    help: "Set one brand, layout and content system for the customer page, PDF and Excel. Individual quotes can still adjust their content."
+    rule_title: "One design, every output"
+    rule_help: "The customer page, PDF and Excel share one published version and one set of brand rules."
+    sections:
+      layout: "Choose a layout"
+      layout_help: "Start with a professional recipe, then tune density and brand color."
+      content: "Default content"
+      content_help: "Defaults apply to new quotes and may be overridden per quote."
+      language: "Customer language"
+      language_help: "Each output may use a different language without changing quote data."
+    recipes:
+      classic: { title: "Business classic", help: "Dense and familiar for standard export quotations." }
+      modern: { title: "Modern brand", help: "Stronger brand expression with a calm reading rhythm." }
+      industry: { title: "Industrial technical", help: "Prioritizes model, specification and delivery terms." }
+    fields: { density: "Information density", color: "Brand accent", font: "Document font", logo: "Logo position", customer_page: "Customer page language", pdf: "PDF language", excel: "Excel language" }
+    density: { compact: "Compact", standard: "Standard", spacious: "Spacious" }
+    positions: { left: "Left", right: "Right", center: "Centered" }
+    content: { logo: "Show company logo", images: "Show product images", tax: "Show tax", shipping: "Show freight", payment_term: "Show payment terms", valid_until: "Show validity", terms_section: "Show commercial terms", notes: "Show quote notes", scope_of_supply: "Show scope of supply", signature_block: "Show signature area", closing_message: "Show closing note" }
+    save: "Save document design"
+    save_help: "New Published Versions freeze the current design and language. Existing versions never change."
+    preview: "Live sample"
+    preview_help: "This confirms hierarchy. PDF and Excel are optimized for their respective media."
+    sample: { title: "Commercial quotation", customer: "Buyer", date: "Quote date", item: "Item", qty: "Qty", amount: "Amount", total: "Quoted total" }
+    flash: { saved: "Document design saved." }
+  import_hub:
+    eyebrow: "AI data intake"
+    title: "Turn existing files into usable data"
+    help: "Upload original files. Rubusoo extracts candidates with their source; money, freight and trade terms always require your confirmation."
+    inquiry: { title: "Customer inquiries and old quotes", help: "Extract customer, product, quantity and delivery requirements from email, PDF, Excel or text." }
+    catalog: { title: "Catalogs and price lists", help: "Organize models, specifications, images and reference prices before adding them to the library." }
+    company: { title: "Company profile and certificates", help: "Extract company identity, contacts, address and qualification documents." }
+    design: { title: "Quotation style reference", help: "Open Document design to select a professional layout for every output." }
+  customers:
+    core:
+      eyebrow: "Quote customers"
+      title: "Customers"
+      help: "Only the customer data required to prepare and send quotations."
+      new: "New customer"
+      new_title: "New customer"
+      edit_title: "Edit customer"
+      edit: "Edit details"
+      back: "Back to customers"
+      quotes: "Related quotes"
+      search: "Search company, contact or email"
+      search_action: "Search"
+      quote_count: "%{count} quotes"
+      empty: "No customers yet"
+      empty_help: "Create one here or let AI intake create it from an inquiry."
+      saved: "Customer saved."
+      save: "Save customer"
+      cancel: "Cancel"
+      fields: { name: "Company name", contact_name: "Contact", email: "Email", phone: "Phone", country: "Country/region", tax_id: "Tax ID", payment_terms: "Usual payment terms", address: "Address", notes: "Internal notes" }

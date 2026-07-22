@@ -2,7 +2,7 @@
   <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_import.eyebrow", default: "Library · controlled import") %></p><h1><%= t("self_service.catalog_import.title", default: "Review a product catalog") %></h1><p><%= t("self_service.catalog_import.subtitle", default: "Rubusoo creates review candidates first. Nothing enters Library until you approve it.") %></p></div></header>
   <%= form_with model: @batch, class: "import-dropzone" do |form| %>
     <div><strong><%= t("self_service.catalog_import.file_title", default: "Upload catalog sources") %></strong><p><%= t("self_service.catalog_import.file_help", default: "CSV and XLSX are parsed deterministically. PDF, scans and images use OCR and structured analysis only when necessary.") %></p></div>
-    <%= form.file_field :source_files, multiple: true, accept: ".csv,.xlsx,.pdf,.png,.jpg,.jpeg,.webp" %>
+    <label class="upload-picker"><span><%= t("self_service.catalog_import.choose_files") %></span><small><%= t("self_service.catalog_import.choose_files_help") %></small><%= form.file_field :source_files, multiple: true, accept: ".csv,.xlsx,.pdf,.png,.jpg,.jpeg,.webp" %></label>
     <%= form.submit t("self_service.catalog_import.analyze", default: "Analyze files"), class: "button button--primary" %>
   <% end %>
   <aside class="import-guardrails"><span><%= t("self_service.catalog_import.guardrails", default: "Import guardrails") %></span><ul><li><%= t("self_service.catalog_import.rule_formula", default: "Formula cells are neutralized.") %></li><li><%= t("self_service.catalog_import.rule_price", default: "Missing prices stay missing.") %></li><li><%= t("self_service.catalog_import.rule_review", default: "AI never writes directly to Library.") %></li></ul></aside>

@@ -1,21 +1,15 @@
-<section class="workspace-page settings-workspace">
-  <header class="workspace-heading workspace-heading--split">
-    <div><span class="eyebrow"><%= t("settings_workspace.eyebrow") %></span><h1><%= t("settings_workspace.title") %></h1><p><%= t("settings_workspace.subtitle") %></p></div>
-  </header>
+<%= render "shared/settings_header", title: t("settings_workspace.title"), section: :company %>
 
-  <nav class="settings-rail" aria-label="<%= t("settings_workspace.navigation") %>">
-    <%= link_to t("settings_workspace.tabs.workspace"), edit_company_settings_path, class: "is-active" %>
-    <%= link_to t("settings_workspace.tabs.account"), edit_user_registration_path %>
-    <%= link_to t("settings_workspace.tabs.team"), team_members_path %>
-    <%= link_to t("settings_workspace.tabs.invitations"), team_invitations_path %>
-  </nav>
+<section class="workspace-page settings-workspace settings-workspace--content">
+
+  <section class="ai-entry ai-entry--company"><div><span><%= t("settings_workspace.ai_entry.signal") %></span><h2><%= t("settings_workspace.ai_entry.title") %></h2><p><%= t("settings_workspace.ai_entry.body") %></p></div><%= link_to t("settings_workspace.ai_entry.action"), new_company_profile_import_path, class: "button button--primary" %></section>
 
   <% if @company.errors.any? || @template.errors.any? %>
     <section class="form-message form-message--error" role="alert"><strong><%= t("settings_workspace.not_saved") %></strong><p><%= (@company.errors.full_messages + @template.errors.full_messages).to_sentence %></p></section>
   <% end %>
 
   <%= form_with model: @company, url: company_settings_path, method: :patch, local: true, multipart: true, class: "settings-editor", data: { dirty_guard: true } do |form| %>
-    <header class="settings-editor__bar"><div><span class="eyebrow"><%= t("settings_workspace.profile") %></span><strong><%= @company.name %></strong></div><%= form.submit t("settings_workspace.save"), class: "control control--primary" %></header>
+    <header class="settings-editor__bar"><div><span class="eyebrow"><%= t("settings_workspace.profile") %></span><strong><%= @company.name %></strong></div><div class="settings-editor__actions"><%= link_to t("settings_workspace.import_company"), new_company_profile_import_path, class: "button button--secondary" %><%= form.submit t("settings_workspace.save"), class: "control control--primary" %></div></header>
 
     <section class="field-section">
       <header><span>01</span><div><h2><%= t("settings_workspace.identity.title") %></h2><p><%= t("settings_workspace.identity.help") %></p></div></header>
@@ -36,8 +30,8 @@
       <div class="field-grid field-grid--two">
         <label class="field"><span><%= t("settings_workspace.fields.currency") %></span><%= form.select :default_currency, %w[USD EUR GBP CNY JPY CAD AUD SGD AED] %></label>
         <label class="field"><span><%= t("settings_workspace.fields.validity") %></span><%= form.number_field :default_validity_days, min: 1 %></label>
-        <label class="field"><span><%= t("settings_workspace.fields.trade_term") %></span><%= form.text_field :default_trade_term, placeholder: "FOB Shanghai" %></label>
-        <label class="field"><span><%= t("settings_workspace.fields.payment_term") %></span><%= form.text_field :default_payment_term, placeholder: "30% deposit, 70% before shipment" %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.trade_term") %></span><%= form.text_field :default_trade_term, placeholder: t("settings_workspace.placeholders.trade_term") %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.payment_term") %></span><%= form.text_field :default_payment_term, placeholder: t("settings_workspace.placeholders.payment_term") %></label>
         <label class="field"><span><%= t("settings_workspace.fields.tax_rate") %></span><%= form.number_field :default_tax_rate, min: 0, step: 0.01 %></label>
         <label class="field"><span><%= t("settings_workspace.fields.final_document") %></span><%= form.select :default_final_document_type, FinalDocument::TYPES.map { |type| [t("settings_workspace.document_types.#{type}", default: type.humanize), type] } %></label>
       </div>
@@ -55,7 +49,7 @@
       <header><span>04</span><div><h2><%= t("settings_workspace.brand.title") %></h2><p><%= t("settings_workspace.brand.help") %></p></div></header>
       <div class="field-grid field-grid--two">
         <label class="field"><span><%= t("settings_workspace.fields.brand_color") %></span><%= form.color_field :brand_color %></label>
-        <label class="upload-control"><span><%= t("settings_workspace.fields.logo") %></span><small><%= t("settings_workspace.fields.logo_help") %></small><%= form.file_field :logo, accept: "image/*" %></label>
+        <label class="upload-control"><span><%= t("settings_workspace.fields.logo") %></span><small><%= t("settings_workspace.fields.logo_help") %></small><%= form.file_field :logo, accept: "image/*", class: "upload-control__input" %><span class="upload-control__action"><%= t("settings_workspace.file_input.choose_file") %></span><span class="upload-control__empty"><%= t("settings_workspace.file_input.no_file_selected") %></span></label>
         <div class="choice-stack field--span-two">
           <% %w[logo images terms_section notes payment_term customer_owner].each do |field| %><% key = "template_show_#{field}" %>
             <%= hidden_field_tag "company[#{key}]", "0" %>
@@ -68,9 +62,9 @@
     <section class="field-section">
       <header><span>05</span><div><h2><%= t("settings_workspace.follow_up.title") %></h2><p><%= t("settings_workspace.follow_up.help") %></p></div></header>
       <div class="field-grid">
-        <label class="field"><span><%= t("settings_workspace.fields.subject") %></span><%= form.text_field :reminder_email_subject, placeholder: Company::DEFAULT_REMINDER_EMAIL_SUBJECT %></label>
-        <label class="field"><span><%= t("settings_workspace.fields.message") %></span><%= form.text_area :reminder_email_body, rows: 5, placeholder: Company::DEFAULT_REMINDER_EMAIL_BODY %></label>
-        <label class="field"><span><%= t("settings_workspace.fields.cta") %></span><%= form.text_field :reminder_email_cta_label, placeholder: Company::DEFAULT_REMINDER_EMAIL_CTA_LABEL %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.subject") %></span><%= form.text_field :reminder_email_subject, placeholder: t("settings_workspace.placeholders.subject") %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.message") %></span><%= form.text_area :reminder_email_body, rows: 5, placeholder: t("settings_workspace.placeholders.message") %></label>
+        <label class="field"><span><%= t("settings_workspace.fields.cta") %></span><%= form.text_field :reminder_email_cta_label, placeholder: t("settings_workspace.placeholders.cta") %></label>
       </div>
     </section>
 
@@ -82,7 +76,7 @@
     <%= form_with model: @company_document, url: company_documents_path, local: true, multipart: true, class: "document-upload-row" do |document_form| %>
       <label class="field"><span><%= t("settings_workspace.documents.name") %></span><%= document_form.text_field :title, placeholder: t("settings_workspace.documents.placeholder") %></label>
       <label class="field"><span><%= t("settings_workspace.documents.type") %></span><%= document_form.select :document_type, CompanyDocument::DOCUMENT_TYPES.map { |value| [t("settings_workspace.document_types.#{value}", default: value.humanize), value] } %></label>
-      <label class="upload-control"><span><%= t("settings_workspace.documents.choose") %></span><%= document_form.file_field :file %></label>
+      <label class="upload-control"><span><%= t("settings_workspace.documents.choose") %></span><%= document_form.file_field :file, class: "upload-control__input" %><span class="upload-control__action"><%= t("settings_workspace.file_input.choose_file") %></span><span class="upload-control__empty"><%= t("settings_workspace.file_input.no_file_selected") %></span></label>
       <%= document_form.submit t("settings_workspace.documents.upload"), class: "control" %>
     <% end %>
     <div class="settings-document-list">

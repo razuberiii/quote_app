@@ -49,13 +49,6 @@ class Rack::Attack
     end
   end
 
-  # Throttle team invitation creates by IP.
-  throttle("team invitations by ip", limit: 20, period: 60) do |req|
-    if req.request_method == "POST" && req.path == "/team_invitations"
-      req.ip
-    end
-  end
-
   # Throttle all other mutating requests by IP (100 per minute)
   # Catches POST, PUT, PATCH, DELETE on paths not matched above
   throttle("requests by ip", limit: 100, period: 60) do |req|

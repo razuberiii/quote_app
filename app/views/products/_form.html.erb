@@ -1,18 +1,18 @@
 <%= form_with model: product, html: { multipart: true, class: "resource-editor" } do |form| %>
   <% if product.errors.any? %>
     <section class="form-message form-message--error" role="alert">
-      <strong>Check the highlighted product details.</strong>
+      <strong><%= t("self_service.product.form.check") %></strong>
       <p><%= product.errors.full_messages.to_sentence %></p>
     </section>
   <% end %>
 
   <header class="resource-editor__bar">
     <div>
-      <span class="eyebrow">Library / Products</span>
-      <strong><%= product.new_record? ? "Create a reusable product" : product.name %></strong>
+      <span class="eyebrow"><%= t("self_service.product.form.eyebrow") %></span>
+      <strong><%= product.new_record? ? t("self_service.product.form.create") : product.name %></strong>
     </div>
     <div class="resource-editor__actions">
-      <%= link_to "Cancel", back_path, class: "control control--quiet" %>
+      <%= link_to t("self_service.product.form.cancel"), back_path, class: "control control--quiet" %>
       <%= form.submit submit_label, class: "control control--primary" %>
     </div>
   </header>
@@ -21,18 +21,18 @@
     <aside class="resource-media">
       <div class="resource-media__preview">
         <% if product.display_image.present? %>
-          <%= image_tag product.display_image, alt: product.name.presence || "Product image" %>
+          <%= image_tag product.display_image, alt: product.name.presence || t("self_service.product.form.image") %>
         <% else %>
-          <div class="product-visual-placeholder" aria-label="No product image">
-            <span>PRODUCT / MEDIA</span>
+          <div class="product-visual-placeholder" aria-label="<%= t('self_service.product.form.no_image') %>">
+            <span><%= t("self_service.product.form.media") %></span>
             <strong><%= product.sku.presence || "SKU —" %></strong>
             <i></i>
           </div>
         <% end %>
       </div>
       <label class="upload-control">
-        <span>Upload product images</span>
-        <small>PNG, JPG or WebP · up to 10 MB</small>
+        <span><%= t("self_service.product.form.upload") %></span>
+        <small><%= t("self_service.product.form.upload_help") %></small>
         <%= form.file_field :gallery_images, accept: "image/*", multiple: true %>
       </label>
       <% if product.gallery_images.attached? %>
@@ -46,36 +46,36 @@
 
     <div class="resource-fields">
       <section class="field-section">
-        <header><span>01</span><div><h2>Identity</h2><p>The minimum information needed to match this product from an inquiry.</p></div></header>
+        <header><span>01</span><div><h2><%= t("self_service.product.form.identity") %></h2><p><%= t("self_service.product.form.identity_help") %></p></div></header>
         <div class="field-grid field-grid--two">
-          <label class="field"><span>Name</span><%= form.text_field :name, required: true, placeholder: "Hydraulic press line" %></label>
-          <label class="field"><span>SKU / model</span><%= form.text_field :sku, placeholder: "HP-400T" %></label>
-          <label class="field"><span>Category</span><%= form.text_field :product_category, placeholder: "Machinery / forming" %></label>
-          <label class="field"><span>Sales unit</span><%= form.text_field :unit, placeholder: "set, unit, kg, carton" %></label>
+          <label class="field"><span><%= t("self_service.product.form.name") %></span><%= form.text_field :name, required: true, placeholder: t("self_service.product.form.name_placeholder") %></label>
+          <label class="field"><span><%= t("self_service.product.form.sku") %></span><%= form.text_field :sku, placeholder: "HP-400T" %></label>
+          <label class="field"><span><%= t("self_service.product.form.category") %></span><%= form.text_field :product_category, placeholder: t("self_service.product.form.category_placeholder") %></label>
+          <label class="field"><span><%= t("self_service.product.form.unit") %></span><%= form.text_field :unit, placeholder: t("self_service.product.form.unit_placeholder") %></label>
         </div>
       </section>
 
       <section class="field-section">
-        <header><span>02</span><div><h2>Commercial defaults</h2><p>Reference values only. Every Deal still requires a confirmed price source.</p></div></header>
+        <header><span>02</span><div><h2><%= t("self_service.product.form.commercial") %></h2><p><%= t("self_service.product.form.commercial_help") %></p></div></header>
         <div class="field-grid field-grid--three">
-          <label class="field"><span>Reference price</span><%= form.number_field :default_price, min: 0, step: 0.01, placeholder: "0.00" %></label>
-          <label class="field"><span>Currency</span><%= form.select :price_currency, Product::PRICE_CURRENCIES %></label>
-          <label class="field"><span>Internal cost</span><%= form.number_field :cost_price, min: 0, step: 0.01, placeholder: "Optional" %></label>
+          <label class="field"><span><%= t("self_service.product.form.reference_price") %></span><%= form.number_field :default_price, min: 0, step: 0.01, placeholder: "0.00" %></label>
+          <label class="field"><span><%= t("self_service.product.form.currency") %></span><%= form.select :price_currency, Product::PRICE_CURRENCIES %></label>
+          <label class="field"><span><%= t("self_service.product.form.internal_cost") %></span><%= form.number_field :cost_price, min: 0, step: 0.01, placeholder: t("self_service.product.form.optional") %></label>
           <label class="field"><span>MOQ</span><%= form.number_field :moq, min: 0, step: 1, placeholder: "1" %></label>
-          <label class="field field--span-two"><span>Typical lead time</span><%= form.text_field :lead_time, placeholder: "25–30 days after deposit" %></label>
+          <label class="field field--span-two"><span><%= t("self_service.product.form.lead_time") %></span><%= form.text_field :lead_time, placeholder: t("self_service.product.form.lead_time_placeholder") %></label>
         </div>
       </section>
 
       <section class="field-section">
-        <header><span>03</span><div><h2>Buyer-facing description</h2><p>Clear product context that can flow into a working quote.</p></div></header>
-        <label class="field"><span>Description</span><%= form.text_area :description, rows: 7, placeholder: "What the product is, what is included, and where it fits…" %></label>
+        <header><span>03</span><div><h2><%= t("self_service.product.form.description") %></h2><p><%= t("self_service.product.form.description_help") %></p></div></header>
+        <label class="field"><span><%= t("self_service.product.form.description_label") %></span><%= form.text_area :description, rows: 7, placeholder: t("self_service.product.form.description_placeholder") %></label>
       </section>
 
     </div>
   </div>
 
   <footer class="resource-editor__footer">
-    <span>Saved products become available inside Smart Intake and Quote Studio.</span>
+    <span><%= t("self_service.product.form.save_help") %></span>
     <%= form.submit submit_label, class: "control control--primary" %>
   </footer>
 <% end %>

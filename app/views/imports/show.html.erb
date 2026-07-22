@@ -1,0 +1,9 @@
+<main class="workspace-page import-hub">
+  <header><p class="eyebrow"><%= t("import_hub.eyebrow") %></p><h1><%= t("import_hub.title") %></h1><p><%= t("import_hub.help") %></p></header>
+  <section class="import-hub__list">
+    <%= link_to new_inquiry_path, class: "import-hub__row" do %><span>01</span><div><strong><%= t("import_hub.inquiry.title") %></strong><small><%= t("import_hub.inquiry.help") %></small></div><i>→</i><% end %>
+    <%= link_to new_product_import_batch_path, class: "import-hub__row" do %><span>02</span><div><strong><%= t("import_hub.catalog.title") %></strong><small><%= t("import_hub.catalog.help") %></small></div><i>→</i><% end %>
+    <%= link_to new_company_profile_import_path, class: "import-hub__row" do %><span>03</span><div><strong><%= t("import_hub.company.title") %></strong><small><%= t("import_hub.company.help") %></small></div><i>→</i><% end %>
+    <%= link_to edit_document_design_path, class: "import-hub__row" do %><span>04</span><div><strong><%= t("import_hub.design.title") %></strong><small><%= t("import_hub.design.help") %></small></div><i>→</i><% end %>
+  </section>
+</main>

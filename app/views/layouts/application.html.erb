@@ -12,6 +12,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Rubusoo">
     <meta name="mobile-web-app-capable" content="yes">
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem("rubusoo-theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
@@ -24,7 +25,7 @@
     <link rel="shortcut icon" href="<%= favicon_href %>" type="image/png">
     <link rel="apple-touch-icon" href="<%= favicon_href %>">
 
-    <%# Workspace pages are migrating to the isolated Deal-first design foundation. %>
+    <%# Quote-first product shell. %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "components", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "rubusoo", "data-turbo-track": "reload" %>
@@ -36,7 +37,7 @@
   </head>
 
   <body class="app-root neo-os neo-os--app page-<%= controller_path.tr('/', '-') %> page-action-<%= action_name %>"
-    data-controller="app-shell"
+    data-controller="app-shell motion-orchestrator theme"
     data-app-shell-dirty-confirm-text-value="<%= t("application.unsaved_changes_confirm", default: "You have unsaved changes. Leave this page?") %>"
     data-app-shell-notification-loading-text-value="<%= t("notifications.loading", default: "Loading notifications...") %>"
     <% if user_signed_in? %>
@@ -52,26 +53,26 @@
           <% end %>
         </div>
         <% if user_signed_in? %>
-          <% account_nav_active = ["users/registrations", "company_settings", "team_invitations", "email_changes"].include?(controller_path) %>
+          <% account_nav_active = ["users/registrations", "company_settings", "email_changes"].include?(controller_path) %>
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">
             <span></span>
             <span></span>
             <span></span>
           </button>
+          <div class="navbar-drawer">
           <ul class="navbar-menu" id="primary-navigation">
-            <%= ui_nav_link t("nav.inbox"), inbox_index_path, icon: :dashboard %>
-            <%= ui_nav_link t("nav.deals"), deals_path, icon: :quotes %>
+            <%= ui_nav_link t("nav.quotes"), quotes_path, icon: :quotes %>
+            <%= ui_nav_link t("nav.customers"), customers_path, icon: :customers %>
             <%= ui_nav_link t("nav.library"), library_path, icon: :products %>
             <%= ui_nav_link t("nav.settings"), edit_company_settings_path, icon: :team %>
             <% if current_user.admin? %>
               <%= ui_nav_link t("nav.admin"), admin_root_path, icon: :admin %>
             <% end %>
           </ul>
-          <% invite_count = pending_team_invitations_count %>
           <div class="navbar-controls">
-            <%= link_to t("nav.search"), deals_path(focus: "search"), class: "app-nav-link neo-global-search" %>
-            <%= link_to t("nav.import_inquiry"), new_inquiry_path, class: "app-nav-link" %>
-            <%= link_to t("nav.new_deal"), new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
+            <%= link_to t("nav.search"), quotes_path(focus: "search"), class: "app-nav-link neo-global-search" %>
+            <%= link_to t("nav.ai_import"), imports_path, class: "app-nav-link" %>
+            <%= link_to t("nav.new_quote"), new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
             <div class="account-menu">
                     <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"
@@ -85,26 +86,23 @@
                   <% end %>
                 </span>
                 <span><%= t("account.menu") %></span>
-                <% if invite_count.positive? %>
-                  <span class="account-notice-badge"><%= invite_count %></span>
-                <% end %>
               </button>
               <div class="account-dropdown app-dropdown-panel" id="account-dropdown" hidden>
-                <p class="account-dropdown-group-label app-dropdown-group-label"><%= t("account.settings") %></p>
-                <%= link_to t("account.account_settings"), edit_user_registration_path, class: "app-dropdown-link account-dropdown-link" %>
+                <div class="account-dropdown__identity"><span class="account-avatar"><%= current_user.email.to_s.first.to_s.upcase %></span><div><strong><%= current_user.full_name.presence || current_user.username %></strong><small><%= current_user.email %></small></div></div>
+                <%= link_to t("account.account_settings"), edit_user_registration_path, class: "app-dropdown-link account-dropdown-link account-dropdown-link--account" %>
                 <% if current_user.can_manage_templates? %>
-                  <%= link_to t("account.company_settings"), edit_company_settings_path, class: "app-dropdown-link account-dropdown-link" %>
+                  <%= link_to t("account.company_settings"), edit_company_settings_path, class: "app-dropdown-link account-dropdown-link account-dropdown-link--company" %>
                 <% end %>
-                <p class="account-dropdown-group-label app-dropdown-group-label"><%= t("account.workspace") %></p>
-                <%= link_to t("account.my_invitations", count: invite_count), team_invitations_path, class: "app-dropdown-link account-dropdown-link" %>
-                <%= link_to t("account.logout"), destroy_user_session_path, class: "app-dropdown-link account-dropdown-link", data: { turbo_method: :delete } %>
+                <%= link_to t("account.logout"), destroy_user_session_path, class: "app-dropdown-link account-dropdown-link account-dropdown-link--logout", data: { turbo_method: :delete } %>
               </div>
             </div>
             <%# Notification bell %>
             <%= render "layouts/notification_bell" %>
+            <%= render "layouts/theme_switch" %>
             <div class="locale-nav-item">
               <%= render "layouts/locale_nav" %>
             </div>
+          </div>
           </div>
         <% else %>
           <button class="navbar-toggle" type="button" aria-expanded="false" aria-controls="public-navigation" aria-label="<%= t('landing.shared.navigation.toggle') %>">

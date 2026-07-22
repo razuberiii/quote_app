@@ -4,8 +4,6 @@ class TeamMembersController < ApplicationController
 
   def index
     @members = current_user.company.users.order(:company_role, :id)
-    @new_invitation = TeamInvitation.new(company_role: "member")
-    @pending_invitations = current_user.company.team_invitations.active.order(created_at: :desc)
   end
 
   def show; end
@@ -28,8 +26,6 @@ class TeamMembersController < ApplicationController
       redirect_to team_members_path, notice: t("team_members.flash.member_role_updated")
     else
       @members = current_user.company.users.order(:company_role, :id)
-      @new_invitation = TeamInvitation.new(company_role: "member")
-      @pending_invitations = current_user.company.team_invitations.active.order(created_at: :desc)
       render :index, status: :unprocessable_entity
     end
   end

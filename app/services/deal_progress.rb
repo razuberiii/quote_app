@@ -6,7 +6,7 @@ class DealProgress
   end
 
   def call
-    return result("closed", "Closed", "view", "View deal", false, closed_signal, @quote.updated_at) if closed?
+    return result("closed", text("stages.closed"), "view", text("actions.view"), false, closed_signal, @quote.updated_at) if closed?
     return accepted_progress if accepted?
     return live_progress if live?
 
@@ -17,25 +17,25 @@ class DealProgress
 
   def draft_progress
     if @quote.inquiry.present? && %w[draft processing extracted failed].include?(@quote.inquiry.status)
-      result("draft", "Draft", "review_inquiry", "Review inquiry", true, "Inquiry needs review", @quote.inquiry.updated_at)
+      result("draft", text("stages.draft"), "review_inquiry", text("actions.review_inquiry"), true, text("signals.inquiry_review"), @quote.inquiry.updated_at)
     elsif @quote.customer.blank?
-      result("draft", "Draft", "confirm_buyer", "Confirm buyer", true, "Buyer is missing", @quote.updated_at)
+      result("draft", text("stages.draft"), "confirm_buyer", text("actions.confirm_buyer"), true, text("signals.buyer_missing"), @quote.updated_at)
     elsif @quote.quote_items.empty?
-      result("draft", "Draft", "match_products", "Match products", true, "Products need confirmation", @quote.updated_at)
+      result("draft", text("stages.draft"), "match_products", text("actions.match_products"), true, text("signals.products_review"), @quote.updated_at)
     elsif readiness_issues.any?
       text = readiness_issues.join(" ").downcase
       label = if text.include?("price")
-        "Add missing prices"
+        text("actions.add_prices")
       elsif text.include?("freight") || text.include?("shipping")
-        "Add freight"
+        text("actions.add_freight")
       else
-        "Complete quote"
+        text("actions.complete_quote")
       end
-      result("draft", "Draft", label.parameterize(separator: "_"), label, true, readiness_issues.first, @quote.updated_at)
+      result("draft", text("stages.draft"), "complete_quote", label, true, readiness_issues.first, @quote.updated_at)
     elsif published_version && !published_version.delivered?
-      result("draft", "Draft", "choose_delivery", "Choose delivery method", true, "Published Version is ready to deliver", published_version.published_at || published_version.created_at)
+      result("draft", text("stages.draft"), "choose_delivery", text("actions.choose_delivery"), true, text("signals.ready_to_deliver"), published_version.published_at || published_version.created_at)
     else
-      result("draft", "Draft", "publish", "Publish quote", true, "Ready to publish", @quote.updated_at)
+      result("draft", text("stages.draft"), "publish", text("actions.publish"), true, text("signals.ready_to_publish"), @quote.updated_at)
     end
   end
 
@@ -43,50 +43,54 @@ class DealProgress
     failed = @quote.version_deliveries.where(status: "failed").order(created_at: :desc).first
     latest_success = @quote.version_deliveries.where(status: %w[sent succeeded externally_sent]).maximum(:delivered_at)
     failed_at = failed&.delivered_at || failed&.created_at
-    return result("live", "Live", "retry_delivery", "Retry delivery", true, "Latest delivery failed", failed_at) if failed && (latest_success.blank? || failed_at > latest_success)
+    return result("live", text("stages.live"), "retry_delivery", text("actions.retry_delivery"), true, text("signals.delivery_failed"), failed_at) if failed && (latest_success.blank? || failed_at > latest_success)
 
     response = @quote.deal_responses.where(status: "open").order(received_at: :desc).first
     if response
       action = case response.kind
-      when "returned_excel", "returned_pdf", "buyer_file" then [ "review_returned_file", "Review returned file" ]
-      when "purchase_order" then [ "review_po", "Review PO differences" ]
-      when "email_reply", "external_message", "phone_note" then [ "record_acceptance", "Review buyer response" ]
-      else [ "prepare_update", "Prepare update" ]
+      when "returned_excel", "returned_pdf", "buyer_file" then [ "review_returned_file", text("actions.review_file") ]
+      when "purchase_order" then [ "review_po", text("actions.review_po") ]
+      when "email_reply", "external_message", "phone_note" then [ "record_acceptance", text("actions.review_response") ]
+      else [ "prepare_update", text("actions.prepare_update") ]
       end
-      return result("live", "Live", action.first, action.last, true, response.kind.humanize, response.received_at)
+      return result("live", text("stages.live"), action.first, action.last, true, text("signals.response_received"), response.received_at)
     end
     question = questions.where(replied_at: nil).order(created_at: :desc).first
-    return result("live", "Live", "reply", "Reply to buyer", true, "Buyer asked a question", question.created_at) if question
+    return result("live", text("stages.live"), "reply", text("actions.reply"), true, text("signals.buyer_question"), question.created_at) if question
 
     request = change_requests.where(status: "open").order(created_at: :desc).first
-    return result("live", "Live", "prepare_version", "Prepare new version", true, "Buyer requested changes", request.created_at) if request
+    return result("live", text("stages.live"), "prepare_version", text("actions.prepare_version"), true, text("signals.change_requested"), request.created_at) if request
 
     if @quote.valid_until.present? && @quote.valid_until <= 1.day.from_now.to_date
-      return result("live", "Live", "follow_up", "Follow up", true, "Quote expires soon", @quote.valid_until.beginning_of_day)
+      return result("live", text("stages.live"), "follow_up", text("actions.follow_up"), true, text("signals.expiring"), @quote.valid_until.beginning_of_day)
     end
 
     activity = @quote.buyer_activities.order(created_at: :desc).first
-    result("live", "Live", "wait", "Wait for buyer", false, activity_label(activity), activity&.created_at || @quote.updated_at)
+    result("live", text("stages.live"), "wait", text("actions.wait"), false, activity_label(activity), activity&.created_at || @quote.updated_at)
   end
 
   def accepted_progress
     document = @quote.final_documents.order(created_at: :desc).first
     company = @quote.company
     if company.require_final_document? && document.blank?
-      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Acceptance recorded", @quote.quote_acceptance&.accepted_at)
+      return result("accepted", text("stages.accepted"), "generate_final_document", text("actions.generate_document"), true, text("signals.acceptance_recorded"), @quote.quote_acceptance&.accepted_at)
     end
     if document && !document.sent_at?
-      return result("accepted", "Accepted", "send_final_document", "Send final document", true, "Final document is ready", document.created_at)
+      return result("accepted", text("stages.accepted"), "send_final_document", text("actions.send_document"), true, text("signals.document_ready"), document.created_at)
     end
     if company.require_deposit_workflow?
-      return result("accepted", "Accepted", "generate_final_document", "Generate final document", true, "Payment workflow requires a final document", @quote.quote_acceptance&.accepted_at) unless document
-      return result("accepted", "Accepted", "confirm_payment", "Confirm payment", true, "Awaiting payment", document.sent_at || document.created_at) unless document.payment_received_at?
+      return result("accepted", text("stages.accepted"), "generate_final_document", text("actions.generate_document"), true, text("signals.payment_document"), @quote.quote_acceptance&.accepted_at) unless document
+      return result("accepted", text("stages.accepted"), "confirm_payment", text("actions.confirm_payment"), true, text("signals.awaiting_payment"), document.sent_at || document.created_at) unless document.payment_received_at?
     end
-    result("accepted", "Accepted", "close_won", "Close as won", true, "Commercial acceptance is complete", @quote.quote_acceptance&.accepted_at)
+    result("accepted", text("stages.accepted"), "close_won", text("actions.close_won"), true, text("signals.acceptance_complete"), @quote.quote_acceptance&.accepted_at)
   end
 
   def result(stage, stage_label, action_key, action_label, attention, signal, signal_at)
     Result.new(stage:, stage_label:, action_key:, action_label:, attention:, signal:, signal_at:)
+  end
+
+  def text(key)
+    I18n.t("self_service.deals.progress.#{key}")
   end
 
   def questions
@@ -114,17 +118,17 @@ class DealProgress
   end
 
   def published_version
-    @published_version ||= @quote.quote_revisions.ordered.first
+    @published_version ||= @quote.quote_revisions.where.not(published_at: nil).ordered.first
   end
 
   def closed_signal
-    @quote.status == "won" ? "Won" : @quote.status.to_s.humanize
+    @quote.status == "won" ? text("signals.won") : text("signals.closed")
   end
 
   def activity_label(activity)
-    return "Waiting for buyer" unless activity
+    return text("signals.waiting") unless activity
 
-    { "viewed" => "Buyer viewed the quote", "question" => "Buyer asked a question",
-      "revision_requested" => "Buyer requested changes", "accepted" => "Buyer accepted" }.fetch(activity.kind, activity.kind.humanize)
+    { "viewed" => text("signals.viewed"), "question" => text("signals.buyer_question"),
+      "revision_requested" => text("signals.change_requested"), "accepted" => text("signals.accepted") }.fetch(activity.kind, activity.kind.humanize)
   end
 end

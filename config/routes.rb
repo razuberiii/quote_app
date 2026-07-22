@@ -33,7 +33,7 @@ Rails.application.routes.draw do
   get "email-change/confirm/:token", to: "email_changes#confirm", as: :email_change
 
   authenticated :user do
-    root "inbox#index", as: :authenticated_root
+    root "quotes#index", as: :authenticated_root
   end
 
   unauthenticated do
@@ -48,7 +48,6 @@ Rails.application.routes.draw do
     resources :contact_requests, only: [ :create ]
   end
 
-  get "quotes", to: redirect("/deals"), as: :all_quotes
   resources :inbox, only: :index
   resources :deals, only: %i[index show] do
     member do
@@ -105,11 +104,10 @@ Rails.application.routes.draw do
       delete :bulk_remove_gallery_images
     end
   end
-  resources :quote_templates, except: [ :show ] do
-    member do
-      patch :set_default
-    end
-  end
+  resource :document_design, only: %i[edit update]
+  get "quote_templates", to: redirect("/document_design/edit")
+  get "quote_templates/new", to: redirect("/document_design/edit")
+  get "quote_templates/:id/edit", to: redirect("/document_design/edit")
   resources :quote_presets, except: [ :show ] do
     member do
       post :duplicate
@@ -121,18 +119,34 @@ Rails.application.routes.draw do
   resources :spec_presets, except: [ :show ]
   resources :addon_presets, except: [ :show ]
   resources :team_members, only: [ :index, :show, :update, :destroy ]
-  resources :team_invitations, only: [ :index, :create, :destroy ], param: :token do
-    member do
-      post :accept
-    end
-  end
+  get "settings/company", to: redirect("/company_settings/edit")
   resource :company_settings, only: [ :edit, :update ]
+  resources :company_profile_imports, path: "settings/company-imports", only: %i[new create show update] do
+    member { patch :apply }
+  end
   resources :quote_reason_options, only: [ :create, :destroy ]
+  resources :customers, except: :destroy
+  resource :imports, only: :show
 
-  # A Quote is the private Working draft inside a Deal. Formal output is
-  # available only from an immutable Published Version.
-  resources :quotes, only: %i[show edit update] do
-    member { get :preview }
+  # Quote is the commercial aggregate. Customer-facing output is generated
+  # only from an immutable Published Version.
+  resources :quotes, only: %i[index show edit update] do
+    member do
+      get :preview
+      get :publish
+      get :deliver, to: "deal_deliveries#new"
+      post :deliver, to: "deal_deliveries#create"
+      get "deliveries/:delivery_id/download", to: "deal_deliveries#download", as: :download_delivery
+      patch "versions/:version_id/link", to: "deal_deliveries#update_link", as: :version_link
+      patch "questions/:question_id/reply", action: :reply_question, as: :reply_question
+      get "responses/new", to: "deal_responses#new", as: :new_response
+      post :responses, to: "deal_responses#create"
+      patch "responses/:response_id/apply", to: "deal_responses#apply", as: :apply_response
+      patch "responses/:response_id/disposition", to: "deal_responses#disposition", as: :response_disposition
+      get "acceptance/new", to: "deal_acceptances#new", as: :new_acceptance
+      post :acceptance, to: "deal_acceptances#create"
+    end
+    get "versions/:version_id/export/:output", to: "quote_exports#show", as: :version_export
   end
   namespace :admin do
     root "dashboard#index"

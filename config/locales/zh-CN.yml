@@ -1,4 +1,7 @@
 zh-CN:
+  time:
+    formats:
+      long: "%Y年%m月%d日 %H:%M"
   app:
     brand_name: Rubusoo
   notifications:
@@ -75,6 +78,9 @@ zh-CN:
     qty: 数量
     date: 日期
   nav:
+    quotes: 报价
+    ai_import: AI 导入
+    new_quote: 新建报价
     inbox: 收件箱
     deals: 交易
     library: 商品库
@@ -2697,28 +2703,6 @@ zh-CN:
       owner_cannot_removed: 所有者不能被移除。
       cannot_remove_self: 你不能移除自己。
       removed_from_team: 已从团队移除：%{email}。账号已保留。
-  team_invitations:
-    view:
-      index:
-        header_title: 我的邀请
-        hint: 邀请属于账号级通知，接受后会切换到对应公司工作区。
-        company: 公司
-        role: 角色
-        invited_by: 邀请人
-        status: 状态
-        expires: 过期时间
-        action: 操作
-        pending: 待处理
-        accept: 接受
-        empty: 暂无待处理邀请。
-    flash:
-      email_already_member: 该邮箱已经是你公司成员。
-      no_account_found: 该邮箱未找到账户，请先让对方注册。
-      pending_invitation_exists: 该邮箱已存在待处理邀请。
-      invitation_created: 已为 %{email} 创建邀请。
-      invitation_revoked: 邀请已撤销。
-      joined_company: 你已加入 %{company}。
-      unable_accept: 无法接受邀请：%{message}
   admin:
     layout:
       title: 管理控制台
@@ -2916,6 +2900,12 @@ zh-CN:
       flash:
         verify_email_before_login: 登录前请先验证邮箱。
   devise:
+    failure:
+      unauthenticated: 请先登录后继续。
+      user:
+        unauthenticated: 请先登录后继续。
+        not_found_in_database: 账号或密码错误。
+      not_found_in_database: 账号或密码错误。
     registrations:
       updated: 账户资料更新成功。
       updated_but_not_signed_in: 账户资料已更新成功，但因密码已变更，请重新登录。

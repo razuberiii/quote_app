@@ -1,8 +1,8 @@
 <section class="workspace-page workspace-page--editor">
   <header class="workspace-heading">
-    <span class="eyebrow">Library / Products / Edit</span>
+    <span class="eyebrow"><%= t("self_service.product.edit.eyebrow") %></span>
     <h1><%= @product.name %></h1>
-    <p>Reusable source data for matching and quote preparation.</p>
+    <p><%= t("self_service.product.edit.body") %></p>
   </header>
 
   <%= render "form",

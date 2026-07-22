@@ -5,31 +5,27 @@ class DealWorkspaceControllerTest < ActionDispatch::IntegrationTest
     sign_in users(:one)
   end
 
-  test "primary deal workspace pages render" do
-    get inbox_index_path
-    assert_response :success
-    assert_select ".deal-page-header h1", "Inbox"
-
+  test "primary quote workspace pages render" do
     get deals_path
-    assert_response :success
-    assert_select ".deal-page-header h1", "Deals"
+    assert_redirected_to quotes_path
 
-    get deal_path(quotes(:one))
+    get quote_path(quotes(:one))
     assert_response :success
     assert_select ".deal-primary-action"
-    assert_select ".deal-tabs a", text: "Conversation"
+    assert_select ".quote-core-tabs a", text: I18n.t("self_service.quote_core.detail.tabs.activity")
 
     get library_path
     assert_response :success
-    assert_select ".deal-page-header h1", "Library"
+    assert_select ".deal-page-header h1", I18n.t("self_service.library.title")
   end
 
-  test "legacy quote list leads to deal workspace" do
-    get all_quotes_path
-    assert_redirected_to "/deals"
+  test "quote list is the canonical commercial home" do
+    get quotes_path
+    assert_response :success
+    assert_select ".quote-core-index"
   end
 
-  test "Library product and workspace settings use Deal-first surfaces" do
+  test "Library product and workspace settings use Quote-first surfaces" do
     get new_product_path
     assert_response :success
     assert_select ".resource-editor"

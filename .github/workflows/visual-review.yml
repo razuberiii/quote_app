@@ -66,6 +66,9 @@ jobs:
           exit "$status"
       - name: Build full-site contact sheets
         if: always()
+        env:
+          MAGICK_HEIGHT_LIMIT: 256KP
+          MAGICK_WIDTH_LIMIT: 64KP
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq imagemagick

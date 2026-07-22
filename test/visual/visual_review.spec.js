@@ -63,7 +63,7 @@ async function capture(page, name, route, scenario, viewport, options = {}) {
   }
   manifest.push({
     commit_sha: process.env.GITHUB_SHA || execSync("git rev-parse HEAD", { cwd: root }).toString().trim(),
-    generated_at: new Date().toISOString(), application_version: "Rubusoo Deal Workspace",
+    generated_at: new Date().toISOString(), application_version: "Rubusoo Quote Core",
     route, scenario, viewport: `${viewport.width}x${viewport.height}`, locale: "en",
     motion_mode: options.motion || "normal", screenshot_filename: file,
     playwright_test: test.info().title, data_fixture: "VisualReviewSeeder",
@@ -72,11 +72,12 @@ async function capture(page, name, route, scenario, viewport, options = {}) {
 }
 
 async function login(page) {
-  await page.goto("/users/sign_in")
+  await page.goto("/users/sign_in?locale=en")
   await page.locator('input[name="user[login]"]').fill(seed.email)
   await page.locator('input[name="user[password]"]').fill(seed.password)
   await page.locator('input[type="submit"]').click()
-  await expect(page.getByRole("heading", { name: "Inbox", exact: true })).toBeVisible()
+  await page.goto("/quotes?locale=en")
+  await expect(page.locator(".quote-core-index")).toBeVisible()
 }
 
 async function audit(page, name) {
@@ -102,37 +103,37 @@ test("public product story and commercial entry points", async ({ page }) => {
   await audit(page, "public buyer demo")
 })
 
-test("seller Deal workspace desktop", async ({ page }) => {
+test("seller Quote workspace desktop", async ({ page }) => {
   await login(page)
-  const deal = `/deals/${seed.deal_id}`
-  await capture(page, "seller-inbox", "/inbox", "actionable-inbox", { width: 1440, height: 900 }, { stage: "Live", action: "Review PO differences" })
-  await capture(page, "seller-deals", "/deals", "deal-groups", { width: 1440, height: 900 })
-  await capture(page, "seller-deal-overview", deal, "channel-neutral-deal", { width: 1440, height: 900 }, { stage: "Live", action: "Review PO differences" })
-  await capture(page, "seller-conversation", `${deal}?tab=conversation`, "all-channel-response", { width: 1440, height: 900 })
-  await capture(page, "seller-versions", `${deal}?tab=versions`, "published-versions-deliveries", { width: 1440, height: 900 })
+  const quote = `/quotes/${seed.deal_id}`
+  await capture(page, "seller-quotes", "/quotes", "quote-lifecycle", { width: 1440, height: 900 })
+  await capture(page, "seller-quote-overview", quote, "quote-overview", { width: 1440, height: 900 })
+  await capture(page, "seller-activity", `${quote}?tab=activity`, "customer-activity", { width: 1440, height: 900 })
+  await capture(page, "seller-versions", `${quote}?tab=versions`, "published-outputs", { width: 1440, height: 900 })
   await capture(page, "seller-version-diff", `/quote_revisions/${seed.version_two_id}`, "version-difference", { width: 1440, height: 900 })
-  await capture(page, "seller-documents", `${deal}?tab=documents`, "optional-final-documents", { width: 1440, height: 900 })
-  await capture(page, "seller-delivery-chooser", `${deal}/deliver?version_id=${seed.version_two_id}`, "multi-channel-delivery", { width: 1440, height: 900 })
-  await capture(page, "seller-record-acceptance", `${deal}/acceptance/new?version_id=${seed.version_two_id}`, "external-acceptance", { width: 1440, height: 900 })
+  await capture(page, "seller-delivery-chooser", `${quote}/deliver?version_id=${seed.version_two_id}`, "multi-channel-delivery", { width: 1440, height: 900 })
+  await capture(page, "seller-record-acceptance", `${quote}/acceptance/new?version_id=${seed.version_two_id}`, "external-acceptance", { width: 1440, height: 900 })
   await capture(page, "seller-library-products", "/library?section=products", "library-products", { width: 1440, height: 900 })
-  await capture(page, "seller-library-formats", "/library?section=presets", "quote-formats", { width: 1440, height: 900 })
+  await capture(page, "seller-document-design", "/document_design/edit", "document-design", { width: 1440, height: 900 })
+  await capture(page, "seller-customers", "/customers", "customers", { width: 1440, height: 900 })
+  await capture(page, "seller-import-hub", "/imports", "AI-import", { width: 1440, height: 900 })
   await capture(page, "seller-settings", "/company_settings/edit", "completion-settings", { width: 1440, height: 900 })
   await capture(page, "seller-inquiry-import", "/inquiries/new", "inquiry-import", { width: 1440, height: 900 })
   await capture(page, "seller-smart-intake", `/inquiries/${seed.inquiry_id}`, "smart-intake-review", { width: 1440, height: 900 })
   await capture(page, "seller-quote-studio", `/quotes/${seed.edge_deals.no_image}/edit`, "working-draft", { width: 1440, height: 900 })
   await audit(page, "quote studio")
-  business.push({ scenario: "visual-workspace", result: test.info().status, evidence: ["seller-versions.png", "seller-conversation.png", "buyer-room-desktop.png"] })
+  business.push({ scenario: "visual-workspace", result: test.info().status, evidence: ["seller-versions.png", "seller-activity.png", "buyer-room-desktop.png"] })
 })
 
 test("seller workspace real mobile reflow", async ({ page }) => {
   await login(page)
-  const deal = `/deals/${seed.deal_id}`
-  await capture(page, "seller-inbox-360", "/inbox", "mobile-inbox", { width: 360, height: 800 })
-  await capture(page, "seller-inbox-390", "/inbox", "mobile-inbox", { width: 390, height: 844 })
-  await capture(page, "seller-deal-mobile", deal, "mobile-deal", { width: 390, height: 844 })
-  await capture(page, "seller-conversation-mobile", `${deal}?tab=conversation`, "mobile-conversation", { width: 390, height: 844 })
-  await capture(page, "seller-acceptance-mobile", `${deal}/acceptance/new?version_id=${seed.version_two_id}`, "mobile-external-acceptance", { width: 390, height: 844 })
-  await capture(page, "seller-delivery-mobile", `${deal}/deliver?version_id=${seed.version_two_id}`, "mobile-delivery", { width: 412, height: 915 })
+  const quote = `/quotes/${seed.deal_id}`
+  await capture(page, "seller-quotes-360", "/quotes", "mobile-quotes", { width: 360, height: 800 })
+  await capture(page, "seller-quotes-390", "/quotes", "mobile-quotes", { width: 390, height: 844 })
+  await capture(page, "seller-quote-mobile", quote, "mobile-quote", { width: 390, height: 844 })
+  await capture(page, "seller-activity-mobile", `${quote}?tab=activity`, "mobile-activity", { width: 390, height: 844 })
+  await capture(page, "seller-acceptance-mobile", `${quote}/acceptance/new?version_id=${seed.version_two_id}`, "mobile-external-acceptance", { width: 390, height: 844 })
+  await capture(page, "seller-delivery-mobile", `${quote}/deliver?version_id=${seed.version_two_id}`, "mobile-delivery", { width: 412, height: 915 })
   await capture(page, "seller-smart-intake-mobile", `/inquiries/${seed.inquiry_id}`, "mobile-smart-intake", { width: 390, height: 844 })
 })
 
@@ -159,22 +160,22 @@ test("Buyer Room current, selection and acceptance", async ({ page }) => {
 
 test("edge conditions remain explicit", async ({ page }) => {
   await login(page)
-  await capture(page, "edge-empty-deals", "/deals?q=no-such-deal-visual", "empty-deals", { width: 1440, height: 900 })
-  await capture(page, "edge-missing-price", `/deals/${seed.edge_deals.missing_price}`, "missing-price", { width: 1440, height: 900 }, { stage: "Draft", action: "Add missing prices" })
-  await capture(page, "edge-no-product-image", `/deals/${seed.edge_deals.no_image}`, "no-product-image", { width: 1440, height: 900 })
+  await capture(page, "edge-empty-quotes", "/quotes?q=no-such-quote-visual", "empty-quotes", { width: 1440, height: 900 })
+  await capture(page, "edge-missing-price", `/quotes/${seed.edge_deals.missing_price}`, "missing-price", { width: 1440, height: 900 })
+  await capture(page, "edge-no-product-image", `/quotes/${seed.edge_deals.no_image}`, "no-product-image", { width: 1440, height: 900 })
   await capture(page, "edge-long-quote-50-products", `/quotes/${seed.edge_deals.long_quote}/edit`, "50-products", { width: 1440, height: 900 })
-  await capture(page, "edge-delivery-failure", `/deals/${seed.edge_deals.delivery_failure}`, "delivery-failure", { width: 1440, height: 900 }, { stage: "Live", action: "Retry delivery" })
-  await capture(page, "edge-po-difference", `/deals/${seed.deal_id}?tab=conversation`, "po-difference", { width: 1440, height: 900 })
+  await capture(page, "edge-delivery-failure", `/quotes/${seed.edge_deals.delivery_failure}?tab=versions`, "delivery-failure", { width: 1440, height: 900 })
+  await capture(page, "edge-po-difference", `/quotes/${seed.deal_id}?tab=activity`, "po-difference", { width: 1440, height: 900 })
   await capture(page, "edge-old-version", `/q/${seed.old_buyer_token}`, "superseded-version", { width: 1440, height: 900 })
-  await capture(page, "edge-closed-deal", `/deals/${seed.edge_deals.closed}`, "closed-deal", { width: 1440, height: 900 }, { stage: "Closed", action: "View deal" })
+  await capture(page, "edge-closed-quote", `/quotes/${seed.edge_deals.closed}`, "closed-quote", { width: 1440, height: 900 })
   business.push({ scenario: "edge-state-rendering", result: test.info().status,
-    evidence: ["edge-po-difference.png", "edge-delivery-failure.png", "edge-closed-deal.png"] })
+    evidence: ["edge-po-difference.png", "edge-delivery-failure.png", "edge-closed-quote.png"] })
 })
 
 test.use({ reducedMotion: "reduce" })
 test("reduced motion preserves channel actions", async ({ page }) => {
   await login(page)
-  await capture(page, "reduced-motion-delivery", `/deals/${seed.deal_id}/deliver?version_id=${seed.version_two_id}`,
+  await capture(page, "reduced-motion-delivery", `/quotes/${seed.deal_id}/deliver?version_id=${seed.version_two_id}`,
     "reduced-motion", { width: 390, height: 844 }, { motion: "reduced" })
   await expect(page.locator('input[type="submit"]')).toBeEnabled()
 })

@@ -75,6 +75,9 @@ en:
     qty: Qty
     date: Date
   nav:
+    quotes: Quotes
+    ai_import: AI import
+    new_quote: New quote
     inbox: Inbox
     deals: Deals
     library: Library
@@ -2697,28 +2700,6 @@ en:
       owner_cannot_removed: Owner cannot be removed.
       cannot_remove_self: You cannot remove yourself.
       removed_from_team: "Removed from team: %{email}. Account preserved."
-  team_invitations:
-    view:
-      index:
-        header_title: My Invitations
-        hint: Invitations are account-level notifications. Accepting one will switch you to that company workspace.
-        company: Company
-        role: Role
-        invited_by: Invited By
-        status: Status
-        expires: Expires
-        action: Action
-        pending: Pending
-        accept: Accept
-        empty: No pending invitations.
-    flash:
-      email_already_member: This email is already a member of your company.
-      no_account_found: No account found for this email. Ask them to sign up first.
-      pending_invitation_exists: A pending invitation already exists for this email.
-      invitation_created: Invitation created for %{email}.
-      invitation_revoked: Invitation revoked.
-      joined_company: You joined %{company}.
-      unable_accept: "Unable to accept invitation: %{message}"
   admin:
     layout:
       title: Admin Console

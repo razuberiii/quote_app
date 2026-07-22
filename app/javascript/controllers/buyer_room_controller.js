@@ -27,7 +27,13 @@ export default class extends Controller {
     this.quantityTargets.forEach(input => { subtotal += Number(input.dataset.unitPrice || 0) * Number(input.value || 0) })
     this.accessoryTargets.filter(input => input.checked).forEach(input => { subtotal += Number(input.dataset.price || 0) })
     const total = Math.max(0, subtotal + this.shippingValue + this.taxValue - this.discountValue)
-    this.totalTargets.forEach(el => { el.textContent = `${this.currencyValue} ${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}` })
+    this.totalTargets.forEach(el => {
+      el.textContent = `${this.currencyValue} ${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)}`
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return
+      el.classList.remove("is-total-updating")
+      requestAnimationFrame(() => el.classList.add("is-total-updating"))
+      window.setTimeout(() => el.classList.remove("is-total-updating"), 420)
+    })
     this.syncSelectionForms()
   }
   syncSelectionForms() {

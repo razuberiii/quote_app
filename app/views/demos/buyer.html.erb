@@ -1,7 +1,7 @@
 <main class="rb-page">
   <header class="rb-page-head">
-    <div><p class="eyebrow">Buyer Room demo</p><h1>A quotation built for a decision.</h1></div>
-    <p>The seeded interactive room is not available yet. Open the complete buyer preview to inspect the document, terms and response flow.</p>
+    <div><p class="eyebrow"><%= t("self_service.marketing.buyer_fallback.eyebrow") %></p><h1><%= t("self_service.marketing.buyer_fallback.title") %></h1></div>
+    <p><%= t("self_service.marketing.buyer_fallback.body") %></p>
   </header>
-  <%= link_to "Open buyer preview →", buyer_demo_path, class: "button button--primary" %>
+  <%= link_to t("self_service.marketing.buyer_fallback.action"), seller_demo_path, class: "button button--primary" %>
 </main>

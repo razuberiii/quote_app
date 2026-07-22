@@ -1,10 +1,44 @@
 class QuotesController < ApplicationController
-  before_action :set_quote
+  before_action :set_quote, except: :index
   before_action :set_form_context, only: %i[edit update]
+  before_action :use_buyer_locale, only: :preview
+
+  def index
+    @quotes = current_user.company.quotes.not_archived.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
+      :buyer_activities, quote_revisions: %i[buyer_questions change_requests version_deliveries]).order(updated_at: :desc)
+    if params[:q].present?
+      term = "%#{ActiveRecord::Base.sanitize_sql_like(params[:q].to_s.strip)}%"
+      @quotes = @quotes.left_joins(:customer, :quote_items).where(
+        "customers.name ILIKE :term OR quotes.quote_no ILIKE :term OR quotes.custom_title ILIKE :term OR quote_items.description ILIKE :term",
+        term:
+      ).distinct
+    end
+    @quotes = @quotes.where(status: quote_status_scope(params[:status])) if quote_status_scope(params[:status])
+    @quote_rows = @quotes.map { |quote| [ quote, QuoteLifecycle.new(quote).call ] }
+  end
 
   def show
-    @revisions = @quote.quote_revisions.ordered
+    @lifecycle = QuoteLifecycle.new(@quote).call
+    @versions = @quote.quote_revisions.where.not(published_at: nil).ordered
+    @questions = BuyerQuestion.where(quote_revision_id: @versions.select(:id)).order(created_at: :desc)
+    @requests = ChangeRequest.where(quote_revision_id: @versions.select(:id)).order(created_at: :desc)
+    @responses = @quote.deal_responses.includes(attachment_attachment: :blob).order(received_at: :desc)
+    @deliveries = @quote.version_deliveries.order(delivered_at: :desc)
+    @activities = @quote.buyer_activities.order(created_at: :desc).limit(40)
+    @acceptance = @quote.quote_acceptance
+    @tab = params[:tab].presence_in(%w[quote activity versions]) || "quote"
+  end
+
+  def publish
+    @revisions = @quote.quote_revisions.where.not(published_at: nil).ordered
     @readiness_issues = QuoteReadinessAudit.new(@quote).issues
+    render :publish
+  end
+
+  def reply_question
+    question = BuyerQuestion.where(quote_revision_id: @quote.quote_revisions.select(:id)).find(params[:question_id])
+    question.update!(seller_reply: params.require(:buyer_question).require(:seller_reply), replied_at: Time.current)
+    redirect_to quote_path(@quote, tab: "activity"), notice: t("self_service.quote_core.reply_saved")
   end
 
   def preview
@@ -19,15 +53,15 @@ class QuotesController < ApplicationController
   end
 
   def edit
-    return redirect_to quote_path(@quote), alert: "Published content is immutable. Prepare an update from the Deal instead." unless @quote.can_edit_revision?
+    return redirect_to quote_path(@quote), alert: t("self_service.quote_core.immutable_edit") unless @quote.can_edit_revision?
     ensure_item
   end
 
   def update
-    return redirect_to quote_path(@quote), alert: "Published content is immutable. Prepare an update from the Deal instead." unless @quote.can_edit_revision?
+    return redirect_to quote_path(@quote), alert: t("self_service.quote_core.immutable_edit") unless @quote.can_edit_revision?
     @quote.assign_attributes(quote_params)
     if @quote.save
-      redirect_to edit_quote_path(@quote), status: :see_other, notice: "Working draft saved."
+      redirect_to edit_quote_path(@quote), status: :see_other, notice: t("self_service.quote_core.draft_saved")
     else
       ensure_item
       render :edit, status: :unprocessable_entity
@@ -40,9 +74,19 @@ class QuotesController < ApplicationController
     @quote = current_user.company.quotes.not_archived.includes({ quote_items: [ :product, { item_image_attachment: :blob } ] }, :customer, :template).find(params[:id])
   end
 
+  def quote_status_scope(value)
+    {
+      "draft" => %w[draft ready pending],
+      "sent" => %w[sent],
+      "viewed" => %w[viewed],
+      "changes" => %w[revision_requested negotiating],
+      "accepted" => %w[accepted awaiting_deposit won],
+      "expired" => %w[expired archived cancelled lost]
+    }[value.to_s]
+  end
+
   def set_form_context
     @products = current_user.company.products.with_attached_image.with_attached_gallery_images.order(:name)
-    @template_options = current_user.company.quote_templates.ordered
     @quote_presets_by_module = QuotePreset::MODULE_KEYS.index_with { [] }
     @quote_preset_master = current_user.company.quote_preset_master
   end
@@ -52,7 +96,7 @@ class QuotesController < ApplicationController
   end
 
   def quote_params
-    params.require(:quote).permit(:currency, :issued_on, :valid_until, :payment_term, :trade_term,
+    params.require(:quote).permit(:currency, :buyer_locale, :issued_on, :valid_until, :payment_term, :trade_term,
       :custom_title, :notes, :tax_amount, :shipping_amount, :shipping_price_source,
       :discount_amount, :terms_text, :delivery_notes,
       quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity,
@@ -60,5 +104,9 @@ class QuotesController < ApplicationController
         :item_image_blob_id, :remove_item_image, :price_source, :selection_mode,
         :sku_snapshot, :unit_snapshot, :lead_time_snapshot, :packing_snapshot,
         :_destroy, { buyer_options: {} } ])
+  end
+
+  def use_buyer_locale
+    I18n.locale = @quote.buyer_locale.presence_in(I18n.available_locales.map(&:to_s)) || I18n.default_locale
   end
 end

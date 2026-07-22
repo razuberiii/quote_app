@@ -12,7 +12,7 @@ async function login(page) {
   await page.locator('input[name="user[login]"]').fill(seed.email)
   await page.locator('input[name="user[password]"]').fill(seed.password)
   await page.locator('input[type="submit"]').click()
-  await expect(page.getByRole("heading", { name: "Inbox", exact: true })).toBeVisible()
+  await expect(page.locator(".quote-core-index")).toBeVisible()
 }
 
 async function saveVideo(page, name) {
@@ -24,8 +24,12 @@ async function saveVideo(page, name) {
 test("homepage signature transformation is visible", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto("/")
-  await expect(page.locator(".kinetic-headline__window")).toBeVisible()
-  await page.waitForTimeout(8600)
+  const headline = page.locator(".hero-fixed-headline")
+  const text = await headline.innerText()
+  const box = await headline.boundingBox()
+  await page.waitForTimeout(3000)
+  await expect(headline).toHaveText(text)
+  expect(await headline.boundingBox()).toEqual(box)
   await saveVideo(page, "homepage-signature-motion")
 })
 
@@ -44,7 +48,7 @@ test("Smart Intake evidence and Quote Studio total feedback", async ({ page }) =
 
 test("Delivery channel state and Buyer response feedback", async ({ page }) => {
   await login(page)
-  await page.goto(`/deals/${seed.deal_id}/deliver?version_id=${seed.version_two_id}`)
+  await page.goto(`/quotes/${seed.deal_id}/deliver?version_id=${seed.version_two_id}`)
   await page.locator('.channel-option[data-value="email_link_pdf"]').click()
   await page.waitForTimeout(900)
   await page.locator('.channel-option[data-value="external"]').click()
@@ -62,7 +66,7 @@ test.use({ reducedMotion: "reduce" })
 test("reduced motion keeps the same usable states", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto("/")
-  await expect(page.locator(".kinetic-headline__window")).toContainText("buyer requests")
+  await expect(page.locator(".hero-fixed-headline")).toBeVisible()
   await page.waitForTimeout(1000)
   await saveVideo(page, "reduced-motion")
 })

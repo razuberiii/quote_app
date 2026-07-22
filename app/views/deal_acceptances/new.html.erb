@@ -1,18 +1,18 @@
 <main class="deal-workspace context-form acceptance-recorder">
-  <header><%= link_to "← Deal", deal_path(@deal), class: "deal-back" %><p class="eyebrow">Immutable commercial evidence</p><h1>Record acceptance</h1><p>Use this when confirmation arrives outside Buyer Room. The Acceptance binds to a Published Version and stores its own snapshot.</p></header>
-  <%= form_with model: @acceptance, url: acceptance_deal_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
+  <header><%= link_to t("self_service.quote_core.acceptance_form.back"), quote_path(@deal, tab: "activity"), class: "deal-back" %><p class="eyebrow"><%= t("self_service.quote_core.acceptance_form.eyebrow") %></p><h1><%= t("self_service.quote_core.acceptance_form.title") %></h1><p><%= t("self_service.quote_core.acceptance_form.help") %></p></header>
+  <%= form_with model: @acceptance, url: acceptance_quote_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
-    <div><%= form.label :quote_revision_id, "Accepted Version" %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| ["Version #{version.number} · #{version.currency} #{version.total}", version.id] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :acceptance_method, "Acceptance method" %><%= form.select :acceptance_method, QuoteAcceptance::METHODS.reject { |item| item == "buyer_room" }.map { |item| [item.humanize, item] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :name, "Accepted by" %><%= form.text_field :name, required: true, class: "app-ui-input" %></div>
-    <div><%= form.label :buyer_company, "Buyer company" %><%= form.text_field :buyer_company, class: "app-ui-input" %></div>
-    <div><%= form.label :email, "Contact email" %><%= form.email_field :email, class: "app-ui-input" %></div>
-    <div><%= form.label :accepted_at, "Acceptance time" %><%= form.datetime_local_field :accepted_at, required: true, class: "app-ui-input" %></div>
-    <div><%= form.label :po_number, "PO number" %><%= form.text_field :po_number, class: "app-ui-input" %></div>
-    <div class="acceptance-difference"><%= form.label :has_differences do %><%= form.check_box :has_differences %><span>Evidence differs from the Published Version</span><% end %><small>Differences remain visible and cannot be represented as an exact acceptance.</small></div>
-    <div class="context-form__wide"><%= form.label :evidence_summary, "Evidence summary" %><%= form.text_field :evidence_summary, class: "app-ui-input", placeholder: "Email subject, message timestamp, signed document reference…" %></div>
-    <div class="context-form__wide"><%= form.label :note, "Seller note" %><%= form.text_area :note, rows: 4, class: "app-ui-input" %></div>
-    <div class="context-form__wide"><%= form.label :evidence_files, "Evidence files" %><%= form.file_field :evidence_files, multiple: true %></div>
-    <footer class="context-form__wide"><div><span>Record type</span><strong>Seller-recorded acceptance</strong></div><%= form.submit "Lock acceptance", class: "button button--primary" %></footer>
+    <div><%= form.label :quote_revision_id, t("self_service.quote_core.acceptance_form.version") %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| [t("self_service.quote_core.response_form.version_option", number: version.number, currency: version.currency, total: version.total), version.id] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :acceptance_method, t("self_service.quote_core.acceptance_form.method") %><%= form.select :acceptance_method, QuoteAcceptance::METHODS.reject { |item| item == "buyer_room" }.map { |item| [t("self_service.quote_core.acceptance_form.methods.#{item}", default: item.humanize), item] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :name, t("self_service.quote_core.acceptance_form.name") %><%= form.text_field :name, required: true, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_company, t("self_service.quote_core.acceptance_form.company") %><%= form.text_field :buyer_company, class: "app-ui-input" %></div>
+    <div><%= form.label :email, t("self_service.quote_core.acceptance_form.email") %><%= form.email_field :email, class: "app-ui-input" %></div>
+    <div><%= form.label :accepted_at, t("self_service.quote_core.acceptance_form.time") %><%= form.datetime_local_field :accepted_at, required: true, class: "app-ui-input" %></div>
+    <div><%= form.label :po_number, t("self_service.quote_core.acceptance_form.po") %><%= form.text_field :po_number, class: "app-ui-input" %></div>
+    <div class="acceptance-difference"><%= form.label :has_differences do %><%= form.check_box :has_differences %><span><%= t("self_service.quote_core.acceptance_form.differences") %></span><% end %><small><%= t("self_service.quote_core.acceptance_form.differences_help") %></small></div>
+    <div class="context-form__wide"><%= form.label :evidence_summary, t("self_service.quote_core.acceptance_form.evidence") %><%= form.text_field :evidence_summary, class: "app-ui-input", placeholder: t("self_service.quote_core.acceptance_form.evidence_placeholder") %></div>
+    <div class="context-form__wide"><%= form.label :note, t("self_service.quote_core.acceptance_form.note") %><%= form.text_area :note, rows: 4, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :evidence_files, t("self_service.quote_core.acceptance_form.files") %><%= form.file_field :evidence_files, multiple: true %></div>
+    <footer class="context-form__wide"><div><span><%= t("self_service.quote_core.acceptance_form.record_type") %></span><strong><%= t("self_service.quote_core.acceptance_form.record_value") %></strong></div><%= form.submit t("self_service.quote_core.acceptance_form.submit"), class: "button button--primary" %></footer>
   <% end %>
 </main>

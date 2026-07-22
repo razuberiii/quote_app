@@ -1,0 +1,19 @@
+<main class="deal-workspace company-import">
+  <header class="deal-page-header">
+    <div><p class="eyebrow"><%= t("self_service.company_import.new.eyebrow") %></p><h1><%= t("self_service.company_import.new.title") %></h1><p><%= t("self_service.company_import.new.subtitle") %></p></div>
+    <%= link_to t("self_service.company_import.back"), edit_company_settings_path, class: "button button--secondary" %>
+  </header>
+
+  <%= form_with model: @profile_import, local: true, multipart: true, class: "inquiry-import__form" do |form| %>
+    <section class="inquiry-source-panel">
+      <label class="field"><span><%= t("self_service.company_import.new.source") %></span><%= form.text_area :source_text, rows: 16, placeholder: t("self_service.company_import.new.placeholder") %></label>
+    </section>
+    <aside class="inquiry-upload-panel">
+      <p class="section-kicker"><%= t("self_service.company_import.new.file") %></p>
+      <label class="upload-picker"><span><%= t("self_service.company_import.new.choose_file") %></span><small><%= t("self_service.company_import.new.choose_file_help") %></small><%= form.file_field :source_file, accept: ".pdf,.txt,.csv,application/pdf,text/plain,text/csv" %></label>
+      <p><%= t("self_service.company_import.new.file_help") %></p>
+      <div class="import-guardrails"><strong><%= t("self_service.company_import.new.guardrails") %></strong><ul><li><%= t("self_service.company_import.new.rule_json") %></li><li><%= t("self_service.company_import.new.rule_blank") %></li><li><%= t("self_service.company_import.new.rule_review") %></li></ul></div>
+      <%= form.submit t("self_service.company_import.new.analyze"), class: "button button--primary button--full" %>
+    </aside>
+  <% end %>
+</main>

@@ -11335,7 +11335,7 @@ kbd.app-shortcut-badge {
   margin: 0;
 }
 .team-members-panel--secondary {
-  background: #fff;
+  background: transparent;
 }
 .team-admin-shell,
 .preset-admin-shell {
@@ -11363,9 +11363,9 @@ kbd.app-shortcut-badge {
   width: fit-content;
 }
 .team-members-panel .table-responsive {
-  border: 1px solid #dbe3ee;
-  border-radius: 12px;
-  background: #fff;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   overflow: auto;
 }
 .team-members-panel table {
@@ -11427,10 +11427,11 @@ kbd.app-shortcut-badge {
   flex-wrap: wrap;
 }
 .team-overview-item {
-  border: 1px solid #dbe3ee;
-  border-radius: 10px;
-  padding: 0.7rem 0.8rem;
-  background: #f8fafc;
+  border: 0;
+  border-left: 2px solid var(--ws-border, #dbe3ee);
+  border-radius: 0;
+  padding: 0.35rem 0.8rem;
+  background: transparent;
 }
 .team-overview-item span {
   display: block;
@@ -11680,11 +11681,12 @@ kbd.app-shortcut-badge {
   .team-members-panel .team-members-table tr {
     display: grid;
     gap: 0.45rem;
-    margin-bottom: 0.68rem;
-    padding: 0.72rem 0.76rem;
-    border: 1px solid #dbe3ee;
-    border-radius: 12px;
-    background: #fff;
+    margin: 0;
+    padding: 1rem 0;
+    border: 0;
+    border-bottom: 1px solid var(--ws-border, #dbe3ee);
+    border-radius: 0;
+    background: transparent;
   }
 
   .team-members-panel .team-members-table tr:last-child {

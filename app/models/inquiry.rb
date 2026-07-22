@@ -17,7 +17,7 @@ class Inquiry < ApplicationRecord
       "commercial_terms" => { "incoterm" => candidates["incoterm"], "destination" => candidates["destination"] }.compact,
       "evidence" => { "customer" => candidates["customer"], "contact_name" => candidates["contact_name"],
         "contact_email" => candidates["contact_email"], "incoterm" => candidates["incoterm"], "destination" => candidates["destination"] }.compact,
-      "warnings" => [ "AI 未完成，本页显示确定性识别候选；请逐项确认。" ]
+      "warnings" => []
     }
     self.field_states = { "customer" => candidates["customer"].present? ? "uncertain" : "missing",
       "products" => candidates["products"].present? ? "uncertain" : "missing", "price" => "missing", "freight" => "missing" }

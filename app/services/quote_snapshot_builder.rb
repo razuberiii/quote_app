@@ -36,11 +36,33 @@ class QuoteSnapshotBuilder
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title
     snapshot["quote_items"] = @quote.quote_items.ordered.map { |item| build_quote_item_snapshot(item) }
+    snapshot["document_design"] = document_design_snapshot
+    snapshot["seller_company"] = {
+      "name" => @quote.company.name,
+      "legal_name" => @quote.company.legal_name,
+      "email" => @quote.company.email,
+      "phone" => @quote.company.phone,
+      "address" => @quote.company.address,
+      "website" => @quote.company.website,
+      "brand_color" => @quote.company.brand_color
+    }
     add_sales_owner(snapshot)
     JSON.parse(JSON.generate(snapshot))
   end
 
   private
+
+  def document_design_snapshot
+    design = @quote.template || @quote.company.quote_template_or_default
+    design.attributes.slice(
+      "layout_type", "layout_density", "accent_color", "font_family", "logo_position",
+      "show_logo", "show_images", "show_tax", "show_shipping", "show_payment_term",
+      "show_valid_until", "show_terms_section", "show_notes", "show_scope_of_supply",
+      "show_signature_block", "show_closing_message", "closing_message",
+      "public_link_locale", "pdf_locale", "excel_locale", "amount_decimals",
+      "thousand_separator", "currency_display_mode"
+    )
+  end
 
   def add_sales_owner(snapshot)
     return unless Customer.internal_owner_enabled?

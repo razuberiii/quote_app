@@ -1,0 +1,120 @@
+---
+en:
+  self_service:
+    buyer_room:
+      secure: Secure quote
+      revision: "Revision %{number}"
+      prepared_for: "Prepared for %{customer}"
+      default_title: Your quotation
+      default_intro: Review the products, quantities, prices, and delivery terms below. Ask your sales contact if anything needs changing.
+      prepared_by: Prepared by
+      quote: Quote
+      version: Version
+      preview: Preview
+      valid_until: Valid until
+      open: To be confirmed
+      currency: Currency
+      products_kicker: 01 · Quoted products
+      products_title: Products in this quotation
+      products_help: Adjustable quantities update the total immediately. Contact sales for other changes.
+      product_image: Product image
+      item: "Item %{number}"
+      configured: Configured
+      quantity: Quantity
+      selectable: · Adjustable
+      fixed: · Confirmed
+      unit_price: Unit price
+      lead_time: Lead time
+      see_terms: See terms below
+      your_selection: Your selection
+      summary: Quote total
+      product_count: "%{count} products"
+      shipping: Freight
+      total: Current total
+      total_help: Includes taxes and discounts
+      accept: Accept quote
+      request_changes: Request changes
+      ask: Ask sales
+      download: Download PDF
+      attachments: Attachments
+      ask_short: Ask
+      optional_accessories: Optional accessories
+      ask_product: Ask about this product
+      plans_kicker: 02 · Configuration
+      plans_title: Choose the right configuration
+      essential: Essential
+      essential_title: Main equipment only
+      essential_help: Optional accessories excluded
+      recommended: Recommended
+      recommended_title: Current configuration
+      recommended_help: Selected for this requirement
+      seller_choice: Seller recommendation
+      complete: Complete
+      complete_title: All accessories included
+      complete_help: Everything supplied together
+      terms_kicker: 03 · Delivery and commercial terms
+      terms_title: Terms beyond the price
+      incoterm: Incoterm
+      payment: Payment
+      delivery: Delivery
+      validity: Quote validity
+      packaging: Packaging
+      pending: To be confirmed
+      agreed: As agreed
+      export_packaging: Standard export packaging
+      ask_terms: Ask about these terms
+      state_preview: Internal preview
+      state_accepted: Accepted
+      state_readonly: Read only
+      preview_help: This is a working preview. Publishing creates a locked version.
+      accepted_help: The customer accepted this version. Its scope and total are locked.
+      readonly_help: This version is no longer active. Contact sales for the latest quotation.
+      accepted_kicker: Quote accepted
+      accepted_title: Thank you. Your acceptance has been recorded.
+      accepted_body: Sales has been notified. Keep this link to review the accepted version and proforma invoice progress.
+      accepted_total: Accepted total
+      question_about: Question about
+      entire_quote: Entire quotation
+      your_name: Your name
+      work_email: Work email
+      question: Question
+      question_placeholder: Tell sales what you need clarified
+      cancel: Cancel
+      send_question: Send question
+      changes_kicker: Change request
+      changes_title: Tell sales what needs changing
+      changes_help: Your request is recorded separately; the published version remains unchanged.
+      changes_placeholder: For example, quantity, voltage, specification, price, or delivery date…
+      supporting_file: Supporting file
+      send_request: Send request
+      acceptance_kicker: Formal acceptance
+      acceptance_title: "Accept revision %{number}"
+      acceptance_help: Confirm the selected products and current total
+      full_name: Full name
+      job_title: Job title (optional)
+      po_number: PO number (optional)
+      note: Note to sales (optional)
+      authorization: I am authorized to accept this quotation on behalf of my company.
+      locking: Locking your selection
+      recording: Recording acceptance
+      confirm_acceptance: Confirm acceptance
+      pdf:
+        title: Commercial quotation
+        prepared_for_html: "Prepared for %{customer}"
+        quote: Quote
+        revision: Revision
+        issued: Issued
+        valid_until: Valid until
+        intro: Thank you for the opportunity to prepare this proposal. The equipment, commercial scope and delivery basis below reflect the confirmed inquiry.
+        scope: Equipment & scope
+        product: Product
+        specification: Specification
+        quantity: Qty
+        unit_price: Unit price
+        amount: Amount
+        terms: Commercial terms
+        incoterm: Incoterm
+        payment: Payment
+        delivery: Delivery
+        total: Total
+        total_note: "Revision %{number} · subject to the terms above"

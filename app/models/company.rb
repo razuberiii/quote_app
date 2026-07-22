@@ -24,15 +24,14 @@ class Company < ApplicationRecord
   has_many :quote_templates, dependent: :destroy
   has_many :quote_reason_options, dependent: :destroy
   has_many :company_documents, dependent: :destroy
-  has_many :team_invitations, dependent: :destroy
   has_many :customer_tags, dependent: :destroy
   has_many :quote_revisions, dependent: :restrict_with_exception
   has_many :quote_acceptances, dependent: :restrict_with_exception
   has_many :proforma_invoices, dependent: :restrict_with_exception
   has_many :ai_analyses, dependent: :restrict_with_exception
-  has_many :product_import_batches, dependent: :destroy
   has_many :evidence_records, dependent: :restrict_with_exception
   has_many :product_import_batches, dependent: :restrict_with_exception
+  has_many :company_profile_imports, dependent: :restrict_with_exception
   has_many :buyer_activities, dependent: :restrict_with_exception
   has_many :version_deliveries, dependent: :restrict_with_exception
   has_many :deal_responses, dependent: :restrict_with_exception

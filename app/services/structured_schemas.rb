@@ -7,6 +7,26 @@ module StructuredSchemas
 
   VERSION = "2026-07-18".freeze
 
+  COMPANY_PROFILE = {
+    "type" => "object", "additionalProperties" => false,
+    "required" => %w[company warnings evidence],
+    "properties" => {
+      "company" => object({
+        "name" => nullable_string, "legal_name" => nullable_string,
+        "registration_number" => nullable_string, "registration_details" => nullable_string,
+        "email" => nullable_string, "phone" => nullable_string, "address" => nullable_string,
+        "website" => nullable_string, "business_type" => nullable_string,
+        "evidence_ids" => array({ "type" => "string" })
+      }, %w[name legal_name registration_number registration_details email phone address website business_type evidence_ids]),
+      "warnings" => array({ "type" => "string" }),
+      "evidence" => array(object({
+        "id" => { "type" => "string" }, "field_path" => { "type" => "string" },
+        "excerpt" => { "type" => "string" }, "source" => { "type" => "string" },
+        "location" => { "type" => [ "string", "null" ] }
+      }, %w[id field_path excerpt source location]))
+    }
+  }.freeze
+
   INQUIRY = {
     "type" => "object", "additionalProperties" => false,
     "required" => %w[customer contact country currency products commercial_terms missing_fields ambiguities warnings evidence],

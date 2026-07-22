@@ -3,6 +3,20 @@ module DealsHelper
     deal.custom_title.presence || deal.quote_items.first&.description.presence || "Commercial proposal"
   end
 
+  def quote_action_path(quote, lifecycle)
+    case lifecycle.action
+    when "complete", "revise" then edit_quote_path(quote)
+    when "send" then quote_path(quote, tab: "versions")
+    when "reply", "review" then quote_path(quote, tab: "activity")
+    else quote_path(quote)
+    end
+  end
+
+  def quote_version_label(quote)
+    number = quote.quote_revisions.where.not(published_at: nil).maximum(:number)
+    number ? "V#{number}" : I18n.t("self_service.quote_core.lifecycle.states.draft")
+  end
+
   def deal_action_path(deal, progress)
     case progress.action_key
     when "review_inquiry" then deal.inquiry ? inquiry_path(deal.inquiry) : edit_quote_path(deal)

@@ -2,6 +2,7 @@ class DealsController < ApplicationController
   before_action :load_deal, only: %i[show reply_question close reopen]
 
   def index
+    return redirect_to quotes_path, status: :moved_permanently
     rows = current_user.company.quotes.not_archived.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
       :final_documents, :buyer_activities, quote_revisions: %i[buyer_questions change_requests]).order(updated_at: :desc)
     rows = rows.where(customer_id: params[:buyer_id]) if params[:buyer_id].present?
@@ -14,16 +15,17 @@ class DealsController < ApplicationController
     end
     @deals = rows.map { |quote| [ quote, DealProgress.new(quote).call ] }
     @groups = {
-      "Needs attention" => @deals.select { |_quote, progress| progress.attention && !%w[accepted closed].include?(progress.stage) },
-      "Waiting on buyer" => @deals.select { |_quote, progress| progress.stage == "live" && !progress.attention },
-      "Accepted" => @deals.select { |_quote, progress| progress.stage == "accepted" },
-      "Closed" => @deals.select { |_quote, progress| progress.stage == "closed" }
+      I18n.t("self_service.deals.groups.attention") => @deals.select { |_quote, progress| progress.attention && !%w[accepted closed].include?(progress.stage) },
+      I18n.t("self_service.deals.groups.waiting") => @deals.select { |_quote, progress| progress.stage == "live" && !progress.attention },
+      I18n.t("self_service.deals.groups.accepted") => @deals.select { |_quote, progress| progress.stage == "accepted" },
+      I18n.t("self_service.deals.groups.closed") => @deals.select { |_quote, progress| progress.stage == "closed" }
     }
   end
 
   def show
+    return redirect_to quote_path(@deal), status: :moved_permanently
     @progress = DealProgress.new(@deal).call
-    @versions = @deal.quote_revisions.ordered
+    @versions = @deal.quote_revisions.where.not(published_at: nil).ordered
     @questions = BuyerQuestion.where(quote_revision_id: @versions.select(:id)).order(created_at: :desc)
     @requests = ChangeRequest.where(quote_revision_id: @versions.select(:id)).order(created_at: :desc)
     @responses = @deal.deal_responses.includes(attachment_attachment: :blob).order(received_at: :desc)

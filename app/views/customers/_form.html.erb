@@ -1,0 +1,9 @@
+<%= form_with model: customer, class: "resource-editor customer-editor" do |form| %>
+  <% if customer.errors.any? %><div class="form-message form-message--error"><%= customer.errors.full_messages.to_sentence %></div><% end %>
+  <div class="field-grid field-grid--two">
+    <% %i[name contact_name email phone country tax_id payment_terms].each do |field| %><label class="field"><span><%= t("customers.core.fields.#{field}") %></span><%= field == :email ? form.email_field(field) : form.text_field(field) %></label><% end %>
+    <label class="field field--span-two"><span><%= t("customers.core.fields.address") %></span><%= form.text_area :address, rows: 3 %></label>
+    <label class="field field--span-two"><span><%= t("customers.core.fields.notes") %></span><%= form.text_area :notes, rows: 4 %></label>
+  </div>
+  <footer><%= link_to t("customers.core.cancel"), customers_path, class: "button button--secondary" %><%= form.submit t("customers.core.save"), class: "button button--primary" %></footer>
+<% end %>

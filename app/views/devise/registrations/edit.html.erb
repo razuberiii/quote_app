@@ -1,6 +1,6 @@
 <%= render "shared/settings_header", title: t("users.registrations.view.edit.header_title"), section: :account %>
 
-<div class="account-settings-layout">
+<div class="workspace-page settings-workspace settings-workspace--content account-settings-layout">
 <section class="team-members-panel account-settings-layout__profile">
   <h2><%= t("users.registrations.view.edit.personal_profile") %></h2>
   <p class="team-members-hint"><%= t("users.registrations.view.edit.profile_hint") %></p>
@@ -107,13 +107,6 @@
   <% end %>
 </section>
 
-<section class="team-members-panel account-settings-layout__invitations">
-  <h2><%= t("users.registrations.view.edit.company_invitations") %></h2>
-  <p class="team-members-hint">
-    <%= t("users.registrations.view.edit.pending_invitations", count: pending_team_invitations_count) %>
-    <%= link_to t("users.registrations.view.edit.open_invitations"), team_invitations_path %>
-  </p>
-</section>
 </div>
 <!-- Email Change Modal -->
 <div id="email-change-modal" class="neo-modal" hidden>

@@ -1,0 +1,142 @@
+zh-CN:
+  self_service:
+    quote_core:
+      delivery_failed_with_reason: "发送失败：%{reason}"
+      link_updated: "客户链接已更新。"
+      delivery_success: "报价已发送。"
+      file_generated: "已从不可变版本 V%{number} 生成文件。"
+      delivery_recorded: "发送记录已保存。"
+      response_form:
+        back: "← 返回客户动态"
+        eyebrow: "客户反馈"
+        title: "记录客户反馈"
+        help: "把邮件、文件、采购订单、聊天或电话反馈关联到一个已发布版本。原版本不会被改写。"
+        version: "对应版本"
+        version_option: "V%{number} · %{currency} %{total}"
+        type: "反馈类型"
+        source: "来源渠道"
+        received_at: "收到时间"
+        contact: "客户联系人"
+        email: "客户邮箱"
+        context: "关联内容"
+        reference: "商品、费用或条款"
+        body: "客户说了什么，或要求改什么？"
+        file: "客户回传文件"
+        file_help: "支持 PDF、XLSX、CSV 和 TXT。文件只作为不可信证据解析，表格公式不会执行。"
+        submit: "保存客户反馈"
+        kinds: { message: "普通反馈", returned_excel: "回传 Excel", purchase_order: "采购订单", change_request: "修改要求", acceptance: "确认接受" }
+        sources: { email: "邮件", excel: "Excel", buyer_room: "客户页面", messaging: "即时通讯", phone: "电话", other: "其他" }
+        contexts: { general: "整份报价", item: "商品", fee: "费用", term: "条款", delivery: "交付" }
+      acceptance_form:
+        back: "← 返回客户动态"
+        eyebrow: "商业确认凭证"
+        title: "记录客户确认"
+        help: "用于记录客户在客户页面之外做出的确认，并把凭证固定到对应的已发布版本。"
+        version: "确认的版本"
+        method: "确认方式"
+        name: "确认人"
+        company: "客户公司"
+        email: "联系邮箱"
+        time: "确认时间"
+        po: "采购订单号"
+        differences: "凭证内容与已发布版本存在差异"
+        differences_help: "存在差异时只作为待核对凭证，不能视为完全一致的确认。"
+        evidence: "凭证摘要"
+        evidence_placeholder: "邮件主题、消息时间或签署文件编号"
+        note: "内部备注"
+        files: "凭证文件"
+        record_type: "记录类型"
+        record_value: "人工记录的客户确认"
+        submit: "锁定确认记录"
+        methods: { email: "邮件", purchase_order: "采购订单", signed_document: "签署文件", phone: "电话", messaging: "即时通讯", other: "其他" }
+      response_review:
+        no_changes: "没有可应用的已核对差异"
+        applied: "已把选中的客户修改带入报价草稿。"
+        invalid_status: "无效的反馈处理状态"
+        title: "结构化核对"
+        parser_error: "文件解析失败：%{error}。请保留为凭证或让客户提供更清晰的文件。"
+        source_mismatch: "文件标识与当前版本不一致，已禁止自动带入。"
+        unsafe: "已隔离 %{count} 个不安全单元格"
+        unsafe_help: "公式从未执行，也不能自动带入报价。"
+        formula_ignored: "已忽略公式"
+        apply: "把选中修改带入报价草稿"
+        keep: "仅保留为凭证"
+        exact: "核心商务内容与已发布版本一致，源文件继续作为凭证保存。"
+        severity: { exact_match: "完全一致", changes: "存在修改", warning: "需要核对", unsafe: "存在风险" }
+  nav:
+    customers: "客户"
+  settings:
+    document_design: "文档设计"
+  document_design:
+    eyebrow: "客户文档系统"
+    title: "文档设计"
+    help: "统一设置客户页面、PDF 和 Excel 的品牌、版式与内容规则。每份报价仍可单独调整内容，不需要维护一堆模板。"
+    rule_title: "一套设计，多种输出"
+    rule_help: "客户页面、PDF 与 Excel 使用同一个已发布版本和同一套品牌规则。"
+    sections:
+      layout: "选择版式"
+      layout_help: "选一个稳定的专业版式，再调整密度和品牌色。"
+      content: "默认内容"
+      content_help: "这些是新报价的默认规则，单份报价可以覆盖。"
+      language: "客户语言"
+      language_help: "各输出渠道可以使用不同语言，报价数据保持不变。"
+    recipes:
+      classic: { title: "商务经典", help: "信息密度高，适合标准外贸报价。" }
+      modern: { title: "现代品牌", help: "更强的品牌表达和清晰的阅读节奏。" }
+      industry: { title: "工业技术", help: "突出型号、规格与交付条件。" }
+    fields:
+      density: "信息密度"
+      color: "品牌强调色"
+      font: "文档字体"
+      logo: "Logo 位置"
+      customer_page: "客户页面语言"
+      pdf: "PDF 语言"
+      excel: "Excel 语言"
+    density: { compact: "紧凑", standard: "标准", spacious: "舒展" }
+    positions: { left: "左侧", right: "右侧", center: "居中" }
+    content:
+      logo: "显示公司 Logo"
+      images: "显示商品图片"
+      tax: "显示税费"
+      shipping: "显示运费"
+      payment_term: "显示付款条款"
+      valid_until: "显示有效期"
+      terms_section: "显示商务条款"
+      notes: "显示报价备注"
+      scope_of_supply: "显示供货范围"
+      signature_block: "显示签署区"
+      closing_message: "显示结尾说明"
+    save: "保存文档设计"
+    save_help: "新发布的版本会冻结当时的设计与语言；旧版本不会被改写。"
+    preview: "实时示意"
+    preview_help: "这里用于确认信息层级。正式 PDF 和 Excel 会按各自媒介优化排版。"
+    sample: { title: "商业报价", customer: "买方", date: "报价日期", item: "项目", qty: "数量", amount: "金额", total: "报价总额" }
+    flash: { saved: "文档设计已保存。" }
+  import_hub:
+    eyebrow: "AI 资料入口"
+    title: "把现有资料变成可用数据"
+    help: "上传原始文件，系统先提取候选内容并保留来源；金额、运费和贸易条款必须由你确认。"
+    inquiry: { title: "客户询盘与旧报价", help: "从邮件、PDF、Excel 或文本提取客户、商品、数量与交付要求。" }
+    catalog: { title: "商品目录与价格表", help: "批量整理型号、规格、图片和参考价格，确认后写入资料库。" }
+    company: { title: "公司资料与资质", help: "从简介或证书中整理公司名称、联系方式、地址与资质文件。" }
+    design: { title: "报价样式参考", help: "先进入文档设计，选择专业版式并统一所有输出。" }
+  customers:
+    core:
+      eyebrow: "报价客户"
+      title: "客户"
+      help: "只保留制作和发送报价需要的客户资料。"
+      new: "新建客户"
+      new_title: "新建客户"
+      edit_title: "编辑客户"
+      edit: "编辑资料"
+      back: "返回客户"
+      quotes: "相关报价"
+      search: "搜索公司、联系人或邮箱"
+      search_action: "搜索"
+      quote_count: "%{count} 份报价"
+      empty: "还没有客户"
+      empty_help: "新建客户，或从询盘导入时自动创建。"
+      saved: "客户资料已保存。"
+      save: "保存客户"
+      cancel: "取消"
+      fields: { name: "公司名称", contact_name: "联系人", email: "邮箱", phone: "电话", country: "国家/地区", tax_id: "税务编号", payment_terms: "常用付款条款", address: "地址", notes: "内部备注" }

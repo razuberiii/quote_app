@@ -1,25 +1,24 @@
 <main class="deal-workspace library-page">
   <header class="deal-page-header">
-    <div><p class="eyebrow">Reusable commercial knowledge</p><h1>Library</h1><p>Save what earns reuse. A Deal never has to wait for Library setup.</p></div>
-    <div class="library-header-actions"><%= link_to "Import catalog", new_product_import_batch_path, class: "button button--secondary" %><%= link_to "Add product", new_product_path, class: "button button--primary" %></div>
+    <div><p class="eyebrow"><%= t("self_service.library.eyebrow") %></p><h1><%= t("self_service.library.title") %></h1><p><%= t("self_service.library.subtitle") %></p></div>
+    <div class="library-header-actions"><%= link_to t("self_service.library.import_catalog"), new_product_import_batch_path, class: "button button--secondary" %><%= link_to t("self_service.library.add_product"), new_product_path, class: "button button--primary" %></div>
   </header>
-  <nav class="library-tabs"><% [["products","Products"],["presets","Quote presets"],["pricing","Pricing"],["content","Content blocks"],["formats","Formats"],["brand","Brand kit"],["output","Output settings"]].each do |key,label| %><%= link_to label, library_path(section: key), class: ("is-active" if @section == key) %><% end %></nav>
+  <section class="ai-entry ai-entry--catalog"><div><span><%= t("self_service.library.ai_entry.signal") %></span><h2><%= t("self_service.library.ai_entry.title") %></h2><p><%= t("self_service.library.ai_entry.body") %></p></div><%= link_to t("self_service.library.ai_entry.action"), new_product_import_batch_path, class: "button button--primary" %></section>
+  <nav class="library-tabs" aria-label="<%= t('self_service.library.navigation') %>"><% %w[products presets].each do |key| %><%= link_to t("self_service.library.tabs.#{key}"), library_path(section: key), class: ("is-active" if @section == key) %><% end %><%= link_to t("settings.document_design"), edit_document_design_path %></nav>
   <% if @section == "products" %>
     <section class="library-grid">
       <% @products.each do |product| %><%= link_to product_path(product), class: "library-product" do %>
         <div><% if product.display_image.present? %><%= image_tag product.display_image %><% else %><span><%= product.name.to_s.first %></span><% end %></div>
-        <small><%= product.sku.presence || "Deal-ready item" %></small><h2><%= product.name %></h2>
-        <p><%= product.default_price.to_d.positive? ? "#{product.currency} #{number_with_delimiter(product.base_price)}" : "Price required" %> · MOQ <%= product.moq.presence || "—" %></p>
+        <small><%= product.sku.presence || t("self_service.library.deal_ready") %></small><h2><%= product.name %></h2>
+        <p><%= product.default_price.to_d.positive? ? "#{product.currency} #{number_with_delimiter(product.base_price)}" : t("self_service.library.price_required") %> · MOQ <%= product.moq.presence || "—" %></p>
       <% end %><% end %>
-      <%= link_to new_product_path, class: "library-add" do %><span>＋</span><strong>Add to Library</strong><small>Products can also be saved from Quote Studio.</small><% end %>
+      <%= link_to new_product_path, class: "library-add" do %><span>＋</span><strong><%= t("self_service.library.add_to_library") %></strong><small><%= t("self_service.library.add_help") %></small><% end %>
     </section>
-  <% else %>
+  <% elsif @section == "presets" %>
     <section class="library-resource-list">
-      <% if %w[presets formats].include?(@section) %>
-        <% (@quote_presets + @templates).each do |resource| %><article><div><span><%= @section == "formats" ? "Constrained quote format" : resource.class.model_name.human %></span><strong><%= resource.respond_to?(:name) ? resource.name : resource.title %></strong><small><%= @section == "formats" ? "Structure, module order and output visibility — data remains portable" : "Reusable inside Quote Studio" %></small></div><%= link_to "Edit", resource.is_a?(QuoteTemplate) ? edit_quote_template_path(resource) : edit_quote_preset_path(resource), class: "deal-next" %></article><% end %>
-      <% else %>
-        <div class="library-empty"><span class="eyebrow"><%= @section.humanize %></span><h2>Nothing reusable saved yet</h2><p>Create this resource while preparing a Deal. The current Deal can always use one-off content.</p><dl><div><dt>Where it appears</dt><dd>Smart Intake and Quote Studio</dd></div><div><dt>Setup required</dt><dd>None</dd></div></dl><%= link_to "Review workspace defaults", edit_company_settings_path, class: "button button--secondary" %></div>
-      <% end %>
+      <header class="library-resource-heading"><div><p class="section-kicker"><%= t("self_service.library.presets.eyebrow") %></p><h2><%= t("self_service.library.presets.title") %></h2><p><%= t("self_service.library.presets.help") %></p></div><%= link_to t("self_service.library.presets.manage"), quote_presets_path, class: "button button--primary" %></header>
+      <% @quote_presets.each do |resource| %><article><div><span><%= t("self_service.library.presets.type") %></span><strong><%= resource.name %></strong><small><%= t("self_service.library.presets.reuse") %></small></div><%= link_to t("self_service.library.edit"), edit_quote_preset_path(resource), class: "deal-next" %></article><% end %>
+      <% if @quote_presets.empty? %><div class="library-empty"><h2><%= t("self_service.library.presets.empty") %></h2><p><%= t("self_service.library.presets.empty_help") %></p><%= link_to t("self_service.library.presets.create"), new_quote_preset_path, class: "button button--primary" %></div><% end %>
     </section>
   <% end %>
 </main>

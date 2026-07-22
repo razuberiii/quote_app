@@ -1,17 +1,22 @@
 <main class="deal-workspace context-form">
-  <header><%= link_to "← Conversation", deal_path(@deal, tab: "conversation"), class: "deal-back" %><p class="eyebrow">Channel-neutral response</p><h1>Add buyer response</h1><p>Record email, returned files, PO, messaging or phone feedback against one immutable Version. Nothing here overwrites it.</p></header>
-  <%= form_with model: @response, url: responses_deal_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
+  <header>
+    <%= link_to t("self_service.quote_core.response_form.back"), quote_path(@deal, tab: "activity"), class: "deal-back" %>
+    <p class="eyebrow"><%= t("self_service.quote_core.response_form.eyebrow") %></p>
+    <h1><%= t("self_service.quote_core.response_form.title") %></h1>
+    <p><%= t("self_service.quote_core.response_form.help") %></p>
+  </header>
+  <%= form_with model: @response, url: responses_quote_path(@deal), multipart: true, class: "context-form__grid" do |form| %>
     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
-    <div><%= form.label :quote_revision_id, "Published Version" %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| ["Version #{version.number} · #{version.currency} #{version.total}", version.id] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :kind, "Response type" %><%= form.select :kind, DealResponse::KINDS.map { |kind| [kind.humanize, kind] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :source, "Source channel" %><%= form.select :source, DealResponse::SOURCES.map { |source| [source.humanize, source] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :received_at, "Received at" %><%= form.datetime_local_field :received_at, class: "app-ui-input" %></div>
-    <div><%= form.label :buyer_name, "Buyer contact" %><%= form.text_field :buyer_name, class: "app-ui-input" %></div>
-    <div><%= form.label :buyer_email, "Buyer email" %><%= form.email_field :buyer_email, class: "app-ui-input" %></div>
-    <div><%= form.label :context_type, "Context" %><%= form.select :context_type, DealResponse::CONTEXT_TYPES.map { |type| [type.humanize, type] }, {}, class: "app-ui-input" %></div>
-    <div><%= form.label :context_key, "Product / fee / term reference" %><%= form.text_field :context_key, class: "app-ui-input" %></div>
-    <div class="context-form__wide"><%= form.label :body, "What did the buyer say or change?" %><%= form.text_area :body, rows: 5, class: "app-ui-input" %></div>
-    <div class="context-form__wide"><%= form.label :attachment, "Returned file, PO, PDF or evidence" %><%= form.file_field :attachment, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain" %><small>PDF, XLSX, CSV and TXT are parsed as untrusted evidence. Spreadsheet formulas are never executed.</small></div>
-    <footer class="context-form__wide"><%= form.submit "Add to Conversation", class: "button button--primary" %></footer>
+    <div><%= form.label :quote_revision_id, t("self_service.quote_core.response_form.version") %><%= form.select :quote_revision_id, @deal.quote_revisions.ordered.map { |version| [t("self_service.quote_core.response_form.version_option", number: version.number, currency: version.currency, total: version.total), version.id] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :kind, t("self_service.quote_core.response_form.type") %><%= form.select :kind, DealResponse::KINDS.map { |kind| [t("self_service.quote_core.response_form.kinds.#{kind}", default: kind.humanize), kind] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :source, t("self_service.quote_core.response_form.source") %><%= form.select :source, DealResponse::SOURCES.map { |source| [t("self_service.quote_core.response_form.sources.#{source}", default: source.humanize), source] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :received_at, t("self_service.quote_core.response_form.received_at") %><%= form.datetime_local_field :received_at, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_name, t("self_service.quote_core.response_form.contact") %><%= form.text_field :buyer_name, class: "app-ui-input" %></div>
+    <div><%= form.label :buyer_email, t("self_service.quote_core.response_form.email") %><%= form.email_field :buyer_email, class: "app-ui-input" %></div>
+    <div><%= form.label :context_type, t("self_service.quote_core.response_form.context") %><%= form.select :context_type, DealResponse::CONTEXT_TYPES.map { |type| [t("self_service.quote_core.response_form.contexts.#{type}", default: type.humanize), type] }, {}, class: "app-ui-input" %></div>
+    <div><%= form.label :context_key, t("self_service.quote_core.response_form.reference") %><%= form.text_field :context_key, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :body, t("self_service.quote_core.response_form.body") %><%= form.text_area :body, rows: 5, class: "app-ui-input" %></div>
+    <div class="context-form__wide"><%= form.label :attachment, t("self_service.quote_core.response_form.file") %><%= form.file_field :attachment, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain" %><small><%= t("self_service.quote_core.response_form.file_help") %></small></div>
+    <footer class="context-form__wide"><%= form.submit t("self_service.quote_core.response_form.submit"), class: "button button--primary" %></footer>
   <% end %>
 </main>

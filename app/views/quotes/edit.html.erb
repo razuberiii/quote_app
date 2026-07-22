@@ -9,8 +9,8 @@
 <% end %>
 <main class="quote-studio quote-studio--editor" data-controller="studio-motion">
   <header class="studio-toolbar">
-    <div class="studio-toolbar__identity"><%= link_to t("self_service.studio.back"), deal_path(@quote, tab: "quote"), class: "studio-back" %><div><p class="eyebrow"><%= t("self_service.studio.title") %></p><h1><%= @quote.quote_no %> <span><%= t("self_service.studio.working") %></span></h1></div></div>
-    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● <%= t("self_service.studio.saved") %></span><%= link_to t("self_service.studio.preview"), preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to t("self_service.studio.review_publish"), quote_path(@quote), class: "button button--primary" %></div>
+    <div class="studio-toolbar__identity"><%= link_to t("self_service.studio.back"), quote_path(@quote), class: "studio-back" %><div><p class="eyebrow"><%= t("self_service.studio.title") %></p><h1><%= @quote.quote_no %> <span><%= t("self_service.studio.working") %></span></h1></div></div>
+    <div class="studio-actions"><span class="studio-save-state" data-studio-motion-target="saveState">● <%= t("self_service.studio.saved") %></span><%= link_to t("self_service.studio.preview"), preview_quote_path(@quote), class: "button button--secondary", target: "_blank" %><%= link_to t("self_service.studio.review_publish"), publish_quote_path(@quote), class: "button button--primary" %></div>
   </header>
   <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-grid studio-grid--editor", data: { action: "turbo:submit-start->studio-motion#saving turbo:submit-end->studio-motion#saved" } } do |f| %>
     <aside class="studio-structure">
@@ -32,7 +32,7 @@
           <p class="section-kicker"><%= t("self_service.studio.prepared_for", buyer: @quote.customer.name) %></p>
           <%= f.text_area :custom_title, rows: 2, class: "studio-inline-title", placeholder: t("self_service.studio.title_placeholder") %>
           <%= f.text_area :notes, rows: 3, class: "studio-inline-intro", placeholder: t("self_service.studio.intro_placeholder") %>
-          <dl class="studio-cover__meta"><div><dt><%= t("self_service.studio.quote") %></dt><dd><%= @quote.quote_no %></dd></div><div><dt><%= f.label :issued_on, t("self_service.studio.issued") %></dt><dd><%= f.date_field :issued_on %></dd></div><div><dt><%= f.label :valid_until, t("self_service.studio.valid_until") %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div><div><dt><%= f.label :currency, t("self_service.studio.currency") %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div></dl>
+          <dl class="studio-cover__meta"><div><dt><%= t("self_service.studio.quote") %></dt><dd><%= @quote.quote_no %></dd></div><div><dt><%= f.label :issued_on, t("self_service.studio.issued") %></dt><dd><%= f.date_field :issued_on %></dd></div><div><dt><%= f.label :valid_until, t("self_service.studio.valid_until") %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div><div><dt><%= f.label :currency, t("self_service.studio.currency") %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div><div class="studio-buyer-language"><dt><%= f.label :buyer_locale, t("self_service.studio.buyer_language") %></dt><dd><%= f.select :buyer_locale, [[t("self_service.studio.languages.en"), "en"], [t("self_service.studio.languages.zh-CN"), "zh-CN"], [t("self_service.studio.languages.es-419"), "es-419"]] %><small><%= t("self_service.studio.buyer_language_help") %></small></dd></div></dl>
         </section>
 
         <section id="studio-products" class="studio-products">

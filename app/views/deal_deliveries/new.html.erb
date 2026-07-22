@@ -1,5 +1,5 @@
 <main class="deal-workspace channel-flow" data-controller="channel-flow">
-  <header class="channel-flow__header"><div><%= link_to t("self_service.delivery.back"), deal_path(@deal), class: "deal-back" %><p class="eyebrow"><%= t("self_service.delivery.eyebrow", number: @version.number) %></p><h1><%= t("self_service.delivery.title") %></h1><p><%= t("self_service.delivery.subtitle") %></p></div><div class="version-lock"><span><%= t("self_service.delivery.locked_amount") %></span><strong><%= @version.currency %> <%= number_with_delimiter(@version.total) %></strong><small><%= t("self_service.delivery.published", time: l(@version.published_at, format: :long)) %></small></div></header>
+  <header class="channel-flow__header"><div><%= link_to t("self_service.delivery.back"), quote_path(@deal, tab: "versions"), class: "deal-back" %><p class="eyebrow"><%= t("self_service.delivery.eyebrow", number: @version.number) %></p><h1><%= t("self_service.delivery.title") %></h1><p><%= t("self_service.delivery.subtitle") %></p></div><div class="version-lock"><span><%= t("self_service.delivery.locked_amount") %></span><strong><%= @version.currency %> <%= number_with_delimiter(@version.total) %></strong><small><%= t("self_service.delivery.published", time: l(@version.published_at, format: :long)) %></small></div></header>
 
   <section class="channel-picker" role="list" aria-label="<%= t("self_service.delivery.methods") %>">
     <% [["buyer_room_link","buyer_room"],["email_link","email_link"],["email_pdf","email_pdf"],["email_link_pdf","email_both"],["pdf_download","pdf"],["excel_export","excel"],["external","external"],["printed","printed"]].each do |value,key| %>
@@ -8,14 +8,14 @@
     <% end %>
   </section>
 
-  <%= form_with model: @delivery, url: deliver_deal_path(@deal, version_id: @version.id), class: "channel-form", multipart: true, data: { action: "turbo:submit-start->channel-flow#sending turbo:submit-end->channel-flow#finished" } do |form| %>
+  <%= form_with model: @delivery, url: deliver_quote_path(@deal, version_id: @version.id), class: "channel-form", multipart: true, data: { action: "turbo:submit-start->channel-flow#sending turbo:submit-end->channel-flow#finished" } do |form| %>
     <%= form.hidden_field :channel, value: "buyer_room_link", data: { channel_flow_target: "channel" } %>
     <%= hidden_field_tag :idempotency_key, SecureRandom.uuid %>
 
     <section class="channel-form__wide delivery-link-panel" data-channel-flow-target="link">
       <div><span><%= t("self_service.delivery.secure_room", number: @version.number) %></span><strong><%= @version.revoked_at? ? t("self_service.delivery.revoked") : t("self_service.delivery.active") %></strong></div>
       <div class="delivery-link-row"><input readonly value="<%= buyer_room_url(@version.secure_token) %>" data-channel-flow-target="copy"><button type="button" class="button button--secondary" data-action="channel-flow#copy"><%= t("self_service.delivery.copy") %></button><%= link_to t("self_service.delivery.open"), buyer_room_path(@version.secure_token, preview: 1), target: "_blank", class: "button button--secondary" %></div>
-      <div><%= link_to(@version.revoked_at? ? t("self_service.delivery.regenerate") : t("self_service.delivery.revoke"), version_link_deal_path(@deal, version_id: @version.id, link_action: @version.revoked_at? ? "regenerate" : "revoke"), data: { turbo_method: :patch }, class: "text-action") %></div>
+      <div><%= link_to(@version.revoked_at? ? t("self_service.delivery.regenerate") : t("self_service.delivery.revoke"), version_link_quote_path(@deal, version_id: @version.id, link_action: @version.revoked_at? ? "regenerate" : "revoke"), data: { turbo_method: :patch }, class: "text-action") %></div>
     </section>
 
     <section class="channel-form__wide delivery-email-panel" data-channel-flow-target="email" hidden>

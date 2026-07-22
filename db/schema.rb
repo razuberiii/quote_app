@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_19_133000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -197,6 +197,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
     t.datetime "updated_at", null: false
     t.index ["company_id", "document_type"], name: "index_company_documents_on_company_id_and_document_type"
     t.index ["company_id"], name: "index_company_documents_on_company_id"
+  end
+
+  create_table "company_profile_imports", force: :cascade do |t|
+    t.jsonb "candidate_data", default: {}, null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id"
+    t.text "source_text"
+    t.string "status", default: "draft", null: false
+    t.datetime "updated_at", null: false
+    t.jsonb "warnings", default: [], null: false
+    t.index ["company_id", "status"], name: "index_company_profile_imports_on_company_id_and_status"
+    t.index ["company_id"], name: "index_company_profile_imports_on_company_id"
+    t.index ["created_by_id"], name: "index_company_profile_imports_on_created_by_id"
   end
 
   create_table "customer_follow_up_events", force: :cascade do |t|
@@ -705,6 +719,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
     t.jsonb "advanced_trade_terms", default: {}, null: false
     t.jsonb "advanced_visibility", default: {}, null: false
     t.datetime "archived_at"
+    t.string "buyer_locale", default: "en", null: false
     t.text "changes_request_message"
     t.datetime "changes_requested_at"
     t.bigint "company_id", null: false
@@ -797,22 +812,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
     t.index ["provider_event_id"], name: "index_subscription_events_on_provider_event_id", unique: true
   end
 
-  create_table "team_invitations", force: :cascade do |t|
-    t.datetime "accepted_at"
-    t.bigint "company_id", null: false
-    t.integer "company_role", default: 1, null: false
-    t.datetime "created_at", null: false
-    t.string "email", null: false
-    t.datetime "expires_at", null: false
-    t.bigint "invited_by_id", null: false
-    t.string "token", null: false
-    t.datetime "updated_at", null: false
-    t.index ["company_id", "email", "accepted_at"], name: "index_team_invites_on_company_email_status"
-    t.index ["company_id"], name: "index_team_invitations_on_company_id"
-    t.index ["invited_by_id"], name: "index_team_invitations_on_invited_by_id"
-    t.index ["token"], name: "index_team_invitations_on_token", unique: true
-  end
-
   create_table "users", force: :cascade do |t|
     t.bigint "company_id"
     t.integer "company_role", default: 2, null: false
@@ -899,6 +898,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
   add_foreign_key "change_requests", "companies"
   add_foreign_key "change_requests", "quote_revisions"
   add_foreign_key "company_documents", "companies"
+  add_foreign_key "company_profile_imports", "companies"
+  add_foreign_key "company_profile_imports", "users", column: "created_by_id"
   add_foreign_key "customer_follow_up_events", "customers"
   add_foreign_key "customer_follow_up_events", "quotes"
   add_foreign_key "customer_follow_up_events", "users"
@@ -964,8 +965,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_18_130000) do
   add_foreign_key "quotes", "quotes", column: "source_quote_id"
   add_foreign_key "spec_presets", "companies"
   add_foreign_key "subscription_events", "companies"
-  add_foreign_key "team_invitations", "companies"
-  add_foreign_key "team_invitations", "users", column: "invited_by_id"
   add_foreign_key "users", "companies"
   add_foreign_key "version_deliveries", "companies"
   add_foreign_key "version_deliveries", "quote_revisions"

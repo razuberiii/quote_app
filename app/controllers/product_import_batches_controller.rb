@@ -5,7 +5,7 @@ class ProductImportBatchesController < ApplicationController
 
   def create
     files = Array(params.dig(:product_import_batch, :source_files)).reject(&:blank?)
-    return redirect_to new_product_import_batch_path, alert: "请选择 CSV、XLSX、PDF、扫描件或产品图片。" if files.empty?
+    return redirect_to new_product_import_batch_path, alert: t("self_service.catalog_import.errors.file_required") if files.empty?
     result = ProductCatalogParser.new(files).call
     @batch = current_user.company.product_import_batches.create!(created_by: current_user, input_fingerprint: result.fingerprint,
       warnings: result.warnings, processing_report: result.processing_report, status: "review")
@@ -17,9 +17,9 @@ class ProductImportBatchesController < ApplicationController
         products = merge_candidates(products, ai_products)
         @batch.update!(warnings: @batch.warnings + ai_warnings)
       rescue StructuredAiClient::ResponseError, StructuredAiClient::ConfigurationError => error
-        failed_report = @batch.processing_report.map { |range| range["analysis"] == "ai_required" ? range.merge("status" => "failed", "detail" => "AI 语义分析失败，已保留可人工审核的确定性结果") : range }
+        failed_report = @batch.processing_report.map { |range| range["analysis"] == "ai_required" ? range.merge("status" => "failed", "detail" => t("self_service.catalog_import.errors.ai_failed_detail")) : range }
         @batch.update!(processing_report: failed_report,
-          warnings: @batch.warnings + [ "结构化分析未完成：#{error.message}。确定性候选仍可审核。" ])
+          warnings: @batch.warnings + [ t("self_service.catalog_import.errors.ai_failed", error: error.message) ])
       end
     end
     products.each do |data|
@@ -28,8 +28,8 @@ class ProductImportBatchesController < ApplicationController
     end
     redirect_to @batch
   rescue CSV::MalformedCSVError => error
-    @batch&.update!(status: "review", warnings: @batch.warnings + [ "结构化分析未完成：#{error.message}" ])
-    redirect_to(@batch || new_product_import_batch_path, alert: "文件已保留，但自动分析未完成。请人工审核或重试。")
+    @batch&.update!(status: "review", warnings: @batch.warnings + [ t("self_service.catalog_import.errors.analysis_failed", error: error.message) ])
+    redirect_to(@batch || new_product_import_batch_path, alert: t("self_service.catalog_import.errors.file_retained"))
   end
 
   def show
@@ -39,7 +39,7 @@ class ProductImportBatchesController < ApplicationController
 
   def update
     persist_review!
-    redirect_to @batch, notice: "审核结果已保存，尚未写入 Library。"
+    redirect_to @batch, notice: t("self_service.catalog_import.flash.review_saved")
   end
 
   def apply
@@ -48,7 +48,7 @@ class ProductImportBatchesController < ApplicationController
       @batch.product_import_candidates.where.not(decision: %w[pending ignore]).find_each { |candidate| apply_candidate(candidate) }
       @batch.update!(status: "applied")
     end
-    redirect_to library_path, notice: "已应用审核通过的商品；来源未明确的价格仍保持为空。"
+    redirect_to library_path, notice: t("self_service.catalog_import.flash.applied")
   end
 
   private

@@ -1,19 +1,16 @@
-<% content_for :title, "Pricing · Rubusoo" %>
+<% content_for :title, t("self_service.marketing.pricing_page.meta_title") %>
 <main class="rb-page">
   <header class="rb-page-head">
     <div>
-      <p class="eyebrow">Simple, honest pricing</p>
-      <h1>Close the first deal before you pay.</h1>
+      <p class="eyebrow"><%= t("self_service.marketing.pricing_page.eyebrow") %></p>
+      <h1><%= t("self_service.marketing.pricing_page.title") %></h1>
     </div>
-    <p>Start with every core workflow unlocked. Upgrade when your team and quote volume grow—not because a buyer needs to open a link.</p>
+    <p><%= t("self_service.marketing.pricing_page.body") %></p>
   </header>
 
-  <% plans = [
-    { name: "Trial", price: "$0", note: "14 days · no card required", features: ["5 sent quotations", "Buyer Rooms", "PDF and Excel export"], action: "Start free", style: :secondary },
-    { name: "Solo", price: "$15", note: "per month · one seller", features: ["30 sent quotations", "Revision history", "Buyer activity signals"], action: "Choose Solo", style: :secondary, plan: "solo" },
-    { name: "Pro", price: "$29", note: "per month · up to 3 users", features: ["150 sent quotations", "Team workspace", "Acceptance and PI conversion"], action: "Choose Pro", style: :secondary, plan: "pro" },
-    { name: "Business", price: "$69", note: "per month · growing teams", features: ["Team controls", "Assisted catalog import", "Priority support"], action: "Talk to us", style: :secondary, contact: true }
-  ] %>
+  <% plans = %w[trial solo pro business].zip(%w[$0 $15 $29 $69]).map do |key, fallback_price| %>
+    <% { key:, name: t("self_service.marketing.pricing_page.plans.#{key}.name"), price: t("self_service.marketing.pricing_page.plans.#{key}.price", default: fallback_price), note: t("self_service.marketing.pricing_page.plans.#{key}.note"), features: t("self_service.marketing.pricing_page.plans.#{key}.features"), action: t("self_service.marketing.pricing_page.plans.#{key}.action"), style: :secondary, plan: (key unless key.in?(%w[trial business])), contact: key == "business" } %>
+  <% end %>
   <div class="pricing-grid">
     <% plans.each do |plan| %>
       <section>
@@ -25,7 +22,7 @@
         </ul>
         <% if plan[:contact] %>
           <%= link_to plan[:action], contact_path, class: "button button--secondary" %>
-        <% elsif user_signed_in? && plan[:plan] %>
+        <% elsif user_signed_in? && plan[:plan].present? %>
           <%= button_to plan[:action], billing_checkout_path(plan: plan[:plan]), class: "button button--secondary button--full" %>
         <% else %>
           <%= link_to plan[:action], new_user_registration_path, class: "button button--#{plan[:style]}" %>

@@ -1,0 +1,100 @@
+---
+es-419:
+  self_service:
+    buyer_room:
+      secure: Cotización segura
+      revision: "Revisión %{number}"
+      prepared_for: "Preparada para %{customer}"
+      default_title: Su cotización
+      default_intro: Revise los productos, cantidades, precios y condiciones de entrega. Si necesita algún cambio, comuníquese con ventas.
+      prepared_by: Preparada por
+      quote: Cotización
+      version: Versión
+      preview: Vista previa
+      valid_until: Válida hasta
+      open: Por confirmar
+      currency: Moneda
+      products_kicker: 01 · Productos cotizados
+      products_title: Productos de esta cotización
+      products_help: Las cantidades ajustables actualizan el total de inmediato. Para otros cambios, contacte a ventas.
+      product_image: Imagen del producto
+      item: "Artículo %{number}"
+      configured: Configurado
+      quantity: Cantidad
+      selectable: · Ajustable
+      fixed: · Confirmada
+      unit_price: Precio unitario
+      lead_time: Plazo de entrega
+      see_terms: Ver condiciones
+      your_selection: Su selección
+      summary: Total de la cotización
+      product_count: "%{count} productos"
+      shipping: Flete
+      total: Total actual
+      total_help: Incluye impuestos y descuentos
+      accept: Aceptar cotización
+      request_changes: Solicitar cambios
+      ask: Consultar a ventas
+      download: Descargar PDF
+      attachments: Archivos adjuntos
+      ask_short: Consultar
+      optional_accessories: Accesorios opcionales
+      ask_product: Consultar este producto
+      plans_kicker: 02 · Configuración
+      plans_title: Elija la configuración adecuada
+      essential: Esencial
+      essential_title: Solo equipo principal
+      essential_help: No incluye accesorios opcionales
+      recommended: Recomendada
+      recommended_title: Configuración actual
+      recommended_help: Seleccionada para este requerimiento
+      seller_choice: Recomendación del vendedor
+      complete: Completa
+      complete_title: Incluye todos los accesorios
+      complete_help: Todo suministrado en conjunto
+      terms_kicker: 03 · Entrega y condiciones comerciales
+      terms_title: Condiciones además del precio
+      incoterm: Incoterm
+      payment: Pago
+      delivery: Entrega
+      validity: Vigencia de la cotización
+      packaging: Embalaje
+      pending: Por confirmar
+      agreed: Según lo acordado
+      export_packaging: Embalaje estándar de exportación
+      ask_terms: Consultar estas condiciones
+      state_preview: Vista previa interna
+      state_accepted: Aceptada
+      state_readonly: Solo lectura
+      preview_help: Esta es una vista de trabajo. Al publicar se crea una versión bloqueada.
+      accepted_help: El cliente aceptó esta versión. Su alcance y total están bloqueados.
+      readonly_help: Esta versión ya no está activa. Contacte a ventas para obtener la cotización vigente.
+      accepted_kicker: Cotización aceptada
+      accepted_title: Gracias. Su aceptación quedó registrada.
+      accepted_body: Ventas recibió la notificación. Conserve este enlace para revisar la versión aceptada y el avance de la factura proforma.
+      accepted_total: Total aceptado
+      question_about: Consulta sobre
+      entire_quote: Cotización completa
+      your_name: Su nombre
+      work_email: Correo laboral
+      question: Pregunta
+      question_placeholder: Indique qué necesita aclarar
+      cancel: Cancelar
+      send_question: Enviar pregunta
+      changes_kicker: Solicitud de cambios
+      changes_title: Indique a ventas qué debe cambiar
+      changes_help: Su solicitud se registra por separado; la versión publicada no se modifica.
+      changes_placeholder: Por ejemplo, cantidad, voltaje, especificación, precio o fecha de entrega…
+      supporting_file: Archivo de respaldo
+      send_request: Enviar solicitud
+      acceptance_kicker: Aceptación formal
+      acceptance_title: "Aceptar revisión %{number}"
+      acceptance_help: Confirme los productos seleccionados y el total actual
+      full_name: Nombre completo
+      job_title: Cargo (opcional)
+      po_number: Número de orden de compra (opcional)
+      note: Nota para ventas (opcional)
+      authorization: Estoy autorizado para aceptar esta cotización en nombre de mi empresa.
+      locking: Bloqueando su selección
+      recording: Registrando la aceptación
+      confirm_acceptance: Confirmar aceptación

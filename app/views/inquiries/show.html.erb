@@ -86,13 +86,13 @@
         </div>
         <template data-inquiry-review-target="template">
           <article class="inquiry-product-card inquiry-product-card--new">
-            <header><span>＋</span><div><input name="inquiry[extracted_data][products][NEW_INDEX][name]" class="inquiry-product-card__name" placeholder="商品名称" required><small>手工添加 · Deal-only item</small></div><button type="button" class="text-action" data-action="inquiry-review#removeProduct">移除</button></header>
+            <header><span>＋</span><div><input name="inquiry[extracted_data][products][NEW_INDEX][name]" class="inquiry-product-card__name" placeholder="商品名称" required><small><%= t("self_service.review.manual_product") %></small></div><button type="button" class="text-action" data-action="inquiry-review#removeProduct">移除</button></header>
             <div class="inquiry-product-card__facts"><label><span>Model</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][model]"></label><label><span>数量</span><input class="input" type="number" min="1" name="inquiry[extracted_data][products][NEW_INDEX][quantity]" required></label><label><span>单位</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][unit]" value="pcs"></label><label><span>包装</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][packing]"></label></div>
             <div class="inquiry-product-card__specs"><label><span>电压</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][specifications][voltage]"></label><label><span>颜色</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][specifications][color]"></label><label><span>材质</span><input class="input" name="inquiry[extracted_data][products][NEW_INDEX][specifications][material]"></label></div>
             <input type="hidden" name="inquiry[extracted_data][products][NEW_INDEX][price_source]" value="unpriced">
           </article>
         </template>
-        <button type="button" class="studio-add-product inquiry-add-product" data-action="inquiry-review#addProduct">＋ 手工添加 Deal-only 商品</button>
+        <button type="button" class="studio-add-product inquiry-add-product" data-action="inquiry-review#addProduct"><%= t("self_service.review.add_manual_product") %></button>
       </div>
 
       <div class="inquiry-review-section inquiry-review-section--questions">

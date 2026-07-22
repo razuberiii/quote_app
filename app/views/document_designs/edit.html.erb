@@ -1,0 +1,51 @@
+<%= render "shared/settings_header", title: t("document_design.title"), section: :document_design %>
+<main class="workspace-page document-design">
+  <header class="document-design__hero">
+    <div><p class="eyebrow"><%= t("document_design.eyebrow") %></p><h1><%= t("document_design.title") %></h1><p><%= t("document_design.help") %></p></div>
+    <div class="document-design__rule"><strong><%= t("document_design.rule_title") %></strong><span><%= t("document_design.rule_help") %></span></div>
+  </header>
+
+  <%= form_with model: @design, url: document_design_path, method: :patch, class: "document-design__grid" do |form| %>
+    <section class="document-design__controls">
+      <div class="design-section"><span>01</span><div><h2><%= t("document_design.sections.layout") %></h2><p><%= t("document_design.sections.layout_help") %></p></div></div>
+      <div class="design-recipes">
+        <% %w[classic modern industry].each do |recipe| %>
+          <label><%= form.radio_button :layout_type, recipe %><span><i></i><strong><%= t("document_design.recipes.#{recipe}.title") %></strong><small><%= t("document_design.recipes.#{recipe}.help") %></small></span></label>
+        <% end %>
+      </div>
+      <div class="field-grid field-grid--two">
+        <label class="field"><span><%= t("document_design.fields.density") %></span><%= form.select :layout_density, %w[compact standard spacious].map { |value| [t("document_design.density.#{value}"), value] } %></label>
+        <label class="field"><span><%= t("document_design.fields.color") %></span><%= form.color_field :accent_color %></label>
+        <label class="field"><span><%= t("document_design.fields.font") %></span><%= form.select :font_family, ["Noto Sans", "Inter", "Source Sans 3", "Georgia"] %></label>
+        <label class="field"><span><%= t("document_design.fields.logo") %></span><%= form.select :logo_position, %w[left right center].map { |value| [t("document_design.positions.#{value}"), value] } %></label>
+      </div>
+
+      <div class="design-section"><span>02</span><div><h2><%= t("document_design.sections.content") %></h2><p><%= t("document_design.sections.content_help") %></p></div></div>
+      <div class="choice-stack">
+        <% %w[logo images tax shipping payment_term valid_until terms_section notes scope_of_supply signature_block closing_message].each do |field| %>
+          <label class="choice-row"><%= form.check_box "show_#{field}" %><span><strong><%= t("document_design.content.#{field}") %></strong></span></label>
+        <% end %>
+      </div>
+
+      <div class="design-section"><span>03</span><div><h2><%= t("document_design.sections.language") %></h2><p><%= t("document_design.sections.language_help") %></p></div></div>
+      <div class="field-grid field-grid--two">
+        <% { public_link_locale: "customer_page", pdf_locale: "pdf", excel_locale: "excel" }.each do |field, key| %>
+          <label class="field"><span><%= t("document_design.fields.#{key}") %></span><%= form.select field, QuoteTemplate::OUTPUT_LOCALES.map { |value, label| [label, value] } %></label>
+        <% end %>
+      </div>
+      <footer><span><%= t("document_design.save_help") %></span><%= form.submit t("document_design.save"), class: "button button--primary" %></footer>
+    </section>
+
+    <aside class="document-design__preview" style="--preview-accent:<%= @design.accent_color %>">
+      <span class="document-design__preview-label"><%= t("document_design.preview") %></span>
+      <article class="design-paper">
+        <header><div><small><%= current_user.company.name %></small><h2><%= t("document_design.sample.title") %></h2></div><strong>QT-2026-014</strong></header>
+        <dl><div><dt><%= t("document_design.sample.customer") %></dt><dd>Atlas Industrial Supply</dd></div><div><dt><%= t("document_design.sample.date") %></dt><dd>2026-07-21</dd></div></dl>
+        <table><thead><tr><th><%= t("document_design.sample.item") %></th><th><%= t("document_design.sample.qty") %></th><th><%= t("document_design.sample.amount") %></th></tr></thead><tbody><tr><td>HZ-240 Hydraulic Power Unit<small>380V / 50Hz · IP54</small></td><td>5</td><td>USD 36,000</td></tr><tr><td>Commissioning & training</td><td>1</td><td>USD 2,450</td></tr></tbody></table>
+        <div class="design-paper__total"><span><%= t("document_design.sample.total") %></span><strong>USD 38,450</strong></div>
+        <footer><span>CIF Long Beach</span><span>30% deposit · 70% before shipment</span></footer>
+      </article>
+      <p><%= t("document_design.preview_help") %></p>
+    </aside>
+  <% end %>
+</main>

@@ -15,7 +15,7 @@ class DealResponsesController < ApplicationController
     @response.attachment.attach(params.dig(:deal_response, :attachment)) if params.dig(:deal_response, :attachment).present?
     @response.save!
     @response.update!(difference_review: DealResponseAnalyzer.new(@response).call)
-    redirect_to deal_path(@deal, tab: "conversation"), notice: "Buyer response added to this Deal."
+    redirect_to quote_path(@deal, tab: "activity"), notice: I18n.t("self_service.quote_core.response_added")
   rescue ActiveRecord::RecordInvalid => error
     flash.now[:alert] = error.record.errors.full_messages.to_sentence
     render :new, status: :unprocessable_entity
@@ -23,17 +23,17 @@ class DealResponsesController < ApplicationController
 
   def apply
     response = @deal.deal_responses.find(params[:response_id])
-    raise ActionController::BadRequest, "Only reviewed differences can be applied" if response.difference_review["changes"].blank?
+    raise ActionController::BadRequest, I18n.t("self_service.quote_core.response_review.no_changes") if response.difference_review["changes"].blank?
     WorkingUpdateApplier.new(response:, selected_paths: params[:selected_paths]).call
-    redirect_to edit_quote_path(@deal, applied_response_id: response.id), notice: "Selected buyer changes are highlighted in the Working update draft."
+    redirect_to edit_quote_path(@deal, applied_response_id: response.id), notice: I18n.t("self_service.quote_core.response_review.applied")
   end
 
   def disposition
     response = @deal.deal_responses.find(params[:response_id])
     status = params.require(:status).presence_in(%w[reviewed evidence_only])
-    raise ActionController::BadRequest, "Invalid response disposition" unless status
+    raise ActionController::BadRequest, I18n.t("self_service.quote_core.response_review.invalid_status") unless status
     response.update!(status:)
-    redirect_to deal_path(@deal, tab: "conversation"), notice: status == "evidence_only" ? "Kept as evidence; the published Version was not changed." : "Response review completed."
+    redirect_to quote_path(@deal, tab: "activity"), notice: status == "evidence_only" ? I18n.t("self_service.quote_core.evidence_kept") : I18n.t("self_service.quote_core.response_reviewed")
   end
 
   private

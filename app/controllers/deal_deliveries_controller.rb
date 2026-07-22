@@ -24,7 +24,7 @@ class DealDeliveriesController < ApplicationController
     mark_deal_delivered(delivery) if delivery.successful?
     redirect_to delivery_destination(delivery), notice: delivery_notice(delivery)
   rescue StandardError => error
-    redirect_to deliver_deal_path(@deal, version_id: @version.id), alert: "Delivery failed: #{error.message}"
+    redirect_to deliver_quote_path(@deal, version_id: @version.id), alert: I18n.t("self_service.quote_core.delivery_failed_with_reason", reason: error.message)
   end
 
   def download
@@ -43,9 +43,9 @@ class DealDeliveriesController < ApplicationController
     delivery.save!
     VersionDeliveryExecutor.new(delivery).call
     mark_deal_delivered(delivery)
-    redirect_to deal_path(@deal, tab: "documents"), notice: "Delivery retry sent successfully."
+    redirect_to quote_path(@deal, tab: "versions"), notice: I18n.t("self_service.quote_core.delivery_retried")
   rescue StandardError => error
-    redirect_to deal_path(@deal, tab: "documents"), alert: "Retry failed: #{error.message}"
+    redirect_to quote_path(@deal, tab: "versions"), alert: "#{I18n.t('self_service.quote_core.delivery_failed')}: #{error.message}"
   end
 
   def update_link
@@ -55,7 +55,7 @@ class DealDeliveriesController < ApplicationController
     when "regenerate"
       @version.update!(secure_token: SecureRandom.urlsafe_base64(32), revoked_at: nil, status: "current")
     end
-    redirect_to deliver_deal_path(@deal, version_id: @version.id), notice: "Buyer Room link updated."
+    redirect_to deliver_quote_path(@deal, version_id: @version.id), notice: I18n.t("self_service.quote_core.link_updated")
   end
 
   private
@@ -92,12 +92,12 @@ class DealDeliveriesController < ApplicationController
   end
 
   def delivery_destination(delivery)
-    delivery.generated_file.attached? ? deal_path(@deal, tab: "documents") : deal_path(@deal)
+    delivery.generated_file.attached? ? quote_path(@deal, tab: "versions") : quote_path(@deal)
   end
 
   def delivery_notice(delivery)
-    return "Version delivered successfully." if delivery.successful?
-    return "File generated from immutable Version #{delivery.quote_revision.number}." if delivery.status == "generated"
-    "Delivery recorded."
+    return I18n.t("self_service.quote_core.delivery_success") if delivery.successful?
+    return I18n.t("self_service.quote_core.file_generated", number: delivery.quote_revision.number) if delivery.status == "generated"
+    I18n.t("self_service.quote_core.delivery_recorded")
   end
 end

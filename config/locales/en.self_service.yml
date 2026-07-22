@@ -1,5 +1,8 @@
 en:
   settings_workspace:
+    file_input:
+      choose_file: "Choose file"
+      no_file_selected: "No file selected"
     eyebrow: Workspace settings
     title: Settings
     subtitle: Manage seller identity, commercial defaults and close policy for every Deal.
@@ -16,8 +19,50 @@ en:
     follow_up: { title: Follow-up email, help: Reusable Deal follow-up copy that remains editable before sending. }
     fields: { trading_name: Trading name, legal_name: Legal name, registration_number: Registration number, website: Website, email: Commercial email, phone: Phone, address: Registered address, registration_details: Registration details, currency: Currency, validity: Validity in days, trade_term: Trade term, payment_term: Payment term, tax_rate: Default tax rate, final_document: Default final document, brand_color: Brand signal color, logo: Company logo, logo_help: Transparent PNG or SVG preferred, subject: Subject, message: Message, cta: CTA label }
     documents: { eyebrow: Seller evidence, title: Company documents, help: Credentials available when a Deal needs them., name: Title, placeholder: Company profile, type: Type, choose: Choose file, upload: Upload, remove: Remove, remove_confirm: Remove this document?, empty: No company documents yet. Add them when a Deal needs supporting credentials. }
-    document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration }
+    document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration, certificate: Certificate }
   self_service:
+    quote_core:
+      immutable_edit: Published versions are immutable. Create a working revision from the current quote.
+      draft_saved: Quote draft saved.
+      reply_saved: Reply saved to this quote.
+      published: "Quote V%{number} is published. PDF, Excel and customer delivery are ready."
+      response_added: Customer feedback added to the quote.
+      evidence_kept: Kept as evidence; the published quote was not changed.
+      response_reviewed: Customer feedback review completed.
+      acceptance_recorded: "Acceptance recorded against quote V%{number}."
+      delivery_retried: Quote sent again.
+      delivery_failed: Quote delivery failed
+      lifecycle:
+        states: { draft: Draft, ready: Ready to send, sent: Sent, viewed: Viewed, changes: Feedback to review, accepted: Accepted, expired: Expired }
+        actions: { continue: Continue editing, send: Publish and send, follow_up: Follow up, revise: Create revision, review: Review feedback, reply: Reply, view: View quote }
+        signals: { draft: Draft is editable, incomplete: Required information still needs confirmation, ready: Published quote is ready to send, sent: Quote was sent to the customer, viewed: Customer opened the quote, changes: Customer requested changes, response: Customer reply or file received, accepted: Customer accepted the quote, expired: Quote is no longer active }
+      index:
+        eyebrow: Quote workspace
+        title: Quotes
+        subtitle: Manage requirements, formal output, customer feedback and revisions around one quote.
+        ai_import: AI import
+        new: New quote
+        search: Search quotes
+        search_placeholder: Customer, quote number, project or product
+        filters: Quote status
+        statuses: { all: All, draft: Drafts, sent: Sent, viewed: Viewed, changes: Needs action, accepted: Accepted, expired: Expired }
+        columns: { quote: Quote, customer: Customer, amount: Amount, status: Status, next: Next step }
+        updated: "Updated %{time} ago"
+        customer_missing: Customer to confirm
+        empty: No quotes yet
+        empty_help: Start from a blank quote or let AI organize a pasted or uploaded inquiry.
+      detail:
+        back: ← Back to quotes
+        owner: "Owner %{name}"
+        status: Quote status
+        amount: Current amount
+        latest: Latest activity
+        next: Next step
+        not_set: Not set
+        tabs: { quote: Quote, activity: Customer activity, versions: Versions and exports }
+        quote: { kicker: Working draft, title: Edit, preview and publish this quote, help: The draft is internal; publishing creates an immutable reproducible version., edit: Edit quote, preview: Preview customer page, publish: Review and publish, customer: Customer, items: Items, valid_until: Valid until, language: Customer language, incoterm: Incoterm, payment: Payment terms }
+        activity: { kicker: Customer activity, title: Views, questions, changes and acceptance stay with this quote, help: Every response keeps its published-version context and never silently edits formal output., record: Record customer feedback, accept: Record acceptance, question: Customer question, change: Change request, empty: No customer activity yet, empty_help: Views, questions, requests and returned files appear here after sending. }
+        versions: { kicker: Formal output, title: Open, download or send every version directly, help: PDF, Excel and the customer page use the same frozen snapshot., current: Current version, previous: Previous version, customer_page: Customer page, send: Send, empty: No published versions yet, empty_help: Review and publish the quote to create PDF, Excel and the customer page. }
     auth:
       welcome: Welcome back.
       welcome_body: Continue the Deal, deliver the next Version, or respond while buyer intent is still fresh.
@@ -32,7 +77,215 @@ en:
       eyebrow: Actionable workspace
       title: Inbox
       subtitle: Only the events that can move a deal forward.
+    deals:
+      buyer_pending: Buyer to confirm
+      ago: "%{time} ago"
+      progress:
+        stages: { draft: Draft, live: Live, accepted: Accepted, closed: Closed }
+        actions:
+          view: View deal
+          review_inquiry: Review inquiry
+          confirm_buyer: Confirm buyer
+          match_products: Match products
+          add_prices: Add missing prices
+          add_freight: Add freight
+          complete_quote: Complete quote
+          choose_delivery: Choose delivery method
+          publish: Publish quote
+          retry_delivery: Retry delivery
+          reply: Reply to buyer
+          prepare_version: Prepare new version
+          follow_up: Follow up
+          wait: Wait for buyer
+          review_file: Review returned file
+          review_po: Review PO differences
+          review_response: Review buyer response
+          prepare_update: Prepare update
+          generate_document: Generate final document
+          send_document: Send final document
+          confirm_payment: Confirm payment
+          close_won: Close as won
+        signals:
+          inquiry_review: Inquiry needs review
+          buyer_missing: Buyer is missing
+          products_review: Products need confirmation
+          ready_to_deliver: Published Version is ready to deliver
+          ready_to_publish: Ready to publish
+          delivery_failed: Latest delivery failed
+          buyer_question: Buyer asked a question
+          change_requested: Buyer requested changes
+          expiring: Quote expires soon
+          waiting: Waiting for buyer
+          viewed: Buyer viewed the quote
+          accepted: Buyer accepted
+          response_received: Buyer response received
+          acceptance_recorded: Acceptance recorded
+          document_ready: Final document is ready
+          payment_document: Payment workflow requires a final document
+          awaiting_payment: Awaiting payment
+          acceptance_complete: Commercial acceptance is complete
+          won: Won
+          closed: Deal closed
+      detail:
+        back: ← Back to deals
+        owner: "Owner %{name}"
+        stage: Stage
+        current_amount: Current amount
+        last_buyer_activity: Last buyer activity
+        next_action: Next action
+        more: More actions
+        edit_draft: Edit working draft
+        deliver_version: Deliver current Version
+        add_response: Add buyer response
+        record_acceptance: Record acceptance
+        not_set: Not set
+        reopen: Reopen deal
+        close_won: Close as won
+        close_lost: Close as lost
+        tabs: { overview: Overview, quote: Quote, conversation: Conversation, versions: Versions, documents: Documents }
+        quote_panel:
+          kicker: Quote draft
+          title: Edit once. Deliver in the format you need.
+          body: The draft stays internal. Publishing creates an immutable version shared by the buyer page, PDF, Excel and external delivery.
+          edit: Edit quote
+          deliver: Deliver current version
+        conversation:
+          kicker: Buyer conversation
+          title: Questions, change requests and returned files stay tied to the relevant quote version.
+          add_response: Add buyer response
+          file_received: File received for review
+          question: "Question · %{context}"
+          quote_context: Quote
+          change_request: Change request
+          seller_reply: Seller reply
+          reply_placeholder: Reply with the product and option context preserved
+          reply: Reply
+          empty: No buyer responses yet
+          empty_help: Buyer-page questions, email, returned files, purchase orders and external messages appear here.
+        versions:
+          kicker: Published versions
+          title: Lock every publication and retain its delivery history.
+          version: "Version %{number}"
+          current: Current published version
+          published: "Published %{time} ago · %{count} deliveries"
+          compare: Compare changes
+          view: View version
+          empty: No published versions yet
+          empty_help: Complete and publish the quote before generating PDF, Excel or a buyer page.
+        version_statuses: { draft: Draft, current: Current, superseded: Superseded, revoked: Revoked, expired: Expired, accepted: Accepted }
+        signals:
+          title: Current signals
+          latest_response: Latest response
+          no_response: No buyer response
+          waiting: Waiting for buyer input
+          latest_delivery: Latest delivery
+          delivery_state: "%{channel} · %{status}"
+          not_delivered: Not delivered
+          choose_channel: Choose a channel after publishing
+          risk: Risk / blocker
+          no_blocker: No active blocker
+        facts:
+          title: Commercial snapshot
+          buyer: Buyer
+          items: Items
+          currency: Currency
+          valid_until: Valid until
+          deliveries: Deliveries
+          delivery_count: "%{count} deliveries across %{channels} channels"
+          acceptance: Acceptance
+          accepted: "%{method} · locked"
+          not_recorded: Not recorded
+        timeline:
+          title: Recent timeline
+          help: All activity stays with this deal
+          created: Deal created
+          draft_started: Working quote started
+        activity_kinds: { viewed: Buyer viewed, delivered: Quote delivered, accepted: Buyer accepted, question: Buyer asked a question, change_requested: Buyer requested changes }
+        channels: { email_link: Email link, email_pdf: Email PDF, email_link_pdf: Email link and PDF, buyer_room: Buyer Room, external: External channel, printed: Print or offline }
+        statuses: { draft: Draft, queued: Queued, sent: Sent, succeeded: Completed, pending: Pending, preparing: Preparing, delivered: Delivered, failed: Failed, generated: Generated, downloaded: Downloaded, externally_sent: Sent through an external channel, revoked: Revoked, viewed: Viewed, accepted: Accepted }
+        response_kinds: { email: Email response, purchase_order: Purchase order, returned_file: Returned file, external_message: External message, signed_document: Signed document }
+        response_sources: { email: Email, purchase_order: Purchase order, excel: Excel, pdf: PDF, buyer_room: Buyer quote page, external: External channel, phone: Phone }
+        acceptance_methods: { click: Online confirmation, email: Email confirmation, purchase_order: Purchase order, signed_document: Signed document, external: External confirmation }
+        documents:
+          kicker: Deal documents
+          title: One Version. Every output.
+          subtitle: Generated files remain tied to their immutable commercial source.
+          generate_or_deliver: Generate PDF / Excel or deliver
+          buyer_room: Buyer quote page
+          generate_send: Generate or send
+          published_ago: "Published %{time} ago"
+          generated_ago: "Generated %{time} ago · %{channel}"
+          download: Download
+          delivery_history: Delivery history
+          published_title: Published quote files
+          published_help: Buyer Room, PDF and Excel generated from a frozen Version.
+          buyer_title: Buyer files
+          buyer_help: Returned workbooks, PO, signed files and evidence with review state.
+          buyer_empty: No buyer files yet
+          buyer_empty_help: Returned Excel, PO and signed evidence will appear here with their Version context.
+          final_title: Final documents
+          final_help: Files generated only from the locked Acceptance snapshot.
+          final_empty: Available after Acceptance
+          final_empty_help: Order Confirmation, PI and final offers use the buyer’s immutable accepted selection.
+    seller_demo:
+      eyebrow: Seller Demo · Read-only workspace
+      title: One export deal, from inquiry to order.
+      subtitle: Atlas Industrial Supply is preparing a multi-product CIF quotation for Pacific Trading Group.
+      buyer_room: Experience Buyer Room
+      start: Start your workspace
+      nav: { home: Home, inquiry: Inquiry, studio: Quote Studio, revision: Revision, activity: Buyer activity, pi: PI }
+      overview_title: The next commercial move is obvious.
+      metrics:
+        open_value: Open value
+        open_help: Across the current formal scope
+        latest_revision: Latest revision
+        draft: Draft
+        buyer_signals: Buyer signals
+        signals_help: Views, questions and decisions
+      inquiry_kicker: Inquiry extraction
+      inquiry_title: Messy request, reviewable requirements.
+      inquiry_quote: “Please quote 5 hydraulic power units and spare seal kits, 380V / 50Hz, delivery CIF Long Beach. Please confirm packing, lead time and whether the control cabinet supports IP54.”
+      facts: { destination: Destination, destination_value: Long Beach, United States, basis: Commercial basis, confirmed: Confirmed, price_status: Price status, freight_required: Freight required }
+      studio_title: A commercial document, not an admin form.
+      cover: Cover
+      products: Products
+      options: Options
+      pricing: Pricing
+      shipping: Shipping
+      terms: Terms
+      acceptance: Acceptance
+      prepared_for: Prepared for
+      package_title: Hydraulic production package
+      package_help: Configured for continuous-duty operation and export delivery to Long Beach.
+      total: Total
+      valid_until: Valid until
+      revision_title: Every buyer-facing version stays accountable.
+      initial_scope: Initial equipment scope
+      initial_help: 5 pumps · EXW basis
+      current: Current
+      current_scope: CIF scope with export packing
+      current_help: Freight and spare seal kit added · total updated
+      revision_history: Revision history
+      superseded: Superseded
+      working_days: 20 working days
+      five_units: 5 units
+      activity_title: Questions arrive with their context.
+      voltage_question: Question · Voltage configuration
+      voltage_body: Can the control cabinet be supplied for 380V / 50Hz and IP54?
+      procurement: Ethan Miller · Procurement
+      quantity_request: Revision request · Product quantity
+      quantity_body: Please change the main unit quantity from 4 to 5 and keep two spare seal kits.
+      quantity_help: Selection remains separate from the formal revision.
+      pi_kicker: Accept to PI
+      pi_title: The accepted snapshot becomes the order source.
+      awaiting_deposit: Awaiting deposit · immutable accepted scope
+      proforma_invoice: PROFORMA INVOICE
+      empty_title: Demo data is being prepared.
+      empty_help: Please return in a moment.
     studio:
+      buyer_language: Customer language
+      buyer_language_help: Applies to this buyer page and customer documents without changing your workspace language.
+      languages: { en: English, zh-CN: 简体中文, es-419: Español }
       review_publish: Review & publish
       save: Save quote
       preview: Preview

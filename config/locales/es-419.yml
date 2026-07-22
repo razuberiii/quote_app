@@ -2677,28 +2677,6 @@ es-419:
       owner_cannot_removed: El propietario no puede ser eliminado.
       cannot_remove_self: No puedes eliminarte a ti mismo.
       removed_from_team: "Eliminado del equipo: %{email}. Cuenta preservada."
-  team_invitations:
-    view:
-      index:
-        header_title: Mis invitaciones
-        hint: Las invitaciones son notificaciones a nivel de cuenta. Aceptar una cambiará tu espacio de trabajo de empresa.
-        company: Empresa
-        role: Rol
-        invited_by: Invitación de
-        status: Estado
-        expires: Expira
-        action: Acción
-        pending: Pendiente
-        accept: Aceptar
-        empty: No hay invitaciones pendientes.
-    flash:
-      email_already_member: Este correo electrónico ya es miembro de su empresa.
-      no_account_found: No se encontró ninguna cuenta para este correo electrónico. Pídales que se registren primero.
-      pending_invitation_exists: Ya existe una invitación pendiente para este correo electrónico.
-      invitation_created: Invitación creada para %{email}.
-      invitation_revoked: Invitación revocada.
-      joined_company: Te uniste a %{company}.
-      unable_accept: "No se pudo aceptar la invitación: %{message}"
   admin:
     layout:
       title: Consola de Administración

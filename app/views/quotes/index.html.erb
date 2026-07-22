@@ -1,0 +1,27 @@
+<main class="deal-workspace quote-core-index">
+  <header class="deal-page-header">
+    <div><p class="eyebrow"><%= t("self_service.quote_core.index.eyebrow") %></p><h1><%= t("self_service.quote_core.index.title") %></h1><p><%= t("self_service.quote_core.index.subtitle") %></p></div>
+    <div class="quote-core-header-actions"><%= link_to t("self_service.quote_core.index.ai_import"), new_inquiry_path, class: "button button--secondary" %><%= link_to t("self_service.quote_core.index.new"), new_inquiry_path(mode: "manual"), class: "button button--primary" %></div>
+  </header>
+
+  <form class="quote-core-filters" method="get">
+    <label><span><%= t("self_service.quote_core.index.search") %></span><input type="search" name="q" value="<%= params[:q] %>" placeholder="<%= t('self_service.quote_core.index.search_placeholder') %>"></label>
+    <nav aria-label="<%= t('self_service.quote_core.index.filters') %>">
+      <% %w[all draft sent viewed changes accepted expired].each do |status| %><%= link_to t("self_service.quote_core.index.statuses.#{status}"), quotes_path(q: params[:q], status: (status unless status == "all")), class: ("is-active" if (params[:status].presence || "all") == status) %><% end %>
+    </nav>
+  </form>
+
+  <section class="quote-core-list">
+    <header><span><%= t("self_service.quote_core.index.columns.quote") %></span><span><%= t("self_service.quote_core.index.columns.customer") %></span><span><%= t("self_service.quote_core.index.columns.amount") %></span><span><%= t("self_service.quote_core.index.columns.status") %></span><span><%= t("self_service.quote_core.index.columns.next") %></span></header>
+    <% @quote_rows.each do |quote, lifecycle| %>
+      <article>
+        <%= link_to quote_path(quote), class: "quote-core-identity" do %><small><%= quote.quote_no %></small><strong><%= deal_title(quote) %></strong><span><%= t("self_service.quote_core.index.updated", time: time_ago_in_words(quote.updated_at)) %></span><% end %>
+        <div class="quote-core-customer"><strong><%= quote.customer&.name || t("self_service.quote_core.index.customer_missing") %></strong><span><%= quote.customer&.contact_name.presence || quote.customer&.email %></span></div>
+        <strong class="quote-core-amount"><%= quote.currency %> <%= number_with_delimiter(quote.grand_total) %></strong>
+        <div class="quote-core-state"><span class="quote-state quote-state--<%= lifecycle.state %>"><i></i><%= lifecycle.label %></span><small><%= lifecycle.signal %></small></div>
+        <%= link_to lifecycle.action_label, quote_action_path(quote, lifecycle), class: "deal-next" %>
+      </article>
+    <% end %>
+    <% if @quote_rows.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.index.empty") %></h2><p><%= t("self_service.quote_core.index.empty_help") %></p><%= link_to t("self_service.quote_core.index.new"), new_inquiry_path(mode: "manual"), class: "button button--primary" %></div><% end %>
+  </section>
+</main>

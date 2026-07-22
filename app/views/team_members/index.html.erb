@@ -1,8 +1,7 @@
 <%= render "shared/settings_header", title: t("team_members.view.index.header_title"), section: :team %>
 
-<section class="app-page-shell app-page-shell--settings-form team-admin-shell">
-  <div class="team-admin-shell__top">
-  <article class="app-surface team-members-panel">
+<section class="workspace-page settings-workspace settings-workspace--content team-admin-shell">
+  <article class="team-members-panel">
     <div class="app-section-heading">
       <h2><%= t("team_members.view.index.overview_title") %></h2>
     </div>
@@ -12,81 +11,13 @@
         <strong><%= @members.size %></strong>
       </div>
       <div class="team-overview-item">
-        <span><%= t("team_members.view.index.pending_invitations") %></span>
-        <strong><%= @pending_invitations.size %></strong>
-      </div>
-      <div class="team-overview-item">
         <span><%= t("team_members.view.index.your_permission") %></span>
         <strong><%= t("team_members.view.index.roles.#{current_user.company_role}", default: current_user.company_role.to_s.humanize) %></strong>
       </div>
     </div>
   </article>
 
-  <article class="app-surface team-members-panel">
-    <div class="app-section-heading">
-      <h2><%= t("team_members.view.index.invite_title") %></h2>
-    </div>
-    <p class="app-section-caption team-members-hint"><%= t("team_members.view.index.invite_hint") %></p>
-    <%= form_with model: @new_invitation, url: team_invitations_path, local: true, html: { class: "team-invite-form" } do |f| %>
-      <div class="team-invite-field">
-        <%= f.label :email, t("team_members.view.index.email") %>
-        <%= f.email_field :email, required: true, class: ui_input_classes %>
-      </div>
-      <div class="team-invite-field">
-        <%= f.label :company_role, t("team_members.view.index.company_role") %>
-        <%= f.select :company_role, [[t("team_members.view.index.member_role"), "member"], [t("team_members.view.index.admin_role"), "admin"]], {}, class: ui_input_classes %>
-      </div>
-      <%= f.submit t("team_members.view.index.create_invitation"), class: ui_button_classes(:primary, "team-invite-submit") %>
-    <% end %>
-  </article>
-  </div>
-
-  <article class="app-table-surface team-members-panel team-members-panel--secondary">
-    <div class="app-section-heading">
-      <h2><%= t("team_members.view.index.pending_section") %></h2>
-    </div>
-    <% if @pending_invitations.any? %>
-      <div class="table-responsive">
-        <table class="team-members-table team-members-table--pending">
-          <thead>
-            <tr>
-              <th><%= t("team_members.view.index.pending_table.email") %></th>
-              <th><%= t("team_members.view.index.pending_table.role") %></th>
-              <th><%= t("team_members.view.index.pending_table.status") %></th>
-              <th><%= t("team_members.view.index.pending_table.expires") %></th>
-              <th><%= t("team_members.view.index.pending_table.actions") %></th>
-            </tr>
-          </thead>
-          <tbody>
-            <% @pending_invitations.each do |invitation| %>
-              <tr>
-                <td data-label="<%= t("team_members.view.index.pending_table.email") %>"><%= invitation.email %></td>
-                <td data-label="<%= t("team_members.view.index.pending_table.role") %>">
-                  <%= status_badge(
-                        t("team_members.view.index.roles.#{invitation.company_role}", default: invitation.company_role.to_s.humanize),
-                        invitation.company_role == "admin" ? :indigo : :slate
-                      ) %>
-                </td>
-                <td data-label="<%= t("team_members.view.index.pending_table.status") %>"><%= status_badge(t("team_members.view.index.pending"), :amber) %></td>
-                <td data-label="<%= t("team_members.view.index.pending_table.expires") %>"><%= invitation.expires_at.strftime("%Y-%m-%d %H:%M") %></td>
-                <td data-label="<%= t("team_members.view.index.pending_table.actions") %>">
-                  <%= button_to t("team_members.view.index.revoke"),
-                                team_invitation_path(invitation.token),
-                                method: :delete,
-                                data: { turbo_confirm: t("team_members.view.index.revoke_confirm", email: invitation.email) },
-                                class: ui_button_classes(:danger) %>
-                </td>
-              </tr>
-            <% end %>
-          </tbody>
-        </table>
-      </div>
-    <% else %>
-      <p class="team-members-hint"><%= t("team_members.view.index.no_pending") %></p>
-    <% end %>
-  </article>
-
-  <article class="app-table-surface team-members-panel team-members-panel--secondary">
+  <article class="team-members-panel team-members-panel--secondary">
     <div class="app-section-heading">
       <h2><%= t("team_members.view.index.current_team") %></h2>
     </div>
@@ -117,12 +48,9 @@
               </td>
               <td data-label="<%= t("team_members.view.index.members_table.email") %>"><%= link_to member.email, team_member_path(member), class: "team-member-email-link" %></td>
               <td data-label="<%= t("team_members.view.index.members_table.company_role") %>">
-                <%= status_badge(
-                      t("team_members.view.index.roles.#{member.company_role}", default: member.company_role.to_s.humanize),
-                      member.company_role == "admin" ? :indigo : :slate
-                    ) %>
+                <span class="team-member-role"><%= t("team_members.view.index.roles.#{member.company_role}", default: member.company_role.to_s.humanize) %></span>
               </td>
-              <td data-label="<%= t("team_members.view.index.members_table.status") %>"><%= status_badge(t("team_members.view.index.active"), :green) %></td>
+              <td data-label="<%= t("team_members.view.index.members_table.status") %>"><span class="team-member-status"><i aria-hidden="true"></i><%= t("team_members.view.index.active") %></span></td>
               <td data-label="<%= t("team_members.view.index.members_table.actions") %>">
                 <% if member.company_owner? %>
                   <div class="team-actions">

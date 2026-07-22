@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= html_lang %>">
   <head>
     <title><%= content_for?(:title) ? yield(:title) : "Quotation · Rubusoo" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="robots" content="noindex,nofollow,noarchive">
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem("rubusoo-theme")||"light"}catch(e){document.documentElement.dataset.theme="light"}</script>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
@@ -11,5 +12,5 @@
     <%= stylesheet_link_tag "rubusoo", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
-  <body class="buyer-body neo-os neo-os--buyer"><%= yield %></body>
+  <body class="buyer-body neo-os neo-os--buyer" data-controller="theme"><%= yield %></body>
 </html>

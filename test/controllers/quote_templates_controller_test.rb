@@ -1,45 +1,25 @@
 require "test_helper"
 
-class QuoteTemplatesControllerTest < ActionDispatch::IntegrationTest
+class DocumentDesignsControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     sign_in @user
   end
 
-  test "set_default switches default template and rebinds old default quotes" do
+  test "document design updates the single company design profile" do
     company = @user.company
-    old_default = company.quote_templates.first
-    old_default.update!(default_template: true)
+    design = company.quote_template_or_default
 
-    replacement = company.quote_templates.create!(
-      name: "Modern Template",
-      slug: "modern-template",
-      layout_type: "modern",
-      accent_color: "#1F4E79",
-      font_family: "Noto Sans",
-      show_logo: true,
-      show_images: true,
-      show_tax: true,
-      show_shipping: true,
-      show_currency: true,
-      show_valid_until: true,
-      show_payment_term: true,
-      show_terms_section: true,
-      show_notes: true,
-      show_product_images: true,
-      show_signature_block: false,
-      show_negotiated_flag: false,
-      document_kind: "quotation"
-    )
+    patch document_design_path, params: { quote_template: {
+      layout_type: "modern", layout_density: "compact", accent_color: "#146EF5",
+      font_family: "Inter", logo_position: "left", show_logo: "1", show_images: "0",
+      public_link_locale: "en", pdf_locale: "en", excel_locale: "en"
+    } }
 
-    quote = company.quotes.first
-    quote.update_column(:template_id, old_default.id)
-
-    patch set_default_quote_template_url(replacement)
-    assert_redirected_to quote_templates_path
-
-    assert replacement.reload.default_template?
-    assert_not old_default.reload.default_template?
-    assert_equal replacement.id, quote.reload.template_id
+    assert_redirected_to edit_document_design_path
+    assert_equal "modern", design.reload.layout_type
+    assert_equal "compact", design.layout_density
+    assert_equal "#146EF5", design.accent_color
+    assert_not design.show_images?
   end
 end

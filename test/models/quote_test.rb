@@ -210,7 +210,7 @@ class QuoteTest < ActiveSupport::TestCase
     duplicate.quote_items.build(description: "PI Two", unit_price: 120, quantity: 1)
 
     assert_not duplicate.valid?
-    assert_includes duplicate.errors[:source_quote_id], "has already been taken"
+    assert duplicate.errors.added?(:source_quote_id, :taken, value: source_quote.id)
   end
 
   test "pi quote can still be edited when status is not draft" do
@@ -383,5 +383,24 @@ class QuoteTest < ActiveSupport::TestCase
 
     assert_not quote.valid?
     assert_includes quote.errors[:container_loading_block], "rows exceed limit (#{Quote::MAX_CONTAINER_LOADING_ROWS})"
+  end
+
+  test "buyer locale is limited to supported customer languages" do
+    quote = quotes(:one)
+    Quote::BUYER_LOCALES.each do |locale|
+      quote.buyer_locale = locale
+      assert quote.valid?, "expected #{locale} to be accepted"
+    end
+
+    quote.buyer_locale = "fr"
+    assert_not quote.valid?
+    assert_includes quote.errors[:buyer_locale], "is not included in the list"
+  end
+
+  test "published snapshot keeps the buyer locale" do
+    quote = quotes(:one)
+    quote.buyer_locale = "es-419"
+
+    assert_equal "es-419", QuoteSnapshotBuilder.new(quote).as_json["buyer_locale"]
   end
 end

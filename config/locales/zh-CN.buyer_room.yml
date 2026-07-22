@@ -1,0 +1,119 @@
+---
+zh-CN:
+  self_service:
+    buyer_room:
+      revision: "第 %{number} 版"
+      prepared_for: "发给 %{customer}"
+      default_title: 本次报价的商品和条款
+      default_intro: 请核对商品、数量、价格和交期。如需调整，可以直接在这里告诉销售。
+      prepared_by: 报价方
+      quote: 报价编号
+      version: 版本
+      preview: 预览
+      valid_until: 有效期至
+      open: 待确认
+      currency: 币种
+      products_kicker: 01 · 报价商品
+      products_title: 本次报价包含以下商品
+      products_help: 可调整的数量会立即更新合计；其他内容如需修改，请联系销售。
+      product_image: 商品图片
+      item: "商品 %{number}"
+      configured: 已选配置
+      quantity: 数量
+      selectable: · 可调整
+      fixed: · 已确定
+      unit_price: 单价
+      lead_time: 交期
+      see_terms: 见下方说明
+      your_selection: 当前选择
+      summary: 报价合计
+      product_count: "%{count} 件商品"
+      shipping: 运费
+      total: 当前合计
+      total_help: 已包含税费和折扣
+      accept: 确认报价
+      request_changes: 提出修改
+      ask: 询问销售
+      download: 下载 PDF
+      attachments: 附件
+      ask_short: 询问
+      optional_accessories: 可选配件
+      ask_product: 咨询这件商品
+      plans_kicker: 02 · 选择配置
+      plans_title: 按需要选择配置
+      essential: 基础配置
+      essential_title: 仅主设备
+      essential_help: 不含可选配件
+      recommended: 推荐配置
+      recommended_title: 当前配置
+      recommended_help: 按本次需求选配
+      seller_choice: 销售推荐
+      complete: 完整配置
+      complete_title: 包含全部配件
+      complete_help: 适合一次配齐
+      terms_kicker: 03 · 交付与交易条件
+      terms_title: 价格之外的约定
+      incoterm: 贸易术语
+      payment: 付款方式
+      delivery: 交付说明
+      validity: 报价有效期
+      packaging: 包装
+      pending: 待确认
+      agreed: 按双方约定
+      export_packaging: 出口标准包装
+      ask_terms: 咨询交易条件
+      state_preview: 内部预览
+      state_accepted: 已确认
+      state_readonly: 仅供查看
+      preview_help: 这是工作稿预览，正式发布后会生成不可修改的版本。
+      accepted_help: 该版本已被客户确认，内容和金额已锁定。
+      readonly_help: 该版本已停止使用，请联系销售获取最新报价。
+      accepted_kicker: 报价已确认
+      accepted_title: 感谢确认，我们已收到你的决定。
+      accepted_body: 销售已经收到通知。请保留此链接，后续可在这里查看已确认版本和形式发票进度。
+      accepted_total: 确认金额
+      question_about: 咨询内容
+      entire_quote: 整份报价
+      your_name: 姓名
+      work_email: 工作邮箱
+      question: 问题
+      question_placeholder: 请告诉销售需要说明的内容
+      cancel: 取消
+      send_question: 发送问题
+      changes_kicker: 修改报价
+      changes_title: 告诉销售需要改什么
+      changes_help: 修改要求将单独记录，当前正式版本保持不变。
+      changes_placeholder: 例如数量、电压、规格、价格或交期需要调整……
+      supporting_file: 补充附件
+      send_request: 发送修改要求
+      acceptance_kicker: 正式确认
+      acceptance_title: "确认第 %{number} 版报价"
+      acceptance_help: 确认当前所选商品及合计金额
+      full_name: 姓名
+      job_title: 职务（选填）
+      po_number: 采购单号（选填）
+      note: 给销售的备注（选填）
+      authorization: 我确认本人有权代表公司接受这份报价。
+      locking: 正在锁定所选商品
+      recording: 正在记录确认结果
+      confirm_acceptance: 确认接受
+      pdf:
+        title: 商务报价单
+        prepared_for_html: "报价对象：%{customer}"
+        quote: 报价编号
+        revision: 版本
+        issued: 签发日期
+        valid_until: 有效期至
+        intro: 感谢贵司提供本次合作机会。以下设备、商务范围和交付条件均依据已确认的询盘信息编制。
+        scope: 设备与供货范围
+        product: 商品
+        specification: 规格
+        quantity: 数量
+        unit_price: 单价
+        amount: 金额
+        terms: 商务条款
+        incoterm: 贸易术语
+        payment: 付款方式
+        delivery: 交付说明
+        total: 合计
+        total_note: "第 %{number} 版 · 以本报价所列条款为准"

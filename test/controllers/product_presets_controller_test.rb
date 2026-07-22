@@ -9,6 +9,6 @@ class ProductPresetsControllerTest < ActionDispatch::IntegrationTest
     get product_presets_url
 
     assert_response :success
-    assert_match "Product Presets", response.body
+    assert_select "h1", I18n.t("product_presets.view.index.title")
   end
 end

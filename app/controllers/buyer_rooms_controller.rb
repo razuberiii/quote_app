@@ -2,6 +2,7 @@ class BuyerRoomsController < ApplicationController
   skip_before_action :authenticate_user!
   layout "buyer_room"
   before_action :load_revision
+  before_action :use_buyer_locale
   before_action :ensure_actionable!, except: %i[show pdf]
 
   def show
@@ -71,6 +72,12 @@ class BuyerRoomsController < ApplicationController
 
   def ensure_actionable!
     raise ActiveRecord::RecordNotFound unless @revision.actionable?
+  end
+
+  def use_buyer_locale
+    requested = params[:locale].presence_in(Quote::BUYER_LOCALES)
+    stored = @revision.snapshot["buyer_locale"].presence_in(Quote::BUYER_LOCALES) || @revision.quote.buyer_locale
+    I18n.locale = (requested || stored).presence_in(I18n.available_locales.map(&:to_s)) || :en
   end
 
   def buyer_room_state

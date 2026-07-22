@@ -6,8 +6,8 @@
     <%= link_to t("settings.account"), edit_user_registration_path, class: ("is-active" if section == :account) %>
     <% if current_user.can_manage_templates? %>
       <%= link_to t("settings.company"), edit_company_settings_path, class: ("is-active" if section == :company) %>
+      <%= link_to t("settings.document_design"), edit_document_design_path, class: ("is-active" if section == :document_design) %>
     <% end %>
-    <%= link_to t("settings.invitations"), team_invitations_path, class: ("is-active" if section == :invitations) %>
     <% if current_user.can_manage_team? %>
       <%= link_to t("settings.team"), team_members_path, class: ("is-active" if section == :team) %>
     <% end %>

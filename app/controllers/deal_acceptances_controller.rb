@@ -11,9 +11,9 @@ class DealAcceptancesController < ApplicationController
     version = @deal.quote_revisions.find(params.require(:quote_acceptance).require(:quote_revision_id))
     acceptance = ExternalAcceptanceRecorder.new(revision: version, actor: current_user,
       attributes: acceptance_params.to_h.symbolize_keys, idempotency_key: params[:idempotency_key]).call
-    redirect_to deal_path(@deal), notice: "Acceptance recorded against Version #{version.number}."
+    redirect_to quote_path(@deal), notice: I18n.t("self_service.quote_core.acceptance_recorded", number: version.number)
   rescue ExternalAcceptanceRecorder::NotActionable, ActiveRecord::RecordInvalid => error
-    redirect_to new_acceptance_deal_path(@deal, version_id: version&.id), alert: error.message
+    redirect_to new_acceptance_quote_path(@deal, version_id: version&.id), alert: error.message
   end
 
   private

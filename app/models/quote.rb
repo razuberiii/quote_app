@@ -1,4 +1,5 @@
 class Quote < ApplicationRecord
+  BUYER_LOCALES = %w[en zh-CN es-419].freeze
   REMINDER_COOLDOWN = 12.hours
   MAX_DECIMAL_15_4 = BigDecimal("99999999999.9999")
   MAX_QUOTE_ITEMS_COUNT = 200
@@ -124,6 +125,7 @@ class Quote < ApplicationRecord
   }.freeze
 
   belongs_to :company
+  validates :buyer_locale, inclusion: { in: BUYER_LOCALES }
   belongs_to :customer
   belongs_to :template, class_name: "QuoteTemplate", optional: true
   belongs_to :source_quote, class_name: "Quote", optional: true
@@ -759,6 +761,7 @@ class Quote < ApplicationRecord
 
   def set_defaults
     self.currency = "USD" if currency.blank?
+    self.buyer_locale = company&.quote_language.presence_in(BUYER_LOCALES) || "en" if buyer_locale.blank?
     self.status = "draft" if status.blank?
     self.issued_on ||= Date.current
     self.tax_amount ||= 0

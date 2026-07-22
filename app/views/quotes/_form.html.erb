@@ -135,13 +135,6 @@
       <div class="quote-form-section-body">
       <div class="quote-form-grid">
         <div>
-          <%= f.label :template_id, t("quotes.view.form.template") %>
-          <%= f.select :template_id,
-                       (@template_options || []).map { |t| ["#{t.name} (#{t.layout_type})", t.id] },
-                       { include_blank: false },
-                       { class: ui_input_classes, data: { searchable_select: true, search_placeholder: t("quotes.view.form.search_template") } } %>
-        </div>
-        <div>
           <%= f.label :currency %>
           <%= f.select :currency, [ "USD", "EUR", "GBP", "CNY", "JPY", "AUD", "CAD", "SGD", "HKD", "MXN", "BRL", "COP", "CLP", "PEN", "ARS" ], {}, { class: ui_input_classes, disabled: pi_mode } %>
           <%= hidden_field_tag "quote[currency]", quote.currency if pi_mode %>

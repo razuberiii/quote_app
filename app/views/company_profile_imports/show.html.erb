@@ -1,0 +1,28 @@
+<% company_data = @profile_import.candidate_data.fetch("company", {}) %>
+<% evidence = Array(@profile_import.candidate_data["evidence"]) %>
+<main class="deal-workspace company-import company-import--review">
+  <header class="deal-page-header">
+    <div><p class="eyebrow"><%= t("self_service.company_import.review.eyebrow") %></p><h1><%= t("self_service.company_import.review.title") %></h1><p><%= t("self_service.company_import.review.subtitle") %></p></div>
+    <%= link_to t("self_service.company_import.restart"), new_company_profile_import_path, class: "button button--secondary" %>
+  </header>
+
+  <% if @profile_import.warnings.any? %><section class="form-message form-message--warning"><strong><%= t("self_service.company_import.review.warnings") %></strong><ul><% @profile_import.warnings.each do |warning| %><li><%= warning %></li><% end %></ul></section><% end %>
+
+  <% if @profile_import.status == "failed" %>
+    <section class="empty-state"><h2><%= t("self_service.company_import.review.failed") %></h2><p><%= t("self_service.company_import.review.failed_help") %></p><%= link_to t("self_service.company_import.restart"), new_company_profile_import_path, class: "button button--primary" %></section>
+  <% else %>
+    <%= form_with model: @profile_import, method: :patch, class: "inquiry-review__grid" do |form| %>
+      <aside class="inquiry-original"><p class="section-kicker"><%= t("self_service.company_import.review.source") %></p><blockquote><%= @profile_import.source_text.presence || t("self_service.company_import.review.file_source") %></blockquote></aside>
+      <section class="inquiry-result">
+        <div class="studio-paper__heading"><p class="section-kicker"><%= t("self_service.company_import.review.candidate") %></p><h2><%= t("self_service.company_import.review.confirm_title") %></h2><p><%= t("self_service.company_import.review.confirm_help") %></p></div>
+        <div class="extraction-fields">
+          <% CompanyProfileImport::COMPANY_FIELDS.each do |field| %>
+            <% cited = evidence.find { |row| row["field_path"].to_s.end_with?(field) } %>
+            <label class="extraction-field"><span><%= t("self_service.company_import.fields.#{field}") %></span><%= text_area_tag "company_profile_import[candidate_data][#{field}]", company_data[field], rows: field.in?(%w[registration_details address]) ? 3 : 1 %><small class="evidence"><%= cited ? t("self_service.company_import.review.evidence", excerpt: cited["excerpt"]) : t("self_service.company_import.review.no_evidence") %></small></label>
+          <% end %>
+        </div>
+        <div class="inquiry-build"><%= form.submit t("self_service.company_import.review.save"), class: "button button--secondary" %><%= button_tag t("self_service.company_import.review.apply"), type: "submit", formaction: apply_company_profile_import_path(@profile_import), class: "button button--primary" %></div>
+      </section>
+    <% end %>
+  <% end %>
+</main>

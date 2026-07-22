@@ -6,7 +6,9 @@ Core tokens are the `--rb-*` family, with compatibility aliases for `--canvas`, 
 
 Visual convergence contract: authenticated pages are audited as a dark operating surface. A light area wider than 520px and taller than 160px is considered a visual leak unless it is inside `.studio-paper`, `.pi-document`, `.final-document`, `.document-preview`, or `.buyer-storefront`. Shared overlays use `.neo-modal`, `.neo-modal__panel`, and `.neo-modal__state`; inline modal presentation styles are not allowed. The automated full-site crawler records overflow, clipped text, broken images, and light-surface leaks at 1440, 390, and priority 360/412 widths before a visual baseline may be updated.
 
-Signature motion uses the same motion tokens as application feedback. `.kinetic-headline__window` owns the marketing phrase transition; Smart Intake retains evidence/extraction motion; `.studio-save-state` owns Dirty → Saving → Saved feedback; and `.channel-flow` owns delivery preparation/failure feedback. Every signature animation must have a non-animated `prefers-reduced-motion` state with identical content and controls.
+Signature motion uses the same motion tokens as application feedback. The marketing headline is deliberately static; Smart Intake retains evidence/extraction motion, `.studio-save-state` owns Dirty → Saving → Saved feedback, and `.channel-flow` owns delivery preparation/failure feedback. Every remaining signature animation must have a non-animated `prefers-reduced-motion` state with identical content and controls.
+
+The marketing deal Hero is the single cinematic exception within Neo Commerce OS: `.product-hero` owns the ambient orbit and `.product-hero__product` owns the three-stage live deal graph. It may use spatial depth and stronger type scale, but must preserve the same blue/cyan/red tokens, real workflow content, manual step controls, mobile containment, and reduced-motion fallback. Company profile import reuses `inquiry-import__*`, `inquiry-review__*`, `extraction-*`, and `import-guardrails`; do not introduce a separate AI wizard or light review surface.
 
 Canonical primitives are `.button` with `--primary`, `--secondary`, `--ghost`, and `--full` modifiers; `.input`; `.textarea`; `.field-label`; `.status`; `.rubusoo-dialog`; `.brand`; `.eyebrow`; and `.section-kicker`. Marketing campaign structures use `marketing-`; pricing and guided demo structures use `rb-`; buyer-facing structures use `buyer-`; inquiry workflow uses `inquiry-`; and authenticated product pages use `rubusoo-`. Do not add Bootstrap-style dashboard patterns, generic utility-card grids, decorative glass effects, or alternate button/input systems.
 
@@ -14,17 +16,39 @@ Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bott
 
 Inquiry import and review use the `inquiry-import__*` and `inquiry-review__*` families. The review is evidence-led: source content remains in a sticky paper panel, extracted fields use quiet inline status text, Catalog candidates are rows rather than generic cards, and all monetary confirmation is grouped in a dark commercial band. On narrow screens the source becomes a bounded preview above the editable results.
 
+Smart Intake is an application surface in both themes. `.inquiry-source-panel`, `.extracted-field`, `.inquiry-product-card`, Catalog visuals and their controls must consume `--neo-*` theme tokens; hard-coded graphite cards are prohibited because they create dark islands in light mode. Visual leakage tests are bidirectional: dark mode rejects large light surfaces and light mode rejects large dark surfaces outside explicitly documented output previews.
+
 Catalog review uses `.import-coverage*` for the page/Sheet processing ledger and `.candidate-*` for human decisions. Failed or unrecognized ranges remain visible above candidates. Account security overlays use the shared `.neo-modal` panel, field, state, and action families; inline light modal styling is prohibited.
 
 Settings upload controls and account secondary actions remain dark operating-surface controls. Native file selector buttons are normalized inside `.upload-control`; white legacy upload and security buttons are not permitted.
 
+Settings file fields use the same themed control surface as text inputs. `.upload-control` is a compact label-and-control primitive; it must not introduce a padded upload card or a hard-coded light/dark background. Company document uploads use one two-column metadata row with the file control spanning the row, collapsing to one column on mobile.
+
+`.upload-control__input` hides the browser-dependent native filename control; `.upload-control__action` and `.upload-control__empty` provide localized, theme-safe affordances.
+
+Settings boolean choices and Smart Intake extracted fields are editorial rows, not nested cards. Their grouping comes from spacing and a single bottom rule; do not wrap every checkbox or extracted value in a bordered surface.
+
+Authenticated navigation hover, active and focus states consume `--neo-elevated` and `--neo-text` in both themes. Page-specific styles must not hard-code a light hover background or dark hover text.
+
+The legacy `/settings/company` entry point redirects to the canonical company settings editor so old bookmarks and previously shared links do not become application 404s.
+
 ### Motion direction
 
-The shared motion grammar mirrors the Remotion timeline rules while remaining native CSS/Stimulus in the live Rails UI. Use one normalized progress curve: `--motion-crisp: cubic-bezier(.16,1,.3,1)` for entrances, `--motion-editorial` for quiet status breathing, and `--motion-pop` only for small brand emphasis. Page scenes enter once, sibling sections use bounded 55–70ms sequencing, and persistent motion is limited to live/confirmed status signals. Buttons may use the shared light sweep, rows may translate at most 4px on hover, and inputs use a focus glow without layout movement. Every motion selector must have a `prefers-reduced-motion` opt-out. Remotion itself is reserved for rendered product-story video assets; it is not a runtime dependency for ordinary controls.
+The shared motion grammar mirrors the Remotion timeline rules while remaining native CSS/Stimulus in the live Rails UI. Use one normalized progress curve: `--motion-crisp: cubic-bezier(.16,1,.3,1)` for entrances, `--motion-editorial` for quiet status breathing, and `--motion-pop` only for small brand emphasis. Content is visible by default; the orchestrator may attach an entrance class only when a node is already at or just before the viewport, and must never leave below-fold content transparent. Page scenes enter once, sibling sections use bounded 55–70ms sequencing, and persistent motion is limited to live/confirmed status signals. The global two-pixel scroll signal and marketing pointer light are the only shared cinematic effects. Buttons may use the shared light sweep, rows may translate at most 4px on hover, and inputs use a focus glow without layout movement. Every motion selector must have a `prefers-reduced-motion` opt-out. Remotion itself is reserved for rendered product-story video assets; it is not a runtime dependency for ordinary controls.
 
-Quote Studio uses `quote-studio--editor` with three true functional columns. The center `studio-paper` is the buyer document itself and owns inline editing; the left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface.
+Theme contract: light is the safe default; an explicit user choice is persisted as `rubusoo-theme`. `html[data-theme]` switches both `--neo-*` and `--ws-*` tokens from one source. Page or component rules must consume these tokens and must not reassert hard-coded white backgrounds after the theme block. The shared `.theme-switch` is the only theme control. Theme changes use token transitions only; root View Transition snapshots are prohibited because they can expose mixed-theme frames and nested page captures. Mobile account navigation uses the compact `.account-dropdown__identity` and `.account-dropdown-link*` command-panel structure; full-width legacy white account cards and text-only theme buttons are prohibited.
+
+Company settings uses a transparent `.settings-editor` canvas rather than a white/surface card around the full form. On mobile, `.settings-editor__bar` keeps company identity above two equal compact actions; it must not turn the import and save controls into stacked full-width panels.
+
+Marketing motion contract: `.product-landing` owns `product-reveal` section entrances and `.product-hero` owns the auto-advancing three-state `product-story`. The story advances every 2.6 seconds, pauses for pointer/focus interaction, and retains manual previous/next controls. A static Hero with only hover effects does not satisfy the product-motion baseline.
+The product-story footer is an opaque, bordered control bar with reserved layout space below every story card. Navigation buttons must never share or overlap the quote amount/content region.
+On mobile, the three story phases share one stable 336px editorial viewport so automatic and manual changes never move surrounding content. The composition is a compact deal filmstrip: the existing graphite surface and evidence highlights remain, while one Rubus-red progress accent, hairline structure, and small square controls tie it to the rest of the marketing page. The progress track stays above all phase panels and visibly advances through one-third, two-thirds and complete states. Content begins from a consistent top baseline instead of being vertically centered in oversized empty space. Large ghost numerals, neon status dots, scanning light and blur entrances are prohibited. Phase changes use a short 12px horizontal entrance with restrained text sequencing and an immediate reduced-motion fallback.
+
+Quote Studio uses `quote-studio--editor` with three true functional columns. It is an application editor, not a literal print preview: shell, canvas, editable document surface, controls and pricing region all consume the active theme through the `--studio-*` layer tokens. The center `.studio-paper` owns inline editing but must never force white controls or dark text in dark mode. Only the separate PDF/Excel renderers and buyer-facing immutable output may retain paper styling. The left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface, and do not add theme-specific `!important` paper overrides.
 
 Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.
+
+Buyer PDF output follows the immutable Revision buyer locale. All document labels and standard prose live under `self_service.buyer_room.pdf`; the issued date falls back to the publication date, and optional contact values must not leave orphan separators.
 
 Revision comparison uses paired `revision-values` and `revision-item-diff` columns; never expose raw snapshot JSON. PI uses the print-safe `pi-document` hierarchy and must always render from the immutable acceptance snapshot.
 
@@ -33,6 +57,12 @@ Delivery, response review, and document evidence use the `channel-flow`, `respon
 The remainder of this document describes legacy families retained only while old pages are replaced.
 
 This document is the single usage guide for project styling.
+
+Quote Core is the canonical authenticated commercial surface. `.quote-core-index`, `.quote-core-detail`, `.quote-core-list`, `.quote-core-summary`, `.quote-activity-stream`, and `.quote-version-output` express the quote lifecycle without Deal/CRM cards. Quote status uses the compact `.quote-state` signal; PDF, Excel, customer-page and send actions are first-level controls on each immutable version. New seller pages must not introduce Deal-stage, KPI dashboard, or separate Files-hub patterns.
+
+Document design replaces user-facing template CRUD. `.document-design`, `.design-recipes`, and `.design-paper` form one settings surface for brand, curated layout recipe, content defaults and per-channel language. `.design-paper` is the only paper-white preview inside this authenticated page. `.import-hub` is the single AI entry and `.customer-core` is the quote-required customer resource; both use editorial rows instead of nested cards.
+
+The `.design-paper` preview owns fixed document-ink colors in both themes. Application theme tokens must not recolor its headings, table content, metadata or rules.
 
 - Canonical app stylesheet: `app/assets/stylesheets/components.css`
 - Public quote stylesheet: `app/assets/stylesheets/public_quote.css`
@@ -184,6 +214,7 @@ Dashboard families are local to dashboard sequencing and must not be reused as g
 - `.team-members-table*` (team management table + mobile card transform for member/invitation rows)
 
 Team families are local to team management pages.
+Team member roles are plain text and member state uses a small semantic dot plus text. Do not render role/state as rounded badges in the compact member list.
 
 7. Admin Console helpers (minimal)
 - Prefer canonical families for admin pages: `.app-page-shell`, `.app-surface`, `.app-table-surface`, `.app-ui-button`, `.app-ui-input`.
@@ -405,6 +436,8 @@ data-action="click->clipboard#copy"
 - `.deal-tabs` owns Overview, Quote, Conversation, Versions and Documents within one Deal. These are contextual views, not primary navigation.
 - `.deal-motion` uses a short staggered entry animation for actionable Inbox items. Motion is disabled by the global reduced-motion rule.
 - Ordinary Deal surfaces remain graphite. Light surfaces are reserved for Quote Studio canvas, Buyer Room light theme, PI and printable documents.
+- Quote Studio's `.studio-paper` is a deliberately light, buyer-document canvas in both themes. Dark-theme application rules must not recolor its headings, labels, or form controls; only the surrounding editor chrome changes theme.
+- Below `520px`, Deal rows must use shrinkable grid tracks (`min-width: 0`), wrap long identity and activity copy, and keep only the amount unbroken. Desktop table minimum widths must not create horizontal page overflow.
 - `.channel-flow` and `.context-form` are the canonical channel-neutral workflow surfaces for Delivery, buyer Response and seller-recorded Acceptance. They use the existing button/input primitives, graphite surface hierarchy and shared motion tokens.
 - `.channel-picker` is a flat connected decision grid, not a card collection. Selecting a channel moves the signal edge and updates whether Buyer Room view activity is available.
 - Delivery/Acceptance forms become one-column, nearly full-width workflows below `900px`; no desktop modal is scaled down on mobile.
@@ -412,9 +445,73 @@ data-action="click->clipboard#copy"
 ### Settings workspace
 
 - Desktop settings are composed workspaces, not mobile cards stretched to fill the viewport.
-- `.account-settings-layout` keeps profile editing primary and places security/invitations in a supporting rail.
-- `.team-admin-shell__top` pairs team overview and invitation controls above the dense member tables.
+- `.account-settings-layout` keeps profile editing primary and places account security in a supporting rail.
+- `.team-admin-shell__top` pairs team overview and member administration above the dense member table. Invitation UI was removed because the legacy model reassigned `company_id` instead of creating a safe membership.
+- Team administration is a flat settings workspace: overview metrics and mobile member rows use dividers, not nested white cards or rounded paper containers. Do not add `app-surface`/`app-table-surface` to `.team-members-panel`.
 - Both structures intentionally collapse to one column at `900px`; mobile primary actions use the available width.
+
+### Marketing authentication
+
+- `.marketing-auth-shell` and `.marketing-auth-grid` own sign-in and registration; both use the marketing graphite surface at desktop and mobile sizes.
+- `.marketing-auth-title`, `.marketing-auth-body`, and `.auth-submit-button` have intentionally scoped literal foreground/action colors. This prevents old light-page heading and generic form-button rules from leaking into authentication pages.
+- Authentication forms reuse `app-ui-input` and `app-ui-button`; do not add a second auth-only field or button family.
+
+### Stable marketing hero and account settings
+
+- `.hero-fixed-headline` is the only homepage headline presentation. Its two locale-backed lines are structurally fixed; the outcome line may receive a one-time underline reveal, but no phrase replacement, caret, reserved phrase width, or timer may alter wrapping.
+- `product-story` may change the adjacent workflow panel only after explicit previous/next input; it must not autoplay.
+- Account settings uses `.account-settings-layout` as one aligned profile/security workspace. Page-scoped rules under `page-users-registrations.page-action-edit` normalize legacy panel, label, email row, primary action, and mobile behavior.
+
+### Global motion orchestration
+
+- `motion-orchestrator` mounts on both application bodies and provides short viewport entrances and repeated-row staggering.
+- `.motion-node` is added at runtime so no-JS rendering remains fully visible. Motion uses only small opacity and vertical-transform changes and must never change layout dimensions.
+- Homepage copy is static. `product-story` changes only the adjacent workflow state after explicit input.
+- Reduced-motion disables entrances and row staggering while preserving complete text and controls.
+
+### Marketing editorial composition
+
+- Homepage copy uses direct sales language: customer input, seller action and buyer outcome. Internal terms such as “受控草稿”“商业决定” and “结构化候选” do not belong in marketing headlines.
+- `.product-landing` is the canonical scope for the 2026 marketing composition. It owns section gutters, editorial heading scale, connected problem rows and feature spacing without changing authenticated application density.
+- The hero uses a direct two-line customer-to-outcome statement. A red underline may reveal once beneath the outcome, without changing the text or its wrapping.
+- Mobile headings are intentionally smaller than the earlier poster treatment. At `390px`, the hero should reveal body copy and at least one action without forcing the user through a full viewport of headline text.
+- At `520px` and below, long Chinese marketing headings use a relaxed CJK line-height; dark-theme story-row hover states must remain dark and must not inherit the light theme's grey fill.
+- Product UI compositions provide proof after each claim. Decorative motion can reveal or illuminate them, but must not autoplay workflow state, move layout, or delay access to controls.
+- The seller walkthrough uses `.seller-demo__mast`, `.seller-demo__nav` and `.seller-demo__section` as one bounded public-page family. Mobile CJK headings use document-like line-height instead of the desktop display treatment.
+
+### Rubusoo product system
+
+- The shared direction is a neutral revenue workspace: warm-white marketing and application surfaces, graphite text and one Rubus red commercial signal. Neon gradients, pointer lights, cyan display copy and decorative blur are retired.
+- Marketing uses the product as the primary visual. Copy stays compact above or beside a real interface composition; it does not imitate a poster or split a sentence into oversized animated fragments.
+- Authenticated pages use application-scale headings (`32px–52px` desktop, approximately `34px` mobile), dense rows and plain white working surfaces. Marketing headline scale must not leak into Inbox, Library, settings or import flows.
+- Primary buttons are graphite. Rubus red indicates progress, missing commercial input, selection or acceptance—not generic decoration.
+- Motion is state-based and fast: `160ms–280ms` for hover, row entry, panel change and progress. Global pointer fields, blur entrances, page progress decoration and typewriter copy are prohibited.
+- Product motion may use a short timeline when it explains work: inquiry fields settle in source order, totals tick after quantity changes, and acceptance changes the action rail from pending to locked. These sequences remain interruptible and respect reduced motion.
+
+### Chinese product copy
+
+- Describe the operation, resulting state and next required action. Avoid giving the product a conversational personality.
+- Replace defensive phrases such as “不会瞎填”, “不会猜”, “永远不会” and “你只管” with explicit states such as “未识别字段保留为空” and “金额需由销售确认”.
+- Use established product terms including “商品库”, “报价草稿”, “已发布版本” and “核对结果”. Do not mix Library, Deal, Candidate or Working draft into Chinese UI.
+- Controls use short actions such as “创建报价”, “开始识别” and “保存核对结果”. Marketing slogans do not belong in controls.
+- Keep help text factual and concise. Do not repeat trust claims already enforced by the workflow.
+
+### Theme and responsive navigation
+
+- `data-theme` on the root `<html>` element is the single theme switch. `theme_controller` persists an explicit choice and otherwise follows the operating-system preference.
+- Application colors must resolve through `--ws-*` tokens. Marketing dark-mode exceptions stay scoped beneath `[data-theme="dark"] body.neo-os--marketing`.
+- `.navbar-drawer` owns the primary navigation and controls as one mobile surface. Do not position `.navbar-menu` and `.navbar-controls` as separate stacked panels.
+- Account, notification, locale and theme controls use the same row height and padding inside the drawer. On mobile the notification list opens as a bottom sheet so it cannot be clipped by the navigation surface.
+- High-energy motion belongs to state surfaces, highlights and ambient layers. It must not replace copy, change layout dimensions or delay input.
+
+### Settings, catalog import and buyer quotation
+
+- Account, company and team settings share `_settings_header`, `.settings-workspace--header`, `.settings-rail` and `.settings-workspace--content`. A settings page must not create a second tab bar or a different outer width.
+- Team overview metrics use one two-column divider row, and mobile members use compact identity rows with the avatar as the only left column. Reintroducing form-style stacked `data-label` rows is prohibited.
+- `.settings-workspace--header` owns only context and navigation; it has no trailing page-sized padding. The content shell owns the vertical rhythm below the tabs.
+- `.catalog-import .import-dropzone` stays on the workspace canvas. Only `.upload-picker` is a bounded upload target; do not wrap the whole operation in a white paper card.
+- Buyer quotation colors resolve through `--buyer-*` tokens. Every buyer document surface, plan state and summary must support both root `data-theme` values; fixed white plan cards are prohibited.
+- `.buyer-plan-grid .is-selected` must change the full option surface and text contrast without changing its position or dimensions.
 
 1. Search class usage with `rg` in `app/views` and stylesheet files.
 2. Confirm no duplicate selector blocks were introduced.

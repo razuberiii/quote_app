@@ -1,3 +1,4 @@
+<% if locale_nav_items.many? %>
 <div class="locale-nav" role="navigation" aria-label="<%= t('locale.switcher_label') %>">
   <details class="locale-nav-dropdown">
     <summary class="locale-nav-trigger">
@@ -22,3 +23,4 @@
     </div>
   </details>
 </div>
+<% end %>

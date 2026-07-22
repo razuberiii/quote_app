@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
   before_action :touch_last_active_at!
   before_action :ensure_email_verified!
   before_action :configure_permitted_parameters, if: :devise_controller?
-  helper_method :pending_team_invitations_count, :ui_brand_color, :ui_brand_text_color,
+  helper_method :ui_brand_color, :ui_brand_text_color,
                 :locale_nav_items, :current_locale_nav_item, :locale_switch_url,
                 :impersonating?, :real_admin_user, :acting_user_for_audit
 
@@ -89,8 +89,7 @@ class ApplicationController < ActionController::Base
 
   def locale_nav_items
     [
-      { locale: :"zh-CN", label: "简体中文", short_label: "中文" },
-      { locale: :en, label: "English", short_label: "EN" }
+      { locale: :"zh-CN", label: "简体中文", short_label: "中文" }
     ]
   end
 
@@ -237,12 +236,6 @@ class ApplicationController < ActionController::Base
 
   def require_company_settings_manager!
     redirect_to root_path, alert: t("flash.not_authorized") unless current_user&.can_manage_templates?
-  end
-
-  def pending_team_invitations_count
-    return 0 unless current_user.present?
-
-    TeamInvitation.active.where("LOWER(email) = ?", current_user.email.to_s.downcase).count
   end
 
   def ui_brand_color

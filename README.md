@@ -10,7 +10,8 @@ It focuses on quote revisions, buyer interaction, public quote links, and multi-
 - PDF and Excel export
 - Quote template system (branding, visibility toggles, output controls)
 - Quote item image support (gallery select + upload, stable per quote item)
-- Multi-language UI/content (`en`, `zh-CN`, `es-419`)
+- Chinese-first seller UI with all visible product copy routed through I18n. English and Spanish locale files remain migration sources but are not advertised as complete product locales until their end-to-end audits pass.
+- Controlled AI imports for inquiries, product catalogs, and company profiles (strict JSON candidates + human review before write)
 - Independent admin console (`/admin`) for user management, impersonation, and audit logs
 - Public legal pages for marketing site: `/privacy`, `/terms`
 
@@ -77,6 +78,35 @@ Run minimal checks:
 bundle exec rails zeitwerk:check
 bundle exec rails test
 ```
+
+## New-user quote workflow
+
+Rubusoo is quote-first; there is no separate Deal pipeline to maintain.
+
+1. Open **AI import** and add the seller company profile. Confirm the extracted legal identity, contact details and certificates.
+2. Open **Document design** once. Choose a curated layout, brand color, content defaults and the customer-page/PDF/Excel languages.
+3. Import a catalog or price list into **Library**. AI creates candidates; a user confirms products and reference prices before they become mastered data.
+4. Import the customer's inquiry from email text, PDF or spreadsheet. Confirm the customer, products, quantities, destination, Incoterm, price and freight evidence.
+5. Edit the quote, preview the customer page, then publish an immutable Version.
+6. From **Versions & exports**, open the customer page or download PDF/Excel directly. Send the same Version to the customer.
+7. Record customer feedback in **Customer activity**. Apply reviewed changes to a new quote draft and publish V2; V1 remains read-only.
+
+### Suggested AI intake test text
+
+```text
+From: Anna Keller <anna@atlas-industrial.example>
+Company: Atlas Industrial Supply GmbH, Hamburg, Germany
+
+Please quote 5 × HZ-240 hydraulic power units, 380V / 50Hz, IP54,
+including one spare seal kit per unit. Delivery to Hamburg under CIF.
+We need shipment before 30 September. Please quote in USD and send the
+customer-facing quotation in English.
+
+The inquiry does not include a target price, freight amount or payment term.
+Keep those items unconfirmed for our sales team to complete.
+```
+
+Expected review behavior: customer, product, quantity, voltage, destination, currency and requested language are extracted with source evidence; price, freight and payment terms remain explicitly unconfirmed instead of being guessed.
 
 ## Page Screenshot Script
 

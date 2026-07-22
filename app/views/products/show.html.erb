@@ -1,27 +1,27 @@
 <section class="workspace-page product-source">
   <header class="workspace-heading workspace-heading--split">
-    <div><span class="eyebrow">Library / Product source</span><h1><%= @product.name %></h1><p><%= @product.sku.presence || "No SKU" %> · <%= @product.product_category.presence || "Uncategorised" %></p></div>
-    <div class="resource-editor__actions"><%= link_to "Back to Library", library_path, class: "control control--quiet" %><%= link_to "Edit source", edit_product_path(@product), class: "control control--primary" %></div>
+    <div><span class="eyebrow"><%= t("self_service.product.show.eyebrow") %></span><h1><%= @product.name %></h1><p><%= @product.sku.presence || t("self_service.product.show.no_sku") %> · <%= @product.product_category.presence || t("self_service.product.show.uncategorized") %></p></div>
+    <div class="resource-editor__actions"><%= link_to t("self_service.product.show.back"), library_path, class: "control control--quiet" %><%= link_to t("self_service.product.show.edit"), edit_product_path(@product), class: "control control--primary" %></div>
   </header>
 
   <div class="product-source__layout">
     <aside class="resource-media">
       <div class="resource-media__preview">
-        <% if @product.display_image.present? %><%= image_tag @product.display_image, alt: @product.name %><% else %><div class="product-visual-placeholder"><span>PRODUCT / SOURCE</span><strong><%= @product.sku.presence || @product.name %></strong><i></i></div><% end %>
+        <% if @product.display_image.present? %><%= image_tag @product.display_image, alt: @product.name %><% else %><div class="product-visual-placeholder"><span><%= t("self_service.product.show.source") %></span><strong><%= @product.sku.presence || @product.name %></strong><i></i></div><% end %>
       </div>
       <% if @product.gallery_images.attached? %><div class="resource-media__gallery"><% @product.gallery_images.each do |image| %><%= image_tag image, alt: @product.name %><% end %></div><% end %>
     </aside>
 
     <div class="product-source__content">
-      <section class="source-summary"><span class="eyebrow">Commercial source</span><strong><%= @product.price_currency %> <%= number_with_precision(@product.default_price, precision: 2) %></strong><p>Reference price · confirmation is still required inside each Deal.</p></section>
+      <section class="source-summary"><span class="eyebrow"><%= t("self_service.product.show.commercial") %></span><strong><%= @product.price_currency %> <%= number_with_precision(@product.default_price, precision: 2) %></strong><p><%= t("self_service.product.show.reference_help") %></p></section>
       <dl class="source-facts">
-        <div><dt>Sales unit</dt><dd><%= @product.unit.presence || "—" %></dd></div>
+        <div><dt><%= t("self_service.product.show.unit") %></dt><dd><%= @product.unit.presence || "—" %></dd></div>
         <div><dt>MOQ</dt><dd><%= @product.moq.presence || "—" %></dd></div>
-        <div><dt>Lead time</dt><dd><%= @product.lead_time.presence || "Not specified" %></dd></div>
-        <div><dt>Internal cost</dt><dd><%= @product.cost_price.present? ? "#{@product.price_currency} #{number_with_precision(@product.cost_price, precision: 2)}" : "Not recorded" %></dd></div>
+        <div><dt><%= t("self_service.product.show.lead_time") %></dt><dd><%= @product.lead_time.presence || t("self_service.product.show.not_specified") %></dd></div>
+        <div><dt><%= t("self_service.product.show.internal_cost") %></dt><dd><%= @product.cost_price.present? ? "#{@product.price_currency} #{number_with_precision(@product.cost_price, precision: 2)}" : t("self_service.product.show.not_recorded") %></dd></div>
       </dl>
-      <section class="source-description"><span class="eyebrow">Buyer-facing description</span><h2>Product context</h2><p><%= @product.description.presence || "Add a concise description before this product enters a buyer-facing quote." %></p></section>
-      <section class="source-config"><span class="eyebrow">Configuration</span><div><article><strong>Specification preset</strong><span><%= @product.default_spec_preset&.name || "No default" %></span></article><article><strong>Accessory preset</strong><span><%= @product.default_addon_preset&.name || "No default" %></span></article></div></section>
+      <section class="source-description"><span class="eyebrow"><%= t("self_service.product.show.description") %></span><h2><%= t("self_service.product.show.context") %></h2><p><%= @product.description.presence || t("self_service.product.show.context_empty") %></p></section>
+      <section class="source-config"><span class="eyebrow"><%= t("self_service.product.show.configuration") %></span><div><article><strong><%= t("self_service.product.show.spec_preset") %></strong><span><%= @product.default_spec_preset&.name || t("self_service.product.show.no_default") %></span></article><article><strong><%= t("self_service.product.show.addon_preset") %></strong><span><%= @product.default_addon_preset&.name || t("self_service.product.show.no_default") %></span></article></div></section>
     </div>
   </div>
 </section>

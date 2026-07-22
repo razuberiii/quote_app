@@ -35,7 +35,7 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     inquiry.manually_extract!
     get inquiry_path(inquiry)
     assert_response :success
-    assert_select "[data-action='inquiry-review#addProduct']", text: /Deal-only/
+    assert_select "[data-action='inquiry-review#addProduct']", text: /#{Regexp.escape(I18n.t("self_service.review.add_manual_product"))}/
   end
 
   test "primary Build Deal action saves the current review before creating" do

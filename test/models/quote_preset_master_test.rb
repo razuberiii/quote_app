@@ -11,7 +11,7 @@ class QuotePresetMasterTest < ActiveSupport::TestCase
     second = QuotePresetMaster.new(company: @company)
 
     assert_not second.valid?
-    assert_includes second.errors[:company_id], "has already been taken"
+    assert second.errors.added?(:company_id, :taken, value: @company.id)
   end
 
   test "preset module must match configured slot" do

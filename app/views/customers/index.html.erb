@@ -1,0 +1,5 @@
+<main class="workspace-page customer-core">
+  <header class="customer-core__hero"><div><p class="eyebrow"><%= t("customers.core.eyebrow") %></p><h1><%= t("customers.core.title") %></h1><p><%= t("customers.core.help") %></p></div><%= link_to t("customers.core.new"), new_customer_path, class: "button button--primary" %></header>
+  <%= form_with url: customers_path, method: :get, class: "quote-core-filters" do |form| %><%= form.search_field :q, value: params[:q], placeholder: t("customers.core.search") %><%= form.submit t("customers.core.search_action"), class: "button button--secondary" %><% end %>
+  <section class="customer-core__list"><% @customers.each do |customer| %><%= link_to customer_path(customer), class: "customer-core__row" do %><div><strong><%= customer.name %></strong><small><%= [customer.contact_name, customer.email].compact_blank.join(" · ") %></small></div><span><%= t("customers.core.quote_count", count: customer.quotes.size) %></span><i>→</i><% end %><% end %><% if @customers.empty? %><div class="deal-zero"><h2><%= t("customers.core.empty") %></h2><p><%= t("customers.core.empty_help") %></p></div><% end %></section>
+</main>

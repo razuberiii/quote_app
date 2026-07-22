@@ -1,73 +1,33 @@
 import { Controller } from "@hotwired/stimulus"
 
-const TYPE_DELAY = 58
-const DELETE_DELAY = 31
-const HOLD_DELAY = 1150
-
 export default class extends Controller {
-  static targets = ["step", "status", "progress", "phrase"]
+  static targets = ["step", "status", "progress"]
+  static values = { labels: Array }
 
   connect() {
-    this.reduced = matchMedia("(prefers-reduced-motion: reduce)").matches
-    this.phrases = ["buyer requests", "messy emails", "spreadsheets", "purchase orders"]
-    this.labels = ["Evidence located", "Commercial gaps controlled", "Version locked · accepted"]
-    this.phraseIndex = 0
+    this.labels = this.hasLabelsValue ? this.labelsValue : ["", "", ""]
     this.storyIndex = 0
-    this.timeouts = []
-
-    if (this.reduced) {
-      this.phraseTarget.textContent = "buyer requests"
-      this.renderStory(2)
-      return
-    }
-
-    this.phraseTarget.textContent = ""
-    this.typeCurrentPhrase()
     this.renderStory(0)
-    this.storyTimer = window.setInterval(() => this.advanceStory(1), 2700)
-  }
-
-  disconnect() {
-    this.timeouts.forEach(window.clearTimeout)
-    window.clearInterval(this.storyTimer)
-  }
-
-  later(callback, delay) {
-    const id = window.setTimeout(callback, delay)
-    this.timeouts.push(id)
-    return id
-  }
-
-  typeCurrentPhrase(position = 0) {
-    const phrase = this.phrases[this.phraseIndex]
-    this.phraseTarget.textContent = phrase.slice(0, position)
-    if (position < phrase.length) {
-      // Keep the cadence human, but deterministic so visual regression captures
-      // the same product story frame on every run.
-      this.later(() => this.typeCurrentPhrase(position + 1), TYPE_DELAY + (position % 3) * 12)
-    } else {
-      this.later(() => this.deleteCurrentPhrase(phrase.length), HOLD_DELAY)
+    if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      this.start()
+      this.element.addEventListener("pointerenter", this.pause)
+      this.element.addEventListener("pointerleave", this.start)
+      this.element.addEventListener("focusin", this.pause)
+      this.element.addEventListener("focusout", this.start)
     }
   }
 
-  deleteCurrentPhrase(position) {
-    const phrase = this.phrases[this.phraseIndex]
-    this.phraseTarget.textContent = phrase.slice(0, position)
-    if (position > 0) {
-      this.later(() => this.deleteCurrentPhrase(position - 1), DELETE_DELAY)
-    } else {
-      this.phraseIndex = (this.phraseIndex + 1) % this.phrases.length
-      this.later(() => this.typeCurrentPhrase(), 180)
-    }
+  disconnect() { this.pause() }
+
+  start = () => {
+    this.pause()
+    this.timer = setInterval(() => this.advanceStory(1), 2600)
   }
 
-  next() { this.restartStory(); this.advanceStory(1) }
-  previous() { this.restartStory(); this.advanceStory(-1) }
+  pause = () => { clearInterval(this.timer) }
 
-  restartStory() {
-    window.clearInterval(this.storyTimer)
-    if (!this.reduced) this.storyTimer = window.setInterval(() => this.advanceStory(1), 2700)
-  }
+  next() { this.advanceStory(1); this.start() }
+  previous() { this.advanceStory(-1); this.start() }
 
   advanceStory(delta) {
     this.storyIndex = (this.storyIndex + delta + this.stepTargets.length) % this.stepTargets.length

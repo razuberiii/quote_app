@@ -6,6 +6,7 @@
 
 ## 查看材料
 
+- [详细讲解版录像（推荐先看）](./guided-new-user-walkthrough.webm)
 - [完整操作录像](./new-user-walkthrough.webm)
 - [最终“版本与导出”页面截图](./final-versions.png)
 - [实际导出的 PDF 报价单](./quote-v1.pdf)
@@ -23,3 +24,5 @@
 - Excel：有效 Microsoft Excel 2007+ 文件
 
 录像中的公司、联系人和商品均为虚构测试资料。
+
+详细讲解版约 2 分 05 秒。每个阶段会先解释当前目标，点击前用粉色指示框标出目标控件；原录像保留为快速验收记录。

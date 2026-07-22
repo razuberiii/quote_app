@@ -18,9 +18,11 @@ class InquiriesController < ApplicationController
       @inquiry.update!(source_text: InquirySourceReader.new(@inquiry.source_file).call, source_type: inferred_source_type)
     end
     @inquiry.source_type == "manual" ? @inquiry.manually_extract! : @inquiry.extract_requirements!
+    record_initial_message
     redirect_to @inquiry, notice: t("self_service.intake.extracted")
   rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError, InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile => error
     @inquiry&.manually_extract!
+    record_initial_message if @inquiry&.persisted?
     Rails.logger.warn("Inquiry AI extraction failed: #{error.class}: #{error.message}")
     redirect_to @inquiry, alert: t("self_service.intake.fallback")
   end
@@ -29,6 +31,9 @@ class InquiriesController < ApplicationController
     @catalog_matches = @inquiry.catalog_matches
     @catalog_products = current_user.company.products.order(:name)
     @guidance = InquiryGuidance.new(@inquiry)
+    @clarification_questions = InquiryClarificationPrompt.new(@inquiry).questions
+    @messages = @inquiry.inquiry_messages.to_a
+    @message = @inquiry.inquiry_messages.new(direction: "buyer", channel: "email")
   end
 
   def update
@@ -95,5 +100,24 @@ class InquiriesController < ApplicationController
 
   def inferred_source_type
     @inquiry.source_file.content_type == "application/pdf" ? "pdf" : "excel"
+  end
+
+  def initial_channel
+    case @inquiry.source_type
+    when "email" then "email"
+    when "manual" then "text"
+    when "chat" then "other"
+    else "file"
+    end
+  end
+
+  def record_initial_message
+    @inquiry.inquiry_messages.find_or_create_by!(occurred_at: @inquiry.created_at) do |message|
+      message.recorded_by = current_user
+      message.direction = "buyer"
+      message.channel = initial_channel
+      message.body = @inquiry.source_text
+      message.change_summary = { "initial" => true }
+    end
   end
 end

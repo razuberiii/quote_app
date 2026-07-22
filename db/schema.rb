@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_19_133000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_22_123000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -368,6 +368,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_133000) do
     t.index ["company_id"], name: "index_inquiries_on_company_id"
     t.index ["created_by_id"], name: "index_inquiries_on_created_by_id"
     t.index ["customer_id"], name: "index_inquiries_on_customer_id"
+  end
+
+  create_table "inquiry_messages", force: :cascade do |t|
+    t.text "body"
+    t.string "channel", default: "email", null: false
+    t.jsonb "change_summary", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.string "direction", default: "buyer", null: false
+    t.bigint "inquiry_id", null: false
+    t.datetime "occurred_at", null: false
+    t.bigint "recorded_by_id"
+    t.datetime "updated_at", null: false
+    t.index ["inquiry_id", "occurred_at"], name: "index_inquiry_messages_on_inquiry_id_and_occurred_at"
+    t.index ["inquiry_id"], name: "index_inquiry_messages_on_inquiry_id"
+    t.index ["recorded_by_id"], name: "index_inquiry_messages_on_recorded_by_id"
   end
 
   create_table "notifications", force: :cascade do |t|
@@ -921,6 +936,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_19_133000) do
   add_foreign_key "inquiries", "companies"
   add_foreign_key "inquiries", "customers"
   add_foreign_key "inquiries", "users", column: "created_by_id"
+  add_foreign_key "inquiry_messages", "inquiries"
+  add_foreign_key "inquiry_messages", "users", column: "recorded_by_id"
   add_foreign_key "notifications", "users"
   add_foreign_key "product_addon_presets", "addon_presets"
   add_foreign_key "product_addon_presets", "products"

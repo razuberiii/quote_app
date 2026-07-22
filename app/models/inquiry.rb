@@ -4,6 +4,7 @@ class Inquiry < ApplicationRecord
   belongs_to :customer, optional: true
   belongs_to :created_by, class_name: "User", optional: true
   has_one_attached :source_file
+  has_many :inquiry_messages, -> { order(:occurred_at, :id) }, dependent: :destroy
   has_one :quote, dependent: :nullify
   validates :source_type, inclusion: { in: %w[email chat text excel csv pdf image manual] }
 
@@ -47,5 +48,13 @@ class Inquiry < ApplicationRecord
     products = Array(extracted_data["products"])
     extracted_data["customer"].present? && extracted_data["currency"].present? && products.any? &&
       products.all? { |product| product["name"].present? && product["quantity"].to_d.positive? }
+  end
+
+  def conversation_source
+    messages = inquiry_messages.filter_map do |message|
+      next if message.body.blank?
+      "[#{message.occurred_at.to_date} · #{message.direction} · #{message.channel}]\n#{message.body.strip}"
+    end
+    messages.presence&.join("\n\n") || source_text.to_s
   end
 end

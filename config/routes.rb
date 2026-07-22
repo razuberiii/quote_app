@@ -80,6 +80,7 @@ Rails.application.routes.draw do
     member { post :apply }
   end
   resources :inquiries, only: %i[new create show update] do
+    resources :inquiry_messages, only: :create
     member { post :build_quote }
   end
   resources :quote_revisions, only: %i[show create]

@@ -1,5 +1,5 @@
 <main class="rubusoo-page inquiry-import">
-  <header class="page-heading inquiry-import__heading"><p class="eyebrow"><%= t("self_service.intake.eyebrow", default: "01 · Import inquiry") %></p><h1><%= t("self_service.intake.title", default: "Turn the buyer request into a controlled Deal") %></h1><p><%= t("self_service.intake.subtitle", default: "Paste the complete message or upload the original file. Rubusoo identifies buyer, products and requirements, then asks you to confirm them.") %></p></header>
+  <header class="page-heading inquiry-import__heading"><p class="eyebrow"><%= t("self_service.intake.eyebrow", default: "01 · Import inquiry") %></p><h1><%= t("self_service.intake.title", default: "Start with what the buyer actually sent") %></h1><p><%= t("self_service.intake.subtitle", default: "Paste the first email or chat message now. Add later replies to the same inquiry as the conversation develops.") %></p></header>
   <%= form_with model: @inquiry, class: "inquiry-import__workspace", multipart: true do |f| %>
     <section class="inquiry-import__composer">
       <div class="inquiry-import__source-tabs inquiry-import__source-tabs--mode" role="group" aria-label="<%= t("self_service.intake.source") %>">

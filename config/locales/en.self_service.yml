@@ -21,6 +21,34 @@ en:
     documents: { eyebrow: Seller evidence, title: Company documents, help: Credentials available when a Deal needs them., name: Title, placeholder: Company profile, type: Type, choose: Choose file, upload: Upload, remove: Remove, remove_confirm: Remove this document?, empty: No company documents yet. Add them when a Deal needs supporting credentials. }
     document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration, certificate: Certificate }
   self_service:
+    conversation:
+      kicker: Inquiry record
+      title: Keep every clarification with the same requirement
+      help: Add email, chat, call notes or files. Rubusoo refreshes changes and gaps while preserving the original conversation.
+      added: The conversation was added and the current requirement was refreshed.
+      fallback: The message was kept. AI is unavailable, so local extraction was used; please review the result.
+      initial: Initial inquiry retained
+      updated: Updated by this message
+      evidence_only: Retained as evidence; no structured requirement changed
+      change_count: "%{count} fields changed · %{products} products now"
+      add_kicker: Continue follow-up
+      add_title: Add the latest conversation
+      add_help: The buyer does not need to provide everything at once. Add each reply and keep gaps visible.
+      placeholder: Paste the buyer reply, your call notes, or newly supplied requirements…
+      attachment: Attachment (optional)
+      analyze: Save and refresh requirements
+      invalid_file: We could not read that file. Add a supported document or paste the latest message.
+      invalid_message: Add a message or attachment before saving.
+      prompt_title: Suggested next questions
+      prompts:
+        customer: Please confirm the buyer company and contact.
+        currency: Which currency should this quotation use?
+        destination: Please provide the final destination or port.
+        incoterm: Which Incoterm should we quote?
+        delivery: What delivery date or lead time is required?
+        product: Please provide product, model, quantity and key specifications.
+      directions: { buyer: Buyer reply, seller: Seller sent, internal: Internal note }
+      channels: { text: Pasted text, email: Email, whatsapp: WhatsApp, wechat: WeChat, line: LINE, phone: Phone, meeting: Meeting, file: File, other: Other }
     quote_core:
       immutable_edit: Published versions are immutable. Create a working revision from the current quote.
       draft_saved: Quote draft saved.

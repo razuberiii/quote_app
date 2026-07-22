@@ -27,7 +27,44 @@
     </div>
   </section>
 
-  <%= form_with model: @inquiry, class: "inquiry-review__grid" do |f| %>
+  <section class="inquiry-conversation" id="conversation" aria-labelledby="conversation-title">
+    <header class="inquiry-conversation__header">
+      <div><p class="section-kicker"><%= t("self_service.conversation.kicker") %></p><h2 id="conversation-title"><%= t("self_service.conversation.title") %></h2><p><%= t("self_service.conversation.help") %></p></div>
+      <div class="inquiry-conversation__readiness"><span><%= t("self_service.review.readiness") %></span><strong><%= @inquiry.ready_to_build_quote? ? t("self_service.review.ready") : t("self_service.review.not_ready") %></strong></div>
+    </header>
+    <div class="inquiry-conversation__layout">
+      <ol class="inquiry-timeline">
+        <% @messages.each_with_index do |message, index| %>
+          <li class="inquiry-message inquiry-message--<%= message.direction %>">
+            <div class="inquiry-message__marker"><span><%= (index + 1).to_s.rjust(2, "0") %></span></div>
+            <article>
+              <header><strong><%= t("self_service.conversation.directions.#{message.direction}") %></strong><span><%= t("self_service.conversation.channels.#{message.channel}") %> · <%= message.occurred_at.strftime("%Y-%m-%d %H:%M") %></span></header>
+              <div class="inquiry-message__body"><%= simple_format(message.body) %></div>
+              <% summary = message.change_summary.deep_stringify_keys %>
+              <% if summary["initial"] %><footer><%= t("self_service.conversation.initial") %></footer>
+              <% elsif Array(summary["changed"]).any? || summary["products_before"] != summary["products_after"] %>
+                <footer><strong><%= t("self_service.conversation.updated") %></strong><%= t("self_service.conversation.change_count", count: Array(summary["changed"]).size, products: summary["products_after"]) %></footer>
+              <% else %><footer><%= t("self_service.conversation.evidence_only") %></footer><% end %>
+            </article>
+          </li>
+        <% end %>
+      </ol>
+      <aside class="inquiry-followup">
+        <p class="section-kicker"><%= t("self_service.conversation.add_kicker") %></p>
+        <h3><%= t("self_service.conversation.add_title") %></h3>
+        <p><%= t("self_service.conversation.add_help") %></p>
+        <% if @clarification_questions.any? %><div class="inquiry-followup__prompts"><strong><%= t("self_service.conversation.prompt_title") %></strong><ul><% @clarification_questions.each do |question| %><li><%= question %></li><% end %></ul></div><% end %>
+        <%= form_with model: [@inquiry, @message], class: "inquiry-followup__form", multipart: true do |f| %>
+          <div class="inquiry-followup__meta"><%= f.select :direction, InquiryMessage::DIRECTIONS.map { |value| [t("self_service.conversation.directions.#{value}"), value] }, {}, class: "input" %><%= f.select :channel, InquiryMessage::CHANNELS.map { |value| [t("self_service.conversation.channels.#{value}"), value] }, {}, class: "input" %></div>
+          <%= f.text_area :body, rows: 7, class: "textarea", placeholder: t("self_service.conversation.placeholder") %>
+          <label class="inquiry-followup__file"><span><%= t("self_service.conversation.attachment") %></span><%= f.file_field :attachment, accept: ".pdf,.xlsx,.csv,.txt,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %></label>
+          <%= f.submit t("self_service.conversation.analyze"), class: "button button--primary button--full" %>
+        <% end %>
+      </aside>
+    </div>
+  </section>
+
+  <%= form_with model: @inquiry, class: "inquiry-review__workspace" do |f| %>
     <section class="inquiry-source-panel" data-intake-motion-target="source">
       <header><div><p class="section-kicker"><%= t("self_service.review.original") %></p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : @inquiry.source_type.humanize %></h2></div><span><%= t("self_service.review.source_truth") %></span></header>
       <div class="inquiry-source-panel__body"><%= simple_format(@inquiry.source_text, {}, wrapper_tag: "div") %></div>

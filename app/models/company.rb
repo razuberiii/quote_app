@@ -37,6 +37,7 @@ class Company < ApplicationRecord
   has_many :deal_responses, dependent: :restrict_with_exception
   has_many :final_documents, dependent: :restrict_with_exception
   has_many :inquiries, dependent: :destroy
+  has_many :inquiry_messages, through: :inquiries
   has_one_attached :logo
   validate :logo_constraints
 

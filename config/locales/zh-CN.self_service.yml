@@ -83,6 +83,34 @@ zh-CN:
       registration: 注册证明
       certificate: 资质证书
   self_service:
+    conversation:
+      kicker: 询盘记录
+      title: 客户每次补充，都接在同一份需求上
+      help: 追加邮件、聊天、电话纪要或附件。系统重新整理变化和缺项，原始沟通始终保留。
+      added: 已追加沟通记录，并重新整理当前需求。
+      fallback: 已保留这条沟通；AI 暂时不可用，系统已用本地规则更新，请人工核对。
+      initial: 初始询盘已保留
+      updated: 本次更新
+      evidence_only: 已保留为沟通依据，当前结构化需求没有变化
+      change_count: "%{count} 个字段变化 · 当前 %{products} 项商品"
+      add_kicker: 继续跟进
+      add_title: 追加最新沟通
+      add_help: 不必等客户一次说完整。把每次回复放进来，缺少的信息会继续保留。
+      placeholder: 粘贴客户回复、你的电话纪要，或对方新补充的要求……
+      attachment: 附件（可选）
+      analyze: 保存并更新需求
+      invalid_file: 无法读取这个文件，请换用支持的文件，或直接粘贴最新消息。
+      invalid_message: 请先填写沟通内容或添加附件。
+      prompt_title: 建议下一次确认
+      prompts:
+        customer: 请确认买家公司名称和联系人。
+        currency: 这次报价使用哪种币种？
+        destination: 请提供最终交货地点或目的港。
+        incoterm: 希望按哪种贸易术语报价？
+        delivery: 对交期有什么要求？
+        product: 请提供商品名称、型号、数量和关键规格。
+      directions: { buyer: 客户回复, seller: 销售发出, internal: 内部记录 }
+      channels: { text: 粘贴文本, email: 邮件, whatsapp: WhatsApp, wechat: 微信, line: LINE, phone: 电话, meeting: 会议, file: 文件, other: 其他 }
     quote_core:
       immutable_edit: 已发布版本不可修改，请从当前报价创建修订草稿。
       draft_saved: 报价草稿已保存。
@@ -722,7 +750,7 @@ zh-CN:
     intake:
       eyebrow: 01 · 导入询盘
       title: 导入并核对客户询盘
-      subtitle: 粘贴询盘内容或上传原文件，核对客户、商品与交付要求后创建交易。
+      subtitle: 先导入客户当前发来的内容；后续回复可以继续追加，信息够用时再创建报价草稿。
       source: 询盘来源
       smart: 智能识别
       smart_help: 适用于邮件、聊天记录、表格和文档
@@ -746,11 +774,11 @@ zh-CN:
       no_guess: 未识别金额保持为空
       no_guess_help: 完成价格与运费核对后即可发布。
       submit: 整理询盘
-      extracted: 询盘已经整理好，请核对后创建交易。
+      extracted: 询盘已整理，请核对结果；客户后续补充可继续追加到这条询盘。
       fallback: 自动整理未完成。原始询盘已保存，可切换为手工录入。
       review_saved: 已保存询盘核对结果。
       build_blocked: 创建报价草稿前，请确认买家、币种、商品名称和数量。价格与运费可在报价工作台继续完善。
-      deal_created: "已创建包含 %{count} 件商品的交易。请在发布第 1 版前确认价格与运费。"
+      deal_created: "已创建包含 %{count} 件商品的报价草稿。请在发布第 1 版前确认价格与运费。"
     priority:
       title: 任务优先级
       now: 现在必须完成
@@ -765,7 +793,7 @@ zh-CN:
       saved: 已自动保存
       saved_ago: "%{time}前更新"
       current_step: 当前最重要的一步
-      ready_title: 已具备创建交易的条件
+      ready_title: 已具备创建报价草稿的条件
       ready_body: 可创建报价草稿；价格与运费需在发布前确认。
       original: 原始询盘
       source_truth: 核对依据
@@ -792,7 +820,7 @@ zh-CN:
       freight_help: CIF、CFR、DAP、DDP 报价需在发布前确认运费。
       ai_no_amount: 原始询盘未提供该金额。
       products_heading: 商品匹配
-      products_help: 选择商品库中的对应商品，或将其保留为本次交易的临时商品。
+      products_help: 选择商品库中的对应商品，或仅在这份报价中使用临时商品。
       model: 型号
       quantity: 数量
       unit: 单位
@@ -807,7 +835,7 @@ zh-CN:
       best_match: 建议匹配
       candidate: 识别结果
       deal_only: 临时商品
-      deal_only_help: 仅用于本次交易，不加入商品库。
+      deal_only_help: 仅用于这份报价，不加入商品库。
       choose_other: 选择其他商品
       select_manual: 手工选择……
       manual_product: 手工添加 · 临时商品
@@ -822,11 +850,11 @@ zh-CN:
       buyer_questions: 买家问题
       missing_information: 待补充信息
       needs_review: 需要核对
-      readiness: 交易创建条件
-      ready: 可创建交易；价格待确认
+      readiness: 报价草稿创建条件
+      ready: 可创建报价草稿；价格待确认
       not_ready: 先确认买家、币种、商品和数量
       save_review: 保存核对结果
-      build_deal: 创建交易
+      build_deal: 创建报价草稿
       price_sources:
         unpriced: 待补价格
         catalog: 商品库参考价

@@ -16,6 +16,8 @@ Buyer Room is mobile-first below 860px. Its selection panel becomes a fixed bott
 
 Inquiry import and review use the `inquiry-import__*` and `inquiry-review__*` families. The review is evidence-led: source content remains in a sticky paper panel, extracted fields use quiet inline status text, Catalog candidates are rows rather than generic cards, and all monetary confirmation is grouped in a dark commercial band. On narrow screens the source becomes a bounded preview above the editable results.
 
+Inquiry clarification uses `.inquiry-conversation`, `.inquiry-timeline`, `.inquiry-message`, and `.inquiry-followup`. It is an open-canvas workflow: the timeline and composer carry their own functional boundaries, while `.inquiry-review__workspace` must not add a page-sized outer border or background. Each appended buyer/seller/internal record remains visible and precedes the latest structured review. On narrow screens the composer follows the timeline and all sticky positioning is removed.
+
 Smart Intake is an application surface in both themes. `.inquiry-source-panel`, `.extracted-field`, `.inquiry-product-card`, Catalog visuals and their controls must consume `--neo-*` theme tokens; hard-coded graphite cards are prohibited because they create dark islands in light mode. Visual leakage tests are bidirectional: dark mode rejects large light surfaces and light mode rejects large dark surfaces outside explicitly documented output previews.
 
 Catalog review uses `.import-coverage*` for the page/Sheet processing ledger and `.candidate-*` for human decisions. Failed or unrecognized ranges remain visible above candidates. Account security overlays use the shared `.neo-modal` panel, field, state, and action families; inline light modal styling is prohibited.

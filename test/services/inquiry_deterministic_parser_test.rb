@@ -1,6 +1,25 @@
 require "test_helper"
 
 class InquiryDeterministicParserTest < ActiveSupport::TestCase
+  test "extracts an unnumbered follow-up containing quantity and model" do
+    result = InquiryDeterministicParser.new("We need 6 sets, model HPU-380 or equivalent, 380V/50Hz.").call
+    assert_equal "HPU-380", result.dig("products", 0, "model")
+    assert_equal 6, result.dig("products", 0, "quantity")
+    assert_equal "380V/50Hz", result.dig("products", 0, "specifications", "voltage")
+  end
+
+  test "ignores conversation metadata after a signature" do
+    result = InquiryDeterministicParser.new("Regards,\nDaniel Wu\nNorth Harbor Engineering\n\n[2026-07-22 · buyer · email]\nCIF Rotterdam in USD").call
+    assert_equal "North Harbor Engineering", result["customer"]
+    assert_equal "Rotterdam", result["destination"]
+  end
+
+  test "extracts contact and company from a multiline signature" do
+    result = InquiryDeterministicParser.new("Please quote.\n\nRegards,\nDaniel Wu\nNorth Harbor Engineering").call
+    assert_equal "Daniel Wu", result["contact_name"]
+    assert_equal "North Harbor Engineering", result["customer"]
+  end
+
   SOURCE = <<~TEXT
     Dear Sales,
     Please quote CIF Jebel Ali for:

@@ -140,6 +140,7 @@ Rails.application.routes.draw do
       get "deliveries/:delivery_id/download", to: "deal_deliveries#download", as: :download_delivery
       patch "versions/:version_id/link", to: "deal_deliveries#update_link", as: :version_link
       patch "questions/:question_id/reply", action: :reply_question, as: :reply_question
+      patch "change_requests/:change_request_id/apply", action: :apply_change_request, as: :apply_change_request
       get "responses/new", to: "deal_responses#new", as: :new_response
       post :responses, to: "deal_responses#create"
       patch "responses/:response_id/apply", to: "deal_responses#apply", as: :apply_response

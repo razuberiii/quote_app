@@ -73,6 +73,12 @@ zh-CN:
     help: "统一设置客户页面、PDF 和 Excel 的品牌、版式与内容规则。每份报价仍可单独调整内容，不需要维护一堆模板。"
     rule_title: "一套设计，多种输出"
     rule_help: "客户页面、PDF 与 Excel 使用同一个已发布版本和同一套品牌规则。"
+    advanced_layout: "细调版式"
+    advanced_layout_help: "推荐设置已经可用；需要时再调整密度、字体和 Logo。"
+    advanced_content: "调整默认显示内容"
+    advanced_content_help: "默认包含标准报价所需内容。"
+    advanced_language: "设置各渠道语言"
+    advanced_language_help: "默认跟随客户语言，也可为 PDF 和 Excel 单独指定。"
     sections:
       layout: "选择版式"
       layout_help: "选一个稳定的专业版式，再调整密度和品牌色。"

@@ -50,6 +50,16 @@ On mobile, the three story phases share one stable 336px editorial viewport so a
 
 Quote Studio uses `quote-studio--editor` with three true functional columns. It is an application editor, not a literal print preview: shell, canvas, editable document surface, controls and pricing region all consume the active theme through the `--studio-*` layer tokens. The center `.studio-paper` owns inline editing but must never force white controls or dark text in dark mode. Only the separate PDF/Excel renderers and buyer-facing immutable output may retain paper styling. The left outline is navigation/readiness, and the right summary is commercial validation. Do not render the legacy `.quote-edit-shell` inside this surface, and do not add theme-specific `!important` paper overrides.
 
+The quote completion flow uses `.seller-preview-bar` in working previews and `.publish-complete` after publication. Preview actions remain outside buyer content semantics, and publication success must expose customer link, PDF, Excel and delivery as first-level actions. `.studio-readiness` consumes `QuoteReadinessAudit`; views must not maintain a second independent blocker list.
+
+Inquiry follow-up is one low-friction composer. Direction and channel selectors live in the collapsed `.inquiry-followup__advanced` disclosure, while queued analysis is shown inline on `.inquiry-message`; do not make sellers choose when to run analysis.
+
+Buyer-requested structured changes use `.change-request-diff` to compare the immutable source version with the requested value. Applying a request updates only the working draft and sends the seller to review it; it never mutates the published Revision.
+
+Document design exposes curated recipes first. Density, typography, default content and per-channel language overrides are progressive settings inside `.design-advanced`; recommended defaults must allow a first quote without opening them.
+
+Public authentication uses an open application canvas. On new session and registration pages, the direct `main` wrapper remains full-width and transparent in both themes; only `.marketing-auth-card` owns a bounded surface. Never let the generic authenticated-main background create a page-sized black or white slab around `.marketing-auth-shell`.
+
 Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial cover, visual product stories, working selections, plan comparison, commercial terms, and a dark sticky decision summary. Desktop retains a sticky side summary; below 980px it becomes a bottom decision bar. Dialogs must preserve the selected plan, quantities, and accessories without mutating the formal Revision.
 
 Buyer PDF output follows the immutable Revision buyer locale. All document labels and standard prose live under `self_service.buyer_room.pdf`; the issued date falls back to the publication date, and optional contact values must not leave orphan separators.

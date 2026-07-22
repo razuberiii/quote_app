@@ -73,6 +73,12 @@ en:
     help: "Set one brand, layout and content system for the customer page, PDF and Excel. Individual quotes can still adjust their content."
     rule_title: "One design, every output"
     rule_help: "The customer page, PDF and Excel share one published version and one set of brand rules."
+    advanced_layout: "Fine-tune layout"
+    advanced_layout_help: "Recommended settings are ready; adjust density, type and logo only when needed."
+    advanced_content: "Adjust default content"
+    advanced_content_help: "Standard quotation content is enabled by default."
+    advanced_language: "Set channel languages"
+    advanced_language_help: "Outputs follow the customer language by default and can be overridden here."
     sections:
       layout: "Choose a layout"
       layout_help: "Start with a professional recipe, then tune density and brand color."

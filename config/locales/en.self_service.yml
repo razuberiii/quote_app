@@ -26,6 +26,8 @@ en:
       title: Keep every clarification with the same requirement
       help: Add email, chat, call notes or files. Rubusoo refreshes changes and gaps while preserving the original conversation.
       added: The conversation was added and the current requirement was refreshed.
+      queued: Conversation received. We will merge and analyze it automatically, then surface only decisions that need you.
+      processing: Merging this with the latest conversation. You can keep working.
       fallback: The message was kept. AI is unavailable, so local extraction was used; please review the result.
       initial: Initial inquiry retained
       updated: Updated by this message
@@ -34,9 +36,11 @@ en:
       add_kicker: Continue follow-up
       add_title: Add the latest conversation
       add_help: The buyer does not need to provide everything at once. Add each reply and keep gaps visible.
+      advanced: Source and direction (usually automatic)
       placeholder: Paste the buyer reply, your call notes, or newly supplied requirements…
       attachment: Attachment (optional)
       analyze: Save and refresh requirements
+      add: Add conversation
       invalid_file: We could not read that file. Add a supported document or paste the latest message.
       invalid_message: Add a message or attachment before saving.
       prompt_title: Suggested next questions
@@ -57,6 +61,10 @@ en:
       response_added: Customer feedback added to the quote.
       evidence_kept: Kept as evidence; the published quote was not changed.
       response_reviewed: Customer feedback review completed.
+      change_request_applied: "Structured changes from V%{number} were applied to the working draft. Review the buyer note before publishing V2."
+      change_request_from: "Changes from V%{number}"
+      change_request_quantity: "Item %{item} quantity"
+      apply_to_draft: Apply changes to revision draft
       acceptance_recorded: "Acceptance recorded against quote V%{number}."
       delivery_retried: Quote sent again.
       delivery_failed: Quote delivery failed
@@ -319,10 +327,29 @@ en:
       preview: Preview
       preview_room: Preview Buyer Room
       saved: Saved
+      blockers_only: Only publication blockers need attention
+      blockers_help: Recommended defaults handle everything else for this quote.
+      next_preview: "Next: preview the customer quote"
     publish:
       button: "Publish Version %{number}"
       preview: Preview Buyer Room
       continue: Continue editing
+    preview_flow:
+      kicker: Customer-view preview
+      ready: The quote is ready to publish
+      blocked: "%{count} publication blockers remain"
+      back: Back to edit
+      fix: Resolve blockers
+      publish: "Confirm and publish V%{number}"
+    publish_complete:
+      kicker: Quote published
+      title: "V%{number} is ready to deliver"
+      help: The customer link, PDF and Excel all come from the same locked version.
+      copy: Copy customer link
+      copied: Customer link copied
+      pdf: Download PDF
+      excel: Download Excel
+      send: Send to customer
     delivery:
       submit: Deliver Version
       ready: Ready to prepare

@@ -1,22 +1,20 @@
-# Deal stages and Next action
+# Quote lifecycle and next action
 
 ```mermaid
 flowchart LR
-  D[Draft] -->|Publish immutable Version| C{Successful Delivery?}
-  C -->|No| CD[Choose delivery method / Retry delivery]
-  C -->|Yes: any channel| L[Live]
-  L -->|Question| R[Reply to buyer]
-  L -->|Returned file| RF[Review returned file]
-  L -->|PO| PO[Review PO differences]
-  L -->|Requested change| U[Prepare update → publish updated Version]
-  L -->|Acceptance via any channel| A[Accepted]
-  A -->|Final document required| FD[Generate / send final document]
-  A -->|Payment workflow required| P[Confirm payment]
-  A -->|No mandatory document/payment| W[Close as won]
-  D --> X[Closed: Lost / Cancelled]
-  L --> X
-  A --> X
-  X -->|Reopen with history| D
+  I[Add inquiry communication] --> A[Automatic grouped analysis]
+  A --> C{Enough to create quote?}
+  C -->|No| Q[Show next buyer question]
+  C -->|Yes| D[Create working quote]
+  D --> B[Resolve publication blockers]
+  B --> P[Customer-view preview]
+  P --> V[Confirm and publish Version]
+  V --> O[Copy link / PDF / Excel / send]
+  O --> F{Customer response}
+  F -->|Question| R[Reply with Version context]
+  F -->|Change| U[Review difference and apply to draft]
+  U --> B
+  F -->|Accept| X[Lock acceptance snapshot]
 ```
 
-`DealProgress` is the single derivation point used by Inbox, Deals and Deal Overview. Viewed, Delivered, Expired, PO received, PI generated and payment received remain conditions or activities rather than user-visible top-level stages.
+`QuoteLifecycle` supplies shared state and next action for Quote list and detail. `QuoteReadinessAudit` is the single publication gate. Viewed, delivered, expired and awaiting deposit are signals rather than separate workspaces.

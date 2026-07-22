@@ -1,17 +1,27 @@
 # Rubusoo product
 
-Rubusoo is an interactive quote-to-close workspace for exporters, manufacturers, trading companies and small B2B sales teams. The implemented commercial core follows Inquiry → Deal → interactive quote → buyer response → Version → acceptance snapshot → PI → won.
+Rubusoo is a quote-first workspace for exporters, manufacturers, trading companies and small B2B sales teams. Its commercial core is:
 
-The primary signed-in navigation is Inbox, Deals, Library and Settings. A Deal is the user-facing aggregate for the underlying Quote, Customer, Inquiry, QuoteRevision, BuyerActivity, Question, ChangeRequest, Acceptance and PI records. Buyer access never requires an account. Trial, Solo, Pro and Business send limits are enforced by the version publishing service.
+`Inquiry conversation → working quote → customer preview → immutable Version → customer feedback → revision → acceptance → final document`.
 
-The only user-visible stages are Draft, Live, Accepted and Closed. Viewed, revision requested, expired and awaiting deposit remain signals or conditions. `DealProgress` derives one shared Next action for Inbox, Deal list and Deal detail.
+The primary signed-in navigation is Quotes, Customers, Catalog and Settings, with AI Import and New Quote as global actions. Quote is the user-facing commercial aggregate. Buyer access never requires an account.
 
-Module disposition:
+## Product contract
 
-- Kept: Inbox, Deals, Library, Settings, Smart Intake, Quote Studio and Buyer Room.
-- Merged: Catalog + Templates + Presets + brand resources into Library; Questions + Change Requests into Deal Conversation; Activity + actionable notifications into Inbox and Deal Timeline.
-- Contextualized: Buyer records, Versions, Acceptance, PI, PDFs and attachments live inside a Deal.
-- Removed from primary navigation: Home, Quotes, Customers, Catalog, Templates, Tasks, Activities, Files, Revisions, PI, Insights and Reports.
-- Retained underneath for compatibility and audit: Quote, Customer, QuoteRevision, BuyerActivity, Notification, QuoteAcceptance and ProformaInvoice models and legacy routes.
+- Sellers add communication; Rubusoo decides when to merge and analyze it. Rapid additions are grouped, and sellers are interrupted only for decisions.
+- AI may extract and match evidence, but never invents prices, freight or commercial terms.
+- Quote creation requirements and publication blockers are distinct. A quote may be created before price and freight are complete.
+- Quote Studio surfaces publication blockers from `QuoteReadinessAudit`; it does not ask the seller to rediscover missing information.
+- Customer preview keeps “return to edit” and “confirm and publish” in the same task flow.
+- Publication creates an immutable `QuoteRevision`. The completion state immediately exposes customer link, PDF, Excel and delivery.
+- Customer changes remain tied to their source Version. Applying structured changes updates only the working draft; publishing creates V2 and never overwrites V1.
 
-Unknown pricing is never inferred: manual inquiry fallback explicitly marks product, price and freight as missing or required.
+## Canonical modules
+
+- Quotes: working drafts, customer activity and immutable versions.
+- Customers: only the identity and contact data required for quoting.
+- Catalog: reusable products, specifications and trusted price sources.
+- Settings: company identity and recommended document defaults; advanced channel-specific controls are progressive.
+- AI Import: company, catalog, inquiry and quotation-style source intake.
+
+Legacy Deal/CRM routes and models may remain for compatibility, but they are not a product surface and must not introduce Deal stages, KPI dashboards or separate Files navigation.

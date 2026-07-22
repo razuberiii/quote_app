@@ -88,6 +88,8 @@ zh-CN:
       title: 客户沟通与当前需求
       help: 把新邮件、聊天记录或电话纪要追加在这里；每次更新都保留原文，并同步到待核对信息。
       added: 已保存这次沟通，待核对信息已更新。
+      queued: 已收下这批沟通，系统会自动合并整理；需要你决定时再提醒你。
+      processing: 正在与刚刚追加的沟通合并整理，无需等待。
       fallback: 已保留这条沟通。AI 暂时不可用，基础规则已整理可识别内容，请核对结果。
       initial: 第一条客户消息
       updated: 已更新报价信息
@@ -96,9 +98,11 @@ zh-CN:
       add_kicker: 继续跟进
       add_title: 添加一条沟通
       add_help: 选择谁说的、来自哪个渠道，再粘贴原文或上传附件。
+      advanced: 来源与方向（通常无需修改）
       placeholder: 粘贴客户回复、你的电话纪要，或对方新补充的要求……
       attachment: 附件（可选）
       analyze: 保存并整理
+      add: 添加沟通
       invalid_file: 无法读取这个文件，请换用支持的文件，或直接粘贴最新消息。
       invalid_message: 请先填写沟通内容或添加附件。
       prompt_title: 建议下一次确认
@@ -119,6 +123,10 @@ zh-CN:
       response_added: 客户反馈已添加到报价。
       evidence_kept: 已保留为证据，正式报价版本没有改变。
       response_reviewed: 客户反馈已完成核对。
+      change_request_applied: "已把客户对 V%{number} 的结构化修改应用到工作草稿；请核对自由文本后发布 V2。"
+      change_request_from: "相对 V%{number} 的修改"
+      change_request_quantity: "商品 %{item} 数量"
+      apply_to_draft: 应用变更并创建修订草稿
       acceptance_recorded: "客户确认已绑定到报价 V%{number}。"
       delivery_retried: 已重新发送报价。
       delivery_failed: 报价发送失败
@@ -936,6 +944,9 @@ zh-CN:
       fees: 费用
       required: 必填
       ready: 可以进入发布检查
+      blockers_only: 现在只处理发布阻塞项
+      blockers_help: 其余版式和文案已使用推荐值，不影响本次报价发布。
+      next_preview: 下一步：预览客户报价
       checks: "还有 %{count} 项需确认"
       ready_help: 必要商业信息已具备。发送前请预览买家体验。
       save: 保存报价
@@ -967,6 +978,22 @@ zh-CN:
       ledger: Version 记录
       history: 正式版本历史
       empty: 尚未发布任何正式内容。
+    preview_flow:
+      kicker: 客户视角预览
+      ready: 内容已具备，可以直接确认发布
+      blocked: "还有 %{count} 项发布前必须补齐"
+      back: 返回修改
+      fix: 处理阻塞项
+      publish: "确认并发布 V%{number}"
+    publish_complete:
+      kicker: 报价已发布
+      title: "V%{number} 已生成，交付文件已就绪"
+      help: 客户链接、PDF 和 Excel 来自同一个锁定版本，内容不会互相跑偏。
+      copy: 复制客户链接
+      copied: 客户链接已复制
+      pdf: 下载 PDF
+      excel: 下载 Excel
+      send: 发送给客户
     readiness:
       customer: 缺少买家
       currency: 缺少币种

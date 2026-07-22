@@ -11,10 +11,12 @@ class InquiryMessagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "appends a buyer clarification and preserves it in the inquiry source" do
-    assert_difference -> { @inquiry.inquiry_messages.count }, 1 do
-      post inquiry_inquiry_messages_path(@inquiry), params: { inquiry_message: {
-        direction: "buyer", channel: "email", body: "Please quote 12 HPU-380 units in USD, CIF Jebel Ali."
-      } }
+    perform_enqueued_jobs do
+      assert_difference -> { @inquiry.inquiry_messages.count }, 1 do
+        post inquiry_inquiry_messages_path(@inquiry), params: { inquiry_message: {
+          direction: "buyer", channel: "email", body: "Please quote 12 HPU-380 units in USD, CIF Jebel Ali."
+        } }
+      end
     end
 
     message = @inquiry.inquiry_messages.last
@@ -22,6 +24,17 @@ class InquiryMessagesControllerTest < ActionDispatch::IntegrationTest
     assert_includes @inquiry.reload.source_text, "12 HPU-380 units"
     assert_equal "buyer", message.direction
     assert message.change_summary.key?("products_after")
+  end
+
+  test "accepts a message without asking the seller for channel or direction" do
+    assert_enqueued_with(job: InquiryConversationAnalysisJob) do
+      post inquiry_inquiry_messages_path(@inquiry), params: { inquiry_message: { body: "Quantity is now 18." } }
+    end
+
+    message = @inquiry.inquiry_messages.last
+    assert_equal "buyer", message.direction
+    assert_equal "text", message.channel
+    assert_equal "queued", message.change_summary["status"]
   end
 
   test "cannot append to another company inquiry" do

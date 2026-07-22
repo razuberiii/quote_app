@@ -1,34 +1,18 @@
-# Deal business objects
+# Quote business objects
 
 ```mermaid
 erDiagram
-  DEAL ||--o| INQUIRY : originates_from
-  DEAL }o--|| BUYER : commercial_party
-  DEAL ||--|| WORKING_DRAFT : edits
-  DEAL ||--o{ PUBLISHED_VERSION : freezes
-  PUBLISHED_VERSION ||--o{ DELIVERY : delivered_through
-  PUBLISHED_VERSION ||--o{ BUYER_RESPONSE : receives
-  PUBLISHED_VERSION ||--o| ACCEPTANCE : accepted_by
-  ACCEPTANCE ||--o{ FINAL_DOCUMENT : generates
-  DEAL ||--o{ ACTIVITY : records
-
-  PUBLISHED_VERSION {
-    jsonb snapshot "immutable commercial content"
-    integer number
-    datetime published_at
-  }
-  DELIVERY {
-    string channel
-    string status
-    datetime delivered_at
-    string recipient
-  }
-  ACCEPTANCE {
-    string acceptance_method
-    jsonb snapshot "immutable accepted terms"
-    jsonb selection
-    boolean seller_recorded
-  }
+  INQUIRY ||--o{ INQUIRY_MESSAGE : retains
+  INQUIRY ||--o| QUOTE : creates
+  QUOTE }o--|| CUSTOMER : prepared_for
+  QUOTE ||--o{ QUOTE_ITEM : contains
+  QUOTE ||--o{ QUOTE_REVISION : publishes
+  QUOTE_REVISION ||--o{ VERSION_DELIVERY : delivered_through
+  QUOTE_REVISION ||--o{ BUYER_QUESTION : receives
+  QUOTE_REVISION ||--o{ CHANGE_REQUEST : receives
+  QUOTE_REVISION ||--o| QUOTE_ACCEPTANCE : accepted_as
 ```
 
-The Rails `Quote` model remains the persistence root for compatibility but is presented as Deal. `QuoteRevision` is the Published Version. `VersionDelivery`, `DealResponse` and `QuoteAcceptance` deliberately reference that immutable Version. Working-draft edits never mutate a Published Version or Acceptance snapshot.
+`Quote` is the editable commercial aggregate. `QuoteRevision` is the immutable Published Version used by the customer page, PDF and Excel. Customer questions and requested changes always reference the Version the buyer saw. Applying a structured change updates the working Quote and creates no historical mutation; a later publish creates the next Version.
+
+Legacy Deal naming is compatibility-only in older controllers and persistence associations.

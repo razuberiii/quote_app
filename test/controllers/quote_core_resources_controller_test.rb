@@ -36,4 +36,20 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{quote_version_export_path(quotes(:one), revision, output: 'pdf')}']"
     assert_select "a[href='#{quote_version_export_path(quotes(:one), revision, output: 'excel')}']"
   end
+
+  test "buyer quantity changes become a reviewed revision draft without mutating the published version" do
+    quote = quotes(:one)
+    revision = quote.quote_revisions.create!(company: companies(:one), number: 1, status: "current",
+      currency: "USD", total: quote.grand_total, snapshot: QuoteSnapshotBuilder.new(quote).as_json,
+      secure_token: SecureRandom.urlsafe_base64(16), published_at: Time.current)
+    request_record = revision.change_requests.create!(company: companies(:one), message: "Please increase quantity",
+      idempotency_key: SecureRandom.uuid, requested_changes: { "quantities" => { "0" => "8" } })
+
+    patch apply_change_request_quote_path(quote, change_request_id: request_record.id)
+
+    assert_redirected_to edit_quote_path(quote, source_version: 1)
+    assert_equal 8, quote.quote_items.first.reload.quantity
+    assert_equal "reviewed", request_record.reload.status
+    assert_equal 5, revision.reload.snapshot.fetch("quote_items").first.fetch("quantity")
+  end
 end

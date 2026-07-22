@@ -13,26 +13,26 @@
           <label><%= form.radio_button :layout_type, recipe %><span><i></i><strong><%= t("document_design.recipes.#{recipe}.title") %></strong><small><%= t("document_design.recipes.#{recipe}.help") %></small></span></label>
         <% end %>
       </div>
-      <div class="field-grid field-grid--two">
+      <details class="design-advanced"><summary><strong><%= t("document_design.advanced_layout") %></strong><span><%= t("document_design.advanced_layout_help") %></span></summary><div class="field-grid field-grid--two">
         <label class="field"><span><%= t("document_design.fields.density") %></span><%= form.select :layout_density, %w[compact standard spacious].map { |value| [t("document_design.density.#{value}"), value] } %></label>
         <label class="field"><span><%= t("document_design.fields.color") %></span><%= form.color_field :accent_color %></label>
         <label class="field"><span><%= t("document_design.fields.font") %></span><%= form.select :font_family, ["Noto Sans", "Inter", "Source Sans 3", "Georgia"] %></label>
         <label class="field"><span><%= t("document_design.fields.logo") %></span><%= form.select :logo_position, %w[left right center].map { |value| [t("document_design.positions.#{value}"), value] } %></label>
-      </div>
+      </div></details>
 
       <div class="design-section"><span>02</span><div><h2><%= t("document_design.sections.content") %></h2><p><%= t("document_design.sections.content_help") %></p></div></div>
-      <div class="choice-stack">
+      <details class="design-advanced"><summary><strong><%= t("document_design.advanced_content") %></strong><span><%= t("document_design.advanced_content_help") %></span></summary><div class="choice-stack">
         <% %w[logo images tax shipping payment_term valid_until terms_section notes scope_of_supply signature_block closing_message].each do |field| %>
           <label class="choice-row"><%= form.check_box "show_#{field}" %><span><strong><%= t("document_design.content.#{field}") %></strong></span></label>
         <% end %>
-      </div>
+      </div></details>
 
       <div class="design-section"><span>03</span><div><h2><%= t("document_design.sections.language") %></h2><p><%= t("document_design.sections.language_help") %></p></div></div>
-      <div class="field-grid field-grid--two">
+      <details class="design-advanced"><summary><strong><%= t("document_design.advanced_language") %></strong><span><%= t("document_design.advanced_language_help") %></span></summary><div class="field-grid field-grid--two">
         <% { public_link_locale: "customer_page", pdf_locale: "pdf", excel_locale: "excel" }.each do |field, key| %>
           <label class="field"><span><%= t("document_design.fields.#{key}") %></span><%= form.select field, QuoteTemplate::OUTPUT_LOCALES.map { |value, label| [label, value] } %></label>
         <% end %>
-      </div>
+      </div></details>
       <footer><span><%= t("document_design.save_help") %></span><%= form.submit t("document_design.save"), class: "button button--primary" %></footer>
     </section>
 

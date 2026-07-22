@@ -8,12 +8,10 @@ class InquiryMessagesController < ApplicationController
     if message.body.blank? && message.attachment.attached?
       message.body = InquirySourceReader.new(message.attachment).call
     end
+    message.change_summary = { "status" => "queued" }
     message.save!
-    InquiryConversationUpdater.new(inquiry, message).call
-    redirect_to inquiry_path(inquiry, anchor: "conversation"), notice: t("self_service.conversation.added")
-  rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError => error
-    inquiry&.manually_extract!
-    redirect_to inquiry_path(inquiry, anchor: "conversation"), alert: t("self_service.conversation.fallback")
+    InquiryConversationAnalysisJob.set(wait: 12.seconds).perform_later(inquiry.id, message.id)
+    redirect_to inquiry_path(inquiry, anchor: "conversation"), notice: t("self_service.conversation.queued")
   rescue InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile
     redirect_to inquiry_path(inquiry, anchor: "conversation"), alert: t("self_service.conversation.invalid_file")
   rescue ActiveRecord::RecordInvalid
@@ -23,6 +21,9 @@ class InquiryMessagesController < ApplicationController
   private
 
   def message_params
-    params.require(:inquiry_message).permit(:direction, :channel, :body, :attachment)
+    permitted = params.require(:inquiry_message).permit(:direction, :channel, :body, :attachment)
+    permitted[:direction] = "buyer" if permitted[:direction].blank?
+    permitted[:channel] = permitted[:attachment].present? ? "file" : "text" if permitted[:channel].blank?
+    permitted
   end
 end

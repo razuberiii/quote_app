@@ -35,6 +35,20 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "processing", response.parsed_body["status"]
   end
 
+  test "saving a quote returns to Studio with a rendered save time" do
+    customer = @user.company.customers.create!(name: "Save Feedback Buyer")
+    quote = @user.company.quotes.new(customer:, currency: "USD", status: "draft", issued_on: Date.current)
+    quote.quote_items.build(description: "Model A cart", quantity: 12, unit_price: 500)
+    quote.save!
+
+    patch quote_path(quote), params: { quote: { currency: "USD", notes: "Updated draft" } }
+
+    assert_redirected_to edit_quote_path(quote, saved: 1)
+    follow_redirect!
+    assert_response :success
+    assert_select ".studio-save-state.is-saved", text: /已保存 · \d{2}:\d{2}/
+  end
+
   test "empty Library does not block a multi item Working draft" do
     inquiry = @user.company.inquiries.create!(created_by: @user, source_type: "email", source_text: <<~TEXT)
       Please quote CIF Jebel Ali for:

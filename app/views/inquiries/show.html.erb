@@ -66,7 +66,7 @@
 
   <%= form_with model: @inquiry, class: "inquiry-review__workspace" do |f| %>
     <section class="inquiry-source-panel" data-intake-motion-target="source">
-      <header><div><p class="section-kicker"><%= t("self_service.review.original") %></p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : @inquiry.source_type.humanize %></h2></div><span><%= t("self_service.review.source_truth") %></span></header>
+      <header><div><p class="section-kicker"><%= t("self_service.review.original") %></p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : t("self_service.intake.#{@inquiry.source_type}", default: t("self_service.intake.text")) %></h2></div><span><%= t("self_service.review.source_truth") %></span></header>
       <div class="inquiry-source-panel__body"><%= simple_format(@inquiry.source_text, {}, wrapper_tag: "div") %></div>
       <% if @inquiry.source_file.attached? %><footer><%= t("self_service.review.file_retained", size: number_to_human_size(@inquiry.source_file.byte_size)) %></footer><% end %>
     </section>

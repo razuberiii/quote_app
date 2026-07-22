@@ -72,7 +72,7 @@
           <div class="navbar-controls">
             <%= link_to t("nav.search"), quotes_path(focus: "search"), class: "app-nav-link neo-global-search" %>
             <%= link_to t("nav.ai_import"), imports_path, class: "app-nav-link" %>
-            <%= link_to t("nav.new_quote"), new_inquiry_path(mode: "manual"), class: "navbar-cta-link" %>
+            <%= link_to t("nav.new_quote"), new_inquiry_path, class: "navbar-cta-link" %>
             <div class="account-menu">
                     <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"

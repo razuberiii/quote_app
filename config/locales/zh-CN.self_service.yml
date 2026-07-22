@@ -85,20 +85,20 @@ zh-CN:
   self_service:
     conversation:
       kicker: 询盘记录
-      title: 客户每次补充，都接在同一份需求上
-      help: 追加邮件、聊天、电话纪要或附件。系统重新整理变化和缺项，原始沟通始终保留。
-      added: 已追加沟通记录，并重新整理当前需求。
-      fallback: 已保留这条沟通；AI 暂时不可用，系统已用本地规则更新，请人工核对。
-      initial: 初始询盘已保留
-      updated: 本次更新
-      evidence_only: 已保留为沟通依据，当前结构化需求没有变化
-      change_count: "%{count} 个字段变化 · 当前 %{products} 项商品"
+      title: 客户沟通与当前需求
+      help: 把新邮件、聊天记录或电话纪要追加在这里；每次更新都保留原文，并同步到待核对信息。
+      added: 已保存这次沟通，待核对信息已更新。
+      fallback: 已保留这条沟通。AI 暂时不可用，基础规则已整理可识别内容，请核对结果。
+      initial: 第一条客户消息
+      updated: 已更新报价信息
+      evidence_only: 已保存这条沟通，报价信息没有变化
+      change_count: "更新 %{count} 处 · 当前 %{products} 项商品"
       add_kicker: 继续跟进
-      add_title: 追加最新沟通
-      add_help: 不必等客户一次说完整。把每次回复放进来，缺少的信息会继续保留。
+      add_title: 添加一条沟通
+      add_help: 选择谁说的、来自哪个渠道，再粘贴原文或上传附件。
       placeholder: 粘贴客户回复、你的电话纪要，或对方新补充的要求……
       attachment: 附件（可选）
-      analyze: 保存并更新需求
+      analyze: 保存并整理
       invalid_file: 无法读取这个文件，请换用支持的文件，或直接粘贴最新消息。
       invalid_message: 请先填写沟通内容或添加附件。
       prompt_title: 建议下一次确认
@@ -129,7 +129,7 @@ zh-CN:
       index:
         eyebrow: 报价工作台
         title: 报价
-        subtitle: 从客户需求到正式报价、客户反馈和修订版本，都围绕一份报价管理。
+        subtitle: 集中管理报价草稿、已发送版本和客户反馈。
         ai_import: AI 导入
         new: 新建报价
         search: 搜索报价
@@ -140,7 +140,7 @@ zh-CN:
         updated: "%{time}前更新"
         customer_missing: 客户待确认
         empty: 还没有报价
-        empty_help: 可以新建空白报价，也可以粘贴或上传客户询盘，让 AI 先整理资料。
+        empty_help: 从客户的邮件、聊天记录或询盘文件创建第一份报价。
       detail:
         back: ← 返回报价
         owner: "负责人 %{name}"
@@ -748,35 +748,35 @@ zh-CN:
       recording: 正在记录确认结果
       confirm_acceptance: 确认接受
     intake:
-      eyebrow: 01 · 导入询盘
-      title: 导入并核对客户询盘
-      subtitle: 先导入客户当前发来的内容；后续回复可以继续追加，信息够用时再创建报价草稿。
-      source: 询盘来源
-      smart: 智能识别
-      smart_help: 适用于邮件、聊天记录、表格和文档
-      manual_help: 跳过智能识别，直接核对字段
+      eyebrow: 01 · 创建报价
+      title: 从客户消息开始
+      subtitle: 粘贴邮件或聊天记录，也可以上传原文件。系统先整理报价所需信息，你确认后再生成报价草稿。
+      source: 整理方式
+      smart: AI 整理
+      smart_help: 从客户消息和附件中提取报价信息
+      manual_help: 不调用 AI，只用基础规则整理原文
       email: 邮件
       chat: 聊天记录
       text: 普通文字
-      manual: 手工录入
-      placeholder: "在这里粘贴完整询盘……\n\n例如：请报价 12 台液压动力单元，380V / 50Hz，CIF Jebel Ali。"
-      upload: 或上传原始文件
-      upload_help: PDF、XLSX、CSV 或 TXT · 原文件会被保留
-      what_happens: 接下来会发生什么
-      step_read: 读取并保留原始内容
-      step_read_help: 原文件会和这笔询盘一起保存。
-      step_extract: 整理客户、商品和要求
-      step_extract_help: 点开字段就能看到对应原文。
-      step_confirm: 核对客户和商品
-      step_confirm_help: 客户、币种、商品和数量确认后即可创建报价。
-      step_price: 核对价格与运费
-      step_price_help: 缺少价格或运费的字段将在发布前标记。
-      no_guess: 未识别金额保持为空
-      no_guess_help: 完成价格与运费核对后即可发布。
-      submit: 整理询盘
-      extracted: 询盘已整理，请核对结果；客户后续补充可继续追加到这条询盘。
-      fallback: 自动整理未完成。原始询盘已保存，可切换为手工录入。
-      review_saved: 已保存询盘核对结果。
+      manual: 基础整理
+      placeholder: "粘贴客户发来的邮件或聊天记录……\n\n例如：请报价 12 台液压动力单元，380V / 50Hz，CIF Jebel Ali。"
+      upload: 上传客户原文件（选填）
+      upload_help: 支持 PDF、XLSX、CSV、TXT；原文件会随报价保留
+      what_happens: 完成这一步后
+      step_read: 保留客户原话
+      step_read_help: 后续核对时可以随时查看原文。
+      step_extract: 整理报价信息
+      step_extract_help: 提取客户、商品、数量和交付要求。
+      step_confirm: 补齐关键信息
+      step_confirm_help: 先确认客户、币种、商品和数量。
+      step_price: 进入报价编辑
+      step_price_help: 价格和运费可在报价草稿中继续填写。
+      no_guess: 金额不会自动猜测
+      no_guess_help: 未提供的价格和运费保持为空，等你确认。
+      submit: 整理并核对
+      extracted: 已整理客户消息。请核对关键信息，客户后续回复可继续追加到这里。
+      fallback: AI 整理未完成，客户原文已保留，并已使用基础规则生成待核对内容。
+      review_saved: 已保存当前核对内容，可稍后继续。
       build_blocked: 创建报价草稿前，请确认买家、币种、商品名称和数量。价格与运费可在报价工作台继续完善。
       deal_created: "已创建包含 %{count} 件商品的报价草稿。请在发布第 1 版前确认价格与运费。"
     priority:
@@ -788,15 +788,15 @@ zh-CN:
       optional: 可以忽略
     review:
       eyebrow: 02 · 核对询盘
-      title: 核对询盘信息
-      description: 核对客户、商品、数量和规格。未识别字段保留为空，可在本页补充。
+      title: 核对报价所需信息
+      description: 先确认客户、币种、商品和数量；价格、运费和其他要求可以继续补充。
       saved: 已自动保存
       saved_ago: "%{time}前更新"
-      current_step: 当前最重要的一步
-      ready_title: 已具备创建报价草稿的条件
-      ready_body: 可创建报价草稿；价格与运费需在发布前确认。
-      original: 原始询盘
-      source_truth: 核对依据
+      current_step: 建议先处理
+      ready_title: 关键信息已齐全
+      ready_body: 现在可以创建报价草稿，价格与运费可在编辑报价时补充。
+      original: 客户原话
+      source_truth: 原始记录
       file_retained: "已保留原始文件 · %{size}"
       buyer_heading: 买家与目的地
       buyer_help: 确认买家身份与货物目的地。
@@ -853,7 +853,7 @@ zh-CN:
       readiness: 报价草稿创建条件
       ready: 可创建报价草稿；价格待确认
       not_ready: 先确认买家、币种、商品和数量
-      save_review: 保存核对结果
+      save_review: 保存，稍后继续
       build_deal: 创建报价草稿
       price_sources:
         unpriced: 待补价格

@@ -253,10 +253,10 @@
 
 [data-theme="dark"] body.neo-os--app, [data-theme="dark"] body.neo-os--app > main { background: var(--ws-canvas) !important; color: var(--ws-text) !important; }
 [data-theme="dark"] .neo-os--app .navbar { border-color: var(--ws-border) !important; background: rgba(13,15,20,.94) !important; }
-[data-theme="dark"] .neo-os--app :is(.settings-editor,.settings-documents,.ai-entry,.deal-metrics,.inbox-event,.waiting-deal,.library-product,.library-add,.app-surface,.app-table-surface,.inquiry-source-panel,.inquiry-upload-panel,.inquiry-results-panel) { border-color: var(--ws-border) !important; background: var(--ws-surface) !important; color: var(--ws-text) !important; }
+[data-theme="dark"] .neo-os--app :is(.settings-editor,.settings-documents,.ai-entry,.deal-metrics,.inbox-event,.waiting-deal,.library-product,.library-add,.app-surface,.app-table-surface,.inquiry-upload-panel) { border-color: var(--ws-border); background: var(--ws-surface); color: var(--ws-text); }
 [data-theme="dark"] .neo-os--app :is(h1,h2,h3,h4,strong,label,th,td) { color: var(--ws-text) !important; }
 [data-theme="dark"] .neo-os--app :is(p,small,.eyebrow) { color: var(--ws-secondary); }
-[data-theme="dark"] .neo-os--app :is(input,textarea,select,.app-ui-input) { border-color: var(--ws-border) !important; background: #0e1117 !important; color: var(--ws-text) !important; }
+[data-theme="dark"] .neo-os--app :is(input,textarea,select,.app-ui-input) { border-color: var(--ws-border); background: var(--ws-elevated); color: var(--ws-text); }
 /* Quote Studio is an application editor, not a print preview. Its four layers
    consume the active theme together; only exported documents keep paper CSS. */
 .neo-os--app .quote-studio--editor {

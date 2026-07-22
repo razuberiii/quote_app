@@ -11,9 +11,9 @@
   <% if @profile_import.status == "failed" %>
     <section class="empty-state"><h2><%= t("self_service.company_import.review.failed") %></h2><p><%= t("self_service.company_import.review.failed_help") %></p><%= link_to t("self_service.company_import.restart"), new_company_profile_import_path, class: "button button--primary" %></section>
   <% else %>
-    <%= form_with model: @profile_import, method: :patch, class: "inquiry-review__grid" do |form| %>
-      <aside class="inquiry-original"><p class="section-kicker"><%= t("self_service.company_import.review.source") %></p><blockquote><%= @profile_import.source_text.presence || t("self_service.company_import.review.file_source") %></blockquote></aside>
-      <section class="inquiry-result">
+    <%= form_with model: @profile_import, method: :patch, class: "company-profile-review" do |form| %>
+      <aside class="company-profile-review__source"><p class="section-kicker"><%= t("self_service.company_import.review.source") %></p><blockquote><%= @profile_import.source_text.presence || t("self_service.company_import.review.file_source") %></blockquote></aside>
+      <section class="company-profile-review__result">
         <div class="studio-paper__heading"><p class="section-kicker"><%= t("self_service.company_import.review.candidate") %></p><h2><%= t("self_service.company_import.review.confirm_title") %></h2><p><%= t("self_service.company_import.review.confirm_help") %></p></div>
         <div class="extraction-fields">
           <% CompanyProfileImport::COMPANY_FIELDS.each do |field| %>

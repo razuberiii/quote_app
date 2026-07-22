@@ -21,16 +21,28 @@ en:
     documents: { eyebrow: Seller evidence, title: Company documents, help: Credentials available when a Deal needs them., name: Title, placeholder: Company profile, type: Type, choose: Choose file, upload: Upload, remove: Remove, remove_confirm: Remove this document?, empty: No company documents yet. Add them when a Deal needs supporting credentials. }
     document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration, certificate: Certificate }
   self_service:
+    intake:
+      queued: The customer source is saved and quote information is being organized in the background.
+      processing_eyebrow: Quote preparation · Processing
+      processing_title: Organizing customer requirements
+      processing_body: The original customer message is saved. Rubusoo is extracting the buyer, products, quantities and delivery requirements without blocking the workspace.
+      processing_status: Processing
+      processing_wait_title: You can continue with other work
+      processing_wait_body: This page checks quietly and opens the review only when processing finishes. It does not repeatedly refresh the full page.
+      leave_processing: Back to quotes
     catalog_import:
       selected_one: "Selected: %{name} · %{size}"
       selected_many: "Selected %{count} files · %{size} total"
       submitting: Upload complete. Opening the processing queue…
+      flash:
+        retry_started: Recognition restarted from the retained source file.
     catalog_review:
       processing_eyebrow: Product catalog · Processing
       processing_title: Organizing the product catalog
       processing_body: The files are stored safely. Rubusoo is reading sheets and identifying products and price sources; you may leave this page and return to review the results.
       processing_wait_title: You do not need to remain on the upload page
-      processing_wait_body: This page refreshes automatically. Large XLSX, PDF or image files may take some time while the rest of the workspace remains available.
+      processing_wait_body: Rubusoo checks progress quietly without repeatedly refreshing the page. Large XLSX, PDF or image files may take some time while the rest of the workspace remains available.
+      retry: Retry recognition
       status:
         processing: Processing
     conversation:
@@ -339,6 +351,7 @@ en:
       preview: Preview
       preview_room: Preview Buyer Room
       saved: Saved
+      saved_at: "Saved · %{time}"
       unsaved: Unsaved changes
       saving: Saving
       save_failed: Save failed. Review the entered information.

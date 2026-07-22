@@ -17,10 +17,11 @@ class InquiriesController < ApplicationController
     if @inquiry.source_text.blank? && @inquiry.source_file.attached?
       @inquiry.update!(source_text: InquirySourceReader.new(@inquiry.source_file).call, source_type: inferred_source_type)
     end
-    @inquiry.extract_requirements!
     record_initial_message
-    redirect_to @inquiry, notice: t("self_service.intake.extracted")
-  rescue InquiryAiExtractor::ConfigurationError, InquiryAiExtractor::ResponseError, InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile => error
+    @inquiry.update!(status: "processing")
+    InitialInquiryAnalysisJob.perform_later(@inquiry.id)
+    redirect_to @inquiry, notice: t("self_service.intake.queued")
+  rescue InquirySourceReader::UnsupportedFile, InquirySourceReader::UnreadableFile => error
     @inquiry&.manually_extract!
     record_initial_message if @inquiry&.persisted?
     Rails.logger.warn("Inquiry AI extraction failed: #{error.class}: #{error.message}")
@@ -28,6 +29,10 @@ class InquiriesController < ApplicationController
   end
 
   def show
+    respond_to do |format|
+      format.json { return render json: { status: @inquiry.status } }
+      format.html { return render :processing if @inquiry.status == "processing" }
+    end
     @catalog_matches = @inquiry.catalog_matches
     @catalog_products = current_user.company.products.order(:name)
     @guidance = InquiryGuidance.new(@inquiry)

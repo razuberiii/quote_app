@@ -1,5 +1,5 @@
 class ProductImportBatchesController < ApplicationController
-  before_action :set_batch, only: %i[show update apply]
+  before_action :set_batch, only: %i[show update apply retry_processing]
 
   def new = @batch = current_user.company.product_import_batches.new
 
@@ -17,6 +17,17 @@ class ProductImportBatchesController < ApplicationController
   def show
     @candidates = @batch.product_import_candidates.includes(:matched_product).order(:id)
     @products = current_user.company.products.order(:name)
+    respond_to do |format|
+      format.html
+      format.json { render json: { status: @batch.status, candidate_count: @candidates.size } }
+    end
+  end
+
+  def retry_processing
+    @batch.product_import_candidates.destroy_all
+    @batch.update!(status: "processing", warnings: [])
+    ProductImportBatchProcessingJob.perform_later(@batch.id)
+    redirect_to @batch, notice: t("self_service.catalog_import.flash.retry_started")
   end
 
   def update

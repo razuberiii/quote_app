@@ -78,7 +78,7 @@ class QuotesController < ApplicationController
     return redirect_to quote_path(@quote), alert: t("self_service.quote_core.immutable_edit") unless @quote.can_edit_revision?
     @quote.assign_attributes(quote_params)
     if @quote.save
-      redirect_to edit_quote_path(@quote), status: :see_other, notice: t("self_service.quote_core.draft_saved")
+      redirect_to edit_quote_path(@quote, saved: 1), status: :see_other, notice: t("self_service.quote_core.draft_saved")
     else
       ensure_item
       render :edit, status: :unprocessable_entity

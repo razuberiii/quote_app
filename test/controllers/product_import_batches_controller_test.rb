@@ -78,7 +78,12 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", text: "正在整理商品目录"
-    assert_select "meta[http-equiv='refresh'][content='3']"
+    assert_select "meta[http-equiv='refresh']", count: 0
+    assert_select "[data-controller='catalog-processing']"
     assert_select ".candidate-review", count: 0
+
+    get product_import_batch_path(batch, format: :json)
+    assert_response :success
+    assert_equal "processing", response.parsed_body["status"]
   end
 end

@@ -779,6 +779,14 @@ zh-CN:
       no_guess_help: 未提供的价格和运费保持为空，等你确认。
       submit: 整理并核对
       extracted: 已整理客户消息。请核对关键信息，客户后续回复可继续追加到这里。
+      queued: 客户原文已保存，系统正在后台整理报价信息。
+      processing_eyebrow: 报价准备 · 后台处理中
+      processing_title: 正在整理客户需求
+      processing_body: 客户原文已经保存。系统正在提取买家、商品、数量和交付要求，不会阻塞其他页面。
+      processing_status: 整理中
+      processing_wait_title: 可以继续处理其他工作
+      processing_wait_body: 页面会静默检查进度，只在整理完成后进入核对页，不会反复整页刷新。
+      leave_processing: 返回报价列表
       fallback: 部分内容未能识别，客户原文已完整保留。请在核对页补充缺少的信息。
       review_saved: 已保存当前核对内容，可稍后继续。
       build_blocked: 创建报价草稿前，请确认买家、币种、商品名称和数量。价格与运费可在报价工作台继续完善。
@@ -890,6 +898,7 @@ zh-CN:
       title: 报价工作台
       working: 报价草稿
       saved: 已保存
+      saved_at: 已保存 · %{time}
       unsaved: 有未保存的更改
       saving: 正在保存
       save_failed: 保存失败，请检查输入内容
@@ -1087,6 +1096,7 @@ zh-CN:
       flash:
         review_saved: 核对结果已保存，商品尚未加入商品库。
         applied: 已应用审核通过的商品；来源未明确的价格仍保持为空。
+        retry_started: 已使用原文件重新开始识别。
     company_import:
       back: 返回公司设置
       restart: 重新导入
@@ -1242,7 +1252,7 @@ zh-CN:
       processing_title: 正在整理商品目录
       processing_body: 文件已安全保存。系统正在读取 Sheet、识别商品与价格来源；你可以离开此页，完成后再回来核对。
       processing_wait_title: 无需停留在上传页面
-      processing_wait_body: 此页面会自动刷新。大型 XLSX、PDF 或图片可能需要一些时间，期间其他页面仍可正常使用。
+      processing_wait_body: 系统会在后台检查处理状态，不会反复刷新页面。大型 XLSX、PDF 或图片可能需要一些时间，期间其他页面仍可正常使用。
       coverage_eyebrow: 处理范围
       coverage_title: 每个页面与 Sheet 的处理结果
       coverage_summary: 共 %{count} 个范围，%{incomplete} 个需要人工处理
@@ -1260,6 +1270,7 @@ zh-CN:
       warnings: 需要注意
       empty_title: 未识别到商品
       empty_body: 原文件已保留。可重新识别、手工录入，或创建临时商品继续报价。
+      retry: 重新识别原文件
       start_deal: 继续导入询盘
       no_sku: 未提供 SKU
       name: 商品名称

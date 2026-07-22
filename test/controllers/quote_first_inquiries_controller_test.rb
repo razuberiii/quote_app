@@ -18,6 +18,23 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     assert_select "main", text: /基础整理/, count: 0
   end
 
+  test "initial AI analysis is queued without blocking the create request" do
+    assert_enqueued_with(job: InitialInquiryAnalysisJob) do
+      post inquiries_path, params: { inquiry: { source_type: "email", source_text: "Please quote 12 model A carts at USD 500." } }
+    end
+
+    inquiry = @user.company.inquiries.order(:id).last
+    assert_redirected_to inquiry_path(inquiry)
+    assert_equal "processing", inquiry.status
+
+    get inquiry_path(inquiry)
+    assert_response :success
+    assert_select "[data-controller='catalog-processing']"
+
+    get inquiry_path(inquiry, format: :json)
+    assert_equal "processing", response.parsed_body["status"]
+  end
+
   test "empty Library does not block a multi item Working draft" do
     inquiry = @user.company.inquiries.create!(created_by: @user, source_type: "email", source_text: <<~TEXT)
       Please quote CIF Jebel Ali for:

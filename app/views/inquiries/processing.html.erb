@@ -1,0 +1,7 @@
+<main class="rubusoo-page inquiry-review" data-controller="catalog-processing" data-catalog-processing-url-value="<%= inquiry_path(@inquiry, format: :json) %>">
+  <header class="inquiry-review__header">
+    <div><p class="eyebrow"><%= t("self_service.intake.processing_eyebrow") %></p><h1><%= t("self_service.intake.processing_title") %></h1><p><%= t("self_service.intake.processing_body") %></p></div>
+    <div class="inquiry-review__status"><span class="status-dot"></span><strong><%= t("self_service.intake.processing_status") %></strong></div>
+  </header>
+  <section class="library-empty"><h2><%= t("self_service.intake.processing_wait_title") %></h2><p><%= t("self_service.intake.processing_wait_body") %></p><%= link_to t("self_service.intake.leave_processing"), quotes_path, class: "button button--secondary" %></section>
+</main>

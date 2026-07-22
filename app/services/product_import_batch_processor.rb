@@ -37,7 +37,7 @@ class ProductImportBatchProcessor
   def extract_semantic_candidates(result, products)
     return products unless result.ai_required && result.ai_input.present?
 
-    ai_products, ai_warnings = CatalogAiExtractor.new(@batch).call(result.ai_input)
+    ai_products, ai_warnings = extract_with_retry(result.ai_input)
     @batch.update!(warnings: @batch.warnings + ai_warnings)
     merge_candidates(products, ai_products)
   rescue StructuredAiClient::ResponseError, StructuredAiClient::ConfigurationError => error
@@ -48,6 +48,17 @@ class ProductImportBatchProcessor
       I18n.t("self_service.catalog_import.errors.ai_failed", error: error.message)
     ])
     products
+  end
+
+  def extract_with_retry(input)
+    attempts = 0
+    begin
+      attempts += 1
+      CatalogAiExtractor.new(@batch).call(input)
+    rescue StructuredAiClient::ResponseError => error
+      retry if attempts < 2 && error.message.match?(/timeout|timed out/i)
+      raise
+    end
   end
 
   def create_candidates(products)

@@ -327,6 +327,11 @@ en:
       preview: Preview
       preview_room: Preview Buyer Room
       saved: Saved
+      unsaved: Unsaved changes
+      saving: Saving
+      save_failed: Save failed. Review the entered information.
+      recheck: Save to refresh publication checks
+      recheck_help: Totals are current. Publication checks will refresh after saving.
       blockers_only: Only publication blockers need attention
       blockers_help: Recommended defaults handle everything else for this quote.
       next_preview: "Next: preview the customer quote"

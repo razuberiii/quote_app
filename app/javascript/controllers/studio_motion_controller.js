@@ -1,14 +1,26 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["quantity", "price", "shipping", "discount", "tax", "total", "saveState"]
+  static targets = ["quantity", "price", "shipping", "discount", "tax", "total", "saveState", "summarySubtotal", "summaryFees", "summaryTotal", "readiness", "readinessTitle", "readinessHelp"]
+  static values = { unsaved: String, saving: String, saved: String, saveFailed: String, recheck: String, recheckHelp: String }
   connect() { this.recalculate() }
-  dirty() { this.saveStateTarget.textContent = "● Unsaved changes"; this.saveStateTarget.classList.add("is-dirty"); this.recalculate() }
-  saving() { this.saveStateTarget.textContent = "● Saving…"; this.saveStateTarget.classList.remove("is-saved"); this.saveStateTarget.classList.add("is-saving") }
+  dirty() {
+    this.saveStateTarget.textContent = `● ${this.unsavedValue}`
+    this.saveStateTarget.classList.add("is-dirty")
+    if (this.hasReadinessTarget) {
+      this.readinessTarget.classList.remove("is-ready")
+      this.readinessTarget.classList.add("is-stale")
+      this.readinessTarget.querySelector("ul")?.setAttribute("hidden", "hidden")
+      this.readinessTitleTarget.textContent = this.recheckValue
+      this.readinessHelpTarget.textContent = this.recheckHelpValue
+    }
+    this.recalculate()
+  }
+  saving() { this.saveStateTarget.textContent = `● ${this.savingValue}`; this.saveStateTarget.classList.remove("is-saved"); this.saveStateTarget.classList.add("is-saving") }
   saved(event) {
     this.saveStateTarget.classList.remove("is-saving")
-    if (!event.detail.success) { this.saveStateTarget.textContent = "● Save failed"; this.saveStateTarget.classList.add("is-dirty"); return }
-    this.saveStateTarget.textContent = "● Saved"
+    if (!event.detail.success) { this.saveStateTarget.textContent = `● ${this.saveFailedValue}`; this.saveStateTarget.classList.add("is-dirty"); return }
+    this.saveStateTarget.textContent = `● ${this.savedValue}`
     this.saveStateTarget.classList.remove("is-dirty")
     this.saveStateTarget.classList.add("is-saved")
   }
@@ -41,8 +53,14 @@ export default class extends Controller {
   }
   recalculate() {
     const items = this.quantityTargets.reduce((sum, input, index) => sum + Number(input.value || 0) * Number(this.priceTargets[index]?.value || 0), 0)
-    const total = Math.max(0, items + Number(this.shippingTarget?.value || 0) + Number(this.taxTarget?.value || 0) - Number(this.discountTarget?.value || 0))
+    const fees = Number(this.shippingTarget?.value || 0) + Number(this.taxTarget?.value || 0)
+    const total = Math.max(0, items + fees - Number(this.discountTarget?.value || 0))
     const next = new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total)
     if (this.totalTarget.textContent !== next) { this.totalTarget.textContent = next; this.totalTarget.classList.remove("is-updated"); void this.totalTarget.offsetWidth; this.totalTarget.classList.add("is-updated") }
+    const currency = this.element.querySelector("select[name='quote[currency]']")?.value || ""
+    const money = value => `${currency} ${new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`
+    if (this.hasSummarySubtotalTarget) this.summarySubtotalTarget.textContent = money(items)
+    if (this.hasSummaryFeesTarget) this.summaryFeesTarget.textContent = money(fees)
+    if (this.hasSummaryTotalTarget) this.summaryTotalTarget.textContent = money(total)
   }
 }

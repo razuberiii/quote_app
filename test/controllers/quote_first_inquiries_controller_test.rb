@@ -53,8 +53,8 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     inquiry.manually_extract!
     patch inquiry_path(inquiry), params: { build_deal: "1", inquiry: { extracted_data: {
       customer: "New Buyer Ltd", currency: "USD",
-      products: { "0" => { name: "Deal-only control cabinet", quantity: "4", unit: "sets", price_source: "unpriced" } },
-      commercial_terms: { incoterm: "EXW" }, questions: "", missing_information: ""
+      products: { "0" => { name: "Deal-only control cabinet", quantity: "4", unit: "sets", unit_price: "2400", price_source: "manual" } },
+      commercial_terms: { incoterm: "CIF", freight_amount: "1800", freight_source: "freight_forwarder_quote" }, questions: "", missing_information: ""
     } } }
 
     quote = inquiry.reload.quote
@@ -62,5 +62,9 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "New Buyer Ltd", quote.customer.name
     assert_equal "Deal-only control cabinet", quote.quote_items.first.description
     assert_equal 4, quote.quote_items.first.quantity
+    assert_equal 2400.to_d, quote.quote_items.first.unit_price
+    assert_equal "manual", quote.quote_items.first.price_source
+    assert_equal 1800.to_d, quote.shipping_amount
+    assert_equal "freight_forwarder_quote", quote.shipping_price_source
   end
 end

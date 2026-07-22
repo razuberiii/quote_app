@@ -8,6 +8,10 @@ class InquiryAiExtractor
     time, company facts, or product identity. Use null for unknown values. Every
     non-null candidate must cite an evidence id whose excerpt is copied from the
     source. specifications must use a [{name, value}] array. confidence describes extraction certainty, not commercial validity.
+    Treat accessories, spare parts, included kits, and optional add-ons mentioned
+    with a primary product as specifications or packing context for that product,
+    not as separate products, unless the source gives them an independent quantity
+    or explicitly asks for a separate line price.
   PROMPT
 
   def initialize(inquiry: nil, **client_options)

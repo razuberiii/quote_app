@@ -193,15 +193,15 @@ zh-CN:
           empty_help: 完成报价检查并发布后，PDF、Excel 和客户页面会直接出现在这里。
     marketing:
       hero:
-        eyebrow: 跨境 B2B 报价成交工作台
-        title: 从询盘到报价，一处完成。
-        title_lines: [从询盘到报价，, 一处完成。]
+        eyebrow: 跨境 B2B 报价管理
+        title: 询盘、报价与客户确认，集中管理。
+        title_lines: [询盘、报价与客户确认，, 集中管理。]
         before: 把
         after: 变成决定。
         phrases: [买家询盘, 混乱邮件, 产品表格, 采购订单]
         statuses: [询盘信息已整理, 商务信息待核对, 报价版本已确认]
-        body: 导入邮件、聊天记录、PDF 或表格，核对商品、价格、贸易条款与运费，再发布一份可追踪、可确认的买家报价。
-        primary: 用真实询盘试一次
+        body: 从邮件、聊天记录、PDF 或表格提取报价信息，在同一工作区完成商品匹配、定价、版本发布和客户确认。
+        primary: 创建第一份报价
         secondary: 查看示例报价
         proof: 14 天完整试用 · 无需信用卡 · 买家无需注册
         workflow_label: 从询盘导入到客户确认
@@ -226,14 +226,14 @@ zh-CN:
           accepted: 已接受 · 邮件 + PO
       problem:
         eyebrow: 报价流程的三个断点
-        title: 询盘、价格依据和客户反馈没有连在同一笔交易里。
+        title: 分散的信息增加报价核对与版本管理成本。
         items:
           0: { title: 询盘需要手工拆字段, body: 从邮件和聊天中逐项整理型号、数量、规格、目的港和交期。 }
           1: { title: 报价依据分散, body: 商品价、客户价、运费和贸易条款分别保存在目录、表格和消息记录中。 }
           2: { title: 客户反馈脱离报价版本, body: 查看、提问、修改要求和采购订单无法直接对应到客户收到的那一版报价。 }
       intake:
         eyebrow: 01 · 整理询盘
-        title: 从原始询盘提取报价信息。
+        title: 将原始询盘整理为可核对的报价信息。
         body: 导入邮件、聊天记录、PDF 或 Excel，集中核对客户、商品、数量与交付要求。未识别字段保留为空。
         points: [字段关联对应原文, 支持商品库匹配与人工调整, 价格与运费确认后方可发布]
         sample: “……380V 三相电，不锈钢外壳，CIF Hamburg……”
@@ -247,7 +247,7 @@ zh-CN:
         freight_help: 原始询盘未提供运费。
       studio:
         eyebrow: 02 · 编制报价
-        title: 在同一页面编辑商品、价格与条款。
+        title: 在统一工作区完成商品、价格与条款编辑。
         body: 报价内容按买家页面的结构编排，编辑结果与对外版本保持一致。
         outline_html: 封面<br>简介<br><strong>产品</strong><br>选项<br>价格<br>运输<br>条款<br>接受
         prepared: 为 Northstar Machinery 准备
@@ -261,7 +261,7 @@ zh-CN:
         preview: 预览
       buyer:
         eyebrow: 03 · 客户确认
-        title: 通过在线报价完成查看、提问与确认。
+        title: 为客户提供可查看、提问和确认的在线报价。
         body: 商品、选项、交期与总价集中展示。客户反馈关联当前报价版本，便于销售继续跟进。
         demo: 看看买家页面
         private_quote: Pacific Trading Group · 私密报价
@@ -275,7 +275,7 @@ zh-CN:
         selection: 当前选择
       revision:
         eyebrow: 04 · 版本记录
-        title: 每次修改与确认均保留完整版本。
+        title: 保留每次发布、修改与确认记录。
         initial: 初始范围
         initial_value: 4 台 · EXW
         changes_html: 数量 +1<br>增加运费<br>确认电压
@@ -291,9 +291,9 @@ zh-CN:
           1: { title: 编制并发布报价, body: 在一笔交易中维护商品、选配、价格、贸易条款和修订版本。 }
           2: { title: 记录客户确认, body: 将客户确认的版本锁定，并据此生成形式发票或订单确认文件。 }
       pricing:
-        eyebrow: 先试，再决定
-        title: 使用真实询盘体验完整报价流程。
-        body: 导入询盘、编制报价并打开买家页面，完成一次从创建到确认的流程。
+        eyebrow: 产品试用
+        title: 使用真实询盘完成一次报价流程。
+        body: 试用包含询盘整理、报价编制、客户页面、版本发布以及 PDF 和 Excel 导出。
         compare: 查看价格
         per_month: / 月
         features: 询盘识别、报价工作台、买家报价空间、修订、确认、专业 PDF 与形式发票。
@@ -307,10 +307,10 @@ zh-CN:
           2: { question: 买家确认后会发生什么？, answer: 当前版本、买家选择、金额、条款和确认人信息将被锁定，后续形式发票使用同一份记录。 }
           3: { question: Rubusoo 会替代 CRM 或 ERP 吗？, answer: 不会。Rubusoo 专注从收到询盘到买家确认和 PI 交接这段流程；客户主数据、销售管道和财务库存继续由现有 CRM、ERP 管理。 }
       final:
-        eyebrow: 下一份报价，别再从复制表格开始
-        title: 客户正在等报价，现在就把它做出来。
-        primary: 免费做一份报价
-        secondary: 看看销售怎么用
+        eyebrow: 开始使用 Rubusoo
+        title: 建立可核对、可发布、可追踪的报价流程。
+        primary: 创建报价
+        secondary: 查看产品演示
       pricing_page:
         meta_title: 价格 · Rubusoo
         eyebrow: 简单、透明的价格
@@ -890,6 +890,11 @@ zh-CN:
       title: 报价工作台
       working: 报价草稿
       saved: 已保存
+      unsaved: 有未保存的更改
+      saving: 正在保存
+      save_failed: 保存失败，请检查输入内容
+      recheck: 保存后重新检查发布条件
+      recheck_help: 当前金额已更新；发布条件将在保存后按最新内容重新检查。
       preview: 预览
       review_publish: 检查并发布
       structure: 报价结构
@@ -1096,7 +1101,7 @@ zh-CN:
         rule_json: 识别结果采用固定字段结构。
         rule_blank: 未识别字段保留为空。
         rule_review: 核对并确认后更新公司资料。
-        analyze: 开始识别
+        analyze: 提取公司资料
       review:
         eyebrow: 设置 · 核对公司资料
         title: 核对识别结果

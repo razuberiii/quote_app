@@ -10,7 +10,7 @@
     </section>
     <aside class="inquiry-upload-panel">
       <p class="section-kicker"><%= t("self_service.company_import.new.file") %></p>
-      <label class="upload-picker"><span><%= t("self_service.company_import.new.choose_file") %></span><small><%= t("self_service.company_import.new.choose_file_help") %></small><%= form.file_field :source_file, accept: ".pdf,.txt,.csv,application/pdf,text/plain,text/csv" %></label>
+      <label class="upload-picker"><span><%= t("self_service.company_import.new.choose_file") %></span><small><%= t("self_service.company_import.new.choose_file_help") %></small><%= form.file_field :source_file, accept: ".pdf,.txt,.csv,application/pdf,text/plain,text/csv", class: "upload-control__input" %></label>
       <p><%= t("self_service.company_import.new.file_help") %></p>
       <div class="import-guardrails"><strong><%= t("self_service.company_import.new.guardrails") %></strong><ul><li><%= t("self_service.company_import.new.rule_json") %></li><li><%= t("self_service.company_import.new.rule_blank") %></li><li><%= t("self_service.company_import.new.rule_review") %></li></ul></div>
       <%= form.submit t("self_service.company_import.new.analyze"), class: "button button--primary button--full" %>

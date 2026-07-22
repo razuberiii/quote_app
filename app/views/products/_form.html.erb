@@ -33,7 +33,9 @@
       <label class="upload-control">
         <span><%= t("self_service.product.form.upload") %></span>
         <small><%= t("self_service.product.form.upload_help") %></small>
-        <%= form.file_field :gallery_images, accept: "image/*", multiple: true %>
+        <%= form.file_field :gallery_images, accept: "image/*", multiple: true, class: "upload-control__input" %>
+        <span class="upload-control__action"><%= t("settings_workspace.file_input.choose_file") %></span>
+        <span class="upload-control__empty"><%= t("settings_workspace.file_input.no_file_selected") %></span>
       </label>
       <% if product.gallery_images.attached? %>
         <div class="resource-media__gallery">

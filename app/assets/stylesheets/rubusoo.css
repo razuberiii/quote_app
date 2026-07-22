@@ -178,6 +178,10 @@ html{scroll-behavior:smooth}.neo-os{margin:0;background:var(--neo-bg);color:var(
 }
 @media(max-width:520px){.product-landing .product-problem h2{font-size:2.15rem;line-height:1.15;letter-spacing:-.035em;text-wrap:wrap}}
 
+/* Application layout owns no visual panel. This final rule retires legacy main
+   container geometry that otherwise wraps every authenticated page in a slab. */
+body.app-root.neo-os--app>main{width:100%;max-width:none;margin:0;padding:0;background:transparent}
+
 /* Canonical navigation drawer, pricing cards, themes and high-energy state motion. */
 .neo-os--marketing .navbar-drawer{display:contents}
 .rb-page{width:min(1240px,calc(100% - 48px));margin:0 auto;padding:clamp(64px,8vw,110px) 0 100px}
@@ -632,6 +636,7 @@ body.page-users-registrations.page-action-edit .account-profile-form>.app-ui-but
 
 /* Final product-system cascade. Kept last while legacy families are retired. */
 body.app-root.neo-os{background:var(--ws-canvas,#f6f6f3);color:var(--ws-text,#202022)}
+body.app-root.neo-os--app{background:radial-gradient(900px circle at 12% 8%,color-mix(in srgb,var(--ws-blue) 7%,transparent),transparent 62%),radial-gradient(760px circle at 88% 18%,color-mix(in srgb,var(--neo-red) 5%,transparent),transparent 64%),var(--ws-canvas)}
 body.app-root.neo-os .navbar{min-height:58px;background:color-mix(in srgb,var(--ws-shell,#fafaf8) 94%,transparent);border-color:var(--ws-border,#e2e2de)}
 body.app-root.neo-os .navbar-container{min-height:58px}
 body.app-root.neo-os--marketing .product-hero{background:#fafaf8}
@@ -642,7 +647,11 @@ body.app-root.neo-os--marketing .product-hero .hero-outcome-line{display:block;w
 body.app-root.neo-os--marketing .product-hero .hero-outcome-line::after{right:0;left:0;height:.12em;background:#e63f68}
 body.app-root.neo-os--marketing :is(.navbar-cta-link,.button.button--primary){border-color:#202022;background:#202022;color:#fff}
 body.app-root.neo-os--marketing :is(.navbar-cta-link,.button.button--primary):hover{background:#343437;color:#fff}
-body.app-root.neo-os--app>main{background:var(--ws-canvas);color:var(--ws-text)}
+body.app-root.neo-os--app>main{background:transparent;color:var(--ws-text)}
+body.app-root.neo-os--app>main>.alert{position:fixed;z-index:90;top:72px;right:22px;width:min(440px,calc(100% - 44px));margin:0;padding:11px 14px 11px 34px;border:1px solid var(--ws-border);border-radius:8px;background:color-mix(in srgb,var(--ws-elevated) 94%,transparent);color:var(--ws-text);box-shadow:0 14px 36px rgba(0,0,0,.16);backdrop-filter:blur(14px);font-size:.78rem;line-height:1.45}
+body.app-root.neo-os--app>main>.alert::before{content:"";position:absolute;top:15px;left:15px;width:7px;height:7px;border-radius:50%;background:var(--neo-blue)}
+body.app-root.neo-os--app>main>.alert-success::before{background:var(--neo-green)}
+body.app-root.neo-os--app>main>.alert-danger::before{background:var(--neo-red)}
 body.app-root.neo-os--app :is(.deal-workspace,.workspace-page,.app-page-shell,.inquiry-import,.inquiry-review,.revision-page){color:var(--ws-text)}
 body.app-root.neo-os--app :is(.deal-page-header,.deal-metrics,.inbox-stream,.waiting-strip,.library-tabs,.settings-rail,.settings-editor,.settings-documents,.ai-entry){border-color:var(--ws-border)}
 body.app-root.neo-os--app :is(.deal-metrics,.inbox-event,.waiting-deal,.library-product,.library-add,.ai-entry,.settings-documents,.app-surface,.app-table-surface){background:var(--ws-surface);color:var(--ws-text)}
@@ -670,6 +679,7 @@ body.app-root.neo-os--app.page-users-registrations.page-action-edit .workspace-h
 body.app-root.neo-os--app table{color:var(--ws-text)}body.app-root.neo-os--app th{border-color:var(--ws-border);color:var(--ws-muted)}body.app-root.neo-os--app td{border-color:var(--ws-border)}
 body.app-root.neo-os--app .account-menu-trigger,body.app-root.neo-os--app .account-menu-trigger:hover,body.app-root.neo-os--app .account-menu-trigger:focus,body.app-root.neo-os--app .account-menu-trigger[aria-expanded="true"]{border-color:var(--ws-border);background:var(--ws-surface);color:var(--ws-text)}
 @media(max-width:900px){body.app-root.neo-os .navbar,body.app-root.neo-os .navbar-container{min-height:62px}body.app-root.neo-os--marketing .product-hero .hero-fixed-headline{font-size:clamp(2.5rem,10.7vw,3.15rem)}body.app-root.neo-os--marketing .product-hero .hero-fixed-headline>span{white-space:nowrap}}
+@media(max-width:760px){body.app-root.neo-os--app>main>.alert{top:72px;right:16px;width:calc(100% - 32px)}}
 @media(max-width:760px){
   body.app-root.neo-os--app .settings-editor{margin-top:16px}
   body.app-root.neo-os--app .settings-editor__bar{position:sticky;top:62px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;min-height:0;padding:12px 0;border-block:1px solid var(--ws-border)}

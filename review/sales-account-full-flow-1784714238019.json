@@ -1,0 +1,8 @@
+{
+  "email": "sales.review.1784714238019@example.com",
+  "video": "sales-account-full-flow-1784714238019.webm",
+  "findings": [
+    "公司资料分析未进入可应用状态",
+    "Console: TypeError: Failed to fetch\n    at W (https://next.rubusoo.com/assets/turbo.min-9fd88cd5.js:5:7238)\n    at z.perform (https://next.rubusoo.com/assets/turbo.min-9fd88cd5.js:5:9017)"
+  ]
+}

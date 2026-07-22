@@ -364,6 +364,9 @@
 /* Catalog import uses the workspace canvas; the upload control is the only bounded target. */
 .neo-os--app .catalog-import .import-dropzone { margin-top:24px; padding:28px 0; border-color:var(--ws-border); background:transparent; }
 .neo-os--app .catalog-import .import-guardrails { padding-inline:0; border-top:1px solid var(--ws-border); background:transparent; }
+.neo-os--app .company-import .import-guardrails { grid-template-columns:120px minmax(0,1fr); gap:16px; margin-top:4px; padding:16px 0 0; border:0; border-top:1px solid var(--ws-border); background:transparent; color:var(--ws-text); }
+.neo-os--app .company-import .import-guardrails > strong { color:var(--ws-muted); font-size:.68rem; font-weight:700; }
+.neo-os--app .company-import .import-guardrails ul { display:grid; gap:6px; color:var(--ws-secondary); }
 
 @media(max-width:760px){
   .neo-os--app .navbar-drawer { background: var(--ws-shell); }
@@ -371,6 +374,7 @@
   .neo-os--app .inquiry-import__composer { padding:18px 0 0; background:transparent; }
   .neo-os--app .inquiry-import__textarea { min-height:230px; max-height:55dvh; }
   .neo-os--app .inquiry-import__rail { margin:20px 0 0; padding:20px; border:1px solid var(--ws-border); border-radius:12px; }
+  .neo-os--app .company-import .import-guardrails { grid-template-columns:1fr; gap:8px; }
 }
 
 

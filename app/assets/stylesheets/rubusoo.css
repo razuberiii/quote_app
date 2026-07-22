@@ -540,7 +540,7 @@ body.app-root.neo-os.neo-os--app[data-controller~="shortcuts"] .app-page-shell--
 
 /* Product convergence: cinematic deal hero and one controlled import review language. */
 .product-hero{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(115deg,rgba(49,95,220,.08),transparent 32% 68%,rgba(255,79,120,.055))}
-.company-import .inquiry-import__form{padding-bottom:50px}.company-import .inquiry-source-panel textarea{min-height:440px}.company-import .inquiry-upload-panel{display:flex;flex-direction:column;gap:16px}.company-import .import-guardrails{margin-top:auto;padding:18px;border-left:2px solid var(--neo-blue);background:var(--neo-elevated)}
+.company-import .inquiry-import__form{padding-bottom:50px}.company-import .inquiry-source-panel textarea{min-height:440px}.company-import .inquiry-upload-panel{display:flex;flex-direction:column;gap:16px}
 .company-import--review .inquiry-result{min-width:0}.company-import--review .extraction-field textarea{width:100%;margin-top:7px;padding:9px;resize:vertical}.company-import--review .empty-state{padding-block:80px}.settings-editor__actions{display:flex;align-items:center;gap:8px}
 @media(max-width:760px){.company-import .inquiry-source-panel textarea{min-height:300px}.company-import--review .inquiry-review__grid{display:block}}
 
@@ -664,7 +664,6 @@ body.app-root.neo-os--app .settings-rail{background:var(--ws-canvas)}
 body.app-root.neo-os--app :is(.inquiry-source-panel,.inquiry-upload-panel,.inquiry-results-panel,.inquiry-original,.inquiry-result){border-color:var(--ws-border);background:var(--ws-surface);color:var(--ws-text)}
 body.app-root.neo-os--app .inquiry-source-panel{border:1px solid var(--ws-border)}
 body.app-root.neo-os--app .inquiry-source-panel__body,body.app-root.neo-os--app .inquiry-original blockquote{color:var(--ws-secondary)}
-body.app-root.neo-os--app .company-import .import-guardrails{border-left-color:var(--ws-red);background:var(--ws-elevated);color:var(--ws-text)}
 body.app-root.neo-os--app .upload-picker{border-color:var(--ws-border);background:var(--ws-shell);color:var(--ws-text)}
 body.app-root.neo-os--app.page-users-registrations.page-action-edit .workspace-heading h1,body.app-root.neo-os--app.page-users-registrations.page-action-edit .account-settings-layout h2,body.app-root.neo-os--app.page-users-registrations.page-action-edit .account-settings-layout label{color:var(--ws-text)}
 body.app-root.neo-os--app table{color:var(--ws-text)}body.app-root.neo-os--app th{border-color:var(--ws-border);color:var(--ws-muted)}body.app-root.neo-os--app td{border-color:var(--ws-border)}
@@ -708,7 +707,6 @@ body.app-root.neo-os--app .account-menu-trigger,body.app-root.neo-os--app .accou
   body.neo-os--marketing .marketing-auth-card{border-radius:10px}
   body.neo-os--app .inquiry-import__signals{border-color:#deded9;background:#fff}
   body.neo-os--app .inquiry-import__signals div{border-color:#deded9;background:#fff;color:#202022}
-  body.neo-os--app .import-guardrails{border-left-color:#e63f68;background:#f0f0ed;color:#202022}
   .buyer-storefront .buyer-product__image{min-height:220px}
   .buyer-storefront .product-copy h3{font-size:2rem;line-height:1.02}
   .buyer-storefront .buyer-product__controls{grid-template-columns:1fr 1fr}

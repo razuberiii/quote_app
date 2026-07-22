@@ -21,6 +21,18 @@ en:
     documents: { eyebrow: Seller evidence, title: Company documents, help: Credentials available when a Deal needs them., name: Title, placeholder: Company profile, type: Type, choose: Choose file, upload: Upload, remove: Remove, remove_confirm: Remove this document?, empty: No company documents yet. Add them when a Deal needs supporting credentials. }
     document_types: { proforma_invoice: Proforma invoice, order_confirmation: Order confirmation, company_profile: Company profile, registration: Registration, certificate: Certificate }
   self_service:
+    catalog_import:
+      selected_one: "Selected: %{name} · %{size}"
+      selected_many: "Selected %{count} files · %{size} total"
+      submitting: Upload complete. Opening the processing queue…
+    catalog_review:
+      processing_eyebrow: Product catalog · Processing
+      processing_title: Organizing the product catalog
+      processing_body: The files are stored safely. Rubusoo is reading sheets and identifying products and price sources; you may leave this page and return to review the results.
+      processing_wait_title: You do not need to remain on the upload page
+      processing_wait_body: This page refreshes automatically. Large XLSX, PDF or image files may take some time while the rest of the workspace remains available.
+      status:
+        processing: Processing
     conversation:
       kicker: Inquiry record
       title: Keep every clarification with the same requirement

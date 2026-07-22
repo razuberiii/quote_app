@@ -1,4 +1,9 @@
 <main class="deal-workspace catalog-import">
+  <% if @batch.status == "processing" %>
+    <% content_for :head do %><meta http-equiv="refresh" content="3"><% end %>
+    <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_review.processing_eyebrow") %></p><h1><%= t("self_service.catalog_review.processing_title") %></h1><p><%= t("self_service.catalog_review.processing_body") %></p></div><span class="status-signal"><%= t("self_service.catalog_review.status.processing") %></span></header>
+    <section class="library-empty"><h2><%= t("self_service.catalog_review.processing_wait_title") %></h2><p><%= t("self_service.catalog_review.processing_wait_body") %></p></section>
+  <% else %>
   <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_review.eyebrow", default: "Catalog review") %></p><h1><%= t("self_service.catalog_review.title", count: @candidates.size, default: "%{count} candidates found") %></h1><p><%= t("self_service.catalog_review.subtitle", default: "Check identity, source evidence and price provenance. Your decision is saved before anything enters Library.") %></p></div><span class="status-signal"><%= t("self_service.catalog_review.status.#{@batch.status}", default: @batch.status.humanize) %></span></header>
   <nav class="task-priority" aria-label="<%= t("self_service.priority.title", default: "Task priority") %>"><div class="is-now"><span><%= t("self_service.priority.now", default: "Required now") %></span><strong><%= t("self_service.catalog_review.now", default: "Choose create, merge, variant or ignore for every candidate") %></strong></div><div><span><%= t("self_service.priority.later", default: "Before quoting") %></span><strong><%= t("self_service.catalog_review.later", default: "Confirm price again inside the Deal") %></strong></div></nav>
   <% if @batch.warnings.any? %><section class="import-warnings"><strong><%= t("self_service.catalog_review.warnings", default: "Needs attention") %></strong><ul><% @batch.warnings.each do |warning| %><li><%= warning %></li><% end %></ul></section><% end %>
@@ -23,4 +28,5 @@
     </article><% end %>
     <footer class="candidate-actions"><%= submit_tag t("self_service.catalog_review.save", default: "Save review"), class: "button button--secondary" %><%= button_tag t("self_service.catalog_review.apply", default: "Apply approved candidates"), formaction: apply_product_import_batch_path(@batch), formmethod: :post, class: "button button--primary" %></footer>
   <% end %><% end %>
+  <% end %>
 </main>

@@ -131,6 +131,7 @@ Evidence required:
 - `2026-07-21`: Quotes became the authenticated home; Inbox/Deal/template navigation was removed or redirected.
 - `2026-07-21`: Added Customer resource, unified AI import hub, constrained Document design and frozen seller/design snapshot data.
 - `2026-07-21`: Added direct PDF/XLSX version exports; both real generators pass binary smoke tests.
+- `2026-07-22`: Moved catalog XLSX/PDF/image parsing to the background queue. Upload now returns immediately to a persistent processing page, so large workbooks no longer occupy a web request or make the workspace appear unavailable.
 - `2026-07-22`: Deployed `rubusoo:quote-core-rebuild-6`; production browser audit covered eight canonical pages at 1440/390 in light/dark.
 - `2026-07-22`: Production business-flow test verified customer page, PDF and Excel directly from one immutable version.
 

@@ -21,7 +21,9 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     upload = Rack::Test::UploadedFile.new(file.path, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", original_filename: "supplier-catalog.xlsx")
 
     assert_no_difference -> { @user.company.products.count } do
-      post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+      perform_enqueued_jobs do
+        post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+      end
     end
     batch = @user.company.product_import_batches.order(:id).last
     assert_redirected_to product_import_batch_path(batch)
@@ -54,7 +56,9 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
 
     original_api_key = ENV["OPENAI_API_KEY"]
     ENV["OPENAI_API_KEY"] = nil
-    post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+    perform_enqueued_jobs do
+      post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+    end
 
     batch = @user.company.product_import_batches.order(:id).last
     assert_redirected_to product_import_batch_path(batch)
@@ -64,5 +68,17 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
   ensure
     ENV["OPENAI_API_KEY"] = original_api_key
     file&.close!
+  end
+
+  test "processing batch renders a stable waiting page while the worker parses files" do
+    batch = @user.company.product_import_batches.create!(created_by: @user,
+      input_fingerprint: "processing:test", status: "processing")
+
+    get product_import_batch_path(batch)
+
+    assert_response :success
+    assert_select "h1", text: "正在整理商品目录"
+    assert_select "meta[http-equiv='refresh'][content='3']"
+    assert_select ".candidate-review", count: 0
   end
 end

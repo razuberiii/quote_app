@@ -12,5 +12,51 @@ class CompanyProfileAiExtractor
     StructuredAiClient.new(company: @profile_import.company, source_record: @profile_import,
       analysis_type: "company_profile_extraction", schema: StructuredSchemas::COMPANY_PROFILE,
       system_prompt: SYSTEM_PROMPT).call(text).data
+  rescue StructuredAiClient::ConfigurationError, StructuredAiClient::ResponseError => error
+    deterministic_fallback(text, error)
+  end
+
+  private
+
+  FIELD_LABELS = {
+    "name" => [ "对外名称", "Public trading name" ],
+    "legal_name" => [ "法定名称", "Legal name", "English legal name" ],
+    "registration_number" => [ "注册编号", "Registration number" ],
+    "registration_details" => [ "注册信息", "Registration details" ],
+    "email" => [ "商务邮箱", "Business email", "Email" ],
+    "phone" => [ "联系电话", "电话", "Telephone", "Phone" ],
+    "address" => [ "注册地址", "English address", "Registered address", "Address" ],
+    "website" => [ "网站", "Website" ],
+    "business_type" => [ "业务类型", "Business type" ]
+  }.freeze
+
+  def deterministic_fallback(text, error)
+    lines = text.to_s.lines.map(&:strip).reject(&:blank?)
+    evidence = []
+    company = CompanyProfileImport::COMPANY_FIELDS.index_with do |field|
+      line = matching_line(lines, FIELD_LABELS.fetch(field))
+      next if line.blank?
+
+      value = line.split(/[：:]/, 2).last.to_s.strip.presence
+      next if value.blank?
+
+      evidence << { "id" => "fallback-#{field}", "field_path" => "company.#{field}",
+        "excerpt" => line.first(240), "source" => "profile", "location" => nil }
+      value
+    end
+    company["evidence_ids"] = evidence.map { |row| row["id"] }
+    {
+      "company" => company,
+      "warnings" => [ I18n.t("self_service.company_import.warnings.deterministic_fallback"), error.message.to_s.first(240) ],
+      "evidence" => evidence
+    }.tap { |payload| StructuredSchemas.validate!(payload, StructuredSchemas::COMPANY_PROFILE) }
+  end
+
+  def matching_line(lines, labels)
+    labels.each do |label|
+      found = lines.find { |line| line.match?(/\A#{Regexp.escape(label)}\s*[：:]/i) }
+      return found if found
+    end
+    nil
   end
 end

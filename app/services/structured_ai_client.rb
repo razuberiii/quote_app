@@ -34,6 +34,11 @@ class StructuredAiClient
     body = JSON.parse(response.body)
     raise ResponseError, body.dig("error", "message").presence || "AI provider returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
     content = body.dig("choices", 0, "message", "content").to_s
+    if content.blank?
+      error = ResponseError.new("AI provider returned HTTP #{response.code} without message content")
+      record_failure(fingerprint, started, error)
+      raise error
+    end
     data = JSON.parse(content)
     StructuredSchemas.validate!(data, @schema)
     usage = body["usage"] || {}

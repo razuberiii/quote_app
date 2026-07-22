@@ -17,4 +17,23 @@ class CompanyProfileAiExtractorTest < ActiveSupport::TestCase
     payload["company"]["invented_field"] = "not allowed"
     assert_raises(ArgumentError) { StructuredSchemas.validate!(payload, StructuredSchemas::COMPANY_PROFILE) }
   end
+
+  test "explicit field lines remain importable when structured AI is unavailable" do
+    profile_import = CompanyProfileImport.new(company: companies(:one), created_by: users(:one), source_text: "test")
+    result = CompanyProfileAiExtractor.new(profile_import).send(:deterministic_fallback, <<~TEXT,
+        对外名称：NorthPeak Automation
+        法定名称：深圳市北峰自动化设备有限公司
+        注册编号：91440300TEST202607
+        商务邮箱：export@northpeak-automation.example
+        联系电话：+86 755 5550 2188
+        网站：https://northpeak-automation.example
+      TEXT
+      StructuredAiClient::ResponseError.new("empty response"))
+
+    assert_equal "NorthPeak Automation", result.dig("company", "name")
+    assert_equal "深圳市北峰自动化设备有限公司", result.dig("company", "legal_name")
+    assert_equal "export@northpeak-automation.example", result.dig("company", "email")
+    assert_equal 6, result["evidence"].size
+    assert result["warnings"].first.include?("字段：值")
+  end
 end

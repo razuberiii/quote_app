@@ -1079,6 +1079,7 @@ zh-CN:
         file_size: 文件不能超过 15 MB
       warnings:
         file_unreadable: "文件文字读取失败：%{error}"
+        deterministic_fallback: AI 服务未返回有效结构，已按明确的“字段：值”内容生成待核对资料。
       flash:
         analysis_failed: 文件识别未完成；原始记录已保留，公司资料未修改。
         review_saved: 核对结果已保存，尚未更新公司资料。

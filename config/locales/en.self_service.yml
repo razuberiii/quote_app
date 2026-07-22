@@ -111,6 +111,27 @@ en:
         customer_missing: Customer to confirm
         empty: No quotes yet
         empty_help: Start from a blank quote or let AI organize a pasted or uploaded inquiry.
+      start:
+        eyebrow: New quote
+        title: Start with a blank quote
+        help: Confirm the customer, then open the quote editor. Inquiry import remains an optional shortcut.
+        ai_action: Import an inquiry with AI
+        buyer_title: Choose the customer
+        buyer_help: Select an existing customer or create a basic customer record here.
+        existing_customer: Existing customer
+        existing_help: When an existing customer is selected, the new-customer fields are ignored.
+        new_customer: New customer
+        new_customer_details: New customer details
+        company_name: Customer company
+        company_placeholder: Enter the customer company name
+        contact_name: Contact
+        email: Email
+        next_title: "Next: edit the quote"
+        next_help: The draft can be saved at any time. Products and prices can be completed in the editor.
+        submit: Create blank quote
+        placeholder_item: Product to be completed
+        created: Blank quote created.
+        error_title: The quote could not be created
       detail:
         back: ← Back to quotes
         owner: "Owner %{name}"

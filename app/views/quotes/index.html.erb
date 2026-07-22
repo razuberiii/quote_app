@@ -1,7 +1,7 @@
 <main class="deal-workspace quote-core-index">
   <header class="deal-page-header">
     <div><p class="eyebrow"><%= t("self_service.quote_core.index.eyebrow") %></p><h1><%= t("self_service.quote_core.index.title") %></h1><p><%= t("self_service.quote_core.index.subtitle") %></p></div>
-    <div class="quote-core-header-actions"><%= link_to t("self_service.quote_core.index.new"), new_inquiry_path, class: "button button--primary" %></div>
+    <div class="quote-core-header-actions"><%= link_to t("self_service.quote_core.index.ai_import"), new_inquiry_path, class: "button button--secondary" %><%= link_to t("self_service.quote_core.index.new"), new_quote_path, class: "button button--primary" %></div>
   </header>
 
   <form class="quote-core-filters" method="get">
@@ -22,6 +22,6 @@
         <%= link_to lifecycle.action_label, quote_action_path(quote, lifecycle), class: "deal-next" %>
       </article>
     <% end %>
-    <% if @quote_rows.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.index.empty") %></h2><p><%= t("self_service.quote_core.index.empty_help") %></p><%= link_to t("self_service.quote_core.index.new"), new_inquiry_path, class: "button button--primary" %></div><% end %>
+    <% if @quote_rows.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.index.empty") %></h2><p><%= t("self_service.quote_core.index.empty_help") %></p><div class="deal-zero__actions"><%= link_to t("self_service.quote_core.index.new"), new_quote_path, class: "button button--primary" %><%= link_to t("self_service.quote_core.index.ai_import"), new_inquiry_path, class: "button button--secondary" %></div></div><% end %>
   </section>
 </main>

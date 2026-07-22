@@ -26,6 +26,53 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".dashboard-module", 0
   end
 
+  test "new quote offers blank creation with optional AI import" do
+    get new_quote_path
+
+    assert_response :success
+    assert_select ".quote-start"
+    assert_select "form[action='#{quotes_path}']"
+    assert_select "a[href='#{new_inquiry_path}']"
+  end
+
+  test "blank quote starts from an existing customer and opens the editor" do
+    customer = customers(:one)
+
+    assert_difference "Quote.count", 1 do
+      post quotes_path, params: { blank_quote: { customer_id: customer.id } }
+    end
+
+    quote = Quote.order(:created_at).last
+    assert_redirected_to edit_quote_path(quote)
+    assert_equal customer, quote.customer
+    assert_equal "unpriced", quote.quote_items.first.price_source
+    assert_equal 0.to_d, quote.quote_items.first.unit_price
+  end
+
+  test "blank quote can create its customer without AI intake" do
+    assert_difference [ "Customer.count", "Quote.count" ], 1 do
+      post quotes_path, params: { blank_quote: {
+        customer_name: "Northstar Components",
+        contact_name: "Mina Patel",
+        customer_email: "mina@northstar.example"
+      } }
+    end
+
+    quote = Quote.order(:created_at).last
+    assert_redirected_to edit_quote_path(quote)
+    assert_equal "Northstar Components", quote.customer.name
+    assert_equal "Mina Patel", quote.customer.contact_name
+  end
+
+  test "blank quote keeps validation on the creation page" do
+    assert_no_difference [ "Customer.count", "Quote.count" ] do
+      post quotes_path, params: { blank_quote: { customer_name: "" } }
+    end
+
+    assert_response :unprocessable_entity
+    assert_select ".quote-start__errors"
+  end
+
   test "published versions expose direct PDF and Excel downloads" do
     revision = quotes(:one).quote_revisions.create!(company: companies(:one), number: 1, status: "current",
       currency: "USD", total: 100, snapshot: QuoteSnapshotBuilder.new(quotes(:one)).as_json,

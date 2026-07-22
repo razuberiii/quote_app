@@ -134,7 +134,7 @@ Rails.application.routes.draw do
 
   # Quote is the commercial aggregate. Customer-facing output is generated
   # only from an immutable Published Version.
-  resources :quotes, only: %i[index show edit update] do
+  resources :quotes, only: %i[index new create show edit update] do
     member do
       get :preview
       get :publish

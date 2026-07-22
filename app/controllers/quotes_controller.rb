@@ -1,5 +1,5 @@
 class QuotesController < ApplicationController
-  before_action :set_quote, except: :index
+  before_action :set_quote, except: %i[index new create]
   before_action :set_form_context, only: %i[edit update]
   before_action :set_seller_locale, only: :preview
   before_action :use_buyer_locale, only: :preview
@@ -16,6 +16,36 @@ class QuotesController < ApplicationController
     end
     @quotes = @quotes.where(status: quote_status_scope(params[:status])) if quote_status_scope(params[:status])
     @quote_rows = @quotes.map { |quote| [ quote, QuoteLifecycle.new(quote).call ] }
+  end
+
+  def new
+    @customers = current_user.company.customers.order(:name)
+    @selected_customer_id = params[:customer_id].presence
+  end
+
+  def create
+    @customers = current_user.company.customers.order(:name)
+    @selected_customer_id = blank_quote_params[:customer_id].presence
+    company = current_user.company
+    customer = if @selected_customer_id
+      company.customers.find(@selected_customer_id)
+    else
+      company.customers.new(name: blank_quote_params[:customer_name], contact_name: blank_quote_params[:contact_name],
+        email: blank_quote_params[:customer_email])
+    end
+
+    @quote = company.quotes.new(customer:, currency: company.default_currency,
+      valid_until: (company.default_validity_days.presence || 30).to_i.days.from_now.to_date,
+      payment_term: company.default_payment_term, trade_term: company.default_trade_term)
+    @quote.quote_items.build(description: t("self_service.quote_core.start.placeholder_item"), quantity: 1,
+      unit_price: 0, price_source: "unpriced", selection_mode: "fixed")
+
+    if customer.valid? && @quote.save
+      redirect_to edit_quote_path(@quote), notice: t("self_service.quote_core.start.created")
+    else
+      @errors = customer.errors.full_messages + @quote.errors.full_messages
+      render :new, status: :unprocessable_entity
+    end
   end
 
   def show
@@ -122,6 +152,10 @@ class QuotesController < ApplicationController
         :item_image_blob_id, :remove_item_image, :price_source, :selection_mode,
         :sku_snapshot, :unit_snapshot, :lead_time_snapshot, :packing_snapshot,
         :_destroy, { buyer_options: {} } ])
+  end
+
+  def blank_quote_params
+    params.fetch(:blank_quote, {}).permit(:customer_id, :customer_name, :contact_name, :customer_email)
   end
 
   def use_buyer_locale

@@ -148,7 +148,28 @@ zh-CN:
         updated: "%{time}前更新"
         customer_missing: 客户待确认
         empty: 还没有报价
-        empty_help: 从客户的邮件、聊天记录或询盘文件创建第一份报价。
+        empty_help: 可以直接创建空白报价，也可以让 AI 整理客户询盘。
+      start:
+        eyebrow: 新建报价
+        title: 从空白报价开始
+        help: 先确认客户，再进入报价编辑。询盘导入是可选的快捷方式。
+        ai_action: 改用 AI 导入询盘
+        buyer_title: 选择报价客户
+        buyer_help: 选择已有客户，或在此创建一条基础客户记录。
+        existing_customer: 已有客户
+        existing_help: 选择已有客户后，下方的新客户资料不会写入。
+        new_customer: 新客户
+        new_customer_details: 新客户资料
+        company_name: 客户公司
+        company_placeholder: 输入客户公司名称
+        contact_name: 联系人
+        email: 邮箱
+        next_title: "下一步：编辑报价"
+        next_help: 草稿可以随时保存，商品和价格可在编辑页继续补充。
+        submit: 创建空白报价
+        placeholder_item: 待填写商品
+        created: 空白报价已创建。
+        error_title: 暂时无法创建报价
       detail:
         back: ← 返回报价
         owner: "负责人 %{name}"

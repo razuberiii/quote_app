@@ -1,0 +1,15 @@
+<main class="deal-workspace quote-start">
+  <header class="deal-page-header">
+    <div><p class="eyebrow"><%= t("self_service.quote_core.start.eyebrow") %></p><h1><%= t("self_service.quote_core.start.title") %></h1><p><%= t("self_service.quote_core.start.help") %></p></div>
+    <%= link_to t("self_service.quote_core.start.ai_action"), new_inquiry_path, class: "button button--secondary" %>
+  </header>
+  <% if @errors.present? %><div class="quote-start__errors" role="alert"><strong><%= t("self_service.quote_core.start.error_title") %></strong><p><%= @errors.to_sentence %></p></div><% end %>
+  <section class="quote-start__workspace">
+    <div class="quote-start__intro"><span>01</span><h2><%= t("self_service.quote_core.start.buyer_title") %></h2><p><%= t("self_service.quote_core.start.buyer_help") %></p></div>
+    <%= form_with scope: :blank_quote, url: quotes_path, class: "quote-start__form" do |form| %>
+      <% if @customers.any? %><label class="quote-start__field"><span><%= t("self_service.quote_core.start.existing_customer") %></span><%= form.select :customer_id, [[t("self_service.quote_core.start.new_customer"), ""]] + @customers.map { |customer| [customer.name, customer.id] }, { selected: @selected_customer_id }, class: "input" %><small><%= t("self_service.quote_core.start.existing_help") %></small></label><% end %>
+      <fieldset class="quote-start__new-customer"><legend><%= t("self_service.quote_core.start.new_customer_details") %></legend><label><span><%= t("self_service.quote_core.start.company_name") %></span><%= form.text_field :customer_name, class: "input", placeholder: t("self_service.quote_core.start.company_placeholder") %></label><label><span><%= t("self_service.quote_core.start.contact_name") %></span><%= form.text_field :contact_name, class: "input" %></label><label><span><%= t("self_service.quote_core.start.email") %></span><%= form.email_field :customer_email, class: "input" %></label></fieldset>
+      <footer><div><strong><%= t("self_service.quote_core.start.next_title") %></strong><small><%= t("self_service.quote_core.start.next_help") %></small></div><%= form.submit t("self_service.quote_core.start.submit"), class: "button button--primary" %></footer>
+    <% end %>
+  </section>
+</main>

@@ -16,7 +16,10 @@ class MarketingInteractionsTest < ApplicationSystemTestCase
 
   test "homepage presents the channel-neutral Deal story" do
     visit "/"
-    assert_selector "h1.hero-fixed-headline", text: I18n.t("self_service.marketing.hero.title")
+    assert_selector "h1.hero-fixed-headline[aria-label='#{I18n.t("self_service.marketing.hero.title")}']"
+    I18n.t("self_service.marketing.hero.title_lines").each do |line|
+      assert_selector "h1.hero-fixed-headline span", text: line, exact_text: true
+    end
     assert_no_selector ".kinetic-headline__window"
     assert_text I18n.t("self_service.marketing.hero.body")
     assert_link I18n.t("self_service.marketing.hero.secondary")

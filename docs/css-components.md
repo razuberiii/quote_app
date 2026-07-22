@@ -531,6 +531,7 @@ data-action="click->clipboard#copy"
 - `.settings-workspace--header` owns only context and navigation; it has no trailing page-sized padding. The content shell owns the vertical rhythm below the tabs.
 - `.catalog-import .import-dropzone` stays on the workspace canvas. Only `.upload-picker` is a bounded upload target; do not wrap the whole operation in a white paper card.
 - Catalog file selection must produce immediate inline feedback: `.import-dropzone.has-files` confirms the selected filename/count and total size, while submission changes the existing primary action to its queued state. Do not rely on the hidden native filename control as the only feedback.
+- Catalog candidate actions may stay sticky on desktop, but become a static footer below `760px`; they must not cover editable candidate fields on mobile.
 - Buyer quotation colors resolve through `--buyer-*` tokens. Every buyer document surface, plan state and summary must support both root `data-theme` values; fixed white plan cards are prohibited.
 - `.buyer-plan-grid .is-selected` must change the full option surface and text contrast without changing its position or dimensions.
 

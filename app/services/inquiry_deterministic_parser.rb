@@ -42,12 +42,12 @@ class InquiryDeterministicParser
     model = @text.match(MODEL)
     return [] unless quantity && model
 
-    [{
+    [ {
       "name" => model[1], "model" => model[1], "quantity" => quantity[1].delete(",").to_f,
       "unit" => quantity[2], "specifications" => { "voltage" => @text.match(VOLTAGE)&.[](1) }.compact,
       "evidence" => @text.lines.find { |line| line.include?(quantity[0]) }.to_s.strip,
       "confidence" => 0.62, "catalog_product_id" => nil, "unit_price" => nil, "price_source" => nil
-    }]
+    } ]
   end
 
   def signature_parts

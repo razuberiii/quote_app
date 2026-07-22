@@ -37,6 +37,8 @@ Settings boolean choices and Smart Intake extracted fields are editorial rows, n
 
 Authenticated navigation hover, active and focus states consume `--neo-elevated` and `--neo-text` in both themes. Page-specific styles must not hard-code a light hover background or dark hover text.
 
+Native select menus follow the active application theme. Dark mode sets `color-scheme: dark`, and both `option` and `optgroup` use the shared elevated surface and text tokens; page-specific select styles must not restore the browser's white popup palette.
+
 The legacy `/settings/company` entry point redirects to the canonical company settings editor so old bookmarks and previously shared links do not become application 404s.
 
 ### Motion direction
@@ -57,6 +59,7 @@ Quote Studio uses `quote-studio--editor` with three true functional columns. It 
 Quote Studio totals update immediately while editing. Once any field changes, the right-side readiness panel must stop presenting the previous server audit as current and instead request a save; the authoritative blocker list is restored by the server response after saving.
 
 The quote completion flow uses `.seller-preview-bar` in working previews and `.publish-complete` after publication. Preview actions remain outside buyer content semantics, and publication success must expose customer link, PDF, Excel and delivery as first-level actions. `.studio-readiness` consumes `QuoteReadinessAudit`; views must not maintain a second independent blocker list.
+The customer preview never creates a Revision directly. It returns to editing or advances to the canonical publish check; only that check performs the irreversible publish action.
 
 Inquiry follow-up is one low-friction composer. Direction and channel selectors live in the collapsed `.inquiry-followup__advanced` disclosure, while queued analysis is shown inline on `.inquiry-message`; do not make sellers choose when to run analysis.
 

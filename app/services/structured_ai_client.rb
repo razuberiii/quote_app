@@ -2,6 +2,9 @@ require "digest"
 require "net/http"
 
 class StructuredAiClient
+  DEFAULT_OPEN_TIMEOUT = 15
+  DEFAULT_READ_TIMEOUT = 180
+
   class ConfigurationError < StandardError; end
   class ResponseError < StandardError; end
 
@@ -9,10 +12,13 @@ class StructuredAiClient
 
   def initialize(company:, source_record:, analysis_type:, schema:, system_prompt:,
     api_key: ENV["OPENAI_API_KEY"], base_url: ENV.fetch("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-    model: ENV.fetch("OPENAI_MODEL", "gpt-5.6-luna"), http_client: Net::HTTP)
+    model: ENV.fetch("OPENAI_MODEL", "gpt-5.6-luna"), http_client: Net::HTTP,
+    open_timeout: ENV.fetch("OPENAI_OPEN_TIMEOUT", DEFAULT_OPEN_TIMEOUT).to_i,
+    read_timeout: ENV.fetch("OPENAI_READ_TIMEOUT", DEFAULT_READ_TIMEOUT).to_i)
     @company = company; @source_record = source_record; @analysis_type = analysis_type
     @schema = schema; @system_prompt = system_prompt; @api_key = api_key.to_s
     @base_url = base_url.to_s.delete_suffix("/"); @model = model; @http_client = http_client
+    @open_timeout = open_timeout; @read_timeout = read_timeout
   end
 
   def call(input)
@@ -30,7 +36,8 @@ class StructuredAiClient
       response_format: { type: "json_schema", json_schema: { name: @analysis_type, strict: true, schema: @schema } },
       max_completion_tokens: 2_500
     }.to_json
-    response = @http_client.start(uri.host, uri.port, use_ssl: uri.scheme == "https", open_timeout: 8, read_timeout: 60) { |http| http.request(request) }
+    response = @http_client.start(uri.host, uri.port, use_ssl: uri.scheme == "https",
+      open_timeout: @open_timeout, read_timeout: @read_timeout) { |http| http.request(request) }
     body = JSON.parse(response.body)
     raise ResponseError, body.dig("error", "message").presence || "AI provider returned HTTP #{response.code}" unless response.is_a?(Net::HTTPSuccess)
     content = body.dig("choices", 0, "message", "content").to_s

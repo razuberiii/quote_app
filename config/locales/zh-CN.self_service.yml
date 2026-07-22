@@ -994,11 +994,11 @@ zh-CN:
       empty: 尚未发布任何正式内容。
     preview_flow:
       kicker: 客户视角预览
-      ready: 内容已具备，可以直接确认发布
+      ready: 预览完成后，继续进行发布检查
       blocked: "还有 %{count} 项发布前必须补齐"
       back: 返回修改
       fix: 处理阻塞项
-      publish: "确认并发布 V%{number}"
+      continue: 继续发布
     publish_complete:
       kicker: 报价已发布
       title: "V%{number} 已生成，交付文件已就绪"

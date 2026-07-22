@@ -49,6 +49,38 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".studio-save-state.is-saved", text: /已保存 · \d{2}:\d{2}/
   end
 
+  test "a manually added unpriced product can be saved as a draft" do
+    customer = @user.company.customers.create!(name: "Manual Product Buyer")
+    quote = @user.company.quotes.create!(customer:, currency: "USD", status: "draft", issued_on: Date.current,
+      quote_items_attributes: [ { description: "Existing item", quantity: 1, unit_price: 100 } ])
+
+    assert_difference -> { quote.quote_items.count }, 1 do
+      patch quote_path(quote), params: { quote: { quote_items_attributes: {
+        "0" => { id: quote.quote_items.first.id, description: "Existing item", quantity: 1, unit_price: 100 },
+        "999999" => { description: "Manual spare part", quantity: 1, unit_price: 0,
+          price_source: "unpriced", selection_mode: "fixed" }
+      } } }
+    end
+
+    assert_redirected_to edit_quote_path(quote, saved: 1)
+    added = quote.reload.quote_items.find_by!(description: "Manual spare part")
+    assert_equal 0.to_d, added.unit_price
+    assert_equal "unpriced", added.price_source
+  end
+
+  test "customer preview continues to the single publish check instead of publishing directly" do
+    customer = @user.company.customers.create!(name: "Preview Buyer")
+    quote = @user.company.quotes.create!(customer:, currency: "USD", status: "draft", issued_on: Date.current,
+      valid_until: 30.days.from_now.to_date, payment_term: "30% deposit", trade_term: "EXW",
+      quote_items_attributes: [ { description: "Ready item", quantity: 1, unit_price: 100, price_source: "manual" } ])
+
+    get preview_quote_path(quote)
+
+    assert_response :success
+    assert_select ".seller-preview-bar a[href='#{publish_quote_path(quote)}']", text: /继续发布/
+    assert_select ".seller-preview-bar form[action='#{quote_revisions_path(quote_id: quote.id)}']", count: 0
+  end
+
   test "empty Library does not block a multi item Working draft" do
     inquiry = @user.company.inquiries.create!(created_by: @user, source_type: "email", source_text: <<~TEXT)
       Please quote CIF Jebel Ali for:

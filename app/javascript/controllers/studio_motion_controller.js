@@ -28,9 +28,10 @@ export default class extends Controller {
     const item = event.currentTarget.closest(".studio-product")
     if (!item) return
     const copy = item.cloneNode(true)
+    const itemIndex = `${Date.now()}`
     copy.querySelectorAll("input, textarea, select").forEach(field => {
       if (field.name?.includes("[id]")) field.remove()
-      else if (field.name) field.name = field.name.replace(/quote_items_attributes\]\[\d+\]/, `quote_items_attributes][new_${Date.now()}]`)
+      else if (field.name) field.name = field.name.replace(/quote_items_attributes\]\[\d+\]/, `quote_items_attributes][${itemIndex}]`)
     })
     item.after(copy)
     copy.animate([{ opacity: 0, transform: "translateY(-10px)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: "cubic-bezier(.2,.8,.2,1)" })
@@ -40,12 +41,17 @@ export default class extends Controller {
     const item = this.element.querySelector(".studio-product:last-of-type")
     if (!item) return
     const copy = item.cloneNode(true)
+    const itemIndex = `${Date.now()}`
     copy.querySelectorAll("input, textarea, select").forEach(field => {
       if (field.name?.includes("[id]")) return field.remove()
-      if (field.name) field.name = field.name.replace(/quote_items_attributes\]\[\d+\]/, `quote_items_attributes][new_${Date.now()}]`)
+      if (field.name) field.name = field.name.replace(/quote_items_attributes\]\[\d+\]/, `quote_items_attributes][${itemIndex}]`)
       if (field.type === "checkbox") field.checked = false
+      else if (field.name?.includes("[quantity]")) field.value = "1"
+      else if (field.name?.includes("[unit_price]")) field.value = "0"
+      else if (field.name?.includes("[price_source]")) field.value = "unpriced"
+      else if (field.name?.includes("[selection_mode]")) field.value = "fixed"
       else if (field.tagName === "SELECT") field.selectedIndex = 0
-      else field.value = field.name?.includes("[quantity]") ? "1" : ""
+      else field.value = ""
     })
     item.after(copy)
     copy.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "center" })

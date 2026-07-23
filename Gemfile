@@ -82,4 +82,4 @@ gem "pdf-reader"
 gem "axlsx"
 gem "caxlsx_rails"
 
-gem "tailwindcss-rails", "~> 4.4"
+gem "tailwindcss-rails", "~> 4.6"

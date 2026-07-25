@@ -35,11 +35,11 @@ class ChatSyncApiTest < ActionDispatch::IntegrationTest
       parserVersion: "test-1"
     }
     path = "/api/chat_sync/bindings/#{binding_id}/messages"
-    post path, params: { requestId: "request-1", messages: [message] }, headers:, as: :json
+    post path, params: { requestId: "request-1", messages: [ message ] }, headers:, as: :json
     assert_response :created
     assert_equal 1, response.parsed_body.fetch("acceptedCount")
 
-    post path, params: { requestId: "request-1", messages: [message] }, headers:, as: :json
+    post path, params: { requestId: "request-1", messages: [ message ] }, headers:, as: :json
     assert_response :success
     assert response.parsed_body.fetch("duplicateRequest")
     assert_equal 1, ChatCapturedMessage.where(chat_conversation_binding_id: binding_id).count

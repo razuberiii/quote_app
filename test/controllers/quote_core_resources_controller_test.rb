@@ -13,10 +13,10 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to edit_document_design_path
   end
 
-  test "AI import hub exposes the four source categories" do
+  test "AI import hub exposes imports and chat synchronization" do
     get imports_path
     assert_response :success
-    assert_select ".import-hub__row", 4
+    assert_select ".import-hub__row", 5
   end
 
   test "customer resource renders without CRM dashboard" do

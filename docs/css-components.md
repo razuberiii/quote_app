@@ -85,6 +85,8 @@ Quote Core is the canonical authenticated commercial surface. `.quote-core-index
 
 Quote creation has two peer entry paths: a blank draft is the primary action and AI inquiry import is optional. `.quote-start*` selects or creates the customer on an open editorial canvas, then opens Quote Studio with one unpriced placeholder item. Draft saving remains available immediately; publication remains blocked until required commercial data is complete. Generic “New quote” actions must not route directly to AI intake.
 
+Chat integration setup uses `.chat-sync-setup*` as an open application canvas with three ruled setup sections and a flat token ledger. The embedded website panel itself is isolated in Shadow DOM and must not reuse or inject Rubusoo application selectors into the host chat website.
+
 Document design replaces user-facing template CRUD. `.document-design`, `.design-recipes`, and `.design-paper` form one settings surface for brand, curated layout recipe, content defaults and per-channel language. `.design-paper` is the only paper-white preview inside this authenticated page. `.import-hub` is the single AI entry and `.customer-core` is the quote-required customer resource; both use editorial rows instead of nested cards.
 
 The `.design-paper` preview owns fixed document-ink colors in both themes. Application theme tokens must not recolor its headings, table content, metadata or rules.

@@ -22,6 +22,9 @@ class User < ApplicationRecord
   has_many :action_items, dependent: :destroy
   has_many :customer_follow_up_events, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :chat_sync_tokens, dependent: :destroy
+  has_many :chat_conversation_bindings, dependent: :destroy
+  has_many :chat_pairing_codes, dependent: :destroy
   has_one_attached :avatar
   before_validation :ensure_company, on: :create
   before_validation :assign_default_language, on: :create

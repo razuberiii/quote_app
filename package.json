@@ -1,7 +1,12 @@
 {
+  "scripts": {
+    "build:chat-sync": "node integrations/chat-sync/build.mjs",
+    "test:chat-sync": "node --test integrations/chat-sync/test/*.test.js"
+  },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",
     "@playwright/test": "^1.61.1",
+    "esbuild": "^0.25.12",
     "exceljs": "^4.4.0",
     "playwright": "^1.58.2"
   },

@@ -38,6 +38,9 @@ class Company < ApplicationRecord
   has_many :final_documents, dependent: :restrict_with_exception
   has_many :inquiries, dependent: :destroy
   has_many :inquiry_messages, through: :inquiries
+  has_many :chat_sync_tokens, dependent: :destroy
+  has_many :chat_conversation_bindings, dependent: :destroy
+  has_many :chat_pairing_codes, dependent: :destroy
   has_one_attached :logo
   validate :logo_constraints
 

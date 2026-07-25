@@ -1,0 +1,21 @@
+<main class="deal-workspace chat-sync-setup">
+  <header class="deal-page-header">
+    <div><p class="eyebrow"><%= t("chat_sync.eyebrow") %></p><h1><%= t("chat_sync.title") %></h1><p><%= t("chat_sync.help") %></p></div>
+    <%= link_to t("chat_sync.install"), "/integrations/rubusoo-chat-sync.user.js", class: "button button--primary", data: { turbo: false } %>
+  </header>
+  <div class="chat-sync-setup__grid">
+    <section data-controller="chat-pairing" data-chat-pairing-url-value="<%= pairing_code_chat_integration_path %>">
+      <span>01</span><h2><%= t("chat_sync.pair_title") %></h2><p><%= t("chat_sync.pair_help") %></p>
+      <button class="button button--secondary" type="button" data-action="chat-pairing#create" data-chat-pairing-target="button"><%= t("chat_sync.generate_code") %></button>
+      <div class="chat-sync-code" data-chat-pairing-target="result" hidden><small><%= t("chat_sync.code_ready") %></small><strong data-chat-pairing-target="code"></strong></div>
+    </section>
+    <section><span>02</span><h2><%= t("chat_sync.supported") %></h2><ul><li><%= t("chat_sync.platforms.whatsapp") %></li><li><%= t("chat_sync.platforms.alibaba") %></li></ul></section>
+    <section><span>03</span><h2><%= t("chat_sync.privacy_title") %></h2><p><%= t("chat_sync.privacy") %></p></section>
+  </div>
+  <section class="chat-sync-tokens">
+    <h2><%= t("chat_sync.tokens") %></h2>
+    <% if @tokens.any? %>
+      <% @tokens.each do |token| %><article><div><strong><%= token.label.presence || "Userscript" %></strong><small><%= token.revoked_at? ? "Revoked" : token.expires_at.strftime("%Y-%m-%d") %></small></div><% unless token.revoked_at? %><%= button_to t("chat_sync.revoke"), revoke_token_chat_integration_path(token), method: :delete, class: "button button--ghost" %><% end %></article><% end %>
+    <% else %><p><%= t("chat_sync.no_tokens") %></p><% end %>
+  </section>
+</main>

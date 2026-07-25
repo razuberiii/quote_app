@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_22_123000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -152,6 +152,93 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123000) do
     t.index ["company_id"], name: "index_change_requests_on_company_id"
     t.index ["quote_revision_id", "idempotency_key"], name: "idx_change_requests_idempotency", unique: true
     t.index ["quote_revision_id"], name: "index_change_requests_on_quote_revision_id"
+  end
+
+  create_table "chat_captured_messages", force: :cascade do |t|
+    t.string "attachment_name"
+    t.datetime "captured_at", null: false
+    t.bigint "chat_conversation_binding_id", null: false
+    t.datetime "created_at", null: false
+    t.string "direction", null: false
+    t.string "fingerprint", null: false
+    t.bigint "inquiry_message_id"
+    t.string "local_id", null: false
+    t.string "message_type", null: false
+    t.string "parser_version", null: false
+    t.string "platform_message_id"
+    t.text "quoted_text"
+    t.string "sender_id"
+    t.string "sender_name"
+    t.datetime "sent_at"
+    t.jsonb "source_metadata", default: {}, null: false
+    t.text "text"
+    t.datetime "updated_at", null: false
+    t.index ["chat_conversation_binding_id", "fingerprint"], name: "index_chat_messages_on_binding_and_fingerprint", unique: true
+    t.index ["chat_conversation_binding_id"], name: "index_chat_captured_messages_on_chat_conversation_binding_id"
+    t.index ["inquiry_message_id"], name: "index_chat_captured_messages_on_inquiry_message_id"
+  end
+
+  create_table "chat_conversation_bindings", force: :cascade do |t|
+    t.jsonb "analysis_result", default: {}, null: false
+    t.bigint "analyzed_message_cursor"
+    t.boolean "auto_analysis", default: true, null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.bigint "customer_id"
+    t.string "display_name"
+    t.bigint "inquiry_id", null: false
+    t.datetime "last_analyzed_at"
+    t.datetime "last_synced_at"
+    t.boolean "paused", default: false, null: false
+    t.string "platform", null: false
+    t.string "platform_account_id", null: false
+    t.string "platform_conversation_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["company_id", "platform", "platform_account_id", "platform_conversation_id"], name: "index_chat_bindings_on_platform_conversation", unique: true
+    t.index ["company_id"], name: "index_chat_conversation_bindings_on_company_id"
+    t.index ["customer_id"], name: "index_chat_conversation_bindings_on_customer_id"
+    t.index ["inquiry_id"], name: "index_chat_conversation_bindings_on_inquiry_id"
+    t.index ["user_id"], name: "index_chat_conversation_bindings_on_user_id"
+  end
+
+  create_table "chat_pairing_codes", force: :cascade do |t|
+    t.string "code_digest", null: false
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "used_at"
+    t.bigint "user_id", null: false
+    t.index ["code_digest"], name: "index_chat_pairing_codes_on_code_digest", unique: true
+    t.index ["company_id"], name: "index_chat_pairing_codes_on_company_id"
+    t.index ["user_id"], name: "index_chat_pairing_codes_on_user_id"
+  end
+
+  create_table "chat_sync_requests", force: :cascade do |t|
+    t.integer "accepted_count", default: 0, null: false
+    t.bigint "chat_conversation_binding_id", null: false
+    t.datetime "created_at", null: false
+    t.string "request_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["chat_conversation_binding_id", "request_id"], name: "index_chat_sync_requests_on_binding_and_request", unique: true
+    t.index ["chat_conversation_binding_id"], name: "index_chat_sync_requests_on_chat_conversation_binding_id"
+  end
+
+  create_table "chat_sync_tokens", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.string "label"
+    t.datetime "last_used_at"
+    t.datetime "revoked_at"
+    t.jsonb "scopes", default: ["chat:sync"], null: false
+    t.string "token_digest", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["company_id"], name: "index_chat_sync_tokens_on_company_id"
+    t.index ["token_digest"], name: "index_chat_sync_tokens_on_token_digest", unique: true
+    t.index ["user_id"], name: "index_chat_sync_tokens_on_user_id"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -372,8 +459,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123000) do
 
   create_table "inquiry_messages", force: :cascade do |t|
     t.text "body"
-    t.string "channel", default: "email", null: false
     t.jsonb "change_summary", default: {}, null: false
+    t.string "channel", default: "email", null: false
     t.datetime "created_at", null: false
     t.string "direction", default: "buyer", null: false
     t.bigint "inquiry_id", null: false
@@ -912,6 +999,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_22_123000) do
   add_foreign_key "buyer_questions", "quote_revisions"
   add_foreign_key "change_requests", "companies"
   add_foreign_key "change_requests", "quote_revisions"
+  add_foreign_key "chat_captured_messages", "chat_conversation_bindings"
+  add_foreign_key "chat_captured_messages", "inquiry_messages"
+  add_foreign_key "chat_conversation_bindings", "companies"
+  add_foreign_key "chat_conversation_bindings", "customers"
+  add_foreign_key "chat_conversation_bindings", "inquiries"
+  add_foreign_key "chat_conversation_bindings", "users"
+  add_foreign_key "chat_pairing_codes", "companies"
+  add_foreign_key "chat_pairing_codes", "users"
+  add_foreign_key "chat_sync_requests", "chat_conversation_bindings"
+  add_foreign_key "chat_sync_tokens", "companies"
+  add_foreign_key "chat_sync_tokens", "users"
   add_foreign_key "company_documents", "companies"
   add_foreign_key "company_profile_imports", "companies"
   add_foreign_key "company_profile_imports", "users", column: "created_by_id"

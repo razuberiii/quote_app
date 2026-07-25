@@ -131,6 +131,21 @@ Rails.application.routes.draw do
   resources :quote_reason_options, only: [ :create, :destroy ]
   resources :customers, except: :destroy
   resource :imports, only: :show
+  resource :chat_integration, only: :show do
+    post :pairing_code
+    delete "tokens/:id", action: :revoke, as: :revoke_token
+  end
+
+  namespace :api do
+    namespace :chat_sync do
+      post :pair, to: "pairings#create"
+      get :context, to: "contexts#show"
+      resources :bindings, only: %i[create update destroy] do
+        post :messages, to: "messages#create"
+        resource :analysis, only: %i[create show]
+      end
+    end
+  end
 
   # Quote is the commercial aggregate. Customer-facing output is generated
   # only from an immutable Published Version.

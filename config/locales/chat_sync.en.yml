@@ -1,0 +1,18 @@
+en:
+  chat_sync:
+    eyebrow: Web chat sync
+    title: Capture explicitly bound customer conversations
+    help: Incrementally capture messages already rendered in WhatsApp Web and Alibaba Message Center and sync them to the bound inquiry. Unapproved sites and unbound conversations are never uploaded.
+    install: Install userscript
+    pair_title: Connect this browser
+    pair_help: Generate a one-time code and enter it in the Rubusoo panel on the chat website. The code expires in 10 minutes and works once.
+    generate_code: Generate pairing code
+    code_ready: Enter this code in the chat panel
+    supported: Supported websites
+    platforms: { whatsapp: WhatsApp Web, alibaba: Alibaba.com Message Center }
+    privacy_title: Collection boundary
+    privacy: Only approved sites, explicitly bound conversations and sent messages already visible on the page are processed. Draft input, cookies, passwords and other tabs are never read.
+    tokens: Connected browsers
+    no_tokens: No browsers are connected yet.
+    revoke: Revoke
+    revoked: Browser access token revoked.

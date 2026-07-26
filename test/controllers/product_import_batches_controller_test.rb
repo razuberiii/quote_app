@@ -43,6 +43,48 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     file&.close!
   end
 
+  test "applying an untouched review imports the complete batch" do
+    batch = @user.company.product_import_batches.create!(
+      created_by: @user, input_fingerprint: "review:untouched", status: "review"
+    )
+    batch.product_import_candidates.create!(
+      candidate_data: { "name" => "Hydraulic unit", "sku" => "HU-1", "currency" => "元" },
+      decision: "pending"
+    )
+    batch.product_import_candidates.create!(
+      candidate_data: { "name" => "Seal kit", "sku" => "SK-1", "currency" => "USD" },
+      decision: "pending"
+    )
+
+    assert_difference -> { @user.company.products.count }, 2 do
+      post apply_product_import_batch_path(batch), params: { candidates: {} }
+    end
+
+    assert_redirected_to library_path
+    assert_equal "applied", batch.reload.status
+    assert_equal %w[create create], batch.product_import_candidates.order(:id).pluck(:decision)
+    assert_equal "CNY", @user.company.products.find_by!(sku: "HU-1").price_currency
+  end
+
+  test "applying an entirely ignored review stays on review without a false success" do
+    batch = @user.company.product_import_batches.create!(
+      created_by: @user, input_fingerprint: "review:ignored", status: "review"
+    )
+    candidate = batch.product_import_candidates.create!(
+      candidate_data: { "name" => "Do not import" }, decision: "pending"
+    )
+
+    assert_no_difference -> { @user.company.products.count } do
+      post apply_product_import_batch_path(batch), params: {
+        candidates: { candidate.id.to_s => { decision: "ignore", candidate_data: candidate.candidate_data } }
+      }
+    end
+
+    assert_redirected_to product_import_batch_path(batch)
+    assert_equal "review", batch.reload.status
+    assert_equal "没有可导入的商品。请至少选择一个商品，或将不需要的商品设为忽略。", flash[:alert]
+  end
+
 
   test "unknown XLSX keeps deterministic candidates when semantic provider fails" do
     file = Tempfile.new([ "unknown-supplier", ".xlsx" ])

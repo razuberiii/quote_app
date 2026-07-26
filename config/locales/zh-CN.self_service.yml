@@ -1110,13 +1110,14 @@ zh-CN:
       rule_review: 核对并确认后，商品才会加入商品库。
       errors:
         file_required: 请选择 CSV、XLSX、PDF、扫描件或产品图片。
+        no_candidates_selected: 没有可导入的商品。请至少选择一个商品，或将不需要的商品设为忽略。
         ai_failed_detail: 文件识别未完成，已保留可核对的解析结果
         ai_failed: "文件识别未完成：%{error}。现有解析结果仍可核对。"
         analysis_failed: "结构化分析未完成：%{error}"
         file_retained: 文件已保留，但自动分析未完成。请人工审核或重试。
       flash:
         review_saved: 核对结果已保存，商品尚未加入商品库。
-        applied: 已应用审核通过的商品；来源未明确的价格仍保持为空。
+        applied: "已将 %{count} 个商品加入商品库；来源未明确的价格仍保持为空。"
         retry_started: 已使用原文件重新开始识别。
     catalog_task:
       processing: 商品目录正在分析

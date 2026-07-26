@@ -56,11 +56,10 @@ class ProductImportBatchesController < ApplicationController
 
   def apply
     persist_review!
-    Product.transaction do
-      @batch.product_import_candidates.where.not(decision: %w[pending ignore]).find_each { |candidate| apply_candidate(candidate) }
-      @batch.update!(status: "applied")
-    end
-    redirect_to library_path, notice: t("self_service.catalog_import.flash.applied")
+    count = ProductImportBatchApplier.new(batch: @batch).call
+    redirect_to library_path, notice: t("self_service.catalog_import.flash.applied", count:)
+  rescue ProductImportBatchApplier::NoCandidatesSelected
+    redirect_to @batch, alert: t("self_service.catalog_import.errors.no_candidates_selected")
   end
 
   private
@@ -74,18 +73,6 @@ class ProductImportBatchesController < ApplicationController
       candidate.update!(decision: attrs[:decision], matched_product_id: attrs[:matched_product_id],
         candidate_data: candidate.candidate_data.merge(data))
     end
-  end
-
-  def apply_candidate(candidate)
-    data = candidate.candidate_data
-    product = candidate.decision == "merge" ? candidate.matched_product : nil
-    product ||= current_user.company.products.new
-    if candidate.decision == "variant" && candidate.matched_product
-      data = data.merge("description" => [ data["description"], "Variant of #{candidate.matched_product.name}" ].compact.join(" · "))
-    end
-    product.assign_attributes(name: data["name"], sku: data["sku"].presence, product_category: data["category"], description: data["description"], unit: data["unit"], moq: data["moq"], lead_time: data["lead_time"], price_currency: data["currency"].presence || product.price_currency || "USD", default_price: data["explicit_price"].presence || product.default_price)
-    product.save!
-    candidate.update!(matched_product: product)
   end
 
   def active_batch_label(batch)

@@ -2,7 +2,7 @@
   <% if @batch.status == "processing" %>
     <div data-controller="catalog-processing" data-catalog-processing-url-value="<%= product_import_batch_path(@batch, format: :json) %>">
     <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_review.processing_eyebrow") %></p><h1><%= t("self_service.catalog_review.processing_title") %></h1><p><%= t("self_service.catalog_review.processing_body") %></p></div><span class="status-signal"><%= t("self_service.catalog_review.status.processing") %></span></header>
-    <section class="library-empty"><h2><%= t("self_service.catalog_review.processing_wait_title") %></h2><p><%= t("self_service.catalog_review.processing_wait_body") %></p></section>
+    <section class="library-empty"><h2><%= t("self_service.catalog_review.processing_wait_title") %></h2><p><%= t("self_service.catalog_review.processing_wait_body") %></p><%= link_to t("self_service.catalog_task.continue"), library_path, class: "button button--secondary" %></section>
     </div>
   <% else %>
   <header class="deal-page-header"><div><p class="eyebrow"><%= t("self_service.catalog_review.eyebrow", default: "Catalog review") %></p><h1><%= t("self_service.catalog_review.title", count: @candidates.size, default: "%{count} candidates found") %></h1><p><%= t("self_service.catalog_review.subtitle", default: "Check identity, source evidence and price provenance. Your decision is saved before anything enters Library.") %></p></div><span class="status-signal"><%= t("self_service.catalog_review.status.#{@batch.status}", default: @batch.status.humanize) %></span></header>

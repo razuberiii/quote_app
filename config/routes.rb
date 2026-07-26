@@ -77,6 +77,7 @@ Rails.application.routes.draw do
   end
   get "library", to: "library#index", as: :library
   resources :product_import_batches, path: "library/catalog-imports", only: %i[new create show update] do
+    collection { get :active }
     member do
       post :apply
       post :retry_processing

@@ -1,4 +1,11 @@
 module ApplicationHelper
+  def active_product_import_batch
+    return unless user_signed_in?
+
+    @active_product_import_batch ||= current_user.company.product_import_batches
+      .where(status: %w[processing review failed]).order(created_at: :desc).first
+  end
+
   def html_lang
     I18n.locale.to_s
   end

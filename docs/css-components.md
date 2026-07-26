@@ -27,6 +27,8 @@ Smart Intake is an application surface in both themes. `.inquiry-source-panel`, 
 
 Catalog review uses `.import-coverage*` for the page/Sheet processing ledger and `.candidate-*` for human decisions. Failed or unrecognized ranges remain visible above candidates. Account security overlays use the shared `.neo-modal` panel, field, state, and action families; inline light modal styling is prohibited.
 
+Catalog import processing is a persistent background task. `.catalog-task-bar` is a thin ruled application status row, not a filled notification card. It may update its own text and signal while the user works elsewhere, but must never refresh or replace the current page. The dedicated processing page may transition to review exactly once when the server leaves `processing`.
+
 Settings upload controls and account secondary actions remain dark operating-surface controls. Native file selector buttons are normalized inside `.upload-control`; white legacy upload and security buttons are not permitted.
 
 Settings file fields use the same themed control surface as text inputs. `.upload-control` is a compact label-and-control primitive; it must not introduce a padded upload card or a hard-coded light/dark background. Company document uploads use one two-column metadata row with the file control spanning the row, collapsing to one column on mobile.

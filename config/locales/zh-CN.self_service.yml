@@ -1103,7 +1103,7 @@ zh-CN:
       choose_files_help: 点击选择一个或多个 CSV、XLSX、PDF 或图片
       selected_one: "已选择：%{name} · %{size}"
       selected_many: "已选择 %{count} 个文件 · 共 %{size}"
-      submitting: 文件已上传，正在进入整理队列…
+      submitting: 正在上传文件…
       guardrails: 导入说明
       rule_formula: 表格公式仅读取结果，不在系统中执行。
       rule_price: 文件里没有价格的商品会保持空白。
@@ -1118,6 +1118,13 @@ zh-CN:
         review_saved: 核对结果已保存，商品尚未加入商品库。
         applied: 已应用审核通过的商品；来源未明确的价格仍保持为空。
         retry_started: 已使用原文件重新开始识别。
+    catalog_task:
+      processing: 商品目录正在分析
+      review: "商品目录分析完成 · %{count} 个待核对"
+      failed: 商品目录分析未完成
+      background: 可以继续处理其他工作，离开页面不会中断任务。
+      open: 查看任务
+      continue: 继续处理其他工作
     company_import:
       back: 返回公司设置
       restart: 重新导入

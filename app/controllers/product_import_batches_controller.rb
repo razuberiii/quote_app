@@ -1,7 +1,12 @@
 class ProductImportBatchesController < ApplicationController
   before_action :set_batch, only: %i[show update apply retry_processing]
 
-  def new = @batch = current_user.company.product_import_batches.new
+  def new
+    active_batch = current_user.company.product_import_batches.where(status: "processing").order(created_at: :desc).first
+    return redirect_to active_batch if active_batch
+
+    @batch = current_user.company.product_import_batches.new
+  end
 
   def create
     files = Array(params.dig(:product_import_batch, :source_files)).reject(&:blank?)
@@ -21,6 +26,20 @@ class ProductImportBatchesController < ApplicationController
       format.html
       format.json { render json: { status: @batch.status, candidate_count: @candidates.size } }
     end
+  end
+
+  def active
+    batch = current_user.company.product_import_batches.where(status: %w[processing review failed])
+      .order(created_at: :desc).first
+    return head :no_content unless batch
+
+    render json: {
+      id: batch.id,
+      status: batch.status,
+      candidateCount: batch.product_import_candidates.count,
+      path: product_import_batch_path(batch),
+      label: active_batch_label(batch)
+    }
   end
 
   def retry_processing
@@ -67,5 +86,16 @@ class ProductImportBatchesController < ApplicationController
     product.assign_attributes(name: data["name"], sku: data["sku"].presence, product_category: data["category"], description: data["description"], unit: data["unit"], moq: data["moq"], lead_time: data["lead_time"], price_currency: data["currency"].presence || product.price_currency || "USD", default_price: data["explicit_price"].presence || product.default_price)
     product.save!
     candidate.update!(matched_product: product)
+  end
+
+  def active_batch_label(batch)
+    case batch.status
+    when "processing"
+      t("self_service.catalog_task.processing")
+    when "review"
+      t("self_service.catalog_task.review", count: batch.product_import_candidates.count)
+    else
+      t("self_service.catalog_task.failed")
+    end
   end
 end

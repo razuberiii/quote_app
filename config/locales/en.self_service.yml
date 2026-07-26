@@ -33,9 +33,16 @@ en:
     catalog_import:
       selected_one: "Selected: %{name} · %{size}"
       selected_many: "Selected %{count} files · %{size} total"
-      submitting: Upload complete. Opening the processing queue…
+      submitting: Uploading files…
       flash:
         retry_started: Recognition restarted from the retained source file.
+    catalog_task:
+      processing: Product catalog analysis is running
+      review: "Product catalog analysis complete · %{count} to review"
+      failed: Product catalog analysis did not complete
+      background: You can continue working. Leaving this page will not interrupt the task.
+      open: View task
+      continue: Continue with other work
     catalog_review:
       processing_eyebrow: Product catalog · Processing
       processing_title: Organizing the product catalog

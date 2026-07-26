@@ -1,0 +1,21 @@
+<aside class="catalog-task-bar catalog-task-bar--<%= batch.status %>"
+  data-controller="catalog-task"
+  data-catalog-task-url-value="<%= active_product_import_batches_path(format: :json) %>"
+  data-catalog-task-batch-id-value="<%= batch.id %>"
+  data-catalog-task-status-value="<%= batch.status %>">
+  <span class="catalog-task-bar__signal" aria-hidden="true"></span>
+  <div>
+    <strong data-catalog-task-target="label">
+      <% if batch.status == "processing" %>
+        <%= t("self_service.catalog_task.processing") %>
+      <% elsif batch.status == "review" %>
+        <%= t("self_service.catalog_task.review", count: batch.product_import_candidates.count) %>
+      <% else %>
+        <%= t("self_service.catalog_task.failed") %>
+      <% end %>
+    </strong>
+    <small data-catalog-task-target="detail"><%= t("self_service.catalog_task.background") %></small>
+  </div>
+  <%= link_to t("self_service.catalog_task.open"), product_import_batch_path(batch),
+    class: "catalog-task-bar__link", data: { catalog_task_target: "link" } %>
+</aside>

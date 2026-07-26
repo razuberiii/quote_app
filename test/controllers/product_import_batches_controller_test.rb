@@ -86,4 +86,27 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_equal "processing", response.parsed_body["status"]
   end
+
+  test "new import resumes an existing processing task" do
+    batch = @user.company.product_import_batches.create!(created_by: @user,
+      input_fingerprint: "processing:resume", status: "processing")
+
+    get new_product_import_batch_path
+
+    assert_redirected_to product_import_batch_path(batch)
+  end
+
+  test "active task endpoint exposes a stable return path and completion state" do
+    batch = @user.company.product_import_batches.create!(created_by: @user,
+      input_fingerprint: "review:ready", status: "review")
+    batch.product_import_candidates.create!(candidate_data: { "name" => "Dosing pump" }, decision: "pending")
+
+    get active_product_import_batches_path(format: :json)
+
+    assert_response :success
+    assert_equal batch.id, response.parsed_body["id"]
+    assert_equal "review", response.parsed_body["status"]
+    assert_equal 1, response.parsed_body["candidateCount"]
+    assert_equal product_import_batch_path(batch), response.parsed_body["path"]
+  end
 end

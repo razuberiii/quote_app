@@ -120,6 +120,8 @@
       </div>
     </nav>
 
+    <%= render "layouts/catalog_import_task", batch: active_product_import_batch if user_signed_in? && active_product_import_batch %>
+
     <main>
       <%= render "layouts/impersonation_banner" %>
 

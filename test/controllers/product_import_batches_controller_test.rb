@@ -28,7 +28,7 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     batch = @user.company.product_import_batches.order(:id).last
     assert_redirected_to product_import_batch_path(batch)
     assert_equal 2, batch.product_import_candidates.size
-    assert batch.product_import_candidates.all? { |candidate| candidate.decision == "pending" }
+    assert batch.product_import_candidates.all? { |candidate| candidate.decision == "create" }
     assert_equal "Sheet 1 · A2:F2", batch.product_import_candidates.first.evidence.first["location"]
 
     first = batch.product_import_candidates.first
@@ -36,24 +36,25 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
       first.id.to_s => { decision: "create", candidate_data: first.candidate_data.merge("name" => "HPU 380 Confirmed") }
     } }
     assert_redirected_to library_path
-    assert_equal 1, @user.company.products.count
+    assert_equal 2, @user.company.products.count
     assert @user.company.products.exists?(name: "HPU 380 Confirmed")
+    assert @user.company.products.exists?(name: "Dosing pump")
     assert_equal 2460, @user.company.products.find_by!(name: "HPU 380 Confirmed").default_price
   ensure
     file&.close!
   end
 
-  test "applying an untouched review imports the complete batch" do
+  test "applying a default review imports the complete batch" do
     batch = @user.company.product_import_batches.create!(
       created_by: @user, input_fingerprint: "review:untouched", status: "review"
     )
     batch.product_import_candidates.create!(
       candidate_data: { "name" => "Hydraulic unit", "sku" => "HU-1", "currency" => "元" },
-      decision: "pending"
+      decision: "create"
     )
     batch.product_import_candidates.create!(
       candidate_data: { "name" => "Seal kit", "sku" => "SK-1", "currency" => "USD" },
-      decision: "pending"
+      decision: "create"
     )
 
     assert_difference -> { @user.company.products.count }, 2 do
@@ -62,8 +63,34 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to library_path
     assert_equal "applied", batch.reload.status
-    assert_equal %w[create create], batch.product_import_candidates.order(:id).pluck(:decision)
+    assert_equal %w[imported imported], batch.product_import_candidates.order(:id).pluck(:decision)
     assert_equal "CNY", @user.company.products.find_by!(sku: "HU-1").price_currency
+  end
+
+  test "a partial review imports only explicit choices and remains reviewable" do
+    batch = @user.company.product_import_batches.create!(
+      created_by: @user, input_fingerprint: "review:partial", status: "review"
+    )
+    selected = batch.product_import_candidates.create!(
+      candidate_data: { "name" => "Selected product", "sku" => "SEL-1" }, decision: "create"
+    )
+    deferred = batch.product_import_candidates.create!(
+      candidate_data: { "name" => "Deferred product", "sku" => "DEF-1" }, decision: "pending"
+    )
+
+    assert_difference -> { @user.company.products.count }, 1 do
+      post apply_product_import_batch_path(batch), params: { candidates: {
+        selected.id.to_s => { decision: "create", candidate_data: selected.candidate_data },
+        deferred.id.to_s => { decision: "pending", candidate_data: deferred.candidate_data }
+      } }
+    end
+
+    assert_redirected_to product_import_batch_path(batch)
+    assert_equal "review", batch.reload.status
+    assert_equal "imported", selected.reload.decision
+    assert_equal "pending", deferred.reload.decision
+    assert @user.company.products.exists?(sku: "SEL-1")
+    assert_not @user.company.products.exists?(sku: "DEF-1")
   end
 
   test "applying an entirely ignored review stays on review without a false success" do
@@ -105,10 +132,36 @@ class ProductImportBatchesControllerTest < ActionDispatch::IntegrationTest
     batch = @user.company.product_import_batches.order(:id).last
     assert_redirected_to product_import_batch_path(batch)
     assert_equal [ "Dosing pump" ], batch.product_import_candidates.map { |candidate| candidate.candidate_data["name"] }
-    assert_equal "pending", batch.product_import_candidates.first.decision
+    assert_equal "create", batch.product_import_candidates.first.decision
     assert_equal "failed", batch.processing_report.first["status"]
   ensure
     ENV["OPENAI_API_KEY"] = original_api_key
+    file&.close!
+  end
+
+  test "a repeated product without SKU defaults to merging by normalized name" do
+    existing = @user.company.products.create!(name: "Dosing Pump", price_currency: "USD")
+    file = Tempfile.new([ "repeat-product", ".xlsx" ])
+    package = Axlsx::Package.new
+    package.workbook.add_worksheet do |sheet|
+      sheet.add_row [ "Product", "Unit price", "Currency" ]
+      sheet.add_row [ "  Dosing Pump  ", 1200, "USD" ]
+    end
+    package.serialize(file.path)
+    upload = Rack::Test::UploadedFile.new(
+      file.path,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      original_filename: "repeat-product.xlsx"
+    )
+
+    perform_enqueued_jobs do
+      post product_import_batches_path, params: { product_import_batch: { source_files: [ upload ] } }
+    end
+
+    candidate = @user.company.product_import_batches.order(:id).last.product_import_candidates.first
+    assert_equal "merge", candidate.decision
+    assert_equal existing, candidate.matched_product
+  ensure
     file&.close!
   end
 

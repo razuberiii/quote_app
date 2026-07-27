@@ -38,6 +38,8 @@ en:
         no_candidates_selected: Select at least one product to import, or mark unwanted products as ignored.
       flash:
         applied: "%{count} products were added to Library. Prices without a reliable source remain blank."
+        partially_applied: "%{count} products were imported. Products marked Decide later remain on this page."
+        already_applied: This batch has already been imported.
         retry_started: Recognition restarted from the retained source file.
     catalog_task:
       processing: Product catalog analysis is running

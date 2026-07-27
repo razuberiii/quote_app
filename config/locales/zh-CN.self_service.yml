@@ -1118,6 +1118,8 @@ zh-CN:
       flash:
         review_saved: 核对结果已保存，商品尚未加入商品库。
         applied: "已将 %{count} 个商品加入商品库；来源未明确的价格仍保持为空。"
+        partially_applied: "已导入 %{count} 个商品；选择“稍后决定”的商品仍保留在本页。"
+        already_applied: 这批商品已经导入，无需重复操作。
         retry_started: 已使用原文件重新开始识别。
     catalog_task:
       processing: 商品目录正在分析

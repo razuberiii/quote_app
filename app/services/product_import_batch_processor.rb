@@ -63,9 +63,17 @@ class ProductImportBatchProcessor
 
   def create_candidates(products)
     products.each do |data|
-      match = data["sku"].present? && @batch.company.products.find_by("LOWER(sku) = ?", data["sku"].downcase)
+      match = matching_product(data)
       @batch.product_import_candidates.create!(candidate_data: data.except("evidence"), evidence: data["evidence"],
-        confidence: data["confidence"], matched_product: match, decision: "pending")
+        confidence: data["confidence"], matched_product: match, decision: match ? "merge" : "create")
+    end
+  end
+
+  def matching_product(data)
+    if data["sku"].present?
+      @batch.company.products.find_by("LOWER(sku) = ?", data["sku"].to_s.strip.downcase)
+    elsif data["name"].present?
+      @batch.company.products.find_by("LOWER(TRIM(name)) = ?", data["name"].to_s.strip.downcase)
     end
   end
 

@@ -16,23 +16,13 @@ class ProductImportBatchApplier
   def call
     Product.transaction do
       candidates = @batch.product_import_candidates.lock.to_a
-      selected = candidates.reject { |candidate| candidate.decision.in?(%w[pending ignore]) }
-
-      # Pressing the import button with an untouched review is an explicit
-      # confirmation of the complete batch. Once the user makes any decisions,
-      # pending rows remain pending and only their explicit choices are applied.
-      if selected.empty? && candidates.any? { |candidate| candidate.decision == "pending" }
-        candidates.select { |candidate| candidate.decision == "pending" }.each do |candidate|
-          candidate.decision = candidate.matched_product_id? ? "merge" : "create"
-          candidate.save!
-        end
-        selected = candidates.reject { |candidate| candidate.decision == "ignore" }
-      end
+      selected = candidates.select { |candidate| candidate.decision.in?(%w[create merge variant]) }
 
       raise NoCandidatesSelected if selected.empty?
 
       selected.each { |candidate| apply_candidate(candidate) }
-      @batch.update!(status: "applied")
+      unresolved = @batch.product_import_candidates.where(decision: "pending").exists?
+      @batch.update!(status: unresolved ? "review" : "applied")
       selected.size
     end
   end
@@ -62,7 +52,7 @@ class ProductImportBatchApplier
       default_price: data["explicit_price"].presence || product.default_price
     )
     product.save!
-    candidate.update!(matched_product: product)
+    candidate.update!(matched_product: product, decision: "imported")
   end
 
   def normalized_currency(value, fallback)

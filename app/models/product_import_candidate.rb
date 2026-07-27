@@ -1,5 +1,6 @@
 class ProductImportCandidate < ApplicationRecord
-  DECISIONS = %w[pending create merge variant ignore].freeze
+  REVIEW_DECISIONS = %w[pending create merge variant ignore].freeze
+  DECISIONS = (REVIEW_DECISIONS + %w[imported]).freeze
 
   belongs_to :product_import_batch
   belongs_to :matched_product, class_name: "Product", optional: true

@@ -20,7 +20,9 @@ class ProductImportBatchesController < ApplicationController
   end
 
   def show
-    @candidates = @batch.product_import_candidates.includes(:matched_product).order(:id)
+    return redirect_to library_path, notice: t("self_service.catalog_import.flash.already_applied") if @batch.status == "applied"
+
+    @candidates = @batch.product_import_candidates.where.not(decision: "imported").includes(:matched_product).order(:id)
     @products = current_user.company.products.order(:name)
     respond_to do |format|
       format.html
@@ -55,9 +57,15 @@ class ProductImportBatchesController < ApplicationController
   end
 
   def apply
+    return redirect_to library_path, notice: t("self_service.catalog_import.flash.already_applied") if @batch.status == "applied"
+
     persist_review!
     count = ProductImportBatchApplier.new(batch: @batch).call
-    redirect_to library_path, notice: t("self_service.catalog_import.flash.applied", count:)
+    if @batch.status == "review"
+      redirect_to @batch, notice: t("self_service.catalog_import.flash.partially_applied", count:)
+    else
+      redirect_to library_path, notice: t("self_service.catalog_import.flash.applied", count:)
+    end
   rescue ProductImportBatchApplier::NoCandidatesSelected
     redirect_to @batch, alert: t("self_service.catalog_import.errors.no_candidates_selected")
   end

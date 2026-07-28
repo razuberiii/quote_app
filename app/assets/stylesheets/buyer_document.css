@@ -1,0 +1,190 @@
+/*
+ * Buyer-facing quotation.
+ * This file is loaded only by the public Buyer Room layout and intentionally
+ * owns its typography and density after the shared application styles.
+ */
+.buyer-storefront {
+  font-family:
+    "Noto Sans CJK SC",
+    "Noto Sans",
+    "Source Sans 3",
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  font-size: 16px;
+  line-height: 1.62;
+  letter-spacing: -0.008em;
+}
+
+.buyer-storefront :is(h1, h2, h3, strong, dd) {
+  font-family: inherit;
+  letter-spacing: -0.032em;
+}
+
+.buyer-storefront .buyer-cover {
+  min-height: 460px;
+  align-items: center;
+  padding: clamp(54px, 6vw, 84px);
+}
+
+.buyer-storefront .buyer-cover h1 {
+  max-width: 820px;
+  margin: 18px 0;
+  font-size: clamp(3rem, 5.8vw, 5.6rem);
+  font-weight: 720;
+  line-height: 1.02;
+  letter-spacing: -0.058em;
+}
+
+.buyer-storefront .buyer-intro {
+  max-width: 720px;
+  font-size: 1.05rem;
+  line-height: 1.72;
+}
+
+.buyer-storefront .buyer-contact-line {
+  margin-top: 24px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.buyer-storefront .quote-meta {
+  padding-block: 12px;
+}
+
+.buyer-storefront .quote-meta div {
+  padding-block: 10px;
+}
+
+.buyer-storefront .doc-section {
+  padding: clamp(48px, 5.5vw, 78px);
+}
+
+.buyer-storefront .buyer-section-heading {
+  max-width: 720px;
+  margin-bottom: 34px;
+}
+
+.buyer-storefront .buyer-section-heading h2 {
+  margin: 0.5rem 0 0.65rem;
+  font-size: clamp(2.25rem, 3.6vw, 3.8rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.048em;
+}
+
+.buyer-storefront .buyer-section-heading > p:last-child {
+  max-width: 64ch;
+  line-height: 1.68;
+}
+
+.buyer-storefront .buyer-product--visual {
+  grid-template-columns: minmax(220px, 0.62fr) minmax(0, 1.38fr);
+  gap: clamp(30px, 4vw, 56px);
+  padding: 36px 0;
+}
+
+.buyer-storefront .buyer-product__image {
+  min-height: 270px;
+}
+
+.buyer-storefront .product-copy h3 {
+  margin: 0.6rem 0 0.8rem;
+  font-size: clamp(1.8rem, 2.7vw, 2.8rem);
+  font-weight: 700;
+  line-height: 1.12;
+}
+
+.buyer-storefront .product-copy > p:not(.product-index) {
+  max-width: 68ch;
+  color: var(--buyer-muted);
+  line-height: 1.68;
+}
+
+.buyer-storefront .buyer-spec-grid {
+  margin: 24px 0;
+}
+
+.buyer-storefront .buyer-spec-grid div {
+  padding-block: 14px;
+}
+
+.buyer-storefront .buyer-product__controls > * {
+  min-width: 0;
+  padding: 15px 16px;
+}
+
+.buyer-storefront .buyer-plan-grid button {
+  min-height: 156px;
+  padding: 22px;
+}
+
+.buyer-storefront .buyer-plan-grid strong {
+  margin: 30px 0 7px;
+  font-size: 1.08rem;
+}
+
+.buyer-storefront .buyer-plan-grid small,
+.buyer-storefront .buyer-terms-copy {
+  line-height: 1.62;
+}
+
+.buyer-storefront .selection-panel {
+  font-family: inherit;
+}
+
+@media (max-width: 760px) {
+  .buyer-storefront {
+    font-size: 15px;
+  }
+
+  .buyer-storefront .buyer-cover {
+    padding: 44px 18px 38px;
+  }
+
+  .buyer-storefront .buyer-cover h1 {
+    font-size: clamp(2.55rem, 12vw, 3.8rem);
+    line-height: 1.05;
+  }
+
+  .buyer-storefront .doc-section {
+    padding: 46px 18px;
+  }
+
+  .buyer-storefront .buyer-section-heading h2 {
+    font-size: 2.35rem;
+    line-height: 1.1;
+  }
+
+  .buyer-storefront .buyer-product--visual {
+    gap: 24px;
+    padding: 30px 0;
+  }
+
+  .buyer-storefront .buyer-product__image {
+    min-height: 220px;
+  }
+
+  .buyer-storefront .product-copy h3 {
+    font-size: 1.9rem;
+    line-height: 1.14;
+  }
+
+  .buyer-storefront .selection-panel {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .buyer-storefront .selection-panel .total-row {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .buyer-storefront .selection-panel .total-row strong {
+    overflow: visible;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+}

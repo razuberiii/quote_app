@@ -1,4 +1,5 @@
 <% review = response.difference_review.to_h %>
+<% deal = local_assigns[:deal] || @deal || @quote %>
 <section class="response-review response-review--<%= review['severity'] %>">
   <header>
     <div><span><%= t("self_service.quote_core.response_review.title") %></span><strong><%= t("self_service.quote_core.response_review.severity.#{review['severity']}", default: review['severity'].to_s.humanize) %></strong></div>
@@ -11,14 +12,14 @@
     <div class="response-review__unsafe"><strong><%= t("self_service.quote_core.response_review.unsafe", count: review['unsafe_cells'].size) %></strong><p><%= t("self_service.quote_core.response_review.unsafe_help") %></p><ul><% review['unsafe_cells'].first(8).each do |cell| %><li><code><%= cell['cell'] || cell[:cell] %></code> <%= cell['neutralized'] || cell[:neutralized] || t("self_service.quote_core.response_review.formula_ignored") %></li><% end %></ul></div>
   <% end %>
   <% if review['changes'].present? %>
-    <%= form_with url: apply_response_quote_path(@deal, response_id: response.id), method: :patch, class: "response-review__changes" do %>
+    <%= form_with url: apply_response_quote_path(id: deal.id, response_id: response.id), method: :patch, class: "response-review__changes" do %>
       <% review['changes'].each do |change| %>
         <label class="response-change response-change--<%= change['kind'] %>">
           <%= check_box_tag "selected_paths[]", change['path'], change['kind'] != 'unsafe', disabled: review['source_valid'] == false %>
           <span><em><%= change['kind'].humanize %><%= " · #{change['match_confidence'].to_s.humanize} match" if change['match_confidence'].present? %></em><strong><%= change['path'].to_s.gsub('.', ' › ').humanize %></strong><small><del><%= change['old'].is_a?(Hash) ? change['old'].to_json : change['old'] %></del><b>→</b><ins><%= change['new'].is_a?(Hash) ? change['new'].to_json : change['new'] %></ins></small></span>
         </label>
       <% end %>
-      <div class="response-review__actions"><%= submit_tag t("self_service.quote_core.response_review.apply"), class: "button button--primary", disabled: review['source_valid'] == false %><%= link_to t("self_service.quote_core.response_review.keep"), response_disposition_quote_path(@deal, response_id: response.id, status: "evidence_only"), data: { turbo_method: :patch }, class: "button button--ghost" %></div>
+      <div class="response-review__actions"><%= submit_tag t("self_service.quote_core.response_review.apply"), class: "button button--primary", disabled: review['source_valid'] == false %><%= link_to t("self_service.quote_core.response_review.keep"), response_disposition_quote_path(id: deal.id, response_id: response.id, status: "evidence_only"), data: { turbo_method: :patch }, class: "button button--ghost" %></div>
     <% end %>
   <% elsif review['severity'] == 'exact_match' %>
     <p class="response-review__exact"><%= t("self_service.quote_core.response_review.exact") %></p>

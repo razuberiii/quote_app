@@ -75,6 +75,8 @@ Buyer Room uses `buyer-storefront` as a branded commercial microsite: editorial 
 
 Buyer PDF output follows the immutable Revision buyer locale. All document labels and standard prose live under `self_service.buyer_room.pdf`; the issued date falls back to the publication date, and optional contact values must not leave orphan separators.
 
+Buyer-facing quotation typography is isolated in `buyer_document.css`, loaded only after the shared Buyer Room styles. It uses the Noto Sans family for multilingual commercial documents, a compact editorial cover, readable 1.6-class body leading, and bounded heading scales. Printable quotation layouts use the same Noto-first font stack and must preserve at least 1.4 body leading; display-serif overrides and compressed sub-9pt body copy are not permitted. On narrow screens, the Buyer Room action rail uses a full-width total row above two equal actions so the amount cannot be compressed or clipped by the buttons.
+
 Revision comparison uses paired `revision-values` and `revision-item-diff` columns; never expose raw snapshot JSON. PI uses the print-safe `pi-document` hierarchy and must always render from the immutable acceptance snapshot.
 
 Delivery, response review, and document evidence use the `channel-flow`, `response-review`, and `documents-hub` families. System-executed delivery must never expose a user-selectable success state. Returned file differences are compact semantic rows, and unsafe workbook cells use a dedicated non-actionable signal. The Documents hub groups Published quote files, Buyer files, and Final documents without introducing a global Files module.

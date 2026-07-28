@@ -43,7 +43,7 @@ class VisualReviewSeeder
       "version_one_id" => version_one.id, "version_two_id" => version_two.id,
       "buyer_token" => version_two.secure_token, "old_buyer_token" => version_one.secure_token,
       "e2e_deal_id" => e2e_deal.id, "e2e_excel_deal_id" => e2e_excel_deal.id,
-      "inquiry_id" => inquiry.id, "product_id" => products.first.id,
+      "inquiry_id" => inquiry.id, "product_id" => products.first.id, "customer_id" => buyer.id,
       "edge_deals" => edge_deals.transform_values(&:id)
     }
     FileUtils.mkdir_p(Rails.root.join("tmp"))

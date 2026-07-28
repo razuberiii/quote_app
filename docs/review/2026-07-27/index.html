@@ -1,0 +1,246 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1"><title>Rubusoo 全功能交互验收</title>
+    <style>
+      *{box-sizing:border-box}body{margin:0;background:#f2f3f0;color:#171a18;font:16px/1.65 "Noto Sans CJK SC","Noto Sans",Arial,sans-serif}
+      header{padding:76px max(24px,calc((100vw - 1240px)/2));background:#101512;color:#f7faf8}
+      header p{max-width:780px;color:#bdc7c1}h1{font-size:clamp(38px,6vw,72px);line-height:1.02;margin:12px 0 22px;letter-spacing:-.04em}
+      main{max-width:1240px;margin:0 auto;padding:56px 24px 100px}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#ccd3ce;margin-bottom:50px}
+      .summary div{background:#fff;padding:24px}.summary strong{display:block;font-size:28px}.card{background:#fff;margin:0 0 42px;padding:34px;border:1px solid #dce1de}
+      .meta{display:flex;gap:18px;align-items:center;color:#68716c;font-size:13px}.meta span{color:#2257c8;font-weight:900}.meta code{white-space:normal}
+      h2{font-size:30px;line-height:1.15;margin:12px 0}p{margin:0 0 24px;color:#5e6862}.card img{display:block;width:100%;height:auto;border:1px solid #d7ddda;background:#e9ecea}
+      .outputs{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}.outputs a{color:white;border:1px solid #56605b;padding:11px 15px;text-decoration:none}
+      @media(max-width:700px){header{padding-top:48px}.summary{grid-template-columns:1fr}.card{padding:20px;margin-bottom:26px}h2{font-size:24px}}
+    </style></head><body><header><div>2026-07-27 · REAL BROWSER REVIEW</div><h1>Rubusoo 全功能<br>交互验收指南</h1>
+    <p>按真实用户入口整理全部功能页、说明页、只读状态、弹窗、移动端页面与最终交付物。每一项都说明入口、职责、主要动作和结果。</p>
+    <div class="outputs"><a href="exports/quote-v2.pdf">正式 PDF</a><a href="exports/quote-v2.xlsx">正式 Excel</a><a href="exports/buyer-room-quote-v2.pdf">客户页 PDF</a></div></header>
+    <main><section class="summary"><div><strong>46</strong>页面与交互状态</div><div><strong>2</strong>桌面与移动端布局</div><div><strong>3</strong>真实导出文件</div></section><article class="card" id="01-home">
+      <div class="meta"><span>01</span><code>/</code></div>
+      <h2>公开首页</h2>
+      <p>入口：直接访问网站。用途：说明产品解决的问题、核心流程与试用入口。交互：查看产品演示、价格与注册入口。</p>
+      <a href="screenshots/01-home.jpg"><img loading="lazy" src="screenshots/01-home.jpg" alt="公开首页"></a>
+    </article><article class="card" id="02-pricing">
+      <div class="meta"><span>02</span><code>/pricing</code></div>
+      <h2>价格方案</h2>
+      <p>入口：首页“价格”或导航。用途：比较方案能力和试用条件。交互：选择方案并进入注册。</p>
+      <a href="screenshots/02-pricing.jpg"><img loading="lazy" src="screenshots/02-pricing.jpg" alt="价格方案"></a>
+    </article><article class="card" id="03-seller-demo">
+      <div class="meta"><span>03</span><code>/seller-demo</code></div>
+      <h2>销售端演示</h2>
+      <p>入口：首页产品演示。用途：在未登录状态理解销售从询盘到报价的完整工作方式。</p>
+      <a href="screenshots/03-seller-demo.jpg"><img loading="lazy" src="screenshots/03-seller-demo.jpg" alt="销售端演示"></a>
+    </article><article class="card" id="04-buyer-demo">
+      <div class="meta"><span>04</span><code>/buyer-demo</code></div>
+      <h2>客户体验演示</h2>
+      <p>入口：首页客户页面演示。用途：展示客户如何查看、提问、修改和接受报价。</p>
+      <a href="screenshots/04-buyer-demo.jpg"><img loading="lazy" src="screenshots/04-buyer-demo.jpg" alt="客户体验演示"></a>
+    </article><article class="card" id="05-sign-in">
+      <div class="meta"><span>05</span><code>/users/sign_in?locale=zh-CN</code></div>
+      <h2>登录</h2>
+      <p>入口：顶部“登录”。用途：进入销售工作台。交互：账号密码、记住登录、注册入口。</p>
+      <a href="screenshots/05-sign-in.jpg"><img loading="lazy" src="screenshots/05-sign-in.jpg" alt="登录"></a>
+    </article><article class="card" id="06-sign-up">
+      <div class="meta"><span>06</span><code>/users/sign_up?locale=zh-CN</code></div>
+      <h2>注册</h2>
+      <p>入口：顶部“免费开始”。用途：创建新的销售工作空间。</p>
+      <a href="screenshots/06-sign-up.jpg"><img loading="lazy" src="screenshots/06-sign-up.jpg" alt="注册"></a>
+    </article><article class="card" id="07-contact">
+      <div class="meta"><span>07</span><code>/zh-CN/contact</code></div>
+      <h2>联系页面</h2>
+      <p>入口：网站页脚。用途：提交商务咨询；不是报价工作流页面。</p>
+      <a href="screenshots/07-contact.jpg"><img loading="lazy" src="screenshots/07-contact.jpg" alt="联系页面"></a>
+    </article><article class="card" id="08-privacy">
+      <div class="meta"><span>08</span><code>/zh-CN/privacy</code></div>
+      <h2>隐私说明</h2>
+      <p>入口：网站页脚。用途：说明数据处理和隐私边界；只读页面。</p>
+      <a href="screenshots/08-privacy.jpg"><img loading="lazy" src="screenshots/08-privacy.jpg" alt="隐私说明"></a>
+    </article><article class="card" id="09-terms">
+      <div class="meta"><span>09</span><code>/zh-CN/terms</code></div>
+      <h2>服务条款</h2>
+      <p>入口：网站页脚。用途：说明产品使用条款；只读页面。</p>
+      <a href="screenshots/09-terms.jpg"><img loading="lazy" src="screenshots/09-terms.jpg" alt="服务条款"></a>
+    </article><article class="card" id="10-quotes">
+      <div class="meta"><span>10</span><code>/quotes</code></div>
+      <h2>报价工作台</h2>
+      <p>入口：登录后主导航“报价”。用途：查看所有交易、当前阶段和下一步动作。交互：打开交易或新建报价。</p>
+      <a href="screenshots/10-quotes.jpg"><img loading="lazy" src="screenshots/10-quotes.jpg" alt="报价工作台"></a>
+    </article><article class="card" id="11-ai-import-hub">
+      <div class="meta"><span>11</span><code>/imports</code></div>
+      <h2>AI 导入中心</h2>
+      <p>入口：顶部“AI 导入”。用途：选择公司资料、商品目录或客户询盘的导入类型。</p>
+      <a href="screenshots/11-ai-import-hub.jpg"><img loading="lazy" src="screenshots/11-ai-import-hub.jpg" alt="AI 导入中心"></a>
+    </article><article class="card" id="12-company-import">
+      <div class="meta"><span>12</span><code>/settings/company-imports/new</code></div>
+      <h2>公司资料 AI 导入</h2>
+      <p>入口：AI 导入中心或公司设置。用途：粘贴/上传资料，识别后核对并写入公司资料。</p>
+      <a href="screenshots/12-company-import.jpg"><img loading="lazy" src="screenshots/12-company-import.jpg" alt="公司资料 AI 导入"></a>
+    </article><article class="card" id="13-catalog-import">
+      <div class="meta"><span>13</span><code>/library/catalog-imports/new</code></div>
+      <h2>商品目录导入</h2>
+      <p>入口：AI 导入中心或商品库。用途：上传 CSV/XLSX/PDF/图片，后台识别后核对商品。</p>
+      <a href="screenshots/13-catalog-import.jpg"><img loading="lazy" src="screenshots/13-catalog-import.jpg" alt="商品目录导入"></a>
+    </article><article class="card" id="14-smart-intake-entry">
+      <div class="meta"><span>14</span><code>/inquiries/new</code></div>
+      <h2>客户询盘导入</h2>
+      <p>入口：新建报价或 AI 导入中心。用途：粘贴邮件/聊天或上传文件，生成可持续更新的询盘。</p>
+      <a href="screenshots/14-smart-intake-entry.jpg"><img loading="lazy" src="screenshots/14-smart-intake-entry.jpg" alt="客户询盘导入"></a>
+    </article><article class="card" id="15-smart-intake-review">
+      <div class="meta"><span>15</span><code>/inquiries/2</code></div>
+      <h2>询盘核对与持续沟通</h2>
+      <p>入口：询盘导入完成或交易“沟通”。用途：保留原文、核对需求、查看缺项并追加后续客户消息。</p>
+      <a href="screenshots/15-smart-intake-review.jpg"><img loading="lazy" src="screenshots/15-smart-intake-review.jpg" alt="询盘核对与持续沟通"></a>
+    </article><article class="card" id="16-quote-overview">
+      <div class="meta"><span>16</span><code>/quotes/9</code></div>
+      <h2>交易概览</h2>
+      <p>入口：报价列表打开一笔交易。用途：汇总客户、金额、状态和唯一下一步动作。</p>
+      <a href="screenshots/16-quote-overview.jpg"><img loading="lazy" src="screenshots/16-quote-overview.jpg" alt="交易概览"></a>
+    </article><article class="card" id="17-quote-activity">
+      <div class="meta"><span>17</span><code>/quotes/9?tab=activity</code></div>
+      <h2>客户动态</h2>
+      <p>入口：交易详情“客户动态”。用途：查看客户打开、提问、反馈和发送记录；只读事件流。</p>
+      <a href="screenshots/17-quote-activity.jpg"><img loading="lazy" src="screenshots/17-quote-activity.jpg" alt="客户动态"></a>
+    </article><article class="card" id="18-quote-versions">
+      <div class="meta"><span>18</span><code>/quotes/9?tab=versions</code></div>
+      <h2>版本与导出</h2>
+      <p>入口：交易详情“版本与导出”。用途：查看不可变版本，打开客户链接、下载 PDF/Excel 或发送。</p>
+      <a href="screenshots/18-quote-versions.jpg"><img loading="lazy" src="screenshots/18-quote-versions.jpg" alt="版本与导出"></a>
+    </article><article class="card" id="19-quote-documents">
+      <div class="meta"><span>19</span><code>/quotes/9?tab=documents</code></div>
+      <h2>交易文件</h2>
+      <p>入口：交易详情“文件”。用途：集中管理客户文件、交付证据和最终文件。</p>
+      <a href="screenshots/19-quote-documents.jpg"><img loading="lazy" src="screenshots/19-quote-documents.jpg" alt="交易文件"></a>
+    </article><article class="card" id="20-quote-studio">
+      <div class="meta"><span>20</span><code>/quotes/11/edit</code></div>
+      <h2>报价编辑器</h2>
+      <p>入口：交易下一步“编辑报价”。用途：编辑商品、数量、价格、条款和客户可见内容；保存后刷新发布检查。</p>
+      <a href="screenshots/20-quote-studio.jpg"><img loading="lazy" src="screenshots/20-quote-studio.jpg" alt="报价编辑器"></a>
+    </article><article class="card" id="21-publish-check">
+      <div class="meta"><span>21</span><code>/quotes/9/publish</code></div>
+      <h2>发布检查</h2>
+      <p>入口：客户预览顶部“继续发布”。用途：发布前集中确认阻塞项；确认后冻结正式版本。</p>
+      <a href="screenshots/21-publish-check.jpg"><img loading="lazy" src="screenshots/21-publish-check.jpg" alt="发布检查"></a>
+    </article><article class="card" id="22-delivery">
+      <div class="meta"><span>22</span><code>/quotes/9/deliver?version_id=5</code></div>
+      <h2>发送报价</h2>
+      <p>入口：发布完成页或版本列表“发送”。用途：选择邮件、链接或外部渠道并记录交付。</p>
+      <a href="screenshots/22-delivery.jpg"><img loading="lazy" src="screenshots/22-delivery.jpg" alt="发送报价"></a>
+    </article><article class="card" id="23-acceptance">
+      <div class="meta"><span>23</span><code>/quotes/9/acceptance/new?version_id=5</code></div>
+      <h2>记录客户接受</h2>
+      <p>入口：交易下一步或客户确认记录。用途：记录签署人、PO 和接受证据。</p>
+      <a href="screenshots/23-acceptance.jpg"><img loading="lazy" src="screenshots/23-acceptance.jpg" alt="记录客户接受"></a>
+    </article><article class="card" id="24-version-diff">
+      <div class="meta"><span>24</span><code>/quote_revisions/5</code></div>
+      <h2>版本差异</h2>
+      <p>入口：版本列表打开某个版本。用途：比较版本内容，不展示原始 JSON。</p>
+      <a href="screenshots/24-version-diff.jpg"><img loading="lazy" src="screenshots/24-version-diff.jpg" alt="版本差异"></a>
+    </article><article class="card" id="25-library-products">
+      <div class="meta"><span>25</span><code>/library?section=products</code></div>
+      <h2>商品库</h2>
+      <p>入口：主导航“商品库”。用途：维护可复用商品、价格依据和使用记录。</p>
+      <a href="screenshots/25-library-products.jpg"><img loading="lazy" src="screenshots/25-library-products.jpg" alt="商品库"></a>
+    </article><article class="card" id="26-library-presets">
+      <div class="meta"><span>26</span><code>/library?section=presets</code></div>
+      <h2>报价预设</h2>
+      <p>入口：商品库“报价预设”。用途：维护常用条款、配置和可复用报价模块。</p>
+      <a href="screenshots/26-library-presets.jpg"><img loading="lazy" src="screenshots/26-library-presets.jpg" alt="报价预设"></a>
+    </article><article class="card" id="27-document-design">
+      <div class="meta"><span>27</span><code>/document_design/edit</code></div>
+      <h2>报价输出设计</h2>
+      <p>入口：商品库“输出格式”或设置。用途：设置 Logo、字体、密度、字段显示和客户语言。</p>
+      <a href="screenshots/27-document-design.jpg"><img loading="lazy" src="screenshots/27-document-design.jpg" alt="报价输出设计"></a>
+    </article><article class="card" id="28-product-source">
+      <div class="meta"><span>28</span><code>/products/4</code></div>
+      <h2>商品详情与价格依据</h2>
+      <p>入口：商品库打开商品。用途：查看商品资料、历史报价和价格来源。</p>
+      <a href="screenshots/28-product-source.jpg"><img loading="lazy" src="screenshots/28-product-source.jpg" alt="商品详情与价格依据"></a>
+    </article><article class="card" id="29-product-new">
+      <div class="meta"><span>29</span><code>/products/new</code></div>
+      <h2>手工新建商品</h2>
+      <p>入口：商品库“手工添加产品”。用途：不经过文件导入直接建立商品。</p>
+      <a href="screenshots/29-product-new.jpg"><img loading="lazy" src="screenshots/29-product-new.jpg" alt="手工新建商品"></a>
+    </article><article class="card" id="30-product-edit">
+      <div class="meta"><span>30</span><code>/products/4/edit</code></div>
+      <h2>编辑商品</h2>
+      <p>入口：商品详情“编辑”。用途：维护商品身份、图片、价格、规格和交期。</p>
+      <a href="screenshots/30-product-edit.jpg"><img loading="lazy" src="screenshots/30-product-edit.jpg" alt="编辑商品"></a>
+    </article><article class="card" id="31-customers">
+      <div class="meta"><span>31</span><code>/customers</code></div>
+      <h2>客户列表</h2>
+      <p>入口：主导航“客户”。用途：按客户查看跟进状态、报价和下一步。</p>
+      <a href="screenshots/31-customers.jpg"><img loading="lazy" src="screenshots/31-customers.jpg" alt="客户列表"></a>
+    </article><article class="card" id="32-customer-detail">
+      <div class="meta"><span>32</span><code>/customers/2</code></div>
+      <h2>客户详情</h2>
+      <p>入口：客户列表打开客户。用途：汇总联系人、交易、活动和待办。</p>
+      <a href="screenshots/32-customer-detail.jpg"><img loading="lazy" src="screenshots/32-customer-detail.jpg" alt="客户详情"></a>
+    </article><article class="card" id="33-customer-new">
+      <div class="meta"><span>33</span><code>/customers/new</code></div>
+      <h2>新建客户</h2>
+      <p>入口：客户列表“新建客户”。用途：手工建立客户资料。</p>
+      <a href="screenshots/33-customer-new.jpg"><img loading="lazy" src="screenshots/33-customer-new.jpg" alt="新建客户"></a>
+    </article><article class="card" id="34-company-settings">
+      <div class="meta"><span>34</span><code>/company_settings/edit</code></div>
+      <h2>公司设置</h2>
+      <p>入口：主导航“设置”→公司。用途：维护公司身份、商务默认值、品牌与跟进邮件。</p>
+      <a href="screenshots/34-company-settings.jpg"><img loading="lazy" src="screenshots/34-company-settings.jpg" alt="公司设置"></a>
+    </article><article class="card" id="35-account-settings">
+      <div class="meta"><span>35</span><code>/users/edit</code></div>
+      <h2>账户设置</h2>
+      <p>入口：头像菜单“账户”。用途：维护个人身份、登录信息和安全设置。</p>
+      <a href="screenshots/35-account-settings.jpg"><img loading="lazy" src="screenshots/35-account-settings.jpg" alt="账户设置"></a>
+    </article><article class="card" id="36-team-settings">
+      <div class="meta"><span>36</span><code>/team_members</code></div>
+      <h2>团队设置</h2>
+      <p>入口：设置→团队。用途：查看团队成员、角色与权限。</p>
+      <a href="screenshots/36-team-settings.jpg"><img loading="lazy" src="screenshots/36-team-settings.jpg" alt="团队设置"></a>
+    </article><article class="card" id="38-account-menu">
+      <div class="meta"><span>37</span><code>/quotes</code></div>
+      <h2>账户菜单</h2>
+      <p>入口：顶部头像。用途：切换账户、查看通知和切换主题。交互：菜单内完成账户级操作。</p>
+      <a href="screenshots/38-account-menu.jpg"><img loading="lazy" src="screenshots/38-account-menu.jpg" alt="账户菜单"></a>
+    </article><article class="card" id="39-mobile-navigation">
+      <div class="meta"><span>38</span><code>/quotes</code></div>
+      <h2>移动端主菜单</h2>
+      <p>入口：390px 宽度点击右上角菜单。用途：在手机上访问全部主导航、账户和主题操作。</p>
+      <a href="screenshots/39-mobile-navigation.jpg"><img loading="lazy" src="screenshots/39-mobile-navigation.jpg" alt="移动端主菜单"></a>
+    </article><article class="card" id="37-buyer-room">
+      <div class="meta"><span>39</span><code>/q/AD7H77Ksq-wUgMyUakT6H0oAEVA85ioTAx6cEuYXDhY</code></div>
+      <h2>客户公开报价链接</h2>
+      <p>入口：版本与导出“客户页面”或复制客户链接。用途：客户查看商品、条款、总价并提问、要求修改或接受。</p>
+      <a href="screenshots/37-buyer-room.jpg"><img loading="lazy" src="screenshots/37-buyer-room.jpg" alt="客户公开报价链接"></a>
+    </article><article class="card" id="40-buyer-question">
+      <div class="meta"><span>40</span><code>/q/AD7H77Ksq-wUgMyUakT6H0oAEVA85ioTAx6cEuYXDhY</code></div>
+      <h2>客户提问弹窗</h2>
+      <p>入口：公开报价中商品、规格或整份报价的“提问”。用途：把问题连同上下文回传销售。</p>
+      <a href="screenshots/40-buyer-question.jpg"><img loading="lazy" src="screenshots/40-buyer-question.jpg" alt="客户提问弹窗"></a>
+    </article><article class="card" id="41-buyer-changes">
+      <div class="meta"><span>41</span><code>/q/AD7H77Ksq-wUgMyUakT6H0oAEVA85ioTAx6cEuYXDhY</code></div>
+      <h2>客户要求修改</h2>
+      <p>入口：公开报价右侧“要求修改”。用途：提交修改说明和附件，形成销售可核对的变更。</p>
+      <a href="screenshots/41-buyer-changes.jpg"><img loading="lazy" src="screenshots/41-buyer-changes.jpg" alt="客户要求修改"></a>
+    </article><article class="card" id="42-buyer-accept">
+      <div class="meta"><span>42</span><code>/q/AD7H77Ksq-wUgMyUakT6H0oAEVA85ioTAx6cEuYXDhY</code></div>
+      <h2>客户确认接受</h2>
+      <p>入口：公开报价右侧“接受报价”。用途：确认金额、身份和 PO 信息并锁定接受记录。</p>
+      <a href="screenshots/42-buyer-accept.jpg"><img loading="lazy" src="screenshots/42-buyer-accept.jpg" alt="客户确认接受"></a>
+    </article><article class="card" id="43-buyer-room-mobile">
+      <div class="meta"><span>43</span><code>/q/AD7H77Ksq-wUgMyUakT6H0oAEVA85ioTAx6cEuYXDhY</code></div>
+      <h2>客户公开报价·移动端</h2>
+      <p>入口：客户在手机打开公开链接。用途：验证内容阅读、底部金额和接受/修改动作不遮挡正文。</p>
+      <a href="screenshots/43-buyer-room-mobile.jpg"><img loading="lazy" src="screenshots/43-buyer-room-mobile.jpg" alt="客户公开报价·移动端"></a>
+    </article><article class="card" id="44-quote-pdf-page1">
+      <div class="meta"><span>44</span><code>exports/quote-v2.pdf</code></div>
+      <h2>正式 PDF 报价单</h2>
+      <p>入口：版本与导出 → PDF。用途：销售下载或发送给客户的固定版本文件；本图直接渲染真实导出文件第一页。</p>
+      <a href="screenshots/44-quote-pdf-page1.png"><img loading="lazy" src="screenshots/44-quote-pdf-page1.png" alt="正式 PDF 报价单"></a>
+    </article><article class="card" id="45-buyer-pdf-page1">
+      <div class="meta"><span>45</span><code>exports/buyer-room-quote-v2.pdf</code></div>
+      <h2>客户页面下载的 PDF</h2>
+      <p>入口：客户公开报价页面 → 下载 PDF。用途：客户自行留档；内容与当前正式版本一致，本图直接渲染真实下载文件。</p>
+      <a href="screenshots/45-buyer-pdf-page1.png"><img loading="lazy" src="screenshots/45-buyer-pdf-page1.png" alt="客户页面下载的 PDF"></a>
+    </article><article class="card" id="46-quote-excel-preview">
+      <div class="meta"><span>46</span><code>exports/quote-v2.xlsx</code></div>
+      <h2>正式 Excel 报价单</h2>
+      <p>入口：版本与导出 → Excel。用途：向需要表格文件的客户交付；截图内容由真实 .xlsx 文件读取并呈现。</p>
+      <a href="screenshots/46-quote-excel-preview.jpg"><img loading="lazy" src="screenshots/46-quote-excel-preview.jpg" alt="正式 Excel 报价单"></a>
+    </article></main></body></html>

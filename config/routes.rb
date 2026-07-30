@@ -11,6 +11,7 @@ Rails.application.routes.draw do
   get "q/:token", to: "buyer_rooms#show", as: :buyer_room
   scope "q/:token", as: :buyer_room do
     get "quote.pdf", to: "buyer_rooms#pdf", as: :pdf
+    post "reply", to: "buyer_rooms#reply", as: :reply
     post "questions", to: "buyer_rooms#question", as: :questions
     post "request-changes", to: "buyer_rooms#request_changes", as: :request_changes
     post "accept", to: "buyer_rooms#accept", as: :accept
@@ -85,7 +86,11 @@ Rails.application.routes.draw do
   end
   resources :inquiries, only: %i[new create show update] do
     resources :inquiry_messages, only: :create
-    member { post :build_quote }
+    member do
+      post :build_quote
+      post :analyze_chat
+      get :chat_analysis
+    end
   end
   resources :quote_revisions, only: %i[show create]
   resources :notifications, only: [] do

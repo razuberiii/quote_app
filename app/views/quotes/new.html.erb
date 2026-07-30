@@ -1,15 +1,48 @@
-<main class="deal-workspace quote-start">
-  <header class="deal-page-header">
-    <div><p class="eyebrow"><%= t("self_service.quote_core.start.eyebrow") %></p><h1><%= t("self_service.quote_core.start.title") %></h1><p><%= t("self_service.quote_core.start.help") %></p></div>
-    <%= link_to t("self_service.quote_core.start.ai_action"), new_inquiry_path, class: "button button--secondary" %>
+<main class="deal-workspace quote-start quote-start--intake">
+  <header class="quote-home__bar">
+    <div>
+      <%= link_to "返回报价", quotes_path, class: "deal-back" %>
+      <h1>新建报价</h1>
+    </div>
+    <%= link_to "粘贴邮件或上传文件", new_inquiry_path, class: "button button--primary" %>
   </header>
-  <% if @errors.present? %><div class="quote-start__errors" role="alert"><strong><%= t("self_service.quote_core.start.error_title") %></strong><p><%= @errors.to_sentence %></p></div><% end %>
-  <section class="quote-start__workspace">
-    <div class="quote-start__intro"><span>01</span><h2><%= t("self_service.quote_core.start.buyer_title") %></h2><p><%= t("self_service.quote_core.start.buyer_help") %></p></div>
+
+  <% if @errors.present? %><div class="quote-start__errors" role="alert"><strong>还不能创建</strong><p><%= @errors.to_sentence %></p></div><% end %>
+
+  <section class="quote-start__workspace quote-start__workspace--split">
+    <div class="quote-start__intro">
+      <span>01</span>
+      <h2>客户给了你什么？</h2>
+      <p>有邮件、聊天记录、附件时，直接用左上角入口让系统先识别客户需求。已经知道客户和商品时，可以在这里手工创建草稿。</p>
+      <div class="quote-start__choices">
+        <%= link_to "粘贴邮件或聊天", new_inquiry_path, class: "button button--secondary" %>
+        <%= link_to "上传客户文件", new_inquiry_path, class: "button button--secondary" %>
+        <%= link_to "从商品库添加", library_path, class: "button button--secondary" %>
+      </div>
+    </div>
+
     <%= form_with scope: :blank_quote, url: quotes_path, class: "quote-start__form" do |form| %>
-      <% if @customers.any? %><label class="quote-start__field"><span><%= t("self_service.quote_core.start.existing_customer") %></span><%= form.select :customer_id, [[t("self_service.quote_core.start.new_customer"), ""]] + @customers.map { |customer| [customer.name, customer.id] }, { selected: @selected_customer_id }, class: "input" %><small><%= t("self_service.quote_core.start.existing_help") %></small></label><% end %>
-      <fieldset class="quote-start__new-customer"><legend><%= t("self_service.quote_core.start.new_customer_details") %></legend><label><span><%= t("self_service.quote_core.start.company_name") %></span><%= form.text_field :customer_name, class: "input", placeholder: t("self_service.quote_core.start.company_placeholder") %></label><label><span><%= t("self_service.quote_core.start.contact_name") %></span><%= form.text_field :contact_name, class: "input" %></label><label><span><%= t("self_service.quote_core.start.email") %></span><%= form.email_field :customer_email, class: "input" %></label></fieldset>
-      <footer><div><strong><%= t("self_service.quote_core.start.next_title") %></strong><small><%= t("self_service.quote_core.start.next_help") %></small></div><%= form.submit t("self_service.quote_core.start.submit"), class: "button button--primary" %></footer>
+      <%= form.hidden_field :source_quote_id, value: @source_quote&.id %>
+      <% if @source_quote %>
+        <div class="quote-start__source">
+          <strong>从历史报价复制</strong>
+          <span><%= @source_quote.quote_no %> · <%= @source_quote.title %></span>
+        </div>
+      <% end %>
+      <% if @customers.any? %>
+        <label class="quote-start__field">
+          <span>搜索客户</span>
+          <%= form.select :customer_id, [["新建客户", ""]] + @customers.map { |customer| [customer.name, customer.id] }, { selected: @selected_customer_id || @source_quote&.customer_id }, class: "input" %>
+          <small>客户资料不会作为主模块出现，但报价里仍然可以搜索、创建和打开客户资料。</small>
+        </label>
+      <% end %>
+      <fieldset class="quote-start__new-customer">
+        <legend>新客户资料</legend>
+        <label><span>公司名称</span><%= form.text_field :customer_name, class: "input", placeholder: "例如 Acme Trading LLC" %></label>
+        <label><span>联系人</span><%= form.text_field :contact_name, class: "input" %></label>
+        <label><span>邮箱</span><%= form.email_field :customer_email, class: "input" %></label>
+      </fieldset>
+      <footer><div><strong>下一步进入报价工作区</strong><small>缺失项可以稍后在右栏处理，不需要一次填完。</small></div><%= form.submit "创建报价草稿", class: "button button--primary" %></footer>
     <% end %>
   </section>
 </main>

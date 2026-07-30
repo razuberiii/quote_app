@@ -39,12 +39,17 @@ export class ApiClient {
 
   async request(path, options = {}) {
     const token = options.authenticated === false ? null : await this.runtime.auth.getToken()
+    const method = options.method || "GET"
+    const separator = path.includes("?") ? "&" : "?"
+    const requestPath = method === "GET" ? `${path}${separator}_=${Date.now()}` : path
     const response = await this.runtime.http.request({
-      url: `${this.apiBase}${path}`,
-      method: options.method || "GET",
+      url: `${this.apiBase}${requestPath}`,
+      method,
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+        Pragma: "no-cache",
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: options.body ? JSON.stringify(options.body) : null

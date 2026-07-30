@@ -5,9 +5,8 @@ module DealsHelper
 
   def quote_action_path(quote, lifecycle)
     case lifecycle.action
-    when "complete", "revise" then edit_quote_path(quote)
-    when "send" then quote_path(quote, tab: "versions")
-    when "reply", "review" then quote_path(quote, tab: "activity")
+    when "complete", "revise", "reply", "review" then quote_path(quote)
+    when "send" then preview_quote_path(quote)
     else quote_path(quote)
     end
   end

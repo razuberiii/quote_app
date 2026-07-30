@@ -41,7 +41,7 @@ class ChatReadinessAnalysis
       "conflictingRequirements" => conflicts.map { |key| { "key" => key } },
       "requirementChanges" => recent_changes,
       "suggestedNextActions" => next_actions(status),
-      "suggestedQuestions" => InquiryClarificationPrompt.new(@inquiry).call,
+      "suggestedQuestions" => InquiryClarificationPrompt.new(@inquiry).questions,
       "canGenerateDraft" => preliminary && conflicts.empty?,
       "analysisVersion" => "chat-readiness-v1",
       "analyzedMessageCursor" => cursor,

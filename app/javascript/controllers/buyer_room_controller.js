@@ -1,19 +1,39 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["questionDialog", "changesDialog", "acceptDialog", "questionContext", "plan", "quantity", "accessory", "total", "selectionCopy"]
+  static targets = ["questionDialog", "changesDialog", "replyDialog", "replyContext", "replyContextType", "replyKind", "acceptDialog", "questionContext", "plan", "quantity", "accessory", "total", "selectionCopy"]
   static values = { currency: String, shipping: Number, tax: Number, discount: Number }
 
   connect() { this.recalculate() }
   openQuestion(event) {
     const context = event.currentTarget.dataset.context || "quote"
+    if (this.hasReplyDialogTarget) {
+      this.syncSelectionForms()
+      this.replyContextTarget.value = context.split(":").slice(1).join(":")
+      this.replyContextTypeTarget.value = context.split(":")[0]
+      this.replyKindTargets.forEach(input => { input.checked = input.value === "question" })
+      this.replyDialogTarget.querySelector(".dialog-context").textContent = event.currentTarget.dataset.contextLabel || "Entire quotation"
+      this.replyDialogTarget.showModal()
+      return
+    }
     this.questionContextTarget.value = context
     this.questionDialogTarget.querySelector("[name=context_type]").value = context.split(":")[0]
     this.questionDialogTarget.querySelector("[name=context_key]").value = context.split(":").slice(1).join(":")
     this.questionDialogTarget.querySelector(".dialog-context").textContent = event.currentTarget.dataset.contextLabel || "Entire quotation"
     this.questionDialogTarget.showModal()
   }
-  openChanges() { this.syncSelectionForms(); this.changesDialogTarget.showModal() }
+  openChanges() {
+    this.syncSelectionForms()
+    if (this.hasReplyDialogTarget) {
+      this.replyContextTarget.value = "quote"
+      this.replyContextTypeTarget.value = "quote"
+      this.replyKindTargets.forEach(input => { input.checked = input.value === "change" })
+      this.replyDialogTarget.querySelector(".dialog-context").textContent = "Entire quotation"
+      this.replyDialogTarget.showModal()
+      return
+    }
+    this.changesDialogTarget.showModal()
+  }
   openAccept() { this.syncSelectionForms(); this.acceptDialogTarget.showModal() }
   close(event) { event.currentTarget.closest("dialog").close() }
   selectPlan(event) {

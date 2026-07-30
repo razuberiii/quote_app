@@ -15,6 +15,9 @@ export default class extends Controller {
       const payload = await response.json()
       this.codeTarget.textContent = payload.code
       this.resultTarget.hidden = false
+    } catch (_error) {
+      this.codeTarget.textContent = this.element.dataset.chatPairingErrorMessage
+      this.resultTarget.hidden = false
     } finally {
       this.buttonTarget.disabled = false
     }

@@ -1,6 +1,6 @@
 class InquiriesController < ApplicationController
   before_action :authenticate_user!
-  before_action :load_inquiry, only: %i[show update build_quote]
+  before_action :load_inquiry, only: %i[show update build_quote analyze_chat chat_analysis]
 
   def index
     @inquiries = current_user.company.inquiries.order(created_at: :desc)
@@ -39,6 +39,26 @@ class InquiriesController < ApplicationController
     @clarification_questions = InquiryClarificationPrompt.new(@inquiry).questions
     @messages = @inquiry.inquiry_messages.to_a
     @message = @inquiry.inquiry_messages.new(direction: "buyer", channel: "email")
+    load_chat_analysis
+  end
+
+  def analyze_chat
+    binding = latest_chat_binding
+    return redirect_to(@inquiry, alert: "这个客户需求还没有绑定聊天记录。") unless binding
+
+    ChatConversationAnalysisScheduler.new(binding).call
+    redirect_to inquiry_path(@inquiry, anchor: "conversation"), notice: "分析已开始，完成后页面会自动更新。"
+  rescue ChatConversationAnalysisScheduler::NoMessages
+    redirect_to @inquiry, alert: "还没有可分析的聊天消息。"
+  end
+
+  def chat_analysis
+    binding = latest_chat_binding
+    render json: {
+      status: binding&.analysis_result&.fetch("status", "idle") || "idle",
+      result: binding&.analysis_result || {},
+      messageCount: binding&.chat_captured_messages&.count || 0
+    }
   end
 
   def update
@@ -83,6 +103,16 @@ class InquiriesController < ApplicationController
 
   def load_inquiry
     @inquiry = current_user.company.inquiries.find(params[:id])
+  end
+
+  def latest_chat_binding
+    @latest_chat_binding ||= current_user.company.chat_conversation_bindings
+      .where(inquiry_id: @inquiry.id).order(updated_at: :desc).first
+  end
+
+  def load_chat_analysis
+    @chat_binding = latest_chat_binding
+    @chat_analysis = @chat_binding&.analysis_result.to_h
   end
 
   def inquiry_params

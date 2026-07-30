@@ -1,5 +1,6 @@
 zh-CN:
   chat_sync:
+    settings_nav: 聊天同步
     eyebrow: 网页聊天同步
     title: 自动采集已绑定的客户会话
     help: 在 WhatsApp Web 和 Alibaba 国际站中增量采集已显示的消息，并同步到对应询盘。未授权的网站和未绑定的会话不会上传。
@@ -8,6 +9,7 @@ zh-CN:
     pair_help: 生成一次性绑定码，然后在聊天页面的 Rubusoo 浮窗中输入。绑定码 10 分钟内有效且只能使用一次。
     generate_code: 生成绑定码
     code_ready: 在聊天浮窗中输入此绑定码
+    code_failed: 生成失败，请刷新页面后重试
     supported: 支持的网站
     platforms: { whatsapp: WhatsApp Web, alibaba: Alibaba 国际站消息中心 }
     privacy_title: 采集边界

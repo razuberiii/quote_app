@@ -3,7 +3,28 @@
 <main class="rubusoo-page inquiry-review" data-controller="intake-motion inquiry-review">
   <header class="inquiry-review__header">
     <div><p class="eyebrow"><%= t("self_service.review.eyebrow") %></p><h1><%= t("self_service.review.title") %></h1><p><%= t("self_service.review.description") %></p></div>
-    <div class="inquiry-review__status"><span class="status-dot"></span><strong><%= t("self_service.review.saved") %></strong><small><%= t("self_service.review.saved_ago", time: time_ago_in_words(@inquiry.updated_at)) %></small></div>
+    <div class="inquiry-review__status chat-analysis-status"
+      data-controller="chat-analysis"
+      data-chat-analysis-url-value="<%= chat_analysis_inquiry_path(@inquiry) %>"
+      data-chat-analysis-status-value="<%= @chat_analysis&.fetch("status", "idle") || "idle" %>">
+      <span class="status-dot <%= "is-processing" if @chat_analysis&.fetch("status", nil) == "queued" %>"></span>
+      <strong>
+        <% if @chat_analysis&.fetch("status", nil) == "complete" %>
+          AI 分析 <%= @chat_analysis["readinessScore"] %>%
+        <% elsif @chat_analysis&.fetch("status", nil) == "queued" %>
+          正在分析客户需求
+        <% elsif @chat_analysis&.fetch("status", nil) == "failed" %>
+          上次分析失败
+        <% else %>
+          <%= @chat_binding ? "聊天记录已连接" : t("self_service.review.saved") %>
+        <% end %>
+      </strong>
+      <small><%= @chat_binding ? "已采集 #{@chat_binding.chat_captured_messages.count} 条消息" : t("self_service.review.saved_ago", time: time_ago_in_words(@inquiry.updated_at)) %></small>
+      <% if @chat_binding && @chat_analysis&.fetch("status", nil) != "queued" %>
+        <%= button_to(@chat_analysis&.fetch("status", nil) == "complete" ? "重新分析" : "分析客户需求",
+          analyze_chat_inquiry_path(@inquiry), class: "button button--secondary chat-analysis-status__button") %>
+      <% end %>
+    </div>
   </header>
 
   <section class="review-guidance" aria-labelledby="review-next-step">

@@ -8,6 +8,7 @@
       <%= link_to t("settings.company"), edit_company_settings_path, class: ("is-active" if section == :company) %>
       <%= link_to t("settings.document_design"), edit_document_design_path, class: ("is-active" if section == :document_design) %>
     <% end %>
+    <%= link_to t("chat_sync.settings_nav"), chat_integration_path, class: ("is-active" if section == :chat_integration) %>
     <% if current_user.can_manage_team? %>
       <%= link_to t("settings.team"), team_members_path, class: ("is-active" if section == :team) %>
     <% end %>

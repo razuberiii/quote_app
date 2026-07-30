@@ -11,8 +11,8 @@ class DealWorkspaceControllerTest < ActionDispatch::IntegrationTest
 
     get quote_path(quotes(:one))
     assert_response :success
-    assert_select ".deal-primary-action"
-    assert_select ".quote-core-tabs a", text: I18n.t("self_service.quote_core.detail.tabs.activity")
+    assert_select ".quote-workspace"
+    assert_select ".studio-actions a[href='#{preview_quote_path(quotes(:one))}']", text: /预览并发送|发布新版本/
 
     get library_path
     assert_response :success

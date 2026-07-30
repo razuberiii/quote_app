@@ -1,10 +1,12 @@
+<%= render "shared/settings_header", title: t("chat_sync.title"), section: :chat_integration %>
+
 <main class="deal-workspace chat-sync-setup">
   <header class="deal-page-header">
     <div><p class="eyebrow"><%= t("chat_sync.eyebrow") %></p><h1><%= t("chat_sync.title") %></h1><p><%= t("chat_sync.help") %></p></div>
-    <%= link_to t("chat_sync.install"), "/integrations/rubusoo-chat-sync.user.js", class: "button button--primary", data: { turbo: false } %>
+    <%= link_to t("chat_sync.install"), "/integrations/rubusoo-chat-sync.user.js?v=0.1.6", class: "button button--primary", data: { turbo: false } %>
   </header>
   <div class="chat-sync-setup__grid">
-    <section data-controller="chat-pairing" data-chat-pairing-url-value="<%= pairing_code_chat_integration_path %>">
+    <section data-controller="chat-pairing" data-chat-pairing-url-value="<%= pairing_code_chat_integration_path %>" data-chat-pairing-error-message="<%= t("chat_sync.code_failed") %>">
       <span>01</span><h2><%= t("chat_sync.pair_title") %></h2><p><%= t("chat_sync.pair_help") %></p>
       <button class="button button--secondary" type="button" data-action="chat-pairing#create" data-chat-pairing-target="button"><%= t("chat_sync.generate_code") %></button>
       <div class="chat-sync-code" data-chat-pairing-target="result" hidden><small><%= t("chat_sync.code_ready") %></small><strong data-chat-pairing-target="code"></strong></div>

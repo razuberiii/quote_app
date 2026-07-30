@@ -1,27 +1,88 @@
-<main class="deal-workspace quote-core-index">
-  <header class="deal-page-header">
-    <div><p class="eyebrow"><%= t("self_service.quote_core.index.eyebrow") %></p><h1><%= t("self_service.quote_core.index.title") %></h1><p><%= t("self_service.quote_core.index.subtitle") %></p></div>
-    <div class="quote-core-header-actions"><%= link_to t("self_service.quote_core.index.ai_import"), new_inquiry_path, class: "button button--secondary" %><%= link_to t("self_service.quote_core.index.new"), new_quote_path, class: "button button--primary" %></div>
+<main class="deal-workspace quote-core-index quote-home">
+  <header class="quote-home__bar">
+    <h1>报价</h1>
+    <%= link_to "新建报价", new_quote_path, class: "button button--primary" %>
   </header>
 
-  <form class="quote-core-filters" method="get">
-    <label><span><%= t("self_service.quote_core.index.search") %></span><input type="search" name="q" value="<%= params[:q] %>" placeholder="<%= t('self_service.quote_core.index.search_placeholder') %>"></label>
-    <nav aria-label="<%= t('self_service.quote_core.index.filters') %>">
-      <% %w[all draft sent viewed changes accepted expired].each do |status| %><%= link_to t("self_service.quote_core.index.statuses.#{status}"), quotes_path(q: params[:q], status: (status unless status == "all")), class: ("is-active" if (params[:status].presence || "all") == status) %><% end %>
+  <form class="quote-core-filters quote-home__filters" method="get">
+    <label>
+      <span>搜索</span>
+      <input type="search" name="q" value="<%= params[:q] %>" placeholder="搜索报价、客户、商品">
+    </label>
+    <nav aria-label="报价状态">
+      <% [
+        ["all", "全部"],
+        ["draft", "草稿"],
+        ["sent", "等待客户"],
+        ["changes", "客户有反馈"],
+        ["accepted", "已接受"],
+        ["expired", "已结束"]
+      ].each do |status, label| %>
+        <%= link_to label, quotes_path(q: params[:q], status: (status unless status == "all")),
+          class: ("is-active" if (params[:status].presence || "all") == status) %>
+      <% end %>
     </nav>
   </form>
 
-  <section class="quote-core-list">
-    <header><span><%= t("self_service.quote_core.index.columns.quote") %></span><span><%= t("self_service.quote_core.index.columns.customer") %></span><span><%= t("self_service.quote_core.index.columns.amount") %></span><span><%= t("self_service.quote_core.index.columns.status") %></span><span><%= t("self_service.quote_core.index.columns.next") %></span></header>
+  <section class="quote-core-list quote-home__list">
+    <header>
+      <span>报价名称</span>
+      <span>客户</span>
+      <span>金额</span>
+      <span>版本</span>
+      <span>更新时间</span>
+      <span>状态</span>
+      <span></span>
+    </header>
     <% @quote_rows.each do |quote, lifecycle| %>
-      <article>
-        <%= link_to quote_path(quote), class: "quote-core-identity" do %><small><%= quote.quote_no %></small><strong><%= deal_title(quote) %></strong><span><%= t("self_service.quote_core.index.updated", time: time_ago_in_words(quote.updated_at)) %></span><% end %>
-        <div class="quote-core-customer"><strong><%= quote.customer&.name || t("self_service.quote_core.index.customer_missing") %></strong><span><%= quote.customer&.contact_name.presence || quote.customer&.email %></span></div>
+      <% latest_revision = quote.quote_revisions.where.not(published_at: nil).ordered.first %>
+      <% customer_link = latest_revision ? buyer_room_url(latest_revision.secure_token) : nil %>
+      <article class="<%= "has-attention" if lifecycle.attention %>">
+        <%= link_to quote_path(quote), class: "quote-core-identity" do %>
+          <small><%= quote.quote_no %></small>
+          <strong><%= deal_title(quote) %></strong>
+          <span><%= lifecycle.signal %></span>
+        <% end %>
+        <div class="quote-core-customer">
+          <% if quote.customer.present? %>
+            <%= link_to quote.customer.name, customer_path(quote.customer) %>
+            <span><%= quote.customer.contact_name.presence || quote.customer.email %></span>
+          <% else %>
+            <strong><%= t("self_service.quote_core.index.customer_missing") %></strong>
+          <% end %>
+        </div>
         <strong class="quote-core-amount"><%= quote.currency %> <%= number_with_delimiter(quote.grand_total) %></strong>
-        <div class="quote-core-state"><span class="quote-state quote-state--<%= lifecycle.state %>"><i></i><%= lifecycle.label %></span><small><%= lifecycle.signal %></small></div>
-        <%= link_to lifecycle.action_label, quote_action_path(quote, lifecycle), class: "deal-next" %>
+        <span class="quote-core-version"><%= latest_revision ? "V#{latest_revision.number}" : "草稿" %></span>
+        <span class="quote-core-time"><%= time_ago_in_words(quote.updated_at) %>前</span>
+        <div class="quote-core-state">
+          <span class="quote-state quote-state--<%= lifecycle.state %>"><i></i><%= lifecycle.label %></span>
+          <small><%= lifecycle.attention ? "需要处理" : "正常" %></small>
+        </div>
+        <div class="quote-row-actions">
+          <%= link_to lifecycle.action_label, quote_action_path(quote, lifecycle), class: "deal-next" %>
+          <details class="quote-row-menu">
+            <summary>...</summary>
+            <div>
+              <%= link_to "复制报价", new_quote_path(source_quote_id: quote.id) %>
+              <% if customer_link %>
+                <button type="button"
+                  data-controller="clipboard"
+                  data-clipboard-text-value="<%= customer_link %>"
+                  data-clipboard-success-message-value="客户链接已复制"
+                  data-action="clipboard#copy">复制客户链接</button>
+              <% end %>
+              <%= link_to "记录线下接受", new_acceptance_quote_path(quote, version_id: latest_revision&.id) if latest_revision && !quote.quote_acceptance %>
+            </div>
+          </details>
+        </div>
       </article>
     <% end %>
-    <% if @quote_rows.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.index.empty") %></h2><p><%= t("self_service.quote_core.index.empty_help") %></p><div class="deal-zero__actions"><%= link_to t("self_service.quote_core.index.new"), new_quote_path, class: "button button--primary" %><%= link_to t("self_service.quote_core.index.ai_import"), new_inquiry_path, class: "button button--secondary" %></div></div><% end %>
+    <% if @quote_rows.empty? %>
+      <div class="deal-zero quote-home__empty">
+        <h2>还没有报价</h2>
+        <p>点击右上角新建报价，可以粘贴客户邮件、上传文件，或从客户和商品资料手工创建。</p>
+        <div class="deal-zero__actions"><%= link_to "新建报价", new_quote_path, class: "button button--primary" %></div>
+      </div>
+    <% end %>
   </section>
 </main>

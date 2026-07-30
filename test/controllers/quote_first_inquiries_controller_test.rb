@@ -35,7 +35,7 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     assert_equal "processing", response.parsed_body["status"]
   end
 
-  test "saving a quote returns to Studio with a rendered save time" do
+  test "saving a quote returns to the workspace with automatic save confirmation" do
     customer = @user.company.customers.create!(name: "Save Feedback Buyer")
     quote = @user.company.quotes.new(customer:, currency: "USD", status: "draft", issued_on: Date.current)
     quote.quote_items.build(description: "Model A cart", quantity: 12, unit_price: 500)
@@ -43,10 +43,10 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
 
     patch quote_path(quote), params: { quote: { currency: "USD", notes: "Updated draft" } }
 
-    assert_redirected_to edit_quote_path(quote, saved: 1)
+    assert_redirected_to quote_path(quote, saved: 1)
     follow_redirect!
     assert_response :success
-    assert_select ".studio-save-state.is-saved", text: /已保存 · \d{2}:\d{2}/
+    assert_select ".studio-save-state.is-saved", text: /已自动保存/
   end
 
   test "a manually added unpriced product can be saved as a draft" do
@@ -62,13 +62,13 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
       } } }
     end
 
-    assert_redirected_to edit_quote_path(quote, saved: 1)
+    assert_redirected_to quote_path(quote, saved: 1)
     added = quote.reload.quote_items.find_by!(description: "Manual spare part")
     assert_equal 0.to_d, added.unit_price
     assert_equal "unpriced", added.price_source
   end
 
-  test "customer preview continues to the single publish check instead of publishing directly" do
+  test "customer preview includes the unified publish action" do
     customer = @user.company.customers.create!(name: "Preview Buyer")
     quote = @user.company.quotes.create!(customer:, currency: "USD", status: "draft", issued_on: Date.current,
       valid_until: 30.days.from_now.to_date, payment_term: "30% deposit", trade_term: "EXW",
@@ -77,8 +77,10 @@ class QuoteFirstInquiriesControllerTest < ActionDispatch::IntegrationTest
     get preview_quote_path(quote)
 
     assert_response :success
-    assert_select ".seller-preview-bar a[href='#{publish_quote_path(quote)}']", text: /继续发布/
-    assert_select ".seller-preview-bar form[action='#{quote_revisions_path(quote_id: quote.id)}']", count: 0
+    assert_select ".seller-preview-bar form", 1 do
+      assert_select "button", text: /发布并复制链接/
+    end
+    assert_select ".seller-preview-bar a[href='#{quote_path(quote)}']", text: /返回编辑/
   end
 
   test "empty Library does not block a multi item Working draft" do

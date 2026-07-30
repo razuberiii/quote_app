@@ -12,7 +12,10 @@ class ChatMessageIngestor
     @messages.each do |payload|
       fingerprint = stable_fingerprint(payload)
       captured = @binding.chat_captured_messages.find_or_initialize_by(fingerprint:)
-      next if captured.persisted?
+      if captured.persisted?
+        accepted << captured if reconcile_direction(captured, payload)
+        next
+      end
 
       captured.assign_attributes(captured_attributes(payload, fingerprint))
       InquiryMessage.transaction do
@@ -49,9 +52,30 @@ class ChatMessageIngestor
       message_type: payload["type"].presence_in(ChatCapturedMessage::MESSAGE_TYPES) || "unknown",
       text: payload["text"].to_s.first(50_000), quoted_text: payload["quotedText"].to_s.first(10_000),
       attachment_name: payload["attachmentName"].to_s.first(500),
-      source_metadata: payload["sourceMetadata"].to_h.slice("visibleTimestamp", "deliveryState", "productId", "adapter"),
+      source_metadata: source_metadata(payload["sourceMetadata"]),
       parser_version: payload["parserVersion"].to_s.first(80).presence || "unknown"
     }
+  end
+
+  def reconcile_direction(captured, payload)
+    direction = payload["direction"].presence_in(%w[customer sales])
+    return false unless direction
+    return false if captured.direction == direction
+
+    captured.update!(
+      direction:,
+      parser_version: payload["parserVersion"].to_s.first(80).presence || captured.parser_version
+    )
+    captured.inquiry_message&.update!(direction: direction == "sales" ? "seller" : "buyer")
+    true
+  end
+
+  def source_metadata(value)
+    allowed = %w[visibleTimestamp deliveryState productId adapter]
+    return value.permit(*allowed).to_h if value.respond_to?(:permit)
+    return value.to_h.stringify_keys.slice(*allowed) if value.respond_to?(:to_h)
+
+    {}
   end
 
   def create_inquiry_message(payload)

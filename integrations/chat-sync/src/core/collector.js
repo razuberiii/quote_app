@@ -8,6 +8,7 @@ export class Collector {
     this.queue = queue
     this.onMessages = onMessages
     this.disposed = false
+    this.poller = null
   }
 
   async start() {
@@ -15,6 +16,7 @@ export class Collector {
     await this.queue.load()
     await this.collect()
     this.adapter.observeConversationChanges(() => this.collect())
+    this.poller = setInterval(() => this.collect(), 2500)
   }
 
   async collect() {
@@ -30,6 +32,7 @@ export class Collector {
 
   dispose() {
     this.disposed = true
+    clearInterval(this.poller)
     this.queue.dispose()
     this.adapter.dispose()
   }

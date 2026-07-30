@@ -3,7 +3,7 @@ import { BaseAdapter } from "./base-adapter.js"
 export class AlibabaAdapter extends BaseAdapter {
   getPlatform() { return "alibaba" }
   isSupportedPage() {
-    return /(^|\.)alibaba\.com$/.test(location.hostname) && /message|inquiry|chat|contact/i.test(location.href)
+    return /(^|\.)alibaba\.com$/.test(location.hostname)
   }
 
   getCurrentAccount() {

@@ -11,7 +11,10 @@ import { FloatingPanel } from "../ui/floating-panel.js"
 
 const runtime = new TampermonkeyRuntime()
 const adapter = [new WhatsAppAdapter(), new AlibabaAdapter()].find(candidate => candidate.isSupportedPage())
-if (adapter) start().catch(error => console.warn("[Rubusoo] startup failed", error.message))
+if (window.top === window.self && !window.__rubusooChatSyncLoaded && adapter) {
+  window.__rubusooChatSyncLoaded = true
+  start().catch(error => console.warn("[Rubusoo] startup failed", error.message))
+}
 
 async function start() {
   const api = new ApiClient(runtime, CONFIG.apiBase)
@@ -58,11 +61,21 @@ async function start() {
 
   async function refresh(force = false) {
     const consent = await runtime.storage.get(`consent:${adapter.getPlatform()}:${location.hostname}`, false)
-    if (!consent) return panel.update({ mode: "consent" })
-    if (!await runtime.auth.getToken()) return panel.update({ mode: "pair" })
+    if (!consent) {
+      if (panel.state.mode !== "consent") panel.update({ mode: "consent" })
+      return
+    }
+    if (!await runtime.auth.getToken()) {
+      if (panel.state.mode !== "pair") panel.update({ mode: "pair" })
+      return
+    }
     const conversation = adapter.getCurrentConversation()
-    if (!conversation) return panel.update({ mode: "no-conversation" })
+    if (!conversation) {
+      if (panel.state.mode !== "no-conversation") panel.update({ mode: "no-conversation" })
+      return
+    }
     if (!force && conversation.id === lastConversationId && active) return
+    if (!force && conversation.id === lastConversationId && panel.state.mode === "binding") return
     disposeActive()
     lastConversationId = conversation.id
     const account = adapter.getCurrentAccount()
@@ -85,7 +98,8 @@ async function start() {
       runtime, api, binding, config: CONFIG,
       onStatus: sync => panel.update({ sync })
     })
-    const deduplicator = new Deduplicator(runtime, `${binding.id}`)
+    const parserGeneration = adapter.getPlatform() === "whatsapp" ? "whatsapp-v2" : "v1"
+    const deduplicator = new Deduplicator(runtime, `${binding.id}:${parserGeneration}`)
     const analysis = new AnalysisTrigger({
       api, queue, binding, config: CONFIG,
       onResult: result => panel.update({ analysis: result })

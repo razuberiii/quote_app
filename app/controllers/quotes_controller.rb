@@ -1,6 +1,6 @@
 class QuotesController < ApplicationController
   before_action :set_quote, except: %i[index new create]
-  before_action :set_form_context, only: %i[edit update]
+  before_action :set_form_context, only: %i[show edit update]
   before_action :set_seller_locale, only: :preview
   before_action :use_buyer_locale, only: :preview
 
@@ -21,27 +21,35 @@ class QuotesController < ApplicationController
   def new
     @customers = current_user.company.customers.order(:name)
     @selected_customer_id = params[:customer_id].presence
+    @source_quote = current_user.company.quotes.not_archived.find_by(id: params[:source_quote_id])
   end
 
   def create
     @customers = current_user.company.customers.order(:name)
     @selected_customer_id = blank_quote_params[:customer_id].presence
     company = current_user.company
+    source_quote = company.quotes.not_archived.find_by(id: blank_quote_params[:source_quote_id])
     customer = if @selected_customer_id
       company.customers.find(@selected_customer_id)
+    elsif source_quote
+      source_quote.customer
     else
       company.customers.new(name: blank_quote_params[:customer_name], contact_name: blank_quote_params[:contact_name],
         email: blank_quote_params[:customer_email])
     end
 
-    @quote = company.quotes.new(customer:, currency: company.default_currency,
-      valid_until: (company.default_validity_days.presence || 30).to_i.days.from_now.to_date,
-      payment_term: company.default_payment_term, trade_term: company.default_trade_term)
+    @quote = if source_quote
+      duplicate_quote(source_quote, customer)
+    else
+      company.quotes.new(customer:, currency: company.default_currency,
+        valid_until: (company.default_validity_days.presence || 30).to_i.days.from_now.to_date,
+        payment_term: company.default_payment_term, trade_term: company.default_trade_term)
+    end
     @quote.quote_items.build(description: t("self_service.quote_core.start.placeholder_item"), quantity: 1,
-      unit_price: 0, price_source: "unpriced", selection_mode: "fixed")
+      unit_price: 0, price_source: "unpriced", selection_mode: "fixed") unless @quote.quote_items.any?
 
     if customer.valid? && @quote.save
-      redirect_to edit_quote_path(@quote), notice: t("self_service.quote_core.start.created")
+      redirect_to quote_path(@quote), notice: t("self_service.quote_core.start.created")
     else
       @errors = customer.errors.full_messages + @quote.errors.full_messages
       render :new, status: :unprocessable_entity
@@ -49,6 +57,7 @@ class QuotesController < ApplicationController
   end
 
   def show
+    ensure_item if @quote.can_edit_revision?
     @lifecycle = QuoteLifecycle.new(@quote).call
     @versions = @quote.quote_revisions.where.not(published_at: nil).ordered
     @questions = BuyerQuestion.where(quote_revision_id: @versions.select(:id)).order(created_at: :desc)
@@ -57,14 +66,11 @@ class QuotesController < ApplicationController
     @deliveries = @quote.version_deliveries.order(delivered_at: :desc)
     @activities = @quote.buyer_activities.order(created_at: :desc).limit(40)
     @acceptance = @quote.quote_acceptance
-    @tab = params[:tab].presence_in(%w[quote activity versions]) || "quote"
     @published_revision = @versions.find_by(id: params[:published_revision_id])
   end
 
   def publish
-    @revisions = @quote.quote_revisions.where.not(published_at: nil).ordered
-    @readiness_issues = QuoteReadinessAudit.new(@quote).issues
-    render :publish
+    redirect_to preview_quote_path(@quote)
   end
 
   def reply_question
@@ -95,23 +101,23 @@ class QuotesController < ApplicationController
     @snapshot = snapshot
     @state = "preview"
     @readiness_issues = QuoteReadinessAudit.new(@quote).issues
+    @published_revision = @quote.quote_revisions.find_by(id: params[:published_revision_id])
     render "buyer_rooms/show", layout: "buyer_room"
   end
 
   def edit
-    return redirect_to quote_path(@quote), alert: t("self_service.quote_core.immutable_edit") unless @quote.can_edit_revision?
-    ensure_item
-    @readiness_issues = QuoteReadinessAudit.new(@quote).issues
+    redirect_to quote_path(@quote)
   end
 
   def update
     return redirect_to quote_path(@quote), alert: t("self_service.quote_core.immutable_edit") unless @quote.can_edit_revision?
     @quote.assign_attributes(quote_params)
     if @quote.save
-      redirect_to edit_quote_path(@quote, saved: 1), status: :see_other, notice: t("self_service.quote_core.draft_saved")
+      redirect_to quote_path(@quote, saved: 1), status: :see_other, notice: t("self_service.quote_core.draft_saved")
     else
       ensure_item
-      render :edit, status: :unprocessable_entity
+      show
+      render :show, status: :unprocessable_entity
     end
   end
 
@@ -124,8 +130,7 @@ class QuotesController < ApplicationController
   def quote_status_scope(value)
     {
       "draft" => %w[draft ready pending],
-      "sent" => %w[sent],
-      "viewed" => %w[viewed],
+      "sent" => %w[sent viewed ready],
       "changes" => %w[revision_requested negotiating],
       "accepted" => %w[accepted awaiting_deposit won],
       "expired" => %w[expired archived cancelled lost]
@@ -155,7 +160,21 @@ class QuotesController < ApplicationController
   end
 
   def blank_quote_params
-    params.fetch(:blank_quote, {}).permit(:customer_id, :customer_name, :contact_name, :customer_email)
+    params.fetch(:blank_quote, {}).permit(:customer_id, :customer_name, :contact_name, :customer_email, :source_quote_id)
+  end
+
+  def duplicate_quote(source_quote, customer)
+    copy_attrs = source_quote.attributes.except("id", "quote_no", "revision_number", "status", "studio_state",
+      "source_quote_id", "inquiry_id", "created_at", "updated_at", "sent_at", "viewed_at", "accepted_at",
+      "changes_requested_at", "changes_request_message", "archived_at", "deleted_at")
+    quote = current_user.company.quotes.new(copy_attrs.merge(customer:, status: "draft", studio_state: "draft"))
+    source_quote.quote_items.ordered.each do |item|
+      item_attrs = item.attributes.except("id", "quote_id", "created_at", "updated_at")
+      quote.quote_items.build(item_attrs)
+    end
+    quote.custom_title = "#{source_quote.custom_title.presence || source_quote.title} copy"
+    quote.valid_until = (current_user.company.default_validity_days.presence || 30).to_i.days.from_now.to_date
+    quote
   end
 
   def use_buyer_locale

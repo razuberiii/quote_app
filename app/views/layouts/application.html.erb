@@ -61,18 +61,16 @@
           </button>
           <div class="navbar-drawer">
           <ul class="navbar-menu" id="primary-navigation">
-            <%= ui_nav_link t("nav.quotes"), quotes_path, icon: :quotes %>
-            <%= ui_nav_link t("nav.customers"), customers_path, icon: :customers %>
-            <%= ui_nav_link t("nav.library"), library_path, icon: :products %>
-            <%= ui_nav_link t("nav.settings"), edit_company_settings_path, icon: :team %>
+            <%= ui_nav_link "报价", quotes_path, icon: :quotes %>
+            <%= ui_nav_link "商品库", library_path, icon: :products %>
+            <%= ui_nav_link "设置", edit_company_settings_path, icon: :team %>
             <% if current_user.admin? %>
               <%= ui_nav_link t("nav.admin"), admin_root_path, icon: :admin %>
             <% end %>
           </ul>
           <div class="navbar-controls">
-            <%= link_to t("nav.search"), quotes_path(focus: "search"), class: "app-nav-link neo-global-search" %>
-            <%= link_to t("nav.ai_import"), imports_path, class: "app-nav-link" %>
-            <%= link_to t("nav.new_quote"), new_quote_path, class: "navbar-cta-link" %>
+            <%= link_to "搜索", quotes_path(focus: "search"), class: "app-nav-link neo-global-search" %>
+            <%= link_to "新建报价", new_quote_path, class: "navbar-cta-link" %>
             <div class="account-menu">
                     <button class="account-menu-trigger <%= "is-active" if account_nav_active %>"
                       type="button"

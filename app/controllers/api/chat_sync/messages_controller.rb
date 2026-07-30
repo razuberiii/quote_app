@@ -7,12 +7,12 @@ module Api
 
         request_id = params.require(:requestId).to_s
         existing = binding.chat_sync_requests.find_by(request_id:)
-        return render json: receipt(existing, duplicate: true) if existing
+        return render json: receipt(existing, binding:, duplicate: true) if existing
 
         accepted = ChatMessageIngestor.new(binding:, user: current_user, messages: params[:messages]).call
         request_record = binding.chat_sync_requests.create!(request_id:, accepted_count: accepted.size)
         binding.update!(last_synced_at: Time.current)
-        render json: receipt(request_record, duplicate: false).merge(
+        render json: receipt(request_record, binding:, duplicate: false).merge(
           acceptedLocalIds: accepted.map(&:local_id),
           messageCursor: binding.chat_captured_messages.maximum(:id)
         ), status: :created
@@ -22,10 +22,11 @@ module Api
 
       private
 
-      def receipt(request_record, duplicate:)
+      def receipt(request_record, binding:, duplicate:)
         {
           requestId: request_record.request_id,
           acceptedCount: request_record.accepted_count,
+          messageCount: binding.chat_captured_messages.count,
           duplicateRequest: duplicate
         }
       end

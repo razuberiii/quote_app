@@ -1,15 +1,17 @@
 // ==UserScript==
 // @name         Rubusoo Chat Sync
-// @namespace    https://next.rubusoo.com/
-// @version      0.1.0
+// @namespace    https://quote.rubusoo.com/
+// @version      0.1.6
 // @description  Sync explicitly bound WhatsApp Web and Alibaba conversations to Rubusoo.
 // @match        https://web.whatsapp.com/*
+// @match        https://alibaba.com/*
 // @match        https://*.alibaba.com/*
-// @connect      next.rubusoo.com
+// @connect      quote.rubusoo.com
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        GM_deleteValue
 // @grant        GM_xmlhttpRequest
+// @noframes
 // @grant        GM_openInTab
 // @grant        GM_notification
 // @run-at       document-idle
@@ -18,8 +20,8 @@
 (() => {
   // integrations/chat-sync/src/core/config.js
   var CONFIG = Object.freeze({
-    apiBase: "https://next.rubusoo.com/api/chat_sync",
-    appBase: "https://next.rubusoo.com",
+    apiBase: "https://quote.rubusoo.com/api/chat_sync",
+    appBase: "https://quote.rubusoo.com",
     batchSize: 25,
     flushDelayMs: 1800,
     maxQueueSize: 3e3,
@@ -63,12 +65,17 @@
     }
     async request(path, options = {}) {
       const token = options.authenticated === false ? null : await this.runtime.auth.getToken();
+      const method = options.method || "GET";
+      const separator = path.includes("?") ? "&" : "?";
+      const requestPath = method === "GET" ? `${path}${separator}_=${Date.now()}` : path;
       const response = await this.runtime.http.request({
-        url: `${this.apiBase}${path}`,
-        method: options.method || "GET",
+        url: `${this.apiBase}${requestPath}`,
+        method,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          "Cache-Control": "no-store",
+          Pragma: "no-cache",
           ...token ? { Authorization: `Bearer ${token}` } : {}
         },
         body: options.body ? JSON.stringify(options.body) : null
@@ -142,12 +149,14 @@
       this.queue = queue;
       this.onMessages = onMessages;
       this.disposed = false;
+      this.poller = null;
     }
     async start() {
       await this.deduplicator.load();
       await this.queue.load();
       await this.collect();
       this.adapter.observeConversationChanges(() => this.collect());
+      this.poller = setInterval(() => this.collect(), 2500);
     }
     async collect() {
       if (this.disposed) return;
@@ -161,6 +170,7 @@
     }
     dispose() {
       this.disposed = true;
+      clearInterval(this.poller);
       this.queue.dispose();
       this.adapter.dispose();
     }
@@ -200,6 +210,7 @@
       this.timer = null;
       this.retryCount = 0;
       this.flushing = null;
+      this.uploadedCount = Number(binding.messageCount || 0);
     }
     async load() {
       this.messages = await this.runtime.storage.get(this.key, []);
@@ -230,10 +241,11 @@
     async performFlush() {
       const batch = this.messages.slice(0, this.config.batchSize);
       const requestId = crypto.randomUUID();
-      this.onStatus?.({ state: "syncing", pending: this.messages.length });
+      this.onStatus?.({ state: "syncing", pending: this.messages.length, uploaded: this.uploadedCount });
       try {
-        await this.api.upload(this.binding.id, { requestId, messages: batch });
+        const receipt = await this.api.upload(this.binding.id, { requestId, messages: batch });
         this.messages.splice(0, batch.length);
+        this.uploadedCount = Number(receipt.messageCount ?? this.uploadedCount + Number(receipt.acceptedCount || 0));
         this.retryCount = 0;
         await this.persist();
         this.report("synced");
@@ -250,7 +262,7 @@
       await this.runtime.storage.set(this.key, this.messages);
     }
     report(state = "idle", error = null) {
-      this.onStatus?.({ state, pending: this.messages.length, error });
+      this.onStatus?.({ state, pending: this.messages.length, uploaded: this.uploadedCount, error });
     }
     dispose() {
       clearTimeout(this.timer);
@@ -268,6 +280,7 @@
       this.newCount = 0;
       this.lastCursorKey = `analysis:${binding.id}`;
       this.timer = null;
+      this.running = null;
     }
     note(messages) {
       if (!this.binding.autoAnalysis) return;
@@ -278,10 +291,17 @@
       else this.timer = setTimeout(() => this.run(), this.config.autoAnalysisIdleMs);
     }
     async run() {
+      if (this.running) return this.running;
+      this.running = this.performRun().finally(() => {
+        this.running = null;
+      });
+      return this.running;
+    }
+    async performRun() {
       await this.queue.flush();
       await this.api.analyze(this.binding.id);
       this.newCount = 0;
-      await this.poll();
+      return this.poll();
     }
     async poll() {
       for (let attempt = 0; attempt < 60; attempt += 1) {
@@ -353,41 +373,67 @@
     }
     getCurrentConversation() {
       const header = document.querySelector("#main header");
-      const displayName = header?.querySelector("[title]")?.getAttribute("title") || header?.querySelector("span[dir='auto']")?.textContent?.trim();
+      const title = header?.querySelector(
+        "[data-testid='conversation-info-header-chat-title'], [data-testid='conversation-info-header'] span[dir='auto'][title], div[role='button'] span[dir='auto'][title], span[dir='auto'][title]"
+      );
+      const displayName = title?.getAttribute("title") || title?.textContent?.trim() || header?.querySelector("span[dir='auto']")?.textContent?.trim();
       if (!displayName) return null;
       const native = document.querySelector("#main [data-id]")?.getAttribute("data-id")?.split("_")?.[1];
       return { id: this.stableConversationId(native || displayName), displayName };
     }
     findMessageContainer() {
-      return document.querySelector("#main [role='application']") || document.querySelector("#main div[tabindex='-1']");
+      return document.querySelector("#main");
     }
     parseVisibleMessages() {
-      const nodes = this.findMessageContainer()?.querySelectorAll("[data-id], .message-in, .message-out") || [];
-      return [...new Set(nodes)].map((node) => this.parseMessage(node)).filter(Boolean);
+      const nodes = document.querySelectorAll(
+        "#main [data-pre-plain-text], #main [data-id], #main .message-in, #main .message-out, #main [data-testid*='document'], #main [data-testid*='image'], #main [data-testid*='audio']"
+      );
+      const roots = [...nodes].map((node) => node.closest(".message-in,.message-out,[data-testid='msg-container']") || node.closest("[data-id]") || node.parentElement || node).filter((node) => node.querySelector("[data-pre-plain-text], .selectable-text, [data-testid*='document'], [data-testid*='image'], [data-testid*='audio']"));
+      return [...new Set(roots)].map((node) => this.parseMessage(node)).filter(Boolean);
     }
     parseMessage(node) {
       const root = node.matches(".message-in,.message-out") ? node : node.closest(".message-in,.message-out") || node;
       const text = [...root.querySelectorAll(".selectable-text span, [data-testid='conversation-text']")].map((element) => element.textContent).join(" ").trim();
       const attachment = root.querySelector("[data-testid*='document'], [data-testid*='image'], [data-testid*='audio']");
       if (!text && !attachment) return null;
+      const dataId = root.getAttribute("data-id") || root.querySelector("[data-id]")?.getAttribute("data-id") || "";
+      const direction = inferDirection(root, dataId);
       const pre = root.querySelector("[data-pre-plain-text]")?.getAttribute("data-pre-plain-text") || "";
       const sender = pre.match(/\]\s*([^:]+):/)?.[1];
       const visibleTime = pre.match(/\[([^\]]+)\]/)?.[1];
       const testId = attachment?.getAttribute("data-testid") || "";
       return {
-        platformMessageId: root.getAttribute("data-id") || node.getAttribute("data-id"),
-        direction: root.classList.contains("message-out") ? "sales" : root.classList.contains("message-in") ? "customer" : "unknown",
+        platformMessageId: dataId || null,
+        direction,
         senderName: sender,
         sentAt: parseVisibleTime(visibleTime),
         type: inferType(testId, text),
         text,
         quotedText: root.querySelector("[data-testid='quoted-message']")?.textContent?.trim(),
         attachmentName: root.querySelector("[title][download], [data-testid*='document'] [title]")?.getAttribute("title"),
-        sourceMetadata: { visibleTimestamp: visibleTime, adapter: "whatsapp-v1" },
-        parserVersion: "whatsapp-v1"
+        sourceMetadata: { visibleTimestamp: visibleTime, adapter: "whatsapp-v2" },
+        parserVersion: "whatsapp-v2"
       };
     }
   };
+  function inferDirection(root, dataId) {
+    const directionHost = root.closest(".message-in,.message-out") || root.querySelector(".message-in,.message-out");
+    if (directionHost?.classList.contains("message-out") || dataId.startsWith("true_")) return "sales";
+    if (directionHost?.classList.contains("message-in") || dataId.startsWith("false_")) return "customer";
+    const sentMarker = root.querySelector(
+      "[data-icon='msg-check'], [data-icon='msg-dblcheck'], [data-testid='msg-check'], [data-testid='msg-dblcheck']"
+    );
+    if (sentMarker) return "sales";
+    const main = document.querySelector("#main");
+    const bubbleRect = root.getBoundingClientRect();
+    const mainRect = main?.getBoundingClientRect();
+    if (bubbleRect.width && mainRect?.width) {
+      const bubbleCenter = bubbleRect.left + bubbleRect.width / 2;
+      const mainCenter = mainRect.left + mainRect.width / 2;
+      return bubbleCenter > mainCenter ? "sales" : "customer";
+    }
+    return "unknown";
+  }
   function inferType(testId, text) {
     if (/audio|ptt/.test(testId)) return "audio";
     if (/image|media/.test(testId)) return "image";
@@ -406,7 +452,7 @@
       return "alibaba";
     }
     isSupportedPage() {
-      return /(^|\.)alibaba\.com$/.test(location.hostname) && /message|inquiry|chat|contact/i.test(location.href);
+      return /(^|\.)alibaba\.com$/.test(location.hostname);
     }
     getCurrentAccount() {
       const id = document.querySelector("[data-account-id]")?.getAttribute("data-account-id") || "alibaba-web";
@@ -489,7 +535,7 @@
       })
     };
     openApp(path = "") {
-      GM_openInTab(`https://next.rubusoo.com${path}`, { active: true });
+      GM_openInTab(`https://quote.rubusoo.com${path}`, { active: true });
     }
     notify(text) {
       GM_notification({ title: "Rubusoo", text, timeout: 5e3 });
@@ -533,7 +579,7 @@
       <label>\u6216\u521B\u5EFA\u5BA2\u6237<input data-field="customerName" placeholder="\u5BA2\u6237\u516C\u53F8\u540D\u79F0"></label>
       <button class="primary" data-action="bind">\u7ED1\u5B9A\u5E76\u5F00\u59CB\u540C\u6B65</button>${this.error()}</main>`;
       if (state.mode === "bound") return `<main><div class="identity"><small>${escapeHtml(this.platform)}</small><h3>${escapeHtml(state.conversation?.displayName || state.binding?.displayName)}</h3><p>\u8BE2\u76D8 #${state.binding?.inquiryId}</p></div>
-      <dl><div><dt>\u5F85\u4E0A\u4F20</dt><dd>${state.sync.pending || 0}</dd></div><div><dt>\u540C\u6B65\u72B6\u6001</dt><dd>${syncLabel(state.sync.state)}</dd></div><div><dt>\u51C6\u5907\u5EA6</dt><dd>${readinessLabel(state.analysis?.readinessStatus)}</dd></div></dl>
+      <dl><div><dt>\u5F85\u4E0A\u4F20</dt><dd>${state.sync.pending || 0}</dd></div><div><dt>\u5DF2\u4E0A\u4F20</dt><dd>${state.sync.uploaded ?? state.binding?.messageCount ?? 0}</dd></div><div><dt>\u540C\u6B65\u72B6\u6001</dt><dd>${syncLabel(state.sync.state)}</dd></div><div><dt>\u51C6\u5907\u5EA6</dt><dd>${readinessLabel(state.analysis?.readinessStatus)}</dd></div></dl>
       ${state.analysis ? analysisSummary(state.analysis) : ""}
       <button class="primary" data-action="analyze">\u7ACB\u5373\u5206\u6790</button><div class="actions"><button data-action="open-inquiry">\u67E5\u770B\u8BE2\u76D8</button><button data-action="pause">${state.binding?.paused ? "\u7EE7\u7EED\u540C\u6B65" : "\u6682\u505C\u540C\u6B65"}</button><button data-action="unbind">\u89E3\u9664\u7ED1\u5B9A</button></div>${this.error()}</main>`;
       return `<main><p>\u6B63\u5728\u8BFB\u53D6\u5F53\u524D\u4F1A\u8BDD\u2026\u2026</p></main>`;
@@ -565,12 +611,15 @@
     return node.innerHTML;
   }
   var styles = `
-:host{all:initial}aside{position:fixed;z-index:2147483646;right:18px;bottom:84px;width:330px;max-height:calc(100vh - 120px);overflow:auto;border:1px solid #2d3748;border-radius:14px;background:#0d1118;color:#f4f7fb;box-shadow:0 22px 70px rgba(0,0,0,.42);font:14px/1.45 Inter,system-ui,sans-serif}aside.collapsed{width:116px}*{box-sizing:border-box}header{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #263042;background:#0d1118}header b{letter-spacing:.04em}header i{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:7px;border-radius:7px;background:#f5f7fb;color:#121722;font-style:normal;font-size:11px}button{min-height:36px;padding:8px 11px;border:1px solid #354156;border-radius:8px;background:#151c27;color:#eef3fa;cursor:pointer}button:hover{border-color:#7598ff}.primary{width:100%;margin-top:10px;border-color:#356df3;background:#356df3;color:white;font-weight:750}main{padding:16px}h3{margin:0 0 8px;font-size:17px}p{margin:6px 0 12px;color:#aab5c5}label{display:grid;gap:5px;margin:12px 0;color:#c9d2df;font-size:12px}input,select{width:100%;min-height:38px;padding:8px 9px;border:1px solid #354156;border-radius:7px;background:#111722;color:#f4f7fb}dl{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;margin:14px 0;background:#283246}dl div{padding:9px;background:#111722}dt{color:#8290a4;font-size:10px}dd{margin:4px 0 0;font-weight:750}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.actions button{flex:1;font-size:11px}.result{margin:12px 0;padding:12px 0;border-block:1px solid #2a3547}.result strong{color:#65e6d8}.result p{font-size:12px}.error{color:#ff7a91}.compact{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px}.dot{width:8px;height:8px;border-radius:50%;background:#64748b}.dot.synced{background:#55d99f}.dot.syncing{background:#7598ff}.dot.error{background:#ff657f}@media(max-width:520px){aside{right:10px;bottom:72px;width:min(330px,calc(100vw - 20px))}}`;
+:host{all:initial}aside{position:fixed;z-index:2147483646;right:18px;bottom:84px;width:330px;max-height:calc(100vh - 120px);overflow:auto;border:1px solid #2d3748;border-radius:14px;background:#0d1118;color:#f4f7fb;box-shadow:0 22px 70px rgba(0,0,0,.42);font:14px/1.45 Inter,system-ui,sans-serif}aside.collapsed{width:116px}*{box-sizing:border-box}header{position:sticky;top:0;display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid #263042;background:#0d1118}header b{letter-spacing:.04em}header i{display:inline-grid;place-items:center;width:28px;height:28px;margin-right:7px;border-radius:7px;background:#f5f7fb;color:#121722;font-style:normal;font-size:11px}button{min-height:36px;padding:8px 11px;border:1px solid #354156;border-radius:8px;background:#151c27;color:#eef3fa;cursor:pointer}button:hover{border-color:#7598ff}.primary{width:100%;margin-top:10px;border-color:#356df3;background:#356df3;color:white;font-weight:750}main{padding:16px}h3{margin:0 0 8px;font-size:17px}p{margin:6px 0 12px;color:#aab5c5}label{display:grid;gap:5px;margin:12px 0;color:#c9d2df;font-size:12px}input,select{width:100%;min-height:38px;padding:8px 9px;border:1px solid #354156;border-radius:7px;background:#111722;color:#f4f7fb}dl{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;margin:14px 0;background:#283246}dl div{min-width:0;padding:9px 6px;background:#111722}dt{color:#8290a4;font-size:10px;white-space:nowrap}dd{margin:4px 0 0;font-weight:750}.actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}.actions button{flex:1;font-size:11px}.result{margin:12px 0;padding:12px 0;border-block:1px solid #2a3547}.result strong{color:#65e6d8}.result p{font-size:12px}.error{color:#ff7a91}.compact{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px}.dot{width:8px;height:8px;border-radius:50%;background:#64748b}.dot.synced{background:#55d99f}.dot.syncing{background:#7598ff}.dot.error{background:#ff657f}@media(max-width:520px){aside{right:10px;bottom:72px;width:min(330px,calc(100vw - 20px))}}`;
 
   // integrations/chat-sync/src/userscript/entry.js
   var runtime = new TampermonkeyRuntime();
   var adapter = [new WhatsAppAdapter(), new AlibabaAdapter()].find((candidate) => candidate.isSupportedPage());
-  if (adapter) start().catch((error) => console.warn("[Rubusoo] startup failed", error.message));
+  if (window.top === window.self && !window.__rubusooChatSyncLoaded && adapter) {
+    window.__rubusooChatSyncLoaded = true;
+    start().catch((error) => console.warn("[Rubusoo] startup failed", error.message));
+  }
   async function start() {
     const api = new ApiClient(runtime, CONFIG.apiBase);
     const panel = new FloatingPanel({ runtime, platform: adapter.getPlatform() });
@@ -634,11 +683,21 @@
     });
     async function refresh(force = false) {
       const consent = await runtime.storage.get(`consent:${adapter.getPlatform()}:${location.hostname}`, false);
-      if (!consent) return panel.update({ mode: "consent" });
-      if (!await runtime.auth.getToken()) return panel.update({ mode: "pair" });
+      if (!consent) {
+        if (panel.state.mode !== "consent") panel.update({ mode: "consent" });
+        return;
+      }
+      if (!await runtime.auth.getToken()) {
+        if (panel.state.mode !== "pair") panel.update({ mode: "pair" });
+        return;
+      }
       const conversation = adapter.getCurrentConversation();
-      if (!conversation) return panel.update({ mode: "no-conversation" });
+      if (!conversation) {
+        if (panel.state.mode !== "no-conversation") panel.update({ mode: "no-conversation" });
+        return;
+      }
       if (!force && conversation.id === lastConversationId && active) return;
+      if (!force && conversation.id === lastConversationId && panel.state.mode === "binding") return;
       disposeActive();
       lastConversationId = conversation.id;
       const account = adapter.getCurrentAccount();
@@ -666,7 +725,8 @@
         config: CONFIG,
         onStatus: (sync) => panel.update({ sync })
       });
-      const deduplicator = new Deduplicator(runtime, `${binding.id}`);
+      const parserGeneration = adapter.getPlatform() === "whatsapp" ? "whatsapp-v2" : "v1";
+      const deduplicator = new Deduplicator(runtime, `${binding.id}:${parserGeneration}`);
       const analysis = new AnalysisTrigger({
         api,
         queue,

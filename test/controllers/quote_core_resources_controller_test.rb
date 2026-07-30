@@ -35,7 +35,7 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href='#{new_inquiry_path}']"
   end
 
-  test "blank quote starts from an existing customer and opens the editor" do
+  test "blank quote starts from an existing customer and opens the workspace" do
     customer = customers(:one)
 
     assert_difference "Quote.count", 1 do
@@ -43,7 +43,7 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     end
 
     quote = Quote.order(:created_at).last
-    assert_redirected_to edit_quote_path(quote)
+    assert_redirected_to quote_path(quote)
     assert_equal customer, quote.customer
     assert_equal "unpriced", quote.quote_items.first.price_source
     assert_equal 0.to_d, quote.quote_items.first.unit_price
@@ -59,7 +59,7 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     end
 
     quote = Quote.order(:created_at).last
-    assert_redirected_to edit_quote_path(quote)
+    assert_redirected_to quote_path(quote)
     assert_equal "Northstar Components", quote.customer.name
     assert_equal "Mina Patel", quote.customer.contact_name
   end

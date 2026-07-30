@@ -57,7 +57,8 @@ module Api
         {
           id: binding.id, platform: binding.platform, displayName: binding.display_name,
           customerId: binding.customer_id, inquiryId: binding.inquiry_id,
-          paused: binding.paused, autoAnalysis: binding.auto_analysis
+          paused: binding.paused, autoAnalysis: binding.auto_analysis,
+          messageCount: binding.chat_captured_messages.count
         }
       end
     end

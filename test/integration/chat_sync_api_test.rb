@@ -31,6 +31,11 @@ class ChatSyncApiTest < ActionDispatch::IntegrationTest
       capturedAt: "2026-07-25T09:00:01Z",
       type: "text",
       text: "Please quote five units",
+      sourceMetadata: {
+        visibleTimestamp: "09:00",
+        adapter: "whatsapp-v1",
+        ignored: "not persisted"
+      },
       rawFingerprint: "client-fingerprint",
       parserVersion: "test-1"
     }
@@ -43,6 +48,16 @@ class ChatSyncApiTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert response.parsed_body.fetch("duplicateRequest")
     assert_equal 1, ChatCapturedMessage.where(chat_conversation_binding_id: binding_id).count
+    captured = ChatCapturedMessage.find_by!(chat_conversation_binding_id: binding_id)
+    assert_equal({ "visibleTimestamp" => "09:00", "adapter" => "whatsapp-v1" }, captured.source_metadata)
+
+    corrected = message.merge(direction: "sales", parserVersion: "whatsapp-v2")
+    post path, params: { requestId: "request-2", messages: [ corrected ] }, headers:, as: :json
+    assert_response :created
+    assert_equal 1, response.parsed_body.fetch("acceptedCount")
+    assert_equal 1, response.parsed_body.fetch("messageCount")
+    assert_equal "sales", captured.reload.direction
+    assert_equal "seller", captured.inquiry_message.direction
   end
 
   test "rejects missing chat sync token" do

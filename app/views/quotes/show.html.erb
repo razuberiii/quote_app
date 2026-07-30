@@ -1,31 +1,216 @@
-<main class="deal-workspace quote-core-detail">
-  <header class="deal-hero quote-core-hero">
-    <div><%= link_to t("self_service.quote_core.detail.back"), quotes_path, class: "deal-back" %><p class="eyebrow"><%= @quote.customer&.name || t("self_service.quote_core.index.customer_missing") %></p><h1><%= deal_title(@quote) %></h1><p><%= @quote.quote_no %> · <%= quote_version_label(@quote) %> · <%= t("self_service.quote_core.detail.owner", name: current_user.full_name.presence || current_user.username) %></p></div>
-    <dl><div><dt><%= t("self_service.quote_core.detail.status") %></dt><dd><span class="quote-state quote-state--<%= @lifecycle.state %>"><i></i><%= @lifecycle.label %></span></dd></div><div><dt><%= t("self_service.quote_core.detail.amount") %></dt><dd><%= @quote.currency %> <%= number_with_delimiter(@quote.grand_total) %></dd></div><div><dt><%= t("self_service.quote_core.detail.latest") %></dt><dd><%= @lifecycle.signal %></dd></div></dl>
-    <div class="deal-primary-action"><span><%= t("self_service.quote_core.detail.next") %></span><strong><%= @lifecycle.action_label %></strong><%= link_to @lifecycle.action_label, quote_action_path(@quote, @lifecycle), class: "button button--primary" %></div>
+<% missing = @readiness_issues %>
+<% latest_revision = @versions.first %>
+<% feedback_items = (@requests.to_a + @questions.to_a + @responses.to_a).sort_by { |item| item.respond_to?(:received_at) ? item.received_at : item.created_at }.reverse %>
+<main class="quote-studio quote-studio--editor quote-workspace" data-controller="studio-motion" data-studio-motion-unsaved-value="<%= t('self_service.studio.unsaved') %>" data-studio-motion-saving-value="<%= t('self_service.studio.saving') %>" data-studio-motion-saved-value="<%= t('self_service.studio.saved') %>" data-studio-motion-save-failed-value="<%= t('self_service.studio.save_failed') %>" data-studio-motion-recheck-value="<%= t('self_service.studio.recheck') %>" data-studio-motion-recheck-help-value="<%= t('self_service.studio.recheck_help') %>">
+  <header class="studio-toolbar quote-workspace__topbar">
+    <div class="studio-toolbar__identity">
+      <%= link_to "返回报价列表", quotes_path, class: "studio-back" %>
+      <div>
+        <h1><%= deal_title(@quote) %></h1>
+        <p class="quote-workspace__meta">
+          <%= link_to(@quote.customer&.name || "客户未填写", (@quote.customer ? customer_path(@quote.customer) : "#")) %>
+          <span><%= @quote.quote_no %></span>
+          <span><%= latest_revision ? "V#{latest_revision.number}" : "草稿" %></span>
+          <span class="quote-state quote-state--<%= @lifecycle.state %>"><i></i><%= @lifecycle.label %></span>
+        </p>
+      </div>
+    </div>
+    <div class="studio-actions">
+      <span class="studio-save-state <%= 'is-saved' if params[:saved] %>" data-studio-motion-target="saveState">已自动保存</span>
+      <details class="quote-row-menu quote-workspace__more">
+        <summary>...</summary>
+        <div>
+          <%= link_to "历史版本", "#workspace-record" %>
+          <%= link_to "记录线下接受", new_acceptance_quote_path(@quote, version_id: latest_revision&.id) if latest_revision && !@acceptance %>
+        </div>
+      </details>
+      <%= link_to "客户预览", preview_quote_path(@quote), class: "button button--secondary" %>
+      <%= link_to missing.empty? ? (latest_revision ? "发布新版本" : "预览并发送") : "预览并发送",
+        preview_quote_path(@quote),
+        class: "button button--primary" %>
+    </div>
   </header>
 
-  <nav class="deal-tabs quote-core-tabs"><% %w[quote activity versions].each do |key| %><%= link_to t("self_service.quote_core.detail.tabs.#{key}"), quote_path(@quote, tab: key), class: ("is-active" if @tab == key) %><% end %></nav>
+  <section class="quote-workspace__grid">
+    <aside class="studio-structure quote-requirements">
+      <div>
+        <p class="section-kicker">客户需求</p>
+        <h2><%= @quote.customer&.name || "未命名客户" %></h2>
+      </div>
 
-  <% if @tab == "quote" %>
-    <section class="quote-core-summary">
-      <div class="quote-core-summary__intro"><p class="section-kicker"><%= t("self_service.quote_core.detail.quote.kicker") %></p><h2><%= t("self_service.quote_core.detail.quote.title") %></h2><p><%= t("self_service.quote_core.detail.quote.help") %></p><div><%= link_to t("self_service.quote_core.detail.quote.edit"), edit_quote_path(@quote), class: "button button--primary" %><%= link_to t("self_service.quote_core.detail.quote.preview"), preview_quote_path(@quote), target: "_blank", class: "button button--secondary" %></div></div>
-      <dl class="quote-core-facts"><div><dt><%= t("self_service.quote_core.detail.quote.customer") %></dt><dd><%= @quote.customer&.name %></dd></div><div><dt><%= t("self_service.quote_core.detail.quote.items") %></dt><dd><%= @quote.quote_items.size %></dd></div><div><dt><%= t("self_service.quote_core.detail.quote.valid_until") %></dt><dd><%= @quote.valid_until || t("self_service.quote_core.detail.not_set") %></dd></div><div><dt><%= t("self_service.quote_core.detail.quote.language") %></dt><dd><%= @quote.buyer_locale %></dd></div><div><dt><%= t("self_service.quote_core.detail.quote.incoterm") %></dt><dd><%= @quote.trade_term.presence || t("self_service.quote_core.detail.not_set") %></dd></div><div><dt><%= t("self_service.quote_core.detail.quote.payment") %></dt><dd><%= @quote.payment_term.presence || t("self_service.quote_core.detail.not_set") %></dd></div></dl>
-    </section>
-  <% elsif @tab == "activity" %>
-    <section class="conversation-stream quote-activity-stream">
-      <header><p class="section-kicker"><%= t("self_service.quote_core.detail.activity.kicker") %></p><h2><%= t("self_service.quote_core.detail.activity.title") %></h2><p><%= t("self_service.quote_core.detail.activity.help") %></p></header>
-      <div class="conversation-toolbar"><%= link_to t("self_service.quote_core.detail.activity.record"), new_response_quote_path(@quote, version_id: @versions.first&.id), class: "button button--secondary" if @versions.any? %><%= link_to t("self_service.quote_core.detail.activity.accept"), new_acceptance_quote_path(@quote, version_id: @versions.first&.id), class: "button button--primary" if @versions.any? && !@acceptance %></div>
-      <% @responses.each do |message| %><article class="channel-response" id="<%= dom_id(message) %>"><div><span><%= t("self_service.deals.detail.response_kinds.#{message.kind}", default: message.kind.humanize) %></span><strong><%= message.buyer_name.presence || @quote.customer&.name %></strong><time><%= t("self_service.deals.ago", time: time_ago_in_words(message.received_at)) %></time></div><p><%= message.body.presence || t("self_service.deals.detail.conversation.file_received") %></p><aside><span>V<%= message.quote_revision.number %></span><strong><%= t("self_service.deals.detail.statuses.#{message.status}", default: message.status.humanize) %></strong></aside><%= render partial: "deals/response_review", locals: { response: message, deal: @quote } if message.difference_review.present? %></article><% end %>
-      <% (@questions.to_a + @requests.to_a).sort_by(&:created_at).reverse.each do |message| %><article><div><span><%= message.is_a?(BuyerQuestion) ? t("self_service.quote_core.detail.activity.question") : t("self_service.quote_core.detail.activity.change") %></span><strong><%= message.buyer_name.presence || message.buyer_email %></strong><time><%= t("self_service.deals.ago", time: time_ago_in_words(message.created_at)) %></time></div><p><%= message.respond_to?(:body) ? message.body : message.message %></p><% if message.is_a?(ChangeRequest) %><div class="change-request-diff"><span><%= t("self_service.quote_core.change_request_from", number: message.quote_revision.number) %></span><% message.requested_changes.to_h.fetch("quantities", {}).each do |index, quantity| %><p><strong><%= t("self_service.quote_core.change_request_quantity", item: index.to_i + 1) %></strong><del><%= Array(message.quote_revision.snapshot["quote_items"])[index.to_i].to_h["quantity"] %></del><b>→</b><ins><%= quantity %></ins></p><% end %></div><%= button_to t("self_service.quote_core.apply_to_draft"), apply_change_request_quote_path(@quote, change_request_id: message.id), method: :patch, class: "button button--primary" if message.status == "open" %><% elsif message.seller_reply.present? %><blockquote><span><%= t("self_service.deals.detail.conversation.seller_reply") %></span><%= message.seller_reply %></blockquote><% else %><%= form_with scope: :buyer_question, url: reply_question_quote_path(@quote, question_id: message.id), method: :patch, class: "conversation-reply" do |form| %><%= form.text_area :seller_reply, placeholder: t("self_service.deals.detail.conversation.reply_placeholder"), required: true, rows: 3 %><%= form.submit t("self_service.deals.detail.conversation.reply"), class: "button button--primary" %><% end %><% end %></article><% end %>
-      <% if @activities.empty? && @responses.empty? && @questions.empty? && @requests.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.detail.activity.empty") %></h2><p><%= t("self_service.quote_core.detail.activity.empty_help") %></p></div><% end %>
-    </section>
-  <% else %>
-    <section class="quote-version-output">
-      <% if @published_revision %><section class="publish-complete"><div><span><%= t("self_service.publish_complete.kicker") %></span><h2><%= t("self_service.publish_complete.title", number: @published_revision.number) %></h2><p><%= t("self_service.publish_complete.help") %></p></div><div class="publish-complete__actions"><button type="button" class="button button--primary" data-controller="clipboard" data-clipboard-text-value="<%= buyer_room_url(@published_revision.secure_token) %>" data-clipboard-success-message-value="<%= t("self_service.publish_complete.copied") %>" data-action="clipboard#copy"><%= t("self_service.publish_complete.copy") %></button><%= link_to t("self_service.publish_complete.pdf"), quote_version_export_path(@quote, @published_revision, output: "pdf"), class: "button button--secondary" %><%= link_to t("self_service.publish_complete.excel"), quote_version_export_path(@quote, @published_revision, output: "excel"), class: "button button--secondary" %><%= link_to t("self_service.publish_complete.send"), deliver_quote_path(@quote, version_id: @published_revision.id), class: "button button--secondary" %></div></section><% end %>
-      <header><div><p class="section-kicker"><%= t("self_service.quote_core.detail.versions.kicker") %></p><h2><%= t("self_service.quote_core.detail.versions.title") %></h2><p><%= t("self_service.quote_core.detail.versions.help") %></p></div></header>
-      <% @versions.each do |version| %><article id="version-<%= version.id %>"><div class="quote-version-output__identity"><span>V<%= version.number %></span><div><strong><%= version.number == @versions.first.number ? t("self_service.quote_core.detail.versions.current") : t("self_service.quote_core.detail.versions.previous") %></strong><small><%= l(version.published_at, format: :long) %> · <%= version.currency %> <%= number_with_delimiter(version.total) %></small></div></div><div class="quote-version-output__actions"><%= link_to t("self_service.quote_core.detail.versions.customer_page"), buyer_room_path(version.secure_token, preview: 1), target: "_blank" %><%= link_to "PDF", quote_version_export_path(@quote, version, output: "pdf") %><%= link_to "Excel", quote_version_export_path(@quote, version, output: "excel") %><%= link_to t("self_service.quote_core.detail.versions.send"), deliver_quote_path(@quote, version_id: version.id), class: "button button--primary" %></div></article><% end %>
-      <% if @versions.empty? %><div class="deal-zero"><h2><%= t("self_service.quote_core.detail.versions.empty") %></h2><p><%= t("self_service.quote_core.detail.versions.empty_help") %></p><%= link_to t("self_service.quote_core.detail.quote.publish"), publish_quote_path(@quote), class: "button button--primary" %></div><% end %>
-    </section>
-  <% end %>
+      <% if @quote.inquiry.present? %>
+        <% data = @quote.inquiry.extracted_data.to_h %>
+        <% field_states = @quote.inquiry.field_states.to_h %>
+        <section class="quote-requirements__panel">
+          <strong>AI 整理</strong>
+          <dl>
+            <div><dt>客户</dt><dd><%= data["customer"].presence || @quote.customer&.name || "缺失" %></dd></div>
+            <div><dt>邮箱</dt><dd><%= data["contact_email"].presence || @quote.customer&.email || "缺失" %></dd></div>
+            <div><dt>币种</dt><dd><%= data["currency"].presence || @quote.currency %></dd></div>
+          </dl>
+        </section>
+        <section class="quote-requirements__panel">
+          <strong>商品和数量</strong>
+          <% Array(data["products"]).each_with_index do |product, index| %>
+            <a href="#studio-products">
+              <span><%= product["quantity"].presence || "?" %></span>
+              <em><%= product["name"].presence || "未识别商品 #{index + 1}" %></em>
+            </a>
+          <% end %>
+          <% if Array(data["products"]).empty? %><p>还没有识别到商品。</p><% end %>
+        </section>
+        <section class="quote-requirements__panel">
+          <strong>缺失和冲突</strong>
+          <% field_states.each do |field, state| %>
+            <% next unless %w[missing conflict uncertain].include?(state.to_s) %>
+            <a href="<%= field.to_s == "freight" ? "#studio-pricing" : "#studio-products" %>">
+              <span><%= state %></span>
+              <em><%= field.to_s.humanize %></em>
+            </a>
+          <% end %>
+        </section>
+        <details class="quote-requirements__raw">
+          <summary>原始消息</summary>
+          <div><%= simple_format(@quote.inquiry.conversation_source.presence || "暂无原始消息") %></div>
+        </details>
+      <% else %>
+        <section class="quote-requirements__panel">
+          <strong>客户资料</strong>
+          <p>这份报价是手工创建的。可以从中间区域补充商品、条款和备注。</p>
+          <%= link_to "粘贴客户消息新建", new_inquiry_path, class: "button button--secondary button--full" %>
+        </section>
+      <% end %>
+    </aside>
+
+    <%= form_with model: @quote, html: { id: "quote-studio-form", class: "studio-canvas quote-editor", data: { action: "input->studio-motion#dirty change->studio-motion#dirty turbo:submit-start->studio-motion#saving turbo:submit-end->studio-motion#saved" } } do |f| %>
+      <% if @quote.errors.any? %><div class="studio-error"><strong>请先处理这些错误</strong><%= @quote.errors.full_messages.to_sentence %></div><% end %>
+      <article class="studio-paper">
+        <section id="studio-cover" class="studio-cover">
+          <div class="studio-cover__brand"><span><%= @quote.company.name.first %></span><strong><%= @quote.company.name %></strong></div>
+          <p class="section-kicker">报价基本信息</p>
+          <%= f.text_area :custom_title, rows: 2, class: "studio-inline-title", placeholder: "报价名称" %>
+          <%= f.text_area :notes, rows: 3, class: "studio-inline-intro", placeholder: "客户可见备注" %>
+          <dl class="studio-cover__meta">
+            <div><dt>报价号</dt><dd><%= @quote.quote_no %></dd></div>
+            <div><dt><%= f.label :issued_on, "报价日期" %></dt><dd><%= f.date_field :issued_on %></dd></div>
+            <div><dt><%= f.label :valid_until, "有效期" %></dt><dd><%= f.date_field :valid_until, min: Date.current %></dd></div>
+            <div><dt><%= f.label :currency, "币种" %></dt><dd><%= f.select :currency, Product::PRICE_CURRENCIES %></dd></div>
+            <div class="studio-buyer-language"><dt><%= f.label :buyer_locale, "客户语言" %></dt><dd><%= f.select :buyer_locale, [["English", "en"], ["简体中文", "zh-CN"], ["Español", "es-419"]] %><small>客户公开页面和导出文件使用这个语言。</small></dd></div>
+          </dl>
+        </section>
+
+        <section id="studio-products" class="studio-products">
+          <div class="studio-paper__heading">
+            <p class="section-kicker">报价内容</p>
+            <h2>商品明细</h2>
+            <p>在列表中直接改数量、单价、交期和本次报价需要展示的资料。</p>
+          </div>
+          <div class="quote-inline-tools">
+            <%= link_to "从商品库添加", library_path, class: "button button--secondary" %>
+            <button type="button" class="button button--secondary" data-action="studio-motion#newItem">粘贴文本让 AI 添加</button>
+          </div>
+          <div class="studio-product-list">
+            <%= f.fields_for :quote_items do |item_fields| %>
+              <% item = item_fields.object %>
+              <article class="studio-product">
+                <div class="studio-product__tools"><button type="button" data-action="studio-motion#duplicateItem">复制</button><label><%= item_fields.check_box :_destroy %><span>移除</span></label></div>
+                <% product_image = item.effective_image_attachment %>
+                <div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span><%= item.description.to_s.first || "P" %></span><small>商品图片</small><% end %></div>
+                <div class="studio-product__content">
+                  <div class="studio-product__top"><div><%= item_fields.text_field :description, class: "studio-product__name", placeholder: "商品名称" %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / Model" %><%= item_fields.text_field :unit_snapshot, placeholder: "单位" %></div></div><label class="studio-mode"><span>客户可调</span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [t("self_service.review.selection_modes.#{mode}"), mode] } %></label></div>
+                  <label class="studio-block-field"><span>描述 / 规格</span><%= item_fields.text_area :specifications_text, rows: 4, placeholder: "功率：5.5 kW\n电压：380V / 50Hz\n材质：不锈钢" %></label>
+                  <div class="studio-product__commercial">
+                    <label><span>数量</span><%= item_fields.number_field :quantity, min: 1, data: { studio_motion_target: "quantity", action: "input->studio-motion#dirty" } %></label>
+                    <label><span>单价</span><%= item_fields.number_field :unit_price, min: 0, step: 0.01, data: { studio_motion_target: "price", action: "input->studio-motion#dirty" } %></label>
+                    <label><span>价格来源</span><%= item_fields.select :price_source, QuoteItem::PRICE_SOURCES.map { |source| [t("self_service.review.price_sources.#{source}"), source] } %></label>
+                    <div><span>小计</span><strong><%= @quote.currency %> <%= number_with_delimiter(item.line_total) %></strong></div>
+                  </div>
+                  <details class="studio-product__details"><summary>交期、包装和附加项</summary><div><label class="studio-block-field"><span>附加费用</span><%= item_fields.text_area :addon_charges_text, rows: 2, placeholder: "备用密封套件：120\n遥控器：85" %></label><label><span>MOQ</span><input value="<%= item.product&.moq %>" disabled></label><label><span>交期</span><%= item_fields.text_field :lead_time_snapshot, placeholder: "20 个工作日" %></label><label><span>包装</span><%= item_fields.text_field :packing_snapshot, placeholder: "出口胶合板箱" %></label></div></details>
+                </div>
+              </article>
+            <% end %>
+          </div>
+          <button type="button" class="studio-add-product" data-action="studio-motion#newItem">添加临时商品</button>
+        </section>
+
+        <section id="studio-pricing" class="studio-pricing">
+          <div><p class="section-kicker">金额</p><h2>折扣、运费、税费</h2></div>
+          <div class="studio-pricing__grid"><label><span>运费</span><%= f.number_field :shipping_amount, min: 0, step: 0.01, data: { studio_motion_target: "shipping", action: "input->studio-motion#dirty" } %></label><label><span>运费来源</span><%= f.select :shipping_price_source, [["选择来源", ""], ["货代报价", "freight_forwarder_quote"], ["承运商报价", "carrier_quote"], ["买家账号", "customer_account"], ["手工录入", "manually_entered"]] %></label><label><span>折扣</span><%= f.number_field :discount_amount, min: 0, step: 0.01, data: { studio_motion_target: "discount", action: "input->studio-motion#dirty" } %></label><label><span>税费</span><%= f.number_field :tax_amount, min: 0, step: 0.01, data: { studio_motion_target: "tax", action: "input->studio-motion#dirty" } %></label><div class="studio-grand-total"><span>总金额</span><strong><%= @quote.currency %> <b data-studio-motion-target="total"><%= number_with_delimiter(@quote.grand_total) %></b></strong></div></div>
+        </section>
+
+        <section id="studio-terms" class="studio-terms"><div class="studio-paper__heading"><p class="section-kicker">商务条款</p><h2>条款和备注</h2></div><div class="studio-terms__grid"><label><span>付款条款</span><%= f.text_field :payment_term, placeholder: "30% 订金，70% 发货前付清" %></label><label><span>贸易条款</span><%= f.text_field :trade_term, placeholder: "CIF Jebel Ali" %></label><label><span>交付说明</span><%= f.text_area :delivery_notes, rows: 3 %></label><label><span>通用条款</span><%= f.text_area :terms_text, rows: 3 %></label></div></section>
+        <footer class="quote-editor__footer"><span>自动保存状态会固定显示在顶部。当前也保留手动保存，避免长表单意外丢失。</span><%= f.submit "保存草稿", class: "button button--primary" %></footer>
+      </article>
+    <% end %>
+
+    <aside class="studio-summary quote-action-rail">
+      <p class="section-kicker"><%= @lifecycle.state.in?(%w[changes]) ? "客户反馈" : latest_revision ? "等待客户" : "当前需要处理" %></p>
+      <h2><%= @lifecycle.action_label %></h2>
+      <dl><div><dt>商品</dt><dd><%= @quote.quote_items.reject(&:marked_for_destruction?).size %></dd></div><div><dt>小计</dt><dd><%= number_to_currency(@quote.subtotal, unit: "#{@quote.currency} ") %></dd></div><div><dt>运费/税费</dt><dd><%= number_to_currency(@quote.shipping_amount.to_d + @quote.tax_amount.to_d, unit: "#{@quote.currency} ") %></dd></div><div class="is-total"><dt>总金额</dt><dd><%= number_to_currency(@quote.grand_total, unit: "#{@quote.currency} ") %></dd></div></dl>
+
+      <% if feedback_items.any? %>
+        <section class="quote-rail-section">
+          <strong>客户有反馈</strong>
+          <% feedback_items.first(6).each do |message| %>
+            <article class="quote-rail-card" id="<%= dom_id(message) %>">
+              <span><%= message.is_a?(ChangeRequest) ? "要求修改" : message.is_a?(BuyerQuestion) ? "客户提问" : t("self_service.deals.detail.response_kinds.#{message.kind}", default: message.kind.humanize) %></span>
+              <p><%= message.respond_to?(:body) ? message.body : message.respond_to?(:message) ? message.message : message.body %></p>
+              <% if message.is_a?(ChangeRequest) %>
+                <% message.requested_changes.to_h.fetch("quantities", {}).each do |index, quantity| %>
+                  <% snapshot_item = Array(message.quote_revision.snapshot["quote_items"])[index.to_i].to_h %>
+                  <small>数量：<%= snapshot_item["quantity"] %> -> <%= quantity %></small>
+                <% end %>
+                <%= button_to "应用修改", apply_change_request_quote_path(@quote, change_request_id: message.id), method: :patch, class: "button button--primary button--full" if message.status == "open" %>
+              <% elsif message.is_a?(BuyerQuestion) && message.seller_reply.blank? %>
+                <%= form_with scope: :buyer_question, url: reply_question_quote_path(@quote, question_id: message.id), method: :patch, class: "conversation-reply" do |form| %>
+                  <%= form.text_area :seller_reply, placeholder: "直接回复这个问题", required: true, rows: 3 %>
+                  <%= form.submit "回复", class: "button button--primary button--full" %>
+                <% end %>
+              <% elsif message.is_a?(BuyerQuestion) %>
+                <blockquote><span>已回复</span><%= message.seller_reply %></blockquote>
+              <% end %>
+            </article>
+          <% end %>
+        </section>
+      <% elsif latest_revision %>
+        <section class="quote-rail-section">
+          <strong>已发布给客户</strong>
+          <p>当前公开版本：V<%= latest_revision.number %></p>
+          <p>发送时间：<%= latest_revision.published_at ? l(latest_revision.published_at, format: :long) : "未记录" %></p>
+          <button type="button" class="button button--primary button--full" data-controller="clipboard" data-clipboard-text-value="<%= buyer_room_url(latest_revision.secure_token) %>" data-clipboard-success-message-value="客户链接已复制" data-action="clipboard#copy">复制客户链接</button>
+          <%= link_to "下载 PDF", quote_version_export_path(@quote, latest_revision, output: "pdf"), class: "button button--secondary button--full" %>
+          <%= link_to "记录外部发送", deliver_quote_path(@quote, version_id: latest_revision.id), class: "button button--secondary button--full" %>
+        </section>
+      <% else %>
+        <section class="studio-readiness <%= 'is-ready' if missing.empty? %>" data-studio-motion-target="readiness">
+          <span class="studio-readiness__signal"><%= missing.empty? ? "可以发送" : "阻塞发送" %></span>
+          <strong data-studio-motion-target="readinessTitle"><%= missing.empty? ? "所有必要内容已完成" : "还有 #{missing.size} 项需要处理" %></strong>
+          <% if missing.any? %>
+            <ul><% missing.each do |entry| %><li><%= entry %> <a href="#studio-pricing">填写</a></li><% end %></ul>
+          <% else %>
+            <p>去客户预览里检查真实页面，然后发布链接或发送邮件。</p>
+          <% end %>
+        </section>
+      <% end %>
+
+      <section class="quote-rail-section" id="workspace-record">
+        <strong>记录</strong>
+        <% if @activities.any? %>
+          <% @activities.first(8).each do |activity| %>
+            <p><span><%= activity.kind.humanize %></span><small><%= time_ago_in_words(activity.created_at) %>前</small></p>
+          <% end %>
+        <% else %>
+          <p>还没有客户查看、发送或人工操作记录。</p>
+        <% end %>
+        <% if @versions.any? %>
+          <details class="quote-version-drawer">
+            <summary><%= latest_revision ? "V#{latest_revision.number}" : "版本" %> 历史</summary>
+            <% @versions.each do |version| %>
+              <article><strong>V<%= version.number %> <%= version == latest_revision ? "当前正式版本" : "历史版本" %></strong><small><%= l(version.published_at, format: :long) %></small><%= link_to "查看", buyer_room_path(version.secure_token, preview: 1), target: "_blank" %><%= link_to "PDF", quote_version_export_path(@quote, version, output: "pdf") %><%= link_to "Excel", quote_version_export_path(@quote, version, output: "excel") %></article>
+            <% end %>
+          </details>
+        <% end %>
+      </section>
+    </aside>
+  </section>
 </main>

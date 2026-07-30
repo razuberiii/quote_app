@@ -30,6 +30,6 @@ export class TampermonkeyRuntime {
     })
   }
 
-  openApp(path = "") { GM_openInTab(`https://next.rubusoo.com${path}`, { active: true }) }
+  openApp(path = "") { GM_openInTab(`https://quote.rubusoo.com${path}`, { active: true }) }
   notify(text) { GM_notification({ title: "Rubusoo", text, timeout: 5000 }) }
 }

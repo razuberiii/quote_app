@@ -9,10 +9,14 @@ require "zip"
 class ProductCatalogParser
   DANGEROUS_PREFIX = /\A[=+\-@]/
   HEADER_ALIASES = {
-    "product" => "name", "product name" => "name", "产品" => "name", "产品名称" => "name", "item" => "name",
-    "sku" => "sku", "model" => "model", "型号" => "model", "category" => "category", "分类" => "category",
-    "description" => "description", "描述" => "description", "unit" => "unit", "单位" => "unit", "moq" => "moq",
-    "price" => "explicit_price", "unit price" => "explicit_price", "单价" => "explicit_price",
+    "product" => "name", "product name" => "name", "产品" => "name", "产品名称" => "name", "商品" => "name",
+    "商品名称" => "name", "名称" => "name", "item" => "name", "model" => "name", "型号" => "name",
+    "sku" => "sku", "编码" => "sku", "货号" => "sku", "category" => "category", "分类" => "category",
+    "description" => "description", "描述" => "description", "基本参数" => "description", "参数" => "description",
+    "规格" => "description", "配置" => "description", "unit" => "unit", "单位" => "unit", "moq" => "moq",
+    "price" => "explicit_price", "unit price" => "explicit_price", "单价" => "explicit_price", "价格" => "explicit_price",
+    "售价" => "explicit_price", "报价" => "explicit_price", "选配参数" => "option_name", "选配" => "option_name",
+    "选配价格" => "option_price", "选配单价" => "option_price",
     "currency" => "currency", "币种" => "currency", "lead time" => "lead_time", "交期" => "lead_time",
     "packing" => "packing", "包装" => "packing"
   }.freeze
@@ -78,8 +82,11 @@ class ProductCatalogParser
         next [] if rows.empty?
         label = "Sheet #{sheet_index}"
         texts << "#{source} #{label}\n#{rows.map { |row| row.join(" | ") }.join("\n")}"
-        products = rows_to_candidates(rows.first, rows.drop(1), source, label, warnings)
-        known_template = known_headers?(rows.first)
+        header_index = header_row_index(rows)
+        headers = header_index ? rows[header_index] : rows.first
+        body_rows = header_index ? rows.drop(header_index + 1) : rows.drop(1)
+        products = rows_to_candidates(headers, body_rows, source, label, warnings, start_row: (header_index || 0) + 2)
+        known_template = known_headers?(headers)
         report << range(source:, location: label, status: products.any? ? "recognized" : "unrecognized",
           analysis: known_template ? "deterministic" : "ai_required",
           detail: known_template ? "标准字段识别 #{products.size} 个候选" : "未知模板，已读取 #{rows.size} 行并等待语义分析")
@@ -112,20 +119,32 @@ class ProductCatalogParser
     []
   end
 
-  def rows_to_candidates(headers, rows, source, location, warnings)
+  def rows_to_candidates(headers, rows, source, location, warnings, start_row: 2)
     normalized = Array(headers).map { |header| header_key(header) }
-    rows.filter_map.with_index(2) do |values, row_number|
+    candidates = []
+    rows.each_with_index do |values, index|
+      row_number = start_row + index
+      next if known_headers?(values)
+
       data = normalized.zip(values).to_h.transform_values.with_index do |value, column|
         neutralize(value, source, row_number, Array(headers)[column], warnings)
       end
-      next if data["name"].blank?
-      candidate(data, source, "#{location} · #{cell_range(row_number, values.length)}")
+      if data["name"].blank?
+        merge_continuation_row(candidates.last, data)
+        next
+      end
+      candidates << candidate(data, source, "#{location} · #{cell_range(row_number, values.length)}")
     end
+    candidates
   end
 
   def known_headers?(headers)
     mapped = Array(headers).map { |header| HEADER_ALIASES[header.to_s.strip.downcase] }.compact
-    mapped.include?("name") && (mapped & %w[sku model description explicit_price]).any?
+    mapped.include?("name") && (mapped & %w[sku description explicit_price option_name]).any?
+  end
+
+  def header_row_index(rows)
+    rows.each_with_index.find { |row, _index| known_headers?(row) }&.last
   end
 
   def range(source:, location:, status:, analysis:, detail:)
@@ -133,10 +152,31 @@ class ProductCatalogParser
   end
 
   def candidate(data, source, location)
-    data.slice("name", "sku", "model", "category", "description", "unit", "moq", "lead_time", "packing", "currency")
+    candidate_data = data.slice("name", "sku", "model", "category", "description", "unit", "moq", "lead_time", "packing", "currency")
+    merge_option(candidate_data, data)
+    candidate_data
       .merge("specifications" => {}, "variants" => [], "image_candidates" => [],
         "explicit_price" => decimal(data["explicit_price"]), "confidence" => 0.96,
         "evidence" => [ { "source" => source, "location" => location } ])
+  end
+
+  def merge_continuation_row(candidate_data, data)
+    return if candidate_data.blank?
+
+    description = data["description"].to_s.strip
+    if description.present?
+      candidate_data["description"] = [ candidate_data["description"], description ].compact_blank.join("\n")
+    end
+    merge_option(candidate_data, data)
+  end
+
+  def merge_option(candidate_data, data)
+    option = data["option_name"].to_s.strip
+    return if option.blank?
+
+    price = decimal(data["option_price"])
+    suffix = price ? "：#{price}" : nil
+    candidate_data["description"] = [ candidate_data["description"], "选配：#{option}#{suffix}" ].compact_blank.join("\n")
   end
 
   def header_key(header) = HEADER_ALIASES[header.to_s.strip.downcase] || header.to_s.strip.downcase.gsub(/\W+/, "_")

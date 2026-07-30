@@ -1,6 +1,6 @@
 export const CONFIG = Object.freeze({
-  apiBase: "https://next.rubusoo.com/api/chat_sync",
-  appBase: "https://next.rubusoo.com",
+  apiBase: "https://quote.rubusoo.com/api/chat_sync",
+  appBase: "https://quote.rubusoo.com",
   batchSize: 25,
   flushDelayMs: 1800,
   maxQueueSize: 3000,

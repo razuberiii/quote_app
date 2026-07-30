@@ -36,6 +36,35 @@ class BuyerRoomsController < ApplicationController
     redirect_to buyer_room_path(@revision.secure_token, event: "question-sent")
   end
 
+  def reply
+    if params[:reply_kind].to_s == "change"
+      request_record = @revision.change_requests.create!(
+        company: @revision.company, buyer_name: params[:buyer_name], buyer_email: params[:buyer_email],
+        message: params.require(:message), requested_changes: permitted_selection.merge(
+          "context_type" => params[:context_type], "context_key" => params[:context_key]
+        ),
+        idempotency_key: idempotency_key
+      )
+      request_record.attachment.attach(params[:attachment]) if params[:attachment].present?
+      @revision.quote.update!(status: "revision_requested", changes_requested_at: Time.current, changes_request_message: request_record.message)
+      track("revision_requested", request_record.id)
+      event = "changes-requested"
+    else
+      question = @revision.buyer_questions.create!(
+        company: @revision.company,
+        context_type: params[:context_type].presence || "quote",
+        context_key: params[:context_key], buyer_name: params[:buyer_name], buyer_email: params[:buyer_email],
+        body: params.require(:message), idempotency_key: idempotency_key
+      )
+      track("question", question.id)
+      event = "question-sent"
+    end
+    Notification.create_quote_revision_requested_notification(@revision.quote)
+    redirect_to buyer_room_path(@revision.secure_token, event:)
+  rescue ActiveRecord::RecordNotUnique
+    redirect_to buyer_room_path(@revision.secure_token, event: "reply-sent")
+  end
+
   def request_changes
     request_record = @revision.change_requests.create!(
       company: @revision.company, buyer_name: params[:buyer_name], buyer_email: params[:buyer_email],
@@ -57,6 +86,7 @@ class BuyerRoomsController < ApplicationController
       selection: permitted_selection, idempotency_key: idempotency_key,
       audit_context: { "ip_hash" => Digest::SHA256.hexdigest(request.remote_ip.to_s), "user_agent" => request.user_agent.to_s.first(500) }
     ).call
+    acceptance.evidence_files.attach(params[:attachment]) if params[:attachment].present?
     track("accepted", acceptance.id)
     Notification.create_quote_accepted_notification(@revision.quote)
     redirect_to buyer_room_path(@revision.secure_token, event: "accepted")

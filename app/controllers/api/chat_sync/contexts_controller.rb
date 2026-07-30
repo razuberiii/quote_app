@@ -33,6 +33,7 @@ module Api
           id: binding.id, platform: binding.platform, displayName: binding.display_name,
           customerId: binding.customer_id, inquiryId: binding.inquiry_id,
           paused: binding.paused, autoAnalysis: binding.auto_analysis,
+          messageCount: binding.chat_captured_messages.count,
           lastSyncedAt: binding.last_synced_at&.iso8601,
           lastAnalyzedAt: binding.last_analyzed_at&.iso8601,
           analysisResult: binding.analysis_result

@@ -8,6 +8,7 @@ export class AnalysisTrigger {
     this.newCount = 0
     this.lastCursorKey = `analysis:${binding.id}`
     this.timer = null
+    this.running = null
   }
 
   note(messages) {
@@ -20,10 +21,16 @@ export class AnalysisTrigger {
   }
 
   async run() {
+    if (this.running) return this.running
+    this.running = this.performRun().finally(() => { this.running = null })
+    return this.running
+  }
+
+  async performRun() {
     await this.queue.flush()
     await this.api.analyze(this.binding.id)
     this.newCount = 0
-    await this.poll()
+    return this.poll()
   }
 
   async poll() {

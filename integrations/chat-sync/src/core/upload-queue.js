@@ -10,6 +10,7 @@ export class UploadQueue {
     this.timer = null
     this.retryCount = 0
     this.flushing = null
+    this.uploadedCount = Number(binding.messageCount || 0)
   }
 
   async load() {
@@ -43,10 +44,11 @@ export class UploadQueue {
   async performFlush() {
     const batch = this.messages.slice(0, this.config.batchSize)
     const requestId = crypto.randomUUID()
-    this.onStatus?.({ state: "syncing", pending: this.messages.length })
+    this.onStatus?.({ state: "syncing", pending: this.messages.length, uploaded: this.uploadedCount })
     try {
-      await this.api.upload(this.binding.id, { requestId, messages: batch })
+      const receipt = await this.api.upload(this.binding.id, { requestId, messages: batch })
       this.messages.splice(0, batch.length)
+      this.uploadedCount = Number(receipt.messageCount ?? (this.uploadedCount + Number(receipt.acceptedCount || 0)))
       this.retryCount = 0
       await this.persist()
       this.report("synced")
@@ -65,7 +67,7 @@ export class UploadQueue {
   }
 
   report(state = "idle", error = null) {
-    this.onStatus?.({ state, pending: this.messages.length, error })
+    this.onStatus?.({ state, pending: this.messages.length, uploaded: this.uploadedCount, error })
   }
 
   dispose() {

@@ -91,6 +91,15 @@
       <div id="signup-turnstile-success" class="neo-modal__state neo-modal__state--success" hidden>
         <p><%= t("users.registrations.view.new.verified_submitting") %></p>
       </div>
+
+      <div id="signup-turnstile-error" class="neo-modal__state neo-modal__state--error" hidden>
+        <p><%= t("users.registrations.view.new.verification_unavailable") %></p>
+      </div>
+
+      <div class="neo-modal__actions">
+        <button type="button" id="signup-verification-close" class="app-ui-button app-ui-button--secondary"><%= t("users.registrations.view.new.close_verification") %></button>
+        <button type="button" id="signup-verification-retry" class="app-ui-button app-ui-button--primary" hidden><%= t("users.registrations.view.new.retry_verification") %></button>
+      </div>
     </div>
   </div>
 
@@ -106,16 +115,23 @@
       const loadingDiv = document.getElementById('signup-turnstile-loading');
       const containerDiv = document.getElementById('signup-turnstile-container');
       const successDiv = document.getElementById('signup-turnstile-success');
+      const errorDiv = document.getElementById('signup-turnstile-error');
+      const closeBtn = document.getElementById('signup-verification-close');
+      const retryBtn = document.getElementById('signup-verification-retry');
       
       // Make sure all elements exist
       if (!signupForm || !submitBtn || !modal || !turnstileResponse) {
         return;
       }
+      if (signupForm.dataset.verificationInitialized === 'true') return;
+      signupForm.dataset.verificationInitialized = 'true';
 
       // Clear any old token and state
       turnstileResponse.value = '';
       let verificationComplete = false;
       let isSubmitting = false;
+      let loadFailureTimer;
+      let loadStartedAt;
 
       signupForm.addEventListener('submit', function(e) {
         if (isSubmitting) {
@@ -141,6 +157,9 @@
         loadingDiv.hidden = false;
         containerDiv.hidden = true;
         successDiv.hidden = true;
+        errorDiv.hidden = true;
+        retryBtn.hidden = true;
+        loadStartedAt = Date.now();
         
         // Wait for Turnstile API to load, then render
         setTimeout(renderTurnstile, 300);
@@ -149,14 +168,16 @@
 
       function renderTurnstile() {
         if (typeof turnstile === 'undefined') {
-          // API not loaded yet, retry
-          setTimeout(renderTurnstile, 200);
+          if (Date.now() - loadStartedAt >= 8000) showVerificationError();
+          else setTimeout(renderTurnstile, 200);
           return;
         }
 
         // Hide loading, show container
         loadingDiv.hidden = true;
         containerDiv.hidden = false;
+        clearTimeout(loadFailureTimer);
+        loadFailureTimer = setTimeout(showVerificationError, 8000);
 
         const widget = containerDiv.querySelector('.cf-turnstile');
         
@@ -170,6 +191,7 @@
           sitekey: '<%= ENV.fetch("TURNSTILE_SITE_KEY", "0x4AAAAAACkKXqa756rWhUr7") %>',
           theme: 'light',
           callback: function(token) {
+            clearTimeout(loadFailureTimer);
             turnstileResponse.value = token;
             verificationComplete = true;
             
@@ -188,13 +210,34 @@
         widget.dataset.rendered = 'true';
       }
 
+      function showVerificationError() {
+        loadingDiv.hidden = true;
+        containerDiv.hidden = true;
+        errorDiv.hidden = false;
+        retryBtn.hidden = false;
+      }
+
+      function closeVerification() {
+        clearTimeout(loadFailureTimer);
+        modal.hidden = true;
+        turnstileResponse.value = '';
+        submitBtn.disabled = false;
+        submitBtn.textContent = createAccountLabel;
+      }
+
+      closeBtn.addEventListener('click', closeVerification);
+      retryBtn.addEventListener('click', function() {
+        errorDiv.hidden = true;
+        retryBtn.hidden = true;
+        loadingDiv.hidden = false;
+        loadStartedAt = Date.now();
+        renderTurnstile();
+      });
+
       // Close modal on background click (only if verification isn't complete)
       modal.addEventListener('click', function(e) {
         if (e.target === modal && !verificationComplete) {
-          modal.hidden = true;
-          turnstileResponse.value = ''; // Clear incomplete verification
-          submitBtn.disabled = false; // Re-enable button
-          submitBtn.textContent = createAccountLabel;
+          closeVerification();
         }
       });
 

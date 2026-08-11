@@ -5,6 +5,7 @@ class QuotesController < ApplicationController
   before_action :use_buyer_locale, only: :preview
 
   def index
+    @open_inquiry_count = current_user.company.inquiries.where.not(status: "converted").count
     @quotes = current_user.company.quotes.not_archived.includes(:customer, :inquiry, :quote_items, :quote_acceptance,
       :buyer_activities, quote_revisions: %i[buyer_questions change_requests version_deliveries]).order(updated_at: :desc)
     if params[:q].present?
@@ -93,15 +94,20 @@ class QuotesController < ApplicationController
   end
 
   def preview
-    snapshot = QuoteSnapshotBuilder.new(@quote).as_json
-    @revision = QuoteRevision.new(company: @quote.company, quote: @quote,
-      number: (@quote.quote_revisions.maximum(:number) || 0) + 1,
-      status: "draft", currency: @quote.currency, total: @quote.grand_total,
-      snapshot:, secure_token: "working-preview", expires_at: @quote.valid_until&.end_of_day)
-    @snapshot = snapshot
-    @state = "preview"
-    @readiness_issues = QuoteReadinessAudit.new(@quote).issues
     @published_revision = @quote.quote_revisions.find_by(id: params[:published_revision_id])
+    if @published_revision
+      @revision = @published_revision
+      @snapshot = @published_revision.snapshot
+    else
+      @snapshot = QuoteSnapshotBuilder.new(@quote).as_json
+      @revision = QuoteRevision.new(company: @quote.company, quote: @quote,
+        number: (@quote.quote_revisions.maximum(:number) || 0) + 1,
+        status: "draft", currency: @quote.currency, total: @quote.grand_total,
+        snapshot: @snapshot, secure_token: "working-preview", expires_at: @quote.valid_until&.end_of_day)
+    end
+    @state = "preview"
+    @readiness_entries = I18n.with_locale(@seller_locale) { QuoteReadinessAudit.new(@quote).entries }
+    @readiness_issues = @readiness_entries.map { |entry| entry[:label] }
     render "buyer_rooms/show", layout: "buyer_room"
   end
 
@@ -141,7 +147,10 @@ class QuotesController < ApplicationController
     @products = current_user.company.products.with_attached_image.with_attached_gallery_images.order(:name)
     @quote_presets_by_module = QuotePreset::MODULE_KEYS.index_with { [] }
     @quote_preset_master = current_user.company.quote_preset_master
-    @readiness_issues = QuoteReadinessAudit.new(@quote).issues
+    @workbook_templates = current_user.company.workbook_templates.order(:name)
+    audit = QuoteReadinessAudit.new(@quote)
+    @readiness_entries = audit.entries
+    @readiness_issues = audit.issues
   end
 
   def ensure_item
@@ -151,7 +160,7 @@ class QuotesController < ApplicationController
   def quote_params
     params.require(:quote).permit(:currency, :buyer_locale, :issued_on, :valid_until, :payment_term, :trade_term,
       :custom_title, :notes, :tax_amount, :shipping_amount, :shipping_price_source,
-      :discount_amount, :terms_text, :delivery_notes,
+      :discount_amount, :terms_text, :delivery_notes, :workbook_template_id, { custom_field_values: {} },
       quote_items_attributes: [ :id, :product_id, :description, :unit_price, :quantity,
         :item_type, :specifications_text, :addon_charges_text, :item_image,
         :item_image_blob_id, :remove_item_image, :price_source, :selection_mode,

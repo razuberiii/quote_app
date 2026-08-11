@@ -1,48 +1,45 @@
-<main class="deal-workspace quote-start quote-start--intake">
+<main class="deal-workspace quote-start quote-start--focused">
   <header class="quote-home__bar">
-    <div>
-      <%= link_to "返回报价", quotes_path, class: "deal-back" %>
-      <h1>新建报价</h1>
-    </div>
-    <%= link_to "粘贴邮件或上传文件", new_inquiry_path, class: "button button--primary" %>
+    <div><%= link_to "返回报价", quotes_path, class: "deal-back" %><h1>开始一份报价</h1></div>
   </header>
 
   <% if @errors.present? %><div class="quote-start__errors" role="alert"><strong>还不能创建</strong><p><%= @errors.to_sentence %></p></div><% end %>
 
-  <section class="quote-start__workspace quote-start__workspace--split">
-    <div class="quote-start__intro">
-      <span>01</span>
-      <h2>客户给了你什么？</h2>
-      <p>有邮件、聊天记录、附件时，直接用左上角入口让系统先识别客户需求。已经知道客户和商品时，可以在这里手工创建草稿。</p>
-      <div class="quote-start__choices">
-        <%= link_to "粘贴邮件或聊天", new_inquiry_path, class: "button button--secondary" %>
-        <%= link_to "上传客户文件", new_inquiry_path, class: "button button--secondary" %>
-        <%= link_to "从商品库添加", library_path, class: "button button--secondary" %>
-      </div>
+  <section class="first-quote-choice" aria-labelledby="first-quote-choice-title">
+    <div class="first-quote-choice__lead">
+      <p class="eyebrow">推荐</p>
+      <h2 id="first-quote-choice-title">直接从客户聊天准备报价</h2>
+      <p>连接插件后，在 WhatsApp Web 或 Alibaba 国际站绑定当前客户会话。消息会自动进入询盘，你只需核对草稿。</p>
+      <%= link_to "连接聊天插件", chat_integration_path, class: "button button--primary" %>
+      <small>只同步你主动绑定的会话，不读取输入框、Cookie 或其他标签页。</small>
     </div>
+    <ol class="first-quote-choice__outcome" aria-label="接下来会发生什么">
+      <li><span>01</span><strong>安装并连接插件</strong></li>
+      <li><span>02</span><strong>打开客户聊天并绑定</strong></li>
+      <li><span>03</span><strong>核对系统准备的报价草稿</strong></li>
+    </ol>
+  </section>
 
+  <details id="manual-options" class="manual-quote-path" <%= "open" if params[:manual].present? %>>
+    <summary><span>暂时不装插件？</span><strong>粘贴内容或上传文件</strong><small>作为临时备用方式</small></summary>
+    <div class="quote-start__fallback"><p>可以粘贴邮件、聊天记录，或者上传 PDF、Excel、CSV 和 TXT。</p><%= link_to "粘贴或上传客户询盘", new_inquiry_path, class: "button button--secondary" %></div>
+  </details>
+
+  <details class="manual-quote-path" <%= "open" if @errors.present? || @source_quote || @selected_customer_id %>>
+    <summary><span>没有可粘贴的内容？</span><strong>手工创建空白报价</strong><small>只需先选客户或填写公司名称</small></summary>
     <%= form_with scope: :blank_quote, url: quotes_path, class: "quote-start__form" do |form| %>
       <%= form.hidden_field :source_quote_id, value: @source_quote&.id %>
-      <% if @source_quote %>
-        <div class="quote-start__source">
-          <strong>从历史报价复制</strong>
-          <span><%= @source_quote.quote_no %> · <%= @source_quote.title %></span>
-        </div>
-      <% end %>
+      <% if @source_quote %><div class="quote-start__source"><strong>从历史报价复制</strong><span><%= @source_quote.quote_no %> · <%= @source_quote.title %></span></div><% end %>
       <% if @customers.any? %>
-        <label class="quote-start__field">
-          <span>搜索客户</span>
-          <%= form.select :customer_id, [["新建客户", ""]] + @customers.map { |customer| [customer.name, customer.id] }, { selected: @selected_customer_id || @source_quote&.customer_id }, class: "input" %>
-          <small>客户资料不会作为主模块出现，但报价里仍然可以搜索、创建和打开客户资料。</small>
-        </label>
+        <label class="quote-start__field"><span>选择已有客户</span><%= form.select :customer_id, [["新建客户", ""]] + @customers.map { |customer| [customer.name, customer.id] }, { selected: @selected_customer_id || @source_quote&.customer_id }, class: "input" %></label>
       <% end %>
       <fieldset class="quote-start__new-customer">
-        <legend>新客户资料</legend>
+        <legend>新客户</legend>
         <label><span>公司名称</span><%= form.text_field :customer_name, class: "input", placeholder: "例如 Acme Trading LLC" %></label>
-        <label><span>联系人</span><%= form.text_field :contact_name, class: "input" %></label>
-        <label><span>邮箱</span><%= form.email_field :customer_email, class: "input" %></label>
+        <label><span>联系人（可稍后填写）</span><%= form.text_field :contact_name, class: "input" %></label>
+        <label><span>邮箱（可稍后填写）</span><%= form.email_field :customer_email, class: "input" %></label>
       </fieldset>
-      <footer><div><strong>下一步进入报价工作区</strong><small>缺失项可以稍后在右栏处理，不需要一次填完。</small></div><%= form.submit "创建报价草稿", class: "button button--primary" %></footer>
+      <footer><div><strong>下一步：填写商品和价格</strong><small>其他条款可以在报价工作区逐项完成。</small></div><%= form.submit "创建空白草稿", class: "button button--primary" %></footer>
     <% end %>
-  </section>
+  </details>
 </main>

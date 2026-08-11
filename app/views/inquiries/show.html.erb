@@ -19,7 +19,7 @@
           <%= @chat_binding ? "聊天记录已连接" : t("self_service.review.saved") %>
         <% end %>
       </strong>
-      <small><%= @chat_binding ? "已采集 #{@chat_binding.chat_captured_messages.count} 条消息" : t("self_service.review.saved_ago", time: time_ago_in_words(@inquiry.updated_at)) %></small>
+      <small><%= @chat_binding ? "已采集 #{@chat_binding.current_captured_messages.count} 条消息" : t("self_service.review.saved_ago", time: time_ago_in_words(@inquiry.updated_at)) %></small>
       <% if @chat_binding && @chat_analysis&.fetch("status", nil) != "queued" %>
         <%= button_to(@chat_analysis&.fetch("status", nil) == "complete" ? "重新分析" : "分析客户需求",
           analyze_chat_inquiry_path(@inquiry), class: "button button--secondary chat-analysis-status__button") %>
@@ -27,10 +27,36 @@
     </div>
   </header>
 
-  <section class="review-guidance" aria-labelledby="review-next-step">
+  <% if @draft_preparation[:items].any? %>
+    <section class="draft-preparation" aria-labelledby="draft-preparation-title">
+      <div class="draft-preparation__lead">
+        <p class="section-kicker">报价草稿准备</p>
+        <h2 id="draft-preparation-title"><%= @draft_preparation[:attention_count].zero? ? "已准备好一份推荐草稿" : "草稿已准备，先确认标记项" %></h2>
+        <p>系统只带入聊天证据和产品库中已有的数据。价格、币种或规格不一致时会保持待确认。</p>
+      </div>
+      <dl class="draft-preparation__metrics">
+        <div><dt>客户需求</dt><dd><%= @draft_preparation[:items].size %></dd></div>
+        <div><dt>推荐匹配</dt><dd><%= @draft_preparation[:matched_count] %></dd></div>
+        <div><dt>有依据价格</dt><dd><%= @draft_preparation[:priced_count] %></dd></div>
+        <div class="<%= 'needs-attention' if @draft_preparation[:attention_count].positive? %>"><dt>需要确认</dt><dd><%= @draft_preparation[:attention_count] %></dd></div>
+      </dl>
+      <nav class="draft-preparation__actions" aria-label="报价准备快捷操作">
+        <% if @draft_preparation[:ready_to_create] && @draft_preparation[:attention_count].zero? %><button type="submit" form="inquiry-review-form" name="build_deal" value="1" class="button button--primary">创建报价草稿</button><% end %>
+        <a href="#quote-products" class="button button--secondary" data-turbo="false">确认产品方案</a>
+        <a href="#quote-customer" class="button button--ghost" data-turbo="false">检查客户与条款</a>
+      </nav>
+    </section>
+  <% end %>
+
+  <details class="review-guidance review-guidance--compact">
+    <summary>
+      <span><%= @guidance.next_item ? "下一步" : "准备状态" %></span>
+      <strong id="review-next-step"><%= @guidance.next_item&.label || t("self_service.review.ready_title") %></strong>
+      <small><%= @guidance.items.count(&:complete) %>/<%= @guidance.items.size %> 项已完成</small>
+    </summary>
     <div class="review-guidance__lead">
       <span><%= t("self_service.review.current_step") %></span>
-      <h2 id="review-next-step"><%= @guidance.next_item&.label || t("self_service.review.ready_title") %></h2>
+      <h2><%= @guidance.next_item&.label || t("self_service.review.ready_title") %></h2>
       <p><%= @guidance.next_item&.reason || t("self_service.review.ready_body") %></p>
     </div>
     <div class="review-guidance__groups">
@@ -46,9 +72,11 @@
         </section>
       <% end %>
     </div>
-  </section>
+  </details>
 
-  <section class="inquiry-conversation" id="conversation" aria-labelledby="conversation-title">
+  <details class="inquiry-conversation inquiry-evidence-drawer" id="conversation">
+    <summary><span>聊天与证据</span><strong><%= @messages.any? ? "查看 #{@messages.size} 条消息或补充内容" : "查看原始沟通或补充内容" %></strong><small>仅在需要核对来源或继续追问时打开</small></summary>
+    <div class="inquiry-evidence-drawer__body">
     <header class="inquiry-conversation__header">
       <div><p class="section-kicker"><%= t("self_service.conversation.kicker") %></p><h2 id="conversation-title"><%= t("self_service.conversation.title") %></h2><p><%= t("self_service.conversation.help") %></p></div>
       <div class="inquiry-conversation__readiness"><span><%= t("self_service.review.readiness") %></span><strong><%= @inquiry.ready_to_build_quote? ? t("self_service.review.ready") : t("self_service.review.not_ready") %></strong></div>
@@ -84,9 +112,10 @@
         <% end %>
       </aside>
     </div>
-  </section>
+    </div>
+  </details>
 
-  <%= form_with model: @inquiry, class: "inquiry-review__workspace" do |f| %>
+  <%= form_with model: @inquiry, id: "inquiry-review-form", class: "inquiry-review__workspace" do |f| %>
     <section class="inquiry-source-panel" data-intake-motion-target="source">
       <header><div><p class="section-kicker"><%= t("self_service.review.original") %></p><h2><%= @inquiry.source_file.attached? ? @inquiry.source_file.filename : t("self_service.intake.#{@inquiry.source_type}", default: t("self_service.intake.text")) %></h2></div><span><%= t("self_service.review.source_truth") %></span></header>
       <div class="inquiry-source-panel__body"><%= simple_format(@inquiry.source_text, {}, wrapper_tag: "div") %></div>
@@ -94,7 +123,7 @@
     </section>
 
     <section class="inquiry-results-panel">
-      <div class="inquiry-review-section">
+      <div class="inquiry-review-section" id="quote-customer">
         <div class="inquiry-review-section__heading"><span>01</span><div><h2><%= t("self_service.review.buyer_heading") %></h2><p><%= t("self_service.review.buyer_help") %></p></div></div>
         <div class="inquiry-field-grid">
           <% [["customer", t("self_service.review.customer")], ["contact_name", t("self_service.review.contact")], ["contact_email", t("self_service.review.email")], ["country", t("self_service.review.country")], ["currency", t("self_service.review.currency")]].each do |key, label| %>
@@ -105,7 +134,7 @@
             </label>
           <% end %>
           <% terms = data.fetch("commercial_terms", {}) %>
-          <% [["destination", t("self_service.review.destination")], ["incoterm", t("self_service.review.incoterm")], ["delivery", t("self_service.review.delivery")], ["packing", t("self_service.review.packing")]].each do |key, label| %>
+          <% [["destination", t("self_service.review.destination")], ["incoterm", t("self_service.review.incoterm")], ["delivery", t("self_service.review.delivery")], ["packing", t("self_service.review.packing")], ["payment_terms", t("self_service.review.payment_terms")]].each do |key, label| %>
             <label class="extracted-field <%= terms[key].present? ? 'is-uncertain' : 'is-missing' %>" data-intake-motion-target="field" data-action="click->intake-motion#focusSource">
               <span><%= label %><em><%= terms[key].present? ? t("self_service.review.uncertain") : t("self_service.review.missing") %></em></span>
               <input class="input" name="inquiry[extracted_data][commercial_terms][<%= key %>]" value="<%= terms[key] %>" placeholder="<%= t("self_service.review.manual") %>" />
@@ -117,31 +146,38 @@
         </div>
       </div>
 
-      <div class="inquiry-review-section">
+      <div class="inquiry-review-section" id="quote-products">
         <div class="inquiry-review-section__heading"><span>02</span><div><h2><%= t("self_service.review.products_heading") %></h2><p><%= t("self_service.review.products_help") %></p></div></div>
         <div class="inquiry-product-list" data-inquiry-review-target="products">
           <% Array(data["products"]).each_with_index do |product, index| %>
-            <% recommended_match = Array(@catalog_matches[index]).first %>
-            <% auto_match_id = recommended_match[:product].id if recommended_match && recommended_match[:score] >= 5 %>
+            <% prepared_item = @draft_preparation[:items][index] %>
+            <% recommended_match = prepared_item[:recommended] if prepared_item %>
+            <% auto_match_id = recommended_match[:product].id if product["catalog_product_id"].blank? && recommended_match && recommended_match[:recommended] %>
+            <% selected_match = Array(prepared_item&.dig(:candidates)).find { |candidate| candidate[:product].id == product["catalog_product_id"].to_i } || (auto_match_id ? recommended_match : nil) %>
+            <% proposal = selected_match ? selected_match[:proposal].deep_stringify_keys : {} %>
+            <% displayed = product.merge(proposal.compact) %>
+            <% requested_proposal = product.slice("name", "model", "quantity", "unit", "packing", "lead_time", "unit_price", "price_source", "specifications").merge("price_source" => product["price_source"].presence || "unpriced") %>
+            <% specification_keys = (product.fetch("specifications", {}).keys + Array(prepared_item&.dig(:candidates)).flat_map { |candidate| candidate.dig(:proposal, :specifications).to_h.keys }).uniq %>
             <article class="inquiry-product-card">
-              <header><span><%= (index + 1).to_s.rjust(2, "0") %></span><div><input name="inquiry[extracted_data][products][<%= index %>][name]" value="<%= product["name"] %>" class="inquiry-product-card__name" /><small><%= product["evidence"].present? ? "#{t("self_service.review.source")}：“#{product['evidence']}”" : t("self_service.review.no_exact_source") %></small></div><strong class="status status--required"><%= product["unit_price"].to_d.positive? ? t("self_service.review.priced") : t("self_service.review.price_required") %></strong></header>
+              <header><span><%= (index + 1).to_s.rjust(2, "0") %></span><div><input data-product-field="name" name="inquiry[extracted_data][products][<%= index %>][name]" value="<%= displayed["name"] %>" class="inquiry-product-card__name" /><small><%= product["evidence"].present? ? "#{t("self_service.review.source")}：“#{product['evidence']}”" : t("self_service.review.no_exact_source") %></small></div><strong class="status status--required"><%= displayed["unit_price"].to_d.positive? ? t("self_service.review.priced") : t("self_service.review.price_required") %></strong></header>
               <div class="inquiry-product-card__facts">
-                <% [["model", t("self_service.review.model")], ["quantity", t("self_service.review.quantity")], ["unit", t("self_service.review.unit")], ["packing", t("self_service.review.packing")]].each do |key, label| %>
-                  <label><span><%= label %></span><input class="input" name="inquiry[extracted_data][products][<%= index %>][<%= key %>]" value="<%= product[key] %>" /></label>
+                <% [["model", t("self_service.review.model")], ["quantity", t("self_service.review.quantity")], ["unit", t("self_service.review.unit")], ["packing", t("self_service.review.packing")], ["lead_time", t("self_service.review.delivery")]].each do |key, label| %>
+                  <label><span><%= label %></span><input class="input" data-product-field="<%= key %>" name="inquiry[extracted_data][products][<%= index %>][<%= key %>]" value="<%= displayed[key] %>" /></label>
                 <% end %>
               </div>
               <div class="inquiry-product-card__specs">
-                <% %w[voltage color material].each do |key| %><label><span><%= t("self_service.review.#{key}") %></span><input class="input" name="inquiry[extracted_data][products][<%= index %>][specifications][<%= key %>]" value="<%= product.dig('specifications', key) %>" placeholder="<%= t("self_service.review.missing") %>" /></label><% end %>
+                <% specification_keys.each do |key| %><label><span><%= t("self_service.review.#{key}", default: key.to_s.humanize) %></span><input class="input" data-spec-key="<%= key %>" name="inquiry[extracted_data][products][<%= index %>][specifications][<%= key %>]" value="<%= displayed.dig('specifications', key) %>" placeholder="<%= t("self_service.review.missing") %>" /></label><% end %>
               </div>
-              <fieldset class="catalog-match"><legend><%= t("self_service.review.catalog_match") %></legend>
-                <% Array(@catalog_matches[index]).each do |match| %>
+              <fieldset class="catalog-match"><legend><%= t("self_service.review.catalog_match") %> · 最多 3 个方案</legend>
+                <p class="catalog-match__state" data-candidate-state><%= auto_match_id ? (recommended_match[:price_available] ? "已预填推荐产品与产品库价格，请确认" : "已预填推荐产品，价格仍需确认") : "请选择最接近客户需求的方案" %></p>
+                <% Array(prepared_item&.dig(:candidates)).each_with_index do |match, candidate_index| %>
                   <% catalog_product = match[:product] %>
-                  <label class="catalog-candidate"><input type="radio" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="<%= catalog_product.id %>" <%= "checked" if product["catalog_product_id"].to_i == catalog_product.id || (product["catalog_product_id"].blank? && auto_match_id == catalog_product.id) %>><span class="catalog-candidate__visual"><% if catalog_product.display_image.present? %><%= image_tag catalog_product.display_image, alt: "" %><% else %><b><%= catalog_product.name.first %></b><% end %></span><span><strong><%= catalog_product.name %></strong><small><%= catalog_product.sku %> · <%= match[:reasons].join(" · ") %></small></span><em><%= match[:score] >= 5 ? t("self_service.review.best_match") : t("self_service.review.candidate") %></em></label>
+                  <label class="catalog-candidate <%= 'is-selected' if product["catalog_product_id"].to_i == catalog_product.id || auto_match_id == catalog_product.id %>"><input type="radio" data-action="change->inquiry-review#applyCandidate" data-proposal="<%= match[:proposal].to_json %>" data-price-available="<%= match[:price_available] %>" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="<%= catalog_product.id %>" <%= "checked" if product["catalog_product_id"].to_i == catalog_product.id || (product["catalog_product_id"].blank? && auto_match_id == catalog_product.id) %>><span class="catalog-candidate__visual"><% if catalog_product.display_image.present? %><%= image_tag catalog_product.display_image, alt: "" %><% else %><b><%= catalog_product.name.first %></b><% end %></span><span><strong><%= catalog_product.name %></strong><small><%= catalog_product.sku %> · <%= match[:reasons].join(" · ") %></small><small class="catalog-candidate__commercial"><%= match[:price_available] ? "#{catalog_product.price_currency} #{catalog_product.default_price.to_d.to_s('F')} · 产品库价格" : "价格待确认" %><%= " · MOQ #{catalog_product.moq}" if catalog_product.moq.to_i.positive? %></small><% if match[:warnings].any? %><small class="catalog-candidate__warning"><%= match[:warnings].map { |warning| { "currency_mismatch" => "币种不一致", "below_moq" => "低于 MOQ", "specification_conflict" => "规格需核对" }[warning] }.join(" · ") %></small><% end %></span><em><%= candidate_index.zero? && match[:recommended] ? "推荐" : t("self_service.review.candidate") %></em></label>
                 <% end %>
-                <label class="catalog-candidate"><input type="radio" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="" <%= "checked" if product["catalog_product_id"].blank? && auto_match_id.blank? %>><span class="catalog-candidate__visual is-temporary">+</span><span><strong><%= t("self_service.review.deal_only") %></strong><small><%= t("self_service.review.deal_only_help") %></small></span></label>
+                <label class="catalog-candidate <%= 'is-selected' if product["catalog_product_id"].blank? && auto_match_id.blank? %>"><input type="radio" data-action="change->inquiry-review#keepRequested" data-proposal="<%= requested_proposal.to_json %>" name="inquiry[extracted_data][products][<%= index %>][catalog_product_id]" value="" <%= "checked" if product["catalog_product_id"].blank? && auto_match_id.blank? %>><span class="catalog-candidate__visual is-temporary">+</span><span><strong><%= t("self_service.review.deal_only") %></strong><small><%= t("self_service.review.deal_only_help") %></small></span></label>
                 <label class="catalog-manual"><span><%= t("self_service.review.choose_other") %></span><select class="input" name="inquiry[extracted_data][products][<%= index %>][manual_catalog_product_id]" onchange="this.closest('fieldset').querySelectorAll('input[type=radio]').forEach(r=>r.checked=false); this.name=this.name.replace('manual_catalog_product_id','catalog_product_id')"><option value=""><%= t("self_service.review.select_manual") %></option><%= options_from_collection_for_select(@catalog_products, :id, :name) %></select></label>
               </fieldset>
-              <div class="price-confirmation"><div><p class="section-kicker"><%= t("self_service.review.commercial") %></p><strong><%= t("self_service.review.ai_never_price") %></strong></div><label><span><%= t("self_service.review.unit_price") %></span><input class="input money-input" type="number" min="0" step="0.01" name="inquiry[extracted_data][products][<%= index %>][unit_price]" value="<%= product["unit_price"] %>" placeholder="<%= t("self_service.review.required") %>"></label><label><span><%= t("self_service.review.price_source") %></span><select class="input" name="inquiry[extracted_data][products][<%= index %>][price_source]"><option value=""><%= t("self_service.studio.select_source") %></option><% QuoteItem::PRICE_SOURCES.each do |source| %><option value="<%= source %>" <%= "selected" if product["price_source"] == source %>><%= t("self_service.review.price_sources.#{source}") %></option><% end %></select></label><label><span><%= t("self_service.review.buyer_control") %></span><select class="input" name="inquiry[extracted_data][products][<%= index %>][selection_mode]"><% QuoteItem::SELECTION_MODES.each do |mode| %><option value="<%= mode %>" <%= "selected" if product["selection_mode"] == mode %>><%= t("self_service.review.selection_modes.#{mode}") %></option><% end %></select></label></div>
+              <div class="price-confirmation"><div><p class="section-kicker"><%= t("self_service.review.commercial") %></p><strong><%= t("self_service.review.ai_never_price") %></strong></div><label><span><%= t("self_service.review.unit_price") %></span><input class="input money-input" data-product-field="unit_price" type="number" min="0" step="0.01" name="inquiry[extracted_data][products][<%= index %>][unit_price]" value="<%= displayed["unit_price"] %>" placeholder="<%= t("self_service.review.required") %>"></label><label><span><%= t("self_service.review.price_source") %></span><select class="input" data-product-field="price_source" name="inquiry[extracted_data][products][<%= index %>][price_source]"><option value=""><%= t("self_service.studio.select_source") %></option><% QuoteItem::PRICE_SOURCES.each do |source| %><option value="<%= source %>" <%= "selected" if displayed["price_source"] == source %>><%= t("self_service.review.price_sources.#{source}") %></option><% end %></select></label><label><span><%= t("self_service.review.buyer_control") %></span><select class="input" name="inquiry[extracted_data][products][<%= index %>][selection_mode]"><% QuoteItem::SELECTION_MODES.each do |mode| %><option value="<%= mode %>" <%= "selected" if product["selection_mode"] == mode %>><%= t("self_service.review.selection_modes.#{mode}") %></option><% end %></select></label></div>
             </article>
           <% end %>
         </div>

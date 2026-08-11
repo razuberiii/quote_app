@@ -1,19 +1,26 @@
-<%= render "shared/settings_header", title: t("chat_sync.title"), section: :chat_integration %>
-
 <main class="deal-workspace chat-sync-setup">
   <header class="deal-page-header">
     <div><p class="eyebrow"><%= t("chat_sync.eyebrow") %></p><h1><%= t("chat_sync.title") %></h1><p><%= t("chat_sync.help") %></p></div>
-    <%= link_to t("chat_sync.install"), "/integrations/rubusoo-chat-sync.user.js?v=0.1.6", class: "button button--primary", data: { turbo: false } %>
+    <%= link_to t("chat_sync.back_to_quotes"), quotes_path, class: "deal-back" %>
   </header>
   <div class="chat-sync-setup__grid">
-    <section data-controller="chat-pairing" data-chat-pairing-url-value="<%= pairing_code_chat_integration_path %>" data-chat-pairing-error-message="<%= t("chat_sync.code_failed") %>">
-      <span>01</span><h2><%= t("chat_sync.pair_title") %></h2><p><%= t("chat_sync.pair_help") %></p>
+    <section><span>01</span><h2><%= t("chat_sync.install_title") %></h2><p><%= t("chat_sync.install_help") %></p><%= link_to t("chat_sync.install"), "/integrations/rubusoo-chat-sync.user.js?v=0.1.6", class: "button button--primary", target: "_blank", rel: "noopener", data: { turbo: false } %><small class="chat-sync-install-note"><%= t("chat_sync.install_next") %></small></section>
+    <section data-controller="chat-pairing" data-chat-pairing-url-value="<%= pairing_code_chat_integration_path %>" data-chat-pairing-error-message="<%= t("chat_sync.code_failed") %>" data-chat-pairing-copy-label-value="<%= t("chat_sync.copy_code") %>" data-chat-pairing-copied-label-value="<%= t("chat_sync.code_copied") %>" data-chat-pairing-expires-label-value="<%= t("chat_sync.code_expires") %>">
+      <span>02</span><h2><%= t("chat_sync.pair_title") %></h2><p><%= t("chat_sync.pair_help") %></p>
       <button class="button button--secondary" type="button" data-action="chat-pairing#create" data-chat-pairing-target="button"><%= t("chat_sync.generate_code") %></button>
-      <div class="chat-sync-code" data-chat-pairing-target="result" hidden><small><%= t("chat_sync.code_ready") %></small><strong data-chat-pairing-target="code"></strong></div>
+      <div class="chat-sync-code" data-chat-pairing-target="result" hidden><small><%= t("chat_sync.code_ready") %></small><strong data-chat-pairing-target="code"></strong><div class="chat-sync-code__actions"><button type="button" class="button button--secondary" data-chat-pairing-target="copy" data-action="chat-pairing#copy" hidden><%= t("chat_sync.copy_code") %></button><small data-chat-pairing-target="countdown"></small></div></div>
     </section>
-    <section><span>02</span><h2><%= t("chat_sync.supported") %></h2><ul><li><%= t("chat_sync.platforms.whatsapp") %></li><li><%= t("chat_sync.platforms.alibaba") %></li></ul></section>
-    <section><span>03</span><h2><%= t("chat_sync.privacy_title") %></h2><p><%= t("chat_sync.privacy") %></p></section>
+    <section><span>03</span><h2><%= t("chat_sync.bind_title") %></h2><p><%= t("chat_sync.bind_help") %></p><ul><li><%= t("chat_sync.platforms.whatsapp") %></li><li><%= t("chat_sync.platforms.alibaba") %></li></ul></section>
   </div>
+  <details class="chat-sync-privacy"><summary><%= t("chat_sync.privacy_title") %></summary><p><%= t("chat_sync.privacy") %></p></details>
+  <section class="chat-sync-conversations">
+    <header><div><p class="section-kicker"><%= t("chat_sync.bound_conversations") %></p><h2><%= t("chat_sync.return_to_chats") %></h2></div><%= link_to t("chat_sync.all_inquiries"), inquiries_path, class: "deal-back" %></header>
+    <% if @bindings.any? %>
+      <% @bindings.each do |binding| %>
+        <article><div><strong><%= binding.display_name.presence || t("chat_sync.platform_conversation", platform: binding.platform.titleize) %></strong><small><%= binding.platform == "alibaba" ? t("chat_sync.platforms.alibaba") : binding.platform.titleize %> · <%= t("chat_sync.message_count", count: binding.chat_captured_messages.count) %></small></div><%= link_to t("chat_sync.view_inquiry"), inquiry_path(binding.inquiry), class: "button button--secondary" %></article>
+      <% end %>
+    <% else %><p><%= t("chat_sync.no_conversations") %></p><% end %>
+  </section>
   <section class="chat-sync-tokens">
     <h2><%= t("chat_sync.tokens") %></h2>
     <% if @tokens.any? %>

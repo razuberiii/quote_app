@@ -6,7 +6,7 @@ class ChatConversationAnalysisScheduler
   end
 
   def call
-    cursor = @binding.chat_captured_messages.maximum(:id)
+    cursor = @binding.current_captured_messages.maximum(:id)
     raise NoMessages unless cursor
 
     current = @binding.analysis_result.to_h

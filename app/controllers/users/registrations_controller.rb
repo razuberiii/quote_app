@@ -30,6 +30,10 @@ module Users
 
     protected
 
+    def sign_up_params
+      params.require(:user).permit(:username, :email, :password, :password_confirmation)
+    end
+
     def verify_turnstile
       turnstile_token = params.dig(:user, :cf_turnstile_response)
       unless verify_turnstile_for_html!(

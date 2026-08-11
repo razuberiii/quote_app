@@ -2841,6 +2841,9 @@ en:
           complete_verification: Please complete the verification to continue
           loading_verification: Loading verification...
           verified_submitting: ✓ Verified! Submitting...
+          verification_unavailable: Verification could not load. Check your connection and try again, or close this dialog for now.
+          close_verification: Back to sign up
+          retry_verification: Try again
         edit:
           username: Username
           username_hint: Used for sign-in and shown inside your workspace.

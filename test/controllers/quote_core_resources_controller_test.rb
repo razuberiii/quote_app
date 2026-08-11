@@ -19,6 +19,20 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".import-hub__row", 5
   end
 
+  test "chat integration lists a return path to bound inquiries" do
+    inquiry = companies(:one).inquiries.create!(created_by: users(:one), source_type: "chat", source_text: "")
+    companies(:one).chat_conversation_bindings.create!(user: users(:one), inquiry:, platform: "alibaba",
+      platform_account_id: "seller-1", platform_conversation_id: "thread-42", display_name: "Atlas Buyer")
+
+    get chat_integration_path
+
+    assert_response :success
+    assert_select ".chat-sync-conversations a[href='#{inquiry_path(inquiry)}']", text: /查看询盘|Review request/
+    assert_select ".chat-sync-conversations", text: /Atlas Buyer/
+    assert_select "[data-chat-pairing-target='copy']", 1
+    assert_select "[data-chat-pairing-target='countdown']", 1
+  end
+
   test "customer resource renders without CRM dashboard" do
     get customers_path
     assert_response :success
@@ -26,12 +40,13 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_select ".dashboard-module", 0
   end
 
-  test "new quote offers blank creation with optional AI import" do
+  test "new quote recommends chat sync with manual fallbacks" do
     get new_quote_path
 
     assert_response :success
     assert_select ".quote-start"
     assert_select "form[action='#{quotes_path}']"
+    assert_select "a.button--primary[href='#{chat_integration_path}']"
     assert_select "a[href='#{new_inquiry_path}']"
   end
 
@@ -62,6 +77,12 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to quote_path(quote)
     assert_equal "Northstar Components", quote.customer.name
     assert_equal "Mina Patel", quote.customer.contact_name
+
+    get quote_path(quote)
+    assert_response :success
+    assert_select ".studio-readiness a[href='#studio-terms']", minimum: 2
+    assert_select ".studio-readiness a[href='#studio-products']", minimum: 2
+    assert_select ".studio-readiness a[href='#studio-pricing']", minimum: 1
   end
 
   test "blank quote keeps validation on the creation page" do
@@ -82,6 +103,22 @@ class QuoteCoreResourcesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "a[href='#{quote_version_export_path(quotes(:one), revision, output: 'pdf')}']"
     assert_select "a[href='#{quote_version_export_path(quotes(:one), revision, output: 'excel')}']"
+  end
+
+  test "buyer page renders frozen base-template custom fields" do
+    quote = quotes(:one)
+    design = quote.company.quote_template_or_default
+    design.update!(custom_fields: [ { "key" => "certificate", "label" => "Certificate requirement", "required" => false, "type" => "text" } ])
+    quote.update!(template: design, custom_field_values: { "certificate" => "CE and RoHS" })
+    revision = quote.quote_revisions.create!(company: companies(:one), number: 1, status: "current",
+      currency: "USD", total: quote.grand_total, snapshot: QuoteSnapshotBuilder.new(quote).as_json,
+      secure_token: SecureRandom.urlsafe_base64(16), published_at: Time.current)
+
+    get buyer_room_path(revision.secure_token)
+
+    assert_response :success
+    assert_select ".buyer-commercial", text: /Certificate requirement/
+    assert_select ".buyer-commercial", text: /CE and RoHS/
   end
 
   test "buyer quantity changes become a reviewed revision draft without mutating the published version" do

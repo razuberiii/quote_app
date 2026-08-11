@@ -31,9 +31,9 @@
   max-width: 820px;
   margin: 18px 0;
   font-size: clamp(3rem, 5.8vw, 5.6rem);
-  font-weight: 720;
-  line-height: 1.02;
-  letter-spacing: -0.058em;
+  font-weight: 650;
+  line-height: 1.08;
+  letter-spacing: -0.038em;
 }
 
 .buyer-storefront .buyer-intro {
@@ -68,9 +68,9 @@
 .buyer-storefront .buyer-section-heading h2 {
   margin: 0.5rem 0 0.65rem;
   font-size: clamp(2.25rem, 3.6vw, 3.8rem);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.048em;
+  font-weight: 650;
+  line-height: 1.14;
+  letter-spacing: -0.032em;
 }
 
 .buyer-storefront .buyer-section-heading > p:last-child {
@@ -91,8 +91,8 @@
 .buyer-storefront .product-copy h3 {
   margin: 0.6rem 0 0.8rem;
   font-size: clamp(1.8rem, 2.7vw, 2.8rem);
-  font-weight: 700;
-  line-height: 1.12;
+  font-weight: 650;
+  line-height: 1.18;
 }
 
 .buyer-storefront .product-copy > p:not(.product-index) {
@@ -114,6 +114,15 @@
   padding: 15px 16px;
 }
 
+.buyer-storefront .buyer-product__controls input[readonly] {
+  cursor: default;
+  pointer-events: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 .buyer-storefront .buyer-plan-grid button {
   min-height: 156px;
   padding: 22px;
@@ -133,6 +142,21 @@
   font-family: inherit;
 }
 
+.neo-os--buyer .seller-preview-bar {
+  border-color: #d7dce5;
+  background: rgba(255, 255, 255, 0.97);
+  color: #111722;
+  box-shadow: 0 8px 24px rgba(16, 23, 34, 0.1);
+}
+
+.neo-os--buyer .seller-preview-bar span {
+  color: #526174;
+}
+
+.neo-os--buyer .seller-preview-bar strong {
+  color: #8f1838;
+}
+
 @media (max-width: 760px) {
   .buyer-storefront {
     font-size: 15px;
@@ -143,37 +167,75 @@
   }
 
   .buyer-storefront .buyer-cover h1 {
-    font-size: clamp(2.55rem, 12vw, 3.8rem);
-    line-height: 1.05;
+    max-width: 100%;
+    font-size: clamp(1.85rem, 8.5vw, 2.3rem);
+    font-weight: 620;
+    line-height: 1.16;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .buyer-storefront .doc-section {
-    padding: 46px 18px;
+    padding: 40px 18px;
   }
 
   .buyer-storefront .buyer-section-heading h2 {
-    font-size: 2.35rem;
-    line-height: 1.1;
+    max-width: 100%;
+    font-size: 1.75rem;
+    line-height: 1.16;
+    overflow-wrap: anywhere;
   }
 
   .buyer-storefront .buyer-product--visual {
-    gap: 24px;
-    padding: 30px 0;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    padding: 26px 0;
   }
 
   .buyer-storefront .buyer-product__image {
-    min-height: 220px;
+    min-height: 190px;
   }
 
   .buyer-storefront .product-copy h3 {
-    font-size: 1.9rem;
-    line-height: 1.14;
+    max-width: 100%;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   .buyer-storefront .selection-panel {
     grid-template-columns: 1fr 1fr;
     gap: 7px;
     padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    border-top: 1px solid #d7dce5;
+    background: rgba(255, 255, 255, 0.98);
+    color: #111722;
+    box-shadow: 0 -8px 24px rgba(16, 23, 34, 0.1);
+  }
+
+  .neo-os--buyer .seller-preview-bar--send > div:first-child {
+    display: grid;
+    gap: 4px;
+    justify-content: stretch;
+    padding: 10px 12px;
+    border-left: 3px solid #b8244c;
+    background: #fff1f4;
+  }
+
+  .neo-os--buyer .seller-preview-bar--send {
+    position: relative;
+    top: auto;
+  }
+
+  .neo-os--buyer .seller-preview-bar--send > div:first-child span {
+    color: #526174;
+  }
+
+  .neo-os--buyer .seller-preview-bar--send > div:first-child strong {
+    color: #8f1838;
+    font-size: 0.82rem;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
   }
 
   .buyer-storefront .selection-panel .total-row {
@@ -183,8 +245,20 @@
   }
 
   .buyer-storefront .selection-panel .total-row strong {
+    color: #176b48;
     overflow: visible;
     font-size: 0.92rem;
     white-space: nowrap;
+  }
+
+  .buyer-storefront .selection-panel .button--primary {
+    background: #111722;
+    color: #fff;
+  }
+
+  .buyer-storefront .selection-panel .button--secondary {
+    border-color: #cfd5df;
+    background: #fff;
+    color: #111722;
   }
 }

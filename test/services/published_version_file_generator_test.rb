@@ -3,6 +3,9 @@ require "test_helper"
 class PublishedVersionFileGeneratorTest < ActiveSupport::TestCase
   test "customer-ready Excel is generated from the immutable snapshot" do
     quote = quotes(:one)
+    design = quote.company.quote_template_or_default
+    design.update!(custom_fields: [ { "key" => "project_code", "label" => "Project code", "required" => true, "type" => "text" } ])
+    quote.update!(template: design, custom_field_values: { "project_code" => "ATLAS-42" })
     revision = quote.quote_revisions.create!(company: quote.company, number: 7, status: "current",
       currency: quote.currency, total: quote.grand_total, snapshot: QuoteSnapshotBuilder.new(quote).as_json,
       secure_token: SecureRandom.urlsafe_base64(16), published_at: Time.current)
@@ -13,6 +16,11 @@ class PublishedVersionFileGeneratorTest < ActiveSupport::TestCase
     assert_operator output.byte_size, :>, 4_000
     assert output.filename.end_with?("-V7.xlsx")
     assert_equal "PK", output.io.read(2)
+    workbook_contents = output.io.tap(&:rewind).read
+    strings = []
+    Zip::File.open_buffer(workbook_contents) { |zip| strings = zip.entries.map { |entry| entry.get_input_stream.read if entry.name.end_with?(".xml") }.compact }
+    assert strings.any? { |xml| xml.include?("Project code") }
+    assert strings.any? { |xml| xml.include?("ATLAS-42") }
   end
 
   test "customer-ready PDF is generated from the immutable snapshot" do

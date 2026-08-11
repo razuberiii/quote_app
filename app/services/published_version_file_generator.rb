@@ -59,6 +59,17 @@ class PublishedVersionFileGenerator
     sheet.merge_cells("A#{sheet.rows.size}:I#{sheet.rows.size}")
     sheet.add_row [ excel_text("incoterm", "Incoterm"), safe(@revision.snapshot["trade_term"]), nil, excel_text("payment", "Payment terms"), safe(@revision.snapshot["payment_term"]), nil, excel_text("delivery", "Delivery"), safe(@revision.snapshot["delivery_notes"]) ]
     sheet.merge_cells("B#{sheet.rows.size}:C#{sheet.rows.size}"); sheet.merge_cells("E#{sheet.rows.size}:F#{sheet.rows.size}"); sheet.merge_cells("H#{sheet.rows.size}:I#{sheet.rows.size}")
+    custom_fields = Array(@revision.snapshot["custom_fields"]).select { |field| @revision.snapshot.fetch("custom_field_values", {})[field["key"]].present? }
+    if custom_fields.any?
+      sheet.add_row []
+      sheet.add_row [ excel_text("custom_fields", "ADDITIONAL INFORMATION") ], style: header
+      sheet.merge_cells("A#{sheet.rows.size}:I#{sheet.rows.size}")
+      custom_fields.each do |field|
+        sheet.add_row [ safe(field["label"]), nil, safe(@revision.snapshot.fetch("custom_field_values", {})[field["key"]]) ], style: [ label ]
+        sheet.merge_cells("A#{sheet.rows.size}:B#{sheet.rows.size}")
+        sheet.merge_cells("C#{sheet.rows.size}:I#{sheet.rows.size}")
+      end
+    end
     sheet.column_widths 8, 18, 32, 38, 12, 12, 16, 14, 18
     sheet.sheet_view.pane do |pane| pane.top_left_cell = "A8"; pane.state = :frozen; pane.y_split = 7 end
     sheet.auto_filter = "A7:I7"

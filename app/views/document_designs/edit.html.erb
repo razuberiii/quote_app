@@ -4,6 +4,7 @@
     <div><p class="eyebrow"><%= t("document_design.eyebrow") %></p><h1><%= t("document_design.title") %></h1><p><%= t("document_design.help") %></p></div>
     <div class="document-design__rule"><strong><%= t("document_design.rule_title") %></strong><span><%= t("document_design.rule_help") %></span></div>
   </header>
+  <p><%= link_to "上传客户 Excel 模板", workbook_templates_path, class: "button button--secondary" %></p>
 
   <%= form_with model: @design, url: document_design_path, method: :patch, class: "document-design__grid" do |form| %>
     <section class="document-design__controls">
@@ -33,6 +34,10 @@
           <label class="field"><span><%= t("document_design.fields.#{key}") %></span><%= form.select field, QuoteTemplate::OUTPUT_LOCALES.map { |value, label| [label, value] } %></label>
         <% end %>
       </div></details>
+
+      <div class="design-section"><span>04</span><div><h2>自定义字段</h2><p>不上传客户文件也能在报价中填写，并自动输出到客户页面、PDF 和 Excel。</p></div></div>
+      <% custom_fields_text = @design.custom_field_definitions.map { |field| [field[:key], field[:label], ("required" if field[:required]), field[:type]].compact.join(" | ") }.join("\n") %>
+      <label class="field"><span>每行一个：字段代号 | 显示名称 | required（可选）| 类型（text/number/date/multiline）</span><%= text_area_tag :custom_fields_text, custom_fields_text, rows: 6, placeholder: "project_code | 项目编号 | required | text\nservice_date | 服务日期 | | date" %><small>字段代号发布后用于保存历史数据，建议不要随意修改。</small></label>
       <footer><span><%= t("document_design.save_help") %></span><%= form.submit t("document_design.save"), class: "button button--primary" %></footer>
     </section>
 

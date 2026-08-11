@@ -9,6 +9,7 @@ module Api
         existing = binding.chat_sync_requests.find_by(request_id:)
         return render json: receipt(existing, binding:, duplicate: true) if existing
 
+        ChatConversationTaskRouter.new(binding:, user: current_user, messages: params[:messages]).call
         accepted = ChatMessageIngestor.new(binding:, user: current_user, messages: params[:messages]).call
         request_record = binding.chat_sync_requests.create!(request_id:, accepted_count: accepted.size)
         binding.update!(last_synced_at: Time.current)

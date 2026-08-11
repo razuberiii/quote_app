@@ -2844,6 +2844,9 @@ zh-CN:
           complete_verification: 请先完成验证再继续
           loading_verification: 正在加载验证...
           verified_submitting: ✓ 验证通过，正在提交...
+          verification_unavailable: 验证组件未能加载。请检查网络后重试，或暂时关闭验证。
+          close_verification: 返回注册
+          retry_verification: 重新加载
         edit:
           username: 用户名
           username_hint: 用于登录，并显示在你的工作空间中。

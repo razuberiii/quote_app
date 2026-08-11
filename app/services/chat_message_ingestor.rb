@@ -1,6 +1,17 @@
 class ChatMessageIngestor
   MAX_BATCH_SIZE = 100
 
+  def self.fingerprint_for(binding, payload)
+    native_id = payload["platformMessageId"].to_s.strip
+    return Digest::SHA256.hexdigest("native:#{binding.platform}:#{native_id}") if native_id.present?
+
+    source = payload["rawFingerprint"].presence || [
+      binding.platform, binding.platform_conversation_id, payload["senderId"],
+      payload["sentAt"], payload["text"], payload["type"], payload["quotedText"]
+    ].join("\u241f")
+    Digest::SHA256.hexdigest(source)
+  end
+
   def initialize(binding:, user:, messages:)
     @binding = binding
     @user = user
@@ -32,14 +43,7 @@ class ChatMessageIngestor
   private
 
   def stable_fingerprint(payload)
-    native_id = payload["platformMessageId"].to_s.strip
-    return Digest::SHA256.hexdigest("native:#{@binding.platform}:#{native_id}") if native_id.present?
-
-    source = payload["rawFingerprint"].presence || [
-      @binding.platform, @binding.platform_conversation_id, payload["senderId"],
-      payload["sentAt"], payload["text"], payload["type"], payload["quotedText"]
-    ].join("\u241f")
-    Digest::SHA256.hexdigest(source)
+    self.class.fingerprint_for(@binding, payload)
   end
 
   def captured_attributes(payload, fingerprint)
@@ -83,11 +87,15 @@ class ChatMessageIngestor
     body = payload["text"].to_s.strip.presence || payload["attachmentName"].to_s.strip.presence || "[#{type}]"
     @binding.inquiry.inquiry_messages.create!(
       recorded_by: @user,
-      direction: payload["direction"] == "sales" ? "seller" : "buyer",
+      direction: inquiry_direction(payload["direction"]),
       channel: @binding.platform == "whatsapp" ? "whatsapp" : "other",
       body:, occurred_at: parse_time(payload["sentAt"]) || Time.current,
       change_summary: { "status" => "captured", "chat_sync" => true }
     )
+  end
+
+  def inquiry_direction(direction)
+    { "customer" => "buyer", "sales" => "seller" }.fetch(direction, "internal")
   end
 
   def parse_time(value)

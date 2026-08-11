@@ -2,14 +2,23 @@ zh-CN:
   chat_sync:
     settings_nav: 聊天同步
     eyebrow: 网页聊天同步
-    title: 自动采集已绑定的客户会话
-    help: 在 WhatsApp Web 和 Alibaba 国际站中增量采集已显示的消息，并同步到对应询盘。未授权的网站和未绑定的会话不会上传。
+    title: 连接客户聊天
+    help: 安装一次，即可从 WhatsApp Web 和 Alibaba 国际站持续同步你主动绑定的客户会话，并准备报价草稿。
+    back_to_quotes: ← 返回报价
+    install_title: 安装聊天插件
+    install_help: 先在浏览器安装 Tampermonkey 或 Violentmonkey，再安装 Rubusoo 聊天同步脚本。
+    install_next: 安装确认会在新标签页打开。完成后回到这里生成绑定码；没有反应时，请先确认脚本管理器已启用。
     install: 安装用户脚本
     pair_title: 连接当前浏览器
     pair_help: 生成一次性绑定码，然后在聊天页面的 Rubusoo 浮窗中输入。绑定码 10 分钟内有效且只能使用一次。
     generate_code: 生成绑定码
     code_ready: 在聊天浮窗中输入此绑定码
     code_failed: 生成失败，请刷新页面后重试
+    copy_code: 复制绑定码
+    code_copied: 已复制
+    code_expires: "__TIME__ 后失效"
+    bind_title: 打开并绑定客户聊天
+    bind_help: 前往聊天网站，在 Rubusoo 浮窗中粘贴绑定码，然后选择当前客户会话。
     supported: 支持的网站
     platforms: { whatsapp: WhatsApp Web, alibaba: Alibaba 国际站消息中心 }
     privacy_title: 采集边界
@@ -18,3 +27,10 @@ zh-CN:
     no_tokens: 还没有已连接的浏览器。
     revoke: 撤销
     revoked: 浏览器访问令牌已撤销。
+    bound_conversations: 已绑定会话
+    return_to_chats: 回到客户聊天记录
+    all_inquiries: 查看全部客户需求
+    platform_conversation: "%{platform} 会话"
+    message_count: "%{count} 条消息"
+    view_inquiry: 查看询盘
+    no_conversations: 还没有绑定会话。安装插件后，在客户聊天页面完成第一次绑定。

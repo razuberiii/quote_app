@@ -3,6 +3,8 @@ class ChatIntegrationsController < ApplicationController
 
   def show
     @tokens = current_user.chat_sync_tokens.order(created_at: :desc)
+    @bindings = current_user.company.chat_conversation_bindings.includes(:inquiry, :customer)
+      .order(updated_at: :desc).limit(30)
   end
 
   def pairing_code

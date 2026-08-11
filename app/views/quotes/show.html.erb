@@ -4,7 +4,7 @@
 <main class="quote-studio quote-studio--editor quote-workspace" data-controller="studio-motion" data-studio-motion-unsaved-value="<%= t('self_service.studio.unsaved') %>" data-studio-motion-saving-value="<%= t('self_service.studio.saving') %>" data-studio-motion-saved-value="<%= t('self_service.studio.saved') %>" data-studio-motion-save-failed-value="<%= t('self_service.studio.save_failed') %>" data-studio-motion-recheck-value="<%= t('self_service.studio.recheck') %>" data-studio-motion-recheck-help-value="<%= t('self_service.studio.recheck_help') %>">
   <header class="studio-toolbar quote-workspace__topbar">
     <div class="studio-toolbar__identity">
-      <%= link_to "返回报价列表", quotes_path, class: "studio-back" %>
+      <%= link_to quotes_path, class: "studio-back" do %><span aria-hidden="true">←</span><span class="studio-back__label">报价列表</span><% end %>
       <div>
         <h1><%= deal_title(@quote) %></h1>
         <p class="quote-workspace__meta">
@@ -24,8 +24,7 @@
           <%= link_to "记录线下接受", new_acceptance_quote_path(@quote, version_id: latest_revision&.id) if latest_revision && !@acceptance %>
         </div>
       </details>
-      <%= link_to "客户预览", preview_quote_path(@quote), class: "button button--secondary" %>
-      <%= link_to missing.empty? ? (latest_revision ? "发布新版本" : "预览并发送") : "预览并发送",
+      <%= link_to missing.empty? ? (latest_revision ? "预览并发布新版本" : "预览并发送") : "客户预览",
         preview_quote_path(@quote),
         class: "button button--primary" %>
     </div>
@@ -63,9 +62,11 @@
           <strong>缺失和冲突</strong>
           <% field_states.each do |field, state| %>
             <% next unless %w[missing conflict uncertain].include?(state.to_s) %>
+            <% state_label = { "missing" => "缺失", "conflict" => "冲突", "uncertain" => "待确认" }.fetch(state.to_s, state) %>
+            <% field_label = { "price" => "单价", "freight" => "运费", "customer" => "客户", "products" => "商品" }.fetch(field.to_s, field.to_s.humanize) %>
             <a href="<%= field.to_s == "freight" ? "#studio-pricing" : "#studio-products" %>">
-              <span><%= state %></span>
-              <em><%= field.to_s.humanize %></em>
+              <span><%= state_label %></span>
+              <em><%= field_label %></em>
             </a>
           <% end %>
         </section>
@@ -115,9 +116,9 @@
               <article class="studio-product">
                 <div class="studio-product__tools"><button type="button" data-action="studio-motion#duplicateItem">复制</button><label><%= item_fields.check_box :_destroy %><span>移除</span></label></div>
                 <% product_image = item.effective_image_attachment %>
-                <div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span><%= item.description.to_s.first || "P" %></span><small>商品图片</small><% end %></div>
+                <div class="studio-product__visual"><% if product_image.present? && product_image.blob&.persisted? %><%= image_tag product_image, alt: item.description %><% else %><span aria-hidden="true">—</span><small>无图片</small><% end %></div>
                 <div class="studio-product__content">
-                  <div class="studio-product__top"><div><%= item_fields.text_field :description, class: "studio-product__name", placeholder: "商品名称" %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / Model" %><%= item_fields.text_field :unit_snapshot, placeholder: "单位" %></div></div><label class="studio-mode"><span>客户可调</span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [t("self_service.review.selection_modes.#{mode}"), mode] } %></label></div>
+                  <div class="studio-product__top"><div><%= item_fields.text_area :description, rows: 2, class: "studio-product__name", placeholder: "商品名称" %><div class="studio-product__sku"><%= item_fields.text_field :sku_snapshot, placeholder: "SKU / Model" %><%= item_fields.text_field :unit_snapshot, placeholder: "单位" %></div></div><label class="studio-mode"><span>客户可调</span><%= item_fields.select :selection_mode, QuoteItem::SELECTION_MODES.map { |mode| [t("self_service.review.selection_modes.#{mode}"), mode] } %></label></div>
                   <label class="studio-block-field"><span>描述 / 规格</span><%= item_fields.text_area :specifications_text, rows: 4, placeholder: "功率：5.5 kW\n电压：380V / 50Hz\n材质：不锈钢" %></label>
                   <div class="studio-product__commercial">
                     <label><span>数量</span><%= item_fields.number_field :quantity, min: 1, data: { studio_motion_target: "quantity", action: "input->studio-motion#dirty" } %></label>
@@ -139,6 +140,17 @@
         </section>
 
         <section id="studio-terms" class="studio-terms"><div class="studio-paper__heading"><p class="section-kicker">商务条款</p><h2>条款和备注</h2></div><div class="studio-terms__grid"><label><span>付款条款</span><%= f.text_field :payment_term, placeholder: "30% 订金，70% 发货前付清" %></label><label><span>贸易条款</span><%= f.text_field :trade_term, placeholder: "CIF Jebel Ali" %></label><label><span>交付说明</span><%= f.text_area :delivery_notes, rows: 3 %></label><label><span>通用条款</span><%= f.text_area :terms_text, rows: 3 %></label></div></section>
+
+        <section id="studio-custom-fields" class="studio-terms">
+          <div class="studio-paper__heading"><p class="section-kicker">补充信息</p><h2>自定义字段和客户 Excel</h2><p>基础模板字段会进入客户页面、PDF 和 Excel；客户 Excel 只是可选输出格式。</p></div>
+          <div class="studio-terms__grid">
+            <label><span>输出模板</span><%= f.collection_select :workbook_template_id, @workbook_templates, :id, :name, { include_blank: "系统基础模板" } %></label>
+            <% @quote.custom_field_definitions.each do |field| %>
+                <label><span><%= field[:label] %><%= "（发布前必填）" if field[:required] %></span><% field_name = "quote[custom_field_values][#{field[:key]}]"; field_value = @quote.custom_field_values.to_h[field[:key].to_s] %><% case field[:type].presence || "text" %><% when "number" %><%= number_field_tag field_name, field_value, step: :any %><% when "date" %><%= date_field_tag field_name, field_value %><% when "multiline" %><%= text_area_tag field_name, field_value, rows: 3 %><% else %><%= text_field_tag field_name, field_value %><% end %></label>
+            <% end %>
+          </div>
+          <p><%= link_to "管理客户 Excel 模板", workbook_templates_path, class: "button button--secondary" %></p>
+        </section>
         <footer class="quote-editor__footer"><span>自动保存状态会固定显示在顶部。当前也保留手动保存，避免长表单意外丢失。</span><%= f.submit "保存草稿", class: "button button--primary" %></footer>
       </article>
     <% end %>
@@ -179,6 +191,8 @@
           <p>发送时间：<%= latest_revision.published_at ? l(latest_revision.published_at, format: :long) : "未记录" %></p>
           <button type="button" class="button button--primary button--full" data-controller="clipboard" data-clipboard-text-value="<%= buyer_room_url(latest_revision.secure_token) %>" data-clipboard-success-message-value="客户链接已复制" data-action="clipboard#copy">复制客户链接</button>
           <%= link_to "下载 PDF", quote_version_export_path(@quote, latest_revision, output: "pdf"), class: "button button--secondary button--full" %>
+          <%= link_to "下载 Excel", quote_version_export_path(@quote, latest_revision, output: "excel"), class: "button button--secondary button--full" %>
+          <% if latest_revision.snapshot.dig("workbook_template", "id").present? %><%= link_to "下载客户模板 Excel", quote_version_export_path(@quote, latest_revision, output: "customer_excel"), class: "button button--secondary button--full" %><% end %>
           <%= link_to "记录外部发送", deliver_quote_path(@quote, version_id: latest_revision.id), class: "button button--secondary button--full" %>
         </section>
       <% else %>
@@ -186,7 +200,7 @@
           <span class="studio-readiness__signal"><%= missing.empty? ? "可以发送" : "阻塞发送" %></span>
           <strong data-studio-motion-target="readinessTitle"><%= missing.empty? ? "所有必要内容已完成" : "还有 #{missing.size} 项需要处理" %></strong>
           <% if missing.any? %>
-            <ul><% missing.each do |entry| %><li><%= entry %> <a href="#studio-pricing">填写</a></li><% end %></ul>
+            <ul><% (@readiness_entries || missing.map { |label| { label: label, anchor: "studio-pricing" } }).each do |entry| %><li><%= entry[:label] %> <a href="#<%= entry[:anchor] %>">去填写</a></li><% end %></ul>
           <% else %>
             <p>去客户预览里检查真实页面，然后发布链接或发送邮件。</p>
           <% end %>

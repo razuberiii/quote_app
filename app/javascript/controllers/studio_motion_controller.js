@@ -3,18 +3,30 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   static targets = ["quantity", "price", "shipping", "discount", "tax", "total", "saveState", "summarySubtotal", "summaryFees", "summaryTotal", "readiness", "readinessTitle", "readinessHelp"]
   static values = { unsaved: String, saving: String, saved: String, saveFailed: String, recheck: String, recheckHelp: String }
-  connect() { this.recalculate() }
+  connect() {
+    this.recalculate()
+    this.form = this.element.querySelector("#quote-studio-form")
+    this.beforeVisit = this.handleBeforeVisit.bind(this)
+    document.addEventListener("turbo:before-visit", this.beforeVisit)
+  }
+  disconnect() {
+    clearTimeout(this.saveTimer)
+    document.removeEventListener("turbo:before-visit", this.beforeVisit)
+  }
   dirty() {
+    this.isDirty = true
     this.saveStateTarget.textContent = `● ${this.unsavedValue}`
     this.saveStateTarget.classList.add("is-dirty")
     if (this.hasReadinessTarget) {
       this.readinessTarget.classList.remove("is-ready")
       this.readinessTarget.classList.add("is-stale")
       this.readinessTarget.querySelector("ul")?.setAttribute("hidden", "hidden")
-      this.readinessTitleTarget.textContent = this.recheckValue
-      this.readinessHelpTarget.textContent = this.recheckHelpValue
+      if (this.hasReadinessTitleTarget) this.readinessTitleTarget.textContent = this.recheckValue
+      if (this.hasReadinessHelpTarget) this.readinessHelpTarget.textContent = this.recheckHelpValue
     }
     this.recalculate()
+    clearTimeout(this.saveTimer)
+    this.saveTimer = setTimeout(() => this.autosave(), 900)
   }
   saving() { this.saveStateTarget.textContent = `● ${this.savingValue}`; this.saveStateTarget.classList.remove("is-saved"); this.saveStateTarget.classList.add("is-saving") }
   saved(event) {
@@ -23,6 +35,51 @@ export default class extends Controller {
     this.saveStateTarget.textContent = `● ${this.savedValue}`
     this.saveStateTarget.classList.remove("is-dirty")
     this.saveStateTarget.classList.add("is-saved")
+  }
+  async autosave() {
+    if (!this.form || !this.isDirty || this.isSaving) return
+    this.isSaving = true
+    this.saving()
+    try {
+      const response = await fetch(this.form.action, {
+        method: "POST",
+        body: new FormData(this.form),
+        credentials: "same-origin",
+        headers: { "Accept": "text/html", "X-CSRF-Token": document.querySelector("meta[name='csrf-token']")?.content || "" }
+      })
+      if (!response.ok) throw new Error(`Autosave failed (${response.status})`)
+      const html = await response.text()
+      this.refreshServerState(html)
+      this.isDirty = false
+      this.saved({ detail: { success: true } })
+      if (this.resumeUrl) {
+        const url = this.resumeUrl
+        this.resumeUrl = null
+        window.Turbo.visit(url)
+      }
+    } catch (_error) {
+      this.saved({ detail: { success: false } })
+      this.resumeUrl = null
+    } finally {
+      this.isSaving = false
+      if (this.isDirty && !this.resumeUrl) this.saveTimer = setTimeout(() => this.autosave(), 1200)
+    }
+  }
+  refreshServerState(html) {
+    const document = new DOMParser().parseFromString(html, "text/html")
+    const nextReadiness = document.querySelector("[data-studio-motion-target='readiness']")
+    if (nextReadiness && this.hasReadinessTarget) this.readinessTarget.replaceWith(nextReadiness)
+
+    const nextPrimaryAction = document.querySelector(".studio-actions .button--primary")
+    const currentPrimaryAction = this.element.querySelector(".studio-actions .button--primary")
+    if (nextPrimaryAction && currentPrimaryAction) currentPrimaryAction.replaceWith(nextPrimaryAction)
+  }
+  handleBeforeVisit(event) {
+    if (!this.isDirty || this.isSaving) return
+    event.preventDefault()
+    this.resumeUrl = event.detail.url
+    clearTimeout(this.saveTimer)
+    this.autosave()
   }
   duplicateItem(event) {
     const item = event.currentTarget.closest(".studio-product")

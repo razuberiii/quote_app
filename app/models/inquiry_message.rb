@@ -4,6 +4,7 @@ class InquiryMessage < ApplicationRecord
 
   belongs_to :inquiry, touch: true
   belongs_to :recorded_by, class_name: "User", optional: true
+  has_one :chat_captured_message, dependent: :nullify
   has_one_attached :attachment
 
   validates :direction, inclusion: { in: DIRECTIONS }

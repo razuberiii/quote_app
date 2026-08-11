@@ -9,9 +9,10 @@ class CompanyProfileAiExtractor
   def initialize(profile_import) = @profile_import = profile_import
 
   def call(text)
+    candidates = deterministic_candidates(text)
     StructuredAiClient.new(company: @profile_import.company, source_record: @profile_import,
       analysis_type: "company_profile_extraction", schema: StructuredSchemas::COMPANY_PROFILE,
-      system_prompt: SYSTEM_PROMPT).call(text).data
+      system_prompt: SYSTEM_PROMPT).call("代码预提取候选（必须对照原文验证）：#{candidates.to_json}\n\n原始资料：\n#{text}").data
   rescue StructuredAiClient::ConfigurationError, StructuredAiClient::ResponseError => error
     deterministic_fallback(text, error)
   end
@@ -31,13 +32,13 @@ class CompanyProfileAiExtractor
   }.freeze
 
   def deterministic_fallback(text, error)
-    lines = text.to_s.lines.map(&:strip).reject(&:blank?)
+    candidates = deterministic_candidates(text)
     evidence = []
     company = CompanyProfileImport::COMPANY_FIELDS.index_with do |field|
-      line = matching_line(lines, FIELD_LABELS.fetch(field))
+      line = candidates.dig(field, "line")
       next if line.blank?
 
-      value = line.split(/[：:]/, 2).last.to_s.strip.presence
+      value = candidates.dig(field, "value")
       next if value.blank?
 
       evidence << { "id" => "fallback-#{field}", "field_path" => "company.#{field}",
@@ -50,6 +51,15 @@ class CompanyProfileAiExtractor
       "warnings" => [ I18n.t("self_service.company_import.warnings.deterministic_fallback"), error.message.to_s.first(240) ],
       "evidence" => evidence
     }.tap { |payload| StructuredSchemas.validate!(payload, StructuredSchemas::COMPANY_PROFILE) }
+  end
+
+  def deterministic_candidates(text)
+    lines = text.to_s.lines.map { |line| line.squish }.reject(&:blank?)
+    CompanyProfileImport::COMPANY_FIELDS.each_with_object({}) do |field, result|
+      line = matching_line(lines, FIELD_LABELS.fetch(field))
+      value = line&.split(/[：:]/, 2)&.last.to_s.strip.presence
+      result[field] = { "value" => value, "line" => line.first(240) } if value
+    end
   end
 
   def matching_line(lines, labels)

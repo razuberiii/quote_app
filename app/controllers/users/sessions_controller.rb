@@ -32,7 +32,6 @@ module Users
         return
       end
 
-      set_flash_message!(:notice, :signed_in)
       sign_in(resource_name, resource)
       resource.update_column(:last_login_at, Time.current)
       yield resource if block_given?

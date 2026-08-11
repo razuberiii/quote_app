@@ -30,7 +30,7 @@ class ChatReadinessAnalysis
     else
       "insufficient"
     end
-    cursor = @binding.chat_captured_messages.maximum(:id)
+    cursor = @binding.current_captured_messages.maximum(:id)
 
     {
       "status" => "complete",
@@ -45,7 +45,7 @@ class ChatReadinessAnalysis
       "canGenerateDraft" => preliminary && conflicts.empty?,
       "analysisVersion" => "chat-readiness-v1",
       "analyzedMessageCursor" => cursor,
-      "sourceMessageIds" => @binding.chat_captured_messages.order(id: :desc).limit(20).pluck(:id).reverse
+      "sourceMessageIds" => @binding.current_captured_messages.order(id: :desc).limit(20).pluck(:id).reverse
     }
   end
 

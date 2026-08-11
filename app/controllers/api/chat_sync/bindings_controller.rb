@@ -3,13 +3,17 @@ module Api
     class BindingsController < BaseController
       def create
         attributes = binding_params
-        customer = resolve_customer(attributes)
-        inquiry = resolve_inquiry(attributes, customer)
         binding = current_company.chat_conversation_bindings.find_or_initialize_by(
           platform: attributes[:platform],
           platform_account_id: attributes[:platformAccountId],
           platform_conversation_id: attributes[:platformConversationId]
         )
+        customer = resolve_customer(attributes) || binding.customer
+        inquiry = if binding.persisted? && attributes[:inquiryId].blank?
+          binding.inquiry
+        else
+          resolve_inquiry(attributes, customer)
+        end
         binding.assign_attributes(user: current_user, customer:, inquiry:,
           display_name: attributes[:displayName], paused: false)
         binding.save!

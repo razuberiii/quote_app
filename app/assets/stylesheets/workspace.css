@@ -272,14 +272,27 @@
   color:var(--studio-text);
 }
 .neo-os--app .quote-studio--editor :is(.studio-toolbar,.studio-structure,.studio-summary){border-color:var(--studio-line);background:var(--studio-rail);color:var(--studio-text)}
+.neo-os--app .quote-studio--editor :is(.studio-toolbar,.studio-structure,.studio-summary) :is(h1,h2,h3,strong,dd){color:var(--studio-text)}
+.neo-os--app .quote-studio--editor :is(.studio-back,.studio-toolbar .eyebrow,.studio-toolbar__identity h1 span,.studio-outline a span,.studio-outline a strong,.studio-outline a em,.studio-summary dt,.studio-summary__note,.studio-readiness li,.studio-structure .section-kicker,.studio-summary .section-kicker,.studio-add-section){color:var(--studio-muted)}
 .neo-os--app .quote-studio--editor .studio-canvas{background:var(--studio-canvas);background-image:linear-gradient(90deg,color-mix(in srgb,var(--studio-line) 38%,transparent) 1px,transparent 1px);background-size:32px 32px}
 .neo-os--app .quote-studio--editor .studio-paper{background:var(--studio-document);color:var(--studio-text);box-shadow:0 24px 64px rgba(0,0,0,.18)}
 .neo-os--app .quote-studio--editor .studio-paper :is(h1,h2,h3,h4,strong,label,th,td,summary){color:var(--studio-text)}
 .neo-os--app .quote-studio--editor .studio-paper :is(p,small,dt,.studio-paper__heading p:last-child){color:var(--studio-muted)}
 .neo-os--app .quote-studio--editor .studio-paper :is(.studio-cover__meta,.studio-products,.studio-pricing,.studio-terms,.studio-product,.studio-product__details,.studio-buyer-language){border-color:var(--studio-line)}
-.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea,select){border-color:var(--studio-line);background:var(--studio-control);color:var(--studio-text);box-shadow:none}
-.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea)::placeholder{color:color-mix(in srgb,var(--studio-muted) 76%,transparent)}
-.neo-os--app .quote-studio--editor .studio-paper :is(.studio-inline-title,.studio-inline-intro,.studio-product__name){border:0;background:transparent;color:var(--studio-text)}
+.neo-os--app .quote-studio--editor .studio-cover__meta{grid-template-columns:repeat(3,minmax(0,1fr)) minmax(110px,.68fr)}
+.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea,select){width:100%;max-width:100%;min-height:40px;padding:9px 11px;border:1px solid var(--studio-line);border-radius:7px;background:var(--studio-control);color:var(--studio-text);font:500 .86rem/1.4 var(--neo-body);box-shadow:inset 0 1px color-mix(in srgb,var(--studio-text) 3%,transparent);accent-color:var(--neo-blue)}
+.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea,select):hover{border-color:color-mix(in srgb,var(--studio-text) 35%,var(--studio-line));background:var(--studio-document)}
+.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea,select):focus{border-color:var(--neo-blue);background:var(--studio-document);box-shadow:0 0 0 3px color-mix(in srgb,var(--neo-blue) 14%,transparent);outline:0}
+.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea)::placeholder{color:color-mix(in srgb,var(--studio-muted) 76%,transparent);opacity:1}
+.neo-os--app .quote-studio--editor .studio-paper select{padding-right:34px}
+.neo-os--app .quote-studio--editor .studio-paper textarea{min-height:88px;resize:vertical}
+.neo-os--app .quote-studio--editor .studio-paper :is(.studio-inline-title,.studio-inline-intro,.studio-product__name){padding-inline:0;border:0;border-radius:0;background:transparent;color:var(--studio-text);box-shadow:none}
+.neo-os--app .quote-studio--editor .studio-paper :is(.studio-inline-title,.studio-inline-intro,.studio-product__name):focus{background:transparent;box-shadow:inset 0 -2px var(--neo-blue)}
+.neo-os--app .quote-studio--editor .studio-paper :is(label>span,dt){margin-bottom:5px;font-weight:650;letter-spacing:.035em}
+.neo-os--app .quote-studio--editor .studio-product__sku{display:grid;grid-template-columns:minmax(0,1fr) minmax(90px,.55fr);gap:8px}
+.neo-os--app .quote-studio--editor .studio-product__content,.neo-os--app .quote-studio--editor .studio-product__commercial>div{min-width:0}
+.neo-os--app .quote-studio--editor .studio-product__commercial{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:18px}
+.neo-os--app .quote-studio--editor .studio-product__commercial>div strong{overflow-wrap:anywhere}
 .neo-os--app .quote-studio--editor .studio-product__visual{background:var(--studio-control);color:var(--neo-blue)}
 .neo-os--app .quote-studio--editor .studio-product__commercial{background:var(--studio-control);color:var(--studio-text)}
 .neo-os--app .quote-studio--editor .studio-pricing{background:var(--studio-rail);color:var(--studio-text)}
@@ -287,6 +300,7 @@
 .neo-os--app .quote-studio--editor .studio-add-product{border-color:var(--studio-line);color:var(--studio-muted)}
 [data-theme="light"] .neo-os--app .quote-studio--editor{--studio-canvas:#ecece8;--studio-document:#fff;--studio-control:#f5f5f2}
 [data-theme="dark"] .neo-os--app .quote-studio--editor{--studio-canvas:#0d1017;--studio-document:#151922;--studio-control:#10141c}
+@media(max-width:760px){.neo-os--app .quote-studio--editor .studio-outline a{min-width:112px}.neo-os--app .quote-studio--editor .studio-outline a em{display:none}.neo-os--app .quote-studio--editor .studio-paper :is(input,textarea,select){min-height:44px;font-size:16px}.neo-os--app .quote-studio--editor .studio-product__sku{grid-template-columns:minmax(0,1fr) minmax(82px,.45fr)}}
 [data-theme="dark"] .neo-os--app .settings-editor__bar { background: rgba(13,15,20,.92) !important; color: var(--ws-text) !important; }
 [data-theme="dark"] .neo-os--app .account-menu-trigger { border-color: var(--ws-border) !important; background: var(--ws-surface) !important; color: var(--ws-text) !important; }
 [data-theme="dark"] .neo-os--app .app-dropdown-panel, [data-theme="dark"] .notification-bell-menu { border-color: var(--ws-border); background: var(--ws-surface); color: var(--ws-text); }

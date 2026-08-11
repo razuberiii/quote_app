@@ -3,7 +3,9 @@ class InquiriesController < ApplicationController
   before_action :load_inquiry, only: %i[show update build_quote analyze_chat chat_analysis]
 
   def index
-    @inquiries = current_user.company.inquiries.order(created_at: :desc)
+    @inquiries = current_user.company.inquiries.includes(:customer, :quote, :inquiry_messages,
+      chat_conversation_bindings: :chat_captured_messages)
+      .order(updated_at: :desc)
   end
 
   def new
@@ -34,6 +36,7 @@ class InquiriesController < ApplicationController
       format.html { return render :processing if @inquiry.status == "processing" }
     end
     @catalog_matches = @inquiry.catalog_matches
+    @draft_preparation = InquiryQuoteDraftPreparer.new(@inquiry, matches: @catalog_matches).call
     @catalog_products = current_user.company.products.order(:name)
     @guidance = InquiryGuidance.new(@inquiry)
     @clarification_questions = InquiryClarificationPrompt.new(@inquiry).questions
@@ -57,7 +60,7 @@ class InquiriesController < ApplicationController
     render json: {
       status: binding&.analysis_result&.fetch("status", "idle") || "idle",
       result: binding&.analysis_result || {},
-      messageCount: binding&.chat_captured_messages&.count || 0
+      messageCount: binding&.current_captured_messages&.count || 0
     }
   end
 
@@ -69,6 +72,11 @@ class InquiriesController < ApplicationController
   end
 
   def build_quote
+    if @inquiry.quote
+      redirect_to quote_path(@inquiry.quote), notice: "这条客户需求已经生成报价，已为你打开原报价。"
+      return
+    end
+
     if params[:inquiry].present? && @inquiry.extracted_data.blank?
       data = reviewed_data
       @inquiry.update!(inquiry_params.except(:extracted_data).merge(extracted_data: data, field_states: reviewed_states(data)))
@@ -84,7 +92,8 @@ class InquiriesController < ApplicationController
     )
     quote = current_user.company.quotes.new(customer: customer, currency: @inquiry.extracted_data["currency"].presence || current_user.company.default_currency,
       inquiry: @inquiry, issued_on: Date.current, valid_until: 30.days.from_now, status: "draft", custom_title: "Proposal for #{customer.name}",
-      trade_term: data.dig("commercial_terms", "incoterm"), delivery_notes: data.dig("commercial_terms", "delivery"),
+      payment_term: data.dig("commercial_terms", "payment_terms"), trade_term: data.dig("commercial_terms", "incoterm"),
+      delivery_notes: data.dig("commercial_terms", "delivery"),
       shipping_amount: data.dig("commercial_terms", "freight_amount"), shipping_price_source: data.dig("commercial_terms", "freight_source"),
       internal_note: "Source inquiry ##{@inquiry.id}. AI extraction and user corrections retained on inquiry record.")
     Array(data["products"]).each do |item|
@@ -92,7 +101,9 @@ class InquiriesController < ApplicationController
       specs = item.fetch("specifications", {}).filter_map { |key, value| { key: key.humanize, value: value } if value.present? }
       quote.quote_items.build(product: product, description: item["name"], quantity: item["quantity"].to_i, unit_price: item["unit_price"].to_d,
         specifications: specs, price_source: item["price_source"].presence || "unpriced", selection_mode: item["selection_mode"].presence || "fixed",
-        sku_snapshot: product&.sku || item["model"], unit_snapshot: item["unit"], lead_time_snapshot: item["lead_time"], packing_snapshot: item["packing"])
+        sku_snapshot: product&.sku || item["model"], unit_snapshot: item["unit"],
+        lead_time_snapshot: item["lead_time"].presence || data.dig("commercial_terms", "delivery"),
+        packing_snapshot: item["packing"].presence || data.dig("commercial_terms", "packing"))
     end
     quote.save!
     @inquiry.update!(status: "converted", customer: customer)

@@ -27,6 +27,7 @@ class AdminConsoleAccessTest < ActionDispatch::IntegrationTest
     post user_session_path, params: { user: { login: @admin.email, password: "password123" } }
 
     assert_redirected_to admin_root_path
+    assert_nil flash[:notice]
     @admin.reload
     assert @admin.last_login_at.present?
   end

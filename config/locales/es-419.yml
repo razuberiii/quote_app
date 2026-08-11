@@ -2818,6 +2818,9 @@ es-419:
           complete_verification: Por favor, complete la verificación para continuar
           loading_verification: Cargando verificación...
           verified_submitting: "✓ ¡Verificado! Enviando..."
+          verification_unavailable: No se pudo cargar la verificación. Compruebe su conexión e inténtelo de nuevo, o cierre este diálogo por ahora.
+          close_verification: Volver al registro
+          retry_verification: Reintentar
         edit:
           header_title: Configuración de la cuenta
           personal_profile: Perfil personal

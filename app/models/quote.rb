@@ -128,8 +128,16 @@ class Quote < ApplicationRecord
   validates :buyer_locale, inclusion: { in: BUYER_LOCALES }
   belongs_to :customer
   belongs_to :template, class_name: "QuoteTemplate", optional: true
+  belongs_to :workbook_template, optional: true
   belongs_to :source_quote, class_name: "Quote", optional: true
   belongs_to :inquiry, optional: true
+  validates :inquiry_id, uniqueness: true, allow_nil: true
+
+  def custom_field_definitions
+    base = (template || company&.quote_template_or_default)&.custom_field_definitions.to_a
+    workbook = workbook_template&.custom_field_definitions.to_a
+    (base + workbook).reverse.uniq { |field| field[:key].to_s }.reverse
+  end
   has_many :derived_quotes, class_name: "Quote", foreign_key: :source_quote_id, dependent: :nullify
   has_many :customer_follow_up_events, dependent: :nullify
   has_many :quote_items, dependent: :destroy
@@ -186,6 +194,7 @@ class Quote < ApplicationRecord
   validate :configuration_block_within_limit
   validate :detail_pictures_block_within_limit
   validate :configuration_block_value_lengths
+  validate :workbook_template_belongs_to_company
   validate :detail_pictures_block_item_constraints
   validate :container_loading_block_within_limit
   validate :container_loading_block_value_lengths
@@ -716,6 +725,12 @@ class Quote < ApplicationRecord
   end
 
   private
+
+  def workbook_template_belongs_to_company
+    return if workbook_template.blank? || workbook_template.company_id == company_id
+
+    errors.add(:workbook_template, "must belong to this workspace")
+  end
 
   def status_for_new_revision
     "draft"

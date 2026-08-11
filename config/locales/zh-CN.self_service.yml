@@ -842,6 +842,7 @@ zh-CN:
       incoterm: Incoterm
       delivery: 交付要求
       packing: 包装要求
+      payment_terms: 付款条件
       confirmed: 已确认
       uncertain: 待确认
       missing: 待补充
@@ -1043,6 +1044,7 @@ zh-CN:
       item_price: "商品 %{number}：缺少单价"
       item_source: "商品 %{number}：缺少可靠价格来源"
       item_config: "商品 %{number}：配置价格需要确认"
+      custom_field: "客户模板字段“%{label}”未填写"
       total: 报价总额必须大于零
       placeholder: 请删除占位或测试内容
     delivery:

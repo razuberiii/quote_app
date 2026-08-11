@@ -10,7 +10,7 @@ class DocumentDesignsControllerTest < ActionDispatch::IntegrationTest
     company = @user.company
     design = company.quote_template_or_default
 
-    patch document_design_path, params: { quote_template: {
+    patch document_design_path, params: { custom_fields_text: "project_code | Project code | required | text", quote_template: {
       layout_type: "modern", layout_density: "compact", accent_color: "#146EF5",
       font_family: "Inter", logo_position: "left", show_logo: "1", show_images: "0",
       public_link_locale: "en", pdf_locale: "en", excel_locale: "en"
@@ -21,5 +21,7 @@ class DocumentDesignsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "compact", design.layout_density
     assert_equal "#146EF5", design.accent_color
     assert_not design.show_images?
+    assert_equal "project_code", design.custom_field_definitions.first[:key]
+    assert design.custom_field_definitions.first[:required]
   end
 end

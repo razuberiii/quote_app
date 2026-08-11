@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_06_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -744,6 +744,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
     t.bigint "company_id", null: false
     t.datetime "created_at", null: false
     t.string "currency_display_mode", default: "symbol_prefix", null: false
+    t.jsonb "custom_fields", default: [], null: false
     t.text "default_scope_of_supply_content"
     t.boolean "default_template", default: false, null: false
     t.string "description_label", default: "Description", null: false
@@ -829,6 +830,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
     t.jsonb "container_loading_block", default: {}, null: false
     t.datetime "created_at", null: false
     t.string "currency"
+    t.jsonb "custom_field_values", default: {}, null: false
     t.string "custom_title"
     t.bigint "customer_id", null: false
     t.datetime "deleted_at"
@@ -879,6 +881,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
     t.string "win_reason"
     t.string "win_reason_detail"
     t.datetime "won_at"
+    t.bigint "workbook_template_id"
     t.index ["accepted_at"], name: "index_quotes_on_accepted_at"
     t.index ["changes_requested_at"], name: "index_quotes_on_changes_requested_at"
     t.index ["company_id", "quote_no", "archived_at"], name: "index_quotes_on_company_quote_archived_at"
@@ -890,6 +893,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
     t.index ["request_reason"], name: "index_quotes_on_request_reason"
     t.index ["source_quote_id"], name: "index_quotes_on_source_quote_id_unique", unique: true, where: "(source_quote_id IS NOT NULL)"
     t.index ["template_id"], name: "index_quotes_on_template_id"
+    t.index ["workbook_template_id"], name: "index_quotes_on_workbook_template_id"
   end
 
   create_table "spec_presets", force: :cascade do |t|
@@ -986,6 +990,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
     t.index ["retry_of_id"], name: "index_version_deliveries_on_retry_of_id"
   end
 
+  create_table "workbook_templates", force: :cascade do |t|
+    t.bigint "company_id", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "custom_fields", default: [], null: false
+    t.jsonb "field_mappings", default: {}, null: false
+    t.jsonb "item_mapping", default: {}, null: false
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["company_id"], name: "index_workbook_templates_on_company_id"
+  end
+
   add_foreign_key "action_items", "users"
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
@@ -1078,6 +1093,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
   add_foreign_key "quotes", "inquiries"
   add_foreign_key "quotes", "quote_templates", column: "template_id"
   add_foreign_key "quotes", "quotes", column: "source_quote_id"
+  add_foreign_key "quotes", "workbook_templates"
   add_foreign_key "spec_presets", "companies"
   add_foreign_key "subscription_events", "companies"
   add_foreign_key "users", "companies"
@@ -1086,4 +1102,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_25_090000) do
   add_foreign_key "version_deliveries", "quotes"
   add_foreign_key "version_deliveries", "users", column: "created_by_id"
   add_foreign_key "version_deliveries", "version_deliveries", column: "retry_of_id"
+  add_foreign_key "workbook_templates", "companies"
 end

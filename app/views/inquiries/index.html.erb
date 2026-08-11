@@ -1,0 +1,17 @@
+<main class="deal-workspace inquiry-task-index">
+  <header class="quote-home__bar"><div><p class="eyebrow">客户需求</p><h1>继续上次的报价准备</h1><p>每一条客户需求是一项独立任务；生成报价后，后续工作会继续保存在对应报价中。</p></div><%= link_to "连接聊天插件", chat_integration_path, class: "button button--primary" %></header>
+  <% if @inquiries.any? %>
+    <section class="inquiry-task-list" aria-label="客户需求列表">
+      <% @inquiries.each do |inquiry| %>
+        <% binding = inquiry.chat_conversation_bindings.max_by(&:updated_at) %>
+        <article>
+          <% platform = binding&.platform || inquiry.extracted_data.dig("task_context", "platform") %>
+          <div><small><%= platform == "alibaba" ? "Alibaba 国际站" : (platform.present? ? platform.titleize : inquiry.source_type.upcase) %> · 询盘 #<%= inquiry.id %></small><strong><%= inquiry.customer&.name.presence || inquiry.extracted_data["customer"].presence || binding&.display_name.presence || "待确认客户" %></strong><span><%= inquiry.inquiry_messages.count %> 条聊天消息 · 更新于 <%= time_ago_in_words(inquiry.updated_at) %>前</span><% if inquiry.extracted_data.dig("task_context", "reason") == "new_messages_after_closed_quote" %><em class="inquiry-task-list__reason">上一单已结束，新消息已单独创建为本次报价任务</em><% end %></div>
+          <% if inquiry.quote %><%= link_to "继续编辑报价", quote_path(inquiry.quote), class: "button button--secondary" %><% else %><%= link_to "继续准备报价", inquiry_path(inquiry), class: "button button--primary" %><% end %>
+        </article>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="first-quote-launch"><h2>还没有正在处理的客户需求</h2><p>连接插件并绑定客户聊天后，这里会自动出现一项可继续处理的报价任务。</p></section>
+  <% end %>
+</main>

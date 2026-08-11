@@ -22,8 +22,10 @@ class EmailVerificationsController < ApplicationController
 
     case result
     when :verified
+      flash[:notice] = t("email_verifications.flash.verified_success")
       render json: { success: true, message: t("email_verifications.flash.verified_success") }
     when :already_verified
+      flash[:notice] = t("email_verifications.flash.already_verified")
       render json: { success: true, message: t("email_verifications.flash.already_verified") }
     when :expired
       render json: { error: t("email_verifications.flash.code_expired") }, status: :unprocessable_entity

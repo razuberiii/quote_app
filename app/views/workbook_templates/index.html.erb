@@ -1,0 +1,49 @@
+<%= render "shared/settings_header", title: "客户 Excel 模板", section: :document_design %>
+<main class="workspace-page settings-workspace">
+  <header class="document-design__hero">
+    <div><p class="eyebrow">Customer workbook</p><h1>使用客户自己的 Excel</h1><p>上传原始 .xlsx 并填写单元格位置。系统只填入数据，保留客户原有版式。</p></div>
+    <%= link_to "返回基础模板", edit_document_design_path, class: "button button--secondary" %>
+  </header>
+
+  <section class="settings-workspace--content">
+    <%= form_with model: @workbook_template, class: "settings-subsection" do |form| %>
+      <% if @workbook_template.errors.any? %><div class="studio-error"><strong>模板还不能保存</strong><%= @workbook_template.errors.full_messages.to_sentence %></div><% end %>
+      <h2>上传并映射模板</h2>
+      <p>先在 Excel 中确认要写入的单元格，例如报价号位于 B3。商品区域填写第一条商品所在行和各列字母。</p>
+      <div class="field-grid field-grid--two">
+        <label class="field"><span>模板名称</span><%= form.text_field :name, required: true, placeholder: "例如：Atlas 采购报价表" %></label>
+        <label class="field"><span>Excel 文件</span><%= form.file_field :workbook, required: true, accept: ".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" %></label>
+        <label class="field"><span>工作表名称</span><%= text_field_tag "item_mapping[sheet]", params.dig(:item_mapping, :sheet), placeholder: "留空使用第一个工作表" %></label>
+      </div>
+
+      <details class="design-advanced" open><summary><strong>1. 基础字段单元格</strong><span>填写需要自动写入的位置，不需要的留空。</span></summary>
+      <div class="field-grid field-grid--two">
+        <% { quote_number: "报价号", issued_on: "报价日期", valid_until: "有效期", seller_name: "报价公司", customer_name: "客户名称", customer_contact: "联系人", currency: "币种", subtotal: "小计", shipping: "运费", discount: "折扣", tax: "税费", total: "总金额", payment_term: "付款条款", trade_term: "贸易条款", delivery_notes: "交付说明" }.each do |key, label| %>
+          <label class="field"><span><%= label %></span><%= text_field_tag "core_mappings[#{key}]", params.dig(:core_mappings, key), placeholder: "例如 B3" %></label>
+        <% end %>
+      </div></details>
+
+      <details class="design-advanced"><summary><strong>2. 商品明细区域</strong><span>指定第一条商品所在行和对应列。</span></summary>
+      <div class="field-grid field-grid--two">
+        <label class="field"><span>第一条商品所在行</span><%= number_field_tag "item_mapping[start_row]", params.dig(:item_mapping, :start_row), min: 1, placeholder: "例如 10" %></label>
+        <% { sku: "SKU 列", description: "商品名称列", specifications: "规格列", quantity: "数量列", unit: "单位列", unit_price: "单价列", discount: "折扣列", amount: "金额列" }.each do |key, label| %>
+          <label class="field"><span><%= label %></span><%= text_field_tag "item_mapping[#{key}]", params.dig(:item_mapping, key), placeholder: "例如 #{key == :description ? 'B' : 'A'}" %></label>
+        <% end %>
+      </div></details>
+
+      <details class="design-advanced"><summary><strong>3. 自定义字段</strong><span>客户需要但系统基础报价没有的字段。</span></summary>
+        <label class="field"><span>每行一个：字段代号 | 显示名称 | 单元格 | required（可选）| 类型（text/number/date/multiline）</span><%= text_area_tag "workbook_template[custom_fields_text]", params.dig(:workbook_template, :custom_fields_text), rows: 5, placeholder: "project_code | 项目编号 | B6 | required | text\nservice_date | 服务日期 | F6 | | date" %></label>
+      </details>
+      <footer><span>模板保存后不会被覆盖；如需换文件，请创建新模板，已发布报价仍使用原文件。</span><%= form.submit "保存客户模板", class: "button button--primary" %></footer>
+    <% end %>
+
+    <section class="settings-subsection settings-subsection--spaced">
+      <h2>已保存模板</h2>
+      <% if @workbook_templates.any? %>
+        <div class="import-hub__list"><% @workbook_templates.each do |template| %>
+          <article class="import-hub__row"><span>XLSX</span><div><strong><%= template.name %></strong><small><%= template.workbook.filename %> · <%= template.custom_field_definitions.size %> 个自定义字段</small></div><%= button_to "删除", workbook_template_path(template), method: :delete, class: "button button--ghost", data: { turbo_confirm: "确定删除这个模板？" } %></article>
+        <% end %></div>
+      <% else %><p>还没有客户模板。系统基础 Excel 仍然可以正常使用。</p><% end %>
+    </section>
+  </section>
+</main>

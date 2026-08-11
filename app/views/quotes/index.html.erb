@@ -1,10 +1,11 @@
 <main class="deal-workspace quote-core-index quote-home">
   <header class="quote-home__bar">
     <h1>报价</h1>
-    <%= link_to "新建报价", new_quote_path, class: "button button--primary" %>
+    <% if @quote_rows.any? %><div class="quote-home__bar-actions"><%= link_to "继续处理客户需求（#{@open_inquiry_count}）", inquiries_path, class: "button button--secondary" if @open_inquiry_count.positive? %><%= link_to "新建报价", new_quote_path, class: "button button--primary" %></div><% end %>
   </header>
 
-  <form class="quote-core-filters quote-home__filters" method="get">
+  <% if @quote_rows.any? %>
+    <form class="quote-core-filters quote-home__filters" method="get">
     <label>
       <span>搜索</span>
       <input type="search" name="q" value="<%= params[:q] %>" placeholder="搜索报价、客户、商品">
@@ -22,10 +23,10 @@
           class: ("is-active" if (params[:status].presence || "all") == status) %>
       <% end %>
     </nav>
-  </form>
+    </form>
 
-  <section class="quote-core-list quote-home__list">
-    <header>
+    <section class="quote-core-list quote-home__list">
+      <header>
       <span>报价名称</span>
       <span>客户</span>
       <span>金额</span>
@@ -33,8 +34,8 @@
       <span>更新时间</span>
       <span>状态</span>
       <span></span>
-    </header>
-    <% @quote_rows.each do |quote, lifecycle| %>
+      </header>
+      <% @quote_rows.each do |quote, lifecycle| %>
       <% latest_revision = quote.quote_revisions.where.not(published_at: nil).ordered.first %>
       <% customer_link = latest_revision ? buyer_room_url(latest_revision.secure_token) : nil %>
       <article class="<%= "has-attention" if lifecycle.attention %>">
@@ -75,14 +76,22 @@
             </div>
           </details>
         </div>
-      </article>
-    <% end %>
-    <% if @quote_rows.empty? %>
-      <div class="deal-zero quote-home__empty">
-        <h2>还没有报价</h2>
-        <p>点击右上角新建报价，可以粘贴客户邮件、上传文件，或从客户和商品资料手工创建。</p>
-        <div class="deal-zero__actions"><%= link_to "新建报价", new_quote_path, class: "button button--primary" %></div>
-      </div>
-    <% end %>
-  </section>
+        </article>
+      <% end %>
+    </section>
+  <% else %>
+    <section class="first-quote-launch">
+      <% if @open_inquiry_count.positive? %>
+        <p class="eyebrow">客户需求已保存</p><h2>继续核对并生成报价</h2>
+        <p>你有 <%= @open_inquiry_count %> 条客户需求正在处理中。打开后确认客户、商品和数量，就能生成报价草稿。</p>
+        <div class="first-quote-launch__actions"><%= link_to "继续处理客户需求（#{@open_inquiry_count}）", inquiries_path, class: "button button--primary" %><%= link_to "开始另一份报价", new_quote_path, class: "button button--secondary" %></div>
+        <small>客户原文和系统整理结果都已保存，可以随时回来继续。</small>
+      <% else %>
+        <p class="eyebrow">第一份报价</p><h2>从客户发来的内容开始</h2>
+        <p>安装聊天插件后，在 WhatsApp Web 或 Alibaba 国际站打开客户会话，就能持续同步消息并准备报价草稿。</p>
+        <div class="first-quote-launch__actions"><%= link_to "连接聊天插件", chat_integration_path, class: "button button--primary" %><%= link_to "查看其他开始方式", new_quote_path(manual: 1, anchor: "manual-options"), class: "button button--secondary" %></div>
+        <small>无需先整理聊天记录；粘贴、上传文件和手工创建仍然可用。</small>
+      <% end %>
+    </section>
+  <% end %>
 </main>

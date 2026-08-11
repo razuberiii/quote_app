@@ -26,7 +26,7 @@ class InquiryAiExtractor
       analysis_type: "inquiry_extraction", schema: StructuredSchemas::INQUIRY,
       system_prompt: SYSTEM_PROMPT, **@client_options).call("Source type: #{source_type}\nDeterministic candidates (verify against source): #{deterministic.to_json}\n\n#{source_text}")
     persist_evidence(result.data, result.analysis, inquiry)
-    normalize(result.data)
+    reconcile(normalize(result.data), deterministic, inquiry)
   end
 
   private
@@ -68,5 +68,30 @@ class InquiryAiExtractor
       name = row["name"].to_s.strip
       result[name] = row["value"] if name.present? && row["value"].present?
     end
+  end
+
+  def reconcile(data, deterministic, inquiry)
+    data["customer"] = inquiry.customer.name if inquiry.customer&.name.present?
+    %w[contact_name contact_email currency].each do |key|
+      data[key] = deterministic[key] if deterministic[key].present?
+    end
+    terms = data["commercial_terms"].to_h
+    { "incoterm" => "incoterm", "destination" => "destination", "delivery" => "delivery",
+      "packing" => "packing", "payment_terms" => "payment_terms" }.each do |term, candidate|
+      terms[term] = deterministic[candidate] if deterministic[candidate].present?
+    end
+    data["commercial_terms"] = terms
+
+    deterministic_products = Array(deterministic["products"])
+    data["products"] = Array(data["products"]).each_with_index.map do |product, index|
+      candidate = deterministic_products[index].to_h
+      next product if candidate.empty?
+
+      product["name"] = candidate["name"] if product["name"].blank? || product["name"].to_s.match?(/\A#{Regexp.escape(product["model"].to_s)}\.?\z/i)
+      %w[model quantity unit].each { |key| product[key] = candidate[key] if candidate[key].present? }
+      product["specifications"] = product["specifications"].to_h.merge(candidate["specifications"].to_h)
+      product
+    end
+    data
   end
 end

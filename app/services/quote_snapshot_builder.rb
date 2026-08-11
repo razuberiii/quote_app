@@ -36,6 +36,15 @@ class QuoteSnapshotBuilder
     snapshot["addon_label"] = @quote.resolved_addon_label
     snapshot["custom_title"] = @quote.custom_title
     snapshot["quote_items"] = @quote.quote_items.ordered.map { |item| build_quote_item_snapshot(item) }
+    snapshot["custom_field_values"] = @quote.custom_field_values.to_h
+    snapshot["custom_fields"] = @quote.custom_field_definitions.map(&:to_h)
+    if @quote.workbook_template
+      snapshot["workbook_template"] = {
+        "id" => @quote.workbook_template.id,
+        "name" => @quote.workbook_template.name,
+        "checksum" => @quote.workbook_template.workbook.blob.checksum
+      }
+    end
     snapshot["document_design"] = document_design_snapshot
     snapshot["seller_company"] = {
       "name" => @quote.company.name,

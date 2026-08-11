@@ -74,5 +74,6 @@ class EmailVerificationsControllerTest < ActionDispatch::IntegrationTest
     body = JSON.parse(response.body)
     assert_equal true, body["success"]
     assert @user.reload.email_verified?
+    assert_equal I18n.t("email_verifications.flash.verified_success"), flash[:notice]
   end
 end

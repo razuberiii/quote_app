@@ -84,7 +84,7 @@ Rails.application.routes.draw do
       post :retry_processing
     end
   end
-  resources :inquiries, only: %i[new create show update] do
+  resources :inquiries, only: %i[index new create show update] do
     resources :inquiry_messages, only: :create
     member do
       post :build_quote
@@ -115,6 +115,7 @@ Rails.application.routes.draw do
     end
   end
   resource :document_design, only: %i[edit update]
+  resources :workbook_templates, only: %i[index create destroy]
   get "quote_templates", to: redirect("/document_design/edit")
   get "quote_templates/new", to: redirect("/document_design/edit")
   get "quote_templates/:id/edit", to: redirect("/document_design/edit")

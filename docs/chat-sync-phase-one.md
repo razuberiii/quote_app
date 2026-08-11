@@ -125,6 +125,11 @@ Evidence required:
 
 ## 9. Progress Log
 - `2026-07-25`: Phase started and contract defined.
+- `2026-08-05`: AI input now uses a deterministic conversation transcript with platform/local message ID, normalized role, message type, channel, timestamp, sender and cleaned body. Unknown direction remains neutral (`internal`/`other`) instead of being classified as buyer content.
+- `2026-08-05`: Chat setup now lists recently bound conversations and links each stable binding back to its Inquiry review. Binding identity remains company + platform + platform account ID + platform conversation ID; message identity remains native platform ID with fingerprint fallback.
+- `2026-08-05`: Inquiry is the seller-visible work unit before quote creation. Rebinding the same platform conversation resumes the same Inquiry without creating an orphan task; an Inquiry can produce only one Quote, and the new Inquiry index resumes either the preparation record or that linked Quote.
+- `2026-08-06`: Plugin-originated analysis now reconciles model output with trusted binding/customer identity and deterministic message facts. Normalized customer senders, English delivery, packing, payment, product names, models and requested configurations survive provider errors and prevent malformed model output from replacing explicit chat evidence.
+- `2026-08-06`: Chat identity is now long-lived while Inquiry remains one quote cycle. A genuinely new buyer message with explicit quote/order intent arriving after a won, lost, cancelled, expired or archived quote rotates the binding to a new Inquiry and preserves the closed quote; replayed and ordinary post-sale messages do not rotate. AI analysis uses current-task facts plus a bounded 32,000-character head/recent-message window, while full original messages remain stored for evidence.
 
 ## 10. Next Priority Queue
 - Next phase/task: Manifest V3 runtime and packaging.

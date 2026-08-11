@@ -430,5 +430,6 @@ en:
       item_price: "Item %{number}: price is required"
       item_source: "Item %{number}: a verified price source is required"
       item_config: "Item %{number}: configuration price requires confirmation"
+      custom_field: "Customer template field “%{label}” is missing"
       total: Quotation total must be greater than zero
       placeholder: Remove placeholder or test content

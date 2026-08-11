@@ -36,4 +36,17 @@ class CompanyProfileAiExtractorTest < ActiveSupport::TestCase
     assert_equal 6, result["evidence"].size
     assert result["warnings"].first.include?("字段：值")
   end
+
+  test "explicit field lines become deterministic candidates before AI" do
+    profile_import = CompanyProfileImport.new(company: companies(:one), created_by: users(:one), source_text: "test")
+    candidates = CompanyProfileAiExtractor.new(profile_import).send(:deterministic_candidates, <<~TEXT)
+      对外名称：NorthPeak Automation
+      商务邮箱：export@northpeak.example
+      Unstructured marketing copy
+    TEXT
+
+    assert_equal "NorthPeak Automation", candidates.dig("name", "value")
+    assert_equal "export@northpeak.example", candidates.dig("email", "value")
+    assert_nil candidates["phone"]
+  end
 end
